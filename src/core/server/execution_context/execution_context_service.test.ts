@@ -59,7 +59,7 @@ describe('ExecutionContextService', () => {
             name: 'name-a',
             id: 'id-a',
             description: 'description-a',
-            parent: undefined,
+            child: undefined,
           },
 
           {
@@ -67,7 +67,7 @@ describe('ExecutionContextService', () => {
             name: 'name-b',
             id: 'id-b',
             description: 'description-b',
-            parent: undefined,
+            child: undefined,
           },
         ]);
       });
@@ -271,17 +271,17 @@ describe('ExecutionContextService', () => {
         );
 
         expect(result?.toJSON()).toEqual({
-          type: 'type-b',
-          name: 'name-b',
-          id: 'id-b',
-          description: 'description-b',
-          parent: {
-            type: 'type-a',
-            name: 'name-a',
-            id: 'id-a',
-            description: 'description-a',
-            parent: undefined,
+          child: {
+            child: undefined,
+            type: 'type-b',
+            name: 'name-b',
+            id: 'id-b',
+            description: 'description-b',
           },
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          description: 'description-a',
         });
       });
 
@@ -306,16 +306,16 @@ describe('ExecutionContextService', () => {
         );
 
         expect(result?.toJSON()).toEqual({
-          type: 'type-b',
-          name: 'name-b',
-          id: 'id-b',
-          description: 'description-b',
-          parent: {
-            type: 'type-a',
-            name: 'name-a',
-            id: 'id-a',
-            description: 'description-a',
-            parent: undefined,
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          description: 'description-a',
+          child: {
+            child: undefined,
+            type: 'type-b',
+            name: 'name-b',
+            id: 'id-b',
+            description: 'description-b',
           },
         });
       });

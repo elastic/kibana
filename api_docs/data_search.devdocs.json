@@ -8799,7 +8799,15 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "() => void"
+              "() => { getAllMigrations: () => ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              },
+              "; }"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source_service.ts",
             "deprecated": false,
@@ -8890,15 +8898,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              "; getAllMigrations: () => { [x: string]: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.MigrateFunction",
-                "text": "MigrateFunction"
-              },
-              "<any, any>; } & ",
+              "; getAllMigrations: () => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
@@ -11162,6 +11162,72 @@
         "path": "src/plugins/data/common/search/aggs/buckets/diversified_sampler.ts",
         "deprecated": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.getEqlFn",
+        "type": "Function",
+        "tags": [],
+        "label": "getEqlFn",
+        "description": [],
+        "signature": [
+          "({ getStartDependencies, }: { getStartDependencies: (getKibanaRequest: any) => Promise<EqlStartDependencies>; }) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EqlExpressionFunctionDefinition",
+            "text": "EqlExpressionFunctionDefinition"
+          }
+        ],
+        "path": "src/plugins/data/common/search/expressions/eql.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getEqlFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  getStartDependencies,\n}",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/eql.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.getEqlFn.$1.getStartDependencies",
+                "type": "Function",
+                "tags": [],
+                "label": "getStartDependencies",
+                "description": [],
+                "signature": [
+                  "(getKibanaRequest: any) => Promise<EqlStartDependencies>"
+                ],
+                "path": "src/plugins/data/common/search/expressions/eql.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.getEqlFn.$1.getStartDependencies.$1",
+                    "type": "Any",
+                    "tags": [],
+                    "label": "getKibanaRequest",
+                    "description": [],
+                    "signature": [
+                      "any"
+                    ],
+                    "path": "src/plugins/data/common/search/expressions/eql.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -20020,6 +20086,83 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.BaseHit",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseHit",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseHit",
+            "text": "BaseHit"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BaseHit._index",
+            "type": "string",
+            "tags": [],
+            "label": "_index",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BaseHit._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BaseHit._source",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "_source",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BaseHit.fields",
+            "type": "Object",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchTypes",
+                "text": "SearchTypes"
+              },
+              "[]> | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.BucketAggParam",
         "type": "Interface",
         "tags": [],
@@ -20377,6 +20520,145 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.EqlRawResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "EqlRawResponse",
+        "description": [],
+        "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.EqlRawResponse.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"eql_raw_response\""
+            ],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.EqlRawResponse.body",
+            "type": "Unknown",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.EqlSearchResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "EqlSearchResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EqlSearchResponse",
+            "text": "EqlSearchResponse"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.EqlSearchResponse.is_partial",
+            "type": "boolean",
+            "tags": [],
+            "label": "is_partial",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.EqlSearchResponse.is_running",
+            "type": "boolean",
+            "tags": [],
+            "label": "is_running",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.EqlSearchResponse.took",
+            "type": "number",
+            "tags": [],
+            "label": "took",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.EqlSearchResponse.timed_out",
+            "type": "boolean",
+            "tags": [],
+            "label": "timed_out",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.EqlSearchResponse.hits",
+            "type": "Object",
+            "tags": [],
+            "label": "hits",
+            "description": [],
+            "signature": [
+              "{ total: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.TotalValue",
+                "text": "TotalValue"
+              },
+              "; sequences?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.EqlSequence",
+                "text": "EqlSequence"
+              },
+              "<T>[] | undefined; events?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BaseHit",
+                "text": "BaseHit"
+              },
+              "<T>[] | undefined; }"
+            ],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.EqlSearchStrategyRequest",
         "type": "Interface",
         "tags": [],
@@ -20417,6 +20699,69 @@
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.EqlSequence",
+        "type": "Interface",
+        "tags": [],
+        "label": "EqlSequence",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EqlSequence",
+            "text": "EqlSequence"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.EqlSequence.join_keys",
+            "type": "Array",
+            "tags": [],
+            "label": "join_keys",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchTypes",
+                "text": "SearchTypes"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.EqlSequence.events",
+            "type": "Array",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BaseHit",
+                "text": "BaseHit"
+              },
+              "<T>[]"
+            ],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
             "deprecated": false
           }
         ],
@@ -23347,16 +23692,7 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": true,
-            "references": [
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              }
-            ]
+            "references": []
           },
           {
             "parentPluginId": "data",
@@ -23562,7 +23898,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"date\" | \"long\" | \"double\" | \"date_nanos\" | undefined"
+              "\"date\" | \"date_nanos\" | \"long\" | \"double\" | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
@@ -23643,6 +23979,39 @@
               "object | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.TotalValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "TotalValue",
+        "description": [],
+        "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.TotalValue.value",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.TotalValue.relation",
+            "type": "string",
+            "tags": [],
+            "label": "relation",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
             "deprecated": false
           }
         ],
@@ -24611,6 +24980,82 @@
           "\"eql\""
         ],
         "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.EqlExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "EqlExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"eql\", Input, Arguments, Output, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/data/common/search/expressions/eql.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.EqlRawResponseExpressionTypeDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "EqlRawResponseExpressionTypeDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionTypeDefinition",
+            "text": "ExpressionTypeDefinition"
+          },
+          "<\"eql_raw_response\", ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EqlRawResponse",
+            "text": "EqlRawResponse"
+          },
+          ", ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EqlRawResponse",
+            "text": "EqlRawResponse"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -27096,6 +27541,20 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.SearchTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchTypes",
+        "description": [],
+        "signature": [
+          "string | number | boolean | object | string[] | number[] | boolean[] | object[] | undefined"
+        ],
+        "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.SerializedSearchSourceFields",
         "type": "Type",
         "tags": [],
@@ -27201,7 +27660,7 @@
             "section": "def-common.SortDirection",
             "text": "SortDirection"
           },
-          "; numeric_type?: \"date\" | \"long\" | \"double\" | \"date_nanos\" | undefined; }"
+          "; numeric_type?: \"date\" | \"date_nanos\" | \"long\" | \"double\" | undefined; }"
         ],
         "path": "src/plugins/data/common/search/search_source/types.ts",
         "deprecated": false,
@@ -27658,6 +28117,88 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.eqlRawResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "eqlRawResponse",
+        "description": [],
+        "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.eqlRawResponse.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"eql_raw_response\""
+            ],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.eqlRawResponse.to",
+            "type": "Object",
+            "tags": [],
+            "label": "to",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.eqlRawResponse.to.datatable",
+                "type": "Function",
+                "tags": [],
+                "label": "datatable",
+                "description": [],
+                "signature": [
+                  "(context: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.EqlRawResponse",
+                    "text": "EqlRawResponse"
+                  },
+                  ") => { type: string; meta: { type: string; source: string; }; columns: { id: string; name: string; meta: { type: \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\"; field: string; params: {}; }; }[]; rows: any[]; }"
+                ],
+                "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.eqlRawResponse.to.datatable.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "context",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataSearchPluginApi",
+                        "section": "def-common.EqlRawResponse",
+                        "text": "EqlRawResponse"
+                      }
+                    ],
+                    "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
           }
         ],
         "initialIsOpen": false

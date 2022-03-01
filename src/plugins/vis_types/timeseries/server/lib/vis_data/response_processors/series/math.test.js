@@ -93,7 +93,7 @@ describe('math(resp, panel, series)', () => {
     expect(results).toHaveLength(1);
 
     expect(results[0]).toEqual({
-      id: 'test:example-01',
+      id: 'test╰┄►example-01',
       label: 'example-01',
       color: 'rgb(255, 0, 0)',
       stack: false,

@@ -219,6 +219,10 @@ export const getCreateTransformRequestBody = (
     : {}),
   dest: {
     index: transformDetailsState.destinationIndex,
+    // conditionally add optional ingest pipeline
+    ...(transformDetailsState.destinationIngestPipeline !== ''
+      ? { pipeline: transformDetailsState.destinationIngestPipeline }
+      : {}),
   },
   // conditionally add continuous mode config
   ...(transformDetailsState.isContinuousModeEnabled

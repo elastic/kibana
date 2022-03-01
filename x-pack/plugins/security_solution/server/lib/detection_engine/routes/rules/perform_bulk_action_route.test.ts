@@ -17,20 +17,20 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
-import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import {
+  getPerformBulkActionSchemaMock,
+  getPerformBulkActionEditSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { isElasticRule } from '../../../../usage/detections';
 import { readRules } from '../../rules/read_rules';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
-jest.mock('../../../../usage/detections', () => ({ isElasticRule: jest.fn() }));
 jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
 
 describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
-  const isElasticRuleMock = isElasticRule as jest.Mock;
   const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -43,9 +43,7 @@ describe.each([
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    isElasticRuleMock.mockReturnValue(false);
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-
     performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
   });
 
@@ -53,14 +51,36 @@ describe.each([
     it('returns 200 when performing bulk action with all dependencies present', async () => {
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual({ success: true, rules_count: 1 });
+      expect(response.body).toEqual({
+        success: true,
+        rules_count: 1,
+        attributes: {
+          results: someBulkActionResults(),
+          summary: {
+            failed: 0,
+            succeeded: 1,
+            total: 1,
+          },
+        },
+      });
     });
 
     it("returns 200 when provided filter query doesn't match any rules", async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual({ success: true, rules_count: 0 });
+      expect(response.body).toEqual({
+        success: true,
+        rules_count: 0,
+        attributes: {
+          results: someBulkActionResults(),
+          summary: {
+            failed: 0,
+            succeeded: 0,
+            total: 0,
+          },
+        },
+      });
     });
 
     it('returns 400 when provided filter query matches too many rules', async () => {
@@ -78,10 +98,9 @@ describe.each([
 
   describe('rules execution failures', () => {
     it('returns error if rule is immutable/elastic', async () => {
-      isElasticRuleMock.mockReturnValue(true);
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({
-          data: [mockRule],
+          data: [{ ...mockRule, params: { ...mockRule.params, immutable: true } }],
           total: 1,
         })
       );
@@ -96,7 +115,7 @@ describe.each([
           errors: [
             {
               message: 'Elastic rule can`t be edited',
-              status_code: 403,
+              status_code: 400,
               rules: [
                 {
                   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
@@ -105,7 +124,8 @@ describe.each([
               ],
             },
           ],
-          rules: {
+          results: someBulkActionResults(),
+          summary: {
             failed: 1,
             succeeded: 0,
             total: 1,
@@ -136,7 +156,8 @@ describe.each([
               ],
             },
           ],
-          rules: {
+          results: someBulkActionResults(),
+          summary: {
             failed: 1,
             succeeded: 0,
             total: 1,
@@ -168,7 +189,8 @@ describe.each([
               ],
             },
           ],
-          rules: {
+          results: someBulkActionResults(),
+          summary: {
             failed: 1,
             succeeded: 0,
             total: 1,
@@ -179,7 +201,108 @@ describe.each([
       });
     });
 
-    it('returns partial failure error if couple of rule validations fail and the rest are successfull', async () => {
+    it('returns error if index patterns action is applied to machine learning rule', async () => {
+      readRulesMock.mockImplementationOnce(() =>
+        Promise.resolve({ ...mockRule, params: { ...mockRule.params, type: 'machine_learning' } })
+      );
+
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionEditSchemaMock(),
+          ids: ['failed-mock-id'],
+          query: undefined,
+          edit: [
+            {
+              type: 'add_index_patterns',
+              value: ['new-index-*'],
+            },
+          ],
+        },
+      });
+
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          summary: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+          errors: [
+            {
+              message:
+                "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
+              status_code: 500,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          results: someBulkActionResults(),
+        },
+        message: 'Bulk edit failed',
+        status_code: 500,
+      });
+    });
+
+    it('returns error if all index pattern tried to be deleted', async () => {
+      readRulesMock.mockImplementationOnce(() =>
+        Promise.resolve({ ...mockRule, params: { ...mockRule.params, index: ['index-*'] } })
+      );
+
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionEditSchemaMock(),
+          ids: ['failed-mock-id'],
+          query: undefined,
+          edit: [
+            {
+              type: 'delete_index_patterns',
+              value: ['index-*'],
+            },
+          ],
+        },
+      });
+
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          summary: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+          errors: [
+            {
+              message: "Can't delete all index patterns. At least one index pattern must be left",
+              status_code: 500,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          results: someBulkActionResults(),
+        },
+        message: 'Bulk edit failed',
+        status_code: 500,
+      });
+    });
+
+    it('returns partial failure error if couple of rule validations fail and the rest are successful', async () => {
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({
           data: [
@@ -207,7 +330,7 @@ describe.each([
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         attributes: {
-          rules: {
+          summary: {
             failed: 3,
             succeeded: 2,
             total: 5,
@@ -238,6 +361,7 @@ describe.each([
               ],
             },
           ],
+          results: someBulkActionResults(),
         },
         message: 'Bulk edit partially failed',
         status_code: 500,
@@ -273,14 +397,14 @@ describe.each([
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         attributes: {
-          rules: {
+          summary: {
             failed: 1,
             succeeded: 1,
             total: 2,
           },
           errors: [
             {
-              message: 'Can`t fetch a rule',
+              message: 'Rule not found',
               status_code: 500,
               rules: [
                 {
@@ -289,6 +413,7 @@ describe.each([
               ],
             },
           ],
+          results: someBulkActionResults(),
         },
         message: 'Bulk edit partially failed',
         status_code: 500,
@@ -402,6 +527,23 @@ describe.each([
     const response = await server.inject(getBulkActionEditRequest(), context);
 
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({ success: true, rules_count: rulesNumber });
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        success: true,
+        rules_count: rulesNumber,
+        attributes: {
+          summary: { failed: 0, succeeded: rulesNumber, total: rulesNumber },
+          results: someBulkActionResults(),
+        },
+      })
+    );
   });
 });
+
+function someBulkActionResults() {
+  return {
+    created: expect.any(Array),
+    deleted: expect.any(Array),
+    updated: expect.any(Array),
+  };
+}

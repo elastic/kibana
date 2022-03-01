@@ -26,7 +26,6 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -43,6 +42,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
+import { getDetails } from '../../tasks/rule_details';
 import {
   changeRowsPerPageTo100,
   filterByCustomRules,
@@ -63,7 +63,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
-describe('Detection rules, EQL', () => {
+describe.skip('Detection rules, EQL', () => {
   const expectedUrls = getEqlRule().referenceUrls.join('');
   const expectedFalsePositives = getEqlRule().falsePositivesExamples.join('');
   const expectedTags = getEqlRule().tags.join('');
@@ -159,7 +159,7 @@ describe('Detection rules, EQL', () => {
   });
 });
 
-describe('Detection rules, sequence EQL', () => {
+describe.skip('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfSequenceAlerts = '1 alert';
 

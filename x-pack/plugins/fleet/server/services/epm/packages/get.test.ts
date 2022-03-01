@@ -19,6 +19,8 @@ import * as Registry from '../registry';
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
 
+import { PackageNotFoundError } from '../../../errors';
+
 import { getPackageInfo, getPackageUsageStats } from './get';
 
 const MockRegistry = Registry as jest.Mocked<typeof Registry>;
@@ -184,7 +186,7 @@ describe('When using EPM `get` services', () => {
     beforeEach(() => {
       const mockContract = createAppContextStartContractMock();
       appContextService.start(mockContract);
-      MockRegistry.fetchFindLatestPackage.mockResolvedValue({
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
         name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
@@ -276,6 +278,46 @@ describe('When using EPM `get` services', () => {
           })
         ).toMatchObject({
           status: 'install_failed',
+        });
+      });
+    });
+
+    describe('registry fetch errors', () => {
+      it('throws when a package that is not installed is not available in the registry and not bundled', async () => {
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).rejects.toThrowError(PackageNotFoundError);
+      });
+
+      it('sets the latestVersion to installed version when an installed package is not available in the registry', async () => {
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            install_status: 'installed',
+          },
+        });
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'installed',
         });
       });
     });

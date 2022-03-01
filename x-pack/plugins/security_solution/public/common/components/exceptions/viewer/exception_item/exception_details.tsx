@@ -11,7 +11,6 @@ import {
   EuiDescriptionList,
   EuiButtonEmpty,
   EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo, Fragment } from 'react';
@@ -92,7 +91,11 @@ const ExceptionDetailsComponent = ({
     <MyExceptionDetails grow={2}>
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem grow={1} className="eventFiltersDescriptionList">
-          <EuiDescriptionList compressed type="column" data-test-subj="exceptionsViewerItemDetails">
+          <EuiDescriptionList
+            compressed
+            type="responsiveColumn"
+            data-test-subj="exceptionsViewerItemDetails"
+          >
             {descriptionListItems.map((item) => (
               <Fragment key={`${item.title}`}>
                 <EuiToolTip content={item.title} anchorClassName="eventFiltersDescriptionListTitle">
@@ -100,14 +103,7 @@ const ExceptionDetailsComponent = ({
                     {item.title}
                   </EuiDescriptionListTitle>
                 </EuiToolTip>
-                <EuiToolTip
-                  content={item.description}
-                  anchorClassName="eventFiltersDescriptionListDescription"
-                >
-                  <EuiDescriptionListDescription className="eui-textBreakWord eui-textTruncate eui-fullWidth">
-                    {item.description}
-                  </EuiDescriptionListDescription>
-                </EuiToolTip>
+                {item.description}
               </Fragment>
             ))}
           </EuiDescriptionList>

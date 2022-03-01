@@ -1989,6 +1989,19 @@
             ],
             "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.VisualizeFieldContext.originatingApp",
+            "type": "string",
+            "tags": [],
+            "label": "originatingApp",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

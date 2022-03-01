@@ -5,31 +5,25 @@
  * 2.0.
  */
 
+import { LogMeta } from 'src/core/server';
+import type { TaskRunMetrics } from '../../../common/types';
 import { ActionType } from './';
 
-type ActionKind = 'event' | 'error' | 'metrics';
-type ActionOutcome = 'success' | 'failure';
-
-interface ActionBase<
-  A extends ActionType,
-  K extends ActionKind,
-  O extends ActionOutcome,
-  EventProvider
-> {
+export interface ReportingAction<A extends ActionType> extends LogMeta {
   event: {
-    action: A;
-    kind: K;
-    outcome?: O;
-    provider: 'reporting';
     timezone: string;
   };
-  kibana: EventProvider & { task?: { id?: string } };
-  user?: { name: string };
-  log: {
-    logger: 'reporting';
-    level: K extends 'error' ? 'error' : 'info';
-  };
   message: string;
+  kibana: {
+    reporting: {
+      actionType: A;
+      id?: string; // "immediate download" exports have no ID
+      jobType: string;
+      byteSize?: number;
+    } & TaskRunMetrics;
+    task?: { id?: string };
+  };
+  user?: { name: string };
 }
 
 export interface ErrorAction {
@@ -39,30 +33,13 @@ export interface ErrorAction {
   type?: string;
 }
 
-type ReportingAction<
-  A extends ActionType,
-  K extends ActionKind,
-  O extends ActionOutcome = 'success'
-> = ActionBase<
-  A,
-  K,
-  O,
-  {
-    reporting: {
-      id?: string; // "immediate download" exports have no ID
-      jobType: string;
-      byteSize?: number;
-    };
-  }
->;
-
-export type ScheduledTask = ReportingAction<ActionType.SCHEDULE_TASK, 'event'>;
-export type StartedExecution = ReportingAction<ActionType.EXECUTE_START, 'event'>;
-export type CompletedExecution = ReportingAction<ActionType.EXECUTE_COMPLETE, 'metrics'>;
-export type SavedReport = ReportingAction<ActionType.SAVE_REPORT, 'event'>;
-export type ClaimedTask = ReportingAction<ActionType.CLAIM_TASK, 'event'>;
-export type ScheduledRetry = ReportingAction<ActionType.RETRY, 'event'>;
-export type FailedReport = ReportingAction<ActionType.FAIL_REPORT, 'event'>;
-export type ExecuteError = ReportingAction<ActionType.EXECUTE_COMPLETE, 'error', 'failure'> & {
+export type ScheduledTask = ReportingAction<ActionType.SCHEDULE_TASK>;
+export type StartedExecution = ReportingAction<ActionType.EXECUTE_START>;
+export type CompletedExecution = ReportingAction<ActionType.EXECUTE_COMPLETE>;
+export type SavedReport = ReportingAction<ActionType.SAVE_REPORT>;
+export type ClaimedTask = ReportingAction<ActionType.CLAIM_TASK>;
+export type ScheduledRetry = ReportingAction<ActionType.RETRY>;
+export type FailedReport = ReportingAction<ActionType.FAIL_REPORT>;
+export type ExecuteError = ReportingAction<ActionType.EXECUTE_ERROR> & {
   error: ErrorAction;
 };

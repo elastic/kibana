@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { RuleDataService } from './rule_data_plugin_service';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';

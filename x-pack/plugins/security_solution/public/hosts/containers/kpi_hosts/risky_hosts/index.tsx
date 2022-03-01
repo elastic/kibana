@@ -7,12 +7,13 @@
 
 import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { createFilter } from '../../../../common/containers/helpers';
 
 import {
   getHostRiskIndex,
+  HostRiskSeverity,
   HostsKpiQueries,
   RequestBasicOptions,
 } from '../../../../../common/search_strategy';
@@ -25,6 +26,8 @@ import type { DataPublicPluginStart } from '../../../../../../../../src/plugins/
 import type { HostsKpiRiskyHostsStrategyResponse } from '../../../../../common/search_strategy/security_solution/hosts/kpi/risky_hosts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
+import { ESTermQuery } from '../../../../../common/typed_json';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export type RiskyHostsScoreRequestOptions = RequestBasicOptions;
 
@@ -33,7 +36,7 @@ type GetHostsRiskScoreProps = RiskyHostsScoreRequestOptions & {
   signal: AbortSignal;
 };
 
-export const getRiskyHosts = ({
+const getRiskyHosts = ({
   data,
   defaultIndex,
   timerange,
@@ -53,7 +56,7 @@ export const getRiskyHosts = ({
     }
   );
 
-export const getRiskyHostsComplete = (
+const getRiskyHostsComplete = (
   props: GetHostsRiskScoreProps
 ): Observable<HostsKpiRiskyHostsStrategyResponse> => {
   return getRiskyHosts(props).pipe(
@@ -68,16 +71,32 @@ const getRiskyHostsWithOptionalSignal = withOptionalSignal(getRiskyHostsComplete
 const useRiskyHostsComplete = () => useObservable(getRiskyHostsWithOptionalSignal);
 
 interface UseRiskyHostProps {
-  filterQuery?: string;
+  filterQuery?: string | ESTermQuery;
   from: string;
   to: string;
-  skip: boolean;
+  skip?: boolean;
+}
+export type SeverityCount = {
+  [k in HostRiskSeverity]: number;
+};
+
+interface RiskScoreKpi {
+  error: unknown;
+  isModuleDisabled: boolean;
+  severityCount: SeverityCount;
+  loading: boolean;
 }
 
-export const useRiskyHosts = ({ filterQuery, from, to, skip }: UseRiskyHostProps) => {
-  const { error, result: response, start, loading } = useRiskyHostsComplete();
+export const useRiskScoreKpi = ({
+  filterQuery,
+  from,
+  to,
+  skip,
+}: UseRiskyHostProps): RiskScoreKpi => {
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const { error, result, start, loading } = useRiskyHostsComplete();
   const { data, spaces } = useKibana().services;
-  const isModuleDisabled = error && isIndexNotFoundError(error);
+  const isModuleDisabled = !!error && isIndexNotFoundError(error);
   const [spaceId, setSpaceId] = useState<string>();
 
   useEffect(() => {
@@ -87,7 +106,7 @@ export const useRiskyHosts = ({ filterQuery, from, to, skip }: UseRiskyHostProps
   }, [spaces]);
 
   useEffect(() => {
-    if (!skip && spaceId) {
+    if (!skip && spaceId && riskyHostsFeatureEnabled) {
       start({
         data,
         timerange: { to, from, interval: '' },
@@ -95,7 +114,18 @@ export const useRiskyHosts = ({ filterQuery, from, to, skip }: UseRiskyHostProps
         defaultIndex: [getHostRiskIndex(spaceId)],
       });
     }
-  }, [data, spaceId, start, filterQuery, to, from, skip]);
+  }, [data, spaceId, start, filterQuery, to, from, skip, riskyHostsFeatureEnabled]);
 
-  return { error, response, loading, isModuleDisabled };
+  const severityCount = useMemo(
+    () => ({
+      [HostRiskSeverity.unknown]: 0,
+      [HostRiskSeverity.low]: 0,
+      [HostRiskSeverity.moderate]: 0,
+      [HostRiskSeverity.high]: 0,
+      [HostRiskSeverity.critical]: 0,
+      ...(result?.riskyHosts ?? {}),
+    }),
+    [result]
+  );
+  return { error, severityCount, loading, isModuleDisabled };
 };

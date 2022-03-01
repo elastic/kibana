@@ -28,7 +28,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 
 import { useKibana } from '../../utils/kibana_react';
 
-import { loadAlerts as loadRules } from '../../../../triggers_actions_ui/public';
+import { loadRules } from '../../../../triggers_actions_ui/public';
 
 const DEFAULT_SEARCH_PAGE_SIZE: number = 25;
 

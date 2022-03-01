@@ -8,7 +8,7 @@
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
 import { spacesMock } from '../../../spaces/server/mocks';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditServiceMock } from '../audit/mocks';
 import { authorizationMock } from '../authorization/index.mock';
 import { setupSpacesClient } from './setup_spaces_client';
 

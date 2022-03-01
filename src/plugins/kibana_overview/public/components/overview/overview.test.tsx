@@ -13,7 +13,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { Overview } from './overview';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
 const mockNewsFetchResult = {

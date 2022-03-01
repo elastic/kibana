@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { registerTestBed, TestBed, findTestSubject } from '@kbn/test/jest';
+import { registerTestBed, TestBed, findTestSubject } from '@kbn/test-jest-helpers';
 
 // This import needs to come first as it sets the jest.mock calls
 import { WithAppDependencies } from './setup_environment';

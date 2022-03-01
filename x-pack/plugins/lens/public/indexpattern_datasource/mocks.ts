@@ -50,6 +50,7 @@ export const createMockedIndexPattern = (): IndexPattern => {
       type: 'number',
       aggregatable: true,
       searchable: true,
+      esTypes: ['float'],
     },
     {
       name: 'source',

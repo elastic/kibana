@@ -81,6 +81,7 @@ describe('Lens App', () => {
       setHeaderActionMenu: jest.fn(),
       datasourceMap,
       visualizationMap,
+      topNavMenuEntryGenerators: [],
     };
   }
 
@@ -165,6 +166,87 @@ describe('Lens App', () => {
     });
 
     expect(services.data.query.filterManager.getFilters).not.toHaveBeenCalled();
+  });
+
+  describe('extra nav menu entries', () => {
+    it('shows custom menu entry', async () => {
+      const runFn = jest.fn();
+      const { instance, services } = await mountWith({
+        props: {
+          ...makeDefaultProps(),
+          topNavMenuEntryGenerators: [
+            () => ({
+              label: 'My entry',
+              run: runFn,
+            }),
+          ],
+        },
+      });
+
+      const extraEntry = instance.find(services.navigation.ui.TopNavMenu).prop('config')[0];
+      expect(extraEntry.label).toEqual('My entry');
+      expect(extraEntry.run).toBe(runFn);
+    });
+
+    it('passes current state, filter, query timerange and initial context into getter', async () => {
+      const getterFn = jest.fn();
+      const preloadedState = {
+        visualization: {
+          activeId: 'lensXY',
+          state: {
+            visState: true,
+          },
+        },
+        activeDatasourceId: 'testDatasource',
+        datasourceStates: {
+          testDatasource: {
+            isLoading: false,
+            state: { datasourceState: true },
+          },
+        },
+        query: {
+          language: 'kuery',
+          query: 'A: B',
+        },
+        filters: [
+          {
+            meta: {
+              key: 'abc',
+            },
+          },
+        ],
+      };
+      await mountWith({
+        props: {
+          ...makeDefaultProps(),
+          topNavMenuEntryGenerators: [getterFn],
+          initialContext: {
+            fieldName: 'a',
+            indexPatternId: '1',
+          },
+        },
+        preloadedState,
+      });
+
+      expect(getterFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          initialContext: {
+            fieldName: 'a',
+            indexPatternId: '1',
+          },
+          visualizationState: preloadedState.visualization.state,
+          visualizationId: preloadedState.visualization.activeId,
+          query: preloadedState.query,
+          filters: preloadedState.filters,
+          datasourceStates: {
+            testDatasource: {
+              isLoading: false,
+              state: preloadedState.datasourceStates.testDatasource.state,
+            },
+          },
+        })
+      );
+    });
   });
 
   describe('breadcrumbs', () => {
@@ -678,13 +760,14 @@ describe('Lens App', () => {
             filters: [pinned, unpinned],
           },
         });
+
+        const { state: expectedFilters } = services.data.query.filterManager.extract([unpinned]);
+
         expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
           expect.objectContaining({
             savedObjectId: defaultSavedObjectId,
             title: 'hello there2',
-            state: expect.objectContaining({
-              filters: services.data.query.filterManager.inject([unpinned], []),
-            }),
+            state: expect.objectContaining({ filters: expectedFilters }),
           }),
           true,
           { id: '5678', savedObjectId: defaultSavedObjectId }
@@ -1243,6 +1326,82 @@ describe('Lens App', () => {
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
       expect(defaultLeave).not.toHaveBeenCalled();
+    });
+
+    it('should confirm when leaving from a context initial doc with changes made in lens', async () => {
+      const initialProps = {
+        ...makeDefaultProps(),
+        contextOriginatingApp: 'TSVB',
+        initialContext: {
+          layers: [
+            {
+              indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              timeFieldName: 'order_date',
+              chartType: 'area',
+              axisPosition: 'left',
+              palette: {
+                type: 'palette',
+                name: 'default',
+              },
+              metrics: [
+                {
+                  agg: 'count',
+                  isFullReference: false,
+                  fieldName: 'document',
+                  params: {},
+                  color: '#68BC00',
+                },
+              ],
+              timeInterval: 'auto',
+            },
+          ],
+          type: 'lnsXY',
+          configuration: {
+            fill: 0.5,
+            legend: {
+              isVisible: true,
+              position: 'right',
+              shouldTruncate: true,
+              maxLines: 1,
+            },
+            gridLinesVisibility: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            extents: {
+              yLeftExtent: {
+                mode: 'full',
+              },
+              yRightExtent: {
+                mode: 'full',
+              },
+            },
+          },
+          savedObjectId: '',
+          vizEditorOriginatingAppUrl: '#/tsvb-link',
+          isVisualizeAction: true,
+        },
+      };
+
+      const mountedApp = await mountWith({
+        props: initialProps as unknown as jest.Mocked<LensAppProps>,
+        preloadedState: {
+          persistedDoc: defaultDoc,
+          visualization: {
+            activeId: 'testVis',
+            state: {},
+          },
+          isSaveable: true,
+        },
+      });
+      const lastCall =
+        mountedApp.props.onAppLeave.mock.calls[
+          mountedApp.props.onAppLeave.mock.calls.length - 1
+        ][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(defaultLeave).not.toHaveBeenCalled();
+      expect(confirmLeave).toHaveBeenCalled();
     });
 
     it('should not confirm when changes are saved', async () => {

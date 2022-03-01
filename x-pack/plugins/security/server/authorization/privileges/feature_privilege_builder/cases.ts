@@ -10,17 +10,20 @@ import { uniq } from 'lodash';
 import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
+export type CasesSupportedOperations = typeof allOperations[number];
+
 // if you add a value here you'll likely also need to make changes here:
 // x-pack/plugins/cases/server/authorization/index.ts
-const readOperations: string[] = [
+const readOperations = [
   'getCase',
   'getComment',
   'getTags',
   'getReporters',
   'getUserActions',
   'findConfigurations',
-];
-const writeOperations: string[] = [
+] as const;
+
+const writeOperations = [
   'createCase',
   'deleteCase',
   'updateCase',
@@ -30,15 +33,18 @@ const writeOperations: string[] = [
   'updateComment',
   'createConfiguration',
   'updateConfiguration',
-];
-const allOperations: string[] = [...readOperations, ...writeOperations];
+] as const;
+const allOperations = [...readOperations, ...writeOperations] as const;
 
 export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(
     privilegeDefinition: FeatureKibanaPrivileges,
     feature: KibanaFeature
   ): string[] {
-    const getCasesPrivilege = (operations: string[], owners: readonly string[]) => {
+    const getCasesPrivilege = (
+      operations: readonly CasesSupportedOperations[],
+      owners: readonly string[]
+    ) => {
       return owners.flatMap((owner) =>
         operations.map((operation) => this.actions.cases.get(owner, operation))
       );

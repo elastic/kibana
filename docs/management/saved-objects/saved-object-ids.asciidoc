@@ -1,0 +1,87 @@
+[[saved-object-ids]]
+=== Saved Object IDs
+
+In the past, many saved object types could have the same ID in different <<xpack-spaces,spaces>>. For example, if you copied dashboard "123"
+from the one space to another space, the second dashboard would also have an ID of "123". While the saved object ID is not something
+that users would interact with directly, many aspects of {kib} rely on it, notably URLs. If you have a "deep link" URL to a saved dashboard,
+that URL includes the saved object ID.
+
+**Starting in the 8.0 release**, {kib} requires most saved objects to have _globally unique_ IDs. This is a change that we needed to make to
+support sharing saved objects to multiple spaces. Most saved objects cannot be shared to multiple spaces _yet_, but we needed to start
+enforcing globally unique object IDs first.
+
+We have made several enhancements to minimize the impact, and this document describes what you need to know about the changes and
+how it will affect you.
+
+[[saved-object-ids-impact-upon-upgrading]]
+==== Impact upon upgrading to 8.x
+
+Every time you upgrade {kib}, <<saved-object-migrations,saved objects are migrated to a new format>>. When you
+first upgrade from 7.x to 8.x, this migration process will start enforcing globally unique saved object IDs.
+
+In practical terms, **any old saved objects that exist in a custom space will have their IDs changed to a new UUID**, while saved objects in
+the Default space will be unchanged. This is how we can ensure that every saved object ID is unique. For example: if you had dashboard "123"
+in the Default space and dashboard "123" in Another space, after the upgrade you would have dashboard "123" in the Default space and
+dashboard "456" in Another space.
+
+[[saved-object-ids-impact-when-using]]
+==== Impact when using 8.x
+
+After you upgrade, or if you set up a new {kib} instance using 8.x, there are a few more things that behave differently.
+
+[[saved-object-ids-impact-when-using-legacy-urls]]
+===== Accessing saved objects using old URLs
+
+When you upgrade {kib} and saved object IDs change, the "deep link" URLs to access those saved objects will also change. To reduce the impact,
+each existing URL is preserved with a special <<legacy-url-aliases,legacy URL alias>>. This means that if you use a bookmark for
+a saved object ID that was changed, you'll be redirected to the new URL for that saved object.
+
+[[saved-object-ids-impact-when-using-import-and-copy]]
+===== Importing and copying saved objects
+
+When you <<managing-saved-objects-copy-to-space,copy a saved object to another space>>, {kib} effectively
+<<managing-saved-objects-export-objects,exports it and imports it into that space>>. In this way, copying a saved object has always behaved
+like an import. In this document when we say "import", it applies to both features.
+
+Historically, whether you imported or copied a saved object, {kib} would create _at most_ one copy of a saved object in that space. If you
+imported the saved object multiple times, {kib} would overwrite the existing object, because it used the same ID. Since saved object IDs are
+now globally unique, {kib} maintains this functionality by tracking each saved object's _origin_. When you import an object in 8.x, {kib}
+uses either the saved object ID _or_ the origin to determine its destination.
+
+If you import a saved object using the "Check for existing objects" option -- whether it was exported from 7.x or 8.x -- {kib} will
+take the following steps:
+
+1. If {kib} finds a matching saved object with the exact same ID in the target space, that will be the import destination -- you can **overwrite** that
+destination or **skip** it.
+
+2. Otherwise, if {kib} finds a matching saved object with a _different_ ID that has the same origin, that will be the import destination
+-- again, you can **overwrite** that destination or **skip** it.
+
+3. Otherwise, if a saved object with the exact same ID exists in a _different_ space, then {kib} will generate a random ID for the import
+destination, preserving the saved object's origin.
+
+4. Otherwise, {kib} creates the saved object with the given ID.
+
+For example, you have a saved object in an `export.ndjson` file, and you set up a brand new {kib} instance. You attempt to import the saved
+object using the "Check for existing objects" and "Automatically overwrite conflicts" options. The first time you import the saved object,
+{kib} will create a new object with the same ID (step 4 above). If you import it again, {kib} will find that object and overwrite it (step 1
+above). If you then create a _different_ space and import it there, {kib} will create a new object with a random ID (step 3 above). Finally,
+if you import it into the second space again, {kib} will find the second object with a matching origin and overwrite it (step 2 above).
+
+WARNING: When you import a saved object and it is created with a different ID, if 1. it contains weak links to other saved objects (such as
+a dashboard with a Markdown URL to navigate to another dashboard) and 2. the object's ID has changed (step 3 above), those weak links will
+be broken. For more information, refer to <<known-issue-123550,the known issue in the changelog>>.
+
+[[saved-object-ids-impact-when-using-apis]]
+===== Using the saved objects APIs
+
+If you are using the saved objects APIs directly, you should be aware of these changes:
+
+* When using the <<saved-objects-api-create,create>> or <<saved-objects-api-bulk-create,bulk create>> API, you may encounter
+  <<saved-objects-api-bulk-create-conflict-errors,conflict errors>> that **cannot** be overridden using the `overwrite: true`
+  option. This can occur if there is already a saved object with this ID in a _different_ space, or if there is a legacy URL alias for this
+  ID in the same space.
+* When using the <<saved-objects-api-import,import>> or <<spaces-api-copy-saved-objects,copy to space>> API, objects can potentially be
+  created with a different ID as described above.
+* When using the <<saved-objects-api-delete,delete>> API, if the saved object exists in multiple spaces, it can only be deleted by using the
+  <<saved-objects-api-delete-query-params,`force` option>>.

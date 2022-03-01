@@ -123,6 +123,7 @@ export const schema = Joi.object()
     mochaOpts: Joi.object()
       .keys({
         bail: Joi.boolean().default(false),
+        dryRun: Joi.boolean().default(false),
         grep: Joi.string(),
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
@@ -152,6 +153,7 @@ export const schema = Joi.object()
     mochaReporter: Joi.object()
       .keys({
         captureLogOutput: Joi.boolean().default(!!process.env.CI),
+        sendToCiStats: Joi.boolean().default(!!process.env.CI),
       })
       .default(),
 

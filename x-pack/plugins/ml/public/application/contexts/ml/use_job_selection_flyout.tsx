@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import moment from 'moment';
 import { useMlKibana } from '../kibana';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaReactOverlays,
+} from '../../../../../../../src/plugins/kibana_react/public';
 import { JobSelectorFlyout } from '../../../embeddables/common/components/job_selector_flyout';
 import { getInitialGroupsMap } from '../../components/job_selector/job_selector';
 import type { JobSelectionResult } from '../../components/job_selector/job_selector_flyout';
@@ -21,6 +24,16 @@ export type GetJobSelection = ReturnType<typeof useJobSelectionFlyout>;
  */
 export function useJobSelectionFlyout() {
   const { overlays, services } = useMlKibana();
+
+  const flyoutRef = useRef<ReturnType<KibanaReactOverlays['openFlyout']>>();
+
+  useEffect(function closeFlyoutOnLeave() {
+    return () => {
+      if (flyoutRef.current) {
+        flyoutRef.current.close();
+      }
+    };
+  }, []);
 
   return useCallback(
     (
@@ -45,7 +58,7 @@ export function useJobSelectionFlyout() {
 
       return new Promise(async (resolve, reject) => {
         try {
-          const flyoutSession = overlays.openFlyout(
+          flyoutRef.current = overlays.openFlyout(
             <KibanaContextProvider services={services}>
               <JobSelectorFlyout
                 selectedIds={[]}
@@ -55,11 +68,11 @@ export function useJobSelectionFlyout() {
                 timeseriesOnly={!!config.timeseriesOnly}
                 onFlyoutClose={() => {
                   reject();
-                  flyoutSession.close();
+                  flyoutRef.current!.close();
                 }}
                 onSelectionConfirmed={(payload) => {
                   resolve(payload);
-                  flyoutSession.close();
+                  flyoutRef.current!.close();
                 }}
                 maps={maps}
               />

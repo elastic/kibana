@@ -97,7 +97,7 @@ import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { SanitizedAlert } from '../../../../../alerting/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
-import { IRuleExecutionLogClient } from '../rule_execution_log';
+import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
 
 export type RuleAlertType = SanitizedAlert<RuleParams>;
 
@@ -199,13 +199,13 @@ export interface CreateRulesOptions {
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   defaultOutputIndex: string;
-  existingRule: SanitizedAlert<RuleParams> | null | undefined;
+  existingRule: RuleAlertType | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 
 export interface PatchRulesOptions extends Partial<PatchRulesFieldsOptions> {
   rulesClient: RulesClient;
-  rule: SanitizedAlert<RuleParams> | null | undefined;
+  rule: RuleAlertType | null | undefined;
 }
 
 interface PatchRulesFieldsOptions {
@@ -269,7 +269,7 @@ export interface ReadRuleOptions {
 export interface DeleteRuleOptions {
   ruleId: Id;
   rulesClient: RulesClient;
-  ruleExecutionLogClient: IRuleExecutionLogClient;
+  ruleExecutionLog: IRuleExecutionLogForRoutes;
 }
 
 export interface FindRuleOptions {

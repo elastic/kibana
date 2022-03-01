@@ -32,28 +32,6 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
   'text/plain',
 ];
 
-// See:
-// https://github.com/chromium/chromium/blob/3611052c055897e5ebbc5b73ea295092e0c20141/services/network/public/cpp/header_util_unittest.cc#L50
-// For a list of headers that chromium doesn't like
-export const KBN_SCREENSHOT_HEADER_BLOCK_LIST = [
-  'accept-encoding',
-  'connection',
-  'content-length',
-  'content-type',
-  'host',
-  'referer',
-  // `Transfer-Encoding` is hop-by-hop header that is meaningful
-  // only for a single transport-level connection, and shouldn't
-  // be stored by caches or forwarded by proxies.
-  'transfer-encoding',
-  'trailer',
-  'te',
-  'upgrade',
-  'keep-alive',
-];
-
-export const KBN_SCREENSHOT_HEADER_BLOCK_LIST_STARTS_WITH_PATTERN = ['proxy-'];
-
 export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';

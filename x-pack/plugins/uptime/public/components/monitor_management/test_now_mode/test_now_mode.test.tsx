@@ -13,9 +13,19 @@ import { kibanaService } from '../../../state/kibana_service';
 import { MonitorFields } from '../../../../common/runtime_types';
 
 describe('TestNowMode', function () {
+  const onDone = jest.fn();
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('should render properly', async function () {
     render(
-      <TestNowMode testRun={{ id: 'test-run', monitor: { type: 'browser' } as MonitorFields }} />
+      <TestNowMode
+        testRun={{ id: 'test-run', monitor: { type: 'browser' } as MonitorFields }}
+        isMonitorSaved={false}
+        onDone={onDone}
+      />
     );
     expect(await screen.findByText('Test result')).toBeInTheDocument();
     expect(await screen.findByText('PENDING')).toBeInTheDocument();

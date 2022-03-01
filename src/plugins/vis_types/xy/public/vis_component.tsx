@@ -373,6 +373,7 @@ const VisComponent = (props: VisComponentProps) => {
             splitSeriesAccessors,
             splitChartColumnAccessor ?? splitChartRowAccessor
           )}
+          ariaLabel={visParams.ariaLabel}
           onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
           onRenderChange={onRenderChange}
           legendAction={

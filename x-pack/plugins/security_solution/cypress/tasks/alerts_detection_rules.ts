@@ -45,6 +45,8 @@ import {
   TOASTER,
   RULE_IMPORT_OVERWRITE_CHECKBOX,
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
+  RULES_TAGS_POPOVER_BTN,
+  RULES_TAGS_POPOVER_WRAPPER,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -157,7 +159,10 @@ export const goToTheRuleDetailsOf = (ruleName: string) => {
 };
 
 export const loadPrebuiltDetectionRules = () => {
-  cy.get(LOAD_PREBUILT_RULES_BTN).should('exist').click({ force: true });
+  cy.get(LOAD_PREBUILT_RULES_BTN)
+    .should('exist')
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.disabled');
 };
 
 export const reloadDeletedRules = () => {
@@ -286,4 +291,14 @@ export const importRulesWithOverwriteAll = (rulesFile: string) => {
   selectOverwriteExceptionsRulesImport();
   cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
+};
+
+export const testAllTagsBadges = (tags: string[]) => {
+  cy.get(RULES_TAGS_POPOVER_BTN).each(($el) => {
+    // open tags popover
+    cy.wrap($el).click();
+    cy.get(RULES_TAGS_POPOVER_WRAPPER).should('have.text', tags.join(''));
+    // close tags popover
+    cy.wrap($el).click();
+  });
 };

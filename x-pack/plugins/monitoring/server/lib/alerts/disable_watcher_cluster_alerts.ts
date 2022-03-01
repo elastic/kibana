@@ -24,7 +24,7 @@ interface DisableWatchesResponse {
 
 async function callMigrationApi(callCluster: ElasticsearchClient, logger: Logger) {
   try {
-    const { body: response } = await callCluster.transport.request({
+    const response = await callCluster.transport.request({
       method: 'post',
       path: '/monitoring.disableWatches',
     });

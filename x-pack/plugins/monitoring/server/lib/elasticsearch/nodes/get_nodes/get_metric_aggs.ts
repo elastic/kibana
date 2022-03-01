@@ -33,7 +33,7 @@ export function getMetricAggs(listingMetrics: string[]) {
       // if metric does not have custom agg defined
       metricAgg = {
         metric: {
-          [metric.metricAgg]: {
+          [metric.metricAgg!]: {
             // max, sum, etc
             field: metric.field,
           },
@@ -49,7 +49,7 @@ export function getMetricAggs(listingMetrics: string[]) {
 
     aggItems = {
       ...aggItems,
-      ...convertMetricNames(metricName, metric.aggs || metricAgg),
+      ...convertMetricNames(metricName, metric.aggs ? metric.aggs : metricAgg!),
     };
   });
 

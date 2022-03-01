@@ -148,7 +148,7 @@ export const TAGS_HELP = i18n.translate('xpack.cases.createCase.fieldTagsHelpTex
 });
 
 export const TAGS_EMPTY_ERROR = i18n.translate('xpack.cases.createCase.fieldTagsEmptyError', {
-  defaultMessage: 'A tag must not be empty',
+  defaultMessage: 'A tag must contain at least one non-space character',
 });
 
 export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {

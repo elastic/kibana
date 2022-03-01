@@ -17,14 +17,38 @@ import { enumeration, IsoDateString, PositiveInteger } from '@kbn/securitysoluti
  * Framework's status to determine the resulting status of a rule.
  */
 export enum RuleExecutionStatus {
-  'succeeded' = 'succeeded',
-  'failed' = 'failed',
-  'going to run' = 'going to run',
-  'partial failure' = 'partial failure',
   /**
-   * @deprecated 'partial failure' status should be used instead
+   * @deprecated Replaced by the 'running' status but left for backwards compatibility
+   * with rule execution events already written to Event Log in the prior versions of Kibana.
+   * Don't use when writing rule status changes.
    */
-  'warning' = 'warning',
+  'going to run' = 'going to run',
+
+  /**
+   * Rule execution started but not reached any intermediate or final status.
+   */
+  'running' = 'running',
+
+  /**
+   * Rule can partially fail for various reasons either in the middle of an execution
+   * (in this case we update its status right away) or in the end of it. So currently
+   * this status can be both intermediate and final at the same time.
+   * A typical reason for a partial failure: not all the indices that the rule searches
+   * over actually exist.
+   */
+  'partial failure' = 'partial failure',
+
+  /**
+   * Rule failed to execute due to unhandled exception or a reason defined in the
+   * business logic of its executor function.
+   */
+  'failed' = 'failed',
+
+  /**
+   * Rule executed successfully without any issues. Note: this status is just an indication
+   * of a rule's "health". The rule might or might not generate any alerts despite of it.
+   */
+  'succeeded' = 'succeeded',
 }
 
 export const ruleExecutionStatus = enumeration('RuleExecutionStatus', RuleExecutionStatus);
@@ -38,7 +62,7 @@ export const ruleExecutionStatusOrderByStatus: Record<
 > = {
   [RuleExecutionStatus.succeeded]: 0,
   [RuleExecutionStatus['going to run']]: 10,
-  [RuleExecutionStatus.warning]: 20,
+  [RuleExecutionStatus.running]: 15,
   [RuleExecutionStatus['partial failure']]: 20,
   [RuleExecutionStatus.failed]: 30,
 };

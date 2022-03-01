@@ -70,6 +70,7 @@ export async function getEsGridTile({
               'Accept-Encoding': 'gzip',
             },
             asStream: true,
+            meta: true,
           }
         );
       }

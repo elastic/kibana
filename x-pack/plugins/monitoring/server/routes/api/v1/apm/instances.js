@@ -30,7 +30,7 @@ export function apmInstancesRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
+      const config = server.config;
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
@@ -44,7 +44,7 @@ export function apmInstancesRoute(server) {
         return {
           stats,
           apms,
-          cgroup: req.server.config().get('monitoring.ui.container.apm.enabled'),
+          cgroup: config.ui.container.apm.enabled,
         };
       } catch (err) {
         return handleError(err, req);

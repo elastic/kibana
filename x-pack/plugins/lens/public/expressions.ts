@@ -24,7 +24,6 @@ import { datatableColumn } from '../common/expressions/datatable/datatable_colum
 
 import { mergeTables } from '../common/expressions/merge_tables';
 import { renameColumns } from '../common/expressions/rename_columns/rename_columns';
-import { pie } from '../common/expressions/pie_chart/pie_chart';
 import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
@@ -39,7 +38,6 @@ export const setupExpressions = (
   [lensMultitable].forEach((expressionType) => expressions.registerType(expressionType));
 
   [
-    pie,
     xyChart,
     mergeTables,
     counterRate,

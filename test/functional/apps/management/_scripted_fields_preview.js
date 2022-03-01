@@ -13,8 +13,15 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings']);
   const SCRIPTED_FIELD_NAME = 'myScriptedField';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/118981
-  describe.skip('scripted fields preview', () => {
+  const scriptResultToJson = (scriptResult) => {
+    try {
+      return JSON.parse(scriptResult);
+    } catch (e) {
+      expect().fail(`Could JSON.parse script result: "${scriptResult}"`);
+    }
+  };
+
+  describe('scripted fields preview', () => {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await PageObjects.settings.navigateTo();
@@ -46,7 +53,15 @@ export default function ({ getService, getPageObjects }) {
       const scriptResults = await PageObjects.settings.executeScriptedField(
         `doc['bytes'].value * 2`
       );
-      expect(scriptResults.replace(/\s/g, '')).to.contain('"myScriptedField":[6196');
+      const [
+        {
+          _id,
+          [SCRIPTED_FIELD_NAME]: { [0]: scriptedField },
+        },
+      ] = scriptResultToJson(scriptResults);
+      expect(_id).to.be.a('string');
+      expect(scriptedField).to.be.a('number');
+      expect(scriptedField).to.match(/[0-9]+/);
     });
 
     it('should display additional fields', async function () {
@@ -54,7 +69,9 @@ export default function ({ getService, getPageObjects }) {
         `doc['bytes'].value * 2`,
         ['bytes']
       );
-      expect(scriptResults.replace(/\s/g, '')).to.contain('"bytes":3098');
+      const [{ _id, bytes }] = scriptResultToJson(scriptResults);
+      expect(_id).to.be.a('string');
+      expect(bytes).to.be.a('number');
     });
   });
 }

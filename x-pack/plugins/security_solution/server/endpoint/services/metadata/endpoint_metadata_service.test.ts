@@ -46,11 +46,7 @@ describe('EndpointMetadataService', () => {
     beforeEach(() => {
       fleetAgentIds = ['one', 'two'];
       endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
-      esClient.search.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise(
-          legacyMetadataSearchResponseMock(endpointMetadataDoc)
-        )
-      );
+      esClient.search.mockResponse(legacyMetadataSearchResponseMock(endpointMetadataDoc));
     });
 
     it('should call elasticsearch with proper filter', async () => {
@@ -79,28 +75,23 @@ describe('EndpointMetadataService', () => {
 
   describe('#doesUnitedIndexExist', () => {
     it('should return true if united index found', async () => {
-      const esMockResponse = elasticsearchServiceMock.createSuccessTransportRequestPromise(
-        unitedMetadataSearchResponseMock()
-      );
-      esClient.search.mockResolvedValue(esMockResponse);
+      esClient.search.mockResponse(unitedMetadataSearchResponseMock());
       const doesIndexExist = await metadataService.doesUnitedIndexExist(esClient);
 
       expect(doesIndexExist).toEqual(true);
     });
 
     it('should return false if united index not found', async () => {
-      const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({
+      esClient.search.mockRejectedValue({
         meta: { body: { error: { type: 'index_not_found_exception' } } },
       });
-      esClient.search.mockResolvedValue(esMockResponse);
       const doesIndexExist = await metadataService.doesUnitedIndexExist(esClient);
 
       expect(doesIndexExist).toEqual(false);
     });
 
     it('should throw wrapped error if es error other than index not found', async () => {
-      const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({});
-      esClient.search.mockResolvedValue(esMockResponse);
+      esClient.search.mockRejectedValue({});
       const response = metadataService.doesUnitedIndexExist(esClient);
       await expect(response).rejects.toThrow(EndpointError);
     });
@@ -115,8 +106,7 @@ describe('EndpointMetadataService', () => {
     });
 
     it('should throw wrapped error if es error', async () => {
-      const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({});
-      esClient.search.mockResolvedValue(esMockResponse);
+      esClient.search.mockRejectedValue({});
       const metadataListResponse = metadataService.getHostMetadataList(
         esClient,
         testMockedContext.fleetServices,
@@ -154,11 +144,7 @@ describe('EndpointMetadataService', () => {
         policy_revision: agentPolicies[0].revision,
       } as unknown as Agent;
       const mockDoc = unitedMetadataSearchResponseMock(endpointMetadataDoc, mockAgent);
-      const esMockResponse = await elasticsearchServiceMock.createSuccessTransportRequestPromise(
-        mockDoc
-      );
-
-      esClient.search.mockResolvedValue(esMockResponse);
+      esClient.search.mockResponse(mockDoc);
       agentPolicyServiceMock.getByIds.mockResolvedValue(agentPolicies);
       testMockedContext.packagePolicyService.list.mockImplementation(
         async (_, { page, perPage }) => {

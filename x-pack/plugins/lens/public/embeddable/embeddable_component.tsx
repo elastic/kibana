@@ -23,8 +23,11 @@ import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
 import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
 import type { XYState } from '../xy_visualization/types';
-import type { PieVisualizationState, MetricState } from '../../common/expressions';
+import type { MetricState } from '../../common/expressions';
+import type { PieVisualizationState } from '../../common';
 import type { DatatableVisualizationState } from '../datatable_visualization/visualization';
+import type { HeatmapVisualizationState } from '../heatmap_visualization/types';
+import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 
 type LensAttributes<TVisType, TVisState> = Omit<
   Document,
@@ -48,7 +51,10 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
     | LensAttributes<'lnsXY', XYState>
     | LensAttributes<'lnsPie', PieVisualizationState>
     | LensAttributes<'lnsDatatable', DatatableVisualizationState>
-    | LensAttributes<'lnsMetric', MetricState>;
+    | LensAttributes<'lnsMetric', MetricState>
+    | LensAttributes<'lnsHeatmap', HeatmapVisualizationState>
+    | LensAttributes<'lnsGauge', GaugeVisualizationState>
+    | LensAttributes<string, unknown>;
 };
 
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {

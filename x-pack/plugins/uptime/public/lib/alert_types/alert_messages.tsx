@@ -13,16 +13,16 @@ import type { CoreTheme } from 'kibana/public';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { RedirectAppLinks, toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { ActionConnector } from '../../state/alerts/alerts';
-import { Alert } from '../../../../alerting/common';
 import { kibanaService } from '../../state/kibana_service';
 import { getUrlForAlert } from './common';
+import type { Rule } from '../../../../triggers_actions_ui/public';
 
 export const simpleAlertEnabled = (
   defaultActions: ActionConnector[],
   theme$: Observable<CoreTheme>,
-  alert: Alert
+  rule: Rule
 ) => {
-  const alertUrl = getUrlForAlert(alert.id, kibanaService.core.http.basePath.get());
+  const alertUrl = getUrlForAlert(rule.id, kibanaService.core.http.basePath.get());
 
   return {
     title: i18n.translate('xpack.uptime.overview.alerts.enabled.success', {

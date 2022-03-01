@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../';
-import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -31,11 +30,11 @@ export function defineGetApiKeysRoutes({ router }: RouteDefinitionParams) {
       try {
         const isAdmin = request.query.isAdmin === 'true';
         const apiResponse =
-          await context.core.elasticsearch.client.asCurrentUser.security.getApiKey<{
-            api_keys: ApiKey[];
-          }>({ owner: !isAdmin });
+          await context.core.elasticsearch.client.asCurrentUser.security.getApiKey({
+            owner: !isAdmin,
+          });
 
-        const validKeys = apiResponse.body.api_keys.filter(({ invalidated }) => !invalidated);
+        const validKeys = apiResponse.api_keys.filter(({ invalidated }) => !invalidated);
 
         return response.ok({ body: { apiKeys: validKeys } });
       } catch (error) {

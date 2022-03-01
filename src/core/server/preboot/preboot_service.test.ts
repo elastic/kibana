@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { REPO_ROOT } from '@kbn/utils';
 import { LoggerFactory } from '@kbn/logging';
 import { Env } from '@kbn/config';

@@ -11,16 +11,20 @@ import Os from 'os';
 import Fs from 'fs';
 import Path from 'path';
 import crypto from 'crypto';
+
 import execa from 'execa';
-import Axios from 'axios';
+import Axios, { AxiosRequestConfig } from 'axios';
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 import httpAdapter from 'axios/lib/adapters/http';
 
 import { ToolingLog } from '../tooling_log';
 import { parseConfig, Config } from './ci_stats_config';
+import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
+import { CiStatsMetadata } from './ci_stats_metadata';
 
 const BASE_URL = 'https://ci-stats.kibana.dev';
 
+/** A ci-stats metric record */
 export interface CiStatsMetric {
   /** Top-level categorization for the metric, e.g. "page load bundle size" */
   group: string;
@@ -40,13 +44,7 @@ export interface CiStatsMetric {
   meta?: CiStatsMetadata;
 }
 
-export interface CiStatsMetadata {
-  /**
-   * Arbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric
-   * objects stored in the ci-stats service
-   */
-  [key: string]: string | string[] | number | boolean | undefined;
-}
+/** A ci-stats timing event */
 export interface CiStatsTiming {
   /** Top-level categorization for the timing, e.g. "scripts/foo", process type, etc. */
   group: string;
@@ -58,13 +56,7 @@ export interface CiStatsTiming {
   meta?: CiStatsMetadata;
 }
 
-interface ReqOptions {
-  auth: boolean;
-  path: string;
-  body: any;
-  bodyDesc: string;
-}
-
+/** Options for reporting timings to ci-stats */
 export interface TimingsOptions {
   /** list of timings to record */
   timings: CiStatsTiming[];
@@ -74,10 +66,41 @@ export interface TimingsOptions {
   kibanaUuid?: string | null;
 }
 
+/** Options for reporting metrics to ci-stats */
 export interface MetricsOptions {
   /** Default metadata to add to each metric */
   defaultMeta?: CiStatsMetadata;
 }
+
+/** Options for reporting tests to ci-stats */
+export interface CiStatsReportTestsOptions {
+  /**
+   * Information about the group of tests that were run
+   */
+  group: CiStatsTestGroupInfo;
+  /**
+   * Information about each test that ran, including failure information
+   */
+  testRuns: CiStatsTestRun[];
+}
+
+/* @internal */
+interface ReportTestsResponse {
+  buildId: string;
+  groupId: string;
+  testRunCount: number;
+}
+
+/* @internal */
+interface ReqOptions {
+  auth: boolean;
+  path: string;
+  body: any;
+  bodyDesc: string;
+  query?: AxiosRequestConfig['params'];
+}
+
+/** Object that helps report data to the ci-stats service */
 export class CiStatsReporter {
   /**
    * Create a CiStatsReporter by inspecting the ENV for the necessary config
@@ -86,7 +109,7 @@ export class CiStatsReporter {
     return new CiStatsReporter(parseConfig(log), log);
   }
 
-  constructor(private config: Config | undefined, private log: ToolingLog) {}
+  constructor(private readonly config: Config | undefined, private readonly log: ToolingLog) {}
 
   /**
    * Determine if CI_STATS is explicitly disabled by the environment. To determine
@@ -165,7 +188,7 @@ export class CiStatsReporter {
 
     this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
 
-    return await this.req({
+    return !!(await this.req({
       auth: !!buildId,
       path: '/v1/timings',
       body: {
@@ -175,7 +198,7 @@ export class CiStatsReporter {
         timings,
       },
       bodyDesc: timings.length === 1 ? `${timings.length} timing` : `${timings.length} timings`,
-    });
+    }));
   }
 
   /**
@@ -188,12 +211,11 @@ export class CiStatsReporter {
     }
 
     const buildId = this.config?.buildId;
-
     if (!buildId) {
-      throw new Error(`CiStatsReporter can't be authorized without a buildId`);
+      throw new Error(`metrics can't be reported without a buildId`);
     }
 
-    return await this.req({
+    return !!(await this.req({
       auth: true,
       path: '/v1/metrics',
       body: {
@@ -204,6 +226,30 @@ export class CiStatsReporter {
       bodyDesc: `metrics: ${metrics
         .map(({ group, id, value }) => `[${group}/${id}=${value}]`)
         .join(' ')}`,
+    }));
+  }
+
+  /**
+   * Send test reports to ci-stats
+   */
+  async reportTests({ group, testRuns }: CiStatsReportTestsOptions) {
+    if (!this.config?.buildId || !this.config?.apiToken) {
+      throw new Error(
+        'unable to report tests unless buildId is configured and auth config available'
+      );
+    }
+
+    return await this.req<ReportTestsResponse>({
+      auth: true,
+      path: '/v1/test_group',
+      query: {
+        buildId: this.config?.buildId,
+      },
+      bodyDesc: `[${group.name}/${group.type}] test groups with ${testRuns.length} tests`,
+      body: [
+        JSON.stringify({ group }),
+        ...testRuns.map((testRun) => JSON.stringify({ testRun })),
+      ].join('\n'),
     });
   }
 
@@ -241,7 +287,7 @@ export class CiStatsReporter {
     }
   }
 
-  private async req({ auth, body, bodyDesc, path }: ReqOptions) {
+  private async req<T>({ auth, body, bodyDesc, path, query }: ReqOptions) {
     let attempt = 0;
     const maxAttempts = 5;
 
@@ -251,23 +297,24 @@ export class CiStatsReporter {
         Authorization: `token ${this.config.apiToken}`,
       };
     } else if (auth) {
-      throw new Error('this.req() shouldnt be called with auth=true if this.config is defined');
+      throw new Error('this.req() shouldnt be called with auth=true if this.config is not defined');
     }
 
     while (true) {
       attempt += 1;
 
       try {
-        await Axios.request({
+        const resp = await Axios.request<T>({
           method: 'POST',
           url: path,
           baseURL: BASE_URL,
           headers,
           data: body,
+          params: query,
           adapter: httpAdapter,
         });
 
-        return true;
+        return resp.data;
       } catch (error) {
         if (!error?.request) {
           // not an axios error, must be a usage error that we should notify user about

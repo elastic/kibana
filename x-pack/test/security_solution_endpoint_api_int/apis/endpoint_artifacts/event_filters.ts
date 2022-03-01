@@ -71,7 +71,10 @@ export default function ({ getService }: FtrProviderContext) {
     type UnknownBodyGetter = () => unknown;
     type PutPostBodyGetter = (
       overrides?: Partial<ExceptionListItemSchema>
-    ) => Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>;
+    ) => Pick<
+      ExceptionListItemSchema,
+      'item_id' | 'namespace_type' | 'os_types' | 'tags' | 'entries'
+    >;
 
     type EventFilterApiCallsInterface<BodyGetter = UnknownBodyGetter> = Array<{
       method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
@@ -138,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('and has authorization to manage endpoint security', () => {
       for (const eventFilterCall of eventFilterCalls) {
-        it(`should error on [${eventFilterCall.method} if invalid field`, async () => {
+        it(`should error on [${eventFilterCall.method}] if invalid field`, async () => {
           const body = eventFilterCall.getBody({});
 
           body.entries[0].field = 'some.invalid.field';
@@ -148,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
             .send(body)
             .expect(400)
             .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/types that failed validation:/));
+            .expect(anErrorMessageWith(/invalid field: some\.invalid\.field/));
         });
 
         it(`should error on [${eventFilterCall.method}] if more than one OS is set`, async () => {
@@ -182,6 +185,9 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(200);
+
+          const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${body.item_id}&namespace_type=${body.namespace_type}`;
+          await supertest.delete(deleteUrl).set('kbn-xsrf', 'true');
         });
       }
     });

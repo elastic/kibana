@@ -17,7 +17,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import { BaseDataGenerator } from './base_data_generator';
 import { ConditionEntryField } from '../types';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../service/artifacts/constants';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts/constants';
 
 /** Utility that removes null and undefined from a Type's property value */
 type NonNullableTypeProperties<T> = {
@@ -87,6 +87,11 @@ const exceptionItemToUpdateExceptionItem = (
   };
 };
 
+const EFFECTIVE_SCOPE: readonly string[] = [
+  `${BY_POLICY_ARTIFACT_TAG_PREFIX}123-456`, // Policy Specific
+  GLOBAL_ARTIFACT_TAG,
+];
+
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
     const exceptionItem: ExceptionListItemSchema = {
@@ -110,7 +115,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       name: `Generated Exception (${this.randomString(5)})`,
       namespace_type: 'agnostic',
       os_types: [this.randomOSFamily()] as ExceptionListItemSchema['os_types'],
-      tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}all`],
+      tags: [this.randomChoice(EFFECTIVE_SCOPE)],
       tie_breaker_id: this.seededUUIDv4(),
       type: 'simple',
       updated_at: '2020-04-20T15:25:31.830Z',
@@ -165,13 +170,31 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   }
 
   generateEventFilter(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
-    const eventFilter = this.generate(overrides);
-
-    return {
-      ...eventFilter,
+    return this.generate({
       name: `Event filter (${this.randomString(5)})`,
       list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-    };
+      entries: [
+        {
+          field: 'process.pe.company',
+          operator: 'excluded',
+          type: 'match',
+          value: 'elastic',
+        },
+        {
+          entries: [
+            {
+              field: 'status',
+              operator: 'included',
+              type: 'match',
+              value: 'dfdfd',
+            },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+        },
+      ],
+      ...overrides,
+    });
   }
 
   generateEventFilterForCreate(
@@ -198,6 +221,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     return this.generate({
       name: `Host Isolation (${this.randomString(5)})`,
       list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      os_types: ['macos', 'linux', 'windows'],
       entries: [
         {
           field: 'destination.ip',

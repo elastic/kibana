@@ -13,6 +13,9 @@ import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
 import type { HttpMethod } from 'src/core/test_helpers/kbn_server';
 
 import type { AgentPolicySOAttributes } from '../types';
+import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';
+
+import { useDockerRegistry } from './docker_registry_helper';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
@@ -42,9 +45,11 @@ const waitForFleetSetup = async (root: Root) => {
   }
 };
 
-describe('Fleet preconfiguration rest', () => {
+describe('Fleet preconfiguration reset', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
+
+  const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
     const { startES } = kbnTestServer.createTestServers({
@@ -63,6 +68,13 @@ describe('Fleet preconfiguration rest', () => {
         {
           xpack: {
             fleet: {
+              registryUrl,
+              packages: [
+                {
+                  name: 'fleet_server',
+                  version: 'latest',
+                },
+              ],
               // Preconfigure two policies test-12345 and test-456789
               agentPolicies: [
                 {
@@ -189,8 +201,7 @@ describe('Fleet preconfiguration rest', () => {
     await stopServers();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/123103
-  describe.skip('Reset all policy', () => {
+  describe('Reset all policy', () => {
     it('Works and reset all preconfigured policies', async () => {
       const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
@@ -219,9 +230,7 @@ describe('Fleet preconfiguration rest', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/123104
-  // FLAKY: https://github.com/elastic/kibana/issues/123105
-  describe.skip('Reset one preconfigured policy', () => {
+  describe('Reset one preconfigured policy', () => {
     const POLICY_ID = 'test-12345';
 
     it('Works and reset one preconfigured policies if the policy is already deleted (with a ghost package policy)', async () => {
@@ -289,6 +298,40 @@ describe('Fleet preconfiguration rest', () => {
           expect.objectContaining({
             name: 'Elastic Cloud agent policy 0001',
             package_policies: expect.arrayContaining([expect.stringMatching(/.*/)]),
+          }),
+          expect.objectContaining({
+            name: 'Second preconfigured policy',
+          }),
+        ])
+      );
+    });
+
+    it('Works and reset one preconfigured policies if the policy was deleted with a preconfiguration deletion record', async () => {
+      const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
+
+      await soClient.delete('ingest-agent-policies', POLICY_ID);
+      await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
+        id: POLICY_ID,
+      });
+
+      const resetAPI = getSupertestWithAdminUser(
+        kbnServer.root,
+        'post',
+        `/internal/fleet/reset_preconfigured_agent_policies/${POLICY_ID}`
+      );
+      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+
+      const agentPolicies = await kbnServer.coreStart.savedObjects
+        .createInternalRepository()
+        .find<AgentPolicySOAttributes>({
+          type: 'ingest-agent-policies',
+          perPage: 10000,
+        });
+      expect(agentPolicies.saved_objects).toHaveLength(2);
+      expect(agentPolicies.saved_objects.map((ap) => ({ ...ap.attributes }))).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'Elastic Cloud agent policy 0001',
           }),
           expect.objectContaining({
             name: 'Second preconfigured policy',

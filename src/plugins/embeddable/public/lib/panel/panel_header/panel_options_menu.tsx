@@ -21,6 +21,7 @@ export interface PanelOptionsMenuProps {
   isViewMode: boolean;
   closeContextMenu: boolean;
   title?: string;
+  index?: number;
 }
 
 interface State {
@@ -63,7 +64,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
   }
 
   public render() {
-    const { isViewMode, title } = this.props;
+    const { isViewMode, title, index } = this.props;
     const enhancedAriaLabel = i18n.translate(
       'embeddableApi.panel.optionsMenu.panelOptionsButtonEnhancedAriaLabel',
       {
@@ -71,12 +72,15 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
         values: { title },
       }
     );
-    const ariaLabelWithoutTitle = i18n.translate(
-      'embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel',
-      {
-        defaultMessage: 'Panel options',
-      }
-    );
+    const ariaLabelWithoutTitle =
+      index === undefined
+        ? i18n.translate('embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel', {
+            defaultMessage: 'Panel options',
+          })
+        : i18n.translate('embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabelWithIndex', {
+            defaultMessage: 'Options for panel {index}',
+            values: { index },
+          });
 
     const button = (
       <EuiButtonIcon

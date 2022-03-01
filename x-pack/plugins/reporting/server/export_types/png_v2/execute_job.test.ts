@@ -94,10 +94,7 @@ test(`passes browserTimezone to generatePng`, async () => {
         ],
       ],
       browserTimezone: 'UTC',
-      conditionalHeaders: expect.objectContaining({
-        conditions: expect.any(Object),
-        headers: {},
-      }),
+      headers: {},
     })
   );
 });

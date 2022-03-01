@@ -12,7 +12,7 @@ import { fetchProvider } from './collector_fetch';
 
 const getMockFetchClients = (hits?: unknown[]) => {
   const fetchParamsMock = createCollectorFetchContextMock();
-  fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: { hits: { hits } } });
+  fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ hits: { hits } });
   return fetchParamsMock;
 };
 

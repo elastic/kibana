@@ -14,7 +14,7 @@ import {
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { buildSiemResponse } from '../utils';
 
@@ -47,7 +47,7 @@ export const createRulesRoute = (
 
       try {
         const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution.getAppClient();
@@ -79,7 +79,7 @@ export const createRulesRoute = (
           request,
           savedObjectsClient,
         });
-        throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+        throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
 
         const indexExists = await getIndexExists(
           esClient.asCurrentUser,
@@ -104,9 +104,7 @@ export const createRulesRoute = (
           await rulesClient.muteAll({ id: createdRule.id });
         }
 
-        const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(
-          createdRule.id
-        );
+        const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);
 
         const [validated, errors] = newTransformValidate(
           createdRule,

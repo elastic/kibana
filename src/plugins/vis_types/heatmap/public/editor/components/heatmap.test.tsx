@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import type { PersistedState } from '../../../../../visualizations/public';
 import HeatmapOptions, { HeatmapOptionsProps } from './heatmap';

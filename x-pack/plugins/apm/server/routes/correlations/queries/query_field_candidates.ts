@@ -70,7 +70,7 @@ export const fetchTransactionDurationFieldCandidates = async (
   const finalFieldCandidates = new Set(FIELDS_TO_ADD_AS_CANDIDATE);
   const acceptableFields: Set<string> = new Set();
 
-  Object.entries(respMapping.body.fields).forEach(([key, value]) => {
+  Object.entries(respMapping.fields).forEach(([key, value]) => {
     const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
     const isSupportedType = fieldTypes.some((type) =>
       SUPPORTED_ES_FIELD_TYPES.includes(type)
@@ -87,7 +87,7 @@ export const fetchTransactionDurationFieldCandidates = async (
   });
 
   const resp = await esClient.search(getRandomDocsRequest(params));
-  const sampledDocs = resp.body.hits.hits.map((d) => d.fields ?? {});
+  const sampledDocs = resp.hits.hits.map((d) => d.fields ?? {});
 
   // Get all field names for each returned doc and flatten it
   // to a list of unique field names used across all docs

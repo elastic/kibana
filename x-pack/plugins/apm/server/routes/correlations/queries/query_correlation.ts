@@ -123,16 +123,16 @@ export const fetchTransactionDurationCorrelation = async (
     )
   );
 
-  if (resp.body.aggregations === undefined) {
+  if (resp.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationCorrelation failed, did not return aggregations.'
     );
   }
 
   const result = {
-    ranges: resp.body.aggregations.latency_ranges.buckets,
-    correlation: resp.body.aggregations.transaction_duration_correlation.value,
-    ksTest: resp.body.aggregations.ks_test.less,
+    ranges: resp.aggregations.latency_ranges.buckets,
+    correlation: resp.aggregations.transaction_duration_correlation.value,
+    ksTest: resp.aggregations.ks_test.less,
   };
   return result;
 };
