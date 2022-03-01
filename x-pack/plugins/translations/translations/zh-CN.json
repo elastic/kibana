@@ -15910,7 +15910,6 @@
     "xpack.ingestPipelines.processors.defaultDescription.dateIndexName.indexNamePrefixDefault.noPrefixValueLabel": "无前缀",
     "xpack.ingestPipelines.processors.defaultDescription.dateIndexName.indexNamePrefixDefault.prefixValueLabel": "带前缀“{prefix}”",
     "xpack.ingestPipelines.processors.defaultDescription.dissect": "从“{field}”提取匹配分解模式的值",
-    "xpack.ingestPipelines.processors.defaultDescription.dot_expander": "将“{field}”扩展成对象字段",
     "xpack.ingestPipelines.processors.defaultDescription.drop": "丢弃文档而不返回错误",
     "xpack.ingestPipelines.processors.defaultDescription.enrich": "如果策略“{policy_name}”匹配“{field}”，将数据扩充到“{target_field}”",
     "xpack.ingestPipelines.processors.defaultDescription.fail": "引发使执行停止的异常",
