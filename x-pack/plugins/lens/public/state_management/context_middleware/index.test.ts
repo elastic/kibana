@@ -10,12 +10,12 @@ import moment from 'moment';
 
 import { contextMiddleware } from '.';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { initialState } from '../lens_slice';
+import { disableAutoApply, initialState, setChangesApplied } from '../lens_slice';
 import { LensAppState } from '../types';
 import { mockDataPlugin, mockStoreDeps } from '../../mocks';
 
 const storeDeps = mockStoreDeps();
-const createMiddleware = (data: DataPublicPluginStart) => {
+const createMiddleware = (data: DataPublicPluginStart, state?: Partial<LensAppState>) => {
   const middleware = contextMiddleware({
     ...storeDeps,
     lensServices: {
@@ -24,7 +24,7 @@ const createMiddleware = (data: DataPublicPluginStart) => {
     },
   });
   const store = {
-    getState: jest.fn(() => ({ lens: initialState })),
+    getState: jest.fn(() => ({ lens: state || initialState })),
     dispatch: jest.fn(),
   };
   const next = jest.fn();
@@ -68,6 +68,40 @@ describe('contextMiddleware', () => {
         },
         type: 'lens/setState',
       });
+      expect(next).toHaveBeenCalledWith(action);
+    });
+    it('does NOT update the searchSessionId when user has unapplied changes', () => {
+      // setup
+      const data = mockDataPlugin();
+      (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
+      (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: 'now-2m',
+        to: 'now',
+      });
+      (data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+        min: moment(Date.now() - 100000),
+        max: moment(Date.now() - 30000),
+      });
+      const { next, invoke, store } = createMiddleware(data, {
+        ...initialState,
+        changesApplied: false,
+        autoApplyDisabled: true,
+      });
+      const action = {
+        type: 'lens/setState',
+        payload: {
+          visualization: {
+            state: {},
+            activeId: 'id2',
+          },
+        },
+      };
+
+      // test
+      invoke(action);
+      expect(store.dispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'lens/setState' })
+      );
       expect(next).toHaveBeenCalledWith(action);
     });
     it('does not update the searchSessionId when the state changes and too little time has passed', () => {
