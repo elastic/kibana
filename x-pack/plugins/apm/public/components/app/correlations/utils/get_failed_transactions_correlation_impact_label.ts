@@ -12,7 +12,8 @@ import {
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/correlations/failed_transactions_correlations/constants';
 
 export function getFailedTransactionsCorrelationImpactLabel(
-  pValue: FailedTransactionsCorrelation['pValue']
+  pValue: FailedTransactionsCorrelation['pValue'],
+  isFallbackResult?: boolean
 ): {
   impact: FailedTransactionsCorrelationsImpactThreshold;
   color: string;
@@ -20,6 +21,12 @@ export function getFailedTransactionsCorrelationImpactLabel(
   if (pValue === null) {
     return null;
   }
+
+  if (isFallbackResult)
+    return {
+      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.VERY_LOW,
+      color: 'default',
+    };
 
   // The lower the p value, the higher the impact
   if (pValue >= 0 && pValue < 1e-6)
@@ -42,30 +49,36 @@ export function getFailedTransactionsCorrelationImpactLabel(
 }
 
 export function getLatencyCorrelationImpactLabel(
-  pValue: FailedTransactionsCorrelation['pValue']
+  correlation: FailedTransactionsCorrelation['pValue'],
+  isFallbackResult?: boolean
 ): {
   impact: FailedTransactionsCorrelationsImpactThreshold;
   color: string;
 } | null {
-  if (pValue === null) {
+  if (correlation === null || correlation < 0) {
     return null;
   }
 
   // The lower the p value, the higher the impact
-  if (pValue >= 0 && pValue < 1e-6)
+  if (isFallbackResult)
     return {
-      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH,
-      color: 'danger',
+      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.VERY_LOW,
+      color: 'default',
     };
-  if (pValue >= 1e-6 && pValue < 0.001)
+  if (correlation < 0.4)
+    return {
+      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW,
+      color: 'default',
+    };
+  if (correlation < 0.6)
     return {
       impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM,
       color: 'warning',
     };
-  if (pValue >= 0.001 && pValue < 0.02)
+  if (correlation < 1)
     return {
-      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW,
-      color: 'default',
+      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH,
+      color: 'danger',
     };
 
   return null;

@@ -28,7 +28,10 @@ import { i18n } from '@kbn/i18n';
 
 import { useUiTracker } from '../../../../../observability/public';
 
-import { asPercent } from '../../../../common/utils/formatters';
+import {
+  asPercent,
+  asPreciseDecimal,
+} from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
@@ -36,6 +39,8 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
+
+import { ImpactBar } from '../../shared/impact_bar';
 import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
@@ -223,6 +228,24 @@ export function FailedTransactionsCorrelations({
         ]
       : [];
     return [
+      {
+        width: '116px',
+        field: 'normalizedScore',
+        name: (
+          <>
+            {i18n.translate(
+              'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
+              {
+                defaultMessage: 'Score',
+              }
+            )}
+          </>
+        ),
+        render: (_, { normalizedScore }) => {
+          return <div>{asPreciseDecimal(normalizedScore, 2)}</div>;
+        },
+        sortable: true,
+      },
       {
         width: '116px',
         field: 'pValue',

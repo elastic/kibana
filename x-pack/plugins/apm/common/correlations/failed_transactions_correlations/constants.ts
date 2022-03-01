@@ -26,4 +26,10 @@ export const FAILED_TRANSACTIONS_IMPACT_THRESHOLD = {
       defaultMessage: 'Low',
     }
   ),
+  VERY_LOW: i18n.translate(
+    'xpack.apm.correlations.failedTransactions.veryLowImpactText',
+    {
+      defaultMessage: 'Very low',
+    }
+  ),
 } as const;
