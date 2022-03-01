@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ConditionEntry, ConditionEntryField } from '../../types';
+import { ConditionEntryField } from '@kbn/securitysolution-utils';
+import { ConditionEntry } from '../../types';
 
 const HASH_LENGTHS: readonly number[] = [
   32, // MD5

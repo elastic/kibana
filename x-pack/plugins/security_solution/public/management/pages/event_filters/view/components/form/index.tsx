@@ -25,8 +25,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 
-import { OperatingSystem, PolicyData } from '../../../../../../../common/endpoint/types';
+import { PolicyData } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
 import { Loader } from '../../../../../../common/components/loader';

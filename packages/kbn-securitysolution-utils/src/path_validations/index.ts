@@ -28,7 +28,7 @@ export const enum OperatingSystem {
   WINDOWS = 'windows',
 }
 
-type TrustedAppEntryTypes = 'match' | 'wildcard';
+export type TrustedAppEntryTypes = 'match' | 'wildcard';
 /*
  * regex to match executable names
  * starts matching from the eol of the path

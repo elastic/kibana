@@ -13,7 +13,7 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { hasSimpleExecutableName } from '@kbn/securitysolution-utils';
+import { hasSimpleExecutableName, OperatingSystem } from '@kbn/securitysolution-utils';
 
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -21,7 +21,6 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { OperatingSystem } from '../../../../common/endpoint/types';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
   InternalArtifactCompleteSchema,

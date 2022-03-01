@@ -18,16 +18,20 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { hasSimpleExecutableName, isPathValid } from '@kbn/securitysolution-utils';
+import {
+  hasSimpleExecutableName,
+  isPathValid,
+  ConditionEntryField,
+  OperatingSystem,
+} from '@kbn/securitysolution-utils';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
+
 import {
   ConditionEntry,
-  ConditionEntryField,
   EffectScope,
   MacosLinuxConditionEntry,
   MaybeImmutable,
   NewTrustedApp,
-  OperatingSystem,
 } from '../../../../../../common/endpoint/types';
 import {
   isValidHash,
