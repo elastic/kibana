@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { AllCasesSelectorModalProps } from '.';
 import { Case } from '../../../containers/types';
+import { useCasesToast } from '../../../methods/use_cases_toast';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
@@ -21,6 +22,7 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
     onSuccess: async (theCase?: Case) => props.onRowClick(theCase),
   });
   const { dispatch } = useCasesContext();
+  const casesToasts = useCasesToast();
 
   const closeModal = useCallback(() => {
     dispatch({
@@ -45,6 +47,7 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
             closeModal();
             createNewCaseFlyout.open();
           } else {
+            casesToasts.showSuccessAttach(theCase);
             if (props.onRowClick) {
               props.onRowClick(theCase);
             }
@@ -64,7 +67,7 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
         },
       },
     });
-  }, [closeModal, createNewCaseFlyout, dispatch, props]);
+  }, [casesToasts, closeModal, createNewCaseFlyout, dispatch, props]);
   return {
     open: openModal,
     close: closeModal,
