@@ -38,7 +38,7 @@ export function registerDynamicRoute({
     {
       path: `/api/monitoring_collection/{type}`,
       options: {
-        // authRequired: !config.allowAnonymous,
+        authRequired: !config.allowAnonymous,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
       },
       validate: {
