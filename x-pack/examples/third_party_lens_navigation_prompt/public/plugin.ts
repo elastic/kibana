@@ -132,7 +132,7 @@ export class EmbeddedLensExamplePlugin
     });
 
     lens.registerTopNavMenuEntryGenerator(
-      ({ visualizationId, visualizationState, datasourceStates }) => {
+      ({ visualizationId, visualizationState, datasourceStates, query, filters }) => {
         if (!datasourceStates.indexpattern.state || !visualizationState) return;
 
         return {
@@ -146,6 +146,7 @@ export class EmbeddedLensExamplePlugin
             const layers = Object.values(datasourceState.layers) as Array<
               PersistedIndexPatternLayer & { indexPatternId: string }
             >;
+            const serializedFilters = JSON.parse(JSON.stringify(filters));
             coreStart.application.navigateToApp('testing_embedded_lens', {
               state: {
                 visualizationType: visualizationId,
@@ -169,8 +170,8 @@ export class EmbeddedLensExamplePlugin
                     },
                   },
                   visualization: visualizationState,
-                  filters: [],
-                  query: { language: 'kuery', query: '' },
+                  filters: serializedFilters,
+                  query,
                 },
               },
             });
