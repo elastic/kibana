@@ -60,8 +60,8 @@ function getBuildJob() {
 function getRunnerJob(env) {
   return {
     command: `${
-      env[E2E_GREP] ? `GREP="${env[E2E_GREP]}"` : ''
-    }".buildkite/scripts/steps/functional/uptime.sh`,
+      env[E2E_GREP] ? `GREP="${env[E2E_GREP]}" ` : ''
+    }.buildkite/scripts/steps/functional/uptime.sh`,
     label: `Uptime E2E - Synthetics runner`,
     agents: { queue: 'n2-4' },
     depends_on: BUILD_UUID,
