@@ -42,7 +42,7 @@ export const ConfigureCustom: React.FC = () => {
 
   const {
     serviceType,
-    configuration: { helpText },
+    configuration: { documentationUrl, helpText },
     name,
     categories = [],
   } = sourceData;
@@ -56,17 +56,32 @@ export const ConfigureCustom: React.FC = () => {
           <EuiText grow={false}>
             <p>{helpText}</p>
             <p>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.docs.link.description"
-                defaultMessage="{link} to learn more about Custom API Sources."
-                values={{
-                  link: (
-                    <EuiLink href={docLinks.workplaceSearchCustomSources} target="_blank">
-                      {CONFIG_CUSTOM_LINK_TEXT}
-                    </EuiLink>
-                  ),
-                }}
-              />
+              {serviceType === 'custom' ? (
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.docs.link.description"
+                  defaultMessage="{link} to learn more about Custom API Sources."
+                  values={{
+                    link: (
+                      <EuiLink href={docLinks.workplaceSearchCustomSources} target="_blank">
+                        {CONFIG_CUSTOM_LINK_TEXT}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentDocs.link.description"
+                  defaultMessage="{link} to learn more about deploying a {name} source."
+                  values={{
+                    link: (
+                      <EuiLink target="_blank" href={documentationUrl}>
+                        {CONFIG_CUSTOM_LINK_TEXT}
+                      </EuiLink>
+                    ),
+                    name,
+                  }}
+                />
+              )}
             </p>
           </EuiText>
           <EuiSpacer size="xxl" />
@@ -88,7 +103,17 @@ export const ConfigureCustom: React.FC = () => {
               isLoading={buttonLoading}
               data-test-subj="CreateCustomButton"
             >
-              {CONFIG_CUSTOM_BUTTON}
+              {serviceType === 'custom' ? (
+                CONFIG_CUSTOM_BUTTON
+              ) : (
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.createNamedSourceButtonLabel"
+                  defaultMessage="Create {name} source"
+                  values={{
+                    name,
+                  }}
+                />
+              )}
             </EuiButton>
           </EuiFormRow>
         </EuiForm>

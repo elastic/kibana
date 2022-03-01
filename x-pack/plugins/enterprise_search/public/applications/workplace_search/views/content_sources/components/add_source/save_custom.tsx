@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiLink,
   EuiPanel,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -59,7 +60,7 @@ export const SaveCustom: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const {
     serviceType,
-    configuration: { documentationUrl },
+    configuration: { githubRepository, documentationUrl },
     name,
     categories = [],
   } = sourceData;
@@ -92,7 +93,22 @@ export const SaveCustom: React.FC = () => {
                 <EuiText grow={false}>
                   <EuiTextAlign textAlign="center">
                     {SAVE_CUSTOM_BODY1}
-                    <br />
+                    <EuiSpacer size="s" />
+                    {serviceType !== 'custom' && githubRepository && (
+                      <>
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.repositoryInstructions"
+                          defaultMessage="First you'll need to clone and deploy this repository"
+                        />
+                        <br />
+                        <EuiCode>
+                          <EuiLinkTo to={`https://github.com/${githubRepository}`}>
+                            {githubRepository}
+                          </EuiLinkTo>
+                        </EuiCode>
+                        <EuiSpacer size="s" />
+                      </>
+                    )}
                     {SAVE_CUSTOM_BODY2}
                     <br />
                     <EuiLinkTo to={getSourcesPath(SOURCES_PATH, isOrganization)}>
@@ -118,17 +134,32 @@ export const SaveCustom: React.FC = () => {
                 <EuiSpacer size="xs" />
                 <EuiText color="subdued" size="s">
                   <p>
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentation.text"
-                      defaultMessage="{link} to learn more about Custom API Sources."
-                      values={{
-                        link: (
-                          <EuiLink target="_blank" href={documentationUrl}>
-                            {SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK}
-                          </EuiLink>
-                        ),
-                      }}
-                    />
+                    {serviceType === 'custom' ? (
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentation.text"
+                        defaultMessage="{link} to learn more about Custom API Sources."
+                        values={{
+                          link: (
+                            <EuiLink target="_blank" href={documentationUrl}>
+                              {SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.namedSourceDocumentation.text"
+                        defaultMessage="{link} to learn more about deploying a {name} source."
+                        values={{
+                          link: (
+                            <EuiLink target="_blank" href={documentationUrl}>
+                              {SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK}
+                            </EuiLink>
+                          ),
+                          name,
+                        }}
+                      />
+                    )}
                   </p>
                 </EuiText>
               </div>

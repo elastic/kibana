@@ -537,21 +537,38 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
     iconName: SOURCE_NAMES.SHAREPOINT_SERVER,
-    categories: ['File Sharing', 'Storage', 'Cloud', 'Microsoft', 'Office 365'], // TODO i18n
+    categories: [
+      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.fileSharing', {
+        defaultMessage: 'File Sharing',
+      }),
+      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
+        defaultMessage: 'Storage',
+      }),
+      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
+        defaultMessage: 'Cloud',
+      }),
+      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.microsoft', {
+        defaultMessage: 'Microsoft',
+      }),
+      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.office', {
+        defaultMessage: 'Office 365',
+      }),
+    ],
     serviceType: 'share_point_server', // this doesn't exist on the BE
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      helpText: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.sources.helpText.sharepointServer',
-        {
-          defaultMessage:
-            "We've got some starter code for you that can help you make a custom api source to import sharepoint stuff. Here's a link to learn more",
-        }
-      ),
+      // helpText: i18n.translate( // TODO updatae this
+      //   'xpack.enterpriseSearch.workplaceSearch.sources.helpText.sharepointServer',
+      //   {
+      //     defaultMessage:
+      //       "Here is some help text. It should probably give the user a heads up that they're going to have to deploy some code.",
+      //   }
+      // ),
       documentationUrl: docLinks.workplaceSearchCustomSources, // TODO update this
       applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-sharepoint-server-connector',
     },
     accountContextOnly: false,
     internalConnectorAvailable: false,

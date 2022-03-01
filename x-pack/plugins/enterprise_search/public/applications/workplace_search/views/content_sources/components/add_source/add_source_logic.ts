@@ -568,7 +568,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
   }),
 });
 
-// TODO honestly can we base all of these on the route we're on?
 const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
   const { connect, configure, reAuthenticate } = props;
   if (connect) return AddSourceSteps.ConnectInstanceStep;

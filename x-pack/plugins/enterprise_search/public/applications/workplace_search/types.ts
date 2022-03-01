@@ -70,6 +70,7 @@ export interface Configuration {
   documentationUrl: string;
   applicationPortalUrl?: string;
   applicationLinkTitle?: string;
+  githubRepository?: string;
 }
 
 export interface SourceDataItem {
