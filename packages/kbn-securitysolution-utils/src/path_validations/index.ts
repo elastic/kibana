@@ -16,13 +16,13 @@ export const FILEPATH_WARNING = i18n.translate('utils.filename.pathWarning', {
   defaultMessage: `Path may be formed incorrectly; verify value`,
 });
 
-export enum ConditionEntryField {
+export const enum ConditionEntryField {
   HASH = 'process.hash.*',
   PATH = 'process.executable.caseless',
   SIGNER = 'process.Ext.code_signature',
 }
 
-export enum OperatingSystem {
+export const enum OperatingSystem {
   LINUX = 'linux',
   MAC = 'macos',
   WINDOWS = 'windows',
