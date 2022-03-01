@@ -186,7 +186,7 @@ describe('When using EPM `get` services', () => {
     beforeEach(() => {
       const mockContract = createAppContextStartContractMock();
       appContextService.start(mockContract);
-      MockRegistry.fetchFindLatestPackage.mockResolvedValue({
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
         name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
@@ -283,8 +283,8 @@ describe('When using EPM `get` services', () => {
     });
 
     describe('registry fetch errors', () => {
-      it('throws when a package that is not installed is not available in the registry', async () => {
-        MockRegistry.fetchFindLatestPackage.mockResolvedValue(undefined);
+      it('throws when a package that is not installed is not available in the registry and not bundled', async () => {
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
         const soClient = savedObjectsClientMock.create();
         soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
 
@@ -298,7 +298,7 @@ describe('When using EPM `get` services', () => {
       });
 
       it('sets the latestVersion to installed version when an installed package is not available in the registry', async () => {
-        MockRegistry.fetchFindLatestPackage.mockResolvedValue(undefined);
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
         const soClient = savedObjectsClientMock.create();
         soClient.get.mockResolvedValue({
           id: 'my-package',
