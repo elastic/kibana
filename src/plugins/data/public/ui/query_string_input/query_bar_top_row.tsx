@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
+import type { Filter } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -21,7 +22,7 @@ import {
   EuiFieldText,
   prettyDuration,
   EuiIconProps,
-  EuiSuperUpdateButton,
+  EuiButtonIcon,
   OnRefreshProps,
 } from '@elastic/eui';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
@@ -32,13 +33,12 @@ import { getQueryLog } from '../../query';
 import type { PersistedLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../../utils/shallow_equal';
+import { AddFilterPopover } from './add_filter';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
-const SuperUpdateButton = React.memo(
-  EuiSuperUpdateButton as any
-) as unknown as typeof EuiSuperUpdateButton;
+const SuperUpdateButton = React.memo(EuiButtonIcon);
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 
@@ -73,6 +73,8 @@ export interface QueryBarTopRowProps {
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
+  filters: Filter[];
+  onFiltersUpdated?: (filters: Filter[]) => void;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -304,6 +306,7 @@ export const QueryBarTopRow = React.memo(
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
             className="kbnQueryBar__datePicker"
+            width="auto"
           />
         </EuiFlexItem>
       );
@@ -314,11 +317,13 @@ export const QueryBarTopRow = React.memo(
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <SuperUpdateButton
-          needsUpdate={props.isDirty}
+          display="fill"
+          iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
+          aria-label="Update"
           isDisabled={isDateRangeInvalid}
-          isLoading={props.isLoading}
           onClick={onClickSubmitButton}
-          fill={props.fillSubmitButton}
+          size="m"
+          color={props.isDirty ? 'success' : 'primary'}
           data-test-subj="querySubmitButton"
         />
       );
@@ -359,6 +364,7 @@ export const QueryBarTopRow = React.memo(
             nonKqlMode={props.nonKqlMode}
             nonKqlModeHelpText={props.nonKqlModeHelpText}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            disableLanguageSwitcher={true}
           />
         </EuiFlexItem>
       );
@@ -376,6 +382,12 @@ export const QueryBarTopRow = React.memo(
         justifyContent="flexEnd"
       >
         {renderQueryInput()}
+        <AddFilterPopover
+          indexPatterns={props.indexPatterns}
+          filters={props.filters}
+          timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+          onFiltersUpdated={props.onFiltersUpdated}
+        />
         <SharingMetaFields
           from={currentDateRange.from}
           to={currentDateRange.to}

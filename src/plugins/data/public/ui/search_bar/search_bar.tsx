@@ -24,7 +24,8 @@ import { IDataPluginServices } from '../../types';
 import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
-import { SavedQueryManagementComponent } from '../saved_query_management';
+import { SavedQueryManagementList } from '../saved_query_management';
+import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -86,8 +87,7 @@ export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
 
 interface State {
   isFiltersVisible: boolean;
-  showSaveQueryModal: boolean;
-  showSaveNewQueryModal: boolean;
+  openQueryBarMenu: boolean;
   showSavedQueryPopover: boolean;
   currentProps?: SearchBarProps;
   query?: Query;
@@ -166,8 +166,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   */
   public state = {
     isFiltersVisible: true,
-    showSaveQueryModal: false,
-    showSaveNewQueryModal: false,
+    openQueryBarMenu: false,
     showSavedQueryPopover: false,
     currentProps: this.props,
     query: this.props.query ? { ...this.props.query } : undefined,
@@ -264,11 +263,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         `Your query "${response.attributes.title}" was saved`
       );
 
-      this.setState({
-        showSaveQueryModal: false,
-        showSaveNewQueryModal: false,
-      });
-
       if (this.props.onSaved) {
         this.props.onSaved(response);
       }
@@ -280,18 +274,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
   };
 
-  public onInitiateSave = () => {
-    this.setState({
-      showSaveQueryModal: true,
-    });
-  };
-
-  public onInitiateSaveNew = () => {
-    this.setState({
-      showSaveNewQueryModal: true,
-    });
-  };
-
   public onQueryBarChange = (queryAndDateRange: { dateRange: TimeRange; query?: Query }) => {
     this.setState({
       query: queryAndDateRange.query,
@@ -301,6 +283,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (this.props.onQueryChange) {
       this.props.onQueryChange(queryAndDateRange);
     }
+  };
+
+  public toggleFilterBarMenuPopover = (value: boolean) => {
+    this.setState({
+      openQueryBarMenu: value,
+    });
   };
 
   public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
@@ -350,6 +338,45 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   public render() {
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
 
+    const saveQueryFormComponent = (
+      <SaveQueryForm
+        savedQueryService={this.savedQueryService}
+        onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
+        onClose={() => this.setState({ openQueryBarMenu: false })}
+        showFilterOption={this.props.showFilterBar}
+        showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
+      />
+    );
+
+    const queryBarMenu = (
+      <QueryBarMenu
+        nonKqlMode={this.props.nonKqlMode}
+        nonKqlModeHelpText={this.props.nonKqlModeHelpText}
+        language={this.state.query!.language}
+        services={this.services}
+        onQueryChange={this.onQueryBarChange}
+        onQueryBarSubmit={this.onQueryBarSubmit}
+        dateRangeFrom={this.state.dateRangeFrom}
+        dateRangeTo={this.state.dateRangeTo}
+        savedQueryService={this.savedQueryService}
+        applySelectedQuery={this.onLoadSavedQuery}
+        saveQueryFormComponent={saveQueryFormComponent}
+        toggleFilterBarMenuPopover={this.toggleFilterBarMenuPopover}
+        openQueryBarMenu={this.state.openQueryBarMenu}
+        onFiltersUpdated={this.props.onFiltersUpdated}
+        filters={this.props.filters}
+        manageFilterSetComponent={
+          this.props.showFilterBar && this.state.query
+            ? this.renderSavedQueryManagement(
+                this.props.onClearSavedQuery,
+                this.props.showSaveQuery,
+                this.props.savedQuery
+              )
+            : undefined
+        }
+      />
+    );
+
     let queryBar;
     if (this.shouldRenderQueryBar()) {
       queryBar = (
@@ -361,15 +388,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
           fillSubmitButton={this.props.fillSubmitButton || false}
-          prepend={
-            this.props.showFilterBar && this.state.query
-              ? this.renderSavedQueryManagement(
-                  this.props.onClearSavedQuery,
-                  this.props.showSaveQuery,
-                  this.props.savedQuery
-                )
-              : undefined
-          }
+          prepend={this.props.showFilterBar && this.state.query ? queryBarMenu : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
@@ -392,6 +411,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           nonKqlMode={this.props.nonKqlMode}
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filters={this.props.filters!}
+          onFiltersUpdated={this.props.onFiltersUpdated}
         />
       );
     }
@@ -425,27 +446,32 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       <div className={globalQueryBarClasses} data-test-subj="globalQueryBar">
         {queryBar}
         {filterBar}
-
-        {this.state.showSaveQueryModal ? (
-          <SaveQueryForm
-            savedQuery={this.props.savedQuery ? this.props.savedQuery : undefined}
-            savedQueryService={this.savedQueryService}
-            onSave={this.onSave}
-            onClose={() => this.setState({ showSaveQueryModal: false })}
-            showFilterOption={this.props.showFilterBar}
-            showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
-          />
-        ) : null}
-        {this.state.showSaveNewQueryModal ? (
-          <SaveQueryForm
-            savedQueryService={this.savedQueryService}
-            onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
-            onClose={() => this.setState({ showSaveNewQueryModal: false })}
-            showFilterOption={this.props.showFilterBar}
-            showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
-          />
-        ) : null}
       </div>
+    );
+  }
+
+  private renderSaveQueryForm() {
+    return (
+      <SaveQueryForm
+        savedQuery={this.props.savedQuery ? this.props.savedQuery : undefined}
+        savedQueryService={this.savedQueryService}
+        onSave={this.onSave}
+        onClose={() => this.setState({ openQueryBarMenu: false })}
+        showFilterOption={this.props.showFilterBar}
+        showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
+      />
+    );
+  }
+
+  private renderSaveQueryFormAsNew() {
+    return (
+      <SaveQueryForm
+        savedQueryService={this.savedQueryService}
+        onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
+        onClose={() => this.setState({ openQueryBarMenu: false })}
+        showFilterOption={this.props.showFilterBar}
+        showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
+      />
     );
   }
 
@@ -456,14 +482,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       savedQuery: SearchBarOwnProps['savedQuery']
     ) => {
       const savedQueryManagement = onClearSavedQuery && (
-        <SavedQueryManagementComponent
+        <SavedQueryManagementList
           showSaveQuery={showSaveQuery}
           loadedSavedQuery={savedQuery}
-          onSave={this.onInitiateSave}
-          onSaveAsNew={this.onInitiateSaveNew}
           onLoad={this.onLoadSavedQuery}
           savedQueryService={this.savedQueryService}
           onClearSavedQuery={onClearSavedQuery}
+          onClose={() => this.setState({ openQueryBarMenu: false })}
+          saveFormComponent={this.renderSaveQueryForm()}
+          saveAsNewFormComponent={this.renderSaveQueryFormAsNew()}
         />
       );
 

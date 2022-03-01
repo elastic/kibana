@@ -7,20 +7,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiModal,
-  EuiButton,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { sortBy, isEqual } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
@@ -51,8 +38,6 @@ export function SaveQueryForm({
   showTimeFilterOption = true,
 }: Props) {
   const [title, setTitle] = useState(savedQuery?.attributes.title ?? '');
-  const [enabledSaveButton, setEnabledSaveButton] = useState(Boolean(savedQuery));
-  const [description, setDescription] = useState(savedQuery?.attributes.description ?? '');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
     Boolean(savedQuery?.attributes.filters ?? true)
@@ -72,10 +57,10 @@ export function SaveQueryForm({
     }
   );
 
-  const savedQueryDescriptionText = i18n.translate(
-    'data.search.searchBar.savedQueryDescriptionText',
+  const titleExistsErrorText = i18n.translate(
+    'data.search.searchBar.savedQueryForm.titleExistsText',
     {
-      defaultMessage: 'Save query text and filters that you want to use again.',
+      defaultMessage: 'Name is required',
     }
   );
 
@@ -103,31 +88,26 @@ export function SaveQueryForm({
       return false;
     }
 
+    if (!title) {
+      errors.push(titleExistsErrorText);
+    }
+
     return !formErrors.length;
-  }, [savedQueries, savedQuery, title, titleConflictErrorText, formErrors]);
+  }, [savedQueries, formErrors, title, savedQuery, titleConflictErrorText, titleExistsErrorText]);
 
   const onClickSave = useCallback(() => {
     if (validate()) {
       onSave({
         id: savedQuery?.id,
         title,
-        description,
+        description: '',
         shouldIncludeFilters,
         shouldIncludeTimefilter,
       });
     }
-  }, [
-    validate,
-    onSave,
-    savedQuery?.id,
-    title,
-    description,
-    shouldIncludeFilters,
-    shouldIncludeTimefilter,
-  ]);
+  }, [validate, onSave, savedQuery?.id, title, shouldIncludeFilters, shouldIncludeTimefilter]);
 
   const onInputChange = useCallback((event) => {
-    setEnabledSaveButton(Boolean(event.target.value));
     setFormErrors([]);
     setTitle(event.target.value);
   }, []);
@@ -143,18 +123,15 @@ export function SaveQueryForm({
 
   const saveQueryForm = (
     <EuiForm isInvalid={hasErrors} error={formErrors} data-test-subj="saveQueryForm">
-      <EuiFormRow>
-        <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
-      </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('data.search.searchBar.savedQueryNameLabelText', {
           defaultMessage: 'Name',
         })}
         helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
-          defaultMessage:
-            'Name is required, it cannot contain leading or trailing whitespace and must be unique.',
+          defaultMessage: 'Cannot contain leading or trailing whitespace and must be unique.',
         })}
         isInvalid={hasErrors}
+        display="rowCompressed"
       >
         <EuiFieldText
           disabled={!!savedQuery}
@@ -164,25 +141,12 @@ export function SaveQueryForm({
           data-test-subj="saveQueryFormTitle"
           isInvalid={hasErrors}
           onBlur={autoTrim}
+          compressed
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={i18n.translate('data.search.searchBar.savedQueryDescriptionLabelText', {
-          defaultMessage: 'Description',
-        })}
-      >
-        <EuiFieldText
-          value={description}
-          name="description"
-          onChange={(event) => {
-            setDescription(event.target.value);
-          }}
-          data-test-subj="saveQueryFormDescription"
-        />
-      </EuiFormRow>
       {showFilterOption && (
-        <EuiFormRow>
+        <EuiFormRow display="rowCompressed">
           <EuiSwitch
             name="shouldIncludeFilters"
             label={i18n.translate('data.search.searchBar.savedQueryIncludeFiltersLabelText', {
@@ -198,7 +162,7 @@ export function SaveQueryForm({
       )}
 
       {showTimeFilterOption && (
-        <EuiFormRow>
+        <EuiFormRow display="rowCompressed">
           <EuiSwitch
             name="shouldIncludeTimefilter"
             label={i18n.translate('data.search.searchBar.savedQueryIncludeTimeFilterLabelText', {
@@ -212,39 +176,23 @@ export function SaveQueryForm({
           />
         </EuiFormRow>
       )}
-    </EuiForm>
-  );
 
-  return (
-    <EuiModal onClose={onClose} initialFocus="[name=title]">
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
-            defaultMessage: 'Save query',
-          })}
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody>{saveQueryForm}</EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
-          {i18n.translate('data.search.searchBar.savedQueryFormCancelButtonText', {
-            defaultMessage: 'Cancel',
-          })}
-        </EuiButtonEmpty>
-
+      <EuiFormRow>
         <EuiButton
+          fullWidth
+          size="s"
           onClick={onClickSave}
           fill
           data-test-subj="savedQueryFormSaveButton"
-          disabled={hasErrors || !enabledSaveButton}
+          disabled={hasErrors}
         >
           {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
-            defaultMessage: 'Save',
+            defaultMessage: 'Save filter set',
           })}
         </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+      </EuiFormRow>
+    </EuiForm>
   );
+
+  return <>{saveQueryForm}</>;
 }

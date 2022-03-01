@@ -7,3 +7,4 @@
  */
 
 export { SavedQueryManagementComponent } from './saved_query_management_component';
+export { SavedQueryManagementList } from './saved_query_management_list';
