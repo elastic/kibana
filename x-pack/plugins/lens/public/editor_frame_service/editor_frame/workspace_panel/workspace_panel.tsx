@@ -91,7 +91,6 @@ interface WorkspaceState {
     fixAction?: DatasourceFixAction<unknown>;
   }>;
   expandError: boolean;
-  initialRenderComplete: boolean;
 }
 
 const dropProps = {
@@ -146,13 +145,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
-    initialRenderComplete: false,
   });
 
   const expressionToRender = useRef<null | undefined | string>();
+  const initialRenderComplete = useRef<boolean>();
 
-  const shouldApplyExpression =
-    autoApplyEnabled || !localState.initialRenderComplete || triggerApply;
+  const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
 
   const { datasourceLayers } = framePublicAPI;
 
@@ -266,13 +264,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   });
 
   const expressionExists = Boolean(expressionToRender.current);
-  // null signals an empty workspace which should count as an initial render
-  if (
-    (expressionExists || expressionToRender.current === null) &&
-    !localState.initialRenderComplete
-  ) {
-    setLocalState((s) => ({ ...s, initialRenderComplete: true }));
-  }
+  useEffect(() => {
+    // null signals an empty workspace which should count as an initial render
+    if (
+      (expressionExists || expressionToRender.current === null) &&
+      !initialRenderComplete.current
+    ) {
+      initialRenderComplete.current = true;
+    }
+  }, [expressionExists]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
