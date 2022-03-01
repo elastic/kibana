@@ -15,12 +15,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { get } from 'lodash';
 import { useKibana } from '../../../common/lib/kibana';
+import {
+  RuleRegistrySearchRequestPagination,
+  RuleRegistrySearchRequestSort,
+} from '../../../../../rule_registry/common';
 import { QueryBar, useQueryBar, Provider, alertsPageStateContainer } from './query_bar';
 import { getVisibleAlertConsumers } from './get_visible_alert_consumers';
-
 import { useFetchDataViews, usePagination, useSorting } from './hooks';
+import { UseFetchAlertsDataProps } from './hooks/alerts_data';
 
 interface BulkActionsObjectProp {
   alertStatusActions?: boolean;
@@ -28,40 +31,40 @@ interface BulkActionsObjectProp {
   onAlertStatusActionFailure?: void;
 }
 
-export interface Sort {
-  columnId: string;
-  columnType: string;
-  sortDirection: 'asc' | 'desc';
-}
+export type AlertsData = Record<string, any[]>;
 
 export interface FetchAlertData {
   activePage: number;
-  alerts: Record<string, any[]>;
+  alerts: AlertsData;
   isInitializing: boolean;
   isLoading: boolean;
   getInspectQuery: () => { request: {}; response: {} };
   onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
-  onPageChange: (pageNumber: number, limit: number) => void;
-  onSortChange: (sort: Sort[]) => void;
+  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
+  onSortChange: (sort: RuleRegistrySearchRequestSort[]) => void;
   refresh: () => void;
-  alertCount: number;
+  alertsCount: number;
 }
 
-type AlertsTableProps = FetchAlertData & {
+interface AlertsTableProps {
   consumers: AlertConsumers[];
   bulkActions: BulkActionsObjectProp;
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
-  itemsPerPage: number;
-  itemsPerPageOptions: number[];
+  pageSize: number;
+  pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
-  renderCellValue: (props: EuiDataGridCellValueElementProps) => React.ReactNode;
+  renderCellValue: (
+    alerts: AlertsData,
+    offset: number,
+    props: EuiDataGridCellValueElementProps
+  ) => React.ReactNode;
   showCheckboxes: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
-  useFetchAlertData: () => FetchAlertData;
-};
+  useFetchAlertsData: (props: UseFetchAlertsDataProps) => FetchAlertData;
+}
 
 const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
   props: AlertsTableProps
@@ -78,36 +81,29 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
     To keep the latest configuration of the alert table in localstorage
     To source it's data from the newly added search strategy and leverage the stream architecture to support large amounts of alerts using the newly created React hook.
    */
-
   const {
     http,
     data,
     application: { capabilities },
     kibanaFeatures,
   } = useKibana().services;
-  const { sortingColumns, onSort } = useSorting();
-  const { pagination, onChangeItemsPerPage, onChangePage } = usePagination();
+  const { alerts, refresh, alertsCount, onSortChange, onPageChange, activePage } =
+    props.useFetchAlertsData({
+      consumers: props.consumers,
+    });
+  const { sortingColumns, onSort } = useSorting(onSortChange);
+  const { pagination, onChangePageSize, onChangePageIndex } = usePagination({
+    onPageChange,
+    pageIndex: activePage,
+    pageSize: props.pageSize,
+  });
 
-  const { refresh, alerts, alertCount } = props.useFetchAlertData();
   const { onQueryBarQueryChange, rangeFrom, rangeTo, kuery } = useQueryBar(data, refresh);
   const visibleConsumers = useMemo(() => {
     return getVisibleAlertConsumers(capabilities, kibanaFeatures, props.consumers);
   }, [props.consumers, capabilities, kibanaFeatures]);
   const { dataViews } = useFetchDataViews(visibleConsumers, http, data);
-
-  // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(props.columns.map(({ id }) => id));
-
-  const RenderCellValue = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-    const row = alerts[rowIndex];
-    if (row) {
-      const val = get(row, columnId);
-      if (val.length === 1) {
-        return val[0];
-      }
-    }
-    return 'N/A';
-  };
 
   return (
     <>
@@ -128,15 +124,17 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
         columns={props.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
-        rowCount={alertCount}
-        renderCellValue={RenderCellValue}
-        inMemory={{ level: 'sorting' }}
+        rowCount={alertsCount}
+        renderCellValue={(cellProps: EuiDataGridCellValueElementProps) =>
+          props.renderCellValue(alerts, activePage * pagination.pageSize, cellProps)
+        }
+        // inMemory={{ level: 'sorting' }}
         sorting={{ columns: sortingColumns, onSort }}
         pagination={{
           ...pagination,
-          pageSizeOptions: props.itemsPerPageOptions,
-          onChangeItemsPerPage,
-          onChangePage,
+          pageSizeOptions: props.pageSizeOptions,
+          onChangeItemsPerPage: onChangePageSize,
+          onChangePage: onChangePageIndex,
         }}
       />
     </>

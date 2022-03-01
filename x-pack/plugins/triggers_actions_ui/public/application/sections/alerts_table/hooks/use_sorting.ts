@@ -5,14 +5,16 @@
  * 2.0.
  */
 import { useCallback, useState } from 'react';
+import { RuleRegistrySearchRequestSort } from '../../../../../../rule_registry/common';
 
-export function useSorting() {
+export function useSorting(onSortChange: (sort: RuleRegistrySearchRequestSort[]) => void) {
   const [sortingColumns, setSortingColumns] = useState([]);
   const onSort = useCallback(
     (_state) => {
+      onSortChange(_state);
       setSortingColumns(_state);
     },
-    [setSortingColumns]
+    [setSortingColumns, onSortChange]
   );
   return { sortingColumns, onSort };
 }
