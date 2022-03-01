@@ -21,7 +21,7 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
     // in a follow up clean up
     onSuccess: async (theCase?: Case) => {
       if (props.onRowClick) {
-        return props.onRowClick();
+        return props.onRowClick(theCase);
       }
     },
   });
