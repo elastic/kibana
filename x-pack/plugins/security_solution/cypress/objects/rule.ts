@@ -165,8 +165,8 @@ const getSeverityOverride4 = (): SeverityOverride => ({
 
 const getRunsEvery = (): Interval => ({
   interval: '1',
-  timeType: 'Seconds',
-  type: 's',
+  timeType: 'Minute',
+  type: 'm',
 });
 
 const getLookBack = (): Interval => ({
