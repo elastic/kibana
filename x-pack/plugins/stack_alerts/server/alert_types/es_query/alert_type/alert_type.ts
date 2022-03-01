@@ -106,7 +106,7 @@ export function getAlertType(
   const actionVariableContextThresholdComparatorLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextThresholdComparatorLabel',
     {
-      defaultMessage: 'A function to determine if the threshold has been met.',
+      defaultMessage: 'A function to determine if the threshold was met.',
     }
   );
 
