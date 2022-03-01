@@ -12,7 +12,7 @@ import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
-import { mockCases } from '../../../../common/mock/mock_cases_plugin';
+import { mockCasesContract } from '../../../../../../cases/public/mocks';
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -52,7 +52,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
       application: {
         capabilities: { siem: { crud_alerts: true, read_alerts: true } },
       },
-      cases: { ...mockCases },
+      cases: mockCasesContract(),
     },
   }),
   useGetUserCasesPermissions: jest.fn().mockReturnValue({
