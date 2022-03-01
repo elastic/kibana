@@ -73,12 +73,14 @@ function getRunnerJob(env) {
 }
 
 function getEnvFromMetadata() {
-  const keys = execSync('buildkite-agent meta-data keys')
+  const env = {};
+
+  env[E2E_COUNT] = execSync(
+    `buildkite-agent meta-data get '${E2E_COUNT}' --default ${defaultCount}`
+  )
     .toString()
-    .split('\n')
-    .filter((k) => k.startsWith('e2e/'));
+    .trim();
+  env[E2E_GREP] = execSync(`buildkite-agent meta-data get '${E2E_GREP}'`).toString().trim();
 
-  keys[E2E_COUNT] = keys[E2E_COUNT] ?? defaultCount;
-
-  return keys;
+  return env;
 }
