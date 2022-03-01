@@ -71,6 +71,9 @@ exports.EcsCustomPropertyMappings = {
                   },
                   metrics: {
                     properties: {
+                      number_of_triggered_actions: {
+                        type: 'long',
+                      },
                       total_indexing_duration_ms: {
                         type: 'long',
                       },
@@ -85,20 +88,6 @@ exports.EcsCustomPropertyMappings = {
                 },
               },
             },
-          },
-        },
-      },
-      // reporting specific fields
-      reporting: {
-        properties: {
-          id: {
-            type: 'keyword',
-          },
-          jobType: {
-            type: 'keyword',
-          },
-          byteSize: {
-            type: 'long',
           },
         },
       },

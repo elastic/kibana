@@ -13,5 +13,6 @@
         "node"
       ],
       "resolveJsonModule": true,
+      "target": "ES2019",
     },
   }

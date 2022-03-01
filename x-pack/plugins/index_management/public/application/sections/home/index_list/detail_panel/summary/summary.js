@@ -36,16 +36,16 @@ const getHeaders = () => {
       defaultMessage: 'Replicas',
     }),
     documents: i18n.translate('xpack.idxMgmt.summary.headers.documentsHeader', {
-      defaultMessage: 'Docs Count',
+      defaultMessage: 'Docs count',
     }),
     documents_deleted: i18n.translate('xpack.idxMgmt.summary.headers.deletedDocumentsHeader', {
-      defaultMessage: 'Docs Deleted',
+      defaultMessage: 'Docs deleted',
     }),
     size: i18n.translate('xpack.idxMgmt.summary.headers.storageSizeHeader', {
-      defaultMessage: 'Storage Size',
+      defaultMessage: 'Storage size',
     }),
     primary_size: i18n.translate('xpack.idxMgmt.summary.headers.primaryStorageSizeHeader', {
-      defaultMessage: 'Primary Storage Size',
+      defaultMessage: 'Primary storage size',
     }),
     aliases: i18n.translate('xpack.idxMgmt.summary.headers.aliases', {
       defaultMessage: 'Aliases',

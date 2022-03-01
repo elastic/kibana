@@ -29,7 +29,6 @@ const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({
     description={
       <>
         <p>{i18n.CASE_CLOSURE_OPTIONS_DESC}</p>
-        <p>{i18n.CASE_CLOSURE_OPTIONS_SUB_CASES}</p>
       </>
     }
     data-test-subj="case-closure-options-form-group"

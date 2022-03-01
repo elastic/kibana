@@ -8,7 +8,7 @@
 
 import { xor, omit, isEmpty } from 'lodash';
 import fastIsEqual from 'fast-deep-equal';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, isFilterPinned } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, isFilterPinned } from '@kbn/es-query';
 
 import { DashboardContainerInput } from '../..';
 import { controlGroupInputIsEqual } from './dashboard_control_group';

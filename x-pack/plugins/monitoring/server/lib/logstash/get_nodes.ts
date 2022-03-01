@@ -81,6 +81,8 @@ export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUui
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
+  const filters = [{ exists: { field: 'logstash_stats.logstash.uuid' } }];
+
   const params = {
     index: indexPatterns,
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
@@ -90,6 +92,7 @@ export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUui
         type,
         dsDataset: `${moduleType}.${dataset}`,
         metricset: dataset,
+        filters,
         start,
         end,
         clusterUuid,

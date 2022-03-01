@@ -149,7 +149,6 @@ export interface AlertsAggregationResponse {
 }
 
 export interface CasesSavedObject {
-  associationType: string;
   type: string;
   alertId: string;
   index: string;

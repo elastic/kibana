@@ -19,7 +19,7 @@ import {
 } from 'src/plugins/data/public';
 import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import { CoreStart } from 'src/core/public';
-import { castEsToKbnFieldTypeName } from '../../../../data/public';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FormatEditor } from './format_editor';
 import { FormatEditorServiceStart } from '../../service';
 import { FieldFormatConfig } from '../../types';

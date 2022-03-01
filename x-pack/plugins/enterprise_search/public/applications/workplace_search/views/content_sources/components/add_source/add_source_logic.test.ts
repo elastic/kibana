@@ -13,7 +13,7 @@ import {
 } from '../../../../../__mocks__/kea_logic';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
@@ -46,7 +46,7 @@ describe('AddSourceLogic', () => {
   const { navigateToUrl } = mockKibanaValues;
   const { clearFlashMessages, flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
 
-  const defaultValues = {
+  const DEFAULT_VALUES = {
     addSourceCurrentStep: AddSourceSteps.ConfigIntroStep,
     addSourceProps: {},
     dataLoading: true,
@@ -90,78 +90,104 @@ describe('AddSourceLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(AddSourceLogic.values).toEqual(defaultValues);
+    expect(AddSourceLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
     it('setSourceConfigData', () => {
       AddSourceLogic.actions.setSourceConfigData(sourceConfigData);
 
-      expect(AddSourceLogic.values.sourceConfigData).toEqual(sourceConfigData);
-      expect(AddSourceLogic.values.dataLoading).toEqual(false);
-      expect(AddSourceLogic.values.buttonLoading).toEqual(false);
-      expect(AddSourceLogic.values.clientIdValue).toEqual(
-        sourceConfigData.configuredFields.clientId
-      );
-      expect(AddSourceLogic.values.clientSecretValue).toEqual(
-        sourceConfigData.configuredFields.clientSecret
-      );
-      expect(AddSourceLogic.values.baseUrlValue).toEqual(sourceConfigData.configuredFields.baseUrl);
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        sourceConfigData,
+        dataLoading: false,
+        buttonLoading: false,
+        clientIdValue: sourceConfigData.configuredFields.clientId,
+        baseUrlValue: sourceConfigData.configuredFields.baseUrl,
+        clientSecretValue: sourceConfigData.configuredFields.clientSecret,
+      });
     });
 
     it('setSourceConnectData', () => {
       AddSourceLogic.actions.setSourceConnectData(sourceConnectData);
 
-      expect(AddSourceLogic.values.sourceConnectData).toEqual(sourceConnectData);
-      expect(AddSourceLogic.values.buttonLoading).toEqual(false);
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        sourceConnectData,
+        buttonLoading: false,
+      });
     });
 
     it('setClientIdValue', () => {
       AddSourceLogic.actions.setClientIdValue('id');
 
-      expect(AddSourceLogic.values.clientIdValue).toEqual('id');
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        clientIdValue: 'id',
+      });
     });
 
     it('setClientSecretValue', () => {
       AddSourceLogic.actions.setClientSecretValue('secret');
 
-      expect(AddSourceLogic.values.clientSecretValue).toEqual('secret');
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        clientSecretValue: 'secret',
+      });
     });
 
     it('setBaseUrlValue', () => {
       AddSourceLogic.actions.setBaseUrlValue('secret');
 
-      expect(AddSourceLogic.values.baseUrlValue).toEqual('secret');
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        baseUrlValue: 'secret',
+      });
     });
 
     it('setCustomSourceNameValue', () => {
       AddSourceLogic.actions.setCustomSourceNameValue('name');
 
-      expect(AddSourceLogic.values.customSourceNameValue).toEqual('name');
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        customSourceNameValue: 'name',
+      });
     });
 
     it('setSourceLoginValue', () => {
       AddSourceLogic.actions.setSourceLoginValue('login');
 
-      expect(AddSourceLogic.values.loginValue).toEqual('login');
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        loginValue: 'login',
+      });
     });
 
     it('setSourcePasswordValue', () => {
       AddSourceLogic.actions.setSourcePasswordValue('password');
 
-      expect(AddSourceLogic.values.passwordValue).toEqual('password');
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        passwordValue: 'password',
+      });
     });
 
     it('setSourceSubdomainValue', () => {
       AddSourceLogic.actions.setSourceSubdomainValue('subdomain');
 
-      expect(AddSourceLogic.values.subdomainValue).toEqual('subdomain');
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        subdomainValue: 'subdomain',
+      });
     });
 
     it('setSourceIndexPermissionsValue', () => {
       AddSourceLogic.actions.setSourceIndexPermissionsValue(true);
 
-      expect(AddSourceLogic.values.indexPermissionsValue).toEqual(true);
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        indexPermissionsValue: true,
+      });
     });
 
     it('setCustomSourceData', () => {
@@ -174,69 +200,85 @@ describe('AddSourceLogic', () => {
 
       AddSourceLogic.actions.setCustomSourceData(newCustomSource);
 
-      expect(AddSourceLogic.values.newCustomSource).toEqual(newCustomSource);
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        newCustomSource,
+      });
     });
 
     it('setPreContentSourceConfigData', () => {
       AddSourceLogic.actions.setPreContentSourceConfigData(config);
 
-      expect(AddSourceLogic.values.dataLoading).toEqual(false);
-      expect(AddSourceLogic.values.sectionLoading).toEqual(false);
-      expect(AddSourceLogic.values.currentServiceType).toEqual(config.serviceType);
-      expect(AddSourceLogic.values.githubOrganizations).toEqual(config.githubOrganizations);
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        oauthConfigCompleted: true,
+        dataLoading: false,
+        sectionLoading: false,
+        currentServiceType: config.serviceType,
+        githubOrganizations: config.githubOrganizations,
+      });
     });
 
     it('setSelectedGithubOrganizations', () => {
       AddSourceLogic.actions.setSelectedGithubOrganizations('foo');
 
-      expect(AddSourceLogic.values.selectedGithubOrganizationsMap).toEqual({ foo: true });
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        selectedGithubOrganizationsMap: {
+          foo: true,
+        },
+        selectedGithubOrganizations: ['foo'],
+      });
     });
 
     it('setPreContentSourceId', () => {
       AddSourceLogic.actions.setPreContentSourceId('123');
 
-      expect(AddSourceLogic.values.preContentSourceId).toEqual('123');
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        oauthConfigCompleted: false,
+        preContentSourceId: '123',
+      });
     });
 
     it('setButtonNotLoading', () => {
       AddSourceLogic.actions.setButtonNotLoading();
 
-      expect(AddSourceLogic.values.buttonLoading).toEqual(false);
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        buttonLoading: false,
+      });
     });
 
     it('resetSourceState', () => {
       AddSourceLogic.actions.resetSourceState();
 
-      expect(AddSourceLogic.values.dataLoading).toEqual(false);
-      expect(AddSourceLogic.values.buttonLoading).toEqual(false);
-      expect(AddSourceLogic.values.clientIdValue).toEqual('');
-      expect(AddSourceLogic.values.clientSecretValue).toEqual('');
-      expect(AddSourceLogic.values.baseUrlValue).toEqual('');
-      expect(AddSourceLogic.values.loginValue).toEqual('');
-      expect(AddSourceLogic.values.passwordValue).toEqual('');
-      expect(AddSourceLogic.values.subdomainValue).toEqual('');
-      expect(AddSourceLogic.values.indexPermissionsValue).toEqual(false);
-      expect(AddSourceLogic.values.customSourceNameValue).toEqual('');
-      expect(AddSourceLogic.values.newCustomSource).toEqual({});
-      expect(AddSourceLogic.values.currentServiceType).toEqual('');
-      expect(AddSourceLogic.values.githubOrganizations).toEqual([]);
-      expect(AddSourceLogic.values.selectedGithubOrganizationsMap).toEqual({});
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        dataLoading: false,
+      });
     });
 
     it('handles fallback states', () => {
       const { publicKey, privateKey, consumerKey } = sourceConfigData.configuredFields;
-      AddSourceLogic.actions.setSourceConfigData({
+      const sourceConfigDataMock = {
         ...sourceConfigData,
         configuredFields: {
           publicKey,
           privateKey,
           consumerKey,
         },
-      });
+      };
+      AddSourceLogic.actions.setSourceConfigData(sourceConfigDataMock);
 
-      expect(AddSourceLogic.values.clientIdValue).toEqual('');
-      expect(AddSourceLogic.values.clientSecretValue).toEqual('');
-      expect(AddSourceLogic.values.baseUrlValue).toEqual('');
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        dataLoading: false,
+        sourceConfigData: sourceConfigDataMock,
+        clientIdValue: '',
+        clientSecretValue: '',
+        baseUrlValue: '',
+      });
     });
   });
 

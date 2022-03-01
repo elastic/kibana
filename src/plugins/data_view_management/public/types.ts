@@ -8,7 +8,6 @@
 
 import {
   ChromeStart,
-  ApplicationStart,
   IUiSettingsClient,
   OverlayStart,
   NotificationsStart,
@@ -26,7 +25,6 @@ import { FieldFormatsStart } from '../../field_formats/public';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
-  application: ApplicationStart;
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;
   overlays: OverlayStart;

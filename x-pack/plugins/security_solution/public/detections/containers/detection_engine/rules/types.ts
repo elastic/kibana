@@ -30,8 +30,10 @@ import {
   timestamp_override,
   threshold,
   BulkAction,
+  BulkActionEditPayload,
   ruleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
+
 import {
   CreateRulesSchema,
   PatchRulesSchema,
@@ -141,7 +143,6 @@ export const RuleSchema = t.intersection([
     exceptions_list: listArray,
     uuid: t.string,
     version: t.number,
-    // TODO: https://github.com/elastic/kibana/pull/121644 clean up
     execution_summary: ruleExecutionSummary,
   }),
 ]);
@@ -230,7 +231,9 @@ export interface DuplicateRulesProps {
 
 export interface BulkActionProps<Action extends BulkAction> {
   action: Action;
-  query: string;
+  query?: string;
+  ids?: string[];
+  edit?: BulkActionEditPayload[];
 }
 
 export interface BulkActionResult {

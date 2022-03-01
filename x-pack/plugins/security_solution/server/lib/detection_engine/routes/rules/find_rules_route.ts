@@ -50,7 +50,7 @@ export const findRulesRoute = (
       try {
         const { query } = request;
         const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = context.core.savedObjects.client;
 
         const rules = await findRules({
@@ -67,7 +67,7 @@ export const findRulesRoute = (
         const ruleIds = rules.data.map((rule) => rule.id);
 
         const [ruleExecutionSummaries, ruleActions] = await Promise.all([
-          ruleExecutionLogClient.getExecutionSummariesBulk(ruleIds),
+          ruleExecutionLog.getExecutionSummariesBulk(ruleIds),
           legacyGetBulkRuleActionsSavedObject({ alertIds: ruleIds, savedObjectsClient, logger }),
         ]);
 

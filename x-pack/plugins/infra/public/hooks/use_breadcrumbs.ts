@@ -9,7 +9,7 @@ import { ChromeBreadcrumb } from 'kibana/public';
 import { useEffect } from 'react';
 import { observabilityTitle } from '../translations';
 import { useKibanaContextForPlugin } from './use_kibana';
-import { useLinkProps } from './use_link_props';
+import { useLinkProps } from '../../../observability/public';
 
 type AppId = 'logs' | 'metrics';
 

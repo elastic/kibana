@@ -215,6 +215,7 @@ export const staticValueOperation: OperationDefinition<
           compressed
           value={inputValue ?? ''}
           onChange={onChangeHandler}
+          step="any"
         />
       </div>
     );

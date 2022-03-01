@@ -203,7 +203,9 @@ interface TemplateMapEntry {
         settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
       };
 }
+
 type TemplateMap = Record<string, TemplateMapEntry>;
+
 function putComponentTemplate(
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -300,7 +302,7 @@ async function installDataStreamComponentTemplates(params: {
           () => esClient.cluster.getComponentTemplate({ name }, { ignore: [404] }),
           { logger }
         );
-        const hasUserSettingsTemplate = result.body.component_templates?.length === 1;
+        const hasUserSettingsTemplate = result.component_templates?.length === 1;
         if (!hasUserSettingsTemplate) {
           // only add if one isn't already present
           const { clusterPromise } = putComponentTemplate(esClient, logger, {
@@ -323,7 +325,7 @@ export async function ensureDefaultComponentTemplate(
   esClient: ElasticsearchClient,
   logger: Logger
 ) {
-  const { body: getTemplateRes } = await retryTransientEsErrors(
+  const getTemplateRes = await retryTransientEsErrors(
     () =>
       esClient.cluster.getComponentTemplate(
         {
@@ -378,7 +380,7 @@ export async function installTemplate({
   }
 
   // Datastream now throw an error if the aliases field is present so ensure that we remove that field.
-  const { body: getTemplateRes } = await retryTransientEsErrors(
+  const getTemplateRes = await retryTransientEsErrors(
     () =>
       esClient.indices.getIndexTemplate(
         {

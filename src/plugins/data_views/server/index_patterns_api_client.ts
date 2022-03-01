@@ -9,14 +9,14 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import {
   GetFieldsOptions,
-  IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
+  IDataViewsApiClient,
 } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
 import { IndexPatternsFetcher } from './fetcher';
 import { hasUserIndexPattern } from './has_user_index_pattern';
 
-export class IndexPatternsApiServer implements IIndexPatternsApiClient {
+export class IndexPatternsApiServer implements IDataViewsApiClient {
   esClient: ElasticsearchClient;
   constructor(
     elasticsearchClient: ElasticsearchClient,

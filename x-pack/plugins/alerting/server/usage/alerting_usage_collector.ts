@@ -76,6 +76,22 @@ const byReasonSchemaByType: MakeSchemaFrom<AlertingUsage>['count_rules_execution
     unknown: byTypeSchema,
   };
 
+const byTaskStatusSchema: MakeSchemaFrom<AlertingUsage>['count_failed_and_unrecognized_rule_tasks_by_status_per_day'] =
+  {
+    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+    DYNAMIC_KEY: { type: 'long' },
+    failed: { type: 'long' },
+    unrecognized: { type: 'long' },
+  };
+
+const byTaskStatusSchemaByType: MakeSchemaFrom<AlertingUsage>['count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day'] =
+  {
+    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+    DYNAMIC_KEY: byTypeSchema,
+    failed: byTypeSchema,
+    unrecognized: byTypeSchema,
+  };
+
 export function createAlertingUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
@@ -135,6 +151,9 @@ export function createAlertingUsageCollector(
           count_rules_executions_failured_by_reason_by_type_per_day: {},
           count_rules_executions_timeouts_per_day: 0,
           count_rules_executions_timeouts_by_type_per_day: {},
+          count_failed_and_unrecognized_rule_tasks_per_day: 0,
+          count_failed_and_unrecognized_rule_tasks_by_status_per_day: {},
+          count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: {},
           avg_execution_time_per_day: 0,
           avg_execution_time_by_type_per_day: {},
         };
@@ -179,6 +198,9 @@ export function createAlertingUsageCollector(
       count_rules_executions_failured_by_reason_by_type_per_day: byReasonSchemaByType,
       count_rules_executions_timeouts_per_day: { type: 'long' },
       count_rules_executions_timeouts_by_type_per_day: byTypeSchema,
+      count_failed_and_unrecognized_rule_tasks_per_day: { type: 'long' },
+      count_failed_and_unrecognized_rule_tasks_by_status_per_day: byTaskStatusSchema,
+      count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: byTaskStatusSchemaByType,
       avg_execution_time_per_day: { type: 'long' },
       avg_execution_time_by_type_per_day: byTypeSchema,
     },

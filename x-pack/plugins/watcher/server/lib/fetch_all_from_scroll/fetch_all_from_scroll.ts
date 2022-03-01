@@ -26,7 +26,7 @@ export function fetchAllFromScroll(
         scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
         scroll_id: scrollId!,
       })
-      .then(({ body: innerResponse }) => {
+      .then((innerResponse) => {
         return fetchAllFromScroll(innerResponse, dataClient, hits);
       });
   }

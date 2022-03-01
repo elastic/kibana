@@ -9,6 +9,7 @@
 import { coreMock } from '../../../core/public/mocks';
 import { homePluginMock } from '../../home/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
+import { dataViewPluginMocks } from '../../data_views/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
 
@@ -22,7 +23,10 @@ describe('SavedObjectsManagementPlugin', () => {
   describe('#setup', () => {
     it('registers the saved_objects feature to the home plugin', async () => {
       const coreSetup = coreMock.createSetup({
-        pluginStartDeps: { data: dataPluginMock.createStartContract() },
+        pluginStartDeps: {
+          dataViews: dataViewPluginMocks.createStartContract(),
+          data: dataPluginMock.createStartContract(),
+        },
       });
       const homeSetup = homePluginMock.createSetupContract();
       const managementSetup = managementPluginMock.createSetupContract();

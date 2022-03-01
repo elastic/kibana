@@ -33,7 +33,6 @@ import {
   CUSTOM_QUERY_DETAILS,
   FALSE_POSITIVES_DETAILS,
   DEFINITION_DETAILS,
-  getDetails,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -51,6 +50,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
+import { getDetails } from '../../tasks/rule_details';
 import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,

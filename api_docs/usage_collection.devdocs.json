@@ -340,13 +340,7 @@
               "Logger"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false

@@ -5830,6 +5830,19 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableChildPanelProps.index",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableChildPanelProps.className",
             "type": "string",
             "tags": [],
@@ -5917,7 +5930,7 @@
                 "section": "def-public.EmbeddableContainerContext",
                 "text": "EmbeddableContainerContext"
               },
-              " | undefined; }>"
+              " | undefined; index?: number | undefined; }>"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
             "deprecated": false,
@@ -8680,7 +8693,7 @@
             "section": "def-public.EmbeddableContainerContext",
             "text": "EmbeddableContainerContext"
           },
-          " | undefined; }>"
+          " | undefined; index?: number | undefined; }>"
         ],
         "path": "src/plugins/embeddable/public/plugin.tsx",
         "deprecated": false,
@@ -9348,7 +9361,7 @@
               "section": "def-public.EmbeddableContainerContext",
               "text": "EmbeddableContainerContext"
             },
-            " | undefined; }>"
+            " | undefined; index?: number | undefined; }>"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,

@@ -33,7 +33,7 @@ export function registerMappingRoute({ router, lib: { handleEsError } }: RouteDe
       };
 
       try {
-        const { body: hit } = await client.asCurrentUser.indices.getMapping(params);
+        const hit = await client.asCurrentUser.indices.getMapping(params);
         const responseBody = formatHit(hit, indexName);
         return response.ok({ body: responseBody });
       } catch (error) {

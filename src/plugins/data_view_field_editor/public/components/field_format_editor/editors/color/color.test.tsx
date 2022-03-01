@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test/jest';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 
 import { ColorFormatEditor } from './color';
 import { FieldFormat, DEFAULT_CONVERTER_COLOR } from '../../../../../../field_formats/common';

@@ -32,7 +32,7 @@ export function registerExecuteRoute({ router, license }: RouteDependencies) {
         });
 
         return res.ok({
-          body: response.body,
+          body: response,
         });
       } catch (error) {
         // Assume invalid painless script was submitted

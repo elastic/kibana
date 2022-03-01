@@ -307,25 +307,6 @@
         "children": [
           {
             "parentPluginId": "reporting",
-            "id": "def-server.ReportingSetupDeps.eventLog",
-            "type": "Object",
-            "tags": [],
-            "label": "eventLog",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "eventLog",
-                "scope": "server",
-                "docId": "kibEventLogPluginApi",
-                "section": "def-server.IEventLogService",
-                "text": "IEventLogService"
-              }
-            ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "reporting",
             "id": "def-server.ReportingSetupDeps.features",
             "type": "Object",
             "tags": [],

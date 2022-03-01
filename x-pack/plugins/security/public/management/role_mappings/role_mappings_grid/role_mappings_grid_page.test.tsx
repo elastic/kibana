@@ -9,7 +9,7 @@ import { EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { CoreStart } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';

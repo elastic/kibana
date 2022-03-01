@@ -1063,7 +1063,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
 
                   operationType: 'count',
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                 },
               },
             },
@@ -2483,7 +2483,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'count',
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                 },
                 ref: {
                   label: '',
@@ -2665,7 +2665,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'count',
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                 },
                 ref: {
                   label: '',
@@ -2679,21 +2679,21 @@ describe('IndexPattern Data Source suggestions', () => {
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'count',
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                 },
                 metric3: {
                   label: '',
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'count',
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                 },
                 metric4: {
                   label: '',
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'count',
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                 },
                 ref2: {
                   label: '',
@@ -2729,10 +2729,19 @@ describe('IndexPattern Data Source suggestions', () => {
 
         const result = getDatasourceSuggestionsFromCurrentState(state);
 
-        // only generate suggestions for top level metrics
+        // only generate suggestions for top level metrics + only first metric with all buckets
         expect(
           result.filter((suggestion) => suggestion.table.changeType === 'reduced').length
-        ).toEqual(3);
+        ).toEqual(4);
+
+        // top level "ref" column over time
+        expect(
+          result.some(
+            (suggestion) =>
+              suggestion.table.changeType === 'reduced' &&
+              isEqual(suggestion.state.layers.first.columnOrder, ['date', 'ref', 'metric'])
+          )
+        ).toBeTruthy();
 
         // top level "ref" column
         expect(
@@ -2842,7 +2851,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'count',
-                sourceField: 'Records',
+                sourceField: '___records___',
               },
             },
           },

@@ -89,7 +89,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           }, {} as Record<string, estypes.MappingRuntimeField>);
 
         const search = async (aggs: Record<string, estypes.AggregationsAggregationContainer>) => {
-          const { body: result } = await requestClient.search({
+          const result = await requestClient.search({
             index: indexPattern.title,
             track_total_hits: true,
             body: {

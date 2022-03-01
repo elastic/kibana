@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTrackPageview } from '../..';
 import { EmptySections } from '../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
@@ -59,6 +59,20 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { hasDataMap, hasAnyData, isAllRequestsComplete } = useHasData();
 
+  const bucketSize = calculateBucketSize({
+    start: absoluteTime.start,
+    end: absoluteTime.end,
+  });
+
+  const bucketSizeValue = useMemo(() => {
+    if (bucketSize?.bucketSize) {
+      return {
+        bucketSize: bucketSize.bucketSize,
+        intervalString: bucketSize.intervalString,
+      };
+    }
+  }, [bucketSize?.bucketSize, bucketSize?.intervalString]);
+
   if (hasAnyData === undefined) {
     return <LoadingObservability />;
   }
@@ -72,11 +86,6 @@ export function OverviewPage({ routeParams }: Props) {
   });
 
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
-
-  const bucketSize = calculateBucketSize({
-    start: absoluteTime.start,
-    end: absoluteTime.end,
-  });
 
   return (
     <ObservabilityPageTemplate
@@ -100,28 +109,36 @@ export function OverviewPage({ routeParams }: Props) {
       {hasData && (
         <>
           <ObservabilityHeaderMenu />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={6}>
-              {/* Data sections */}
-              {hasAnyData && <DataSections bucketSize={bucketSize} />}
-              <EmptySections />
-              <EuiSpacer size="l" />
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  {/* Resources / What's New sections */}
-                  <EuiPanel hasBorder={true}>
-                    <Resources />
-                    <EuiSpacer size="l" />
-                    {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 5)} />}
-                  </EuiPanel>
-                </EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column" gutterSize="s">
                 {hasDataMap?.alert?.hasData && (
                   <EuiFlexItem>
-                    <EuiPanel hasBorder={true}>
+                    <EuiPanel color="subdued">
                       <AlertsSection />
                     </EuiPanel>
                   </EuiFlexItem>
                 )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {/* Data sections */}
+              {hasAnyData && <DataSections bucketSize={bucketSizeValue} />}
+              <EmptySections />
+            </EuiFlexItem>
+            <EuiSpacer size="s" />
+          </EuiFlexGroup>
+          <EuiHorizontalRule />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              {/* Resources / What's New sections */}
+              <EuiFlexGroup direction="row">
+                <EuiFlexItem grow={4}>
+                  {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
+                </EuiFlexItem>
+                <EuiFlexItem grow={2}>
+                  <Resources />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

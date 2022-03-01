@@ -27,7 +27,7 @@ import {
   LogColumnHeadersWrapper,
   LogColumnHeader,
 } from '../../../../../components/logging/log_text_stream/column_headers';
-import { useLinkProps, shouldHandleLinkEvent } from '../../../../../hooks/use_link_props';
+import { useLinkProps, shouldHandleLinkEvent } from '../../../../../../../observability/public';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { LogEntryExample, isCategoryAnomaly } from '../../../../../../common/log_analysis';

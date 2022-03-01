@@ -13,7 +13,7 @@ import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import {
   AutoAbortedAPMClient,
   callApmApi,
-} from '../services/rest/createCallApmApi';
+} from '../services/rest/create_call_apm_api';
 import { useInspectorContext } from '../../../observability/public';
 
 export enum FETCH_STATUS {

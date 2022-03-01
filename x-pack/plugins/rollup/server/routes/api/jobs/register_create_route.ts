@@ -38,7 +38,7 @@ export const registerCreateRoute = ({
           body: rest,
         });
         // Then request the newly created job.
-        const { body: results } = await clusterClient.asCurrentUser.rollup.getJobs({ id });
+        const results = await clusterClient.asCurrentUser.rollup.getJobs({ id });
         return response.ok({ body: results.jobs[0] });
       } catch (err) {
         return handleEsError({ error: err, response });

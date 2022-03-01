@@ -287,6 +287,9 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
+              metrics: {
+                number_of_triggered_actions: 0,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
@@ -356,7 +359,7 @@ describe('Task Runner Cancel', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
@@ -390,7 +393,7 @@ describe('Task Runner Cancel', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     // setting cancelAlertsOnRuleTimeout for ruleType to false here
@@ -424,7 +427,7 @@ describe('Task Runner Cancel', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -463,7 +466,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       7,
-      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -547,6 +550,9 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
+              metrics: {
+                number_of_triggered_actions: 0,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
@@ -607,7 +613,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -801,6 +807,9 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
+              metrics: {
+                number_of_triggered_actions: 1,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },

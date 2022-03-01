@@ -19,11 +19,7 @@ import type {
   InstallSource,
 } from '../../../../common';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
-import {
-  IngestManagerError,
-  PackageOperationNotSupportedError,
-  PackageOutdatedError,
-} from '../../../errors';
+import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
 import { licenseService } from '../../';
@@ -43,7 +39,7 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
-import { isUnremovablePackage, getInstallation, getInstallationObject } from './index';
+import { getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
@@ -402,12 +398,6 @@ async function installPackageByUpload({
     telemetryEvent.installType = installType;
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
-    if (installType !== 'install') {
-      throw new PackageOperationNotSupportedError(
-        `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
-      );
-    }
-
     const installSource = 'upload';
     const paths = await unpackBufferToCache({
       name: packageInfo.name,
@@ -463,7 +453,9 @@ async function installPackageByUpload({
   }
 }
 
-export type InstallPackageParams = { spaceId: string } & (
+export type InstallPackageParams = {
+  spaceId: string;
+} & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
 );
@@ -472,6 +464,7 @@ export async function installPackage(args: InstallPackageParams) {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
   }
+
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
 
@@ -488,7 +481,6 @@ export async function installPackage(args: InstallPackageParams) {
     return response;
   } else if (args.installSource === 'upload') {
     const { archiveBuffer, contentType, spaceId } = args;
-    logger.debug(`kicking off install of uploaded package`);
     const response = installPackageByUpload({
       savedObjectsClient,
       esClient,
@@ -534,7 +526,6 @@ export async function createInstallation(options: {
 }) {
   const { savedObjectsClient, packageInfo, installSource } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
-  const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
@@ -546,6 +537,7 @@ export async function createInstallation(options: {
     ? true
     : undefined;
 
+  // TODO cleanup removable flag and isUnremovablePackage function
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
@@ -556,7 +548,7 @@ export async function createInstallation(options: {
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
-      removable,
+      removable: true,
       install_version: pkgVersion,
       install_status: 'installing',
       install_started_at: new Date().toISOString(),

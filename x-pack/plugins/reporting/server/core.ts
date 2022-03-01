@@ -21,7 +21,6 @@ import type {
 import type { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
-import type { IEventLogService } from '../../event_log/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
 import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
@@ -40,7 +39,6 @@ import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/t
 import type { ReportingPluginRouter, ScreenshotOptions } from './types';
 
 export interface ReportingInternalSetup {
-  eventLog: IEventLogService;
   basePath: Pick<BasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
@@ -390,7 +388,7 @@ export class ReportingCore {
   }
 
   public getEventLogger(report: IReport, task?: { id: string }) {
-    const ReportingEventLogger = reportingEventLoggerFactory(this.pluginSetupDeps!.eventLog);
+    const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
     return new ReportingEventLogger(report, task);
   }
 }

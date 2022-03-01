@@ -63,7 +63,7 @@ describe('migration actions', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    client = esServer.es.getKibanaEsClient();
+    client = esServer.es.getClient();
 
     // Create test fixture data:
     await createIndex({
@@ -277,7 +277,7 @@ describe('migration actions', () => {
       })();
 
       const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
-      expect(redStatusResponse.body.status).toBe('red');
+      expect(redStatusResponse.status).toBe('red');
 
       client.indices.putSettings({
         index: 'red_then_yellow_index',
@@ -291,7 +291,7 @@ describe('migration actions', () => {
       // Assert that the promise didn't resolve before the index became yellow
 
       const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
-      expect(yellowStatusResponse.body.status).toBe('yellow');
+      expect(yellowStatusResponse.status).toBe('yellow');
     });
   });
 
@@ -924,7 +924,7 @@ describe('migration actions', () => {
         },
       });
 
-      await expect(searchResponse.body.hits.hits.length).toBeGreaterThan(0);
+      await expect(searchResponse.hits.hits.length).toBeGreaterThan(0);
     });
     it('rejects if index does not exist', async () => {
       const openPitTask = openPit({ client, index: 'no_such_index' });

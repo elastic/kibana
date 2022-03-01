@@ -146,6 +146,7 @@ describe('Body', () => {
     selectedEventIds: {},
     setSelected: jest.fn() as unknown as StatefulBodyProps['setSelected'],
     sort: mockSort,
+    show: true,
     showCheckboxes: false,
     tabType: TimelineTabs.query,
     totalPages: 1,

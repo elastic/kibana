@@ -11,7 +11,6 @@ import { ReportingCore } from './';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { LevelLogger, ReportingStore } from './lib';
-import { registerEventLogProviderActions } from './lib/event_logger';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
@@ -38,7 +37,6 @@ export class ReportingPlugin
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { http, status } = core;
-
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
     // prevent throwing errors in route handlers about async deps not being initialized
@@ -60,7 +58,6 @@ export class ReportingPlugin
       ...plugins,
     });
 
-    registerEventLogProviderActions(plugins.eventLog);
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);

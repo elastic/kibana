@@ -26,7 +26,7 @@ jest.mock('./utils', () => ({
   getDomainWithProtocol: jest.fn().mockImplementation((domain) => domain),
 }));
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { CrawlerLogic } from '../../crawler_logic';
 import { CrawlerDomain } from '../../types';

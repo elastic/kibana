@@ -5,33 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from 'react-dom';
-import { get, includes } from 'lodash';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { HttpStart, IHttpFetchError, ResponseErrorBody } from 'kibana/public';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../legacy_shims';
-import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
 import { SetupModeFeature } from '../../common/enums';
 import { ISetupModeContext } from '../components/setup_mode/setup_mode_context';
 import { State as GlobalState } from '../application/contexts/global_state_context';
-
-function isOnPage(hash: string) {
-  return includes(window.location.hash, hash);
-}
 
 let globalState: GlobalState;
 let httpService: HttpStart;
 let errorHandler: (error: IHttpFetchError<ResponseErrorBody>) => void;
 
 interface ISetupModeState {
+  supported: boolean;
   enabled: boolean;
   data: any;
   callback?: (() => void) | null;
   hideBottomBar: boolean;
 }
 const setupModeState: ISetupModeState = {
+  supported: false,
   enabled: false,
   data: null,
   callback: null,
@@ -132,7 +126,6 @@ export const toggleSetupMode = (inSetupMode: boolean) => {
   setupModeState.enabled = inSetupMode;
   globalState.inSetupMode = inSetupMode;
   globalState.save?.();
-  setSetupModeMenuItem();
   notifySetupModeDataChange();
 
   if (inSetupMode) {
@@ -141,22 +134,12 @@ export const toggleSetupMode = (inSetupMode: boolean) => {
   }
 };
 
-export const setSetupModeMenuItem = () => {
-  if (isOnPage('no-data')) {
-    return;
-  }
+export const markSetupModeSupported = () => {
+  setupModeState.supported = true;
+};
 
-  const enabled = !globalState.inSetupMode;
-  const I18nContext = Legacy.shims.I18nContext;
-
-  render(
-    <KibanaContextProvider services={Legacy.shims.kibanaServices}>
-      <I18nContext>
-        <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
-      </I18nContext>
-    </KibanaContextProvider>,
-    document.getElementById('setupModeNav')
-  );
+export const markSetupModeUnsupported = () => {
+  setupModeState.supported = false;
 };
 
 export const initSetupModeState = async (

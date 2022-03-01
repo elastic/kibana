@@ -51,6 +51,7 @@ const AddToNewCaseButtonComponent: React.FC<AddToNewCaseButtonProps> = ({
     </>
   );
 };
+AddToNewCaseButtonComponent.displayName = 'AddToNewCaseButton';
 
 export const AddToNewCaseButton = memo(AddToNewCaseButtonComponent);
 

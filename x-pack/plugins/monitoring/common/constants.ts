@@ -125,7 +125,6 @@ export const STANDALONE_CLUSTER_CLUSTER_UUID = '__standalone_cluster__';
 
 export const INDEX_PATTERN = '.monitoring-*';
 export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-*';
-export const INDEX_TEMPLATE_KIBANA = '.monitoring-kibana';
 export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-*';
 export const INDEX_PATTERN_BEATS = '.monitoring-beats-*';
 export const INDEX_ALERTS = '.monitoring-alerts-*';

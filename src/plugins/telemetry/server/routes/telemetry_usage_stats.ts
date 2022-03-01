@@ -35,7 +35,7 @@ export function registerTelemetryUsageStatsRoutes(
         const statsConfig: StatsGetterConfig = {
           request: req,
           unencrypted,
-          refreshCache,
+          refreshCache: unencrypted || refreshCache,
         };
 
         const stats = await telemetryCollectionManager.getStats(statsConfig);

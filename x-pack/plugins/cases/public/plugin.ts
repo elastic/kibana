@@ -8,7 +8,6 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { CasesUiStart, SetupPlugins, StartPlugins } from './types';
 import { KibanaServices } from './common/lib/kibana';
-import { getCaseConnectorUi } from './components/connectors';
 import {
   getCasesLazy,
   getRecentCasesLazy,
@@ -17,7 +16,6 @@ import {
   canUseCases,
 } from './methods';
 import { CasesUiConfigType } from '../common/ui/types';
-import { ENABLE_CASE_CONNECTOR } from '../common/constants';
 
 /**
  * @public
@@ -29,11 +27,7 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
-  public setup(core: CoreSetup, plugins: SetupPlugins) {
-    if (ENABLE_CASE_CONNECTOR) {
-      plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUi());
-    }
-  }
+  public setup(core: CoreSetup, plugins: SetupPlugins) {}
 
   public start(core: CoreStart, plugins: StartPlugins): CasesUiStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();

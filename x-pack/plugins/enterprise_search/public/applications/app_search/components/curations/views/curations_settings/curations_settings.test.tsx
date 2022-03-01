@@ -17,7 +17,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButtonEmpty, EuiCallOut, EuiSwitch } from '@elastic/eui';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { docLinks } from '../../../../../shared/doc_links';
 

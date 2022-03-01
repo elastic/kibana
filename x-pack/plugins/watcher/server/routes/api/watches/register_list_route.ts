@@ -25,7 +25,7 @@ function fetchWatches(dataClient: IScopedClusterClient) {
       },
       { ignore: [404] }
     )
-    .then(({ body }) => fetchAllFromScroll(body, dataClient));
+    .then((body) => fetchAllFromScroll(body, dataClient));
 }
 
 export function registerListRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {

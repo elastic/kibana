@@ -26,24 +26,17 @@ function validateField(field: string) {
   }
 }
 
-const EntrySchema = schema.object({
-  field: schema.string({ validate: validateField }),
-  operator: schema.oneOf([schema.literal('included'), schema.literal('excluded')]),
-  type: schema.oneOf([schema.literal('match'), schema.literal('match_any')]),
-  value: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
-});
-
-const NestedEntrySchema = schema.object({
-  field: schema.string({ validate: validateField }),
-  type: schema.literal('nested'),
-  entries: schema.arrayOf(EntrySchema),
-});
-
-const EntriesSchema = schema.oneOf([EntrySchema, NestedEntrySchema]);
-
 const EventFilterDataSchema = schema.object(
   {
-    entries: schema.arrayOf(EntriesSchema, { minSize: 1 }),
+    entries: schema.arrayOf(
+      schema.object(
+        {
+          field: schema.string({ validate: validateField }),
+        },
+        { unknowns: 'ignore' }
+      ),
+      { minSize: 1 }
+    ),
   },
   {
     unknowns: 'ignore',
@@ -100,5 +93,35 @@ export class EventFilterValidator extends BaseValidator {
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
     }
+  }
+
+  async validatePreGetOneItem(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreSummary(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreDeleteItem(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreExport(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreSingleListFind(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreMultiListFind(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreImport(): Promise<void> {
+    throw new EndpointArtifactExceptionValidationError(
+      'Import is not supported for Endpoint artifact exceptions'
+    );
   }
 }

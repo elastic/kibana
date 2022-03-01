@@ -45,7 +45,11 @@ export interface DefaultPackagesInstallationError {
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
 export type InstallSource = 'registry' | 'upload';
 
-export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
+export type EpmPackageInstallStatus =
+  | 'installed'
+  | 'installing'
+  | 'install_failed'
+  | 'installed_bundled';
 
 export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
@@ -410,11 +414,20 @@ export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-export type Installable<T> = Installed<T> | Installing<T> | NotInstalled<T> | InstallFailed<T>;
+export type Installable<T> =
+  | InstalledRegistry<T>
+  | Installing<T>
+  | NotInstalled<T>
+  | InstallFailed<T>
+  | InstalledBundled<T>;
 
-export type Installed<T = {}> = T & {
+export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
+};
+
+export type InstalledBundled<T = {}> = T & {
+  status: InstallationStatus['InstalledBundled'];
 };
 
 export type Installing<T = {}> = T & {

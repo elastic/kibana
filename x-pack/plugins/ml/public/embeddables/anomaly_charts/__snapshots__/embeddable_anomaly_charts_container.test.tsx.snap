@@ -9,6 +9,7 @@ Object {
     "timeFieldName": "@timestamp",
     "tooManyBuckets": false,
   },
+  "chartsService": undefined,
   "id": "test-explorer-charts-embeddable",
   "mlLocator": undefined,
   "onSelectEntity": [Function],

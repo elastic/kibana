@@ -9,9 +9,10 @@ experimental[] Delete a runtime field from a data view.
 [[data-views-runtime-field-api-delete-request]]
 ==== Request
 
-`DELETE <kibana host>:<port>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
+`DELETE <kibana host>:<port>/api/data_views/data_view/<data_view_id>/runtime_field/<name>`
 
-`DELETE <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
+`DELETE <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<data_view_id>/runtime_field/<name>`
+
 
 [[data-views-runtime-field-api-delete-path-params]]
 ==== Path parameters
@@ -19,11 +20,12 @@ experimental[] Delete a runtime field from a data view.
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-`index_pattern_id`::
+`data_view_id`::
 (Required, string) The ID of the data view your want to delete a runtime field from.
 
 `name`::
 (Required, string) The name of the runtime field you want to delete.
+
 
 
 ==== Example
@@ -32,6 +34,6 @@ Delete a runtime field from a data view:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X DELETE api/index_patterns/index_pattern/<my-pattern>/runtime_field/<runtime-field-name>
+$ curl -X DELETE api/data_views/data_view/<my-view>/runtime_field/<runtime-field-name>
 --------------------------------------------------
 // KIBANA

@@ -28,6 +28,7 @@ import {
   AlertAction,
   AlertAggregations,
   RuleTaskState,
+  RuleTaskStateWithActions,
   AlertSummary,
   ExecutionDuration,
   AlertStatus,
@@ -49,6 +50,7 @@ export type {
   AlertAction,
   AlertAggregations,
   RuleTaskState,
+  RuleTaskStateWithActions,
   AlertSummary,
   ExecutionDuration,
   AlertStatus,
@@ -326,4 +328,10 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
+}
+
+export enum Percentiles {
+  P50 = 'P50',
+  P95 = 'P95',
+  P99 = 'P99',
 }

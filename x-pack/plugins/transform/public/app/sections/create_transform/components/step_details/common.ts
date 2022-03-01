@@ -8,6 +8,7 @@
 import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
 
 export type EsIndexName = string;
+export type EsIngestPipelineName = string;
 export type IndexPatternTitle = string;
 
 export interface StepDetailsExposedState {
@@ -15,6 +16,7 @@ export interface StepDetailsExposedState {
   continuousModeDelay: string;
   createIndexPattern: boolean;
   destinationIndex: EsIndexName;
+  destinationIngestPipeline: EsIngestPipelineName;
   isContinuousModeEnabled: boolean;
   isRetentionPolicyEnabled: boolean;
   retentionPolicyDateField: string;
@@ -48,6 +50,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
     transformFrequency: defaultTransformFrequency,
     transformSettingsMaxPageSearchSize: defaultTransformSettingsMaxPageSearchSize,
     destinationIndex: '',
+    destinationIngestPipeline: '',
     touched: false,
     valid: false,
     indexPatternTimeField: undefined,
@@ -71,6 +74,11 @@ export function applyTransformConfigToDetailsState(
     // Description
     if (transformConfig.description !== undefined) {
       state.transformDescription = transformConfig.description;
+    }
+
+    // Ingest Pipeline
+    if (transformConfig.dest.pipeline !== undefined) {
+      state.destinationIngestPipeline = transformConfig.dest.pipeline;
     }
 
     // Frequency

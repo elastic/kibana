@@ -55,6 +55,6 @@ describe('useExpViewTimeRange', function () {
       wrapper: Wrapper,
     });
 
-    expect(result.current).toEqual({ loading, error });
+    expect(result.current).toEqual({ loading, error, locations: [] });
   });
 });

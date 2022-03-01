@@ -285,9 +285,9 @@
           },
           ", xAccessor: ",
           "Accessor",
-          " | ",
+          "<D> | ",
           "AccessorFn",
-          ") => ({ x: selectedRange }: ",
+          "<D, any>) => ({ x: selectedRange }: ",
           "XYBrushEvent",
           ") => ",
           {
@@ -330,8 +330,9 @@
             "description": [],
             "signature": [
               "Accessor",
-              " | ",
-              "AccessorFn"
+              "<D> | ",
+              "AccessorFn",
+              "<D, any>"
             ],
             "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
             "deprecated": false,
@@ -361,19 +362,19 @@
           },
           ", xAccessor: ",
           "Accessor",
-          " | ",
+          "<never> | ",
           "AccessorFn",
-          ", splitSeriesAccessorFnMap?: Map<string | number, ",
+          "<any, any>, splitSeriesAccessorFnMap?: Map<string | number, ",
           "AccessorFn",
-          "> | undefined, splitChartAccessor?: ",
+          "<any, any>> | undefined, splitChartAccessor?: ",
           "Accessor",
-          " | ",
+          "<never> | ",
           "AccessorFn",
-          " | undefined, negate?: boolean) => (points: [",
+          "<any, any> | undefined, negate?: boolean) => (points: [",
           "GeometryValue",
           ", ",
           "XYChartSeriesIdentifier",
-          "][]) => ",
+          "<any>][]) => ",
           {
             "pluginId": "charts",
             "scope": "public",
@@ -414,8 +415,9 @@
             "description": [],
             "signature": [
               "Accessor",
-              " | ",
-              "AccessorFn"
+              "<never> | ",
+              "AccessorFn",
+              "<any, any>"
             ],
             "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
             "deprecated": false,
@@ -433,7 +435,7 @@
             "signature": [
               "Map<string | number, ",
               "AccessorFn",
-              "> | undefined"
+              "<any, any>> | undefined"
             ],
             "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
             "deprecated": false,
@@ -448,9 +450,9 @@
             "description": [],
             "signature": [
               "Accessor",
-              " | ",
+              "<never> | ",
               "AccessorFn",
-              " | undefined"
+              "<any, any> | undefined"
             ],
             "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
             "deprecated": false,
@@ -494,13 +496,13 @@
           },
           ") => ({ splitAccessors, ...rest }: ",
           "XYChartSeriesIdentifier",
-          ", splitSeriesAccessorFnMap?: Map<string | number, ",
+          "<any>, splitSeriesAccessorFnMap?: Map<string | number, ",
           "AccessorFn",
-          "> | undefined, splitChartAccessor?: ",
+          "<any, any>> | undefined, splitChartAccessor?: ",
           "Accessor",
-          " | ",
+          "<never> | ",
           "AccessorFn",
-          " | undefined, negate?: boolean) => ",
+          "<any, any> | undefined, negate?: boolean) => ",
           {
             "pluginId": "charts",
             "scope": "public",
@@ -680,7 +682,7 @@
         "signature": [
           "(xInterval?: number | undefined, domainStart?: number | undefined, domainEnd?: number | undefined, formatter?: ((v: any) => string) | undefined, renderValue?: boolean) => (headerData: ",
           "TooltipValue",
-          ") => string | JSX.Element"
+          "<any>) => string | JSX.Element"
         ],
         "path": "src/plugins/charts/public/static/components/endzones.tsx",
         "deprecated": false,

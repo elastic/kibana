@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { safeLoad } from 'js-yaml';
 import {
   EuiButtonEmpty,
-  EuiButton,
   EuiBottomBar,
   EuiCallOut,
   EuiFlexGroup,
@@ -42,6 +41,7 @@ import {
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
   sendUpgradePackagePolicyDryRun,
+  useAuthz,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
@@ -64,8 +64,9 @@ import type {
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
+import { EuiButtonWithTooltip } from '../../../../integrations/sections/epm/screens/detail';
 
-import { hasUpgradeAvailable } from './utils';
+import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -122,6 +123,8 @@ export const EditPackagePolicyForm = memo<{
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
 
   const [isUpgrade, setIsUpgrade] = useState<boolean>(false);
+
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
 
   useEffect(() => {
     if (forceUpgrade) {
@@ -227,6 +230,10 @@ export const EditPackagePolicyForm = memo<{
                   ...vars,
                   ...basePolicyInputVars,
                 };
+              }
+              // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
+              if (basePackage.name === 'apm') {
+                newVars = fixApmDurationVars(newVars);
               }
               return {
                 ...restOfInput,
@@ -340,6 +347,8 @@ export const EditPackagePolicyForm = memo<{
         : false;
       if (!hasValidationErrors) {
         setFormState('VALID');
+      } else {
+        setFormState('INVALID');
       }
     },
     [packagePolicy, updatePackagePolicyValidation]
@@ -625,11 +634,27 @@ export const EditPackagePolicyForm = memo<{
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiButton
+                      <EuiButtonWithTooltip
                         onClick={onSubmit}
                         isLoading={formState === 'LOADING'}
                         // Allow to save only if the package policy is upgraded or had been edited
-                        disabled={formState !== 'VALID' || (!isEdited && !isUpgrade)}
+                        isDisabled={
+                          !canWriteIntegrationPolicies ||
+                          formState !== 'VALID' ||
+                          (!isEdited && !isUpgrade)
+                        }
+                        tooltip={
+                          !canWriteIntegrationPolicies
+                            ? {
+                                content: (
+                                  <FormattedMessage
+                                    id="xpack.fleet.agentPolicy.saveIntegrationTooltip"
+                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations. Contact your administrator."
+                                  />
+                                ),
+                              }
+                            : undefined
+                        }
                         iconType="save"
                         color="primary"
                         fill
@@ -646,7 +671,7 @@ export const EditPackagePolicyForm = memo<{
                             defaultMessage="Save integration"
                           />
                         )}
-                      </EuiButton>
+                      </EuiButtonWithTooltip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -709,6 +734,12 @@ const UpgradeBreadcrumb: React.FunctionComponent<{
   return null;
 };
 
+const FlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflowContent {
+    padding: 0;
+  }
+`;
+
 const UpgradeStatusCallout: React.FunctionComponent<{
   dryRunData: UpgradePackagePolicyDryRunResponse;
 }> = ({ dryRunData }) => {
@@ -721,12 +752,6 @@ const UpgradeStatusCallout: React.FunctionComponent<{
   const isReadyForUpgrade = !dryRunData[0].hasErrors;
 
   const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
-
-  const FlyoutBody = styled(EuiFlyoutBody)`
-    .euiFlyoutBody__overflowContent {
-      padding: 0;
-    }
-  `;
 
   return (
     <>

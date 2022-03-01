@@ -40,6 +40,7 @@ Object {
         ],
       },
       "metric": Object {
+        "autoScale": undefined,
         "labels": Object {
           "show": true,
         },

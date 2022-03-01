@@ -63,10 +63,11 @@ import {
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,
 } from './field_names/synthetics';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../../lens/common/constants';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
-export const RECORDS_FIELD = 'Records';
+export const RECORDS_FIELD = DOCUMENT_FIELD_NAME;
 export const RECORDS_PERCENTAGE_FIELD = 'RecordsPercentage';
 
 export const FieldLabels: Record<string, string> = {

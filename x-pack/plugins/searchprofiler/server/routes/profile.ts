@@ -49,7 +49,7 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
         return response.ok({
           body: {
             ok: true,
-            resp: resp.body,
+            resp,
           },
         });
       } catch (err) {

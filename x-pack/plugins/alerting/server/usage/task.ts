@@ -18,6 +18,7 @@ import {
   getTotalCountInUse,
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
+  getFailedAndUnrecognizedTasksPerDay,
 } from './alerting_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
@@ -51,7 +52,13 @@ function registerAlertingTelemetryTask(
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, eventLogIndex),
+      createTaskRunner: telemetryTaskRunner(
+        logger,
+        core,
+        kibanaIndex,
+        eventLogIndex,
+        taskManager.index
+      ),
     },
   });
 }
@@ -73,7 +80,8 @@ export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
   kibanaIndex: string,
-  eventLogIndex: string
+  eventLogIndex: string,
+  taskManagerIndex: string
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
@@ -94,6 +102,7 @@ export function telemetryTaskRunner(
           getTotalCountInUse(esClient, kibanaIndex),
           getExecutionsPerDayCount(esClient, eventLogIndex),
           getExecutionTimeoutsPerDayCount(esClient, eventLogIndex),
+          getFailedAndUnrecognizedTasksPerDay(esClient, taskManagerIndex),
         ])
           .then(
             ([
@@ -101,6 +110,7 @@ export function telemetryTaskRunner(
               totalInUse,
               dailyExecutionCounts,
               dailyExecutionTimeoutCounts,
+              dailyFailedAndUnrecognizedTasks,
             ]) => {
               return {
                 state: {
@@ -120,6 +130,12 @@ export function telemetryTaskRunner(
                   count_rules_executions_timeouts_per_day: dailyExecutionTimeoutCounts.countTotal,
                   count_rules_executions_timeouts_by_type_per_day:
                     dailyExecutionTimeoutCounts.countByType,
+                  count_failed_and_unrecognized_rule_tasks_per_day:
+                    dailyFailedAndUnrecognizedTasks.countTotal,
+                  count_failed_and_unrecognized_rule_tasks_by_status_per_day:
+                    dailyFailedAndUnrecognizedTasks.countByStatus,
+                  count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day:
+                    dailyFailedAndUnrecognizedTasks.countByStatusByRuleType,
                   avg_execution_time_per_day: dailyExecutionCounts.avgExecutionTime,
                   avg_execution_time_by_type_per_day: dailyExecutionCounts.avgExecutionTimeByType,
                 },

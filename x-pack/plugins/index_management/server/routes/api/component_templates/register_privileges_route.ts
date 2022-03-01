@@ -43,13 +43,12 @@ export const registerPrivilegesRoute = ({
       const { client } = context.core.elasticsearch;
 
       try {
-        const {
-          body: { has_all_requested: hasAllPrivileges, cluster },
-        } = await client.asCurrentUser.security.hasPrivileges({
-          body: {
-            cluster: ['manage_index_templates'],
-          },
-        });
+        const { has_all_requested: hasAllPrivileges, cluster } =
+          await client.asCurrentUser.security.hasPrivileges({
+            body: {
+              cluster: ['manage_index_templates'],
+            },
+          });
 
         if (!hasAllPrivileges) {
           privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);

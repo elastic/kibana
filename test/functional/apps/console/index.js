@@ -9,7 +9,8 @@
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
 
-  describe('console app', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/123556
+  describe.skip('console app', function () {
     this.tags('ciGroup1');
 
     before(async function () {

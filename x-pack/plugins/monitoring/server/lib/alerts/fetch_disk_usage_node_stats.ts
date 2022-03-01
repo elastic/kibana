@@ -114,7 +114,7 @@ export async function fetchDiskUsageNodeStats(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const stats: AlertDiskUsageNodeStats[] = [];
   // @ts-expect-error declare type for aggregations explicitly
   const { buckets: clusterBuckets } = response.aggregations?.clusters;

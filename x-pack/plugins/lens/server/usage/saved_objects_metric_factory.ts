@@ -26,7 +26,7 @@ export function createMetricQuery(
     bucketsToObject?: (arg: unknown) => Record<string, number>;
   }): Promise<GenericSavedUsage> {
     const esClient = await getEsClient();
-    const { body: results } = await esClient.search({
+    const results = await esClient.search({
       index: kibanaIndex,
       body: {
         query: {

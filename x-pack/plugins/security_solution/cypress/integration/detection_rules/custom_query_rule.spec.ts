@@ -56,7 +56,6 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -102,7 +101,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { saveEditedRule, waitForKibana } from '../../tasks/edit_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { activatesRule } from '../../tasks/rule_details';
+import { activatesRule, getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 

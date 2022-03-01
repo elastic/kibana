@@ -7,8 +7,6 @@
 
 import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
 import { createRuleTypeMocks } from './test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('registerTransactionDurationAlertType', () => {
   it('sends alert when value is greater than threashold', async () => {
@@ -17,30 +15,28 @@ describe('registerTransactionDurationAlertType', () => {
 
     registerTransactionDurationAlertType(dependencies);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
-          total: {
-            relation: 'eq',
-            value: 2,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 2,
         },
-        aggregations: {
-          latency: {
-            value: 5500000,
-          },
+      },
+      aggregations: {
+        latency: {
+          value: 5500000,
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     const params = {
       threshold: 3000,

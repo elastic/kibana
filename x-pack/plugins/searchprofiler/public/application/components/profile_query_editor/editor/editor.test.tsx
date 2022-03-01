@@ -8,7 +8,7 @@
 import 'brace';
 import 'brace/mode/json';
 
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { Editor, Props } from './editor';
 
 describe('Editor Component', () => {

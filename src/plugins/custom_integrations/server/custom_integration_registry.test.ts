@@ -7,7 +7,7 @@
  */
 
 import { CustomIntegrationRegistry } from './custom_integration_registry';
-import { loggerMock, MockedLogger } from '@kbn/logging/mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { IntegrationCategory, CustomIntegration } from '../common';
 
 describe('CustomIntegrationsRegistry', () => {

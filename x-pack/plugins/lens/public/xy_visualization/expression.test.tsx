@@ -43,7 +43,7 @@ import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/
 import React from 'react';
 import { shallow } from 'enzyme';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { XyEndzones } from './x_domain';

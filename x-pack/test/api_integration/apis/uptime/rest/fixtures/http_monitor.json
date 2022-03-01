@@ -57,5 +57,6 @@
       "lon": 73.2342343434
     },
     "url": "https://example-url.com"
-  }]
+  }],
+  "namespace": "testnamespace"
 }

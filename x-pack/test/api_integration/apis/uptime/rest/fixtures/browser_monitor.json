@@ -37,5 +37,6 @@
   "throttling.latency": "20",
   "throttling.config": "5d/3u/20l",
   "locations": [],
-  "name": "Test HTTP Monitor 03"
+  "name": "Test HTTP Monitor 03",
+  "namespace": "testnamespace"
 }

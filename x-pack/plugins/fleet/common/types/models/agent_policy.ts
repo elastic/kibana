@@ -14,11 +14,13 @@ import type { Output } from './output';
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
 export interface NewAgentPolicy {
+  id?: string;
   name: string;
   namespace: string;
   description?: string;
   is_default?: boolean;
   is_default_fleet_server?: boolean; // Optional when creating a policy
+  has_fleet_server?: boolean;
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: MonitoringType;
   unenroll_timeout?: number;
@@ -27,7 +29,7 @@ export interface NewAgentPolicy {
   monitoring_output_id?: string;
 }
 
-export interface AgentPolicy extends NewAgentPolicy {
+export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
   package_policies: string[] | PackagePolicy[];

@@ -20,9 +20,7 @@ export function registerCloudBackupStatusRoutes({
       const { client: clusterClient } = context.core.elasticsearch;
 
       try {
-        const {
-          body: { snapshots },
-        } = await clusterClient.asCurrentUser.snapshot.get({
+        const { snapshots } = await clusterClient.asCurrentUser.snapshot.get({
           repository: CLOUD_SNAPSHOT_REPOSITORY,
           snapshot: '_all',
           ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.

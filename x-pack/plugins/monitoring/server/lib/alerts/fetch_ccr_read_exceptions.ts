@@ -108,7 +108,7 @@ export async function fetchCCRReadExceptions(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const stats: CCRReadExceptionsStats[] = [];
   // @ts-expect-error declare aggegations type explicitly
   const { buckets: remoteClusterBuckets = [] } = response.aggregations?.remote_clusters;

@@ -16,7 +16,7 @@ import {
   useConfig,
   useFleetStatus,
   useBreadcrumbs,
-  useCapabilities,
+  useAuthz,
   useGetSettings,
   useGetAgentPolicies,
 } from '../../hooks';
@@ -32,11 +32,12 @@ export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
   const history = useHistory();
   const { agents } = useConfig();
-  const capabilities = useCapabilities();
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
+    full: true,
   });
 
   const agentPolicies = useMemo(
@@ -93,7 +94,7 @@ export const AgentsApp: React.FunctionComponent = () => {
   ) {
     return <MissingESRequirementsPage missingRequirements={fleetStatus.missingRequirements} />;
   }
-  if (!capabilities.read) {
+  if (!hasFleetAllPrivileges) {
     return <NoAccessPage />;
   }
 
@@ -110,7 +111,12 @@ export const AgentsApp: React.FunctionComponent = () => {
       )}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            onClick={() => setIsEnrollmentFlyoutOpen(true)}
+            data-test-subj="addAgentBtnTop"
+          >
             <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
           </EuiButton>
         </EuiFlexItem>

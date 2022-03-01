@@ -141,6 +141,19 @@ describe('crawler routes', () => {
       mockRouter.shouldValidate(request);
     });
 
+    it('validates correctly with overrides', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { domain_allowlist: [] } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with empty overrides', () => {
+      const request = { params: { name: 'some-engine' }, body: { overrides: {} } };
+      mockRouter.shouldValidate(request);
+    });
+
     it('fails validation without name', () => {
       const request = { params: {} };
       mockRouter.shouldThrow(request);

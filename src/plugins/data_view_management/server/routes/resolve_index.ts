@@ -31,7 +31,7 @@ export function registerResolveIndexRoute(router: IRouter): void {
       },
     },
     async (context, req, res) => {
-      const { body } = await context.core.elasticsearch.client.asCurrentUser.indices.resolveIndex({
+      const body = await context.core.elasticsearch.client.asCurrentUser.indices.resolveIndex({
         name: req.params.query,
         expand_wildcards: req.query.expand_wildcards || 'open',
       });
