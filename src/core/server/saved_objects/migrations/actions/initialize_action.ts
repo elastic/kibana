@@ -19,14 +19,6 @@ import {
 import { FetchIndexResponse, fetchIndices } from './fetch_indices';
 
 const routingAllocationEnable = 'cluster.routing.allocation.enable';
-
-export const isClusterRoutingAllocationEnabled = (body: ClusterGetSettingsResponse): boolean =>
-  !(
-    body.transient[routingAllocationEnable] === 'none' ||
-    body.persistent[routingAllocationEnable] === 'none' ||
-    body.defaults?.[routingAllocationEnable] === 'none'
-  );
-
 export interface ClusterRoutingAllocationEnabled {
   clusterRoutingAllocationEnabled: boolean;
 }
@@ -52,9 +44,15 @@ export const initAction = ({
         include_defaults: true,
         flat_settings: true,
       })
-      .then((body) => {
+      .then((settings) => {
+        const clusterRoutingAllocations: string[] =
+          settings?.transient?.[routingAllocationEnable] ??
+          settings?.persistent?.[routingAllocationEnable] ??
+          settings?.defaults?.[routingAllocationEnable] ??
+          [];
         return Either.right({
-          clusterRoutingAllocationEnabled: isClusterRoutingAllocationEnabled(body),
+          clusterRoutingAllocationEnabled:
+            clusterRoutingAllocations.length === 0 || !clusterRoutingAllocations.includes('none'),
         });
       })
       .catch(catchRetryableEsClientErrors);

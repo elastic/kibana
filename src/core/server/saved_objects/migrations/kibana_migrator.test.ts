@@ -110,10 +110,17 @@ describe('KibanaMigrator', () => {
 
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
-
       options.client.indices.get.mockResponse({}, { statusCode: 404 });
       options.client.indices.getAlias.mockResponse({}, { statusCode: 404 });
 
+      options.client.cluster.getSettings.mockResponse(
+        {
+          transient: {},
+          persistent: {},
+          defaults: {},
+        },
+        { statusCode: 404 }
+      );
       const migrator = new KibanaMigrator(options);
 
       migrator.prepareMigrations();
@@ -197,6 +204,14 @@ type MockedOptions = KibanaMigratorOptions & {
 
 const mockV2MigrationOptions = () => {
   const options = mockOptions();
+  options.client.cluster.getSettings.mockResponse(
+    {
+      transient: {},
+      persistent: {},
+      defaults: {},
+    },
+    { statusCode: 200 }
+  );
 
   options.client.indices.get.mockResponse(
     {

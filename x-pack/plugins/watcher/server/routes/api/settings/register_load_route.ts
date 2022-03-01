@@ -10,7 +10,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import { Settings } from '../../../models/settings/index';
 import { RouteDependencies } from '../../../types';
 
-function check_cluster_routing_allocation_enabled(client: IScopedClusterClient) {
+function fetchClusterSettings(client: IScopedClusterClient) {
   return client.asCurrentUser.cluster.getSettings({
     include_defaults: true,
     filter_path: '**.xpack.notification',
@@ -25,9 +25,7 @@ export function registerLoadRoute({ router, license, lib: { handleEsError } }: R
     },
     license.guardApiRoute(async (ctx, request, response) => {
       try {
-        const settings = await check_cluster_routing_allocation_enabled(
-          ctx.core.elasticsearch.client
-        );
+        const settings = await fetchClusterSettings(ctx.core.elasticsearch.client);
         return response.ok({ body: Settings.fromUpstreamJson(settings).downstreamJson });
       } catch (e) {
         return handleEsError({ error: e, response });
