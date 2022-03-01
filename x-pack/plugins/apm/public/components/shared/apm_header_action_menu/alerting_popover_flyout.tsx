@@ -106,11 +106,7 @@ export function AlertingPopoverAndFlyout({
                   'xpack.apm.home.alertsMenu.viewActiveAlerts',
                   { defaultMessage: 'Manage rules' }
                 ),
-                href: observability.isRuleManagementEnabled()
-                  ? basePath.prepend('/app/observability/rules')
-                  : basePath.prepend(
-                      '/app/management/insightsAndAlerting/triggersActions/alerts'
-                    ),
+                href: observability.useRulesLink().href,
                 icon: 'tableOfContents',
               },
             ]

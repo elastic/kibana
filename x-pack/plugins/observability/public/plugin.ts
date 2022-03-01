@@ -252,6 +252,8 @@ export class Plugin
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useRulesLink: useRulesLinkCreator(config.unsafe.rules.enabled),
     };
   }
 
