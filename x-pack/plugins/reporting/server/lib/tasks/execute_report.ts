@@ -211,7 +211,6 @@ export class ExecuteReportTask implements ReportingTask {
     const doc: ReportFailedFields = {
       completed_at: completedTime,
       output: docOutput ?? null,
-      error_code: error?.code,
     };
 
     return await store.setReportFailed(report, doc);
@@ -233,6 +232,7 @@ export class ExecuteReportTask implements ReportingTask {
       docOutput.content = output.toString() || defaultOutput;
       docOutput.content_type = unknownMime;
       docOutput.warnings = [output.details ?? output.toString()];
+      docOutput.error_code = output.code;
     }
 
     return docOutput;
@@ -369,7 +369,7 @@ export class ExecuteReportTask implements ReportingTask {
             report._primary_term = stream.getPrimaryTerm()!;
 
             eventLog.logExecutionComplete({
-              ...(report.metrics ?? {}),
+              ...(output.metrics ?? {}),
               byteSize: stream.bytesWritten,
             });
 
@@ -416,12 +416,13 @@ export class ExecuteReportTask implements ReportingTask {
                 if (report == null) {
                   throw new Error(`Report ${jobId} is null!`);
                 }
-                const maxAttemptsMsg = `Max attempts (${attempts}) reached for job ${jobId}. Failed with: ${failedToExecuteErr.message}`;
                 const error =
                   failedToExecuteErr instanceof ReportingError
                     ? failedToExecuteErr
                     : new UnknownError();
-                error.details = maxAttemptsMsg;
+                error.details =
+                  error.details ||
+                  `Max attempts (${attempts}) reached for job ${jobId}. Failed with: ${failedToExecuteErr.message}`;
                 const resp = await this._failJob(report, error);
                 report._seq_no = resp._seq_no;
                 report._primary_term = resp._primary_term;

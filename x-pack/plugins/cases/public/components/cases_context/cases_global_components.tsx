@@ -6,7 +6,10 @@
  */
 
 import React from 'react';
-import { getCreateCaseFlyoutLazyNoProvider } from '../../methods';
+import {
+  getAllCasesSelectorModalNoProviderLazy,
+  getCreateCaseFlyoutLazyNoProvider,
+} from '../../methods';
 import { CasesContextState } from './cases_context_reducer';
 
 export const CasesGlobalComponents = React.memo(({ state }: { state: CasesContextState }) => {
@@ -14,6 +17,9 @@ export const CasesGlobalComponents = React.memo(({ state }: { state: CasesContex
     <>
       {state.createCaseFlyout.isFlyoutOpen && state.createCaseFlyout.props !== undefined
         ? getCreateCaseFlyoutLazyNoProvider(state.createCaseFlyout.props)
+        : null}
+      {state.selectCaseModal.isModalOpen && state.selectCaseModal.props !== undefined
+        ? getAllCasesSelectorModalNoProviderLazy(state.selectCaseModal.props)
         : null}
     </>
   );

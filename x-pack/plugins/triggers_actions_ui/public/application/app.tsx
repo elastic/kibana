@@ -29,8 +29,8 @@ import { setSavedObjectsClient } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
-const AlertDetailsRoute = lazy(
-  () => import('./sections/alert_details/components/alert_details_route')
+const RuleDetailsRoute = lazy(
+  () => import('./sections/rule_details/components/rule_details_route')
 );
 
 export interface TriggersAndActionsUiServices extends CoreStart {
@@ -88,7 +88,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
       />
       <Route
         path={routeToRuleDetails}
-        component={suspendedComponentWithProps(AlertDetailsRoute, 'xl')}
+        component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
       />
       <Route
         exact

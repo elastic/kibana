@@ -20,3 +20,11 @@ export const ALL_ENDPOINT_ARTIFACT_LIST_IDS: readonly string[] = [
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
 ];
+
+export const DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS: Readonly<string[]> = [
+  `name`,
+  `description`,
+  `entries.value`,
+  `entries.entries.value`,
+  `item_id`,
+];

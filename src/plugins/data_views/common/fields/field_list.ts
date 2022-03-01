@@ -15,7 +15,7 @@ import { DataView } from '../data_views';
 type FieldMap = Map<DataViewField['name'], DataViewField>;
 
 export interface IIndexPatternFieldList extends Array<DataViewField> {
-  add(field: FieldSpec): void;
+  add(field: FieldSpec): DataViewField;
   getAll(): DataViewField[];
   getByName(name: DataViewField['name']): DataViewField | undefined;
   getByType(type: DataViewField['type']): DataViewField[];
@@ -55,11 +55,12 @@ export const fieldList = (
     public readonly getByType = (type: DataViewField['type']) => [
       ...(this.groups.get(type) || new Map()).values(),
     ];
-    public readonly add = (field: FieldSpec) => {
+    public readonly add = (field: FieldSpec): DataViewField => {
       const newField = new DataViewField({ ...field, shortDotsEnable });
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
+      return newField;
     };
 
     public readonly remove = (field: IFieldType) => {

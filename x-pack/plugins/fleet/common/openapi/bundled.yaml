@@ -672,6 +672,11 @@ paths:
           name: policyId
           in: query
           required: false
+        - schema:
+            type: string
+          name: kuery
+          in: query
+          required: false
   /agents:
     get:
       summary: Agents - List
@@ -1758,6 +1763,23 @@ paths:
                     $ref: '#/components/schemas/output'
                 required:
                   - item
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+  /logstash_api_keys:
+    post:
+      summary: Generate Logstash API key
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    type: string
+      operationId: generate-logstash-api-key
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
 components:

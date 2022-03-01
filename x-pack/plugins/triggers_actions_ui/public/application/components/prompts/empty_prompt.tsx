@@ -12,7 +12,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
-    data-test-subj="createFirstAlertEmptyPrompt"
+    data-test-subj="createFirstRuleEmptyPrompt"
     title={
       <h2>
         <FormattedMessage
@@ -31,7 +31,7 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
     }
     actions={
       <EuiButton
-        data-test-subj="createFirstAlertButton"
+        data-test-subj="createFirstRuleButton"
         key="create-action"
         fill
         onClick={onCTAClicked}
