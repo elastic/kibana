@@ -154,7 +154,6 @@ describe('Overview - Logs Step', () => {
       const { find, exists } = testBed;
 
       expect(exists('missingPrivilegesCallout')).toBe(true);
-      expect(find('viewLogsLink').text()).toContain('View logs');
     });
   });
 });

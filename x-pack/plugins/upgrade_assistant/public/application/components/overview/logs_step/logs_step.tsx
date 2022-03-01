@@ -123,12 +123,6 @@ const LogsStep = ({ setIsComplete, hasPrivileges, navigateToEsDeprecationLogs }:
         />
 
         <EuiSpacer />
-
-        <EuiButton onClick={navigateToEsDeprecationLogs} data-test-subj="viewLogsLink">
-          {i18nTexts.viewLogsButtonLabel}
-        </EuiButton>
-
-        <EuiSpacer size="m" />
       </>
     );
   }
