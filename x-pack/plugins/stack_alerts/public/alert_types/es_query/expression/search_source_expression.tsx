@@ -158,14 +158,14 @@ export const SearchSourceExpression = ({
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.selectSizePrompt"
+            id="xpack.stackAlerts.searchSource.ui.selectSizePrompt"
             defaultMessage="Select a size"
           />
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       <ValueExpression
-        description={i18n.translate('xpack.stackAlerts.esQuery.ui.sizeExpression', {
+        description={i18n.translate('xpack.stackAlerts.searchSource.ui.sizeExpression', {
           defaultMessage: 'Size',
         })}
         data-test-subj="sizeValueExpression"
@@ -182,7 +182,7 @@ export const SearchSourceExpression = ({
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
+            id="xpack.stackAlerts.searchSource.ui.conditionPrompt"
             defaultMessage="When the number of matches"
           />
         </h5>
