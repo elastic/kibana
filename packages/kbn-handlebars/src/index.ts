@@ -141,6 +141,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         this.acceptKey(block, 'program');
         this.scopes.shift();
       },
+      hash: {}, // TODO: Figure out what actual value to put in hash
     };
     helper.call(context, ...params, options);
   }
