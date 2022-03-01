@@ -81,12 +81,14 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
             updated_at: '2022-02-22T14:17:10.584Z',
             version: 'WzE1OSwxXQ==',
             attributes: {
-              transaction: 'default-apm-*',
-              span: 'default-apm-*',
-              error: 'default-apm-*',
-              metric: 'default-apm-*',
-              sourcemap: 'default-apm-*',
-              onboarding: 'default-apm-*',
+              apmIndices: {
+                transaction: 'default-apm-*',
+                span: 'default-apm-*',
+                error: 'default-apm-*',
+                metric: 'default-apm-*',
+                sourcemap: 'default-apm-*',
+                onboarding: 'default-apm-*',
+              },
             },
             references: [],
             migrationVersion: {
@@ -154,12 +156,14 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
       }),
     });
     const attributes = {
-      transaction: 'space-apm-*',
-      span: 'space-apm-*',
-      error: 'space-apm-*',
-      metric: 'space-apm-*',
-      sourcemap: 'space-apm-*',
-      onboarding: 'space-apm-*',
+      apmIndices: {
+        transaction: 'space-apm-*',
+        span: 'space-apm-*',
+        error: 'space-apm-*',
+        metric: 'space-apm-*',
+        sourcemap: 'space-apm-*',
+        onboarding: 'space-apm-*',
+      },
     };
     const core = {
       savedObjects: {
@@ -197,7 +201,7 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
               type: APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
               id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
               initialNamespaces: [id],
-              attributes: { apmIndices: attributes, isSpaceAware: true },
+              attributes: { ...attributes, isSpaceAware: true },
             };
           })
       );
