@@ -136,13 +136,6 @@ export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
   }
 );
 
-export const ALERTS_HEADERS_TARGET_IMPORT_HASH = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overviewTable.targetImportHash',
-  {
-    defaultMessage: 'Import Hash',
-  }
-);
-
 export const ACTION_OPEN_ALERT = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.openAlertTitle',
   {

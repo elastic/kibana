@@ -10,7 +10,8 @@ import { ProvidedType } from '@kbn/test';
 import { upperFirst } from 'lodash';
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
 
 export interface TrainedModelRowData {
   id: string;
@@ -20,7 +21,10 @@ export interface TrainedModelRowData {
 
 export type MlTrainedModelsTable = ProvidedType<typeof TrainedModelsTableProvider>;
 
-export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
+export function TrainedModelsTableProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -218,6 +222,7 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
           await testSubjects.existOrFail('mlTrainedModelRowDetails', { timeout: 1000 });
         }
       });
+      await mlCommonUI.waitForRefreshButtonEnabled();
     }
 
     public async assertTabContent(

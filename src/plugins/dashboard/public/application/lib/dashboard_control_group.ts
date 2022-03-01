@@ -74,10 +74,11 @@ export const syncDashboardControlGroup = async ({
       })
   );
 
+  const compareAllFilters = (a?: Filter[], b?: Filter[]) =>
+    compareFilters(a ?? [], b ?? [], COMPARE_ALL_OPTIONS);
+
   const dashboardRefetchDiff: DiffChecks = {
-    filters: (a, b) =>
-      compareFilters((a as Filter[]) ?? [], (b as Filter[]) ?? [], COMPARE_ALL_OPTIONS),
-    lastReloadRequestTime: deepEqual,
+    filters: (a, b) => compareAllFilters(a as Filter[], b as Filter[]),
     timeRange: deepEqual,
     query: deepEqual,
     viewMode: deepEqual,
@@ -130,7 +131,14 @@ export const syncDashboardControlGroup = async ({
   subscriptions.add(
     controlGroup
       .getOutput$()
-      .subscribe(() => dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() }))
+      .pipe(
+        distinctUntilChanged(({ filters: filtersA }, { filters: filtersB }) =>
+          compareAllFilters(filtersA, filtersB)
+        )
+      )
+      .subscribe(() => {
+        dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() });
+      })
   );
 
   return {

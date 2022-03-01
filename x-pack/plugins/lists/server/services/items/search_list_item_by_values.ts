@@ -30,6 +30,9 @@ export const searchListItemByValues = async ({
   type,
   value,
 }: SearchListItemByValuesOptions): Promise<SearchListItemArraySchema> => {
+  // TODO: Will need to address this when we switch over to
+  // using PIT, don't want it to get lost
+  // https://github.com/elastic/kibana/issues/103944
   const response = await esClient.search<SearchEsListItemSchema>({
     body: {
       query: {

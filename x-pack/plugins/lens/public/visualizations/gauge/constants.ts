@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GaugeState } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import { GaugeState as GaugeStateOriginal } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
 import { LayerType } from '../../../common/';
 
 export const LENS_GAUGE_ID = 'lnsGauge';
@@ -17,7 +17,19 @@ export const GROUP_ID = {
   GOAL: 'goal',
 } as const;
 
+type GaugeState = Omit<GaugeStateOriginal, 'metric' | 'goal' | 'min' | 'max'> & {
+  metricAccessor?: string;
+  minAccessor?: string;
+  maxAccessor?: string;
+  goalAccessor?: string;
+};
+
 export type GaugeVisualizationState = GaugeState & {
+  layerId: string;
+  layerType: LayerType;
+};
+
+export type GaugeExpressionState = GaugeStateOriginal & {
   layerId: string;
   layerType: LayerType;
 };

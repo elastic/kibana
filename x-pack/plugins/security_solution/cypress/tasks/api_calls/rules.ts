@@ -90,7 +90,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
     failOnStatusCode: false,
   });
 
-export const createCustomRuleActivated = (
+export const createCustomRuleEnabled = (
   rule: CustomRule,
   ruleId = '1',
   interval = '100m',

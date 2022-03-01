@@ -231,7 +231,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
             overlayRanges={[
               {
                 start: currentSnapshot.latest_record_time_stamp,
-                end: job.data_counts.latest_record_timestamp,
+                end: job.data_counts.latest_record_timestamp!,
                 color: '#ff0000',
               },
             ]}
@@ -334,7 +334,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
                   calendarEvents={calendarEvents}
                   setCalendarEvents={setCalendarEvents}
                   minSelectableTimeStamp={snapshot.latest_record_time_stamp}
-                  maxSelectableTimeStamp={job.data_counts.latest_record_timestamp}
+                  maxSelectableTimeStamp={job.data_counts.latest_record_timestamp!}
                   eventRateData={eventRateData}
                   anomalies={anomalies}
                   chartReady={chartReady}

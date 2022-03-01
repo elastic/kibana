@@ -15,6 +15,7 @@ import { Render } from '../../../../presentation_util/public/__stories__';
 import { ColorMode, CustomPaletteState } from '../../../../charts/common';
 import { getMetricVisRenderer } from '../expression_renderers';
 import { MetricStyle, MetricVisRenderConfig, visType } from '../../common/types';
+import { LabelPosition } from '../../common/constants';
 
 const palette: CustomPaletteState = {
   colors: ['rgb(219 231 38)', 'rgb(112 38 231)', 'rgb(38 124 231)'],
@@ -57,8 +58,13 @@ const config: MetricVisRenderConfig = {
   visConfig: {
     metric: {
       metricColorMode: ColorMode.None,
-      labels: { show: true },
+      labels: {
+        show: true,
+        style: { spec: {}, type: 'style', css: '' },
+        position: LabelPosition.BOTTOM,
+      },
       percentageMode: false,
+      colorFullBackground: false,
       style,
     },
     dimensions: {
@@ -132,7 +138,14 @@ storiesOf('renderers/visMetric', module)
           ...config,
           visConfig: {
             ...config.visConfig,
-            metric: { ...config.visConfig.metric, labels: { show: false } },
+            metric: {
+              ...config.visConfig.metric,
+              labels: {
+                show: false,
+                style: { spec: {}, type: 'style', css: '' },
+                position: LabelPosition.BOTTOM,
+              },
+            },
           },
         }}
         {...containerSize}
@@ -152,6 +165,32 @@ storiesOf('renderers/visMetric', module)
               style: {
                 ...config.visConfig.metric.style,
                 spec: { ...config.visConfig.metric.style.spec, fontSize: '120px' },
+              },
+            },
+          },
+        }}
+        {...containerSize}
+      />
+    );
+  })
+  .add('With label position is top and custom font for label', () => {
+    return (
+      <Render
+        renderer={metricVisRenderer}
+        config={{
+          ...config,
+          visConfig: {
+            ...config.visConfig,
+            metric: {
+              ...config.visConfig.metric,
+              style: {
+                ...config.visConfig.metric.style,
+                spec: { ...config.visConfig.metric.style.spec, fontSize: '80px' },
+              },
+              labels: {
+                show: false,
+                style: { spec: { fontSize: '60px', align: 'left' }, type: 'style', css: '' },
+                position: LabelPosition.TOP,
               },
             },
           },
@@ -254,6 +293,53 @@ storiesOf('renderers/visMetric', module)
       <Render
         renderer={metricVisRenderer}
         config={{ ...config, visData: { ...config.visData, rows: [] } as Datatable }}
+        {...containerSize}
+      />
+    );
+  })
+  .add('With colorizing full container', () => {
+    return (
+      <Render
+        renderer={metricVisRenderer}
+        config={{
+          ...config,
+          visData: {
+            type: 'datatable',
+            rows: [{ 'col-0-1': 85 }],
+            columns: [
+              {
+                id: 'col-0-1',
+                name: 'Max products count',
+                meta: { type: 'number', params: {} },
+              },
+            ],
+          },
+          visConfig: {
+            ...config.visConfig,
+            metric: {
+              ...config.visConfig.metric,
+              palette,
+              metricColorMode: ColorMode.Background,
+              style: {
+                ...config.visConfig.metric.style,
+                bgColor: true,
+              },
+              colorFullBackground: true,
+            },
+            dimensions: {
+              metrics: [
+                {
+                  accessor: 0,
+                  format: {
+                    id: 'number',
+                    params: {},
+                  },
+                  type: 'vis_dimension',
+                },
+              ],
+            },
+          },
+        }}
         {...containerSize}
       />
     );
