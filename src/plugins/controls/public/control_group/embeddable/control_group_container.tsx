@@ -37,6 +37,7 @@ import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { Container, EmbeddableFactory } from '../../../../embeddable/public';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { EditControlGroup } from '../editor/edit_control_group';
+import { ControlGroupStrings } from '../control_group_strings';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
@@ -106,9 +107,7 @@ export class ControlGroupContainer extends Container<
     return (
       <SolutionToolbarPopover
         ownFocus
-        label={i18n.translate('dashboard.solutionToolbar.controlsMenuButtonLabel', {
-          defaultMessage: 'Manage controls',
-        })}
+        label={ControlGroupStrings.getControlButtonTitle()}
         iconType="arrowDown"
         iconSide="right"
         panelPaddingSize="none"

@@ -14,7 +14,7 @@ export const ControlGroupStrings = {
       defaultMessage: 'Control group',
     }),
   getControlButtonTitle: () =>
-    i18n.translate('controls.controlGroup.emptyState.addControlButtonTitle', {
+    i18n.translate('controls.controlGroup.toolbarButtonTitle', {
       defaultMessage: 'Manage controls',
     }),
   emptyState: {
