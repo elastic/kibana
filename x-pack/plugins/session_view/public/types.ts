@@ -8,10 +8,6 @@ import { ReactNode } from 'react';
 import { CoreStart } from '../../../../src/core/public';
 import { TimelinesUIStart } from '../../timelines/public';
 
-export interface SessionViewConfigType {
-  enabled: boolean;
-}
-
 export type SessionViewServices = CoreStart & {
   timelines: TimelinesUIStart;
 };

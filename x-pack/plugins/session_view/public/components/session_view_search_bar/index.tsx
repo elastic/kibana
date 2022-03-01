@@ -48,7 +48,7 @@ export const SessionViewSearchBar = ({
     }
   }, [searchResults, setSelectedProcess, selectedResult]);
 
-  const showPagination = searchResults?.length;
+  const showPagination = !!searchResults?.length;
 
   return (
     <div data-test-subj="sessionView:searchInput" css={{ position: 'relative' }}>
