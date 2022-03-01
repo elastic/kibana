@@ -35,7 +35,7 @@ export interface SessionLeaderTableProps {
   setRefetch?: (ref: () => void) => void;
   itemsPerPage?: number[];
   onExpand?: (props: ActionProps) => void;
-  onInspect?: (props: ActionProps) => void;
+  onInspect: (props: ActionProps) => void;
   onAnalyzeSession?: (props: ActionProps) => void;
   onOpenSessionViewer?: (props: ActionProps) => void;
 }
@@ -104,10 +104,11 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     setRefetch = () => {},
     itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
     onExpand = () => {},
-    onInspect = () => {},
-    onAnalyzeSession = () => {},
-    onOpenSessionViewer = () => {},
+    onInspect,
+    onAnalyzeSession,
+    onOpenSessionViewer,
   } = props;
+  console.log(props);
 
   const { timelines } = useKibana<SessionViewServices>().services;
   const [columns, setColumns] = useState<ColumnHeaderOptions[]>(defaultColumns);
@@ -148,7 +149,6 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
   // a React component.
   const renderLeadingControlColumn = (renderProps: any) => {
     const { isSelectAllChecked, onSelectAll } = renderProps as RenderLeadingControllColumnProps;
-    console.log('running');
     return (
       <EuiCheckbox
         id="leading-control-checkbox"
@@ -162,7 +162,6 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     const { ariaRowindex, eventId, checked, onRowSelected } = actionProps;
 
     const checkboxId = `row-${ariaRowindex}-checkbox`;
-    console.log('render again');
 
     return (
       <div css={rowCheckbox}>
@@ -195,7 +194,11 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     );
   };
 
-  const renderInspectButton = (actionProps: ActionProps) => {
+  const InspectButton = (actionProps: ActionProps) => {
+    const clickHandler = useCallback(() => {
+      console.log('holla');
+      onInspect(actionProps);
+    }, [actionProps]);
     return (
       <EuiToolTip position="top" content="Inspect">
         <EuiButtonIcon
@@ -204,7 +207,7 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
           })}
           color="primary"
           iconType="inspect"
-          onClick={() => onInspect(actionProps)}
+          onClick={clickHandler}
         />
       </EuiToolTip>
     );
@@ -265,7 +268,7 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
       <div css={rowButtonContainer}>
         {renderRowCheckbox(actionProps)}
         {renderExpandButton(actionProps)}
-        {renderInspectButton(actionProps)}
+        <InspectButton {...actionProps} />
         {renderOpenMoreActionsButton(actionProps)}
       </div>
     );
@@ -281,11 +284,11 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
   };
 
   const renderTimelinesTable = () => {
-    return timelines.getTGrid<'standalone'>({
+    return timelines.getTGrid<'embedded'>({
       appId: 'session_view',
-      casesOwner: 'session_view_cases_owner',
-      casePermissions: null,
-      type: 'standalone',
+      //casesOwner: 'session_view_cases_owner',
+      //casePermissions: null,
+      type: 'embedded',
       columns,
       deletedEventIds: [],
       disabledCellActions: [],
@@ -294,16 +297,16 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
       filters: [],
       entityType: 'events',
       indexNames,
-      hasAlertsCrudPermissions: () => true,
+      //hasAlertsCrudPermissions: () => true,
       itemsPerPageOptions: itemsPerPage,
-      loadingText: 'Loading text',
-      footerText: 'Session Entry Leaders',
-      onStateChange: handleStateChange,
+      //loadingText: 'Loading text',
+      //footerText: 'Session Entry Leaders',
+      //onStateChange: handleStateChange,
       query: { query: '', language: 'kuery' },
       renderCellValue,
       rowRenderers: NO_ROW_RENDERERS,
       runtimeMappings: {},
-      setRefetch: handleSetRefetch,
+      //setRefetch: handleSetRefetch,
       sort: [],
       filterStatus: 'open',
       leadingControlColumns: [

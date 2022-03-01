@@ -66,7 +66,7 @@ export const doSearch = async (
       search_after: cursor ? [cursor] : undefined,
     },
   });
-
+  console.log({search});
   const events = search.hits.hits.map((hit: any) => {
     // TODO: re-eval if this is needed after moving alerts to it's own route.
     // the .siem-signals-default index flattens many properties. this util unflattens them.

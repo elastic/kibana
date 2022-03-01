@@ -16,10 +16,14 @@ const SessionViewTableProcessTreeLazy = lazy(
   () => import('../components/session_view_table_process_tree')
 );
 const SessionViewLazy = lazy(() => import('../components/session_view'));
-export const getSessionViewTableProcessTreeLazy = () => {
+export const getSessionViewTableProcessTreeLazy = ({
+  onOpenSessionView,
+}: {
+  onOpenSessionView: (eventId: string) => void;
+}) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <SessionViewTableProcessTreeLazy />
+      <SessionViewTableProcessTreeLazy onOpenSessionView={onOpenSessionView} />
     </Suspense>
   );
 };

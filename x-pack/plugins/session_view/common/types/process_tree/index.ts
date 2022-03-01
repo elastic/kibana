@@ -66,7 +66,7 @@ export interface ProcessFields {
   user: User;
   exit_code?: number;
   entry_meta?: EntryMeta;
-  tty: Teletype;
+  tty?: Teletype;
 }
 
 export interface ProcessSelf extends Omit<ProcessFields, 'user'> {
@@ -152,7 +152,7 @@ export interface Process {
   getAlerts(): ProcessEvent[];
   hasExec(): boolean;
   getOutput(): string;
-  getDetails(): ProcessEvent;
+  getDetails(): ProcessEvent | null;
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
   getChildren(verboseMode: boolean): Process[];

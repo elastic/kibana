@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ProcessTreeNode } from '../process_tree_node';
@@ -153,7 +153,7 @@ export const ProcessTree = ({
       </EuiButton>
     );
   }
-
+  console.log({sessionLeader});
   return (
     <div
       ref={scrollerRef}

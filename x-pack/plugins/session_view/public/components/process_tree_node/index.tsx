@@ -68,15 +68,16 @@ export function ProcessTreeNode({
     }
   }, [searchMatched, styles.searchHighlight]);
 
-  if (!processDetails) {
+  if (!processDetails || Object.keys(processDetails).length === 0) {
     return null;
   }
+  console.log(processDetails);
 
-  const { tty } = processDetails.process;
+  const { tty } = processDetails.process ?? '';
 
   const renderChildren = () => {
     const children = process.getChildren(!showGroupLeadersOnly);
-
+    console.log(children);
     if (!childrenExpanded || !children || children.length === 0) {
       return null;
     }

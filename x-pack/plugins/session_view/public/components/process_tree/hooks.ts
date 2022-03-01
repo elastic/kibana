@@ -6,7 +6,7 @@
  */
 import _ from 'lodash';
 import memoizeOne from 'memoize-one';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   EventAction,
   EventKind,
@@ -130,6 +130,9 @@ export class ProcessImpl implements Process {
   // only used to auto expand parts of the tree that could be of interest.
   isUserEntered() {
     const event = this.getDetails();
+    if (event === null || Object.keys(event).length === 0) {
+      return false;
+    }
     const {
       pid,
       tty,
@@ -174,11 +177,13 @@ export class ProcessImpl implements Process {
     const filtered = events.filter((processEvent) => {
       return actionsToFind.includes(processEvent.event.action);
     });
-
+    if (filtered.length === 0) {
+      return null;
+    }
     // because events is already ordered by @timestamp we take the last event
     // which could be a fork (w no exec or exit), most recent exec event (there can be multiple), or end event.
     // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
-    return filtered[filtered.length - 1] || ({} as ProcessEvent);
+    return filtered[filtered.length - 1];
   });
 }
 
@@ -187,8 +192,14 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
   // we add a fake session leader event, sourced from wide event data.
   // this is because we might not always have a session leader event
   // especially if we are paging in reverse from deep within a large session
-  const fakeLeaderEvent = data[0].events.find((event) => event.event.kind === EventKind.event);
-  const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
+  const fakeLeaderEvent = useMemo(
+    () => data[0].events.find((event) => event.event.kind === EventKind.event),
+    [data]
+  );
+  const sessionLeaderProcess: Process = useMemo(
+    () => new ProcessImpl(sessionEntityId),
+    [sessionEntityId]
+  );
 
   if (fakeLeaderEvent) {
     fakeLeaderEvent.process = {
@@ -199,49 +210,35 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
     sessionLeaderProcess.events.push(fakeLeaderEvent);
   }
 
-  const initializedProcessMap: ProcessMap = {
+  const [processMap, setProcessMap] = useState({
     [sessionEntityId]: sessionLeaderProcess,
-  };
-
-  const [processMap, setProcessMap] = useState(initializedProcessMap);
-  const [processedPages, setProcessedPages] = useState<ProcessEventsPage[]>([]);
+  });
+  const processedPages = useMemo(() => new Set(), []);
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
   useEffect(() => {
     let eventsProcessMap: ProcessMap = processMap;
     let newOrphans: Process[] = orphans;
-    const newProcessedPages: ProcessEventsPage[] = [];
 
     data.forEach((page, i) => {
-      const processed = processedPages.find((p) => p.cursor === page.cursor);
-
+      const processed = processedPages.has(page.cursor);
       if (!processed) {
-        const backwards = i < processedPages.length;
-
-        const result = processNewEvents(
+        const backwards = i < processedPages.size;
+        [eventsProcessMap, newOrphans] = processNewEvents(
           eventsProcessMap,
           page.events,
           orphans,
           sessionEntityId,
           backwards
-        ) as [ProcessMap, Process[]];
+        );
 
-        eventsProcessMap = result[0];
-        newOrphans = result[1];
-
-        newProcessedPages.push(page);
+        processedPages.add(page.cursor);
       }
     });
 
     setProcessMap({ ...eventsProcessMap });
-    setProcessedPages([...processedPages, ...newProcessedPages]);
     setOrphans(newOrphans);
-
-    // we disable this eslint rule since this hook will mutate orphans, processMap and processedPages
-    // by including those in the dependency array we create an infinite useEffect loop.
-    // the only time this useEffect should run is if data changes and there are new pages of events to process.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   useEffect(() => {
@@ -249,10 +246,12 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
     autoExpandProcessTree(processMap);
   }, [searchQuery, processMap]);
 
-  // set new orphans array on the session leader
-  const sessionLeader = processMap[sessionEntityId];
+  useEffect(() => {
+    // set new orphans array on the session leader
+    const sessionLeader = processMap[sessionEntityId];
 
-  sessionLeader.orphans = orphans;
+    sessionLeader.orphans = orphans;
+  }, [orphans, processMap, sessionEntityId]);
 
   return { sessionLeader: processMap[sessionEntityId], processMap, searchResults };
 };

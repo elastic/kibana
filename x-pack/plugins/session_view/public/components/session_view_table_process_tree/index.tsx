@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useQuery } from 'react-query';
 import { CoreStart } from 'kibana/public';
@@ -16,9 +16,9 @@ import { SESSION_ENTRY_LEADERS_ROUTE } from '../../../common/constants';
 import { SessionLeaderTable } from '../session_leader_table';
 import { SessionView } from '../session_view';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SessionViewTableProcessTreeProps {
   // TODO: Not sure how we want to allow other plugins to modifiy this
+  onOpenSessionView: (eventId: string) => void;
 }
 
 // Initializing react-query
@@ -27,9 +27,12 @@ const queryClient = new QueryClient();
 export const SessionViewTableProcessTreeContent = (props: SessionViewTableProcessTreeProps) => {
   const [eventId, setEventId] = useState<string>('');
   const [selectedSessionEntityId, setSelectedSessionEntityId] = useState<string>('');
-
-  const isFetchEnabled = !!(eventId && !selectedSessionEntityId);
-
+  const { onOpenSessionView } = props;
+  const isFetchEnabled = useMemo(
+    () => eventId !== '' && selectedSessionEntityId === '',
+    [eventId, selectedSessionEntityId]
+  );
+  console.log({ onOpenSessionView });
   const { http } = useKibana<CoreStart>().services;
   const { data } = useQuery<any, Error>(
     ['SessionViewTableProcessTreeEvent', eventId],
@@ -45,10 +48,14 @@ export const SessionViewTableProcessTreeContent = (props: SessionViewTableProces
     }
   );
 
-  const handleCloseProcessTree = () => {
-    setEventId('');
-    setSelectedSessionEntityId('');
-  };
+  const handleCloseProcessTree = useCallback(
+    (actionProps: ActionProps) => {
+      console.log('fire');
+      onOpenSessionView('');
+      setEventId('');
+    },
+    [onOpenSessionView]
+  );
 
   useEffect(() => {
     if (data?.session_entry_leader?.process) {
@@ -56,9 +63,14 @@ export const SessionViewTableProcessTreeContent = (props: SessionViewTableProces
     }
   }, [data]);
 
-  const handleOpenSessionViewer = (actionProps: ActionProps) => {
-    setEventId(actionProps.eventId);
-  };
+  const handleOpenSessionViewer = useCallback(
+    (actionProps: ActionProps) => {
+      console.log('fire');
+      onOpenSessionView(actionProps.eventId);
+      setEventId(actionProps.eventId);
+    },
+    [onOpenSessionView]
+  );
 
   if (selectedSessionEntityId) {
     return (
@@ -76,7 +88,13 @@ export const SessionViewTableProcessTreeContent = (props: SessionViewTableProces
     );
   }
 
-  return <SessionLeaderTable onOpenSessionViewer={handleOpenSessionViewer} />;
+  return (
+    <SessionLeaderTable
+      onOpenSessionViewer={handleOpenSessionViewer}
+      onInspect={handleOpenSessionViewer}
+      onAnalyzeSession={handleOpenSessionViewer}
+    />
+  );
 };
 
 export const SessionViewTableProcessTree = (props: SessionViewTableProcessTreeProps) => {

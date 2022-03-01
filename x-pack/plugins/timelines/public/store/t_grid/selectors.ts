@@ -8,6 +8,7 @@ import { getOr } from 'lodash/fp';
 import { createSelector } from 'reselect';
 import { TGridModel, State } from '.';
 import { tGridDefaults, getTGridManageDefaults } from './defaults';
+import { STANDALONE_ID } from '../../components/t_grid/standalone';
 
 interface TGridById {
   [id: string]: TGridModel;
@@ -26,12 +27,15 @@ export const activeCaseFlowId = createSelector(standaloneTGridById, (tGrid) => {
   );
 });
 
-export const selectTGridById = (state: unknown, timelineId: string): TGridModel => {
-  return getOr(
-    getOr(getDefaultTgrid(timelineId), ['timelineById', timelineId], state),
-    ['timeline', 'timelineById', timelineId],
-    state
-  );
+const selectTGridById = (state: unknown, timelineId: string): TGridModel => {
+  const inner = getOr(getDefaultTgrid(timelineId), ['timelineById', timelineId], state);
+  const theThing = getOr(inner, ['timeline', 'timelineById', timelineId], state);
+  return theThing;
+  // return getOr(
+  //   getOr(getDefaultTgrid(timelineId), ['timelineById', timelineId], state),
+  //   ['timeline', 'timelineById', timelineId],
+  //   state
+  // );
 };
 
 export const getTGridByIdSelector = () => createSelector(selectTGridById, (tGrid) => tGrid);

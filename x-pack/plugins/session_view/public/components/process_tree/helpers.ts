@@ -46,7 +46,7 @@ export const buildProcessTree = (
   events.forEach((event) => {
     const process = processMap[event.process.entity_id];
     const parentProcess = processMap[event.process.parent?.entity_id];
-
+    console.log({process, parentProcess});
     // if session leader, or process already has a parent, return
     if (process.id === sessionEntityId || process.parent) {
       return;
@@ -74,7 +74,8 @@ export const buildProcessTree = (
 
   // with this new page of events processed, lets try re-parent any orphans
   orphans?.forEach((process) => {
-    const parentProcess = processMap[process.getDetails().process.parent.entity_id];
+    const parentProcessId = process.getDetails()?.process.parent.entity_id;
+    const parentProcess = parentProcessId ? processMap[parentProcessId] : null;
 
     if (parentProcess) {
       process.parent = parentProcess; // handy for recursive operations (like auto expand)
@@ -131,7 +132,7 @@ export const autoExpandProcessTree = (processMap: ProcessMap) => {
   for (const processId of Object.keys(processMap)) {
     const process = processMap[processId];
 
-    if (process.searchMatched || process.isUserEntered()) {
+    if (process.events.length > 0 && (process.searchMatched || process.isUserEntered())) {
       let { parent } = process;
       const parentIdSet = new Set<string>();
 
@@ -152,12 +153,12 @@ export const processNewEvents = (
   orphans: Process[],
   sessionEntityId: string,
   backwardDirection: boolean = false
-) => {
+): [ProcessMap, Process[]] => {
   if (!events || events.length === 0) {
-    return eventsProcessMap;
+    return [eventsProcessMap, []];
   }
 
-  const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
+  const updatedProcessMap = autoExpandProcessTree(updateProcessMap(eventsProcessMap, events));
   const newOrphans = buildProcessTree(
     updatedProcessMap,
     events,
@@ -166,5 +167,5 @@ export const processNewEvents = (
     backwardDirection
   );
 
-  return [autoExpandProcessTree(updatedProcessMap), newOrphans];
+  return [updatedProcessMap, newOrphans];
 };

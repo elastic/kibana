@@ -63,6 +63,8 @@ export type TimelineModel = TGridModelForTimeline & {
   resolveTimelineConfig?: ResolveTimelineConfig;
   showSaveModal?: boolean;
   savedQueryId?: string | null;
+  sessionViewId: string | null;
+  sessionViewSessionId: string | null;
   /** When true, show the timeline flyover */
   show: boolean;
   /** status: active | draft */
@@ -118,6 +120,8 @@ export type SubsetTimelineModel = Readonly<
     | 'dateRange'
     | 'selectAll'
     | 'selectedEventIds'
+    | 'sessionViewId'
+    | 'sessionViewSessionId'
     | 'show'
     | 'showCheckboxes'
     | 'sort'

@@ -13,6 +13,7 @@ import { DataStream } from './index';
 export interface EventOptions {
   timestamp?: number;
   entityID?: string;
+  sessionEntryLeader?: string;
   parentEntityID?: string;
   eventType?: string | string[];
   eventCategory?: string | string[];
