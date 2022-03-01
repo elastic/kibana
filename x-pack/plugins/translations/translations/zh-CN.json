@@ -7312,8 +7312,6 @@
     "xpack.apm.serviceIcons.serverless": "无服务器",
     "xpack.apm.serviceIcons.service": "服务",
     "xpack.apm.serviceIcons.serviceDetails.cloud.availabilityZoneLabel": "{zones, plural, other {可用性区域}} ",
-    "xpack.apm.serviceIcons.serviceDetails.cloud.betaLabel": "公测版",
-    "xpack.apm.serviceIcons.serviceDetails.cloud.betaTooltip": "AWS Lambda 支持不是 GA 版。请通过报告错误来帮助我们。",
     "xpack.apm.serviceIcons.serviceDetails.cloud.faasTriggerTypeLabel": "{triggerTypes, plural, other {触发类型}} ",
     "xpack.apm.serviceIcons.serviceDetails.cloud.functionNameLabel": "{functionNames, plural, other {功能名称}} ",
     "xpack.apm.serviceIcons.serviceDetails.cloud.machineTypesLabel": "{machineTypes, plural, other {机器类型}} ",
