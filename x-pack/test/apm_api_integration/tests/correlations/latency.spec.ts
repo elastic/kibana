@@ -254,7 +254,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(correlation?.fieldValue).to.be('success');
         expect(correlation?.correlation).to.be(0.6275246559191225);
         expect(correlation?.ksTest).to.be(4.806503252860024e-13);
-        expect(correlation?.histogram.length).to.be(101);
+        expect(correlation?.histogram?.length).to.be(101);
 
         const fieldStats = finalRawResponse?.fieldStats?.[0];
         expect(typeof fieldStats).to.be('object');
