@@ -16,7 +16,7 @@ import type { DocLinksStart } from 'src/core/public';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
-  const docLinks = {} as DocLinksStart['links'];
+  const docLinks = { legal: { privacyStatement: 'https://some/url' } } as DocLinksStart['links'];
   const coreSetup = coreMock.createSetup();
 
   it('renders as expected', () => {
