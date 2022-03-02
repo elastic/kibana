@@ -51,19 +51,21 @@ describe('Bulk delete artifact hook', () => {
     expect(fakeHttpServices.delete).toHaveBeenCalledTimes(0);
 
     await act(async () => {
-      const res = await result.mutateAsync(['fakeId-1', 'fakeId-2']);
+      const res = await result.mutateAsync([{ id: 'fakeId-1' }, { itemId: 'fakeId-2' }]);
       expect(res).toEqual([exceptionItem1, exceptionItem2]);
       expect(onSuccessMock).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledTimes(2);
       expect(fakeHttpServices.delete).toHaveBeenNthCalledWith(1, '/api/exception_lists/items', {
         query: {
           id: 'fakeId-1',
+          item_id: undefined,
           namespace_type: 'agnostic',
         },
       });
       expect(fakeHttpServices.delete).toHaveBeenNthCalledWith(2, '/api/exception_lists/items', {
         query: {
-          id: 'fakeId-2',
+          id: undefined,
+          item_id: 'fakeId-2',
           namespace_type: 'agnostic',
         },
       });
@@ -90,7 +92,7 @@ describe('Bulk delete artifact hook', () => {
 
     await act(async () => {
       try {
-        await result.mutateAsync(['fakeId-1', 'fakeId-2']);
+        await result.mutateAsync([{ id: 'fakeId-1' }, { id: 'fakeId-2' }]);
       } catch (err) {
         expect(err).toBe(error);
         expect(fakeHttpServices.delete).toHaveBeenCalledTimes(2);

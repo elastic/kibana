@@ -193,8 +193,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         } else {
           const documentCell = await dataGrid.getCellElement(1, 3);
           await documentCell.click();
-          const expandCellContentButton = await documentCell.findByClassName(
-            'euiDataGridRowCell__expandButtonIcon'
+          const expandCellContentButton = await documentCell.findByTestSubject(
+            'euiDataGridCellExpandButton'
           );
           await expandCellContentButton.click();
           await testSubjects.click('filterForButton');

@@ -22,7 +22,7 @@ describe('update runtime field', () => {
           addRuntimeField: jest.fn(),
           getRuntimeField: jest.fn().mockReturnValue({}),
           fields: {
-            getByName: jest.fn().mockReturnValue({
+            getByName: jest.fn().mockReturnValueOnce({
               runtimeField: {},
             }),
           },
