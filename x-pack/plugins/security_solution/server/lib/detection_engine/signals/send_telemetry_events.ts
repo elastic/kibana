@@ -54,7 +54,7 @@ export function sendAlertTelemetryEvents(
     return;
   }
 
-  const selectedEvents = selectEvents(filteredEvents);
+  let selectedEvents = selectEvents(filteredEvents);
   if (selectedEvents.length > 0) {
     // Create map of ancenstor_id -> alert_id
     /* eslint-disable no-param-reassign */
@@ -68,11 +68,11 @@ export function sendAlertTelemetryEvents(
       return signalMap;
     }, new Map<CreatedSignalId, AlertId>());
 
-    const alertsWithSignalIds = enrichEndpointAlertsSignalID(selectedEvents, signalIdMap);
-    try {
-      eventsTelemetry.queueTelemetryEvents(alertsWithSignalIds);
-    } catch (exc) {
-      logger.error(buildRuleMessage(`[-] queing telemetry events failed ${exc}`));
-    }
+    selectedEvents = enrichEndpointAlertsSignalID(selectedEvents, signalIdMap);
+  }
+  try {
+    eventsTelemetry.queueTelemetryEvents(selectedEvents);
+  } catch (exc) {
+    logger.error(buildRuleMessage(`[-] queing telemetry events failed ${exc}`));
   }
 }
