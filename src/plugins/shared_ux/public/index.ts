@@ -18,4 +18,3 @@ export function plugin() {
 export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
 export { ExitFullScreenButton, LazyExitFullScreenButton } from './components';
 export { NoDataViewsPage, LazyNoDataViewsPage } from './components';
-export { NoDataViewsComponent, LazyNoDataViewsComponent } from './components';

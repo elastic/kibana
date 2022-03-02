@@ -42,19 +42,3 @@ export const LazyNoDataViewsPage = React.lazy(() =>
  * a predefined fallback and error boundary.
  */
 export const NoDataViewsPage = withSuspense(LazyNoDataViewsPage);
-
-/**
- * The lazily-loaded `NoDataViews` component that is wrapped by the `withSuspense` HOC. Consumers should use `React.Suspense` or the
- * `withSuspense` HOC to load this component.
- */
-export const LazyNoDataViewsComponent = React.lazy(() =>
-  import('./empty_state/no_data_views').then(({ NoDataViewsComponent }) => ({
-    default: NoDataViewsComponent,
-  }))
-);
-
-/**
- * A `NoDataViews` component that is wrapped by the `withSuspense` HOC.  This component is a pure UI
- * component, and has no reference to services.
- */
-export const NoDataViewsComponent = withSuspense(LazyNoDataViewsComponent);
