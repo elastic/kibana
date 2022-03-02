@@ -6,11 +6,23 @@
  */
 
 import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 
 import { useGetOutputs, useLicense } from '../../../../hooks';
 
+// The super select component do not support null or '' as a value
 export const DEFAULT_OUTPUT_VALUE = '@@##DEFAULT_OUTPUT_VALUE##@@';
+
+function getDefaultOutput(defaultOutputName?: string) {
+  return {
+    inputDisplay: i18n.translate('xpack.fleet.agentPolicy.outputOptions.defaultOutputText', {
+      defaultMessage: 'Default (currently {defaultOutputName})',
+      values: { defaultOutputName },
+    }),
+    value: DEFAULT_OUTPUT_VALUE,
+  };
+}
 
 export function useOutputOptions() {
   const outputsRequest = useGetOutputs();
@@ -36,10 +48,7 @@ export function useOutputOptions() {
     }
 
     const defaultOutputName = outputsRequest.data.items.find((item) => item.is_default)?.name;
-    return [
-      { inputDisplay: `Default (currently ${defaultOutputName})`, value: DEFAULT_OUTPUT_VALUE },
-      ...outputOptions,
-    ]; // TODO translations
+    return [getDefaultOutput(defaultOutputName), ...outputOptions];
   }, [outputsRequest, outputOptions]);
 
   const monitoringOutputOptions = useMemo(() => {
@@ -50,10 +59,7 @@ export function useOutputOptions() {
     const defaultOutputName = outputsRequest.data.items.find(
       (item) => item.is_default_monitoring
     )?.name;
-    return [
-      { inputDisplay: `Default (currently ${defaultOutputName})`, value: DEFAULT_OUTPUT_VALUE },
-      ...outputOptions,
-    ]; // TODO translations
+    return [getDefaultOutput(defaultOutputName), , ...outputOptions]; // TODO translations
   }, [outputsRequest, outputOptions]);
 
   return useMemo(
