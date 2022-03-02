@@ -43,6 +43,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.cache.enabled=false',
         '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
+        // Without below line, default interval for rules is 1m
+        // See https://github.com/elastic/kibana/pull/125396 for details
+        '--xpack.alerting.minimumScheduleInterval=1s',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'riskyHostsEnabled',

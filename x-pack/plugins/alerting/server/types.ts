@@ -11,6 +11,7 @@ import type {
   RequestHandlerContext,
   SavedObjectReference,
   ElasticsearchClient,
+  IUiSettingsClient,
 } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
@@ -77,6 +78,7 @@ export interface AlertServices<
   ActionGroupIds extends string = never
 > {
   savedObjectsClient: SavedObjectsClientContract;
+  uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
   alertFactory: {
     create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
