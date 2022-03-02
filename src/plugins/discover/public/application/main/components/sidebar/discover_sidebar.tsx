@@ -19,11 +19,7 @@ import {
   EuiSpacer,
   EuiNotificationBadge,
   EuiPageSideBar,
-  EuiPopover,
-  EuiPopoverTitle,
   useResizeObserver,
-  EuiBasicTable,
-  EuiToken,
 } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
@@ -44,7 +40,6 @@ import { DiscoverIndexPatternManagement } from './discover_index_pattern_managem
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
 import { DataViewField } from '../../../../../../data_views/common';
-import { FieldTypesCallout } from './discover_field_types_callout';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -122,12 +117,6 @@ export function DiscoverSidebarComponent({
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const onButtonClick = () => {
-    setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
-  };
-  const closePopover = () => setIsPopoverOpen(false);
 
   useEffect(() => {
     if (documents) {
@@ -321,58 +310,6 @@ export function DiscoverSidebarComponent({
     );
   }
 
-  const columnsSidebar = [
-    {
-      field: 'type',
-      name: 'Icon',
-      width: '40px',
-      render: (name) => <EuiToken iconType={name} />,
-    },
-    {
-      field: 'dataType',
-      name: 'Data type',
-      width: '70px',
-    },
-    {
-      field: 'description',
-      name: 'Description',
-    },
-  ];
-
-  const items = [
-    {
-      id: 0,
-      dataType: 'text',
-      type: 'tokenString',
-      description: 'Full text such as the body of an email or a product description.',
-    },
-    {
-      id: 1,
-      dataType: 'number',
-      type: 'tokenNumber',
-      description: 'Long, integer, short, byte, double, and float values.',
-    },
-    {
-      id: 2,
-      dataType: 'keyword',
-      type: 'tokenKeyword',
-      description:
-        'Structured content such as an ID, email address, hostname, status code, or tag.',
-    },
-    {
-      id: 3,
-      dataType: 'date',
-      type: 'tokenDate',
-      description: 'A date string or the number of seconds or milliseconds since 1/1/1970.',
-    },
-    {
-      id: 4,
-      dataType: 'geo_point',
-      type: 'tokenGeo',
-      description: 'Latitude and longitude points.',
-    },
-  ];
-
   return (
     <EuiPageSideBar
       className="dscSidebar"
@@ -416,27 +353,6 @@ export function DiscoverSidebarComponent({
               types={fieldTypes}
             />
           </form>
-        </EuiFlexItem>
-        <EuiFlexItem className="eui-hideFor--xs" grow={false}>
-          <EuiPopover
-            anchorPosition="rightDown"
-            display="block"
-            button={<FieldTypesCallout togglePopover={onButtonClick} />}
-            isOpen={isPopoverOpen}
-            panelPaddingSize="s"
-            closePopover={closePopover}
-          >
-            <EuiPopoverTitle paddingSize="s">Field types</EuiPopoverTitle>
-            <EuiBasicTable
-              style={{ width: 350 }}
-              tableCaption="Description of field types"
-              items={items}
-              compressed={true}
-              rowHeader="firstName"
-              columns={columnsSidebar}
-            />
-            <EuiSpacer size="s" />
-          </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem className="eui-yScroll">
           <div

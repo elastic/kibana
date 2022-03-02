@@ -11,6 +11,7 @@ import './discover_field_search.scss';
 import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiBasicTable,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -27,6 +28,8 @@ import {
   EuiOutsideClickDetector,
   EuiFilterButton,
   EuiSpacer,
+  EuiButtonIcon,
+  EuiToken,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -80,12 +83,70 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
 
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [values, setValues] = useState<State>({
     searchable: 'any',
     aggregatable: 'any',
     type: 'any',
     missing: true,
   });
+
+  const onHelpClick = () => {
+    setIsHelpOpen((isHelpOpen) => !isHelpOpen);
+  };
+  const closeHelp = () => setIsHelpOpen(false);
+
+  const columnsSidebar = [
+    {
+      field: 'type',
+      name: 'Icon',
+      width: '40px',
+      render: (name) => <EuiToken iconType={name} />,
+    },
+    {
+      field: 'dataType',
+      name: 'Data type',
+      width: '70px',
+    },
+    {
+      field: 'description',
+      name: 'Description',
+    },
+  ];
+
+  const items = [
+    {
+      id: 0,
+      dataType: 'text',
+      type: 'tokenString',
+      description: 'Full text such as the body of an email or a product description.',
+    },
+    {
+      id: 1,
+      dataType: 'number',
+      type: 'tokenNumber',
+      description: 'Long, integer, short, byte, double, and float values.',
+    },
+    {
+      id: 2,
+      dataType: 'keyword',
+      type: 'tokenKeyword',
+      description:
+        'Structured content such as an ID, email address, hostname, status code, or tag.',
+    },
+    {
+      id: 3,
+      dataType: 'date',
+      type: 'tokenDate',
+      description: 'A date string or the number of seconds or milliseconds since 1/1/1970.',
+    },
+    {
+      id: 4,
+      dataType: 'geo_point',
+      type: 'tokenGeo',
+      description: 'Latitude and longitude points.',
+    },
+  ];
 
   const filterBtnAriaLabel = isPopoverOpen
     ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
@@ -272,30 +333,56 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-        <EuiFilterGroup className="dscFieldSearch__filterWrapper">
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+        <EuiFlexItem>
+          <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
+            <EuiFilterGroup className="dscFieldSearch__filterWrapper">
+              <EuiPopover
+                id="dataPanelTypeFilter"
+                panelClassName="euiFilterGroup__popoverPanel"
+                panelPaddingSize="none"
+                anchorPosition="rightUp"
+                display="block"
+                isOpen={isPopoverOpen}
+                closePopover={() => {
+                  setPopoverOpen(false);
+                }}
+                button={buttonContent}
+              >
+                <EuiPopoverTitle paddingSize="s">
+                  {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
+                    defaultMessage: 'Filter by type',
+                  })}
+                </EuiPopoverTitle>
+                {selectionPanel}
+                {footer()}
+              </EuiPopover>
+            </EuiFilterGroup>
+          </EuiOutsideClickDetector>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiPopover
-            id="dataPanelTypeFilter"
-            panelClassName="euiFilterGroup__popoverPanel"
-            panelPaddingSize="none"
-            anchorPosition="rightUp"
+            anchorPosition="rightDown"
             display="block"
-            isOpen={isPopoverOpen}
-            closePopover={() => {
-              setPopoverOpen(false);
-            }}
-            button={buttonContent}
+            button={
+              <EuiButtonIcon onClick={onHelpClick} iconType="questionInCircle" aria-label="Help" />
+            }
+            isOpen={isHelpOpen}
+            panelPaddingSize="s"
+            closePopover={closeHelp}
           >
-            <EuiPopoverTitle paddingSize="s">
-              {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
-                defaultMessage: 'Filter by type',
-              })}
-            </EuiPopoverTitle>
-            {selectionPanel}
-            {footer()}
+            <EuiPopoverTitle paddingSize="s">Field types</EuiPopoverTitle>
+            <EuiBasicTable
+              style={{ width: 350 }}
+              tableCaption="Description of field types"
+              items={items}
+              compressed={true}
+              rowHeader="firstName"
+              columns={columnsSidebar}
+            />
           </EuiPopover>
-        </EuiFilterGroup>
-      </EuiOutsideClickDetector>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </React.Fragment>
   );
 }
