@@ -6,4 +6,8 @@
  */
 
 export { getCopyToSpaceFlyoutComponent } from './components';
-export type { CopyToSpaceFlyoutProps, CopyToSpaceSavedObjectTarget } from './types';
+export type {
+  CopyToSpaceFlyoutProps,
+  CopyToSpaceSavedObjectTarget,
+  CopySavedObjectsToSpaceResponse,
+} from './types';

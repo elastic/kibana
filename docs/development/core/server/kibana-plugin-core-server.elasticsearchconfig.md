@@ -23,6 +23,7 @@ export declare class ElasticsearchConfig
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [apiVersion](./kibana-plugin-core-server.elasticsearchconfig.apiversion.md) |  | string | Version of the Elasticsearch (6.7, 7.1 or <code>master</code>) client will be connecting to. |
+|  [compression](./kibana-plugin-core-server.elasticsearchconfig.compression.md) |  | boolean | Whether to use compression for communications with elasticsearch. |
 |  [customHeaders](./kibana-plugin-core-server.elasticsearchconfig.customheaders.md) |  | ElasticsearchConfigType\['customHeaders'\] | Header names and values to send to Elasticsearch with every request. These headers cannot be overwritten by client-side headers and aren't affected by <code>requestHeadersWhitelist</code> configuration. |
 |  [healthCheckDelay](./kibana-plugin-core-server.elasticsearchconfig.healthcheckdelay.md) |  | Duration | The interval between health check requests Kibana sends to the Elasticsearch. |
 |  [hosts](./kibana-plugin-core-server.elasticsearchconfig.hosts.md) |  | string\[\] | Hosts that the client will connect to. If sniffing is enabled, this list will be used as seeds to discover the rest of your cluster. |

@@ -28,9 +28,9 @@ describe('crete_list', () => {
   test('it returns a list as expected with the id changed out for the elastic id', async () => {
     const options = getCreateListOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.index.mockReturnValue(
+    esClient.index.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
+      { _id: 'elastic-id-123' }
     );
     const list = await createList({ ...options, esClient });
     const expected: ListSchema = { ...getListResponseMock(), id: 'elastic-id-123' };
@@ -44,9 +44,9 @@ describe('crete_list', () => {
       serializer: '(?<value>)',
     };
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.index.mockReturnValue(
+    esClient.index.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
+      { _id: 'elastic-id-123' }
     );
     const list = await createList({ ...options, esClient });
     const expected: ListSchema = {
@@ -75,9 +75,9 @@ describe('crete_list', () => {
     const options = getCreateListOptionsMock();
     options.id = undefined;
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.index.mockReturnValue(
+    esClient.index.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
+      { _id: 'elastic-id-123' }
     );
     const list = await createList({ ...options, esClient });
     const expected: ListSchema = { ...getListResponseMock(), id: 'elastic-id-123' };

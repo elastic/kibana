@@ -64,11 +64,13 @@ export const datatableFn =
     }
 
     if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {
+      const sortingHint = args.columns.find((col) => col.columnId === sortBy)?.sortingHint;
       // Sort on raw values for these types, while use the formatted value for the rest
       const sortingCriteria = getSortingCriteria(
-        isRange(columnsReverseLookup[sortBy]?.meta)
-          ? 'range'
-          : columnsReverseLookup[sortBy]?.meta?.type,
+        sortingHint ??
+          (isRange(columnsReverseLookup[sortBy]?.meta)
+            ? 'range'
+            : columnsReverseLookup[sortBy]?.meta?.type),
         sortBy,
         formatters[sortBy],
         sortDirection

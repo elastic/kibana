@@ -17,10 +17,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
-import {
-  euiLightVars as lightEuiTheme,
-  euiDarkVars as darkEuiTheme,
-} from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as lightEuiTheme, euiDarkVars as darkEuiTheme } from '@kbn/ui-theme';
 
 interface EndzonesProps {
   isDarkMode: boolean;

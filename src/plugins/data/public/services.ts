@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { NotificationsStart, CoreStart } from 'src/core/public';
+import { NotificationsStart, CoreStart, ThemeServiceStart } from 'src/core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { IndexPatternsContract } from './data_views';
 import { DataPublicPluginStart } from './types';
@@ -24,3 +24,5 @@ export const [getIndexPatterns, setIndexPatterns] =
 
 export const [getSearchService, setSearchService] =
   createGetterSetter<DataPublicPluginStart['search']>('Search');
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');

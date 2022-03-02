@@ -123,7 +123,7 @@ export function initIndexingRoutes({
     },
     async (context, request, response) => {
       try {
-        const { body: resp } = await context.core.elasticsearch.client.asCurrentUser.delete({
+        const resp = await context.core.elasticsearch.client.asCurrentUser.delete({
           index: request.body.index,
           id: request.params.featureId,
           refresh: true,
@@ -194,7 +194,7 @@ export function initIndexingRoutes({
     async (context, request, response) => {
       const { index } = request.query;
       try {
-        const { body: mappingsResp } =
+        const mappingsResp =
           await context.core.elasticsearch.client.asCurrentUser.indices.getMapping({
             index: request.query.index,
           });

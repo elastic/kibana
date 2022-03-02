@@ -22,7 +22,9 @@ export const postTransformsUpdateRequestSchema = schema.object({
     })
   ),
   frequency: schema.maybe(schema.string()),
-  retention_policy: schema.maybe(retentionPolicySchema),
+  // maybe: If not set, any existing `retention_policy` config will not be updated.
+  // nullable: If set to `null`, any existing `retention_policy` will be removed.
+  retention_policy: schema.maybe(schema.nullable(retentionPolicySchema)),
   settings: schema.maybe(settingsSchema),
   source: schema.maybe(sourceSchema),
   sync: schema.maybe(syncSchema),

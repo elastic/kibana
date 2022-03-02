@@ -80,7 +80,9 @@ export const AnnotationRow = ({
 
       try {
         fetchedIndexPattern = index
-          ? await fetchIndexPattern(index, indexPatterns)
+          ? await fetchIndexPattern(index, indexPatterns, {
+              fetchKibanaIndexForStringIndexes: true,
+            })
           : {
               ...fetchedIndexPattern,
               defaultIndex: await indexPatterns.getDefault(),

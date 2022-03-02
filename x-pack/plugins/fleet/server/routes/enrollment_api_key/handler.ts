@@ -21,7 +21,8 @@ import type {
   PostEnrollmentAPIKeyResponse,
 } from '../../../common';
 import * as APIKeyService from '../../services/api_keys';
-import { defaultIngestErrorHandler } from '../../errors';
+import { agentPolicyService } from '../../services/agent_policy';
+import { defaultIngestErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
@@ -57,6 +58,15 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
+    // validate policy id
+    await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
+      if (soClient.errors.isNotFoundError(err)) {
+        throw new AgentPolicyNotFoundError(`Agent policy "${request.body.policy_id}" not found`);
+      }
+
+      throw err;
+    });
+
     const apiKey = await APIKeyService.generateEnrollmentAPIKey(soClient, esClient, {
       name: request.body.name,
       expiration: request.body.expiration,

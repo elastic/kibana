@@ -68,6 +68,10 @@ const mockNavigateToUrl = jest.fn(() => Promise.resolve());
 class TextExternalUrl implements IExternalUrl {
   constructor(private readonly isCorrect: boolean = true) {}
 
+  public isInternalUrl(url: string): boolean {
+    return false;
+  }
+
   public validateUrl(url: string): URL | null {
     return this.isCorrect ? new URL(url) : null;
   }

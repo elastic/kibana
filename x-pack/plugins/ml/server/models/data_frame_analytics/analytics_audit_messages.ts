@@ -69,7 +69,7 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
       });
     }
 
-    const { body } = await asInternalUser.search({
+    const body = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
       size: SIZE,

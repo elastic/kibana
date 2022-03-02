@@ -104,7 +104,7 @@ export class ContentStream extends Duplex {
   }
 
   private async getMaxContentSize() {
-    const { body } = await this.client.cluster.getSettings({ include_defaults: true });
+    const body = await this.client.cluster.getSettings({ include_defaults: true });
     const { persistent, transient, defaults: defaultSettings } = body;
     const settings = defaults({}, persistent, transient, defaultSettings);
     const maxContentSize = get(settings, 'http.max_content_length', '100mb');
@@ -146,7 +146,7 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Reading report contents.`);
 
     const response = await this.client.search<ReportSource>({ body, index });
-    const hits = response?.body.hits?.hits?.[0];
+    const hits = response?.hits?.hits?.[0];
 
     this.jobSize = hits?._source?.output?.size;
 
@@ -172,7 +172,7 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Reading chunk #${this.chunksRead}.`);
 
     const response = await this.client.search<ChunkSource>({ body, index });
-    const hits = response?.body.hits?.hits?.[0];
+    const hits = response?.hits?.hits?.[0];
 
     return hits?._source?.output.content;
   }
@@ -220,7 +220,7 @@ export class ContentStream extends Duplex {
   private async writeHead(content: string) {
     this.logger.debug(`Updating report contents.`);
 
-    const { body } = await this.client.update<ReportSource>({
+    const body = await this.client.update<ReportSource>({
       ...this.document,
       body: {
         doc: {

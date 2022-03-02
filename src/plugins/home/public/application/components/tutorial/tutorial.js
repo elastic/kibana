@@ -414,6 +414,7 @@ class TutorialUi extends React.Component {
       content = (
         <div>
           <Introduction
+            category={this.state.tutorial.category}
             title={this.state.tutorial.name}
             description={this.props.replaceTemplateStrings(this.state.tutorial.longDescription)}
             previewUrl={previewUrl}

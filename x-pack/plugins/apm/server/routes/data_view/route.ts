@@ -6,15 +6,15 @@
  */
 
 import { createStaticDataView } from './create_static_data_view';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getDynamicDataView } from './get_dynamic_data_view';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { ISavedObjectsRepository } from '../../../../../../src/core/server';
 
 const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<{ created: boolean }> => {
     const {
       request,
       core,
@@ -25,7 +25,10 @@ const staticDataViewRoute = createApmServerRoute({
     const setupPromise = setupRequest(resources);
     const clientPromise = core
       .start()
-      .then((coreStart) => coreStart.savedObjects.createInternalRepository());
+      .then(
+        (coreStart): ISavedObjectsRepository =>
+          coreStart.savedObjects.createInternalRepository()
+      );
 
     const setup = await setupPromise;
     const savedObjectsClient = await clientPromise;
@@ -46,7 +49,15 @@ const staticDataViewRoute = createApmServerRoute({
 const dynamicDataViewRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/data_view/dynamic',
   options: { tags: ['access:apm'] },
-  handler: async ({ context, config, logger }) => {
+  handler: async ({
+    context,
+    config,
+    logger,
+  }): Promise<{
+    dynamicDataView:
+      | import('./get_dynamic_data_view').DataViewTitleAndFields
+      | undefined;
+  }> => {
     const dynamicDataView = await getDynamicDataView({
       context,
       config,
@@ -56,6 +67,7 @@ const dynamicDataViewRoute = createApmServerRoute({
   },
 });
 
-export const dataViewRouteRepository = createApmServerRouteRepository()
-  .add(staticDataViewRoute)
-  .add(dynamicDataViewRoute);
+export const dataViewRouteRepository = {
+  ...staticDataViewRoute,
+  ...dynamicDataViewRoute,
+};

@@ -64,6 +64,7 @@ import {
   SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
 } from '../../types';
+import { SavedObjectsTypeValidator } from '../../validation';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
@@ -370,7 +371,15 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     });
 
-    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
+    /**
+     * If a validation has been registered for this type, we run it against the migrated attributes.
+     * This is an imperfect solution because malformed attributes could have already caused the
+     * migration to fail, but it's the best we can do without devising a way to run validations
+     * inside the migration algorithm itself.
+     */
+    this.validateObjectAttributes(type, migrated as SavedObjectSanitizedDoc<T>);
+
+    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
 
     const requestParams = {
       id: raw._id,
@@ -383,8 +392,8 @@ export class SavedObjectsRepository {
 
     const { body, statusCode, headers } =
       id && overwrite
-        ? await this.client.index(requestParams)
-        : await this.client.create(requestParams);
+        ? await this.client.index(requestParams, { meta: true })
+        : await this.client.create(requestParams, { meta: true });
 
     // throw if we can't verify a 404 response is from Elasticsearch
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
@@ -526,23 +535,42 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      const migrated = this._migrator.migrateDocument({
+        id: object.id,
+        type: object.type,
+        attributes: object.attributes,
+        migrationVersion: object.migrationVersion,
+        coreMigrationVersion: object.coreMigrationVersion,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+        updated_at: time,
+        references: object.references || [],
+        originId: object.originId,
+      }) as SavedObjectSanitizedDoc<T>;
+
+      /**
+       * If a validation has been registered for this type, we run it against the migrated attributes.
+       * This is an imperfect solution because malformed attributes could have already caused the
+       * migration to fail, but it's the best we can do without devising a way to run validations
+       * inside the migration algorithm itself.
+       */
+      try {
+        this.validateObjectAttributes(object.type, migrated);
+      } catch (error) {
+        return {
+          tag: 'Left',
+          value: {
+            id: object.id,
+            type: object.type,
+            error,
+          },
+        };
+      }
+
       const expectedResult = {
         esRequestIndex: bulkRequestIndexCounter++,
         requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(
-          this._migrator.migrateDocument({
-            id: object.id,
-            type: object.type,
-            attributes: object.attributes,
-            migrationVersion: object.migrationVersion,
-            coreMigrationVersion: object.coreMigrationVersion,
-            ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-            ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-            updated_at: time,
-            references: object.references || [],
-            originId: object.originId,
-          }) as SavedObjectSanitizedDoc
-        ),
+        rawMigratedDoc: this._serializer.savedObjectToRaw(migrated),
       };
 
       bulkCreateParams.push(
@@ -574,7 +602,7 @@ export class SavedObjectsRepository {
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const rawResponse = Object.values(bulkResponse?.body.items[esRequestIndex] ?? {})[0] as any;
+        const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
 
         const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
         if (error) {
@@ -644,7 +672,7 @@ export class SavedObjectsRepository {
               docs: bulkGetDocs,
             },
           },
-          { ignore: [404] }
+          { ignore: [404], meta: true }
         )
       : undefined;
     // throw if we can't verify a 404 response is from Elasticsearch
@@ -736,7 +764,7 @@ export class SavedObjectsRepository {
         ...getExpectedVersionProperties(undefined, preflightResult?.rawDocSource),
         refresh,
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
 
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
@@ -837,7 +865,7 @@ export class SavedObjectsRepository {
           }),
         },
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
     // throw if we can't verify a 404 response is from Elasticsearch
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
@@ -991,6 +1019,7 @@ export class SavedObjectsRepository {
       esOptions,
       {
         ignore: [404],
+        meta: true,
       }
     );
     if (statusCode === 404) {
@@ -1100,7 +1129,7 @@ export class SavedObjectsRepository {
               docs: bulkGetDocs,
             },
           },
-          { ignore: [404] }
+          { ignore: [404], meta: true }
         )
       : undefined;
     // fail fast if we can't verify a 404 is from Elasticsearch
@@ -1209,7 +1238,7 @@ export class SavedObjectsRepository {
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
     const indexNotFound = statusCode === 404;
     // check if we have the elasticsearch header when index is not found and, if we do, ensure it is from Elasticsearch
@@ -1340,8 +1369,8 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     };
 
-    const { body } = await this.client
-      .update<SavedObjectsRawDocSource>({
+    const body = await this.client
+      .update<unknown, unknown, SavedObjectsRawDocSource>({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
         ...getExpectedVersionProperties(version, preflightResult?.rawDocSource),
@@ -1528,6 +1557,7 @@ export class SavedObjectsRepository {
           },
           {
             ignore: [404],
+            meta: true,
           }
         )
       : undefined;
@@ -1627,7 +1657,7 @@ export class SavedObjectsRepository {
         }
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
-        const response = bulkUpdateResponse?.body.items[esRequestIndex] ?? {};
+        const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
         const rawResponse = Object.values(response)[0] as any;
 
         const error = getBulkOperationError(type, id, rawResponse);
@@ -1706,7 +1736,7 @@ export class SavedObjectsRepository {
           }),
         },
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
     // fail fast if we can't verify a 404 is from Elasticsearch
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
@@ -1895,7 +1925,7 @@ export class SavedObjectsRepository {
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
-    const { body } = await this.client.update<SavedObjectsRawDocSource>({
+    const body = await this.client.update<unknown, unknown, SavedObjectsRawDocSource>({
       id: raw._id,
       index: this.getIndexForType(type),
       refresh,
@@ -2000,6 +2030,7 @@ export class SavedObjectsRepository {
 
     const { body, statusCode, headers } = await this.client.openPointInTime(esOptions, {
       ignore: [404],
+      meta: true,
     });
 
     if (statusCode === 404) {
@@ -2060,11 +2091,9 @@ export class SavedObjectsRepository {
     id: string,
     options?: SavedObjectsClosePointInTimeOptions
   ): Promise<SavedObjectsClosePointInTimeResponse> {
-    const { body } = await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
+    return await this.client.closePointInTime({
       body: { id },
     });
-
-    return body;
   }
 
   /**
@@ -2185,6 +2214,7 @@ export class SavedObjectsRepository {
       },
       {
         ignore: [404],
+        meta: true,
       }
     );
 
@@ -2276,6 +2306,26 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"namespaces" can only specify a single space when used with space-isolated types'
       );
+    }
+  }
+
+  /** Validate a migrated doc against the registered saved object type's schema. */
+  private validateObjectAttributes(type: string, doc: SavedObjectSanitizedDoc) {
+    const savedObjectType = this._registry.getType(type);
+    if (!savedObjectType?.schemas) {
+      return;
+    }
+
+    const validator = new SavedObjectsTypeValidator({
+      logger: this._logger.get('type-validator'),
+      type,
+      validationMap: savedObjectType.schemas,
+    });
+
+    try {
+      validator.validate(this._migrator.kibanaVersion, doc);
+    } catch (error) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
   }
 }

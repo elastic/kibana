@@ -31,14 +31,11 @@ export const IlmPolicyLink: FunctionComponent<Props> = ({ locator, navigateToUrl
       data-test-subj="ilmPolicyLink"
       size="xs"
       onClick={() => {
-        locator
-          .getUrl({
-            page: 'policy_edit',
-            policyName: ILM_POLICY_NAME,
-          })
-          .then((url) => {
-            navigateToUrl(url);
-          });
+        const url = locator.getRedirectUrl({
+          page: 'policy_edit',
+          policyName: ILM_POLICY_NAME,
+        });
+        navigateToUrl(url);
       }}
     >
       {i18nTexts.buttonLabel}

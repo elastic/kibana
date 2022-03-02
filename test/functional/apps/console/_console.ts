@@ -81,16 +81,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
 
-    it('should provide basic auto-complete functionality', async () => {
-      // Ensure that the text area can be interacted with
-      await PageObjects.console.dismissTutorial();
-      expect(await PageObjects.console.hasAutocompleter()).to.be(false);
-      await PageObjects.console.promptAutocomplete();
-      await retry.waitFor('autocomplete to be visible', () =>
-        PageObjects.console.hasAutocompleter()
-      );
-    });
-
     describe('with a data URI in the load_from query', () => {
       it('loads the data from the URI', async () => {
         await PageObjects.common.navigateToApp('console', {

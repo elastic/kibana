@@ -14,8 +14,8 @@ import { ChartCreationInfo } from './chart_creation_info';
 
 export interface ChartTimeRange {
   lastUpdated: number;
-  to: number;
-  from: number;
+  to?: number;
+  from?: number;
 }
 
 interface Props {

@@ -15,10 +15,10 @@ import type {
   SavedObjectsResolveResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from 'src/core/server';
-import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { AuditEvent } from '../audit';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditLoggerMock } from '../audit/mocks';
 import { Actions } from '../authorization';
 import type { SavedObjectActions } from '../authorization/actions/saved_object';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
@@ -65,7 +65,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
     checkSavedObjectsPrivilegesAsCurrentUser: jest.fn(),
     errors,
     getSpacesService,
-    auditLogger: auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest()),
+    auditLogger: auditLoggerMock.create(),
     forbiddenError,
     generalError,
   };

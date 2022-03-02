@@ -119,11 +119,9 @@ export abstract class BaseAuthenticationProvider {
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
     return this.authenticationInfoToAuthenticatedUser(
       // @ts-expect-error Metadata is defined as Record<string, any>
-      (
-        await this.options.client
-          .asScoped({ headers: { ...request.headers, ...authHeaders } })
-          .asCurrentUser.security.authenticate()
-      ).body
+      await this.options.client
+        .asScoped({ headers: { ...request.headers, ...authHeaders } })
+        .asCurrentUser.security.authenticate()
     );
   }
 

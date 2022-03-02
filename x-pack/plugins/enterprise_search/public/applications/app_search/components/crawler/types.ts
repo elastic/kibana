@@ -330,3 +330,17 @@ export enum CrawlUnits {
   weeks = 'week',
   months = 'month',
 }
+
+export interface DomainConfigFromServer {
+  id: string;
+  name: string;
+  seed_urls: string[];
+  sitemap_urls: string[];
+}
+
+export interface DomainConfig {
+  id: string;
+  name: string;
+  seedUrls: string[];
+  sitemapUrls: string[];
+}

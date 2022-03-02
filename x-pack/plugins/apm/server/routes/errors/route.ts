@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
-import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getErrorDistribution } from './distribution/get_distribution';
@@ -17,7 +16,6 @@ import {
   rangeRt,
   comparisonRangeRt,
 } from '../default_api_types';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
@@ -37,31 +35,32 @@ const errorsMainStatisticsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      t.type({
-        transactionType: t.string,
-      }),
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    errorGroups: Array<{
+      groupId: string;
+      name: string;
+      lastSeen: number;
+      occurrences: number;
+      culprit: string | undefined;
+      handled: boolean | undefined;
+      type: string | undefined;
+    }>;
+  }> => {
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const {
-      environment,
-      transactionType,
-      kuery,
-      sortField,
-      sortDirection,
-      start,
-      end,
-    } = params.query;
+    const { environment, kuery, sortField, sortDirection, start, end } =
+      params.query;
 
     const errorGroups = await getErrorGroupMainStatistics({
       environment,
       kuery,
       serviceName,
-      transactionType,
       sortField,
       sortDirection,
       setup,
@@ -87,13 +86,26 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
       comparisonRangeRt,
       t.type({
         numBuckets: toNumberRt,
-        transactionType: t.string,
         groupIds: jsonRt.pipe(t.array(t.string)),
       }),
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    currentPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+      groupId: string;
+      timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
+    }>;
+    previousPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+      timeseries: Array<{
+        x: number;
+        y: import('./../../../typings/common').Maybe<number>;
+      }>;
+      groupId: string;
+    }>;
+  }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
 
@@ -103,7 +115,6 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
         environment,
         kuery,
         numBuckets,
-        transactionType,
         groupIds,
         comparisonStart,
         comparisonEnd,
@@ -118,7 +129,6 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
       serviceName,
       setup,
       numBuckets,
-      transactionType,
       groupIds,
       comparisonStart,
       comparisonEnd,
@@ -138,7 +148,15 @@ const errorGroupsRoute = createApmServerRoute({
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    transaction:
+      | import('./../../../typings/es_schemas/ui/transaction').Transaction
+      | undefined;
+    error: import('./../../../typings/es_schemas/ui/apm_error').APMError;
+    occurrencesCount: number;
+  }> => {
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName, groupId } = params.path;
@@ -173,7 +191,16 @@ const errorDistributionRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    currentPeriod: Array<{ x: number; y: number }>;
+    previousPeriod: Array<{
+      x: number;
+      y: import('./../../../typings/common').Maybe<number>;
+    }>;
+    bucketSize: number;
+  }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
@@ -200,8 +227,9 @@ const errorDistributionRoute = createApmServerRoute({
   },
 });
 
-export const errorsRouteRepository = createApmServerRouteRepository()
-  .add(errorsMainStatisticsRoute)
-  .add(errorsDetailedStatisticsRoute)
-  .add(errorGroupsRoute)
-  .add(errorDistributionRoute);
+export const errorsRouteRepository = {
+  ...errorsMainStatisticsRoute,
+  ...errorsDetailedStatisticsRoute,
+  ...errorGroupsRoute,
+  ...errorDistributionRoute,
+};

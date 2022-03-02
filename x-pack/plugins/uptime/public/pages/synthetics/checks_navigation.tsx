@@ -12,6 +12,7 @@ import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../components/overview/monitor_list/columns/monitor_status_column';
+import { useBreakpoints } from '../../../public/hooks/use_breakpoints';
 
 interface Props {
   timestamp: string;
@@ -20,11 +21,15 @@ interface Props {
 
 export const ChecksNavigation = ({ timestamp, details }: Props) => {
   const history = useHistory();
+  const { down } = useBreakpoints();
+
+  const isMobile = down('s');
 
   return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem>
+    <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+      <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          size={isMobile ? 'xs' : 'm'}
           iconType="arrowLeft"
           isDisabled={!details?.previous}
           onClick={() => {
@@ -37,11 +42,14 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText className="eui-textNoWrap">{getShortTimeStamp(moment(timestamp))}</EuiText>
+      <EuiFlexItem grow={false}>
+        <EuiText size={isMobile ? 'xs' : 'm'} className="eui-textNoWrap">
+          {getShortTimeStamp(moment(timestamp))}
+        </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          size={isMobile ? 'xs' : 'm'}
           iconType="arrowRight"
           iconSide="right"
           isDisabled={!details?.next}

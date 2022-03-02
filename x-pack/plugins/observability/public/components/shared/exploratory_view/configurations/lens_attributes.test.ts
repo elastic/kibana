@@ -394,7 +394,7 @@ describe('Lens Attribute', () => {
             label: 'Part of count() / overall_sum(count())',
             operationType: 'count',
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X1': {
             customLabel: true,
@@ -408,7 +408,7 @@ describe('Lens Attribute', () => {
             label: 'Part of count() / overall_sum(count())',
             operationType: 'count',
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X2': {
             customLabel: true,
@@ -482,6 +482,11 @@ describe('Lens Attribute', () => {
     });
   });
 
+  it('should not use global filters when there is more than one series', function () {
+    const multiSeriesLensAttr = new LensAttributes([layerConfig, layerConfig]).getJSON();
+    expect(multiSeriesLensAttr.state.query.query).toEqual('transaction.duration.us < 60000000');
+  });
+
   describe('Layer breakdowns', function () {
     it('should return breakdown column', function () {
       const layerConfig1: LayerConfig = {
@@ -521,8 +526,8 @@ describe('Lens Attribute', () => {
 
       expect(lnsAttr.layers.layer0).toEqual({
         columnOrder: [
-          'x-axis-column-layer0',
           'breakdown-column-layer0',
+          'x-axis-column-layer0',
           'y-axis-column-layer0',
           'y-axis-column-layer0X0',
           'y-axis-column-layer0X1',
@@ -604,7 +609,7 @@ describe('Lens Attribute', () => {
             label: 'Part of count() / overall_sum(count())',
             operationType: 'count',
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X1': {
             customLabel: true,
@@ -618,7 +623,7 @@ describe('Lens Attribute', () => {
             label: 'Part of count() / overall_sum(count())',
             operationType: 'count',
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X2': {
             customLabel: true,

@@ -19,7 +19,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { SummaryRow } from './helpers';
-import { VIEW_ALL_DOCUMENT_FIELDS } from './translations';
+import { VIEW_ALL_FIELDS } from './translations';
 
 export const Indent = styled.div`
   padding: 0 12px;
@@ -69,7 +69,7 @@ export const SummaryViewComponent: React.FC<{
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink onClick={goToTable}>
-            <EuiText size="xs">{VIEW_ALL_DOCUMENT_FIELDS}</EuiText>
+            <EuiText size="xs">{VIEW_ALL_FIELDS}</EuiText>
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>

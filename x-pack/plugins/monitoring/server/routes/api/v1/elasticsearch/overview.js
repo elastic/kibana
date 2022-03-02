@@ -13,10 +13,6 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_overview';
-import {
-  INDEX_PATTERN_ELASTICSEARCH,
-  INDEX_PATTERN_ELASTICSEARCH_ECS,
-} from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 
@@ -39,50 +35,22 @@ export function esOverviewRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
+      const config = server.config;
       const clusterUuid = req.params.clusterUuid;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-      const esLegacyIndexPattern = prefixIndexPattern(
-        config,
-        INDEX_PATTERN_ELASTICSEARCH,
-        ccs,
-        true
-      );
-      const esEcsIndexPattern = prefixIndexPattern(
-        config,
-        INDEX_PATTERN_ELASTICSEARCH_ECS,
-        ccs,
-        true
-      );
-
-      const filebeatIndexPattern = prefixIndexPattern(
-        config,
-        config.get('monitoring.ui.logs.index'),
-        '*',
-        true
-      );
+      const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
 
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
 
       try {
         const [clusterStats, metrics, shardActivity, logs] = await Promise.all([
-          getClusterStats(req, esIndexPattern, clusterUuid),
-          getMetrics(req, esIndexPattern, metricSet),
-          getLastRecovery(
-            req,
-            esLegacyIndexPattern,
-            esEcsIndexPattern,
-            config.get('monitoring.ui.max_bucket_size')
-          ),
+          getClusterStats(req, clusterUuid),
+          getMetrics(req, 'elasticsearch', metricSet),
+          getLastRecovery(req, config.ui.max_bucket_size),
+          // TODO this call is missing some items from the signature of `getLogs`, will need to resolve during TS conversion
           getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
         ]);
-        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
-          req,
-          esIndexPattern,
-          clusterStats
-        );
+        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(req, clusterStats);
 
         const result = {
           clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),

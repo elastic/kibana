@@ -159,7 +159,7 @@ describe('ranges', () => {
           label: 'Count',
           dataType: 'number',
           isBucketed: false,
-          sourceField: 'Records',
+          sourceField: '___records___',
           operationType: 'count',
         },
       },

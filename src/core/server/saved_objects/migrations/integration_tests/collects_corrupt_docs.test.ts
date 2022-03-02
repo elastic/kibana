@@ -165,6 +165,7 @@ function createRoot() {
           {
             name: 'root',
             appenders: ['file'],
+            level: 'info',
           },
         ],
       },

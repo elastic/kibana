@@ -11,7 +11,8 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 
 import { AUTO_UPDATE_PACKAGES } from '../../common';
 import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
-import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
+
+import { SO_SEARCH_LIMIT } from '../constants';
 import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 
 import { appContextService } from './app_context';
@@ -26,13 +27,13 @@ import { outputService } from './output';
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { ensureFleetServerAgentPoliciesExists } from './agents';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
 import { getInstallations, installPackage } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
 import { pkgToPkgKey } from './epm/registry';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
+import { upgradeManagedPackagePolicies } from './managed_package_policies';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -93,29 +94,32 @@ async function createSetupSideEffects(
 
   packages = [
     ...packages,
-    ...DEFAULT_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
     ...autoUpdateablePackages.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
   logger.debug('Setting up initial Fleet packages');
 
-  const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
-    soClient,
-    esClient,
-    policies,
-    packages,
-    defaultOutput,
-    DEFAULT_SPACE_ID
-  );
+  const { nonFatalErrors: preconfiguredPackagesNonFatalErrors } =
+    await ensurePreconfiguredPackagesAndPolicies(
+      soClient,
+      esClient,
+      policies,
+      packages,
+      defaultOutput,
+      DEFAULT_SPACE_ID
+    );
+
+  const packagePolicyUpgradeErrors = (
+    await upgradeManagedPackagePolicies(soClient, esClient)
+  ).filter((result) => (result.errors ?? []).length > 0);
+
+  const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
 
   logger.debug('Cleaning up Fleet outputs');
   await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
 
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
-
-  logger.debug('Setting up Fleet Server agent policies');
-  await ensureFleetServerAgentPoliciesExists(soClient, esClient);
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');

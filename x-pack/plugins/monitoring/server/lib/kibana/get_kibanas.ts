@@ -15,6 +15,8 @@ import { calculateAvailability } from '../calculate_availability';
 // @ts-ignore
 import { KibanaMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
 import { KibanaInfo, buildKibanaInfo } from './build_kibana_info';
 
@@ -52,24 +54,28 @@ interface Kibana {
  *  - requests
  *  - response times
  */
-export async function getKibanas(
-  req: LegacyRequest,
-  kbnIndexPattern: string,
-  { clusterUuid }: { clusterUuid: string }
-) {
-  checkParam(kbnIndexPattern, 'kbnIndexPattern in getKibanas');
-
-  const config = req.server.config();
+export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterUuid: string }) {
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
-
+  const moduleType = 'kibana';
+  const type = 'kibana_stats';
+  const dataset = 'stats';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
   const params = {
-    index: kbnIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    index: indexPatterns,
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     body: {
       query: createQuery({
-        types: ['kibana_stats', 'stats'],
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,

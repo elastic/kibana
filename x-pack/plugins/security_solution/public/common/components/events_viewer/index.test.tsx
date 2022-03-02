@@ -33,6 +33,11 @@ jest.mock('../../../timelines/containers', () => ({
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
+const mockUseCreateFieldButton = jest.fn().mockReturnValue(<></>);
+jest.mock('../../../timelines/components/create_field_button', () => ({
+  useCreateFieldButton: (...params: unknown[]) => mockUseCreateFieldButton(...params),
+}));
+
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
@@ -86,5 +91,23 @@ describe('StatefulEventsViewer', () => {
 
       expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);
     });
+  });
+
+  test('it closes field editor when unmounted', async () => {
+    const mockCloseEditor = jest.fn();
+    mockUseCreateFieldButton.mockImplementation((_, __, fieldEditorActionsRef) => {
+      fieldEditorActionsRef.current = { closeEditor: mockCloseEditor };
+      return <></>;
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEventsViewer {...testProps} />
+      </TestProviders>
+    );
+    expect(mockCloseEditor).not.toHaveBeenCalled();
+
+    wrapper.unmount();
+    expect(mockCloseEditor).toHaveBeenCalled();
   });
 });

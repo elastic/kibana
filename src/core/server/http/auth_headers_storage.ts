@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Request } from '@hapi/hapi';
 import { KibanaRequest, ensureRawRequest } from './router';
 import { AuthHeaders } from './lifecycle/auth';
@@ -18,11 +19,22 @@ import { AuthHeaders } from './lifecycle/auth';
 export type GetAuthHeaders = (request: KibanaRequest) => AuthHeaders | undefined;
 
 /** @internal */
-export class AuthHeadersStorage {
+export type SetAuthHeaders = (request: KibanaRequest, headers: AuthHeaders) => void;
+
+/** @internal */
+export interface IAuthHeadersStorage {
+  set: SetAuthHeaders;
+  get: GetAuthHeaders;
+}
+
+/** @internal */
+export class AuthHeadersStorage implements IAuthHeadersStorage {
   private authHeadersCache = new WeakMap<Request, AuthHeaders>();
+
   public set = (request: KibanaRequest | Request, headers: AuthHeaders) => {
     this.authHeadersCache.set(ensureRawRequest(request), headers);
   };
+
   public get: GetAuthHeaders = (request) => {
     return this.authHeadersCache.get(ensureRawRequest(request));
   };

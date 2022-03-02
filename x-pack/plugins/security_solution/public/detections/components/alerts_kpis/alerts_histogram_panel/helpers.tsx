@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
@@ -37,7 +38,8 @@ export const getAlertsHistogramQuery = (
   to: string,
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
-  }>
+  }>,
+  runtimeMappings?: MappingRuntimeFields
 ) => {
   return {
     aggs: {
@@ -79,6 +81,7 @@ export const getAlertsHistogramQuery = (
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
   };
 };
 

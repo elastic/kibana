@@ -67,41 +67,48 @@ describe('getSiblingContext', () => {
     },
   };
 
+  const stateWithDefaultPath = {
+    transient: {
+      resolvedArgs: {
+        'element-foo': {
+          expressionContext: {
+            'ast.chain': state.transient.resolvedArgs['element-foo'].expressionContext,
+          },
+        },
+      },
+    },
+  };
+
+  const expectedElement = {
+    index: 2,
+    context: {
+      type: 'pointseries',
+      columns: {
+        x: { type: 'string', role: 'dimension', expression: 'cost' },
+        y: { type: 'string', role: 'dimension', expression: 'project' },
+        color: { type: 'string', role: 'dimension', expression: 'project' },
+      },
+      rows: [
+        { x: '200', y: 'tigers', color: 'tigers' },
+        { x: '500', y: 'pandas', color: 'pandas' },
+      ],
+    },
+  };
   it('should find context when a previous context value is found', () => {
     // pointseries map
-    expect(getSiblingContext(state, 'element-foo', 2)).toEqual({
-      index: 2,
-      context: {
-        type: 'pointseries',
-        columns: {
-          x: { type: 'string', role: 'dimension', expression: 'cost' },
-          y: { type: 'string', role: 'dimension', expression: 'project' },
-          color: { type: 'string', role: 'dimension', expression: 'project' },
-        },
-        rows: [
-          { x: '200', y: 'tigers', color: 'tigers' },
-          { x: '500', y: 'pandas', color: 'pandas' },
-        ],
-      },
-    });
+    expect(getSiblingContext(state, 'element-foo', 2, [])).toEqual(expectedElement);
+    expect(getSiblingContext(stateWithDefaultPath, 'element-foo', 2)).toEqual(expectedElement);
+    expect(getSiblingContext(stateWithDefaultPath, 'element-foo', 2, ['ast.chain'])).toEqual(
+      expectedElement
+    );
   });
 
   it('should find context when a previous context value is not found', () => {
     // pointseries map
-    expect(getSiblingContext(state, 'element-foo', 1000)).toEqual({
-      index: 2,
-      context: {
-        type: 'pointseries',
-        columns: {
-          x: { type: 'string', role: 'dimension', expression: 'cost' },
-          y: { type: 'string', role: 'dimension', expression: 'project' },
-          color: { type: 'string', role: 'dimension', expression: 'project' },
-        },
-        rows: [
-          { x: '200', y: 'tigers', color: 'tigers' },
-          { x: '500', y: 'pandas', color: 'pandas' },
-        ],
-      },
-    });
+    expect(getSiblingContext(state, 'element-foo', 1000, [])).toEqual(expectedElement);
+    expect(getSiblingContext(stateWithDefaultPath, 'element-foo', 1000)).toEqual(expectedElement);
+    expect(getSiblingContext(stateWithDefaultPath, 'element-foo', 1000, ['ast.chain'])).toEqual(
+      expectedElement
+    );
   });
 });

@@ -11,6 +11,7 @@ import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { getSplits } from '../../helpers/get_splits';
 import { getLastMetric } from '../../helpers/get_last_metric';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
+import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 export function percentile(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
@@ -23,7 +24,7 @@ export function percentile(resp, panel, series, meta, extractFields) {
     (await getSplits(resp, panel, series, meta, extractFields)).forEach((split) => {
       metric.percentiles.forEach((percentile) => {
         const percentileValue = percentile.value ? percentile.value : 0;
-        const id = `${split.id}:${percentile.id}`;
+        const id = `${split.id}${SERIES_SEPARATOR}${percentile.id}`;
         const data = split.timeseries.buckets.map((bucket) => {
           const higherMetric = { ...metric, percent: percentileValue };
           const serieData = [bucket.key, getAggValue(bucket, higherMetric)];

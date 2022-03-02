@@ -39,7 +39,7 @@ import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
-import { getMappedNonEcsValue } from '../data_driven_columns';
+import { useGetMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
@@ -115,21 +115,23 @@ const StatefulEventComponent: React.FC<Props> = ({
   const expandedDetail = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
   );
-  const hostName = useMemo(() => {
-    const hostNameArr = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
-    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
-  }, [event?.data]);
+  const hostNameArr = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
 
+  const hostName = useMemo(() => {
+    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
+  }, [hostNameArr]);
+  const hostIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' });
+  const sourceIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' });
+  const destinationIpList = useGetMappedNonEcsValue({
+    data: event?.data,
+    fieldName: 'destination.ip',
+  });
   const hostIPAddresses = useMemo(() => {
-    const hostIpList = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' }) ?? [];
-    const sourceIpList = getMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' }) ?? [];
-    const destinationIpList =
-      getMappedNonEcsValue({
-        data: event?.data,
-        fieldName: 'destination.ip',
-      }) ?? [];
-    return new Set([...hostIpList, ...sourceIpList, ...destinationIpList]);
-  }, [event?.data]);
+    const hostIps = hostIpList ?? [];
+    const sourceIps = sourceIpList ?? [];
+    const destinationIps = destinationIpList ?? [];
+    return new Set([...hostIps, ...sourceIps, ...destinationIps]);
+  }, [destinationIpList, sourceIpList, hostIpList]);
 
   const activeTab = tabType ?? TimelineTabs.query;
   const activeExpandedDetail = expandedDetail[activeTab];

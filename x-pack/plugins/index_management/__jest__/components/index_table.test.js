@@ -19,7 +19,7 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
       Could not load worker ReferenceError: Worker is not defined
           at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
  */
-import { mountWithIntl, stubWebWorker } from '@kbn/test/jest'; // eslint-disable-line no-unused-vars
+import { mountWithIntl, stubWebWorker } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
 
 import { BASE_PATH, API_BASE_PATH } from '../../common/constants';
 import { AppWithoutRouter } from '../../public/application/app';

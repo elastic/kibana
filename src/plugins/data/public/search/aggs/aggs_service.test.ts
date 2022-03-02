@@ -53,7 +53,7 @@ describe('AggsService - public', () => {
     test('registers default agg types', () => {
       service.setup(setupDeps);
       const start = service.start(startDeps);
-      expect(start.types.getAll().buckets.length).toBe(14);
+      expect(start.types.getAll().buckets.length).toBe(16);
       expect(start.types.getAll().metrics.length).toBe(23);
     });
 
@@ -69,7 +69,7 @@ describe('AggsService - public', () => {
       );
 
       const start = service.start(startDeps);
-      expect(start.types.getAll().buckets.length).toBe(15);
+      expect(start.types.getAll().buckets.length).toBe(17);
       expect(start.types.getAll().buckets.some(({ name }) => name === 'foo')).toBe(true);
       expect(start.types.getAll().metrics.length).toBe(24);
       expect(start.types.getAll().metrics.some(({ name }) => name === 'bar')).toBe(true);
@@ -79,11 +79,10 @@ describe('AggsService - public', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = service.start(startDeps);
-      expect(Object.keys(start).length).toBe(4);
+      expect(Object.keys(start).length).toBe(3);
       expect(start).toHaveProperty('calculateAutoTimeExpression');
       expect(start).toHaveProperty('createAggConfigs');
       expect(start).toHaveProperty('types');
-      expect(start).toHaveProperty('datatableUtilities');
     });
 
     test('types registry returns initialized agg types', () => {

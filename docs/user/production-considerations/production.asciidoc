@@ -16,6 +16,11 @@ separate from  your {es} data or master nodes. To distribute {kib}
 traffic across the nodes in your {es} cluster,
 you can configure {kib} to use a list of {es} hosts.
 
+[WARNING]
+====
+{kib} does not support rolling upgrades, and deploying mixed versions of {kib} can result in data loss or upgrade failures. Please shut down all instances of {kib} before performing an upgrade, and ensure all running {kib} instances have matching versions.
+====
+
 [float]
 [[load-balancing-kibana]]
 === Load balancing across multiple {kib} instances
@@ -68,12 +73,17 @@ bin/kibana -c config/instance2.yml
 === Accessing multiple load-balanced {kib} clusters
 
 To access multiple load-balanced {kib} clusters from the same browser,
-set `xpack.security.cookieName` in the configuration.
+explicitly set `xpack.security.cookieName` to the same value in the {kib} configuration
+of each {kib} instance.
+
+Each {kib} cluster must have a different value of `xpack.security.cookieName`.
+
 This avoids conflicts between cookies from the different {kib} instances.
 
-In each cluster, {kib} instances should have the same `cookieName`
-value. This will achieve seamless high availability and keep the session
+This will achieve seamless high availability and keep the session
 active in case of failure from the currently used instance.
+
+
 
 [float]
 [[high-availability]]

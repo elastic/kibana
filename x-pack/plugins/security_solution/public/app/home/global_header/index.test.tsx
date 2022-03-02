@@ -30,15 +30,19 @@ jest.mock('../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../common/lib/kibana');
   return {
     ...originalModule,
-    useKibana: jest
-      .fn()
-      .mockReturnValue({ services: { http: { basePath: { prepend: jest.fn() } } } }),
+    useKibana: jest.fn().mockReturnValue({
+      services: { theme: { theme$: {} }, http: { basePath: { prepend: jest.fn() } } },
+    }),
     useUiSetting$: jest.fn().mockReturnValue([]),
   };
 });
 
 jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
+}));
+
+jest.mock('../../../common/containers/sourcerer/use_signal_helpers', () => ({
+  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
 jest.mock('react-reverse-portal', () => ({

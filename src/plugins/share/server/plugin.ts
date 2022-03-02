@@ -18,6 +18,7 @@ import {
   registerUrlServiceSavedObjectType,
 } from './url_service';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
+import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 
 /** @public */
 export interface SharePluginSetup {
@@ -54,6 +55,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         }),
     });
     this.url.locators.create(new LegacyShortUrlLocatorDefinition());
+    this.url.locators.create(new ShortUrlRedirectLocatorDefinition());
 
     registerUrlServiceSavedObjectType(core.savedObjects, this.url);
     registerUrlServiceRoutes(core, core.http.createRouter(), this.url);

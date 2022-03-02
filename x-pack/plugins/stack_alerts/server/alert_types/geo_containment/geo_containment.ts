@@ -87,11 +87,11 @@ export function transformResults(
 export function getActiveEntriesAndGenerateAlerts(
   prevLocationMap: Map<string, LatestEntityLocation[]>,
   currLocationMap: Map<string, LatestEntityLocation[]>,
-  alertInstanceFactory: AlertServices<
+  alertFactory: AlertServices<
     GeoContainmentInstanceState,
     GeoContainmentInstanceContext,
     typeof ActionGroupId
-  >['alertInstanceFactory'],
+  >['alertFactory'],
   shapesIdsNamesMap: Record<string, unknown>,
   currIntervalEndTime: Date
 ) {
@@ -113,7 +113,7 @@ export function getActiveEntriesAndGenerateAlerts(
       };
       const alertInstanceId = `${entityName}-${context.containingBoundaryName}`;
       if (shapeLocationId !== OTHER_CATEGORY) {
-        alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
+        alertFactory.create(alertInstanceId).scheduleActions(ActionGroupId, context);
       }
     });
 
@@ -189,7 +189,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
       prevLocationMap,
       currLocationMap,
-      services.alertInstanceFactory,
+      services.alertFactory,
       shapesIdsNamesMap,
       currIntervalEndTime
     );

@@ -2,7 +2,6 @@
   "include": [
     "./x-pack/plugins/apm/**/*",
     "./x-pack/plugins/observability/**/*",
-    "./x-pack/plugins/rule_registry/**/*",
     "./typings/**/*"
   ],
   "exclude": [

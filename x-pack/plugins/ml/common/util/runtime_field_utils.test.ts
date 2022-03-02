@@ -30,7 +30,9 @@ describe('ML runtime field utils', () => {
       expect(isRuntimeField({ type: 'keyword' })).toBe(true);
     });
     it('allows objects with both type and script attributes', () => {
-      expect(isRuntimeField({ type: 'keyword', script: 'some script' })).toBe(true);
+      expect(
+        isRuntimeField({ type: 'keyword', script: 'some script', format: 'some format' })
+      ).toBe(true);
     });
   });
 
@@ -90,11 +92,46 @@ describe('ML runtime field utils', () => {
         isRuntimeMappings({
           fieldName1: { type: 'keyword' },
           fieldName2: { type: 'keyword', script: 'some script as script' },
+          fieldName3: {
+            type: 'keyword',
+            script: {
+              source: 'source script',
+            },
+          },
+          fieldName4: {
+            type: 'keyword',
+            script: {
+              source: 'source script',
+              params: {},
+            },
+          },
         })
       ).toBe(true);
       expect(
         isRuntimeMappings({
           fieldName: { type: 'long', script: { source: 'some script as source' } },
+        })
+      ).toBe(true);
+      expect(
+        isRuntimeMappings({
+          fieldName: {
+            type: 'long',
+            script: {
+              source: 'source script',
+              params: {},
+              lang: 'lang',
+            },
+          },
+        })
+      ).toBe(true);
+      expect(
+        isRuntimeMappings({
+          fieldName: {
+            type: 'long',
+            script: {
+              id: 'a script id',
+            },
+          },
         })
       ).toBe(true);
     });

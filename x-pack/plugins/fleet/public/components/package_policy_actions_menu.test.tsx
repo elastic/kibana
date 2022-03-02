@@ -48,7 +48,6 @@ function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
     monitoring_enabled: [],
     name: 'Test Policy',
     description: '',
-    is_default: false,
     is_preconfigured: false,
     status: 'active',
     is_managed: false,
@@ -117,5 +116,23 @@ test('Should be able to delete integration from a non-managed policy', async () 
   const { utils } = renderMenu({ agentPolicy, packagePolicy });
   await act(async () => {
     expect(utils.queryByText('Delete integration')).not.toBeNull();
+  });
+});
+
+test('Should show add button if the policy is not managed and showAddAgent=true', async () => {
+  const agentPolicy = createMockAgentPolicy();
+  const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+  const { utils } = renderMenu({ agentPolicy, packagePolicy, showAddAgent: true });
+  await act(async () => {
+    expect(utils.queryByText('Add agent')).not.toBeNull();
+  });
+});
+
+test('Should not show add button if the policy is managed and showAddAgent=true', async () => {
+  const agentPolicy = createMockAgentPolicy({ is_managed: true });
+  const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+  const { utils } = renderMenu({ agentPolicy, packagePolicy, showAddAgent: true });
+  await act(async () => {
+    expect(utils.queryByText('Add agent')).toBeNull();
   });
 });

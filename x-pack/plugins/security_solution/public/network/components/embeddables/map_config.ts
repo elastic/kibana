@@ -14,7 +14,7 @@ import {
   LayerMappingDetails,
 } from './types';
 import * as i18n from './translations';
-import { SCALING_TYPES, SOURCE_TYPES } from '../../../../../maps/common';
+import { LAYER_TYPE, SCALING_TYPES, SOURCE_TYPES } from '../../../../../maps/common';
 const euiVisColorPalette = euiPaletteColorBlind();
 
 // Update field mappings to modify what fields will be returned to map tooltip
@@ -114,7 +114,7 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
       alpha: 1,
       visible: true,
       style: null,
-      type: 'VECTOR_TILE',
+      type: LAYER_TYPE.EMS_VECTOR_TILE,
     },
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
       return [
@@ -184,7 +184,7 @@ export const getSourceLayer = (
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
   joins: [],
 });
@@ -248,7 +248,7 @@ export const getDestinationLayer = (
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
 });
 
@@ -332,6 +332,6 @@ export const getLineLayer = (
   maxZoom: 24,
   alpha: 0.5,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
 });

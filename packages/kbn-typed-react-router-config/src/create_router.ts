@@ -15,27 +15,29 @@ import {
 } from 'react-router-config';
 import qs from 'query-string';
 import { findLastIndex, merge, compact } from 'lodash';
-import { mergeRt } from '@kbn/io-ts-utils/merge_rt';
-import { deepExactRt } from '@kbn/io-ts-utils/deep_exact_rt';
-import { FlattenRoutesOf, Route, Router } from './types';
+import { mergeRt, deepExactRt } from '@kbn/io-ts-utils';
+import { FlattenRoutesOf, Route, RouteWithPath, Router, RouteMap } from './types';
 
 function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');
 }
 
-export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
+export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<TRoutes> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
   const reactRouterConfigsByRoute = new Map<Route, ReactRouterConfig>();
 
-  const reactRouterConfigs = routes.map((route) => toReactRouterConfigRoute(route));
+  const reactRouterConfigs = Object.entries(routes).map(([path, route]) =>
+    toReactRouterConfigRoute({ ...route, path })
+  );
 
-  function toReactRouterConfigRoute(route: Route): ReactRouterConfig {
+  function toReactRouterConfigRoute(route: RouteWithPath): ReactRouterConfig {
     const reactRouterConfig: ReactRouterConfig = {
       component: () => route.element,
       routes:
-        (route.children as Route[] | undefined)?.map((child) => toReactRouterConfigRoute(child)) ??
-        [],
-      exact: !route.children?.length,
+        Object.entries((route.children as RouteMap | undefined) ?? {})?.map(([path, child]) =>
+          toReactRouterConfigRoute({ ...child, path })
+        ) ?? [],
+      exact: !route.children || Object.values(route.children).length === 0,
       path: toReactRouterPath(route.path),
     };
 
@@ -97,7 +99,15 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       if (optional) {
         return [];
       }
-      throw new Error(`No matching route found for ${paths}`);
+
+      let errorMessage: string;
+
+      if (paths.length === 1) {
+        errorMessage = `${paths[0]} does not match current path ${location.pathname}`;
+      } else {
+        errorMessage = `None of ${paths.join(', ')} match current path ${location.pathname}`;
+      }
+      throw new Error(errorMessage);
     }
 
     return matches.slice(0, matchIndex + 1).map((matchedRoute) => {

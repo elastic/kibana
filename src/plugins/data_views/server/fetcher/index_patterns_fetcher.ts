@@ -37,10 +37,12 @@ interface FieldSubType {
 export class IndexPatternsFetcher {
   private elasticsearchClient: ElasticsearchClient;
   private allowNoIndices: boolean;
+
   constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices: boolean = false) {
     this.elasticsearchClient = elasticsearchClient;
     this.allowNoIndices = allowNoIndices;
   }
+
   /**
    *  Get a list of field objects for an index pattern that may contain wildcards
    *
@@ -80,11 +82,9 @@ export class IndexPatternsFetcher {
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
-        (
-          await this.elasticsearchClient.rollup.getRollupIndexCaps({
-            index: rollupIndex,
-          })
-        ).body
+        await this.elasticsearchClient.rollup.getRollupIndexCaps({
+          index: rollupIndex,
+        })
       )[rollupIndex].aggs;
       const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
       // Keep meta fields
@@ -150,7 +150,7 @@ export class IndexPatternsFetcher {
             ignore_unavailable: true,
             allow_no_indices: false,
           });
-          return searchResponse.body.indices.length > 0;
+          return searchResponse.indices.length > 0;
         })
         .map((p) => p.catch(() => false))
     );

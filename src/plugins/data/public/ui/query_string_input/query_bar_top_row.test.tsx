@@ -11,9 +11,9 @@ import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 import React from 'react';
 import { mount } from 'enzyme';
 import { render } from '@testing-library/react';
+import { EMPTY } from 'rxjs';
 
 import QueryBarTopRow from './query_bar_top_row';
-
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
@@ -26,6 +26,7 @@ const mockTimeHistory = {
   get: () => {
     return [];
   },
+  get$: () => EMPTY,
 };
 
 startMock.uiSettings.get.mockImplementation((key: string) => {

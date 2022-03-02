@@ -5,13 +5,11 @@
  * 2.0.
  */
 
+import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
-import { MetricExpressionParams, Aggregators } from '../types';
-import { createPercentileAggregation } from './create_percentile_aggregation';
 import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
-
-const COMPOSITE_RESULTS_PER_PAGE = 100;
+import { createPercentileAggregation } from './create_percentile_aggregation';
 
 const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, any> | null = (
   filterQuery
@@ -23,6 +21,7 @@ const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, 
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
   timeframe: { start: number; end: number },
+  compositeSize: number,
   groupBy?: string | string[],
   filterQuery?: string
 ) => {
@@ -73,7 +72,7 @@ export const getElasticsearchMetricQuery = (
     ? {
         groupings: {
           composite: {
-            size: COMPOSITE_RESULTS_PER_PAGE,
+            size: compositeSize,
             sources: Array.isArray(groupBy)
               ? groupBy.map((field, index) => ({
                   [`groupBy${index}`]: {

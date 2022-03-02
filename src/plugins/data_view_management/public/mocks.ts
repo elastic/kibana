@@ -13,12 +13,14 @@ import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '../../data_view_field_editor/public/mocks';
 import { indexPatternEditorPluginMock } from '../../data_view_editor/public/mocks';
+import { dataViewPluginMocks } from '../../data_views/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
   IndexPatternManagementPlugin,
 } from './plugin';
 import { IndexPatternManagmentContext } from './types';
+import { fieldFormatsServiceMock } from '../../field_formats/public/mocks';
 
 const createSetupContract = (): IndexPatternManagementSetup => ({});
 
@@ -53,26 +55,28 @@ const docLinks = {
 const createIndexPatternManagmentContext = (): {
   [key in keyof IndexPatternManagmentContext]: any;
 } => {
-  const { chrome, application, uiSettings, notifications, overlays } = coreMock.createStart();
+  const { chrome, uiSettings, notifications, overlays } = coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();
   const dataViewFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
+  const dataViews = dataViewPluginMocks.createStartContract();
 
   return {
     chrome,
-    application,
     uiSettings,
     notifications,
     overlays,
     http,
     docLinks,
     data,
+    dataViews,
     dataViewFieldEditor,
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
     fieldFormatEditors: dataViewFieldEditor.fieldFormatEditors,
     IndexPatternEditor:
       indexPatternEditorPluginMock.createStartContract().IndexPatternEditorComponent,
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
   };
 };
 

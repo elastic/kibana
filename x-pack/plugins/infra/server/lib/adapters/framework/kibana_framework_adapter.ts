@@ -199,7 +199,7 @@ export class KibanaFramework {
         } as estypes.MlGetBucketsRequest);
         break;
     }
-    return apiResult ? (await apiResult).body : undefined;
+    return apiResult ? await apiResult : undefined;
   }
 
   public async getIndexPatternsServiceWithRequestContext(

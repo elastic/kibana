@@ -38,30 +38,32 @@ const getPointFillColor = (points: VisSeries['points'], color: string | undefine
   );
 };
 
-const getAreaSeriesStyle = ({ color, lines, points }: AreaSeriesComponentProps['visData']) =>
-  ({
-    line: {
-      opacity: isShowLines(lines, points) ? 1 : 0,
-      stroke: color,
-      strokeWidth: lines?.lineWidth !== undefined ? Number(lines.lineWidth) : 3,
-      visible: isShowLines(lines, points),
-    },
-    area: {
-      fill: color,
-      opacity: lines?.fill ?? 0,
-      visible: lines?.show ?? points?.show ?? true,
-    },
-    point: {
-      fill: getPointFillColor(points, color),
-      opacity: 1,
-      radius: points?.radius ?? 3,
-      stroke: color,
-      strokeWidth: points?.lineWidth ?? 2,
-      visible: points?.show ?? false,
-      shape: points?.symbol === 'cross' ? PointShape.X : points?.symbol,
-    },
-    curve: lines?.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
-  } as RecursivePartial<AreaSeriesStyle>);
+const getAreaSeriesStyle = ({
+  color,
+  lines,
+  points,
+}: AreaSeriesComponentProps['visData']): RecursivePartial<AreaSeriesStyle> => ({
+  line: {
+    opacity: isShowLines(lines, points) ? 1 : 0,
+    stroke: color,
+    strokeWidth: lines?.lineWidth !== undefined ? Number(lines.lineWidth) : 3,
+    visible: isShowLines(lines, points),
+  },
+  area: {
+    fill: color,
+    opacity: lines?.fill ?? 0,
+    visible: lines?.show ?? points?.show ?? true,
+  },
+  point: {
+    fill: getPointFillColor(points, color),
+    opacity: 1,
+    radius: points?.radius ?? 3,
+    stroke: color,
+    strokeWidth: points?.lineWidth ?? 2,
+    visible: points?.show ?? false,
+    shape: points?.symbol === 'cross' ? PointShape.X : points?.symbol,
+  },
+});
 
 export const AreaSeriesComponent = ({ index, groupId, visData }: AreaSeriesComponentProps) => (
   <AreaSeries
@@ -75,6 +77,7 @@ export const AreaSeriesComponent = ({ index, groupId, visData }: AreaSeriesCompo
     data={visData._hide ? [] : visData.data}
     sortIndex={index}
     color={visData.color}
+    curve={visData.lines?.steps ? CurveType.CURVE_STEP : CurveType.LINEAR}
     stackAccessors={visData.stack ? [0] : undefined}
     areaSeriesStyle={getAreaSeriesStyle(visData)}
   />

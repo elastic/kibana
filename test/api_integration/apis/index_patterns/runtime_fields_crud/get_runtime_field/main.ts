@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -24,48 +25,50 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('can fetch a runtime field', async () => {
-      const title = `basic_index*`;
-      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-        override: true,
-        index_pattern: {
-          title,
-          runtimeFieldMap: {
-            runtimeFoo: {
-              type: 'keyword',
-              script: {
-                source: "emit(doc['field_name'].value)",
+    configArray.forEach((config) => {
+      describe(config.name, () => {
+        it('can fetch a runtime field', async () => {
+          const title = `basic_index*`;
+          const response1 = await supertest.post(config.path).send({
+            override: true,
+            [config.serviceKey]: {
+              title,
+              runtimeFieldMap: {
+                runtimeFoo: {
+                  type: 'keyword',
+                  script: {
+                    source: "emit(doc['field_name'].value)",
+                  },
+                },
+                runtimeBar: {
+                  type: 'keyword',
+                  script: {
+                    source: "emit(doc['field_name'].value)",
+                  },
+                },
               },
             },
-            runtimeBar: {
-              type: 'keyword',
-              script: {
-                source: "emit(doc['field_name'].value)",
-              },
-            },
-          },
-        },
+          });
+
+          expect(response1.status).to.be(200);
+
+          const response2 = await supertest.get(
+            `${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`
+          );
+
+          const field =
+            config.serviceKey === 'index_pattern' ? response2.body.field : response2.body.fields[0];
+
+          expect(response2.status).to.be(200);
+          expect(response2.body[config.serviceKey]).to.not.be.empty();
+          expect(typeof field).to.be('object');
+          expect(field.name).to.be('runtimeFoo');
+          expect(field.type).to.be('string');
+          expect(field.scripted).to.be(false);
+          expect(field.runtimeField.script.source).to.be("emit(doc['field_name'].value)");
+          await supertest.delete(`${config.path}/${response1.body[config.serviceKey].id}`);
+        });
       });
-
-      expect(response1.status).to.be(200);
-
-      const response2 = await supertest.get(
-        '/api/index_patterns/index_pattern/' +
-          response1.body.index_pattern.id +
-          '/runtime_field/runtimeFoo'
-      );
-
-      expect(response2.status).to.be(200);
-      expect(typeof response2.body.field).to.be('object');
-      expect(response2.body.field.name).to.be('runtimeFoo');
-      expect(response2.body.field.type).to.be('string');
-      expect(response2.body.field.scripted).to.be(false);
-      expect(response2.body.field.runtimeField.script.source).to.be(
-        "emit(doc['field_name'].value)"
-      );
-      await supertest.delete(
-        '/api/index_patterns/index_pattern/' + response1.body.index_pattern.id
-      );
     });
   });
 }

@@ -36,6 +36,9 @@
       "apiKey": {
         "type": "binary"
       },
+      "executionId": {
+        "type": "keyword"
+      },
       "relatedSavedObjects": {
         "enabled": false,
         "type": "object"

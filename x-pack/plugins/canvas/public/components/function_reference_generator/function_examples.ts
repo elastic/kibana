@@ -22,7 +22,8 @@ export const getFunctionExamples = (): FunctionExampleDict => ({
     syntax: `all {neq "foo"} {neq "bar"} {neq "fizz"}
 all condition={gt 10} condition={lt 20}`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | math "mean(percent_uptime)"
 | formatnumber "0.0%"
@@ -42,7 +43,8 @@ all condition={gt 10} condition={lt 20}`,
     syntax: `alterColumn "cost" type="string"
 alterColumn column="@timestamp" name="foo"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | alterColumn "time" name="time_in_ms" type="number"
 | table
@@ -54,7 +56,8 @@ alterColumn column="@timestamp" name="foo"`,
     syntax: `any {eq "foo"} {eq "bar"} {eq "fizz"}
 any condition={lte 10} condition={gt 30}`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | filterrows {
     getCell "project" | any {eq "elasticsearch"} {eq "kibana"} {eq "x-pack"}
@@ -70,7 +73,8 @@ any condition={lte 10} condition={gt 30}`,
 as "foo"
 as name="bar"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | ply by="project" fn={math "count(username)" | as "num_users"} fn={math "mean(price)" | as "price"}
 | pointseries x="project" y="num_users" size="price" color="project"
@@ -94,7 +98,8 @@ asset id="asset-498f7429-4d56-42a2-a7e4-8bf08d98d114"`,
     syntax: `axisConfig show=false
 axisConfig position="right" min=0 max=10 tickSize=1`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | pointseries x="size(cost)" y="project" color="project"
 | plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true}
@@ -129,11 +134,26 @@ case if={lte 50} then="green"`,
       help: 'This sets the color of the progress indicator and the color of the label to `"green"` if the value is less than or equal to `0.5`, `"orange"` if the value is greater than `0.5` and less than or equal to `0.75`, and `"red"` if `none` of the case conditions are met.',
     },
   },
+  clog: {
+    syntax: `clog`,
+    usage: {
+      expression: `kibana
+| demodata
+| clog
+| filterrows fn={getCell "age" | gt 70}
+| clog
+| pointseries x="time" y="mean(price)"
+| plot defaultStyle={seriesStyle lines=1 fill=1}
+| render`,
+      help: 'This prints the `datatable` objects in the browser console before and after the `filterrows` function.',
+    },
+  },
   columns: {
     syntax: `columns include="@timestamp, projects, cost"
 columns exclude="username, country, age"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | columns include="price, cost, state, project"
 | table
@@ -145,7 +165,8 @@ columns exclude="username, country, age"`,
     syntax: `compare "neq" to="elasticsearch"
 compare op="lte" to=100`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | mapColumn project
   fn={getCell project |
@@ -192,6 +213,23 @@ containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e9
       help: 'Using the `context` function allows us to pass the output, or _context_, of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.',
     },
   },
+  createTable: {
+    syntax: `createTable id="a" id="b"    
+createTable id="a" name="A" id="b" name="B" rowCount=5`,
+    usage: {
+      expression: `var_set
+name="logs" value={essql "select count(*) as a from kibana_sample_data_logs"}
+name="commerce" value={essql "select count(*) as b from kibana_sample_data_ecommerce"}
+| createTable ids="totalA" ids="totalB"
+| staticColumn name="totalA" value={var "logs" | getCell "a"}
+| alterColumn column="totalA" type="number"
+| staticColumn name="totalB" value={var "commerce" | getCell "b"}
+| alterColumn column="totalB" type="number"
+| mathColumn id="percent" name="percent" expression="totalA / totalB"
+| render`,
+      help: 'This creates a table based on the results of two `essql` queries, joined into one table.',
+    },
+  },
   csv: {
     syntax: `csv "fruit, stock
   kiwi, 10
@@ -229,7 +267,8 @@ date "01/31/2019" format="MM/DD/YYYY"`,
 demodata "ci"
 demodata type="shirts"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | table
 | render`,
@@ -252,7 +291,8 @@ eq null
 eq 10
 eq "foo"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | mapColumn project
   fn={getCell project |
@@ -272,7 +312,8 @@ eq "foo"`,
 escount "currency:\"EUR\"" index="kibana_sample_data_ecommerce"
 escount query="response:404" index="kibana_sample_data_logs"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | escount "Cancelled:true" index="kibana_sample_data_flights"
 | math "value"
 | progress shape="semicircle"
@@ -290,7 +331,8 @@ esdocs query="response:404" index="kibana_sample_data_logs"
 esdocs index="kibana_sample_data_flights" count=100
 esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | esdocs index="kibana_sample_data_ecommerce"
   fields="customer_gender, taxful_total_price, order_date"
   sort="order_date, asc"
@@ -309,7 +351,8 @@ esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"`,
     syntax: `essql query="SELECT * FROM \"logstash*\""
 essql "SELECT * FROM \"apm*\"" count=10000`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | essql query="SELECT Carrier, FlightDelayMin, AvgTicketPrice FROM   \"kibana_sample_data_flights\""
 | table
 | render`,
@@ -321,7 +364,8 @@ essql "SELECT * FROM \"apm*\"" count=10000`,
 exactly "age" value=50 filterGroup="group2"
 exactly column="project" value="beats"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | exactly column=project value=elasticsearch
 | demodata
 | pointseries x=project y="mean(age)"
@@ -334,7 +378,8 @@ exactly column="project" value="beats"`,
     syntax: `filterrows {getCell "project" | eq "kibana"}
 filterrows fn={getCell "age" | gt 50}`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | filterrows {getCell "country" | any {eq "IN"} {eq "US"} {eq "CN"}}
 | mapColumn "@timestamp"
@@ -379,7 +424,8 @@ font underline=true
 font italic=false
 font lHeight=32`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | pointseries x="project" y="size(cost)" color="project"
 | plot defaultStyle={seriesStyle bars=0.75} legend=false
@@ -399,7 +445,8 @@ font lHeight=32`,
     syntax: `formatdate format="YYYY-MM-DD"
 formatdate "MM/DD/YYYY"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | mapColumn "time" fn={getCell time | formatdate "MMM 'YY"}
 | pointseries x="time" y="sum(price)" color="state"
@@ -412,7 +459,8 @@ formatdate "MM/DD/YYYY"`,
     syntax: `formatnumber format="$0,0.00"
 formatnumber "0.0a"`,
     usage: {
-      expression: `filters
+      expression: `kibana
+| selectFilter
 | demodata
 | math "mean(percent_uptime)"
 | progress shape="gauge"

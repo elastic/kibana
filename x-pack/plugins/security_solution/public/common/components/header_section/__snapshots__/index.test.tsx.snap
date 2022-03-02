@@ -6,6 +6,7 @@ exports[`HeaderSection it renders 1`] = `
 >
   <EuiFlexGroup
     alignItems="center"
+    direction="row"
     gutterSize="s"
   >
     <EuiFlexItem

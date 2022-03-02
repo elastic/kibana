@@ -26,6 +26,7 @@ import {
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
+import { useKibana } from '../../../common/lib/kibana';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 
 /**
@@ -75,6 +76,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+
+    const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
     const showEmptyState = useShowPagesWithEmptyView();
     const emptyStateProps = showEmptyState ? NO_DATA_PAGE_TEMPLATE_PROPS : {};
 
@@ -89,7 +92,9 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         bottomBarProps={SecuritySolutionBottomBarProps}
-        bottomBar={<SecuritySolutionBottomBar onAppLeave={onAppLeave} />}
+        bottomBar={
+          userHasSecuritySolutionVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
+        }
         paddingSize="none"
         solutionNav={solutionNav}
         restrictWidth={false}

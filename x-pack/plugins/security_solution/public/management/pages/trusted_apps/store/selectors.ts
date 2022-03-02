@@ -85,12 +85,6 @@ export const getCurrentLocationIncludedPolicies = (
   return state.location.included_policies;
 };
 
-export const getCurrentLocationExcludedPolicies = (
-  state: Immutable<TrustedAppsListPageState>
-): string => {
-  return state.location.excluded_policies;
-};
-
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
   return getLastLoadedResourceState(state.listView.listResourceState)?.data.totalItemsCount || 0;
 };

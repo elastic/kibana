@@ -9,8 +9,7 @@
 const {
   ToolingLog,
   ToolingLogCollectingWriter,
-  ES_P12_PATH,
-  ES_P12_PASSWORD,
+  ES_NOPASSWORD_P12_PATH,
   createAnyInstanceSerializer,
   createStripAnsiSerializer,
 } = require('@kbn/dev-utils');
@@ -292,9 +291,8 @@ describe('#start(installPath)', () => {
 
     const config = extractConfigFiles.mock.calls[0][0];
     expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.keystore.path=${ES_NOPASSWORD_P12_PATH}`);
     expect(config).toContain(`xpack.security.http.ssl.keystore.type=PKCS12`);
-    expect(config).toContain(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
   });
 
   it(`doesn't setup SSL when disabled`, async () => {
@@ -311,6 +309,8 @@ describe('#start(installPath)', () => {
           Array [
             "action.destructive_requires_name=true",
             "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
           ],
           undefined,
           Object {
@@ -371,9 +371,8 @@ describe('#run()', () => {
 
     const config = extractConfigFiles.mock.calls[0][0];
     expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.keystore.path=${ES_NOPASSWORD_P12_PATH}`);
     expect(config).toContain(`xpack.security.http.ssl.keystore.type=PKCS12`);
-    expect(config).toContain(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
   });
 
   it(`doesn't setup SSL when disabled`, async () => {
@@ -390,6 +389,8 @@ describe('#run()', () => {
           Array [
             "action.destructive_requires_name=true",
             "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
           ],
           undefined,
           Object {

@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`responseFormatter returns correct format 1`] = `
+Object {
+  "body": Object {
+    "data_view": Object {
+      "title": "dataView",
+    },
+    "fields": Array [
+      Object {
+        "name": "field",
+      },
+    ],
+  },
+}
+`;
+
+exports[`responseFormatter returns correct format for legacy 1`] = `
+Object {
+  "body": Object {
+    "field": Object {
+      "name": "field",
+    },
+    "index_pattern": Object {
+      "title": "dataView",
+    },
+  },
+}
+`;

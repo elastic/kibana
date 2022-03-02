@@ -6,22 +6,22 @@
  */
 import { take } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
-import { ApmApiSupertest } from '../../common/apm_api_supertest';
+import { ApmServices } from '../../common/config';
 
 export async function getServiceNodeIds({
-  apmApiSupertest,
+  apmApiClient,
   start,
   end,
   serviceName = 'opbeans-java',
   count = 1,
 }: {
-  apmApiSupertest: ApmApiSupertest;
+  apmApiClient: Awaited<ReturnType<ApmServices['apmApiClient']>>;
   start: string;
   end: string;
   serviceName?: string;
   count?: number;
 }) {
-  const { body } = await apmApiSupertest({
+  const { body } = await apmApiClient.readUser({
     endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
     params: {
       path: { serviceName },

@@ -51,7 +51,7 @@ export const waitForIndexStatusYellow =
         { ignore: [408] }
       )
       .then((res) => {
-        if (res.body.timed_out === true) {
+        if (res.timed_out === true) {
           return Either.left({
             type: 'retryable_es_client_error' as const,
             message: `Timeout waiting for the status of the [${index}] index to become 'yellow'`,

@@ -18,7 +18,6 @@ import { findRules } from '../../rules/find_rules';
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
-import { getCurrentRuleStatuses } from './utils/get_current_rule_statuses';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_get_bulk_rule_actions_saved_object';
@@ -42,6 +41,7 @@ export const findRulesRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+
       const validationErrors = findRuleValidateTypeDependents(request.query);
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
@@ -49,14 +49,10 @@ export const findRulesRoute = (
 
       try {
         const { query } = request;
-        const rulesClient = context.alerting?.getRulesClient();
+        const rulesClient = context.alerting.getRulesClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = context.core.savedObjects.client;
 
-        if (!rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-
-        const execLogClient = context.securitySolution.getExecutionLogClient();
         const rules = await findRules({
           isRuleRegistryEnabled,
           rulesClient,
@@ -67,14 +63,15 @@ export const findRulesRoute = (
           filter: query.filter,
           fields: query.fields,
         });
+
         const ruleIds = rules.data.map((rule) => rule.id);
 
-        const spaceId = context.securitySolution.getSpaceId();
-        const [currentStatusesByRuleId, ruleActions] = await Promise.all([
-          getCurrentRuleStatuses({ ruleIds, execLogClient, spaceId, logger }),
+        const [ruleExecutionSummaries, ruleActions] = await Promise.all([
+          ruleExecutionLog.getExecutionSummariesBulk(ruleIds),
           legacyGetBulkRuleActionsSavedObject({ alertIds: ruleIds, savedObjectsClient, logger }),
         ]);
-        const transformed = transformFindAlerts(rules, currentStatusesByRuleId, ruleActions);
+
+        const transformed = transformFindAlerts(rules, ruleExecutionSummaries, ruleActions);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {

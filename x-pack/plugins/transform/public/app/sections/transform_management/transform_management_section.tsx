@@ -20,13 +20,17 @@ import {
   EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
+  EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
-
-import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+import {
+  APP_GET_TRANSFORM_CLUSTER_PRIVILEGES,
+  TRANSFORM_STATE,
+} from '../../../../common/constants';
 
 import { useRefreshTransformList, TransformListRow } from '../../common';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
-import { useGetTransforms } from '../../hooks';
+import { useDeleteTransforms, useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
@@ -50,11 +54,17 @@ export const TransformManagement: FC = () => {
   const [transforms, setTransforms] = useState<TransformListRow[]>([]);
   const [transformNodes, setTransformNodes] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
+  const [transformIdsWithoutConfig, setTransformIdsWithoutConfig] = useState<
+    string[] | undefined
+  >();
+
+  const deleteTransforms = useDeleteTransforms();
 
   const getTransforms = useGetTransforms(
     setTransforms,
     setTransformNodes,
     setErrorMessage,
+    setTransformIdsWithoutConfig,
     setIsInitialized,
     blockRefresh
   );
@@ -155,6 +165,51 @@ export const TransformManagement: FC = () => {
             )}
             {typeof errorMessage === 'undefined' && (
               <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
+                {transformIdsWithoutConfig ? (
+                  <>
+                    <EuiCallOut color="warning">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.transform.danglingTasksError"
+                          defaultMessage="{count} {count, plural, one {transform is} other {transforms are}} missing configuration details: [{transformIds}] {count, plural, one {It} other {They}} cannot be recovered and should be deleted."
+                          values={{
+                            count: transformIdsWithoutConfig.length,
+                            transformIds: transformIdsWithoutConfig.join(', '),
+                          }}
+                        />
+                      </p>
+                      <EuiButton
+                        color="warning"
+                        size="s"
+                        onClick={async () => {
+                          await deleteTransforms(
+                            // If transform task doesn't have any corresponding config
+                            // we won't know what the destination index or data view would be
+                            // and should be force deleted
+                            {
+                              transformsInfo: transformIdsWithoutConfig.map((id) => ({
+                                id,
+                                state: TRANSFORM_STATE.FAILED,
+                              })),
+                              deleteDestIndex: false,
+                              deleteDestIndexPattern: false,
+                              forceDelete: true,
+                            }
+                          );
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.transform.forceDeleteTransformMessage"
+                          defaultMessage="Delete {count} {count, plural, one {transform} other {transforms}}"
+                          values={{
+                            count: transformIdsWithoutConfig.length,
+                          }}
+                        />
+                      </EuiButton>
+                    </EuiCallOut>
+                    <EuiSpacer />
+                  </>
+                ) : null}
                 <TransformList
                   onCreateTransform={onOpenModal}
                   transformNodes={transformNodes}

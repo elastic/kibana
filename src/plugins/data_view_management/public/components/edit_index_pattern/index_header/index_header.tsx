@@ -9,13 +9,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiPageHeader, EuiToolTip } from '@elastic/eui';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 
 interface IndexHeaderProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   defaultIndex?: string;
   setDefault?: () => void;
   deleteIndexPatternClick?: () => void;
+  canSave: boolean;
 }
 
 const setDefaultAriaLabel = i18n.translate('indexPatternManagement.editDataView.setDefaultAria', {
@@ -40,12 +41,13 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
   setDefault,
   deleteIndexPatternClick,
   children,
+  canSave,
 }) => {
   return (
     <EuiPageHeader
       pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.title}</span>}
       rightSideItems={[
-        defaultIndex !== indexPattern.id && setDefault && (
+        defaultIndex !== indexPattern.id && setDefault && canSave && (
           <EuiToolTip content={setDefaultTooltip}>
             <EuiButtonIcon
               color="text"
@@ -56,7 +58,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
             />
           </EuiToolTip>
         ),
-        deleteIndexPatternClick && (
+        canSave && (
           <EuiToolTip content={removeTooltip}>
             <EuiButtonIcon
               color="danger"

@@ -9,8 +9,8 @@ import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
-import { JOB_STATUSES } from '../../common/constants';
-import {
+import { JOB_STATUSES, JobTypes } from '../../common/constants';
+import type {
   BaseParamsV2,
   JobId,
   ReportApiJSON,
@@ -56,6 +56,7 @@ export class Job {
   public content_type?: TaskRunResult['content_type'];
   public csv_contains_formulas?: TaskRunResult['csv_contains_formulas'];
   public max_size_reached?: TaskRunResult['max_size_reached'];
+  public metrics?: ReportSource['metrics'];
   public warnings?: TaskRunResult['warnings'];
 
   public locatorParams?: BaseParamsV2['locatorParams'];
@@ -90,6 +91,7 @@ export class Job {
     this.max_size_reached = report.output?.max_size_reached;
     this.warnings = report.output?.warnings;
     this.locatorParams = (report.payload as BaseParamsV2).locatorParams;
+    this.metrics = report.metrics;
   }
 
   getStatusMessage() {
@@ -155,6 +157,27 @@ export class Job {
 
   public get isDownloadReady(): boolean {
     return this.status === JOB_STATUSES.COMPLETED || this.status === JOB_STATUSES.WARNINGS;
+  }
+
+  public get prettyJobTypeName(): undefined | string {
+    switch (this.jobtype as JobTypes) {
+      case 'printable_pdf':
+      case 'printable_pdf_v2':
+        return i18n.translate('xpack.reporting.jobType.pdfOutputName', {
+          defaultMessage: 'PDF',
+        });
+      case 'PNG':
+      case 'PNGV2':
+        return i18n.translate('xpack.reporting.jobType.pngOutputName', {
+          defaultMessage: 'PNG',
+        });
+      case 'csv_searchsource':
+        return i18n.translate('xpack.reporting.jobType.csvOutputName', {
+          defaultMessage: 'CSV',
+        });
+      default:
+        return undefined;
+    }
   }
 
   public get prettyTimeout(): string {

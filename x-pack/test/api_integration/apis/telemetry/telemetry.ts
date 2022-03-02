@@ -185,40 +185,37 @@ export default function ({ getService }: FtrProviderContext) {
       const archive = 'x-pack/test/functional/es_archives/monitoring/basic_6.3.x';
       const fromTimestamp = '2018-07-23T22:54:59.087Z';
       const toTimestamp = '2018-07-23T22:55:05.933Z';
-      let cacheLastUpdated: string[] = [];
 
       before(async () => {
         await esArchiver.load(archive);
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
-
         // hit the endpoint to cache results
-        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
+        await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
           .send({ unencrypted: true, refreshCache: true })
           .expect(200);
-
-        cacheLastUpdated = getCacheDetails(body).map(({ updatedAt }) => updatedAt);
       });
       after(() => esArchiver.unload(archive));
+    });
 
-      it('returns cached results by default', async () => {
-        const now = Date.now();
-        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
-          .post('/api/telemetry/v2/clusters/_stats')
-          .set('kbn-xsrf', 'xxx')
-          .send({ unencrypted: true })
-          .expect(200);
+    it('returns non-cached results when unencrypted', async () => {
+      const now = Date.now();
+      const { body }: { body: UnencryptedTelemetryPayload } = await supertest
+        .post('/api/telemetry/v2/clusters/_stats')
+        .set('kbn-xsrf', 'xxx')
+        .send({ unencrypted: true })
+        .expect(200);
 
-        expect(body).length(2);
+      expect(body).length(1);
 
-        const cacheDetails = getCacheDetails(body);
-        // Check that the fetched payload is actually cached by comparing cache and updatedAt timestamps
-        expect(cacheDetails.map(({ updatedAt }) => updatedAt)).to.eql(cacheLastUpdated);
-        // Check that the fetchedAt timestamp is updated when the data is fethed
-        cacheDetails.forEach(({ fetchedAt }) => {
-          expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
-        });
+      const cacheDetails = getCacheDetails(body);
+      cacheDetails.forEach(({ fetchedAt, updatedAt }) => {
+        // Check that the cache is fresh by comparing updatedAt timestamp with
+        // the timestamp the data was fetched.
+        expect(new Date(updatedAt).getTime()).to.be.greaterThan(now);
+        // Check that the fetchedAt timestamp is updated when the data is fetched
+        expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
       });
     });
 
@@ -235,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
         // Check that the cache is fresh by comparing updatedAt timestamp with
         // the timestamp the data was fetched.
         expect(new Date(updatedAt).getTime()).to.be.greaterThan(now);
-        // Check that the fetchedAt timestamp is updated when the data is fethed
+        // Check that the fetchedAt timestamp is updated when the data is fetched
         expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
       });
     });

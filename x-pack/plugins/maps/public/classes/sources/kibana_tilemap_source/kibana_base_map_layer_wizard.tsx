@@ -17,6 +17,7 @@ import { getKibanaTileMap } from '../../../util';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const kibanaBasemapLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const tilemap = getKibanaTileMap();

@@ -6,7 +6,7 @@
  */
 
 import Chance from 'chance';
-import { getRandomString } from '@kbn/test/jest';
+import { getRandomString } from '@kbn/test-jest-helpers';
 import { FollowerIndex } from '../../../../common/types';
 
 const chance = new Chance();

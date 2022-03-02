@@ -25,6 +25,14 @@
             }
           }
         },
+        "unique_value": {
+          "properties": {
+            "test": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
         "user": {
           "type": "nested",
           "properties": {

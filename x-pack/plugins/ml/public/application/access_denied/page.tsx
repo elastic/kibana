@@ -10,7 +10,6 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiSpacer } from '@elastic/eui';
-import { NavigationMenu } from '../components/navigation_menu';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 
@@ -21,7 +20,6 @@ export const Page = () => {
   const helpLink = docLinks.links.ml.guide;
   return (
     <>
-      <NavigationMenu tabId="access-denied" />
       <EuiSpacer size="xxl" />
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>

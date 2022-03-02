@@ -69,6 +69,7 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 import { PrebootServicePreboot } from './preboot';
+import { DocLinksServiceStart, DocLinksServiceSetup } from './doc_links';
 
 export type { PrebootServicePreboot } from './preboot';
 
@@ -138,6 +139,14 @@ export type {
   ElasticsearchConfigPreboot,
   ElasticsearchErrorDetails,
   PollEsNodesVersionOptions,
+  UnauthorizedErrorHandlerOptions,
+  UnauthorizedErrorHandlerResultRetryParams,
+  UnauthorizedErrorHandlerRetryResult,
+  UnauthorizedErrorHandlerNotHandledResult,
+  UnauthorizedErrorHandlerResult,
+  UnauthorizedErrorHandlerToolkit,
+  UnauthorizedErrorHandler,
+  UnauthorizedError,
 } from './elasticsearch';
 
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
@@ -267,6 +276,7 @@ export {
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
   SavedObjectsUtils,
+  mergeSavedObjectMigrationMaps,
 } from './saved_objects';
 
 export type {
@@ -363,6 +373,8 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectsValidationMap,
+  SavedObjectsValidationSpec,
 } from './saved_objects';
 
 export type {
@@ -428,6 +440,8 @@ export type {
   CoreIncrementCounterParams,
 } from './core_usage_data';
 
+export type { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
+
 /**
  * Plugin specific context passed to a route handler.
  *
@@ -491,6 +505,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
   context: ContextSetup;
+  /** {@link DocLinksServiceSetup} */
+  docLinks: DocLinksServiceSetup;
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link ExecutionContextSetup} */
@@ -541,6 +557,8 @@ export type StartServicesAccessor<
 export interface CoreStart {
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
+  /** {@link DocLinksServiceStart} */
+  docLinks: DocLinksServiceStart;
   /** {@link ElasticsearchServiceStart} */
   elasticsearch: ElasticsearchServiceStart;
   /** {@link ExecutionContextStart} */

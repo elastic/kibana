@@ -51,6 +51,20 @@ export function getTransactionMetrics(events: ApmFields[]) {
     'host.name',
     'container.id',
     'kubernetes.pod.name',
+    'cloud.account.id',
+    'cloud.account.name',
+    'cloud.machine.type',
+    'cloud.project.id',
+    'cloud.project.name',
+    'cloud.service.name',
+    'service.language.name',
+    'service.language.version',
+    'service.runtime.name',
+    'service.runtime.version',
+    'host.os.platform',
+    'faas.id',
+    'faas.coldstart',
+    'faas.trigger.type',
   ]);
 
   return metricsets.map((metricset) => {

@@ -6,13 +6,16 @@
  */
 
 // @ts-ignore
-import { checkParam } from '../../error_missing_required';
+import { StringOptions } from '@kbn/config-schema/target_types/types';
 // @ts-ignore
 import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
+import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
+
 export function handleResponse(response: ElasticsearchResponse) {
   const hits = response.hits?.hits;
   if (!hits) {
@@ -57,15 +60,12 @@ export function handleResponse(response: ElasticsearchResponse) {
 
 export function getShardAllocation(
   req: LegacyRequest,
-  esIndexPattern: string,
   {
     shardFilter,
     stateUuid,
     showSystemIndices = false,
   }: { shardFilter: any; stateUuid: string; showSystemIndices: boolean }
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardAllocation');
-
   const filters = [
     {
       bool: {
@@ -97,18 +97,35 @@ export function getShardAllocation(
     });
   }
 
-  const config = req.server.config();
+  const config = req.server.config;
   const clusterUuid = req.params.clusterUuid;
   const metric = ElasticsearchMetric.getMetricFields();
+
+  const dataset = 'shard'; // data_stream.dataset
+  const type = 'shards'; // legacy
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    dataset,
+    moduleType,
+  });
+
   const params = {
-    index: esIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    index: indexPatterns,
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     body: {
-      query: createQuery({ types: ['shard', 'shards'], clusterUuid, metric, filters }),
+      query: createQuery({
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
+        clusterUuid,
+        metric,
+        filters,
+      }),
     },
   };
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then(handleResponse);
 }

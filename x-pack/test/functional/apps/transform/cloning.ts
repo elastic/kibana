@@ -35,6 +35,7 @@ function getTransformConfig(): TransformPivotConfig {
     description:
       'ecommerce batch transform with avg(products.base_price) grouped by terms(category)',
     frequency: '3s',
+    retention_policy: { time: { field: 'order_date', max_age: '1d' } },
     settings: {
       max_page_search_size: 250,
     },
@@ -72,6 +73,7 @@ function getTransformConfigWithRuntimeMappings(): TransformPivotConfig {
     },
     description: 'ecommerce batch transform grouped by terms(rt_gender_lower)',
     frequency: '3s',
+    retention_policy: { time: { field: 'order_date', max_age: '3d' } },
     settings: {
       max_page_search_size: 250,
     },
@@ -99,7 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithRuntimeMapping.id,
         transformConfigWithRuntimeMapping
       );
-
       await transform.api.createAndRunTransform(
         transformConfigWithLatest.id,
         transformConfigWithLatest
@@ -120,6 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.api.deleteIndices(transformConfigWithRuntimeMapping.dest.index);
       await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     const testDataList: TestData[] = [
@@ -156,6 +158,9 @@ export default function ({ getService }: FtrProviderContext) {
               `Women's Clothing`,
             ],
           },
+          retentionPolicySwitchEnabled: true,
+          retentionPolicyField: 'order_date',
+          retentionPolicyMaxAge: '1d',
         },
       },
       {
@@ -185,6 +190,9 @@ export default function ({ getService }: FtrProviderContext) {
             column: 0,
             values: [`female`, `male`],
           },
+          retentionPolicySwitchEnabled: true,
+          retentionPolicyField: 'order_date',
+          retentionPolicyMaxAge: '3d',
         },
       },
       {
@@ -209,6 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
               'July 12th 2019, 23:45:36',
             ],
           },
+          retentionPolicySwitchEnabled: false,
         },
       },
     ];
@@ -302,6 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.transformPreview.values
           );
 
+          // assert details step form
           await transform.testExecution.logTestStep('should load the details step');
           await transform.wizard.advanceToDetailsStep();
 
@@ -329,6 +339,24 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('should display the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
           await transform.wizard.assertContinuousModeSwitchCheckState(false);
+
+          await transform.testExecution.logTestStep(
+            'should display the retention policy settings with pre-filled configuration'
+          );
+          await transform.wizard.assertRetentionPolicySwitchExists();
+          await transform.wizard.assertRetentionPolicySwitchCheckState(
+            testData.expected.retentionPolicySwitchEnabled
+          );
+          if (testData.expected.retentionPolicySwitchEnabled) {
+            await transform.wizard.assertRetentionPolicyFieldSelectExists();
+            await transform.wizard.assertRetentionPolicyFieldSelectValue(
+              testData.expected.retentionPolicyField
+            );
+            await transform.wizard.assertRetentionPolicyMaxAgeInputExists();
+            await transform.wizard.assertRetentionsPolicyMaxAgeValue(
+              testData.expected.retentionPolicyMaxAge
+            );
+          }
 
           await transform.testExecution.logTestStep(
             'should display the advanced settings and show pre-filled configuration'

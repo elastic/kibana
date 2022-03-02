@@ -7,12 +7,14 @@
 experimental[] Update part of an data view. Only the specified fields are updated in the
 data view. Unspecified fields stay as they are persisted.
 
+
 [[data-views-api-update-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/index_patterns/index_pattern/<id>`
+`POST <kibana host>:<port>/api/data_views/data_view/<id>`
 
-`POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>`
+`POST <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<id>`
+
 
 [[data-views-api-update-path-params]]
 ==== Path parameters
@@ -23,13 +25,14 @@ data view. Unspecified fields stay as they are persisted.
 `id`::
   (Required, string) The ID of the data view you want to update.
 
+
 [[data-views-api-update-request-body]]
 ==== Request body
 
 `refresh_fields`:: (Optional, boolean) Reloads the data view fields after
 the data view is updated. The default is `false`.
 
-`index_pattern`::
+`data_view`::
   (Required, object) The data view fields you want to update.
 +
 
@@ -43,23 +46,25 @@ You can partially update the following fields:
 * `type`
 * `typeMeta`
 
+
 [[data-views-api-update-errors-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
+
 [[data-views-api-update-example]]
 ==== Examples
 
-Update a title of the `<my-pattern>` data view:
+Update a title of the `<my-view>` data view:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern
+$ curl -X POST api/saved_objects/data-view/my-view
 {
-  "index_pattern": {
-    "title": "some-other-pattern-*"
+  "data_view": {
+    "title": "some-other-view-*"
   }
 }
 --------------------------------------------------
@@ -69,10 +74,10 @@ Customize the update behavior:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern
+$ curl -X POST api/saved_objects/data-view/my-view
 {
   "refresh_fields": true,
-  "index_pattern": {
+  "data_view": {
     "fields": {}
   }
 }
@@ -84,9 +89,9 @@ All update fields are optional, but you can specify the following fields:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern
+$ curl -X POST api/saved_objects/data-view/my-view
 {
-  "index_pattern": {
+  "data_view": {
     "title": "...",
     "timeFieldName": "...",
     "sourceFilters": [],
@@ -105,8 +110,9 @@ The API returns the updated data view object:
 [source,sh]
 --------------------------------------------------
 {
-    "index_pattern": {
+    "data_view": {
 
     }
 }
 --------------------------------------------------
+

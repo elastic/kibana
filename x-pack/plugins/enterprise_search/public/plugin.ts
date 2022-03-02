@@ -20,7 +20,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { CloudSetup } from '../../cloud/public';
+import { CloudSetup, CloudStart } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
 
@@ -38,7 +38,6 @@ export interface ClientConfigType {
 }
 export interface ClientData extends InitialAppData {
   publicUrl?: string;
-  errorConnecting?: boolean;
   errorConnectingMessage?: string;
 }
 
@@ -48,7 +47,7 @@ interface PluginsSetup {
   security: SecurityPluginSetup;
 }
 export interface PluginsStart {
-  cloud?: CloudSetup;
+  cloud?: CloudSetup & CloudStart;
   licensing: LicensingPluginStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
@@ -173,10 +172,18 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public stop() {}
 
-  private async getKibanaDeps(core: CoreSetup, params: AppMountParameters, cloud?: CloudSetup) {
+  private async getKibanaDeps(
+    core: CoreSetup,
+    params: AppMountParameters,
+    cloudSetup?: CloudSetup
+  ) {
     // Helper for using start dependencies on mount (instead of setup dependencies)
     // and for grouping Kibana-related args together (vs. plugin-specific args)
     const [coreStart, pluginsStart] = await core.getStartServices();
+    const cloud =
+      cloudSetup && (pluginsStart as PluginsStart).cloud
+        ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
+        : undefined;
     const plugins = { ...pluginsStart, cloud } as PluginsStart;
 
     return { params, core: coreStart, plugins };
@@ -195,7 +202,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       this.data = await http.get('/internal/enterprise_search/config_data');
       this.hasInitialized = true;
     } catch (e) {
-      this.data.errorConnecting = true;
       this.data.errorConnectingMessage = `${e.res.status} ${e.message}`;
     }
   }

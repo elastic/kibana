@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { MonitorListPageSizeSelectComponent } from './monitor_list_page_size_select';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 describe('MonitorListPageSizeSelect', () => {
   it('updates the state when selection changes', () => {

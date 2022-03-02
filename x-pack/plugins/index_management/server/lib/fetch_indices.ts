@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { IndexDataEnricher } from '../services';
 import { Index } from '../index';
@@ -16,50 +17,57 @@ async function fetchIndicesCall(
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
   // This call retrieves alias and settings (incl. hidden status) information about indices
-  const { body: indices } = await client.asCurrentUser.indices.get({
+  const indices = await client.asCurrentUser.indices.get({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
+    // only get specified index properties from ES to keep the response under 536MB
+    // node.js string length limit: https://github.com/nodejs/node/issues/33960
+    filter_path: [
+      '*.aliases',
+      '*.settings.index.number_of_shards',
+      '*.settings.index.number_of_replicas',
+      '*.settings.index.frozen',
+      '*.settings.index.hidden',
+      '*.data_stream',
+    ],
+    // for better performance only compute aliases and settings of indices but not mappings
+    // @ts-expect-error new param https://github.com/elastic/elasticsearch-specification/issues/1382
+    features: ['aliases', 'settings'],
   });
 
   if (!Object.keys(indices).length) {
     return [];
   }
 
-  const { body: catHits } = await client.asCurrentUser.cat.indices({
-    format: 'json',
-    h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
-    expand_wildcards: ['hidden', 'all'],
+  const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
     index: indexNamesString,
+    expand_wildcards: ['hidden', 'all'],
+    forbid_closed_indices: false,
+    metric: ['docs', 'store'],
   });
-
-  // System indices may show up in _cat APIs, as these APIs are primarily used for troubleshooting
-  // For now, we filter them out and only return index information for the indices we have
-  // In the future, we should migrate away from using cat APIs (https://github.com/elastic/kibana/issues/57286)
-  return catHits.reduce((decoratedIndices, hit) => {
-    const index = indices[hit.index!];
-
-    if (typeof index !== 'undefined') {
-      const aliases = Object.keys(index.aliases!);
-
-      decoratedIndices.push({
-        health: hit.health!,
-        status: hit.status!,
-        name: hit.index!,
-        uuid: hit.uuid!,
-        primary: hit.pri!,
-        replica: hit.rep!,
-        documents: hit['docs.count'],
-        size: hit['store.size'],
-        isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
-        aliases: aliases.length ? aliases : 'none',
-        // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/532
-        hidden: index.settings.index.hidden === 'true',
-        data_stream: index.data_stream!,
-      });
-    }
-
-    return decoratedIndices;
-  }, [] as Index[]);
+  const indicesNames = Object.keys(indices);
+  return indicesNames.map((indexName: string) => {
+    const indexData = indices[indexName];
+    const indexStats = indicesStats[indexName];
+    const aliases = Object.keys(indexData.aliases!);
+    return {
+      health: indexStats?.health,
+      status: indexStats?.status,
+      name: indexName,
+      uuid: indexStats?.uuid,
+      primary: indexData.settings?.index?.number_of_shards,
+      replica: indexData.settings?.index?.number_of_replicas,
+      documents: indexStats?.total?.docs?.count ?? 0,
+      documents_deleted: indexStats?.total?.docs?.deleted ?? 0,
+      size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
+      primary_size: new ByteSizeValue(indexStats?.primaries?.store?.size_in_bytes ?? 0).toString(),
+      // @ts-expect-error
+      isFrozen: indexData.settings?.index?.frozen === 'true',
+      aliases: aliases.length ? aliases : 'none',
+      hidden: indexData.settings?.index?.hidden === 'true',
+      data_stream: indexData.data_stream,
+    };
+  });
 }
 
 export const fetchIndices = async (

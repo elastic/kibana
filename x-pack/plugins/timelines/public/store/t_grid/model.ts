@@ -84,6 +84,7 @@ export interface TGridModel extends TGridModelSettings {
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for bulk actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
+  timelineType: 'default' | 'template';
   version: string | null;
   initialized?: boolean;
 }

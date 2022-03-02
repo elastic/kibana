@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type { JobParamsPNG, TaskPayloadPNG } from '../../../common/types/export_types/png';
+export type {
+  JobParamsPNGDeprecated,
+  TaskPayloadPNG,
+} from '../../../common/types/export_types/png';

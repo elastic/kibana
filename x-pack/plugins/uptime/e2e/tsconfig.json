@@ -5,5 +5,13 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [ "node"],
-  }
+  },
+  "references": [
+    {
+      "path": "../../apm/tsconfig.json",
+    },
+    {
+      "path": "../tsconfig.json",
+    }
+  ]
 }

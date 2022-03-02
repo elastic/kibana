@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiToolTip,
   EuiPopover,
@@ -43,6 +43,10 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
       selectedMetricField: value,
     });
   };
+
+  const focusButton = useCallback((ref: HTMLButtonElement) => {
+    ref?.focus();
+  }, []);
 
   if (!series.dataType) {
     return null;
@@ -85,7 +89,8 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
     // TODO: Add a link to docs to explain how to add index patterns
     return (
       <EuiText color="danger" className="eui-textNoWrap">
-        {indexPatternError.body.error === 'Forbidden'
+        {indexPatternError.body?.error === 'Forbidden' ||
+        indexPatternError.name === 'DataViewInsufficientAccessError'
           ? NO_PERMISSIONS
           : indexPatternError.body.message}
       </EuiText>
@@ -107,6 +112,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               fill
               size="s"
               isLoading={!indexPattern && loading}
+              buttonRef={focusButton}
             >
               {SELECT_REPORT_METRIC_LABEL}
             </EuiButton>

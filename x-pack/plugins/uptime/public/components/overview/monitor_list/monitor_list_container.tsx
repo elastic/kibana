@@ -7,7 +7,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getMonitorList } from '../../../state/actions';
+import { clearRefreshedMonitorId, getMonitorList } from '../../../state/actions';
 import { esKuerySelector, monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
 import { useUrlParams } from '../../../hooks';
@@ -15,6 +15,7 @@ import { UptimeRefreshContext } from '../../../contexts';
 import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/alerts/alerts';
 import { useMappingCheck } from '../../../hooks/use_mapping_check';
 import { useOverviewFilterCheck } from '../../../hooks/use_overview_filter_check';
+import { refreshedMonitorSelector } from '../../../state/reducers/monitor_list';
 
 export interface MonitorListProps {
   filters?: string;
@@ -42,6 +43,8 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const { dateRangeStart, dateRangeEnd, pagination, statusFilter, query } = getUrlValues();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
+
+  const refreshedMonitorIds = useSelector(refreshedMonitorSelector);
 
   const monitorList = useSelector(monitorListSelector);
   useMappingCheck(monitorList.error);
@@ -81,12 +84,23 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
     dispatch(getConnectorsAction.get());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (refreshedMonitorIds) {
+      refreshedMonitorIds.forEach((id) => {
+        setTimeout(() => {
+          dispatch(clearRefreshedMonitorId(id));
+        }, 5 * 1000);
+      });
+    }
+  }, [dispatch, refreshedMonitorIds]);
+
   return (
     <MonitorListComponent
       {...props}
       monitorList={monitorList}
       pageSize={pageSize}
       setPageSize={setPageSize}
+      refreshedMonitorIds={refreshedMonitorIds}
     />
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter';
+import { Ast, AstFunction, fromExpression } from '@kbn/interpreter';
 import { DatasourceStates } from '../../state_management';
 import { Visualization, DatasourcePublicAPI, DatasourceMap } from '../../types';
 
@@ -35,7 +35,7 @@ export function prependDatasourceExpression(
     ([layerId, expr]) => [layerId, typeof expr === 'string' ? fromExpression(expr) : expr]
   );
 
-  const datafetchExpression: ExpressionFunctionAST = {
+  const datafetchExpression: AstFunction = {
     type: 'function',
     function: 'lens_merge_tables',
     arguments: {
