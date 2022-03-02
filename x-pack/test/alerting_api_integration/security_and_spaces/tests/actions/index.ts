@@ -39,5 +39,6 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./telemetry'));
   });
 }
