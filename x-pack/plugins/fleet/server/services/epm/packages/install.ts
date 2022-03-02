@@ -468,7 +468,7 @@ export type InstallPackageParams = {
   | ({ installSource: Extract<InstallSource, 'bundled'> } & InstallUploadedArchiveParams)
 );
 
-export async function installPackage(args: InstallPackageParams) {
+export async function installPackage(args: InstallPackageParams): Promise<InstallResult> {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
   }
@@ -662,7 +662,6 @@ export async function ensurePackagesCompletedInstall(
       // reinstall package
       if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
         acc.push(
-          // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
           installPackage({
             installSource: 'registry',
             savedObjectsClient,
