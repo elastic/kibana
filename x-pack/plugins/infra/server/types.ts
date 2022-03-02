@@ -11,7 +11,7 @@ import type { MlPluginSetup } from '../../ml/server';
 import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
 
-export { InfraConfig } from '../common/plugin_config_types';
+export type { InfraConfig } from '../common/plugin_config_types';
 
 export interface InfraPluginSetup {
   defineInternalSourceConfiguration: (
