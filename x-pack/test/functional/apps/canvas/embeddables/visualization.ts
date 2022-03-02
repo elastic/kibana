@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'visualize']);
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -24,12 +25,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
-      // The kbn_archiver above was created from an es_archiver which intentionally had
-      // 2 missing index patterns.  But that would fail to load with kbn_archiver.
-      // So we unload those 2 index patterns here.
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens'
+      );
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload'
       );
+
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // create new workpad
