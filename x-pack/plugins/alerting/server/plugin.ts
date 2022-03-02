@@ -384,6 +384,7 @@ export class AlertingPlugin {
     taskRunnerFactory.initialize({
       logger,
       savedObjects: core.savedObjects,
+      uiSettings: core.uiSettings,
       elasticsearch: core.elasticsearch,
       getRulesClientWithRequest,
       spaceIdToNamespace,
