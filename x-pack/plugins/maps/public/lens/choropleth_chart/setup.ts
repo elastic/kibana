@@ -17,7 +17,9 @@ export function setupLensChoroplethChart(
   expressions: ExpressionsSetup,
   lens: LensPublicSetup
 ) {
-  expressions.registerRenderer(() => { return getExpressionRenderer(coreSetup); });
+  expressions.registerRenderer(() => {
+    return getExpressionRenderer(coreSetup);
+  });
 
   expressions.registerFunction(getExpressionFunction);
 

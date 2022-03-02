@@ -196,7 +196,7 @@ export const getVisualization = ({
     } else if (prevState.valueAccessor === columnId) {
       delete update.valueAccessor;
     }
-    
+
     return update;
   },
 

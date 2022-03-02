@@ -20,7 +20,7 @@ interface ChoroplethChartRender {
 export const getExpressionFunction = (): ExpressionFunctionDefinition<
   'lens_choropleth_chart',
   LensMultiTable,
-  Omit<ChoroplethChartConfig, 'layerId' | 'layerType'>,
+  Omit<ChoroplethChartConfig, 'layerType'>,
   ChoroplethChartRender
 > => ({
   name: 'lens_choropleth_chart',

@@ -7,9 +7,10 @@
 
 import uuid from 'uuid/v4';
 import React from 'react';
+import type { FileLayer } from '@elastic/ems-client';
 import { IUiSettingsClient } from 'kibana/public';
+import type { EmbeddableFactory } from 'src/plugins/embeddable/public';
 import type { FormatFactory } from 'src/plugins/field_formats/common';
-import { MapComponent } from '../../embeddable';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
@@ -20,6 +21,15 @@ import {
 import { ChoroplethChartProps } from './types';
 import { Icon } from './icon';
 import { getEmsSuggestion } from './get_ems_suggestion';
+import { PassiveMap } from '../passive_map';
+import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
+
+interface Props extends ChoroplethChartProps {
+  formatFactory: FormatFactory;
+  uiSettings: IUiSettingsClient;
+  emsFileLayers: FileLayer[];
+  mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
+}
 
 export function ChoroplethChart({
   data,
@@ -27,15 +37,16 @@ export function ChoroplethChart({
   formatFactory,
   uiSettings,
   emsFileLayers,
-}: ChoroplethChartProps & {
-  formatFactory: FormatFactory;
-  uiSettings: IUiSettingsClient;
-  emsFileLayers: FileLayer[];
-}) {
+  mapEmbeddableFactory,
+}: Props) {
   console.log('data', data);
   console.log('args', args);
   if (args.isPreview) {
     return <Icon />;
+  }
+
+  if (!args.regionAccessor || !args.valueAccessor) {
+    return null;
   }
 
   const table = data.tables[args.layerId];
@@ -50,69 +61,59 @@ export function ChoroplethChart({
     }
   }
 
-  const layerList = args.layerId
-    ? [
-        {
-          id: uuid(),
-          label: args.title,
-          joins: [
+  const choroplethLayer = {
+    id: args.layerId,
+    label: args.title,
+    joins: [
+      {
+        leftField: emsField,
+        right: {
+          id: args.valueAccessor,
+          type: SOURCE_TYPES.TABLE_SOURCE,
+          __rows: table.rows,
+          __columns: [
             {
-              leftField: emsField,
-              right: {
-                id: args.valueAccessor,
-                type: SOURCE_TYPES.TABLE_SOURCE,
-                __rows: table.rows,
-                __columns: [
-                  {
-                    name: args.regionAccessor,
-                    type: 'string',
-                  },
-                  {
-                    name: args.valueAccessor,
-                    type: 'number',
-                  },
-                ],
-                // Right join/term is the field in the doc you’re trying to join it to (foreign key - e.g. US)
-                term: args.regionAccessor,
-              },
+              name: args.regionAccessor,
+              type: 'string',
+            },
+            {
+              name: args.valueAccessor,
+              type: 'number',
             },
           ],
-          sourceDescriptor: {
-            type: SOURCE_TYPES.EMS_FILE,
-            id: emsLayerId,
-          },
-          style: {
-            type: 'VECTOR',
-            // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated
-            properties: {
-              fillColor: {
-                type: STYLE_TYPE.DYNAMIC,
-                options: {
-                  color: 'Blue to Red',
-                  colorCategory: 'palette_0',
-                  fieldMetaOptions: { isEnabled: true, sigma: 3 },
-                  type: COLOR_MAP_TYPE.ORDINAL,
-                  field: {
-                    name: args.valueAccessor,
-                    origin: FIELD_ORIGIN.JOIN,
-                  },
-                  useCustomColorRamp: false,
-                },
-              },
-              lineWidth: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
-            },
-            isTimeAware: false,
-          },
-          type: LAYER_TYPE.GEOJSON_VECTOR,
+          // Right join/term is the field in the doc you’re trying to join it to (foreign key - e.g. US)
+          term: args.regionAccessor,
         },
-      ]
-    : [];
+      },
+    ],
+    sourceDescriptor: {
+      type: SOURCE_TYPES.EMS_FILE,
+      id: emsLayerId,
+    },
+    style: {
+      type: 'VECTOR',
+      // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated
+      properties: {
+        fillColor: {
+          type: STYLE_TYPE.DYNAMIC,
+          options: {
+            color: 'Blue to Red',
+            colorCategory: 'palette_0',
+            fieldMetaOptions: { isEnabled: true, sigma: 3 },
+            type: COLOR_MAP_TYPE.ORDINAL,
+            field: {
+              name: args.valueAccessor,
+              origin: FIELD_ORIGIN.JOIN,
+            },
+            useCustomColorRamp: false,
+          },
+        },
+        lineWidth: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
+      },
+      isTimeAware: false,
+    },
+    type: LAYER_TYPE.GEOJSON_VECTOR,
+  };
 
-  return (
-    <MapComponent
-      getLayerDescriptors={() => {
-        return layerList;
-      }}
-    />
-  );
+  return <PassiveMap passiveLayer={choroplethLayer} factory={mapEmbeddableFactory} />;
 }

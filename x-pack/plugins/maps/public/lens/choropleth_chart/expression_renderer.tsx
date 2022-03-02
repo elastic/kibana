@@ -8,9 +8,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { IInterpreterRenderHandlers } from 'src/plugins/expressions/public';
+import type { EmbeddableFactory } from 'src/plugins/embeddable/public';
 import type { CoreSetup, CoreStart } from 'src/core/public';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import type { ChoroplethChartProps } from './types';
+import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
 
 export const RENDERER_ID = 'lens_choropleth_chart_renderer';
 
@@ -30,12 +32,21 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
         await coreSetup.getStartServices();
       const { ChoroplethChart } = await import('./choropleth_chart');
       const { getEmsFileLayers } = await import('../../util');
+
+      const mapEmbeddableFactory = plugins.embeddable.getEmbeddableFactory(
+        'map'
+      ) as EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
+      if (!mapEmbeddableFactory) {
+        return;
+      }
+
       ReactDOM.render(
         <ChoroplethChart
           {...config}
           formatFactory={plugins.fieldFormats.deserialize}
           uiSettings={coreStart.uiSettings}
           emsFileLayers={await getEmsFileLayers()}
+          mapEmbeddableFactory={mapEmbeddableFactory}
         />,
         domNode,
         () => {
@@ -45,4 +56,4 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
       handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     },
   };
-};
+}

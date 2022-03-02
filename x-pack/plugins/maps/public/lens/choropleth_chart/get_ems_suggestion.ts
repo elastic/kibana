@@ -8,13 +8,17 @@
 import type { FileLayer } from '@elastic/ems-client';
 import { emsAutoSuggest } from '../../ems_autosuggest';
 
-export function getEmsSuggestion(emsFileLayers: FileLayer[], table: Datatable, regionAccessor: string) {
-    const keys: string[] = [];
-    table.rows.forEach((row) => {
-      const key = row[regionAccessor];
-      if (key && key !== '__other__' && !keys.includes(key)) {
-        keys.push(key);
-      }
-    });
-    return emsAutoSuggest({ sampleValues: keys }, emsFileLayers);
+export function getEmsSuggestion(
+  emsFileLayers: FileLayer[],
+  table: Datatable,
+  regionAccessor: string
+) {
+  const keys: string[] = [];
+  table.rows.forEach((row) => {
+    const key = row[regionAccessor];
+    if (key && key !== '__other__' && !keys.includes(key)) {
+      keys.push(key);
+    }
+  });
+  return emsAutoSuggest({ sampleValues: keys }, emsFileLayers);
 }

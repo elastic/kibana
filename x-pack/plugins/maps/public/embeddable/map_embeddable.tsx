@@ -38,6 +38,7 @@ import {
   setQuery,
   disableScrollZoom,
   setReadOnly,
+  updateLayerById,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -417,6 +418,10 @@ export class MapEmbeddable
         indexPatterns,
       });
     });
+  }
+
+  updateLayerById(layerDescriptor: LayerDescriptor) {
+    this._savedMap.getStore().dispatch<any>(updateLayerById(layerDescriptor));
   }
 
   private async _getIndexPatterns() {
