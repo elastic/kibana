@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React from 'react';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt, EuiEmptyPromptProps } from '@elastic/eui';
 
+import React from 'react';
 import { DataViewIllustration } from '../assets';
 import { DocumentationLink } from './documentation_link';
 

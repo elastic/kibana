@@ -10,7 +10,10 @@ import { action } from '@storybook/addon-actions';
 
 import { docLinksServiceFactory } from '../../../services/storybook/doc_links';
 
-import { NoDataViews as NoDataViewsComponent, Props } from './no_data_views.component';
+import {
+  NoDataViewsComponent,
+  NoDataViewsComponentProps,
+} from '../../../../../shared_ux_components/public';
 import { NoDataViews } from './no_data_views';
 
 import mdx from './no_data_views.mdx';
@@ -34,7 +37,7 @@ export const ConnectedComponent = () => {
   );
 };
 
-type Params = Pick<Props, 'canCreateNewDataView' | 'dataViewsDocLink'>;
+type Params = Pick<NoDataViewsComponentProps, 'canCreateNewDataView' | 'dataViewsDocLink'>;
 
 export const PureComponent = (params: Params) => {
   return <NoDataViewsComponent onClickCreate={action('onClick')} {...params} />;

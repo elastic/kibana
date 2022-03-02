@@ -6,4 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { NoDataViews } from './no_data_views';
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
+/** @internal */
+export interface SharedUXComponentsPluginSetup {}
+
+/**
+ * The Shared UX Components plugin public contract
+ */
+export interface SharedUXComponentsPluginStart {}
+
+/** @internal */
+export interface SharedUXComponentsPluginSetupDeps {}

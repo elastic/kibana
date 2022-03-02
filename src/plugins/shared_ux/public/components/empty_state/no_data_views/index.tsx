@@ -7,4 +7,3 @@
  */
 
 export { NoDataViews } from './no_data_views';
-export { NoDataViews as NoDataViewsComponent } from './no_data_views.component';

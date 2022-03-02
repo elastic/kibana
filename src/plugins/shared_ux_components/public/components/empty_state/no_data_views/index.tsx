@@ -5,5 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export { NoDataViews } from './no_data_views';
+export { NoDataViews as NoDataViewsComponent } from './no_data_views.component';
+export { Props as NoDataViewsComponentProps } from './no_data_views.component';

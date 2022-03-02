@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { NoDataViews } from './no_data_views';
+export const PLUGIN_ID = 'sharedUXComponents';
+export const PLUGIN_NAME = 'sharedUXComponents';
