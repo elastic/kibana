@@ -6,7 +6,7 @@
  */
 
 import { find, isEmpty, uniqBy } from 'lodash/fp';
-import { ALERT_RULE_NAMESPACE, ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -62,10 +62,9 @@ function getFieldsByCategory({
         { id: 'destination.port' },
         { id: 'source.address' },
         { id: 'source.port' },
+        { id: 'dns.question.name' },
         { id: 'process.name' },
       ];
-    case EventCategory.DNS:
-      return [{ id: 'dns.question.name' }, { id: 'process.name' }];
     case EventCategory.REGISTRY:
       return [{ id: 'registry.key' }, { id: 'registry.value' }, { id: 'process.name' }];
     case EventCategory.MALWARE:
@@ -146,18 +145,22 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
       return [
         {
           id: `${ALERT_RULE_PARAMETERS}.machine_learning_job_id`,
+          legacyId: 'signal.rule.machine_learning_job_id',
         },
         {
           id: `${ALERT_RULE_PARAMETERS}.anomaly_threshold`,
+          legacyId: 'signal.rule.anomaly_threshold',
         },
       ];
     case 'threat_match':
       return [
         {
-          id: `${ALERT_RULE_NAMESPACE}.threat_index`,
+          id: `${ALERT_RULE_PARAMETERS}.threat_index`,
+          legacyId: 'signal.rule.threat_index',
         },
         {
-          id: `${ALERT_RULE_NAMESPACE}.threat_query`,
+          id: `${ALERT_RULE_PARAMETERS}.threat_query`,
+          legacyId: 'signal.rule.threat_query',
         },
       ];
     default:
@@ -251,9 +254,16 @@ export const getSummaryRows = ({
 
   return data != null
     ? tableFields.reduce<SummaryRow[]>((acc, field) => {
-        const item = data.find((d) => d.field === field.id);
-        if (!item || isEmpty(item?.values)) {
+        const item = data.find(
+          (d) => d.field === field.id || (field.legacyId && d.field === field.legacyId)
+        );
+        if (!item || isEmpty(item.values)) {
           return acc;
+        }
+
+        // If we found the data by its legacy id we swap the ids to display the correct one
+        if (item.field === field.legacyId) {
+          field.id = field.legacyId;
         }
 
         const linkValueField =
