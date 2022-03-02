@@ -27,17 +27,17 @@ export interface InitActionParams {
   indices: string[];
 }
 
-export const initAction = ({
-  client,
-  indices,
-}: InitActionParams): TaskEither.TaskEither<
-  RetryableEsClientError,
-  { indices: FetchIndexResponse; clusterRoutingAllocationEnabled: boolean }
-> => {
-  const checkClusterRoutingAllocationEnabledTask: TaskEither.TaskEither<
-    RetryableEsClientError,
-    { clusterRoutingAllocationEnabled: boolean }
-  > = () => {
+export interface ClusterAllocationDisabledError {
+  type: 'cluster_routing_allocation_disabled';
+}
+
+export const checkClusterRoutingAllocationEnabledTask =
+  ({
+    client,
+  }: {
+    client: ElasticsearchClient;
+  }): TaskEither.TaskEither<RetryableEsClientError | ClusterAllocationDisabledError, {}> =>
+  () => {
     return client.cluster
       .getSettings({
         include_defaults: true,
@@ -49,26 +49,30 @@ export const initAction = ({
           settings?.persistent?.[routingAllocationEnable] ??
           settings?.defaults?.[routingAllocationEnable] ??
           [];
-        return Either.right({
-          clusterRoutingAllocationEnabled:
-            clusterRoutingAllocations.length === 0 || !clusterRoutingAllocations.includes('none'),
-        });
+
+        const clusterRoutingAllocationEnabled =
+          clusterRoutingAllocations.length === 0 || !clusterRoutingAllocations.includes('none');
+
+        if (!clusterRoutingAllocationEnabled) {
+          return Either.left({ type: 'cluster_routing_allocation_disabled' as const });
+        } else {
+          return Either.right({});
+        }
       })
       .catch(catchRetryableEsClientErrors);
   };
 
+export const initAction = ({
+  client,
+  indices,
+}: InitActionParams): TaskEither.TaskEither<
+  RetryableEsClientError | ClusterAllocationDisabledError,
+  FetchIndexResponse
+> => {
   return pipe(
-    checkClusterRoutingAllocationEnabledTask,
-    TaskEither.chain((res) => {
-      return pipe(
-        fetchIndices({ client, indices }),
-        TaskEither.map((value) => {
-          return {
-            indices: value,
-            ...res,
-          };
-        })
-      );
+    checkClusterRoutingAllocationEnabledTask({ client }),
+    TaskEither.chainW((value) => {
+      return fetchIndices({ client, indices });
     })
   );
 };

@@ -111,7 +111,7 @@ describe('migration actions', () => {
     await esServer.stop();
   });
 
-  describe('fetchIndices', () => {
+  describe('initAction', () => {
     it('resolves right empty record if no indices were found', async () => {
       expect.assertions(1);
       const task = fetchIndices({ client, indices: ['no_such_index'] });
@@ -139,6 +139,7 @@ describe('migration actions', () => {
         })
       );
     });
+    it.todo('resolves left with cluster routing allocation disabled');
   });
 
   describe('setWriteBlock', () => {
@@ -1592,10 +1593,5 @@ describe('migration actions', () => {
         }
       `);
     });
-  });
-
-  describe('check_cluster_routing_allocation_enabled', () => {
-    it.todo('resolves right when cluster.routing.allocation.enabled is not none');
-    it.todo('resolves left when cluster.routing.allocation.enabled is none');
   });
 });

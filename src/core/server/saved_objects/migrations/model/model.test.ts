@@ -47,6 +47,10 @@ import { AliasAction, RetryableEsClientError } from '../actions';
 import { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
+import {
+  ClusterAllocationDisabledError,
+  ClusterRoutingAllocationEnabled,
+} from '../actions/initialize_action';
 
 describe('migrations v2 model', () => {
   const baseState: BaseState = {
@@ -159,17 +163,14 @@ describe('migrations v2 model', () => {
 
     test('resets retryCount, retryDelay when an action succeeds', () => {
       const res: ResponseType<'INIT'> = Either.right({
-        indices: {
-          '.kibana_7.11.0_001': {
-            aliases: {
-              '.kibana': {},
-              '.kibana_7.11.0': {},
-            },
-            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-            settings: {},
+        '.kibana_7.11.0_001': {
+          aliases: {
+            '.kibana': {},
+            '.kibana_7.11.0': {},
           },
+          mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+          settings: {},
         },
-        clusterRoutingAllocationEnabled: true,
       });
       const newState = model({ ...state, ...{ retryCount: 5, retryDelay: 32000 } }, res);
 
@@ -215,19 +216,16 @@ describe('migrations v2 model', () => {
       };
 
       const res: ResponseType<'INIT'> = Either.right({
-        indices: {
-          '.kibana_7.11.0_001': {
-            aliases: {
-              '.kibana': {},
-              '.kibana_7.11.0': {},
-            },
-            mappings: {
-              properties: {},
-            },
-            settings: {},
+        '.kibana_7.11.0_001': {
+          aliases: {
+            '.kibana': {},
+            '.kibana_7.11.0': {},
           },
+          mappings: {
+            properties: {},
+          },
+          settings: {},
         },
-        clusterRoutingAllocationEnabled: true,
       });
       const newState = model(initState, res);
       expect(newState).not.toBe(initState);
@@ -258,17 +256,14 @@ describe('migrations v2 model', () => {
 
       test('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if .kibana is already pointing to the target index', () => {
         const res: ResponseType<'INIT'> = Either.right({
-          indices: {
-            '.kibana_7.11.0_001': {
-              aliases: {
-                '.kibana': {},
-                '.kibana_7.11.0': {},
-              },
-              mappings: mappingsWithUnknownType,
-              settings: {},
+          '.kibana_7.11.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.11.0': {},
             },
+            mappings: mappingsWithUnknownType,
+            settings: {},
           },
-          clusterRoutingAllocationEnabled: true,
         });
         const newState = model(initState, res);
 
@@ -301,23 +296,8 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
       test('INIT -> FATAL when cluster routing allocation is not enabled', () => {
-        const res: ResponseType<'INIT'> = Either.right({
-          indices: {
-            '.kibana_7.12.0_001': {
-              aliases: {
-                '.kibana': {},
-                '.kibana_7.12.0': {},
-              },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
-          },
-          clusterRoutingAllocationEnabled: false,
+        const res: ResponseType<'INIT'> = Either.left({
+          type: 'cluster_routing_allocation_disabled',
         });
         const newState = model(initState, res) as FatalState;
 
@@ -328,22 +308,19 @@ describe('migrations v2 model', () => {
       });
       test("INIT -> FATAL when .kibana points to newer version's index", () => {
         const res: ResponseType<'INIT'> = Either.right({
-          indices: {
-            '.kibana_7.12.0_001': {
-              aliases: {
-                '.kibana': {},
-                '.kibana_7.12.0': {},
-              },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
+          '.kibana_7.12.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.12.0': {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
           },
-          clusterRoutingAllocationEnabled: true,
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana_7.11.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
         });
         const newState = model(initState, res) as FatalState;
 
@@ -361,22 +338,19 @@ describe('migrations v2 model', () => {
         // If the tampered index belonged to a newer version the migration
         // will fail when we start transforming documents.
         const res: ResponseType<'INIT'> = Either.right({
-          indices: {
-            '.kibana_7.invalid.0_001': {
-              aliases: {
-                '.kibana': {},
-                '.kibana_7.12.0': {},
-              },
-              mappings: mappingsWithUnknownType,
-              settings: {},
+          '.kibana_7.invalid.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.12.0': {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
+            mappings: mappingsWithUnknownType,
+            settings: {},
           },
-          clusterRoutingAllocationEnabled: true,
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana_7.11.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
         });
         const newState = model(initState, res) as WaitForYellowSourceState;
 
@@ -386,19 +360,16 @@ describe('migrations v2 model', () => {
 
       test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v2 migrations index (>= 7.11.0)', () => {
         const res: ResponseType<'INIT'> = Either.right({
-          indices: {
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
-              mappings: mappingsWithUnknownType,
-              settings: {},
-            },
-            '.kibana_3': {
-              aliases: {},
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+            mappings: mappingsWithUnknownType,
+            settings: {},
           },
-          clusterRoutingAllocationEnabled: true,
+          '.kibana_3': {
+            aliases: {},
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
         });
         const newState = model(
           {
@@ -420,16 +391,13 @@ describe('migrations v2 model', () => {
 
       test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v1 migrations index (>= 6.5 < 7.11.0)', () => {
         const res: ResponseType<'INIT'> = Either.right({
-          indices: {
-            '.kibana_3': {
-              aliases: {
-                '.kibana': {},
-              },
-              mappings: mappingsWithUnknownType,
-              settings: {},
+          '.kibana_3': {
+            aliases: {
+              '.kibana': {},
             },
+            mappings: mappingsWithUnknownType,
+            settings: {},
           },
-          clusterRoutingAllocationEnabled: true,
         });
         const newState = model(initState, res) as WaitForYellowSourceState;
 
@@ -440,14 +408,11 @@ describe('migrations v2 model', () => {
       });
       test('INIT -> LEGACY_SET_WRITE_BLOCK when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
         const res: ResponseType<'INIT'> = Either.right({
-          indices: {
-            '.kibana': {
-              aliases: {},
-              mappings: mappingsWithUnknownType,
-              settings: {},
-            },
+          '.kibana': {
+            aliases: {},
+            mappings: mappingsWithUnknownType,
+            settings: {},
           },
-          clusterRoutingAllocationEnabled: true,
         });
         const newState = model(initState, res);
 
@@ -486,16 +451,13 @@ describe('migrations v2 model', () => {
       });
       test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a custom kibana.index name (>= 6.5 < 7.11.0)', () => {
         const res: ResponseType<'INIT'> = Either.right({
-          indices: {
-            'my-saved-objects_3': {
-              aliases: {
-                'my-saved-objects': {},
-              },
-              mappings: mappingsWithUnknownType,
-              settings: {},
+          'my-saved-objects_3': {
+            aliases: {
+              'my-saved-objects': {},
             },
+            mappings: mappingsWithUnknownType,
+            settings: {},
           },
-          clusterRoutingAllocationEnabled: true,
         });
         const newState = model(
           {
@@ -515,16 +477,13 @@ describe('migrations v2 model', () => {
       });
       test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a custom kibana.index v2 migrations index (>= 7.11.0)', () => {
         const res: ResponseType<'INIT'> = Either.right({
-          indices: {
-            'my-saved-objects_7.11.0': {
-              aliases: {
-                'my-saved-objects': {},
-              },
-              mappings: mappingsWithUnknownType,
-              settings: {},
+          'my-saved-objects_7.11.0': {
+            aliases: {
+              'my-saved-objects': {},
             },
+            mappings: mappingsWithUnknownType,
+            settings: {},
           },
-          clusterRoutingAllocationEnabled: true,
         });
         const newState = model(
           {
@@ -545,10 +504,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
       test('INIT -> CREATE_NEW_TARGET when no indices/aliases exist', () => {
-        const res: ResponseType<'INIT'> = Either.right({
-          indices: {},
-          clusterRoutingAllocationEnabled: true,
-        });
+        const res: ResponseType<'INIT'> = Either.right({});
         const newState = model(initState, res);
 
         expect(newState).toMatchObject({
