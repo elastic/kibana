@@ -45,7 +45,9 @@ import {
 } from '../../screens/exceptions';
 import { createExceptionList } from '../../tasks/api_calls/exceptions';
 
-describe('Exceptions Table', () => {
+// Skipping as it's flakey, but PR is already up to try to fix these
+// https://github.com/elastic/kibana/pull/126706
+describe.skip('Exceptions Table', () => {
   before(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
