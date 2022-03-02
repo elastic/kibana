@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isOnlySingleFeatureType, assignCategoriesToPalette, dynamicRound } from './style_util';
+import { isOnlySingleFeatureType, assignCategoriesToIcons, dynamicRound } from './style_util';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 
 describe('isOnlySingleFeatureType', () => {
@@ -72,62 +72,62 @@ describe('isOnlySingleFeatureType', () => {
   });
 });
 
-describe('assignCategoriesToPalette', () => {
-  test('Categories and palette values have same length', () => {
+describe('assignCategoriesToIcons', () => {
+  test('Categories and icons have same length', () => {
     const categories = [
       { key: 'alpah', count: 1 },
       { key: 'bravo', count: 1 },
       { key: 'charlie', count: 1 },
       { key: 'delta', count: 1 },
     ];
-    const paletteValues = ['red', 'orange', 'yellow', 'green'];
-    expect(assignCategoriesToPalette({ categories, paletteValues })).toEqual({
+    const iconValues = ['circle', 'marker', 'triangle', 'square'];
+    expect(assignCategoriesToIcons({ categories, iconValues })).toEqual({
       stops: [
-        { stop: 'alpah', style: 'red' },
-        { stop: 'bravo', style: 'orange' },
-        { stop: 'charlie', style: 'yellow' },
+        { stop: 'alpah', icon: 'circle' },
+        { stop: 'bravo', icon: 'marker' },
+        { stop: 'charlie', icon: 'triangle' },
       ],
       fallbackSymbol: {
-        style: 'green',
+        icon: 'square',
         stop: null,
       },
     });
   });
 
-  test('Should More categories than palette values', () => {
+  test('Should More categories than icon values', () => {
     const categories = [
       { key: 'alpah', count: 1 },
       { key: 'bravo', count: 1 },
       { key: 'charlie', count: 1 },
       { key: 'delta', count: 1 },
     ];
-    const paletteValues = ['red', 'orange', 'yellow'];
-    expect(assignCategoriesToPalette({ categories, paletteValues })).toEqual({
+    const iconValues = ['circle', 'square', 'triangle'];
+    expect(assignCategoriesToIcons({ categories, iconValues })).toEqual({
       stops: [
-        { stop: 'alpah', style: 'red' },
-        { stop: 'bravo', style: 'orange' },
+        { stop: 'alpah', icon: 'circle' },
+        { stop: 'bravo', icon: 'square' },
       ],
       fallbackSymbol: {
         stop: null,
-        style: 'yellow',
+        icon: 'triangle',
       },
     });
   });
 
-  test('Less categories than palette values', () => {
+  test('Less categories than icon values', () => {
     const categories = [
       { key: 'alpah', count: 1 },
       { key: 'bravo', count: 1 },
     ];
-    const paletteValues = ['red', 'orange', 'yellow', 'green', 'blue'];
-    expect(assignCategoriesToPalette({ categories, paletteValues })).toEqual({
+    const iconValues = ['circle', 'triangle', 'marker', 'square', 'rectangle'];
+    expect(assignCategoriesToIcons({ categories, iconValues })).toEqual({
       stops: [
-        { stop: 'alpah', style: 'red' },
-        { stop: 'bravo', style: 'orange' },
+        { stop: 'alpah', icon: 'circle' },
+        { stop: 'bravo', icon: 'triangle' },
       ],
       fallbackSymbol: {
         stop: null,
-        style: 'yellow',
+        icon: 'marker',
       },
     });
   });

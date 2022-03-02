@@ -57,23 +57,23 @@ export function dynamicRound(value: number | string) {
   return precision === 0 ? Math.round(value) : parseFloat(value.toFixed(precision + 1));
 }
 
-export function assignCategoriesToPalette({
+export function assignCategoriesToIcons({
   categories,
-  paletteValues,
+  iconValues,
 }: {
   categories: Category[];
-  paletteValues: string[];
+  iconValues: string[];
 }) {
   const stops: IconStop[] = [];
   let fallbackSymbol: IconStop | null = null;
 
-  if (categories.length && paletteValues.length) {
-    const maxLength = Math.min(paletteValues.length, categories.length + 1);
-    fallbackSymbol = { style: paletteValues[maxLength - 1], stop: null };
+  if (categories.length && iconValues.length) {
+    const maxLength = Math.min(iconValues.length, categories.length + 1);
+    fallbackSymbol = { icon: iconValues[maxLength - 1], stop: null };
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
         stop: categories[i].key,
-        style: paletteValues[i],
+        icon: iconValues[i],
       });
     }
   }

@@ -59,7 +59,7 @@ export type CategoryColorStop = {
 
 export type IconStop = {
   stop: string | null;
-  style: string;
+  icon: string;
   svg?: string;
   label?: string;
   cutoff?: number;
