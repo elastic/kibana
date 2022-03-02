@@ -424,7 +424,6 @@ async function installPackageByUpload({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
-    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
@@ -490,7 +489,7 @@ export async function installPackage(args: InstallPackageParams) {
         `found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
       );
 
-      const response = installPackageByUpload({
+      const response = await installPackageByUpload({
         savedObjectsClient,
         esClient,
         archiveBuffer: matchingBundledPackage.buffer,
@@ -502,7 +501,7 @@ export async function installPackage(args: InstallPackageParams) {
     }
 
     logger.debug(`kicking off install of ${pkgkey} from registry`);
-    const response = installPackageFromRegistry({
+    const response = await installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       esClient,
@@ -513,7 +512,7 @@ export async function installPackage(args: InstallPackageParams) {
     return response;
   } else if (args.installSource === 'upload') {
     const { archiveBuffer, contentType, spaceId } = args;
-    const response = installPackageByUpload({
+    const response = await installPackageByUpload({
       savedObjectsClient,
       esClient,
       archiveBuffer,

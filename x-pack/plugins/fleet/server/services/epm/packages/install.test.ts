@@ -83,6 +83,7 @@ describe('install', () => {
       .mockImplementation(() => Promise.resolve({ packageInfo: { license: 'basic' } } as any));
 
     mockGetBundledPackages.mockReset();
+    install._installPackage.mockClear();
   });
 
   describe('registry', () => {
