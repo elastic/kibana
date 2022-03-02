@@ -52,7 +52,10 @@ class HandlebarsTestBench {
 
   toThrow(error?: string | RegExp | jest.Constructable | Error | undefined) {
     expect(() => {
-      this.compileAndExecute();
+      this.compileAndExecuteEval();
+    }).toThrowError(error);
+    expect(() => {
+      this.compileAndExecuteAST();
     }).toThrowError(error);
   }
 
@@ -63,24 +66,50 @@ class HandlebarsTestBench {
   }
 
   private compileAndExecute() {
-    const { renderEval, renderAST } = this.compile();
+    return {
+      outputEval: this.compileAndExecuteEval(),
+      outputAST: this.compileAndExecuteAST(),
+    };
+  }
+
+  private compileAndExecuteEval() {
+    const renderEval = this.compileEval();
 
     const runtimeOptions: ExtendedRuntimeOptions = {
       helpers: this.helpers,
     };
 
-    return {
-      outputEval: renderEval(this.input, runtimeOptions),
-      outputAST: renderAST(this.input, runtimeOptions),
+    return renderEval(this.input, runtimeOptions);
+  }
+
+  private compileAndExecuteAST() {
+    const renderAST = this.compileAST();
+
+    const runtimeOptions: ExtendedRuntimeOptions = {
+      helpers: this.helpers,
     };
+
+    return renderAST(this.input, runtimeOptions);
   }
 
   private compile() {
-    const handlebarsEnv = Handlebars.create();
+    const handlebarsEnv = getHandlebarsEnv();
 
     return {
-      renderEval: handlebarsEnv.compile(this.template, this.compileOptions),
-      renderAST: handlebarsEnv.compileAST(this.template, this.compileOptions),
+      renderEval: this.compileEval(handlebarsEnv),
+      renderAST: this.compileAST(handlebarsEnv),
     };
   }
+
+  private compileEval(handlebarsEnv = getHandlebarsEnv()) {
+    return handlebarsEnv.compile(this.template, this.compileOptions);
+  }
+
+  private compileAST(handlebarsEnv = getHandlebarsEnv()) {
+    return handlebarsEnv.compileAST(this.template, this.compileOptions);
+  }
+}
+
+function getHandlebarsEnv() {
+  return Handlebars.create();
 }
