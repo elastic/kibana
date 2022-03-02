@@ -9,25 +9,31 @@ export type Evaluation = 'passed' | 'failed' | 'NA';
 /** number between 1-100 */
 export type Score = number;
 
-export interface FindingsResults {
+export interface FindingsEvaluation {
   totalFindings: number;
   totalPassed: number;
   totalFailed: number;
 }
 
-export interface Stats extends FindingsResults {
+export interface Stats extends FindingsEvaluation {
   postureScore: Score;
 }
 
-export interface ResourceTypeAgg extends FindingsResults {
-  resourceType: string;
-}
-
-export interface BenchmarkStats extends Stats {
+export interface ResourceType extends FindingsEvaluation {
   name: string;
 }
 
-export interface CloudPostureStats extends Stats {
-  benchmarksStats: BenchmarkStats[];
-  resourceTypesAggs: ResourceTypeAgg[];
+export interface Cluster {
+  meta: {
+    clusterId: string;
+    benchmarkName: string;
+  };
+  stats: Stats;
+  resourcesTypes: ResourceType[];
+}
+
+export interface CloudPostureStats {
+  stats: Stats;
+  resourcesTypes: ResourceType[];
+  clusters: Cluster[];
 }
