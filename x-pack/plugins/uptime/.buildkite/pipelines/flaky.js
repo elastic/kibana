@@ -75,11 +75,16 @@ function getRunnerJob(env) {
 function getEnvFromMetadata() {
   const env = {};
 
-  env[E2E_COUNT] = execSync(
-    `buildkite-agent meta-data get '${E2E_COUNT}' --default ${defaultCount}`
-  )
+  const value = execSync(`buildkite-agent meta-data get '${E2E_COUNT}' --default ${defaultCount}`)
     .toString()
     .trim();
+
+  try {
+    env[E2E_COUNT] = parseInt(value, 10);
+  } catch (e) {
+    console.error(`+++ Failed parsing run count, found: ${value}`);
+  }
+
   env[E2E_GREP] = execSync(`buildkite-agent meta-data get '${E2E_GREP}'`).toString().trim();
 
   return env;
