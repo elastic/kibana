@@ -16,7 +16,7 @@ import {
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 import { createKibanaContextForPlugin } from '../hooks/use_kibana';
-import { InfraClientStartDeps } from '../types';
+import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { NavigationWarningPromptProvider } from '../../../observability/public';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
@@ -45,16 +45,17 @@ export const CommonInfraProviders: React.FC<{
 
 export const CoreProviders: React.FC<{
   core: CoreStart;
+  pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;
   theme$: AppMountParameters['theme$'];
-}> = ({ children, core, plugins, theme$ }) => {
+}> = ({ children, core, pluginStart, plugins, theme$ }) => {
   const { Provider: KibanaContextProviderForPlugin } = useMemo(
-    () => createKibanaContextForPlugin(core, plugins),
-    [core, plugins]
+    () => createKibanaContextForPlugin(core, plugins, pluginStart),
+    [core, pluginStart, plugins]
   );
 
   return (
-    <KibanaContextProviderForPlugin services={{ ...core, ...plugins }}>
+    <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
       <core.i18n.Context>
         <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
       </core.i18n.Context>

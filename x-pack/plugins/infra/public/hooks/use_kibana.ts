@@ -11,14 +11,19 @@ import {
   KibanaReactContextValue,
   useKibana,
 } from '../../../../../src/plugins/kibana_react/public';
-import { InfraClientStartDeps } from '../types';
+import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 
-export type PluginKibanaContextValue = CoreStart & InfraClientStartDeps;
+export type PluginKibanaContextValue = CoreStart & InfraClientStartDeps & InfraClientStartExports;
 
-export const createKibanaContextForPlugin = (core: CoreStart, pluginsStart: InfraClientStartDeps) =>
+export const createKibanaContextForPlugin = (
+  core: CoreStart,
+  plugins: InfraClientStartDeps,
+  pluginStart: InfraClientStartExports
+) =>
   createKibanaReactContext<PluginKibanaContextValue>({
     ...core,
-    ...pluginsStart,
+    ...plugins,
+    ...pluginStart,
   });
 
 export const useKibanaContextForPlugin =

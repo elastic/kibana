@@ -152,10 +152,10 @@ export class Plugin implements InfraClientPluginClass {
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
-        const [coreStart, pluginsStart] = await core.getStartServices();
+        const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/logs_app');
 
-        return renderApp(coreStart, pluginsStart, params);
+        return renderApp(coreStart, pluginsStart, pluginStart, params);
       },
     });
 
