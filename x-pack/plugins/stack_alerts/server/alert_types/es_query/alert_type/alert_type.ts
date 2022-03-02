@@ -192,5 +192,5 @@ export function getAlertType(
 }
 
 function isEsQueryAlert(options: ExecutorOptions<EsQueryAlertParams>) {
-  return options.params.searchType === 'esQuery';
+  return options.params.searchType !== 'searchSource';
 }
