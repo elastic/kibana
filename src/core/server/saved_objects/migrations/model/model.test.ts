@@ -47,10 +47,6 @@ import { AliasAction, RetryableEsClientError } from '../actions';
 import { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
-import {
-  ClusterAllocationDisabledError,
-  ClusterRoutingAllocationEnabled,
-} from '../actions/initialize_action';
 
 describe('migrations v2 model', () => {
   const baseState: BaseState = {
