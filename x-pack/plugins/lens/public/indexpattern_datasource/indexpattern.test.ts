@@ -1583,12 +1583,12 @@ describe('IndexPattern Data Source', () => {
         expect(publicAPI.getFilters(data)).toEqual({
           kuery: [
             [
-              { language: 'kuery', query: 'geo.src: US' },
-              { language: 'kuery', query: 'geo.src: IN' },
+              { language: 'kuery', query: 'geo.src: "US"' },
+              { language: 'kuery', query: 'geo.src: "IN"' },
             ],
             [
-              { language: 'kuery', query: 'geo.dest: IT AND myField: MyValue' },
-              { language: 'kuery', query: 'geo.dest: DE AND myField: MyOtherValue' },
+              { language: 'kuery', query: 'geo.dest: "IT" AND myField: "MyValue"' },
+              { language: 'kuery', query: 'geo.dest: "DE" AND myField: "MyOtherValue"' },
             ],
           ],
           lucene: [],
@@ -1650,12 +1650,12 @@ describe('IndexPattern Data Source', () => {
         expect(publicAPI.getFilters(data)).toEqual({
           kuery: [
             [
-              { language: 'kuery', query: 'geo.src: US' },
-              { language: 'kuery', query: 'geo.src: IN' },
+              { language: 'kuery', query: 'geo.src: "US"' },
+              { language: 'kuery', query: 'geo.src: "IN"' },
             ],
             [
-              { language: 'kuery', query: "geo.dest: IT AND myField: ''" },
-              { language: 'kuery', query: 'geo.dest: DE AND myField: MyOtherValue' },
+              { language: 'kuery', query: `geo.dest: "IT" AND myField: ""` },
+              { language: 'kuery', query: `geo.dest: "DE" AND myField: "MyOtherValue"` },
             ],
           ],
           lucene: [],

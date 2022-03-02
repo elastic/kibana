@@ -12,7 +12,7 @@ import type { DocLinksStart } from 'kibana/public';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { DatatableColumn } from 'src/plugins/expressions';
-import { groupBy } from 'lodash';
+import { groupBy, escape } from 'lodash';
 import type { FramePublicAPI, StateSetter } from '../types';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -302,12 +302,12 @@ function extractQueriesFromTerms(
       if (typeof value !== 'string' && Array.isArray(value.keys)) {
         return {
           query: value.keys
-            .map((term: string, index: number) => `${fields[index]}: ${term || "''"}`)
+            .map((term: string, index: number) => `${fields[index]}: ${`"${escape(term)}"`}`)
             .join(' AND '),
           language: 'kuery',
         };
       }
-      return { query: `${column.sourceField}: ${value}`, language: 'kuery' };
+      return { query: `${column.sourceField}: ${`"${escape(value)}"`}`, language: 'kuery' };
     })
     .filter(Boolean) as Query[];
 }
@@ -421,13 +421,12 @@ export function getFiltersInLayer(
         !(column.params.otherBucket || column.params.missingBucket)
       ) {
         if (!layerData || shouldUseTermsFallback(layerData, colId)) {
+          const fields = operationDefinitionMap[column.operationType]!.getCurrentFields!(column);
           return {
-            kuery: [{ query: `${column.sourceField}: *`, language: 'kuery' }].concat(
-              column.params.secondaryFields?.map((field) => ({
-                query: `${field}: *`,
-                language: 'kuery',
-              })) || []
-            ),
+            kuery: fields.map((field) => ({
+              query: `${field}: *`,
+              language: 'kuery',
+            })),
           };
         }
 
