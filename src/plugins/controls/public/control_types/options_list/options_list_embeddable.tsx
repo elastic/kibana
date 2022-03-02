@@ -207,9 +207,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   }
 
   private runOptionsListQuery = async () => {
-    this.updateComponentState({ loading: true });
-    this.updateOutput({ loading: true });
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    this.updateComponentState({ loading: true });
+    this.updateOutput({ loading: true, dataViews: [dataView] });
     const { ignoreParentSettings, filters, query, selectedOptions, timeRange } = this.getInput();
 
     if (this.abortController) this.abortController.abort();
@@ -261,7 +261,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private buildFilter = async () => {
     const { validSelections } = this.componentState;
     if (!validSelections || isEmpty(validSelections)) {
-      // this.updateOutput({ filters: [] });
       return [];
     }
     const { dataView, field } = await this.getCurrentDataViewAndField();
@@ -274,7 +273,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     newFilter.meta.key = field?.name;
-    // this.updateOutput({ filters: [newFilter] });
     return [newFilter];
   };
 

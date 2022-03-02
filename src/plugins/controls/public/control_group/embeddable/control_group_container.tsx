@@ -80,7 +80,7 @@ export class ControlGroupContainer extends Container<
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
   private childOrderCache: ChildEmbeddableOrderCache;
-  private recalculateOutputSubject$: Subject<null>;
+  private recalculateFilters$: Subject<null>;
 
   constructor(initialInput: ControlGroupInput, parent?: Container) {
     super(
@@ -93,7 +93,7 @@ export class ControlGroupContainer extends Container<
       true
     );
 
-    this.recalculateOutputSubject$ = new Subject();
+    this.recalculateFilters$ = new Subject();
 
     // set up order cache so that it is aligned on input changes.
     this.childOrderCache = this.getEmbeddableOrderCache();
@@ -101,7 +101,8 @@ export class ControlGroupContainer extends Container<
 
     // when all children are ready setup subscriptions
     this.untilReady().then(() => {
-      this.recalculateOutput();
+      this.recalculateDataViews();
+      this.recalculateFilters();
       this.setupSubscriptions();
     });
   }
@@ -117,6 +118,8 @@ export class ControlGroupContainer extends Container<
           distinctUntilChanged((a, b) => controlOrdersAreEqual(a.panels, b.panels))
         )
         .subscribe(() => {
+          this.recalculateDataViews();
+          this.recalculateFilters();
           this.childOrderCache = this.getEmbeddableOrderCache();
           this.childOrderCache.idsInOrder.forEach((id) =>
             this.getChild(id)?.refreshInputFromParent()
@@ -154,9 +157,10 @@ export class ControlGroupContainer extends Container<
       this.getOutput$()
         .pipe(anyChildChangePipe)
         .subscribe((childOutputChangedId) => {
+          this.recalculateDataViews();
           if (childOutputChangedId === this.childOrderCache.lastChildId) {
             // the last control's output has updated, recalculate filters
-            this.recalculateOutputSubject$.next();
+            this.recalculateFilters$.next();
             return;
           }
 
@@ -175,9 +179,7 @@ export class ControlGroupContainer extends Container<
      * debounce output recalculation
      */
     this.subscriptions.add(
-      this.recalculateOutputSubject$
-        .pipe(debounceTime(10))
-        .subscribe(() => this.recalculateOutput())
+      this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
     );
   };
 
@@ -237,16 +239,22 @@ export class ControlGroupContainer extends Container<
     return { IdsToOrder, idsInOrder, lastChildId };
   };
 
-  private recalculateOutput = () => {
+  private recalculateFilters = () => {
     const allFilters: Filter[] = [];
-    const allDataViews: DataView[] = [];
     Object.values(this.children).map((child) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
+    });
+    this.updateOutput({ filters: uniqFilters(allFilters) });
+  };
+
+  private recalculateDataViews = () => {
+    const allDataViews: DataView[] = [];
+    Object.values(this.children).map((child) => {
+      const childOutput = child.getOutput() as ControlOutput;
       allDataViews.push(...(childOutput.dataViews ?? []));
     });
-    // console.log('Outputting filters, ', uniqFilters(allFilters));
-    this.updateOutput({ filters: uniqFilters(allFilters), dataViews: uniqBy(allDataViews, 'id') });
+    this.updateOutput({ dataViews: uniqBy(allDataViews, 'id') });
   };
 
   protected createNewPanelState<TEmbeddableInput extends ControlInput = ControlInput>(

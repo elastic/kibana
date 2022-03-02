@@ -75,8 +75,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       for (const id of ids) {
         await dashboardControls.optionsListOpenPopover(id);
         await retry.try(async () => {
-          // Value counts should be 10, because there are more than 10 speakers and plays in the data set
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(10);
+          // Value counts should be 5, because the previous control, speaker name, has the selection "HAMLET","ROMEO","JULIET","BRUTUS"
+          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(5);
         });
         await dashboardControls.optionsListEnsurePopoverIsClosed(id);
       }
