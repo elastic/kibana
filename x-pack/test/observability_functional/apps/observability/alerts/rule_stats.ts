@@ -45,7 +45,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Stat counters', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/124681
+    describe.skip('Stat counters', () => {
       beforeEach(async () => {
         const uniqueKey = generateUniqueKey();
 

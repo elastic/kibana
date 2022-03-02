@@ -57,10 +57,13 @@ const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
 const defaultTCPConfig = defaultConfig[DataStream.TCP];
 
 describe('<CustomFields />', () => {
+  let onFieldBlurMock: jest.Mock | undefined;
+
   const WrappedComponent = ({
     validate = defaultValidation,
     isEditable = false,
     dataStreams = [DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER],
+    onFieldBlur = onFieldBlurMock,
   }) => {
     return (
       <HTTPContextProvider>
@@ -69,7 +72,11 @@ describe('<CustomFields />', () => {
             <BrowserContextProvider>
               <ICMPSimpleFieldsContextProvider>
                 <TLSFieldsContextProvider>
-                  <CustomFields validate={validate} dataStreams={dataStreams} />
+                  <CustomFields
+                    validate={validate}
+                    dataStreams={dataStreams}
+                    onFieldBlur={onFieldBlur}
+                  />
                 </TLSFieldsContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </BrowserContextProvider>
@@ -79,8 +86,15 @@ describe('<CustomFields />', () => {
     );
   };
 
+  beforeEach(() => {
+    onFieldBlurMock = undefined;
+    jest.resetAllMocks();
+  });
+
   it('renders CustomFields', async () => {
-    const { getByText, getByLabelText, queryByLabelText } = render(<WrappedComponent />);
+    const { getByText, getByLabelText, queryByLabelText } = render(
+      <WrappedComponent onFieldBlur={undefined} />
+    );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     const url = getByLabelText('URL') as HTMLInputElement;
     const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
@@ -365,5 +379,20 @@ describe('<CustomFields />', () => {
     await waitFor(() => {
       expect(enabled).not.toBeChecked();
     });
+  });
+
+  it('calls onFieldBlur on fields', () => {
+    onFieldBlurMock = jest.fn();
+    const { queryByLabelText } = render(
+      <WrappedComponent
+        dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP]}
+        onFieldBlur={onFieldBlurMock}
+      />
+    );
+
+    const monitorTypeSelect = queryByLabelText('Monitor Type') as HTMLInputElement;
+    fireEvent.click(monitorTypeSelect);
+    fireEvent.blur(monitorTypeSelect);
+    expect(onFieldBlurMock).toHaveBeenCalledWith(ConfigKey.MONITOR_TYPE);
   });
 });
