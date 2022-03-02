@@ -7,7 +7,6 @@
  */
 
 import { Assign } from '@kbn/utility-types';
-import { DatatableColumn } from 'src/plugins/expressions';
 import { IndexPattern } from '../..';
 import {
   aggAvg,
@@ -88,7 +87,6 @@ import {
   CreateAggConfigParams,
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
-  AggConfig,
   aggFilteredMetric,
   aggSinglePercentile,
 } from './';
@@ -111,11 +109,6 @@ export interface AggsCommonSetup {
 
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
-  datatableUtilities: {
-    getIndexPattern: (column: DatatableColumn) => Promise<IndexPattern | undefined>;
-    getAggConfig: (column: DatatableColumn) => Promise<AggConfig | undefined>;
-    isFilterable: (column: DatatableColumn) => boolean;
-  };
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[]
