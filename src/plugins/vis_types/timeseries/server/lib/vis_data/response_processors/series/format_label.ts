@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES, PANEL_TYPES } from '../../../../../common/enums';
+import { BUCKET_TYPES, PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import {
   createCachedFieldValueFormatter,
   getFieldsForTerms,
@@ -32,9 +32,13 @@ export function formatLabel(
     const { terms_field: termsField, split_mode: splitMode } = series;
     const termsIds = getFieldsForTerms(termsField);
 
-    // no need to format labels for markdown as they also used there as variables keys
     const shouldFormatLabels =
-      termsIds.length && splitMode === BUCKET_TYPES.TERMS && panel.type !== PANEL_TYPES.MARKDOWN;
+      // no need to format labels for series_agg
+      !series.metrics.some((m) => m.type === TSVB_METRIC_TYPES.SERIES_AGG) &&
+      termsIds.length &&
+      splitMode === BUCKET_TYPES.TERMS &&
+      // no need to format labels for markdown as they also used there as variables keys
+      panel.type !== PANEL_TYPES.MARKDOWN;
 
     if (shouldFormatLabels) {
       const fetchedIndex = meta.dataViewId
