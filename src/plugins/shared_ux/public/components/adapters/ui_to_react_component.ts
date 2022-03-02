@@ -16,7 +16,7 @@ export const uiToReactComponent =
   <Props extends object>(Comp: UiComponent<Props>, as: string = 'div'): FC<Props> =>
   (props) => {
     const ref = useRef<HTMLDivElement>();
-    const comp = useMemo<UiComponentInstance<Props>>(() => Comp(), [Comp]);
+    const comp = useMemo<UiComponentInstance<Props>>(() => Comp(), []);
 
     useLayoutEffect(() => {
       if (!ref.current) return;
