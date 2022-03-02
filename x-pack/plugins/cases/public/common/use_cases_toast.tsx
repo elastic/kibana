@@ -54,7 +54,7 @@ export const useCasesToast = () => {
     },
   };
 };
-const CaseToastSuccessContent = ({
+export const CaseToastSuccessContent = ({
   syncAlerts,
   onViewCaseClick,
 }: {
