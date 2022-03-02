@@ -120,6 +120,7 @@ export async function getEndpointExceptionList(
   return getFilteredEndpointExceptionList(eClient, schemaVersion, filter, ENDPOINT_LIST_ID);
 }
 
+// TODO unify artifact list filter into a single method that accepts a param for listId
 export async function getEndpointTrustedAppsList(
   eClient: ExceptionListClient,
   schemaVersion: string,
@@ -139,6 +140,7 @@ export async function getEndpointTrustedAppsList(
   );
 }
 
+// TODO unify artifact list filter into a single method that accepts a param for listId
 export async function getEndpointEventFiltersList(
   eClient: ExceptionListClient,
   schemaVersion: string,
@@ -158,6 +160,7 @@ export async function getEndpointEventFiltersList(
   );
 }
 
+// TODO unify artifact list filter into a single method that accepts a param for listId
 export async function getHostIsolationExceptionsList(
   eClient: ExceptionListClient,
   schemaVersion: string,
@@ -177,6 +180,7 @@ export async function getHostIsolationExceptionsList(
   );
 }
 
+// TODO unify artifact list filter into a single method that accepts a param for listId
 export async function getEndpointBlocklistsList(
   eClient: ExceptionListClient,
   schemaVersion: string,
