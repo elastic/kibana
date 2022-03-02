@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AnomaliesHostTableProps } from '../types';
+import { AnomaliesTableCommonProps } from '../types';
 
-export const hostEquality = (
-  prevProps: AnomaliesHostTableProps,
-  nextProps: AnomaliesHostTableProps
+export const anomaliesTableDefaultEquality = (
+  prevProps: AnomaliesTableCommonProps,
+  nextProps: AnomaliesTableCommonProps
 ): boolean =>
   prevProps.startDate === nextProps.startDate &&
   prevProps.endDate === nextProps.endDate &&
