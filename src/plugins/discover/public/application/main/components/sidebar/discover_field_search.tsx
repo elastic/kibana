@@ -362,7 +362,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
-            anchorPosition="rightDown"
+            anchorPosition="rightUp"
             display="block"
             button={
               <EuiButtonIcon onClick={onHelpClick} iconType="questionInCircle" aria-label="Help" />
