@@ -1716,6 +1716,8 @@ export function getSplitByTermsLayer(
       paramName: 'secondaryFields',
       value: secondaryFields.map((i) => i.name),
     });
+
+    termsLayer = updateDefaultLabels(termsLayer, indexPattern);
   }
 
   const termsColumnParams = termsParams as TermsIndexPatternColumn['params'];
