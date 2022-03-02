@@ -25,7 +25,6 @@ import {
 } from '../../../../common/types/timeline';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { useKibana } from '../../../common/lib/kibana';
 import { mockCasesContext } from '../../../common/mock/mock_cases_context';
 

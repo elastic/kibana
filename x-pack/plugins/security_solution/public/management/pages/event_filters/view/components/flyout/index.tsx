@@ -210,7 +210,12 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     );
 
     return (
-      <EuiFlyout size="l" onClose={handleOnCancel} data-test-subj="eventFiltersCreateEditFlyout">
+      <EuiFlyout
+        size="l"
+        onClose={handleOnCancel}
+        data-test-subj="eventFiltersCreateEditFlyout"
+        maskProps={{ style: 'z-index: 5000' }}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
