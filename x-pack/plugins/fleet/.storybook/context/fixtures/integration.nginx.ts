@@ -253,7 +253,6 @@ export const item: GetInfoResponse['item'] = {
       map: [],
       security_rule: [],
       csp_rule_template: [],
-
       tag: [],
     },
     elasticsearch: {

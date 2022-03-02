@@ -8,8 +8,6 @@
       "impact": "Anonymous requests will be rejected.",
       "default_value": "By default, anonymous access is enabled.",
       "remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kubeapiserver.yaml on the master node and set the below parameter.\n--anonymous-auth=false",
-      "enabled": true,
-      "muted": false,
       "tags": [
         "Kubernetes",
         "Containers"
@@ -20,3 +18,4 @@
     "id": "sample_csp_rule_template",
     "type": "csp-rule-template"
   }
+  

@@ -15,15 +15,36 @@ const ruleTemplateAssetSavedObjectMappings: SavedObjectsType<CspRuleTemplateSche
   dynamic: false,
   properties: {
     name: {
-      type: 'text', // search
-      fields: {
-        // TODO: how is fields mapping shared with UI ?
-        raw: {
-          type: 'keyword', // sort
-        },
-      },
+      type: 'text',
     },
     description: {
+      type: 'text',
+    },
+    rationale: {
+      type: 'text',
+    },
+    impact: {
+      type: 'text',
+    },
+    default_value: {
+      type: 'text',
+    },
+    remediation: {
+      type: 'text',
+    },
+    benchmark: {
+      type: 'object',
+    },
+    severity: {
+      type: 'text',
+    },
+    benchmark_rule_id: {
+      type: 'text',
+    },
+    rego_rule_id: {
+      type: 'text',
+    },
+    tags: {
       type: 'text',
     },
   },

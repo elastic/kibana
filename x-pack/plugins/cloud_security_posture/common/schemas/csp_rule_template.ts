@@ -18,8 +18,6 @@ const cspRuleTemplateSchema = rt.object({
   benchmark_rule_id: rt.string(),
   rego_rule_id: rt.string(),
   tags: rt.arrayOf(rt.string()),
-  enabled: rt.boolean(),
-  muted: rt.boolean(),
 });
 
 export const cspRuleTemplateSavedObjectType = 'csp-rule-template';
