@@ -236,7 +236,7 @@ export default ({ getService }: FtrProviderContext) => {
        * and at line 397 and change showCheckboxes to true
        *
        */
-      describe.skip('Bulk Actions Button', () => {
+      describe.skip('Bulk Actions', () => {
         before(async () => {
           await security.testUser.setRoles(['global_alerts_logs_all_else_read'], true);
           await observability.alerts.common.submitQuery('kibana.alert.status: "active"');

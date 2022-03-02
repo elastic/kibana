@@ -14,6 +14,7 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   RAC_ALERTS_BULK_UPDATE_URL,
 } from '../../common/constants';
+import { STANDALONE_ID } from '../components/t_grid/standalone';
 
 /**
  * Update alert status by query
@@ -28,7 +29,7 @@ import {
  * @throws An error if response is not OK
  */
 export const useUpdateAlertsStatus = (
-  useDetectionEngine: boolean = false
+  timelineId?: string
 ): {
   updateAlertStatus: (params: {
     status: AlertStatus;
@@ -39,17 +40,17 @@ export const useUpdateAlertsStatus = (
   const { http } = useKibana<CoreStart>().services;
   return {
     updateAlertStatus: async ({ status, index, query }) => {
-      if (useDetectionEngine) {
-        return http.fetch<estypes.UpdateByQueryResponse>(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ status, query }),
-        });
-      } else {
+      if (timelineId === STANDALONE_ID) {
         const response = await http.post<estypes.UpdateByQueryResponse>(
           RAC_ALERTS_BULK_UPDATE_URL,
           { body: JSON.stringify({ index, status, query }) }
         );
         return response;
+      } else {
+        return http.fetch<estypes.UpdateByQueryResponse>(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ status, query }),
+        });
       }
     },
   };
