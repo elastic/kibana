@@ -23,16 +23,19 @@ type TickValue = 0 | 1;
 export const SteppedGradientLegend: React.FC<Props> = ({ legend, bounds, formatter }) => {
   return (
     <LegendContainer>
-      <TickLabel value={0} bounds={bounds} formatter={formatter} />
-      <GradientContainer>
-        {legend.rules.map((rule, index) => (
-          <GradientStep
-            key={`step-${index}-${rule.value}`}
-            style={{ backgroundColor: rule.color }}
-          />
-        ))}
-      </GradientContainer>
       <TickLabel value={1} bounds={bounds} formatter={formatter} />
+      <GradientContainer>
+        {legend.rules
+          .slice()
+          .reverse()
+          .map((rule, index) => (
+            <GradientStep
+              key={`step-${index}-${rule.value}`}
+              style={{ backgroundColor: rule.color }}
+            />
+          ))}
+      </GradientContainer>
+      <TickLabel value={0} bounds={bounds} formatter={formatter} />
     </LegendContainer>
   );
 };
