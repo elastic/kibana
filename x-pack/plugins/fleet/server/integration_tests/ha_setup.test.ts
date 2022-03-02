@@ -19,7 +19,7 @@ import type {
   PackagePolicySOAttributes,
 } from '../types';
 
-import { useDockerRegistry } from './docker_registry_helper';
+import { useDockerRegistry } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
