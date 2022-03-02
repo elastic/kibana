@@ -54,7 +54,7 @@ describe('schedule_notification_actions', () => {
   };
 
   it('Should schedule actions with unflatted and legacy context', () => {
-    const alertInstance = alertServices.alertInstanceFactory(alertId);
+    const alertInstance = alertServices.alertFactory.create(alertId);
     const signals = [sampleThresholdAlert._source, sampleThresholdAlert._source];
     scheduleNotificationActions({
       alertInstance,

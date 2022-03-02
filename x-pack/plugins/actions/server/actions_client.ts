@@ -606,7 +606,7 @@ async function injectExtraFindData(
       },
     };
   }
-  const { body: aggregationResult } = await scopedClusterClient.asInternalUser.search({
+  const aggregationResult = await scopedClusterClient.asInternalUser.search({
     index: defaultKibanaIndex,
     body: {
       aggs,

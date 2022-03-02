@@ -22,18 +22,14 @@ describe('get_cluster_uuids', () => {
   });
 
   const response = {
-    body: {
-      aggregations: {
-        cluster_uuids: {
-          buckets: [{ key: 'abc' }, { key: 'xyz' }, { key: '123' }],
-        },
+    aggregations: {
+      cluster_uuids: {
+        buckets: [{ key: 'abc' }, { key: 'xyz' }, { key: '123' }],
       },
     },
   };
 
-  const expectedUuids = response.body.aggregations.cluster_uuids.buckets.map(
-    (bucket) => bucket.key
-  );
+  const expectedUuids = response.aggregations.cluster_uuids.buckets.map((bucket) => bucket.key);
 
   const timestamp = Date.now();
 
@@ -47,7 +43,7 @@ describe('get_cluster_uuids', () => {
   describe('fetchClusterUuids', () => {
     it('searches for clusters', async () => {
       searchMock.returns(Promise.resolve(response));
-      expect(await fetchClusterUuids(callCluster, timestamp, 1)).toStrictEqual(response.body);
+      expect(await fetchClusterUuids(callCluster, timestamp, 1)).toStrictEqual(response);
     });
   });
 
@@ -59,7 +55,7 @@ describe('get_cluster_uuids', () => {
     });
 
     it('handles valid response', () => {
-      const clusterUuids = handleClusterUuidsResponse(response.body);
+      const clusterUuids = handleClusterUuidsResponse(response);
       expect(clusterUuids).toStrictEqual(expectedUuids);
     });
 

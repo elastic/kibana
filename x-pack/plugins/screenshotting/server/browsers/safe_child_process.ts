@@ -10,7 +10,7 @@ import { take, share, mapTo, delay, tap } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 
 interface IChild {
-  kill: (signal: string) => Promise<void>;
+  kill(signal: string): Promise<unknown>;
 }
 
 // Our process can get sent various signals, and when these occur we wish to

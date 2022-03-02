@@ -18,12 +18,12 @@ interface Props {
   children: React.ReactNode;
 }
 
-const CHART_HEIGHT = 170;
+const CHART_HEIGHT = 120;
 
 export function ChartContainer({
   isInitialLoad,
   children,
-  iconSize = 'xl',
+  iconSize = 'l',
   height = CHART_HEIGHT,
 }: Props) {
   if (isInitialLoad) {

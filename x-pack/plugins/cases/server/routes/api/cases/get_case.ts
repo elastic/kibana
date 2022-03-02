@@ -7,72 +7,83 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
+import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
-export function initGetCaseApi({ router, logger }: RouteDeps) {
-  router.get(
-    {
-      path: CASE_DETAILS_URL,
-      validate: {
-        params: schema.object({
-          case_id: schema.string(),
-        }),
-        query: schema.object({
-          includeComments: schema.boolean({ defaultValue: true }),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const casesClient = await context.cases.getCasesClient();
-        const id = request.params.case_id;
+const params = {
+  params: schema.object({
+    case_id: schema.string(),
+  }),
+  query: schema.object({
+    /**
+     * @deprecated since version 8.1.0
+     */
+    includeComments: schema.boolean({ defaultValue: true }),
+  }),
+};
 
-        return response.ok({
-          body: await casesClient.cases.get({
-            id,
-            includeComments: request.query.includeComments,
-          }),
-        });
-      } catch (error) {
-        logger.error(
-          `Failed to retrieve case in route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments}: ${error}`
+export const getCaseRoute = createCasesRoute({
+  method: 'get',
+  path: CASE_DETAILS_URL,
+  params,
+  handler: async ({ context, request, response, logger, kibanaVersion }) => {
+    try {
+      const isIncludeCommentsParamProvidedByTheUser =
+        request.url.searchParams.has('includeComments');
+
+      if (isIncludeCommentsParamProvidedByTheUser) {
+        logDeprecatedEndpoint(
+          logger,
+          request.headers,
+          `The query parameter 'includeComments' of the get case API '${CASE_DETAILS_URL}' is deprecated`
         );
-        return response.customError(wrapError(error));
       }
-    }
-  );
 
-  router.get(
-    {
-      path: `${CASE_DETAILS_URL}/resolve`,
-      validate: {
-        params: schema.object({
-          case_id: schema.string(),
-        }),
-        query: schema.object({
-          includeComments: schema.boolean({ defaultValue: true }),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const casesClient = await context.cases.getCasesClient();
-        const id = request.params.case_id;
+      const casesClient = await context.cases.getCasesClient();
+      const id = request.params.case_id;
 
-        return response.ok({
-          body: await casesClient.cases.resolve({
-            id,
-            includeComments: request.query.includeComments,
-          }),
-        });
-      } catch (error) {
-        logger.error(
-          `Failed to retrieve case in resolve route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
+      return response.ok({
+        ...(isIncludeCommentsParamProvidedByTheUser && {
+          headers: {
+            ...getWarningHeader(kibanaVersion, 'Deprecated query parameter includeComments'),
+          },
+        }),
+        body: await casesClient.cases.get({
+          id,
+          includeComments: request.query.includeComments,
+        }),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to retrieve case in route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments}: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});
+
+export const resolveCaseRoute = createCasesRoute({
+  method: 'get',
+  path: `${CASE_DETAILS_URL}/resolve`,
+  params,
+  handler: async ({ context, request, response }) => {
+    try {
+      const casesClient = await context.cases.getCasesClient();
+      const id = request.params.case_id;
+
+      return response.ok({
+        body: await casesClient.cases.resolve({
+          id,
+          includeComments: request.query.includeComments,
+        }),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to retrieve case in resolve route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments}: ${error}`,
+        error,
+      });
+    }
+  },
+});

@@ -8,13 +8,18 @@
 import { useEffect, useState, useContext } from 'react';
 import { UptimeRefreshContext } from '../../../contexts';
 
-export function useTickTick() {
-  const { refreshApp, lastRefresh } = useContext(UptimeRefreshContext);
+export function useTickTick(interval?: number, refresh = true) {
+  const { refreshApp } = useContext(UptimeRefreshContext);
+
+  const [nextTick, setNextTick] = useState(Date.now());
 
   const [tickTick] = useState<NodeJS.Timer>(() =>
     setInterval(() => {
-      refreshApp();
-    }, 5 * 1000)
+      if (refresh) {
+        refreshApp();
+      }
+      setNextTick(Date.now());
+    }, interval ?? 5 * 1000)
   );
 
   useEffect(() => {
@@ -23,5 +28,5 @@ export function useTickTick() {
     };
   }, [tickTick]);
 
-  return { refreshTimer: tickTick, lastRefresh };
+  return { refreshTimer: tickTick, lastRefresh: nextTick };
 }

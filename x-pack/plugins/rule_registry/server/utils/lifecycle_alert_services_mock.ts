@@ -34,5 +34,5 @@ export const createLifecycleAlertServicesMock = <
 >(
   alertServices: AlertServices<InstanceState, InstanceContext>
 ): LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds> => ({
-  alertWithLifecycle: ({ id }) => alertServices.alertInstanceFactory(id),
+  alertWithLifecycle: ({ id }) => alertServices.alertFactory.create(id),
 });

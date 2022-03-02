@@ -61,11 +61,9 @@ export const register = (deps: RouteDependencies): void => {
       }
 
       const addClusterPayload = serializeCluster(request.body as Cluster);
-      const { body: updateClusterResponse } = await clusterClient.asCurrentUser.cluster.putSettings(
-        {
-          body: addClusterPayload,
-        }
-      );
+      const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings({
+        body: addClusterPayload,
+      });
       const acknowledged = get(updateClusterResponse, 'acknowledged');
       const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
 

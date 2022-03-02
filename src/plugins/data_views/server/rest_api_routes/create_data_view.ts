@@ -10,11 +10,7 @@ import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
 import { DataViewSpec, DataViewsService } from 'src/plugins/data_views/common';
 import { handleErrors } from './util/handle_errors';
-import {
-  fieldSpecSchema,
-  runtimeFieldSpecSchema,
-  serializedFieldFormatSchema,
-} from './util/schemas';
+import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
@@ -45,7 +41,7 @@ export const createDataView = async ({
   return dataViewsService.createAndSave(spec, override, !refreshFields);
 };
 
-const indexPatternSpecSchema = schema.object({
+const dataViewSpecSchema = schema.object({
   title: schema.string(),
   version: schema.maybe(schema.string()),
   id: schema.maybe(schema.string()),
@@ -71,7 +67,7 @@ const indexPatternSpecSchema = schema.object({
     )
   ),
   allowNoIndex: schema.maybe(schema.boolean()),
-  runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSpecSchema)),
+  runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
 });
 
 const registerCreateDataViewRouteFactory =
@@ -91,9 +87,8 @@ const registerCreateDataViewRouteFactory =
           body: schema.object({
             override: schema.maybe(schema.boolean({ defaultValue: false })),
             refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-            data_view: serviceKey === SERVICE_KEY ? indexPatternSpecSchema : schema.never(),
-            index_pattern:
-              serviceKey === SERVICE_KEY_LEGACY ? indexPatternSpecSchema : schema.never(),
+            data_view: serviceKey === SERVICE_KEY ? dataViewSpecSchema : schema.never(),
+            index_pattern: serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
           }),
         },
       },

@@ -41,7 +41,7 @@ export const getDatatableRenderer = (dependencies: {
     handlers: ILensInterpreterRenderHandlers
   ) => {
     const resolvedGetType = await dependencies.getType;
-    const { hasCompatibleActions } = handlers;
+    const { hasCompatibleActions, isInteractive } = handlers;
 
     // An entry for each table row, whether it has any actions attached to
     // ROW_CLICK_TRIGGER trigger.
@@ -81,6 +81,7 @@ export const getDatatableRenderer = (dependencies: {
             paletteService={dependencies.paletteService}
             getType={resolvedGetType}
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+            interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
           />
         </I18nProvider>

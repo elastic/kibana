@@ -13,7 +13,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
 import realHits from '../../../../__fixtures__/real_hits.js';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';

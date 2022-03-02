@@ -64,19 +64,19 @@ export const fetchTransactionDurationPercentiles = async (
   >(getTransactionDurationPercentilesRequest(params, percents, termFilters));
 
   // return early with no results if the search didn't return any documents
-  if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
+  if ((resp.hits.total as estypes.SearchTotalHits).value === 0) {
     return { totalDocs: 0, percentiles: {} };
   }
 
-  if (resp.body.aggregations === undefined) {
+  if (resp.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationPercentiles failed, did not return aggregations.'
     );
   }
 
   return {
-    totalDocs: (resp.body.hits.total as estypes.SearchTotalHits).value,
+    totalDocs: (resp.hits.total as estypes.SearchTotalHits).value,
     percentiles:
-      resp.body.aggregations.transaction_duration_percentiles.values ?? {},
+      resp.aggregations.transaction_duration_percentiles.values ?? {},
   };
 };

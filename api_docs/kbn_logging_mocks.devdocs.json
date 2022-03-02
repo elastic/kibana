@@ -1,0 +1,234 @@
+{
+  "id": "@kbn/logging-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/logging-mocks",
+        "id": "def-server.MockedLogger",
+        "type": "Type",
+        "tags": [],
+        "label": "MockedLogger",
+        "description": [],
+        "signature": [
+          "{ trace: jest.MockInstance<void, [message: string, meta?: ",
+          "LogMeta",
+          " | undefined]>; debug: jest.MockInstance<void, [message: string, meta?: ",
+          "LogMeta",
+          " | undefined]>; info: jest.MockInstance<void, [message: string, meta?: ",
+          "LogMeta",
+          " | undefined]>; warn: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+          "LogMeta",
+          " | undefined]>; error: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+          "LogMeta",
+          " | undefined]>; fatal: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+          "LogMeta",
+          " | undefined]>; log: jest.MockInstance<void, [record: ",
+          "LogRecord",
+          "]>; get: jest.MockInstance<",
+          "Logger",
+          ", string[]>; } & ",
+          "Logger",
+          " & { context: string[]; }"
+        ],
+        "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/logging-mocks",
+        "id": "def-server.loggerMock",
+        "type": "Object",
+        "tags": [],
+        "label": "loggerMock",
+        "description": [],
+        "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/logging-mocks",
+            "id": "def-server.loggerMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(context?: string[]) => ",
+              {
+                "pluginId": "@kbn/logging-mocks",
+                "scope": "server",
+                "docId": "kibKbnLoggingMocksPluginApi",
+                "section": "def-server.MockedLogger",
+                "text": "MockedLogger"
+              }
+            ],
+            "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/logging-mocks",
+                "id": "def-server.loggerMock.create.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/logging-mocks",
+            "id": "def-server.loggerMock.clear",
+            "type": "Function",
+            "tags": [],
+            "label": "clear",
+            "description": [],
+            "signature": [
+              "(logger: ",
+              {
+                "pluginId": "@kbn/logging-mocks",
+                "scope": "server",
+                "docId": "kibKbnLoggingMocksPluginApi",
+                "section": "def-server.MockedLogger",
+                "text": "MockedLogger"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/logging-mocks",
+                "id": "def-server.loggerMock.clear.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "{ trace: jest.MockInstance<void, [message: string, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; debug: jest.MockInstance<void, [message: string, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; info: jest.MockInstance<void, [message: string, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; warn: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; error: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; fatal: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; log: jest.MockInstance<void, [record: ",
+                  "LogRecord",
+                  "]>; get: jest.MockInstance<",
+                  "Logger",
+                  ", string[]>; } & ",
+                  "Logger",
+                  " & { context: string[]; }"
+                ],
+                "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/logging-mocks",
+            "id": "def-server.loggerMock.collect",
+            "type": "Function",
+            "tags": [],
+            "label": "collect",
+            "description": [],
+            "signature": [
+              "(logger: ",
+              {
+                "pluginId": "@kbn/logging-mocks",
+                "scope": "server",
+                "docId": "kibKbnLoggingMocksPluginApi",
+                "section": "def-server.MockedLogger",
+                "text": "MockedLogger"
+              },
+              ") => { debug: [message: string, meta?: ",
+              "LogMeta",
+              " | undefined][]; error: [errorOrMessage: string | Error, meta?: ",
+              "LogMeta",
+              " | undefined][]; fatal: [errorOrMessage: string | Error, meta?: ",
+              "LogMeta",
+              " | undefined][]; info: [message: string, meta?: ",
+              "LogMeta",
+              " | undefined][]; log: [record: ",
+              "LogRecord",
+              "][]; trace: [message: string, meta?: ",
+              "LogMeta",
+              " | undefined][]; warn: [errorOrMessage: string | Error, meta?: ",
+              "LogMeta",
+              " | undefined][]; }"
+            ],
+            "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/logging-mocks",
+                "id": "def-server.loggerMock.collect.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "{ trace: jest.MockInstance<void, [message: string, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; debug: jest.MockInstance<void, [message: string, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; info: jest.MockInstance<void, [message: string, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; warn: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; error: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; fatal: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  "LogMeta",
+                  " | undefined]>; log: jest.MockInstance<void, [record: ",
+                  "LogRecord",
+                  "]>; get: jest.MockInstance<",
+                  "Logger",
+                  ", string[]>; } & ",
+                  "Logger",
+                  " & { context: string[]; }"
+                ],
+                "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

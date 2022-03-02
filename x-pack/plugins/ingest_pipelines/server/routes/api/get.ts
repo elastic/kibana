@@ -21,7 +21,7 @@ export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDepen
     const { client: clusterClient } = ctx.core.elasticsearch;
 
     try {
-      const { body: pipelines } = await clusterClient.asCurrentUser.ingest.getPipeline();
+      const pipelines = await clusterClient.asCurrentUser.ingest.getPipeline();
 
       return res.ok({ body: deserializePipelines(pipelines) });
     } catch (error) {
@@ -48,7 +48,7 @@ export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDepen
       const { name } = req.params;
 
       try {
-        const { body: pipelines } = await clusterClient.asCurrentUser.ingest.getPipeline({
+        const pipelines = await clusterClient.asCurrentUser.ingest.getPipeline({
           id: name,
         });
 

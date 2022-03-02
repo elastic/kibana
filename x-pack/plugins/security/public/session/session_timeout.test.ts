@@ -130,9 +130,12 @@ describe('SessionTimeout', () => {
     await sessionTimeout.start();
     expect(http.fetch).toHaveBeenCalledTimes(1);
 
-    // Increment system time enough so that session extension gets triggered
+    // Increment system time far enough to bypass throttle time
     nowMock.mockReturnValue(Date.now() + SESSION_EXTENSION_THROTTLE_MS + 10);
+
+    // Trigger session extension and wait for next tick
     window.dispatchEvent(new Event('mousemove'));
+    await new Promise((resolve) => process.nextTick(resolve));
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
     expect(http.fetch).toHaveBeenLastCalledWith(
@@ -159,9 +162,42 @@ describe('SessionTimeout', () => {
 
     expect(http.fetch).toHaveBeenCalledTimes(1);
 
+    // Trigger session extension and wait for next tick
     window.dispatchEvent(new Event('mousemove'));
+    await new Promise((resolve) => process.nextTick(resolve));
 
     expect(http.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('exponentially increases retry time when extending session fails', async () => {
+    nowMock.mockReturnValue(0);
+
+    const { sessionTimeout, http } = createSessionTimeout();
+    await sessionTimeout.start();
+
+    expect(http.fetch).toHaveBeenCalledTimes(1);
+
+    // Increment system time far enough to bypass throttle time
+    nowMock.mockReturnValue(Date.now() + SESSION_EXTENSION_THROTTLE_MS + 10);
+
+    // Now make subsequent HTTP calls fail
+    http.fetch.mockRejectedValue(new Error('Failure'));
+
+    // Trigger session extension and wait for next tick
+    window.dispatchEvent(new Event('mousemove'));
+    await new Promise((resolve) => process.nextTick(resolve));
+
+    expect(http.fetch).toHaveBeenCalledTimes(2);
+
+    // Increment system time far enough to bypass throttle time
+    nowMock.mockReturnValue(Date.now() + SESSION_EXTENSION_THROTTLE_MS + 10);
+
+    // Trigger session extension and wait for next tick
+    window.dispatchEvent(new Event('mousemove'));
+    await new Promise((resolve) => process.nextTick(resolve));
+
+    // Without exponential retry backoff, this would have been called a 3rd time
+    expect(http.fetch).toHaveBeenCalledTimes(2);
   });
 
   it('marks HTTP requests as system requests when tab is not visible', async () => {

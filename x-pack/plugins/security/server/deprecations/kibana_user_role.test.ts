@@ -72,17 +72,11 @@ describe('Kibana Dashboard Only User role deprecations', () => {
   });
 
   it('does not return any deprecations if none of the users and role mappings has a kibana user role', async () => {
-    mockContext.esClient.asCurrentUser.security.getUser.mockResolvedValue(
-      securityMock.createApiResponse({ body: { userA: createMockUser() } })
-    );
+    mockContext.esClient.asCurrentUser.security.getUser.mockResponse({ userA: createMockUser() });
 
-    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResolvedValue(
-      securityMock.createApiResponse({
-        body: {
-          mappingA: { enabled: true, roles: ['roleA'], rules: {}, metadata: {} },
-        },
-      })
-    );
+    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResponse({
+      mappingA: { enabled: true, roles: ['roleA'], rules: {}, metadata: {} },
+    });
 
     await expect(deprecationHandler.getDeprecations(mockContext)).resolves.toEqual([]);
   });
@@ -91,9 +85,9 @@ describe('Kibana Dashboard Only User role deprecations', () => {
     mockContext.esClient.asCurrentUser.security.getUser.mockRejectedValue(
       new errors.ResponseError(securityMock.createApiResponse({ statusCode: 403, body: {} }))
     );
-    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResolvedValue(
-      securityMock.createApiResponse({ body: { mappingA: createMockRoleMapping() } })
-    );
+    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResponse({
+      mappingA: createMockRoleMapping(),
+    });
 
     await expect(deprecationHandler.getDeprecations(mockContext)).resolves.toMatchInlineSnapshot(`
             Array [
@@ -117,9 +111,9 @@ describe('Kibana Dashboard Only User role deprecations', () => {
     mockContext.esClient.asCurrentUser.security.getUser.mockRejectedValue(
       new errors.ResponseError(securityMock.createApiResponse({ statusCode: 500, body: {} }))
     );
-    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResolvedValue(
-      securityMock.createApiResponse({ body: { mappingA: createMockRoleMapping() } })
-    );
+    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResponse({
+      mappingA: createMockRoleMapping(),
+    });
 
     await expect(deprecationHandler.getDeprecations(mockContext)).resolves.toMatchInlineSnapshot(`
             Array [
@@ -139,9 +133,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
   });
 
   it('returns deprecations even if cannot retrieve role mappings due to permission error', async () => {
-    mockContext.esClient.asCurrentUser.security.getUser.mockResolvedValue(
-      securityMock.createApiResponse({ body: { userA: createMockUser() } })
-    );
+    mockContext.esClient.asCurrentUser.security.getUser.mockResponse({ userA: createMockUser() });
     mockContext.esClient.asCurrentUser.security.getRoleMapping.mockRejectedValue(
       new errors.ResponseError(securityMock.createApiResponse({ statusCode: 403, body: {} }))
     );
@@ -165,9 +157,7 @@ describe('Kibana Dashboard Only User role deprecations', () => {
   });
 
   it('returns deprecations even if cannot retrieve role mappings due to unknown error', async () => {
-    mockContext.esClient.asCurrentUser.security.getUser.mockResolvedValue(
-      securityMock.createApiResponse({ body: { userA: createMockUser() } })
-    );
+    mockContext.esClient.asCurrentUser.security.getUser.mockResponse({ userA: createMockUser() });
     mockContext.esClient.asCurrentUser.security.getRoleMapping.mockRejectedValue(
       new errors.ResponseError(securityMock.createApiResponse({ statusCode: 500, body: {} }))
     );
@@ -190,20 +180,16 @@ describe('Kibana Dashboard Only User role deprecations', () => {
   });
 
   it('returns only user-related deprecations', async () => {
-    mockContext.esClient.asCurrentUser.security.getUser.mockResolvedValue(
-      securityMock.createApiResponse({
-        body: {
-          userA: createMockUser({ username: 'userA', roles: ['roleA'] }),
-          userB: createMockUser({ username: 'userB', roles: ['roleB', 'kibana_user'] }),
-          userC: createMockUser({ username: 'userC', roles: ['roleC'] }),
-          userD: createMockUser({ username: 'userD', roles: ['kibana_user'] }),
-        },
-      })
-    );
+    mockContext.esClient.asCurrentUser.security.getUser.mockResponse({
+      userA: createMockUser({ username: 'userA', roles: ['roleA'] }),
+      userB: createMockUser({ username: 'userB', roles: ['roleB', 'kibana_user'] }),
+      userC: createMockUser({ username: 'userC', roles: ['roleC'] }),
+      userD: createMockUser({ username: 'userD', roles: ['kibana_user'] }),
+    });
 
-    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResolvedValue(
-      securityMock.createApiResponse({ body: { mappingA: createMockRoleMapping() } })
-    );
+    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResponse({
+      mappingA: createMockRoleMapping(),
+    });
 
     await expect(deprecationHandler.getDeprecations(mockContext)).resolves.toMatchInlineSnapshot(`
             Array [
@@ -228,20 +214,14 @@ describe('Kibana Dashboard Only User role deprecations', () => {
   });
 
   it('returns only role-mapping-related deprecations', async () => {
-    mockContext.esClient.asCurrentUser.security.getUser.mockResolvedValue(
-      securityMock.createApiResponse({ body: { userA: createMockUser() } })
-    );
+    mockContext.esClient.asCurrentUser.security.getUser.mockResponse({ userA: createMockUser() });
 
-    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResolvedValue(
-      securityMock.createApiResponse({
-        body: {
-          mappingA: createMockRoleMapping({ roles: ['roleA'] }),
-          mappingB: createMockRoleMapping({ roles: ['roleB', 'kibana_user'] }),
-          mappingC: createMockRoleMapping({ roles: ['roleC'] }),
-          mappingD: createMockRoleMapping({ roles: ['kibana_user'] }),
-        },
-      })
-    );
+    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResponse({
+      mappingA: createMockRoleMapping({ roles: ['roleA'] }),
+      mappingB: createMockRoleMapping({ roles: ['roleB', 'kibana_user'] }),
+      mappingC: createMockRoleMapping({ roles: ['roleC'] }),
+      mappingD: createMockRoleMapping({ roles: ['kibana_user'] }),
+    });
 
     await expect(deprecationHandler.getDeprecations(mockContext)).resolves.toMatchInlineSnapshot(`
             Array [
@@ -266,27 +246,19 @@ describe('Kibana Dashboard Only User role deprecations', () => {
   });
 
   it('returns both user-related and role-mapping-related deprecations', async () => {
-    mockContext.esClient.asCurrentUser.security.getUser.mockResolvedValue(
-      securityMock.createApiResponse({
-        body: {
-          userA: createMockUser({ username: 'userA', roles: ['roleA'] }),
-          userB: createMockUser({ username: 'userB', roles: ['roleB', 'kibana_user'] }),
-          userC: createMockUser({ username: 'userC', roles: ['roleC'] }),
-          userD: createMockUser({ username: 'userD', roles: ['kibana_user'] }),
-        },
-      })
-    );
+    mockContext.esClient.asCurrentUser.security.getUser.mockResponse({
+      userA: createMockUser({ username: 'userA', roles: ['roleA'] }),
+      userB: createMockUser({ username: 'userB', roles: ['roleB', 'kibana_user'] }),
+      userC: createMockUser({ username: 'userC', roles: ['roleC'] }),
+      userD: createMockUser({ username: 'userD', roles: ['kibana_user'] }),
+    });
 
-    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResolvedValue(
-      securityMock.createApiResponse({
-        body: {
-          mappingA: createMockRoleMapping({ roles: ['roleA'] }),
-          mappingB: createMockRoleMapping({ roles: ['roleB', 'kibana_user'] }),
-          mappingC: createMockRoleMapping({ roles: ['roleC'] }),
-          mappingD: createMockRoleMapping({ roles: ['kibana_user'] }),
-        },
-      })
-    );
+    mockContext.esClient.asCurrentUser.security.getRoleMapping.mockResponse({
+      mappingA: createMockRoleMapping({ roles: ['roleA'] }),
+      mappingB: createMockRoleMapping({ roles: ['roleB', 'kibana_user'] }),
+      mappingC: createMockRoleMapping({ roles: ['roleC'] }),
+      mappingD: createMockRoleMapping({ roles: ['kibana_user'] }),
+    });
 
     await expect(deprecationHandler.getDeprecations(mockContext)).resolves.toMatchInlineSnapshot(`
             Array [

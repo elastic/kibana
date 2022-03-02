@@ -13,7 +13,7 @@ import { mockApplyDeprecations, mockedChangedPaths } from './config_service.test
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
-import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 
 import type { ConfigDeprecationContext } from './deprecation';
 import { ConfigService, Env, RawPackageInfo } from '.';

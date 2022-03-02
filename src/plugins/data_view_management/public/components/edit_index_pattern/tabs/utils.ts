@@ -105,36 +105,11 @@ export function getPath(field: DataViewField, indexPattern: DataView) {
   return `/dataView/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
-const allTypesDropDown = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.allTypesDropDown',
-  {
-    defaultMessage: 'All field types',
-  }
-);
-
-const allLangsDropDown = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.allLangsDropDown',
-  {
-    defaultMessage: 'All languages',
-  }
-);
-
-export function convertToEuiSelectOption(options: string[], type: string) {
-  const euiOptions =
-    options.length > 0
-      ? [
-          {
-            value: '',
-            text: type === 'scriptedFieldLanguages' ? allLangsDropDown : allTypesDropDown,
-          },
-        ]
-      : [];
-  return euiOptions.concat(
-    uniq(options).map((option) => {
-      return {
-        value: option,
-        text: option,
-      };
-    })
-  );
+export function convertToEuiFilterOptions(options: string[]) {
+  return uniq(options).map((option) => {
+    return {
+      value: option,
+      name: option,
+    };
+  });
 }

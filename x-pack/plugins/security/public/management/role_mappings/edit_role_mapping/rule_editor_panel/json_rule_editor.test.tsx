@@ -10,13 +10,13 @@ import 'brace/mode/json';
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/test/target_node/jest/utils/stub_web_worker';
+import '@kbn/test-jest-helpers/target_node//stub_web_worker';
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import type { monaco } from '@kbn/monaco';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { CodeEditorField } from 'src/plugins/kibana_react/public';
 
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';

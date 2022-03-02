@@ -821,6 +821,9 @@ describe('monitor availability', () => {
             },
             "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
           },
+          Object {
+            "meta": true,
+          },
         ]
       `);
     });

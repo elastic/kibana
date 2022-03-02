@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { TestBed } from '@kbn/test/jest';
-export { findTestSubject } from '@kbn/test/jest';
+export type { TestBed } from '@kbn/test-jest-helpers';
+export { findTestSubject } from '@kbn/test-jest-helpers';
 
 export {
   setupEnvironment,

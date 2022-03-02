@@ -7,7 +7,7 @@
 
 import { parse } from 'query-string';
 import { useLocation } from 'react-router-dom';
-import { TimePickerTime } from '../components/shared/date_picker';
+import { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import { getAbsoluteTime } from '../utils/date';
 import { UI_SETTINGS, useKibanaUISettings } from './use_kibana_ui_settings';
 import { usePluginContext } from './use_plugin_context';
@@ -19,7 +19,7 @@ const getParsedParams = (search: string) => {
 export function useTimeRange() {
   const { plugins } = usePluginContext();
 
-  const timePickerTimeDefaults = useKibanaUISettings<TimePickerTime>(
+  const timePickerTimeDefaults = useKibanaUISettings<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
 

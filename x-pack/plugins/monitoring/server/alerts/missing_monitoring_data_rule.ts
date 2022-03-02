@@ -19,7 +19,7 @@ import {
   CommonAlertFilter,
   AlertNodeState,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
+import { Alert } from '../../../alerting/server';
 import { RULE_MISSING_MONITORING_DATA, RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
@@ -137,7 +137,7 @@ export class MissingMonitoringDataRule extends BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: { alertStates: AlertState[] },
     item: AlertData | null,
     cluster: AlertCluster

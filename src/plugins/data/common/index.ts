@@ -10,6 +10,7 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 export * from './constants';
+export * from './datatable_utilities';
 export * from './es_query';
 export * from './kbn_field_types';
 export * from './query';
@@ -35,7 +36,6 @@ export type {
   GetFieldsOptions,
   GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
-  IIndexPatternsApiClient,
   SavedObject,
   AggregationRestrictions,
   TypeMeta,
@@ -43,9 +43,7 @@ export type {
   FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
-  IndexPatternFieldMap,
   DataViewSpec,
-  IndexPatternSpec,
   SourceFilter,
   IndexPatternExpressionType,
   IndexPatternLoadStartDependencies,

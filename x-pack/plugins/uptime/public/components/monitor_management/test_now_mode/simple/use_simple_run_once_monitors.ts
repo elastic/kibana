@@ -12,8 +12,14 @@ import { Ping } from '../../../../../common/runtime_types';
 import { createEsParams, useEsSearch } from '../../../../../../observability/public';
 import { useTickTick } from '../use_tick_tick';
 
-export const useSimpleRunOnceMonitors = ({ monitorId }: { monitorId: string }) => {
-  const { refreshTimer, lastRefresh } = useTickTick();
+export const useSimpleRunOnceMonitors = ({
+  configId,
+  testRunId,
+}: {
+  configId: string;
+  testRunId?: string;
+}) => {
+  const { refreshTimer, lastRefresh } = useTickTick(2 * 1000, false);
 
   const { settings } = useSelector(selectDynamicSettings);
 
@@ -31,7 +37,7 @@ export const useSimpleRunOnceMonitors = ({ monitorId }: { monitorId: string }) =
             filter: [
               {
                 term: {
-                  config_id: monitorId,
+                  config_id: configId,
                 },
               },
               {
@@ -39,13 +45,22 @@ export const useSimpleRunOnceMonitors = ({ monitorId }: { monitorId: string }) =
                   field: 'summary',
                 },
               },
+              ...(testRunId
+                ? [
+                    {
+                      term: {
+                        test_run_id: testRunId,
+                      },
+                    },
+                  ]
+                : []),
             ],
           },
         },
       },
       size: 10,
     }),
-    [monitorId, settings?.heartbeatIndices, lastRefresh],
+    [configId, settings?.heartbeatIndices, lastRefresh],
     { name: 'TestRunData' }
   );
 

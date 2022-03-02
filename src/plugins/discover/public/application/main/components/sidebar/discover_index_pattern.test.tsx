@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ShallowWrapper } from 'enzyme';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';

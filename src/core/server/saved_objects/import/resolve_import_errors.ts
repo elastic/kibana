@@ -27,6 +27,8 @@ import {
   getImportStateMapForRetries,
   checkConflicts,
   executeImportHooks,
+  checkOriginConflicts,
+  ImportStateMap,
 } from './lib';
 
 /**
@@ -150,6 +152,24 @@ export async function resolveSavedObjectsImportErrors({
   };
   const checkConflictsResult = await checkConflicts(checkConflictsParams);
   errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
+  importStateMap = new Map([...importStateMap, ...checkConflictsResult.importStateMap]);
+
+  let originConflictsImportStateMap: ImportStateMap = new Map();
+  if (!createNewCopies) {
+    // If createNewCopies is *not* enabled, check multi-namespace object types for origin conflicts in this namespace
+    const checkOriginConflictsParams = {
+      objects: checkConflictsResult.filteredObjects,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+      importStateMap,
+      pendingOverwrites: checkConflictsResult.pendingOverwrites,
+      retries,
+    };
+    const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
+    errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
+    originConflictsImportStateMap = checkOriginConflictsResult.importStateMap;
+  }
 
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
   const getImportStateMapForRetriesParams = {
@@ -161,7 +181,9 @@ export async function resolveSavedObjectsImportErrors({
   importStateMap = new Map([
     ...importStateMap,
     ...importStateMapForRetries,
-    ...checkConflictsResult.importStateMap, // this importStateMap takes precedence over the others
+    // the importStateMap entries from checkConflicts and checkOriginConflicts take precedence over the others
+    ...checkConflictsResult.importStateMap,
+    ...originConflictsImportStateMap,
   ]);
 
   // Bulk create in two batches, overwrites and non-overwrites

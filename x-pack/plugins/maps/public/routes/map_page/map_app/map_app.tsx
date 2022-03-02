@@ -13,7 +13,7 @@ import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore } from '@kbn/es-query';
-import type { Query, TimeRange, IndexPattern } from 'src/plugins/data/common';
+import type { Query, TimeRange, DataView } from 'src/plugins/data/common';
 import {
   getData,
   getCoreChrome,
@@ -87,7 +87,7 @@ export interface Props {
 
 export interface State {
   initialized: boolean;
-  indexPatterns: IndexPattern[];
+  indexPatterns: DataView[];
   savedQuery?: SavedQuery;
   isRefreshPaused: boolean;
   refreshInterval: number;

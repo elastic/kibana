@@ -9,6 +9,9 @@
 import React, { FC, createContext, useContext } from 'react';
 import { SharedUXPlatformService } from './platform';
 import { servicesFactory } from './stub';
+import { SharedUXUserPermissionsService } from './permissions';
+import { SharedUXEditorsService } from './editors';
+import { SharedUXDocLinksService } from './doc_links';
 
 /**
  * A collection of services utilized by SharedUX.  This serves as a thin
@@ -20,6 +23,9 @@ import { servicesFactory } from './stub';
  */
 export interface SharedUXServices {
   platform: SharedUXPlatformService;
+  permissions: SharedUXUserPermissionsService;
+  editors: SharedUXEditorsService;
+  docLinks: SharedUXDocLinksService;
 }
 
 // The React Context used to provide the services to the SharedUX components.
@@ -27,8 +33,11 @@ const ServicesContext = createContext<SharedUXServices>(servicesFactory());
 
 /**
  * The `React.Context` Provider component for the `SharedUXServices` context.  Any
- * plugin or environemnt that consumes SharedUX components needs to wrap their React
+ * plugin or environment that consumes SharedUX components needs to wrap their React
  * tree with this provider.
+ *
+ * Within a plugin, you can use the `ServicesContext` provided by the SharedUX plugin start
+ * lifeycle method.
  */
 export const ServicesProvider: FC<SharedUXServices> = ({ children, ...services }) => (
   <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>
@@ -45,3 +54,9 @@ export function useServices() {
  * React hook for accessing the pre-wired `SharedUXPlatformService`.
  */
 export const usePlatformService = () => useServices().platform;
+
+export const usePermissions = () => useServices().permissions;
+
+export const useEditors = () => useServices().editors;
+
+export const useDocLinks = () => useServices().docLinks;

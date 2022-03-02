@@ -16,7 +16,7 @@ import * as sinon from 'sinon';
 
 import { serviceContextMock } from '../../../../contexts/services_context.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import {
   ServicesContextProvider,
   EditorContextProvider,

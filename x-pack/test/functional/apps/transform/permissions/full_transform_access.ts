@@ -154,14 +154,9 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.editFlyout.assertTransformEditFlyoutIngestPipelineFieldSelectExists();
 
         await transform.testExecution.logTestStep(
-          'should have the retention policy inputs enabled'
+          'should have the retention policy switch enabled'
         );
-        await transform.editFlyout.openTransformEditAccordionRetentionPolicySettings();
-        await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(true);
-        await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
-          'RetentionPolicyMaxAge',
-          true
-        );
+        await transform.editFlyout.assertTransformEditFlyoutRetentionPolicySwitchEnabled(true);
 
         await transform.testExecution.logTestStep(
           'should have the advanced settings inputs enabled'

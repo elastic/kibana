@@ -13,7 +13,7 @@ import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import { BaseStateContainer, createStateContainer, Storage } from '../../../../kibana_utils/public';
 import { QueryService, QueryStart } from '../query_service';
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { connectToQueryState } from './connect_to_query_state';
 import { TimefilterContract } from '../timefilter';
 import { QueryState } from './types';

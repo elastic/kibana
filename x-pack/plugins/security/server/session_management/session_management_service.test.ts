@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import type {
@@ -16,7 +16,7 @@ import type {
 } from '../../../task_manager/server';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
 import type { AuditLogger } from '../audit';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditLoggerMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';
@@ -37,7 +37,7 @@ describe('SessionManagementService', () => {
   let auditLogger: AuditLogger;
   beforeEach(() => {
     service = new SessionManagementService(loggingSystemMock.createLogger());
-    auditLogger = auditServiceMock.create().withoutRequest;
+    auditLogger = auditLoggerMock.create();
   });
 
   afterEach(() => {

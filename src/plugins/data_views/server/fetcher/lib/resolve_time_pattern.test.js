@@ -64,15 +64,13 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
     describe('read response', () => {
       it('returns all aliases names in result.all, ordered by time desc', async () => {
         sandbox.stub(callIndexAliasApiNS, 'callIndexAliasApi').returns({
-          body: {
-            'logs-2016.2': {},
-            'logs-Saturday-2017.1': {},
-            'logs-2016.1': {},
-            'logs-Sunday-2017.1': {},
-            'logs-2015': {},
-            'logs-2016.3': {},
-            'logs-Friday-2017.1': {},
-          },
+          'logs-2016.2': {},
+          'logs-Saturday-2017.1': {},
+          'logs-2016.1': {},
+          'logs-Sunday-2017.1': {},
+          'logs-2015': {},
+          'logs-2016.3': {},
+          'logs-Friday-2017.1': {},
         });
 
         const resp = await resolveTimePattern(noop, TIME_PATTERN);
@@ -90,15 +88,13 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
 
       it('returns all indices matching the time pattern in matches, ordered by time desc', async () => {
         sandbox.stub(callIndexAliasApiNS, 'callIndexAliasApi').returns({
-          body: {
-            'logs-2016.2': {},
-            'logs-Saturday-2017.1': {},
-            'logs-2016.1': {},
-            'logs-Sunday-2017.1': {},
-            'logs-2015': {},
-            'logs-2016.3': {},
-            'logs-Friday-2017.1': {},
-          },
+          'logs-2016.2': {},
+          'logs-Saturday-2017.1': {},
+          'logs-2016.1': {},
+          'logs-Sunday-2017.1': {},
+          'logs-2015': {},
+          'logs-2016.3': {},
+          'logs-Friday-2017.1': {},
         });
 
         const resp = await resolveTimePattern(noop, TIME_PATTERN);

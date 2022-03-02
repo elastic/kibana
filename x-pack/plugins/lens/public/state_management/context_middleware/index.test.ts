@@ -122,5 +122,26 @@ describe('contextMiddleware', () => {
       expect(store.dispatch).not.toHaveBeenCalled();
       expect(next).toHaveBeenCalledWith(action);
     });
+
+    it('does not trigger another update on active data update', () => {
+      const data = mockDataPlugin();
+      (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
+      (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: 'now-2m',
+        to: 'now',
+      });
+      (data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+        min: moment(Date.now() - 100000),
+        max: moment(Date.now() - 30000),
+      });
+      const { next, invoke, store } = createMiddleware(data);
+      const action = {
+        type: 'lens/onActiveDataChange',
+        payload: {},
+      };
+      invoke(action);
+      expect(store.dispatch).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(action);
+    });
   });
 });
