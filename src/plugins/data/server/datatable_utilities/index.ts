@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from '../../data_views/common/fields/fields.mocks';
-export * from './datatable_utilities/mock';
+export * from './datatable_utilities_service';
