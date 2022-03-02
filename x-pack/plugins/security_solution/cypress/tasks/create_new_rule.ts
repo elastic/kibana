@@ -27,7 +27,7 @@ import {
   BACK_TO_ALL_RULES_LINK,
   COMBO_BOX_CLEAR_BTN,
   COMBO_BOX_INPUT,
-  CREATE_AND_ACTIVATE_BTN,
+  CREATE_AND_ENABLE_BTN,
   CUSTOM_QUERY_INPUT,
   CUSTOM_QUERY_REQUIRED,
   DEFAULT_RISK_SCORE_INPUT,
@@ -98,10 +98,10 @@ import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
 
-export const createAndActivateRule = () => {
+export const createAndEnableRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
-  cy.get(CREATE_AND_ACTIVATE_BTN).click({ force: true });
-  cy.get(CREATE_AND_ACTIVATE_BTN).should('not.exist');
+  cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
+  cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
   cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
   cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
 };
