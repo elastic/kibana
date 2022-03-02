@@ -6,9 +6,15 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import Boom from '@hapi/boom';
 
+import type { SavedObject } from 'src/core/server';
+
+import { SavedObjectsClient } from '../../../../../../../src/core/server';
+
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 import { ElasticsearchAssetType } from '../../../types';
 import type {
   AssetReference,
@@ -25,6 +31,7 @@ import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
+import { SavedObjectsUtils } from '../../../../../../../src/core/server';
 
 import { getInstallation, kibanaSavedObjectTypes } from './index';
 
@@ -80,10 +87,15 @@ export async function removeInstallation(options: {
 
 async function deleteKibanaAssets(
   installedObjects: KibanaAssetReference[],
-  savedObjectsClient: SavedObjectsClientContract
+  spaceId: string = DEFAULT_SPACE_ID
 ) {
+  const savedObjectsClient = new SavedObjectsClient(
+    appContextService.getSavedObjects().createInternalRepository()
+  );
+  const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
   const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
-    installedObjects
+    installedObjects,
+    { namespace }
   );
 
   const foundObjects = resolvedObjects.filter(
@@ -94,7 +106,7 @@ async function deleteKibanaAssets(
   // we filter these out before calling delete
   const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
   const promises = assetsToDelete.map(async ({ id, type }) => {
-    return savedObjectsClient.delete(type, id);
+    return savedObjectsClient.delete(type, id, { namespace });
   });
 
   return Promise.all(promises);
@@ -123,12 +135,15 @@ function deleteESAssets(
 }
 
 async function deleteAssets(
-  { installed_es: installedEs, installed_kibana: installedKibana }: Installation,
+  {
+    installed_es: installedEs,
+    installed_kibana: installedKibana,
+    installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
+  }: Installation,
   savedObjectsClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
-
   // must delete index templates first, or component templates which reference them cannot be deleted
   // must delete ingestPipelines first, or ml models referenced in them cannot be deleted.
   // separate the assets into Index Templates and other assets.
@@ -155,7 +170,7 @@ async function deleteAssets(
     // then the other asset types
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),
-      deleteKibanaAssets(installedKibana, savedObjectsClient),
+      deleteKibanaAssets(installedKibana, spaceId),
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
@@ -187,19 +202,24 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
   }
 }
 
-export async function deleteKibanaSavedObjectsAssets(
-  savedObjectsClient: SavedObjectsClientContract,
-  installedRefs: KibanaAssetReference[]
-) {
+export async function deleteKibanaSavedObjectsAssets({
+  savedObjectsClient,
+  installedPkg,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  installedPkg: SavedObject<Installation>;
+}) {
+  const { installed_kibana: installedRefs, installed_kibana_space_id: spaceId } =
+    installedPkg.attributes;
   if (!installedRefs.length) return;
 
   const logger = appContextService.getLogger();
   const assetsToDelete = installedRefs
     .filter(({ type }) => kibanaSavedObjectTypes.includes(type))
-    .map(({ id, type }) => ({ id, type }));
+    .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
 
   try {
-    await deleteKibanaAssets(assetsToDelete, savedObjectsClient);
+    await deleteKibanaAssets(assetsToDelete, spaceId);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!savedObjectsClient.errors.isNotFoundError(err)) {

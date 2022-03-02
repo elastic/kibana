@@ -6,11 +6,16 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import { LEGACY_BASE_ALERT_API_PATH } from '../common';
-import type { Alert, AlertType } from '../common';
+import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../common';
+import type { Alert, RuleType } from '../common';
+import { AsApiContract } from '../../actions/common';
+import { transformAlert, transformRuleType, ApiAlert } from './lib/common_transformations';
 
-export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
-  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`);
+export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<RuleType[]> {
+  const res = await http.get<Array<AsApiContract<RuleType>>>(
+    `${BASE_ALERTING_API_PATH}/rule_types`
+  );
+  return res.map((ruleType) => transformRuleType(ruleType));
 }
 
 export async function loadAlertType({
@@ -18,12 +23,10 @@ export async function loadAlertType({
   id,
 }: {
   http: HttpSetup;
-  id: AlertType['id'];
-}): Promise<AlertType | undefined> {
-  const alertTypes = (await http.get(
-    `${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`
-  )) as AlertType[];
-  return alertTypes.find((type) => type.id === id);
+  id: RuleType['id'];
+}): Promise<RuleType | undefined> {
+  const ruleTypes = await loadAlertTypes({ http });
+  return ruleTypes.find((type) => type.id === id);
 }
 
 export async function loadAlert({
@@ -33,5 +36,6 @@ export async function loadAlert({
   http: HttpSetup;
   alertId: string;
 }): Promise<Alert> {
-  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${alertId}`);
+  const res = await http.get<ApiAlert>(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${alertId}`);
+  return transformAlert(res);
 }

@@ -126,6 +126,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       indexPatternId,
       geoField: 'coordinates',
       filterByMapBounds: false,
+      applyGlobalQuery: false,
     });
     const layerDescriptor = GeoJsonVectorLayer.createDescriptor(
       { sourceDescriptor },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButton,
   EuiPopover,
@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { AppDataType, SeriesUrl } from '../../types';
 import { DataTypes, ReportTypes } from '../../configurations/constants';
-import { useExploratoryView } from '../../contexts/exploatory_view_config';
+import { useExploratoryView } from '../../contexts/exploratory_view_config';
 
 interface Props {
   seriesId: number;
@@ -32,6 +32,10 @@ const SELECT_DATA_TYPE = 'SELECT_DATA_TYPE';
 export function DataTypesSelect({ seriesId, series }: Props) {
   const { setSeries, reportType } = useSeriesStorage();
   const [showOptions, setShowOptions] = useState(false);
+
+  const focusButton = useCallback((ref: HTMLButtonElement) => {
+    ref?.focus();
+  }, []);
 
   const onDataTypeChange = (dataType: AppDataType) => {
     if (String(dataType) !== SELECT_DATA_TYPE) {
@@ -72,6 +76,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"
+              buttonRef={focusButton}
             >
               {SELECT_DATA_TYPE_LABEL}
             </EuiButton>

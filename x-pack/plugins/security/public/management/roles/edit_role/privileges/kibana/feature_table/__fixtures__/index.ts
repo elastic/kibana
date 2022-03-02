@@ -9,7 +9,7 @@ import type { EuiButtonGroupProps, EuiCheckboxProps } from '@elastic/eui';
 import { EuiAccordion, EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 
-import { findTestSubject } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test-jest-helpers';
 
 import { SubFeatureForm } from '../sub_feature_form';
 

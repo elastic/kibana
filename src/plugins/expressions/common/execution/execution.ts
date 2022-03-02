@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isPromise } from '@kbn/std';
-import { ObservableLike, UnwrapObservable, UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import {
   combineLatest,
@@ -47,7 +47,7 @@ import { createDefaultInspectorAdapters } from '../util/create_default_inspector
 type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
   ReturnType<Function> extends ObservableLike<unknown>
     ? UnwrapObservable<ReturnType<Function>>
-    : UnwrapPromiseOrReturn<ReturnType<Function>>;
+    : Awaited<ReturnType<Function>>;
 
 /**
  * The result returned after an expression function execution.
@@ -224,7 +224,7 @@ export class Execution<
         inspectorAdapters.tables[name] = datatable;
       },
       isSyncColorsEnabled: () => execution.params.syncColors!,
-      ...execution.params.extraContext,
+      ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
     };
 
@@ -542,10 +542,10 @@ export class Execution<
   interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>> {
     switch (getType(ast)) {
       case 'expression':
-        const execution = this.execution.executor.createExecution(
-          ast as ExpressionAstExpression,
-          this.execution.params
-        );
+        const execution = this.execution.executor.createExecution(ast as ExpressionAstExpression, {
+          ...this.execution.params,
+          variables: this.context.variables,
+        });
         this.childExecutions.push(execution);
 
         return execution.start(input, true);

@@ -6,17 +6,22 @@
  */
 
 import { useMemo } from 'react';
+import { CaseMetricsFeature } from '../../containers/types';
 import { useCasesContext } from './use_cases_context';
 
-interface UseCasesFeaturesReturn {
+interface UseCasesFeatures {
   isSyncAlertsEnabled: boolean;
+  metricsFeatures: CaseMetricsFeature[];
 }
 
-export const useCasesFeatures = (): UseCasesFeaturesReturn => {
+export const useCasesFeatures = (): UseCasesFeatures => {
   const { features } = useCasesContext();
-  const memoizedReturnValue = useMemo(
-    () => ({ isSyncAlertsEnabled: features.alerts.sync }),
+  const casesFeatures = useMemo(
+    () => ({
+      isSyncAlertsEnabled: features.alerts.sync,
+      metricsFeatures: features.metrics,
+    }),
     [features]
   );
-  return memoizedReturnValue;
+  return casesFeatures;
 };

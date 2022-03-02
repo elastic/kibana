@@ -8,12 +8,12 @@
 
 import { Vis } from '../../../visualizations/public';
 
-import { PieVisParams } from './types';
+import { PartitionVisParams } from '../../../chart_expressions/expression_partition_vis/common';
 import { samplePieVis } from './sample_vis.test.mocks';
 import { toExpressionAst } from './to_ast';
 
 describe('vis type pie vis toExpressionAst function', () => {
-  let vis: Vis<PieVisParams>;
+  let vis: Vis<PartitionVisParams>;
   const params = {
     timefilter: {},
     timeRange: {},

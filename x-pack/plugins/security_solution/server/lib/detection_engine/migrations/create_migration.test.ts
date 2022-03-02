@@ -47,8 +47,7 @@ describe('createMigration', () => {
 
   it('returns info about the created migration', async () => {
     (createMigrationIndex as jest.Mock).mockResolvedValueOnce('destinationIndex');
-    // @ts-expect-error minimum stub for our reindex response
-    esClient.reindex.mockResolvedValueOnce({ body: { task: 'reindexTaskId' } });
+    esClient.reindex.mockResponseOnce({ task: 'reindexTaskId' });
 
     const migration = await createMigration({
       esClient,

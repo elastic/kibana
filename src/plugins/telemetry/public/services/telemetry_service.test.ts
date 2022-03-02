@@ -18,17 +18,20 @@ describe('TelemetryService', () => {
 
       await telemetryService.fetchTelemetry();
       expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
-        body: JSON.stringify({ unencrypted: false }),
+        body: JSON.stringify({ unencrypted: false, refreshCache: false }),
       });
     });
   });
 
   describe('fetchExample', () => {
-    it('calls fetchTelemetry with unencrupted: true', async () => {
+    it('calls fetchTelemetry with unencrypted: true, refreshCache: true', async () => {
       const telemetryService = mockTelemetryService();
       telemetryService.fetchTelemetry = jest.fn();
       await telemetryService.fetchExample();
-      expect(telemetryService.fetchTelemetry).toBeCalledWith({ unencrypted: true });
+      expect(telemetryService.fetchTelemetry).toBeCalledWith({
+        unencrypted: true,
+        refreshCache: true,
+      });
     });
   });
 

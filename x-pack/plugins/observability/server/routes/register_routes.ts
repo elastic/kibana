@@ -31,7 +31,7 @@ export function registerRoutes({
   logger: Logger;
   ruleDataService: RuleDataPluginService;
 }) {
-  const routes = repository.getRoutes();
+  const routes = Object.values(repository);
 
   const router = core.setup.http.createRouter();
 

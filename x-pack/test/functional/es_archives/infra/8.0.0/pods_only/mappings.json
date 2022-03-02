@@ -1,0 +1,247 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      "metrics-fake_k8s": {
+      }
+    },
+    "index": "high-cardinality-data-fake_k8s-2022-01-20",
+    "mappings": {
+      "date_detection": false,
+      "dynamic_templates": [
+        {
+          "labels": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "match_mapping_type": "string",
+            "path_match": "labels.*"
+          }
+        },
+        {
+          "strings_as_keyword": {
+            "mapping": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "match_mapping_type": "string"
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "event": {
+          "properties": {
+            "dataset": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "duration": {
+              "type": "long"
+            },
+            "module": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "kubernetes": {
+          "properties": {
+            "namespace": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "node": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "pod": {
+              "properties": {
+                "cpu": {
+                  "properties": {
+                    "usage": {
+                      "properties": {
+                        "limit": {
+                          "properties": {
+                            "pct": {
+                              "scaling_factor": 1000,
+                              "type": "scaled_float"
+                            }
+                          }
+                        },
+                        "nanocores": {
+                          "type": "long"
+                        },
+                        "node": {
+                          "properties": {
+                            "pct": {
+                              "scaling_factor": 1000,
+                              "type": "scaled_float"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "host_ip": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                },
+                "ip": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                },
+                "memory": {
+                  "properties": {
+                    "usage": {
+                      "properties": {
+                        "available": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "limit": {
+                          "properties": {
+                            "pct": {
+                              "scaling_factor": 1000,
+                              "type": "scaled_float"
+                            }
+                          }
+                        },
+                        "major_page_faults": {
+                          "type": "long"
+                        },
+                        "node": {
+                          "properties": {
+                            "pct": {
+                              "scaling_factor": 1000,
+                              "type": "scaled_float"
+                            }
+                          }
+                        },
+                        "page_faults": {
+                          "type": "long"
+                        },
+                        "rss": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "working_set": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "name": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                },
+                "network": {
+                  "properties": {
+                    "rx": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "errors": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "tx": {
+                      "properties": {
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "errors": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "startTime": {
+                  "type": "date"
+                },
+                "status": {
+                  "properties": {
+                    "phase": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "ready": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "scheduled": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "uid": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "metricset": {
+          "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "period": {
+              "type": "long"
+            }
+          }
+        },
+        "service": {
+          "properties": {
+            "address": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "type": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "mapping": {
+          "total_fields": {
+            "limit": "10000"
+          }
+        },
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

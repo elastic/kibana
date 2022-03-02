@@ -8,23 +8,38 @@
 import {
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_NAME,
-} from '@kbn/rule-data-utils/technical_field_names';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
+  ALERT_REASON,
+} from '@kbn/rule-data-utils';
 import type { TopAlert } from '../';
+import { experimentalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
 import { parseTechnicalFields } from '../../../../../rule_registry/common/parse_technical_fields';
+import { parseExperimentalFields } from '../../../../../rule_registry/common/parse_experimental_fields';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 
 export const parseAlert =
   (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) =>
   (alert: Record<string, unknown>): TopAlert => {
-    const parsedFields = parseTechnicalFields(alert);
+    const experimentalFields = Object.keys(experimentalRuleFieldMap);
+    const alertWithExperimentalFields = experimentalFields.reduce((acc, key) => {
+      if (alert[key]) {
+        return { ...acc, [key]: alert[key] };
+      }
+      return acc;
+    }, {});
+
+    const parsedFields = {
+      ...parseTechnicalFields(alert, true),
+      ...parseExperimentalFields(alertWithExperimentalFields, true),
+    };
+
     const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
-      reason: parsedFields[ALERT_RULE_NAME] ?? '',
+      reason: parsedFields[ALERT_REASON] ?? parsedFields[ALERT_RULE_NAME] ?? '',
       ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
     };
 

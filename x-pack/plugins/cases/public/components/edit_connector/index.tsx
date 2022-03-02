@@ -39,7 +39,6 @@ export interface EditConnectorProps {
   connectorName: string;
   connectors: ActionConnector[];
   hasDataToPush: boolean;
-  hideConnectorServiceNowSir?: boolean;
   isLoading: boolean;
   isValidConnector: boolean;
   onSubmit: (
@@ -118,7 +117,6 @@ export const EditConnector = React.memo(
     connectorName,
     connectors,
     hasDataToPush,
-    hideConnectorServiceNowSir = false,
     isLoading,
     isValidConnector,
     onSubmit,
@@ -304,7 +302,6 @@ export const EditConnector = React.memo(
                       dataTestSubj: 'caseConnectors',
                       defaultValue: selectedConnector,
                       disabled: !userCanCrud,
-                      hideConnectorServiceNowSir,
                       idAria: 'caseConnectors',
                       isEdit: editConnector,
                       isLoading,

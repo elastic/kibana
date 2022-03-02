@@ -11,7 +11,7 @@ import './index.scss';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ConfigSchema } from '../config';
 import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
-import {
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,
@@ -27,6 +27,7 @@ import {
   setOverlays,
   setSearchService,
   setUiSettings,
+  setTheme,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import {
@@ -41,7 +42,7 @@ import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
-import { getAggsFormats } from '../common';
+import { getAggsFormats, DatatableUtilitiesService } from '../common';
 
 export class DataPublicPlugin
   implements
@@ -82,6 +83,7 @@ export class DataPublicPlugin
     const startServices = createStartServicesGetter(core.getStartServices);
 
     this.usageCollection = usageCollection;
+    setTheme(core.theme);
 
     const searchService = this.searchService.setup(core, {
       bfetch,
@@ -98,7 +100,7 @@ export class DataPublicPlugin
 
     uiActions.registerTrigger(applyFilterTrigger);
     uiActions.registerAction(
-      createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
+      createFilterAction(queryService.filterManager, queryService.timefilter.timefilter, core.theme)
     );
 
     inspector.registerView(
@@ -106,7 +108,7 @@ export class DataPublicPlugin
         uiActions: startServices().plugins.uiActions,
         uiSettings: startServices().core.uiSettings,
         fieldFormats: startServices().self.fieldFormats,
-        isFilterable: startServices().self.search.aggs.datatableUtilities.isFilterable,
+        isFilterable: startServices().self.datatableUtilities.isFilterable,
       }))
     );
 
@@ -164,12 +166,14 @@ export class DataPublicPlugin
       uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
     );
 
+    const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {
       actions: {
         createFiltersFromValueClickAction,
         createFiltersFromRangeSelectAction,
       },
       autocomplete: this.autocomplete.start(),
+      datatableUtilities,
       fieldFormats,
       indexPatterns: dataViews,
       dataViews,

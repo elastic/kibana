@@ -8,18 +8,19 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiTitle,
   EuiText,
-  transparentize,
 } from '@elastic/eui';
 import React from 'react';
-import styled, { css } from 'styled-components';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
-import { InspectButtonContainer, InspectButton } from '../../../../common/components/inspect';
+import styled from 'styled-components';
+import { euiLightVars } from '@kbn/ui-theme';
+import {
+  InspectButton,
+  BUTTON_CLASS as INPECT_BUTTON_CLASS,
+} from '../../../../common/components/inspect';
 
 import { HostsKpiBaseComponentLoader } from '../common';
 import * as i18n from './translations';
@@ -31,36 +32,14 @@ import {
 
 import { useInspectQuery } from '../../../../common/hooks/use_inspect_query';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
+import { HostRiskScore } from '../../common/host_risk_score';
+import {
+  HostRiskInformationButtonIcon,
+  HOST_RISK_INFO_BUTTON_CLASS,
+} from '../../host_risk_information';
+import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 
 const QUERY_ID = 'hostsKpiRiskyHostsQuery';
-
-const HOST_RISK_SEVERITY_COLOUR = {
-  Unknown: euiLightVars.euiColorMediumShade,
-  Low: euiLightVars.euiColorVis0,
-  Moderate: euiLightVars.euiColorWarning,
-  High: euiLightVars.euiColorVis9_behindText,
-  Critical: euiLightVars.euiColorDanger,
-};
-
-const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity }>`
-  ${({ theme, $severity }) => css`
-    width: fit-content;
-    padding-right: ${theme.eui.paddingSizes.s};
-    padding-left: ${theme.eui.paddingSizes.xs};
-
-    ${($severity === 'Critical' || $severity === 'High') &&
-    css`
-      background-color: ${transparentize(theme.eui.euiColorDanger, 0.2)};
-      border-radius: 999px; // pill shaped
-    `};
-  `}
-`;
-
-const HostRisk: React.FC<{ severity: HostRiskSeverity }> = ({ severity }) => (
-  <HostRiskBadge color={euiLightVars.euiColorDanger} $severity={severity}>
-    <EuiHealth color={HOST_RISK_SEVERITY_COLOUR[severity]}>{severity}</EuiHealth>
-  </HostRiskBadge>
-);
 
 const HostCount = styled(EuiText)`
   font-weight: bold;
@@ -75,6 +54,12 @@ const RiskScoreContainer = styled(EuiFlexItem)`
   min-width: 80px;
 `;
 
+/**
+ * FUTURE ENGINEER: This is a host risk card for the host page.
+ * Due to not being able to apply KQL,
+ * we decided not to go forward with this for 8.1
+ * saving the code for future implementation
+ */
 const RiskyHostsComponent: React.FC<{
   error: unknown;
   loading: boolean;
@@ -93,7 +78,7 @@ const RiskyHostsComponent: React.FC<{
   const totalCount = criticalRiskCount + hightlRiskCount;
 
   return (
-    <InspectButtonContainer>
+    <HoverVisibilityContainer targetClassNames={[INPECT_BUTTON_CLASS, HOST_RISK_INFO_BUTTON_CLASS]}>
       <EuiPanel hasBorder data-test-subj="risky-hosts">
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem>
@@ -102,7 +87,16 @@ const RiskyHostsComponent: React.FC<{
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {data?.inspect && <InspectButton queryId={QUERY_ID} title={i18n.INSPECT_RISKY_HOSTS} />}
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
+                <HostRiskInformationButtonIcon />
+              </EuiFlexItem>
+              {data?.inspect && (
+                <EuiFlexItem>
+                  <InspectButton queryId={QUERY_ID} title={i18n.INSPECT_RISKY_HOSTS} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup>
@@ -124,7 +118,7 @@ const RiskyHostsComponent: React.FC<{
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <RiskScoreContainer grow={false}>
-                <HostRisk severity={HostRiskSeverity.critical} />
+                <HostRiskScore severity={HostRiskSeverity.critical} />
               </RiskScoreContainer>
               <EuiFlexItem>
                 <HostCount size="m" data-test-subj="riskyHostsCriticalQuantity">
@@ -136,7 +130,7 @@ const RiskyHostsComponent: React.FC<{
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <RiskScoreContainer grow={false}>
-                <HostRisk severity={HostRiskSeverity.high} />
+                <HostRiskScore severity={HostRiskSeverity.high} />
               </RiskScoreContainer>
               <EuiFlexItem>
                 <HostCount size="m" data-test-subj="riskyHostsHighQuantity">
@@ -147,7 +141,7 @@ const RiskyHostsComponent: React.FC<{
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-    </InspectButtonContainer>
+    </HoverVisibilityContainer>
   );
 };
 

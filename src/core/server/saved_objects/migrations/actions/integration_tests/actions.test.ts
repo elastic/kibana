@@ -48,7 +48,10 @@ const { startES } = kbnTestServer.createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.join(__dirname, './archives', '7.7.2_xpack_100k_obj.zip'),
+      dataArchive: Path.resolve(
+        __dirname,
+        '../../integration_tests/archives/7.7.2_xpack_100k_obj.zip'
+      ),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
@@ -60,7 +63,7 @@ describe('migration actions', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    client = esServer.es.getKibanaEsClient();
+    client = esServer.es.getClient();
 
     // Create test fixture data:
     await createIndex({
@@ -274,7 +277,7 @@ describe('migration actions', () => {
       })();
 
       const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
-      expect(redStatusResponse.body.status).toBe('red');
+      expect(redStatusResponse.status).toBe('red');
 
       client.indices.putSettings({
         index: 'red_then_yellow_index',
@@ -288,7 +291,7 @@ describe('migration actions', () => {
       // Assert that the promise didn't resolve before the index became yellow
 
       const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
-      expect(yellowStatusResponse.body.status).toBe('yellow');
+      expect(yellowStatusResponse.status).toBe('yellow');
     });
   });
 
@@ -331,7 +334,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              'index.routing.allocation.enable': 'none',
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
@@ -395,7 +398,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              'index.routing.allocation.enable': 'none',
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
@@ -921,7 +924,7 @@ describe('migration actions', () => {
         },
       });
 
-      await expect(searchResponse.body.hits.hits.length).toBeGreaterThan(0);
+      await expect(searchResponse.hits.hits.length).toBeGreaterThan(0);
     });
     it('rejects if index does not exist', async () => {
       const openPitTask = openPit({ client, index: 'no_such_index' });
@@ -1450,7 +1453,7 @@ describe('migration actions', () => {
                 // Allocate 1 replica so that this index stays yellow
                 number_of_replicas: '1',
                 // Disable all shard allocation so that the index status is red
-                'index.routing.allocation.enable': 'none',
+                index: { routing: { allocation: { enable: 'none' } } },
               },
             },
           },
@@ -1567,8 +1570,8 @@ describe('migration actions', () => {
         }
       `);
     });
-    // TODO: unskip after https://github.com/elastic/kibana/issues/116111
-    it.skip('resolves left request_entity_too_large_exception when the payload is too large', async () => {
+
+    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
       const newDocs = new Array(10000).fill({
         _source: {
           title:

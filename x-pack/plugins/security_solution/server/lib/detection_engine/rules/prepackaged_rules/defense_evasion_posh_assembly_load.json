@@ -1,0 +1,82 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects the use of Reflection.Assembly to load PEs and DLLs in memory in PowerShell scripts. Attackers use this method to load executables and DLLs without writing to the disk, bypassing security solutions.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Suspicious .NET Reflection via PowerShell",
+  "query": "event.category:process and \n  powershell.file.script_block_text : (\n    \"[System.Reflection.Assembly]::Load\" or\n    \"[Reflection.Assembly]::Load\"\n  )\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/dotnet/api/system.reflection.assembly.load"
+  ],
+  "risk_score": 73,
+  "rule_id": "e26f042e-c590-4e82-8e05-41e81bd822ad",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/",
+          "subtechnique": [
+            {
+              "id": "T1055.001",
+              "name": "Dynamic-link Library Injection",
+              "reference": "https://attack.mitre.org/techniques/T1055/001/"
+            },
+            {
+              "id": "T1055.002",
+              "name": "Portable Executable Injection",
+              "reference": "https://attack.mitre.org/techniques/T1055/002/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

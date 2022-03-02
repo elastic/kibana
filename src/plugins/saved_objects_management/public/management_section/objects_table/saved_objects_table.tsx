@@ -22,7 +22,7 @@ import {
 } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
-import { IndexPatternsContract } from '../../../../data/public';
+import { DataViewsContract } from '../../../../data_views/public';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import {
   parseQuery,
@@ -61,7 +61,7 @@ export interface SavedObjectsTableProps {
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: IndexPatternsContract;
+  dataViews: DataViewsContract;
   taggingApi?: SavedObjectsTaggingApi;
   http: HttpStart;
   search: DataPublicPluginStart['search'];
@@ -513,7 +513,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const indexPatterns = selectedSavedObjects.filter((object) => object.type === 'index-pattern');
     if (indexPatterns.length) {
-      await this.props.indexPatterns.clearCache();
+      await this.props.dataViews.clearCache();
     }
 
     const deletes = selectedSavedObjects
@@ -557,7 +557,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.hideImportFlyout}
         done={this.finishImport}
         http={this.props.http}
-        indexPatterns={this.props.indexPatterns}
+        dataViews={this.props.dataViews}
         newIndexPatternUrl={newIndexPatternUrl}
         basePath={this.props.http.basePath}
         search={this.props.search}

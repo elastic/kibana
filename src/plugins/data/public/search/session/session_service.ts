@@ -16,8 +16,8 @@ import {
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ConfigSchema } from '../../../config';
-import {
-  createSessionStateContainer,
+import { createSessionStateContainer } from './search_session_state';
+import type {
   SearchSessionState,
   SessionMeta,
   SessionStateContainer,
@@ -31,7 +31,7 @@ import { formatSessionName } from './lib/session_name_formatter';
 
 export type ISessionService = PublicContract<SessionService>;
 
-export interface TrackSearchDescriptor {
+interface TrackSearchDescriptor {
   abort: () => void;
 }
 
@@ -66,7 +66,7 @@ export interface SearchSessionInfoProvider<P extends SerializableRecord = Serial
 /**
  * Configure a "Search session indicator" UI
  */
-export interface SearchSessionIndicatorUiConfig {
+interface SearchSessionIndicatorUiConfig {
   /**
    * App controls if "Search session indicator" UI should be disabled.
    * reasonText will appear in a tooltip.

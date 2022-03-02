@@ -2,9 +2,9 @@
   "author": [
     "Elastic"
   ],
-  "description": "This rule detects the use of discovery-related Windows API Functions in Powershell Scripts. Attackers can use these functions to perform various situational awareness related activities, like enumerating users, shares, sessions, domain trusts, groups, etc.,",
+  "description": "This rule detects the use of discovery-related Windows API functions in PowerShell Scripts. Attackers can use these functions to perform various situational awareness related activities, like enumerating users, shares, sessions, domain trusts, groups, etc.",
   "false_positives": [
-    "Legitimate Powershell Scripts that make use of these Functions"
+    "Legitimate PowerShell scripts that make use of these functions."
   ],
   "from": "now-9m",
   "index": [
@@ -14,9 +14,11 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "PowerShell Suspicious Discovery Related Windows API Functions",
-  "query": "event.code:\"4104\" and \n  powershell.file.script_block_text : (\n    NetShareEnum or\n    NetWkstaUserEnum or\n    NetSessionEnum or\n    NetLocalGroupEnum or\n    NetLocalGroupGetMembers or\n    DsGetSiteName or\n    DsEnumerateDomainTrusts or\n    WTSEnumerateSessionsEx or\n    WTSQuerySessionInformation or\n    LsaGetLogonSessionData or\n    QueryServiceObjectSecurity\n  )\n",
+  "note": "## Triage and analysis.\n\n### Investigating PowerShell Suspicious Discovery Related Windows API Functions\n\nPowerShell is one of the main tools used by system administrators for automation, report routines, and other tasks.\n\nAttackers can use PowerShell to interact with the Win32 API to bypass file based antivirus detections, using libraries\nlike PSReflect or Get-ProcAddress Cmdlet.\n\n#### Possible investigation steps:\n\n- Examine script content that triggered the detection. \n- Investigate script execution chain (parent process tree).\n- Inspect any file or network events from the suspicious PowerShell host process instance.\n- If the action is suspicious for the user, check for any other activities done by the user in the last 48 hours.\n\n### False Positive Analysis\n\n- Verify whether the script content is malicious/harmful.\n\n### Related Rules\n\n- PowerShell PSReflect Script - 56f2e9b5-4803-4e44-a0a4-a52dc79d57fe\n\n### Response and Remediation\n\n- Immediate response should be taken to validate, investigate, and potentially contain the activity to prevent further\npost-compromise behavior.\n\n## Config\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nAdministrative Templates > \nWindows PowerShell > \nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+  "query": "event.category:process and \n  powershell.file.script_block_text : (\n    NetShareEnum or\n    NetWkstaUserEnum or\n    NetSessionEnum or\n    NetLocalGroupEnum or\n    NetLocalGroupGetMembers or\n    DsGetSiteName or\n    DsEnumerateDomainTrusts or\n    WTSEnumerateSessionsEx or\n    WTSQuerySessionInformation or\n    LsaGetLogonSessionData or\n    QueryServiceObjectSecurity\n  )\n",
   "references": [
-    "https://github.com/BC-SECURITY/Empire/blob/9259e5106986847d2bb770c4289c0c0f1adf2344/data/module_source/situational_awareness/network/powerview.ps1#L21413"
+    "https://github.com/BC-SECURITY/Empire/blob/9259e5106986847d2bb770c4289c0c0f1adf2344/data/module_source/situational_awareness/network/powerview.ps1#L21413",
+    "https://github.com/atc-project/atc-data/blob/master/docs/Logging_Policies/LP_0109_windows_powershell_script_block_log.md"
   ],
   "risk_score": 47,
   "rule_id": "61ac3638-40a3-44b2-855a-985636ca985e",
@@ -86,5 +88,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 4
 }

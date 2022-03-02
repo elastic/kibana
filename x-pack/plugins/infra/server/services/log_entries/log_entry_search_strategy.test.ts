@@ -79,7 +79,6 @@ describe('LogEntry search strategy', () => {
               runtime_field: {
                 type: 'keyword',
                 script: {
-                  lang: 'painless',
                   source: 'emit("runtime value")',
                 },
               },
@@ -111,7 +110,6 @@ describe('LogEntry search strategy', () => {
             {
               _id: 'HIT_ID',
               _index: 'HIT_INDEX',
-              _type: '_doc',
               _score: 0,
               _source: null,
               fields: {
@@ -315,6 +313,14 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
           searchable: true,
         },
       ],
+      runtimeFields: {
+        runtime_field: {
+          type: 'keyword',
+          script: {
+            source: 'emit("runtime value")',
+          },
+        },
+      },
     }),
   ]),
 });

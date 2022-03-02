@@ -9,8 +9,8 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { SecurityServiceProvider } from 'test/common/services/security';
+import { Client } from '@elastic/elasticsearch';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
-import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
@@ -24,14 +24,15 @@ export interface ApmFtrConfig {
   kibanaConfig?: Record<string, string | string[]>;
 }
 
-type SecurityService = PromiseReturnType<typeof SecurityServiceProvider>;
+type SecurityService = Awaited<ReturnType<typeof SecurityServiceProvider>>;
 
 function getLegacySupertestClient(kibanaServer: UrlObject, apmUser: ApmUser) {
   return async (context: InheritedFtrProviderContext) => {
     const security = context.getService('security');
+    const es = context.getService('es');
     await security.init();
 
-    await createApmUser(security, apmUser);
+    await createApmUser(security, apmUser, es);
 
     const url = format({
       ...kibanaServer,
@@ -45,9 +46,10 @@ function getLegacySupertestClient(kibanaServer: UrlObject, apmUser: ApmUser) {
 async function getApmApiClient(
   kibanaServer: UrlObject,
   security: SecurityService,
-  apmUser: ApmUser
+  apmUser: ApmUser,
+  es: Client
 ) {
-  await createApmUser(security, apmUser);
+  await createApmUser(security, apmUser, es);
 
   const url = format({
     ...kibanaServer,
@@ -82,21 +84,36 @@ export function createTestConfig(config: ApmFtrConfig) {
         synthtraceEsClient: synthtraceEsClientService,
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const security = context.getService('security');
+          const es = context.getService('es');
           await security.init();
 
           return {
-            noAccessUser: await getApmApiClient(servers.kibana, security, ApmUser.noAccessUser),
-            readUser: await getApmApiClient(servers.kibana, security, ApmUser.apmReadUser),
-            writeUser: await getApmApiClient(servers.kibana, security, ApmUser.apmWriteUser),
+            noAccessUser: await getApmApiClient(servers.kibana, security, ApmUser.noAccessUser, es),
+            readUser: await getApmApiClient(servers.kibana, security, ApmUser.apmReadUser, es),
+            writeUser: await getApmApiClient(servers.kibana, security, ApmUser.apmWriteUser, es),
             annotationWriterUser: await getApmApiClient(
               servers.kibana,
               security,
-              ApmUser.apmAnnotationsWriteUser
+              ApmUser.apmAnnotationsWriteUser,
+              es
             ),
             noMlAccessUser: await getApmApiClient(
               servers.kibana,
               security,
-              ApmUser.apmReadUserWithoutMlAccess
+              ApmUser.apmReadUserWithoutMlAccess,
+              es
+            ),
+            manageOwnAgentKeysUser: await getApmApiClient(
+              servers.kibana,
+              security,
+              ApmUser.apmManageOwnAgentKeys,
+              es
+            ),
+            createAndAllAgentKeysUser: await getApmApiClient(
+              servers.kibana,
+              security,
+              ApmUser.apmManageOwnAndCreateAgentKeys,
+              es
             ),
           };
         },
@@ -136,4 +153,4 @@ export function createTestConfig(config: ApmFtrConfig) {
   };
 }
 
-export type ApmServices = PromiseReturnType<ReturnType<typeof createTestConfig>>['services'];
+export type ApmServices = Awaited<ReturnType<CreateTestConfig>>['services'];

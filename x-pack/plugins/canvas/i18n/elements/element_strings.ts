@@ -238,4 +238,12 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Metric visualization',
     }),
   },
+  heatmap: {
+    displayName: i18n.translate('xpack.canvas.elements.heatmapDisplayName', {
+      defaultMessage: 'Heatmap',
+    }),
+    help: i18n.translate('xpack.canvas.elements.heatmapHelpText', {
+      defaultMessage: 'Heatmap visualization',
+    }),
+  },
 });

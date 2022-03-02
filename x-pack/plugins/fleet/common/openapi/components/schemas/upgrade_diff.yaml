@@ -1,3 +1,23 @@
 title: Package policy Upgrade dryrun
 type: array
-items: {}
+items:
+  allOf:
+    - $ref: ./package_policy.yaml
+    - type: object
+      allOf:
+        - $ref: ./new_package_policy.yaml
+        - type: object
+          properties:
+            errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  message:
+                    type: string
+            missingVars:
+              type: array
+              items:
+                type: string

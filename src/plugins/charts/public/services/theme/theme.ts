@@ -89,9 +89,8 @@ export class ThemeService {
   public init(uiSettings: CoreSetup['uiSettings']) {
     this._uiSettingsDarkMode$ = uiSettings.get$<boolean>('theme:darkMode');
     this._uiSettingsDarkMode$.subscribe((darkMode) => {
-      this._chartsTheme$.next(
-        darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme
-      );
+      const theme = darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
+      this._chartsTheme$.next(theme);
       this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
     });
   }

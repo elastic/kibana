@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FlyoutSubHeader, FlyoutSubHeaderProps } from './flyout_sub_header';
+import { EuiButtonEmpty, CommonProps } from '@elastic/eui';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useEndpointSelector } from '../../hooks';
 import { uiQueryParams } from '../../../store/selectors';
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
+
+type BackButtonProps = CommonProps & {
+  backButton?: {
+    title: string;
+    onClick: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+    href?: string;
+  };
+};
 
 export const BackToEndpointDetailsFlyoutSubHeader = memo<{ endpointId: string }>(
   ({ endpointId }) => {
@@ -28,13 +36,11 @@ export const BackToEndpointDetailsFlyoutSubHeader = memo<{ endpointId: string }>
         }),
       [currentUrlQueryParams, endpointId]
     );
-
     const backToDetailsClickHandler = useNavigateByRouterEventHandler(detailsRoutePath);
-
-    const backButtonProp = useMemo((): FlyoutSubHeaderProps['backButton'] => {
+    const backButtonProps = useMemo((): BackButtonProps['backButton'] => {
       return {
         title: i18n.translate('xpack.securitySolution.endpoint.policyResponse.backLinkTitle', {
-          defaultMessage: 'Endpoint Details',
+          defaultMessage: 'Endpoint details',
         }),
         href: getAppUrl({ path: detailsRoutePath }),
         onClick: backToDetailsClickHandler,
@@ -42,10 +48,19 @@ export const BackToEndpointDetailsFlyoutSubHeader = memo<{ endpointId: string }>
     }, [backToDetailsClickHandler, getAppUrl, detailsRoutePath]);
 
     return (
-      <FlyoutSubHeader
-        backButton={backButtonProp}
-        data-test-subj="endpointDetailsPolicyResponseFlyoutHeader"
-      />
+      <div>
+        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+        <EuiButtonEmpty
+          flush="both"
+          data-test-subj="flyoutSubHeaderBackButton"
+          iconType="arrowLeft"
+          size="xs"
+          href={backButtonProps?.href ?? ''}
+          onClick={backButtonProps?.onClick}
+        >
+          {backButtonProps?.title}
+        </EuiButtonEmpty>
+      </div>
     );
   }
 );

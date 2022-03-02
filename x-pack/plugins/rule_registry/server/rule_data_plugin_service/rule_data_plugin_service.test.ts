@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { RuleDataService } from './rule_data_plugin_service';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { AlertConsumers } from '@kbn/rule-data-utils/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Dataset } from './index_options';
 import { RuleDataClient } from '../rule_data_client/rule_data_client';
 import { createRuleDataClientMock as mockCreateRuleDataClient } from '../rule_data_client/rule_data_client.mock';

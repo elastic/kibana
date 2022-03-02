@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
-import { getOr, get, isNumber, isEmpty } from 'lodash/fp';
+import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
 import uuid from 'uuid';
 import styled from 'styled-components';
@@ -18,6 +18,7 @@ import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { useTimeZone } from '../../lib/kibana';
 import { defaultLegendColors } from '../matrix_histogram/utils';
 import { useThrottledResizeObserver } from '../utils';
+import { hasValueToDisplay } from '../../utils/validators';
 import { EMPTY_VALUE_LABEL } from '../charts/translation';
 
 import { ChartPlaceHolder } from './chart_place_holder';
@@ -53,7 +54,7 @@ const checkIfAnyValidSeriesExist = (
 
 const yAccessors = ['y'];
 const splitSeriesAccessors = [
-  (datum: ChartData) => (isEmpty(datum.g) ? EMPTY_VALUE_LABEL : datum.g),
+  (datum: ChartData) => (hasValueToDisplay(datum.g) ? datum.g : EMPTY_VALUE_LABEL),
 ];
 
 // Bar chart rotation: https://ela.st/chart-rotations

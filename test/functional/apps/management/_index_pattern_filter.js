@@ -44,6 +44,7 @@ export default function ({ getService, getPageObjects }) {
           expect(fieldType).to.be('keyword');
         }
       });
+      await PageObjects.settings.clearFieldTypeFilter('keyword');
 
       await PageObjects.settings.setFieldTypeFilter('long');
 
@@ -54,6 +55,7 @@ export default function ({ getService, getPageObjects }) {
           expect(fieldType).to.be('long');
         }
       });
+      await PageObjects.settings.clearFieldTypeFilter('long');
     });
   });
 }

@@ -32,8 +32,6 @@ export const useStartAction = (forceDisable: boolean, transformNodes: number) =>
   };
 
   const openModal = (newItems: TransformListRow[]) => {
-    // EUI issue: Might trigger twice, one time as an array,
-    // one time as a single object. See https://github.com/elastic/eui/issues/3679
     if (Array.isArray(newItems)) {
       setItems(newItems);
       setModalVisible(true);

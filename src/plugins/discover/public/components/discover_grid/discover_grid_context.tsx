@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data/common';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { ElasticSearchHit } from '../../types';
 
@@ -16,7 +16,7 @@ export interface GridContext {
   setExpanded: (hit?: ElasticSearchHit) => void;
   rows: ElasticSearchHit[];
   onFilter: DocViewFilterFn;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   isDarkMode: boolean;
   selectedDocs: string[];
   setSelectedDocs: (selected: string[]) => void;

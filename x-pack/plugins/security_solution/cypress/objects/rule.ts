@@ -163,6 +163,8 @@ const getSeverityOverride4 = (): SeverityOverride => ({
   sourceValue: 'auditbeat',
 });
 
+// Default interval is 1m, our tests config overwrite this to 1s
+// See https://github.com/elastic/kibana/pull/125396 for details
 const getRunsEvery = (): Interval => ({
   interval: '1',
   timeType: 'Seconds',
@@ -467,7 +469,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     immutable: false,
     type: 'query',
     language: 'kuery',
-    index: ['exceptions-*'],
+    index: getIndexPatterns(),
     query,
     throttle: 'no_actions',
     actions: [],

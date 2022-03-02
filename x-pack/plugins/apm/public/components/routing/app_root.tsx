@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { Route } from 'react-router-dom';
@@ -20,7 +20,7 @@ import {
   HeaderMenuPortal,
   InspectorContextProvider,
 } from '../../../../observability/public';
-import { ScrollToTopOnPathChange } from '../../components/app/Main/ScrollToTopOnPathChange';
+import { ScrollToTopOnPathChange } from '../../components/app/main/scroll_to_top_on_path_change';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -36,6 +36,7 @@ import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
 import { RedirectWithDefaultDateRange } from '../shared/redirect_with_default_date_range';
 import { apmRouter } from './apm_route_config';
 import { TrackPageview } from './track_pageview';
+import { RedirectWithDefaultEnvironment } from '../shared/redirect_with_default_environment';
 
 export function ApmAppRoot({
   apmPluginContextValue,
@@ -60,26 +61,28 @@ export function ApmAppRoot({
           <i18nCore.Context>
             <TimeRangeIdContextProvider>
               <RouterProvider history={history} router={apmRouter as any}>
-                <RedirectWithDefaultDateRange>
-                  <TrackPageview>
-                    <BreadcrumbsContextProvider>
-                      <UrlParamsProvider>
-                        <LicenseProvider>
-                          <AnomalyDetectionJobsContextProvider>
-                            <InspectorContextProvider>
-                              <ApmThemeProvider>
-                                <MountApmHeaderActionMenu />
+                <RedirectWithDefaultEnvironment>
+                  <RedirectWithDefaultDateRange>
+                    <TrackPageview>
+                      <BreadcrumbsContextProvider>
+                        <UrlParamsProvider>
+                          <LicenseProvider>
+                            <AnomalyDetectionJobsContextProvider>
+                              <InspectorContextProvider>
+                                <ApmThemeProvider>
+                                  <MountApmHeaderActionMenu />
 
-                                <Route component={ScrollToTopOnPathChange} />
-                                <RouteRenderer />
-                              </ApmThemeProvider>
-                            </InspectorContextProvider>
-                          </AnomalyDetectionJobsContextProvider>
-                        </LicenseProvider>
-                      </UrlParamsProvider>
-                    </BreadcrumbsContextProvider>
-                  </TrackPageview>
-                </RedirectWithDefaultDateRange>
+                                  <Route component={ScrollToTopOnPathChange} />
+                                  <RouteRenderer />
+                                </ApmThemeProvider>
+                              </InspectorContextProvider>
+                            </AnomalyDetectionJobsContextProvider>
+                          </LicenseProvider>
+                        </UrlParamsProvider>
+                      </BreadcrumbsContextProvider>
+                    </TrackPageview>
+                  </RedirectWithDefaultDateRange>
+                </RedirectWithDefaultEnvironment>
               </RouterProvider>
             </TimeRangeIdContextProvider>
           </i18nCore.Context>
@@ -90,10 +93,11 @@ export function ApmAppRoot({
 }
 
 function MountApmHeaderActionMenu() {
-  const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
+  const { setHeaderActionMenu, theme$ } =
+    useApmPluginContext().appMountParameters;
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
       <ApmHeaderActionMenu />
     </HeaderMenuPortal>
   );

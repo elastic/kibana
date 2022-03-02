@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import IndexThresholdAlertTypeExpression, { DEFAULT_VALUES } from './expression';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
@@ -82,17 +82,17 @@ describe('IndexThresholdAlertTypeExpression', () => {
       ...overrides,
     };
   }
-  async function setup(alertParams: IndexThresholdAlertParams) {
-    const { errors } = validateExpression(alertParams);
+  async function setup(ruleParams: IndexThresholdAlertParams) {
+    const { errors } = validateExpression(ruleParams);
 
     const wrapper = mountWithIntl(
       <IndexThresholdAlertTypeExpression
-        alertInterval="1m"
-        alertThrottle="1m"
+        ruleInterval="1m"
+        ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
-        alertParams={alertParams}
-        setAlertParams={() => {}}
-        setAlertProperty={() => {}}
+        ruleParams={ruleParams}
+        setRuleParams={() => {}}
+        setRuleProperty={() => {}}
         errors={errors}
         data={dataMock}
         defaultActionGroupId=""

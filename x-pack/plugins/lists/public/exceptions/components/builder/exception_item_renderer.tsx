@@ -19,7 +19,7 @@ import {
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
@@ -47,15 +47,15 @@ interface BuilderExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionItemIndex: number;
   osTypes?: OsTypeArray;
-  indexPattern: IndexPatternBase;
+  indexPattern: DataViewBase;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IndexPatternBase,
+    pattern: DataViewBase,
     type: ExceptionListType,
     osTypes?: OsTypeArray
-  ) => IndexPatternBase;
+  ) => DataViewBase;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: boolean) => void;

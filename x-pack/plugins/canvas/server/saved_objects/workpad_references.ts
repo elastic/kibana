@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 import { PersistableStateService } from '../../../../../src/plugins/kibana_utils/common';
 import { SavedObjectReference } from '../../../../../src/core/server';
 import { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
@@ -31,7 +31,10 @@ export const extractReferences = (
         }))
       );
 
-      return { ...element, expression: toExpression(extract.state) };
+      return {
+        ...element,
+        expression: toExpression(extract.state, { source: element.expression }),
+      };
     });
 
     return { ...page, elements };
@@ -59,7 +62,7 @@ export const injectReferences = (
         referencesForElement
       );
 
-      return { ...element, expression: toExpression(injectedAst) };
+      return { ...element, expression: toExpression(injectedAst, { source: element.expression }) };
     });
 
     return { ...page, elements };

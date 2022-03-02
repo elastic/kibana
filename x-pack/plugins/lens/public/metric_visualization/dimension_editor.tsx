@@ -23,7 +23,6 @@ import {
   CustomizablePalette,
   CUSTOM_PALETTE,
   FIXED_PROGRESSION,
-  getStopsForFixedMode,
   PalettePanelContainer,
 } from '../shared_components';
 import type { VisualizationDimensionEditorProps } from '../types';
@@ -165,14 +164,7 @@ export function MetricDimensionEditor(
             <EuiFlexItem>
               <EuiColorPaletteDisplay
                 data-test-subj="lnsMetric_dynamicColoring_palette"
-                palette={
-                  activePalette.params?.name === CUSTOM_PALETTE
-                    ? getStopsForFixedMode(
-                        activePalette.params.stops!,
-                        activePalette.params.colorStops
-                      )
-                    : displayStops.map(({ color }) => color)
-                }
+                palette={displayStops.map(({ color }) => color)}
                 type={FIXED_PROGRESSION}
                 onClick={togglePalette}
               />

@@ -40,6 +40,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(metrics).to.have.length(6);
     });
 
+    it('should display the server metrics meta', async () => {
+      const metricsMetas = await testSubjects.findAll('serverMetricMeta');
+      expect(metricsMetas).to.have.length(3);
+    });
+
     it('should display the server status', async () => {
       const titleText = await testSubjects.getVisibleText('serverStatusTitle');
       expect(titleText).to.contain('Kibana status is');

@@ -58,6 +58,15 @@ export class SavedObjectsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  async importDisabled() {
+    this.log.debug(`tryImport`);
+    this.log.debug(`Finding import action`);
+    await this.testSubjects.click('importObjects');
+    this.log.debug(`Finding import button`);
+    const importButton = await this.testSubjects.find('importSavedObjectsImportBtn');
+    return await importButton.getAttribute('disabled');
+  }
+
   async checkImportSucceeded() {
     await this.testSubjects.existOrFail('importSavedObjectsSuccess', { timeout: 20000 });
   }

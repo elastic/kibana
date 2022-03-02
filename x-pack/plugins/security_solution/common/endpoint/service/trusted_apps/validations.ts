@@ -26,12 +26,45 @@ export const getDuplicateFields = (entries: ConditionEntry[]) => {
   const groupedFields = new Map<ConditionEntryField, ConditionEntry[]>();
 
   entries.forEach((entry) => {
-    groupedFields.set(entry.field, [...(groupedFields.get(entry.field) || []), entry]);
+    // With the move to the Exception Lists api, the server side now validates individual
+    // `process.hash.[type]`'s, so we need to account for that here
+    const field = entry.field.startsWith('process.hash') ? ConditionEntryField.HASH : entry.field;
+
+    groupedFields.set(field, [...(groupedFields.get(field) || []), entry]);
   });
 
   return [...groupedFields.entries()]
     .filter((entry) => entry[1].length > 1)
     .map((entry) => entry[0]);
+};
+
+/*
+ * regex to match executable names
+ * starts matching from the eol of the path
+ * file names with a single or multiple spaces (for spaced names)
+ * and hyphens and combinations of these that produce complex names
+ * such as:
+ * c:\home\lib\dmp.dmp
+ * c:\home\lib\my-binary-app-+/ some/  x/ dmp.dmp
+ * /home/lib/dmp.dmp
+ * /home/lib/my-binary-app+-\ some\  x\ dmp.dmp
+ */
+const WIN_EXEC_PATH = /\\(\w+|\w*[\w+|-]+\/ +)+\w+[\w+|-]+\.*\w+$/i;
+const UNIX_EXEC_PATH = /(\/|\w*[\w+|-]+\\ +)+\w+[\w+|-]+\.*\w*$/i;
+
+export const hasSimpleExecutableName = ({
+  os,
+  type,
+  value,
+}: {
+  os: OperatingSystem;
+  type: TrustedAppEntryTypes;
+  value: string;
+}): boolean => {
+  if (type === 'wildcard') {
+    return os === OperatingSystem.WINDOWS ? WIN_EXEC_PATH.test(value) : UNIX_EXEC_PATH.test(value);
+  }
+  return true;
 };
 
 export const isPathValid = ({

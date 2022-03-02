@@ -7,13 +7,13 @@
  */
 
 import { getPath } from './utils';
-import { IndexPatternField, IndexPattern } from '../../../../../data/public';
+import { DataViewField, DataView } from '../../../../../data_views/public';
 
 test('getPath() should encode "fieldName"', () => {
   expect(
     getPath(
-      { name: 'Memory: Allocated Bytes/sec' } as unknown as IndexPatternField,
-      { id: 'id' } as unknown as IndexPattern
+      { name: 'Memory: Allocated Bytes/sec' } as unknown as DataViewField,
+      { id: 'id' } as unknown as DataView
     )
   ).toMatchInlineSnapshot(`"/dataView/id/field/Memory%3A%20Allocated%20Bytes%2Fsec"`);
 });

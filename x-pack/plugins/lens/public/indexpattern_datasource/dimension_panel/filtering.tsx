@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiPopoverProps,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { Query } from 'src/plugins/data/public';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
@@ -53,6 +54,7 @@ export function Filtering({
   updateLayer,
   indexPattern,
   isInitiallyOpen,
+  helpMessage,
 }: {
   selectedColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
@@ -60,6 +62,7 @@ export function Filtering({
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
   isInitiallyOpen: boolean;
+  helpMessage: string | null;
 }) {
   const inputFilter = selectedColumn.filter;
   const [queryInput, setQueryInput] = useState(inputFilter ?? defaultFilter);
@@ -92,13 +95,26 @@ export function Filtering({
     indexPattern
   );
 
+  const labelNode = helpMessage ? (
+    <>
+      {filterByLabel}{' '}
+      <EuiIconTip
+        color="subdued"
+        content={helpMessage}
+        iconProps={{
+          className: 'eui-alignTop',
+        }}
+        position="top"
+        size="s"
+        type="questionInCircle"
+      />
+    </>
+  ) : (
+    filterByLabel
+  );
+
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      label={filterByLabel}
-      fullWidth
-      isInvalid={!isInputFilterValid}
-    >
+    <EuiFormRow display="rowCompressed" label={labelNode} fullWidth isInvalid={!isInputFilterValid}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
           <EuiPopover

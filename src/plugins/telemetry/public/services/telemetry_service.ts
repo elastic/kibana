@@ -138,9 +138,20 @@ export class TelemetryService {
     return !this.isScreenshotMode && this.getIsOptedIn();
   };
 
+  public fetchLastReported = async (): Promise<number | undefined> => {
+    const response = await this.http.get<{ lastReported?: number }>(
+      '/api/telemetry/v2/last_reported'
+    );
+    return response?.lastReported;
+  };
+
+  public updateLastReported = async (): Promise<number | undefined> => {
+    return this.http.put('/api/telemetry/v2/last_reported');
+  };
+
   /** Fetches an unencrypted telemetry payload so we can show it to the user **/
   public fetchExample = async (): Promise<UnencryptedTelemetryPayload> => {
-    return await this.fetchTelemetry({ unencrypted: true });
+    return await this.fetchTelemetry({ unencrypted: true, refreshCache: true });
   };
 
   /**
@@ -149,9 +160,10 @@ export class TelemetryService {
    */
   public fetchTelemetry = async <T = EncryptedTelemetryPayload | UnencryptedTelemetryPayload>({
     unencrypted = false,
+    refreshCache = false,
   } = {}): Promise<T> => {
     return this.http.post('/api/telemetry/v2/clusters/_stats', {
-      body: JSON.stringify({ unencrypted }),
+      body: JSON.stringify({ unencrypted, refreshCache }),
     });
   };
 

@@ -12,7 +12,8 @@ export const repeatImage: ElementFactory = () => ({
   displayName: 'Image repeat',
   type: 'image',
   help: 'Repeats an image N times',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | math "mean(cost)"
 | repeatImage image=null

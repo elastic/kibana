@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { Observable } from 'rxjs';
-import { UnwrapPromise, SerializableRecord } from '@kbn/utility-types';
+import { SerializableRecord } from '@kbn/utility-types';
 
 import type { NotificationsSetup } from '../../../../../../src/core/public';
 import {
@@ -40,6 +40,7 @@ export interface TestDependencies {
   urlService: SharePluginSetup['url'];
   toasts: NotificationsSetup['toasts'];
   ilmLocator: LocatorPublic<SerializableRecord>;
+  uiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
 }
 
 const mockPollConfig = {
@@ -74,9 +75,10 @@ const createTestBed = registerTestBed(
     license$: l$,
     urlService,
     toasts,
+    uiSettings,
     ...rest
   }: Partial<Props> & TestDependencies) => (
-    <KibanaContextProvider services={{ http, application }}>
+    <KibanaContextProvider services={{ http, application, uiSettings }}>
       <InternalApiClientProvider apiClient={reportingAPIClient}>
         <IlmPolicyStatusContextProvider>
           <ReportListing
@@ -95,7 +97,7 @@ const createTestBed = registerTestBed(
   { memoryRouter: { wrapComponent: false } }
 );
 
-export type TestBed = UnwrapPromise<ReturnType<typeof setup>>;
+export type TestBed = Awaited<ReturnType<typeof setup>>;
 
 export const setup = async (props?: Partial<Props>) => {
   const uiSettingsClient = coreMock.createSetup().uiSettings;
@@ -119,6 +121,7 @@ export const setup = async (props?: Partial<Props>) => {
     license$,
     reportingAPIClient,
     ilmLocator,
+    uiSettings: uiSettingsClient,
     urlService: {
       locators: {
         get: () => ilmLocator,
@@ -130,13 +133,29 @@ export const setup = async (props?: Partial<Props>) => {
 
   const { find, exists, component } = testBed;
 
-  return {
+  const api = {
     ...testBed,
     testDependencies,
     actions: {
       findListTable: () => find('reportJobListing'),
       hasIlmMigrationBanner: () => exists('migrateReportingIndicesPolicyCallOut'),
       hasIlmPolicyLink: () => exists('ilmPolicyLink'),
+      flyout: {
+        open: async (jobId: string) => {
+          await act(async () => {
+            find(`viewReportingLink${jobId}`).simulate('click');
+          });
+          component.update();
+        },
+        openActionsMenu: () => {
+          act(() => {
+            find('reportInfoFlyoutActionsButton').simulate('click');
+          });
+          component.update();
+        },
+        findDownloadButton: () => find('reportInfoFlyoutDownloadButton'),
+        findOpenInAppButton: () => find('reportInfoFlyoutOpenInKibanaButton'),
+      },
       migrateIndices: async () => {
         await act(async () => {
           find('migrateReportingIndicesButton').simulate('click');
@@ -145,4 +164,6 @@ export const setup = async (props?: Partial<Props>) => {
       },
     },
   };
+
+  return api;
 };

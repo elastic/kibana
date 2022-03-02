@@ -40,7 +40,7 @@ Object {
   },
   "fields": Object {},
   "id": "id",
-  "intervalName": undefined,
+  "namespaces": undefined,
   "runtimeFieldMap": Object {
     "aRuntimeField": Object {
       "script": Object {

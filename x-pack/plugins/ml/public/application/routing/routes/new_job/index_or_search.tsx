@@ -34,10 +34,19 @@ const getBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
   {
-    text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.createJobLabel', {
       defaultMessage: 'Create job',
     }),
-    href: '',
+  },
+];
+
+const getDataVisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectDateViewLabel', {
+      defaultMessage: 'Data View',
+    }),
   },
 ];
 
@@ -61,7 +70,11 @@ export const dataVizIndexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'data_view_datavisualizer',
   path: '/datavisualizer_index_select',
+  title: i18n.translate('xpack.ml.selectDataViewLabel', {
+    defaultMessage: 'Select Data View',
+  }),
   render: (props, deps) => (
     <PageWrapper
       {...props}
@@ -70,7 +83,7 @@ export const dataVizIndexOrSearchRouteFactory = (
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {

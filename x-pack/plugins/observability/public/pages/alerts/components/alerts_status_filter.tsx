@@ -8,11 +8,7 @@
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils/alerts_as_data_status';
-import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { AlertStatusFilterButton } from '../../../../common/typings';
 import { AlertStatusFilter } from '../../../../common/typings';
 

@@ -28,7 +28,7 @@ export const txtUrlPreviewHelpText = i18n.translate(
 export const txtUrlTemplateLabel = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateLabel',
   {
-    defaultMessage: 'Enter URL:',
+    defaultMessage: 'Enter URL',
   }
 );
 

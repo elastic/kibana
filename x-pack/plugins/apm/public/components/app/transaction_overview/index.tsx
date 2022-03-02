@@ -13,8 +13,9 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
-import { replace } from '../../shared/Links/url_helpers';
+import { replace } from '../../shared/links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
+import { isServerlessAgent } from '../../../../common/agent_name';
 
 export function TransactionOverview() {
   const {
@@ -24,12 +25,14 @@ export function TransactionOverview() {
       rangeFrom,
       rangeTo,
       transactionType: transactionTypeFromUrl,
+      comparisonEnabled,
+      comparisonType,
     },
   } = useApmParams('/services/{serviceName}/transactions');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, serviceName, fallbackToTransactions } =
+  const { transactionType, serviceName, fallbackToTransactions, runtimeName } =
     useApmServiceContext();
 
   const history = useHistory();
@@ -44,6 +47,8 @@ export function TransactionOverview() {
   if (!serviceName) {
     return null;
   }
+
+  const isServerless = isServerlessAgent(runtimeName);
 
   return (
     <>
@@ -62,6 +67,9 @@ export function TransactionOverview() {
         environment={environment}
         start={start}
         end={end}
+        isServerlessContext={isServerless}
+        comparisonEnabled={comparisonEnabled}
+        comparisonType={comparisonType}
       />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>

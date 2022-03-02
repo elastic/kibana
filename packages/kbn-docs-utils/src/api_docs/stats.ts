@@ -25,6 +25,7 @@ export function collectApiStatsForPlugin(
     isAnyType: [],
     noReferences: [],
     deprecatedAPIsReferencedCount: 0,
+    unreferencedDeprecatedApisCount: 0,
     apiCount: countApiForPlugin(doc),
     missingExports: Object.values(missingApiItems[doc.id] ?? {}).length,
   };
@@ -43,13 +44,14 @@ export function collectApiStatsForPlugin(
 
 function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: PluginApi): void {
   const missingComment = doc.description === undefined || doc.description.length === 0;
+  // Ignore all stats coming from third party libraries, we can't fix that!
+  if (doc.path.includes('node_modules')) return;
+
   if (missingComment) {
     stats.missingComments.push(doc);
   }
 
-  // Any types can be inherited, for example, from an inherited react type. If the any type is coming from
-  // a package in node_modules, it's beyond our control, so we don't care about it in the stats.
-  if (doc.type === TypeKind.AnyKind && !doc.path.includes('node_modules')) {
+  if (doc.type === TypeKind.AnyKind) {
     stats.isAnyType.push(doc);
   }
   if (doc.children) {

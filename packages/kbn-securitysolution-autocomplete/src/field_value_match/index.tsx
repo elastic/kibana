@@ -14,7 +14,7 @@ import {
   EuiComboBoxOptionOption,
   EuiComboBox,
 } from '@elastic/eui';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import { uniq } from 'lodash';
 
@@ -41,9 +41,9 @@ const SINGLE_SELECTION = { asPlainText: true };
 
 interface AutocompleteFieldMatchProps {
   placeholder: string;
-  selectedField: IndexPatternFieldBase | undefined;
+  selectedField: DataViewFieldBase | undefined;
   selectedValue: string | undefined;
-  indexPattern: IndexPatternBase | undefined;
+  indexPattern: DataViewBase | undefined;
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;

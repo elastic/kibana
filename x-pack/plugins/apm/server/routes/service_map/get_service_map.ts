@@ -9,7 +9,6 @@ import { Logger } from 'kibana/server';
 import { chunk } from 'lodash';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery, termQuery } from '../../../../observability/server';
-import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -154,8 +153,8 @@ async function getServicesData(options: IEnvOptions) {
   );
 }
 
-export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
-export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
+export type ConnectionsResponse = Awaited<ReturnType<typeof getConnectionData>>;
+export type ServicesResponse = Awaited<ReturnType<typeof getServicesData>>;
 
 export function getServiceMap(options: IEnvOptions) {
   return withApmSpan('get_service_map', async () => {

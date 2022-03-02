@@ -117,12 +117,12 @@ describe('server/index_patterns/service/lib/es_api', () => {
         },
         fieldCaps,
       };
-      await callFieldCapsApi(callCluster);
+      await callFieldCapsApi({ callCluster });
       sinon.assert.calledOnce(fieldCaps);
     });
 
     it('passes indices directly to es api', async () => {
-      const football = {};
+      const indices = ['indexA', 'indexB'];
       const fieldCaps = sinon.stub();
       const callCluster = {
         indices: {
@@ -130,9 +130,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
         },
         fieldCaps,
       };
-      await callFieldCapsApi(callCluster, football);
+      await callFieldCapsApi({ callCluster, indices });
       sinon.assert.calledOnce(fieldCaps);
-      expect(fieldCaps.args[0][0].index).toBe(football);
+      expect(fieldCaps.args[0][0].index).toBe(indices);
     });
 
     it('returns the es response directly', async () => {
@@ -144,7 +144,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
         },
         fieldCaps,
       };
-      const resp = await callFieldCapsApi(callCluster);
+      const resp = await callFieldCapsApi({ callCluster });
       sinon.assert.calledOnce(fieldCaps);
       expect(resp).toBe(football);
     });
@@ -157,7 +157,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
         },
         fieldCaps,
       };
-      await callFieldCapsApi(callCluster);
+      await callFieldCapsApi({ callCluster });
       sinon.assert.calledOnce(fieldCaps);
 
       const passedOpts = fieldCaps.args[0][0];
@@ -182,7 +182,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
         fieldCaps,
       };
       try {
-        await callFieldCapsApi(callCluster, indices);
+        await callFieldCapsApi({ callCluster, indices });
         throw new Error('expected callFieldCapsApi() to throw');
       } catch (error) {
         expect(error).toBe(convertedError);

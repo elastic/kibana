@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { securityMock } from '../../../../../../plugins/security/public/mocks';
@@ -32,7 +32,6 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
   DEFAULT_TRANSFORMS,
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
@@ -61,7 +60,6 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
     on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
     value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-    idleTimeout: DEFAULT_RULE_REFRESH_IDLE_VALUE,
   },
   [DEFAULT_TRANSFORMS]: {
     enabled: false,
@@ -149,6 +147,9 @@ export const createStartServicesMock = (
     fleet,
     ml: {
       locator,
+    },
+    theme: {
+      theme$: themeServiceMock.createTheme$(),
     },
   } as unknown as StartServices;
 };

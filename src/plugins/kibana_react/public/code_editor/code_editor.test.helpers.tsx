@@ -12,6 +12,7 @@ function createEditorInstance() {
   const keyDownListeners: Array<(e?: unknown) => void> = [];
   const didShowListeners: Array<(e?: unknown) => void> = [];
   const didHideListeners: Array<(e?: unknown) => void> = [];
+  let placeholderDiv: undefined | HTMLDivElement;
   let areSuggestionsVisible = false;
 
   const editorInstance = {
@@ -37,10 +38,20 @@ function createEditorInstance() {
     onKeyDown: jest.fn((listener) => {
       keyDownListeners.push(listener);
     }),
+    addContentWidget: jest.fn((widget: monaco.editor.IContentWidget) => {
+      placeholderDiv?.appendChild(widget.getDomNode());
+    }),
+    applyFontInfo: jest.fn(),
+    removeContentWidget: jest.fn((widget: monaco.editor.IContentWidget) => {
+      placeholderDiv?.removeChild(widget.getDomNode());
+    }),
     getDomNode: jest.fn(),
     // Helpers for our tests
     __helpers__: {
       areSuggestionsVisible: () => areSuggestionsVisible,
+      getPlaceholderRef: (div: HTMLDivElement) => {
+        placeholderDiv = div;
+      },
       onTextareaKeyDown: ((e) => {
         // Let all our listener know that a key has been pressed on the textarea
         keyDownListeners.forEach((listener) => listener(e));
@@ -81,6 +92,7 @@ const mockMonacoEditor = ({
 
   return (
     <div>
+      <div ref={mockedEditorInstance?.__helpers__.getPlaceholderRef} />
       <textarea
         onKeyDown={mockedEditorInstance?.__helpers__.onTextareaKeyDown}
         data-test-subj="monacoEditorTextarea"

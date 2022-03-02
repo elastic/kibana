@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isObject, get, isString, isNumber } from 'lodash';
+import { merge } from '@kbn/std';
+import { isPlainObject } from 'lodash';
 import { Ecs } from '../../../../cases/common';
 
 // TODO we need to allow ->  docValueFields: [{ field: "@timestamp" }],
@@ -62,16 +63,72 @@ export const toStringArray = (value: unknown): string[] => {
   }
 };
 
-export const formatAlertToEcsSignal = (alert: {}): Ecs =>
-  Object.keys(alert).reduce<Ecs>((accumulator, key) => {
-    const item = get(alert, key);
-    if (item != null && isObject(item)) {
-      return { ...accumulator, [key]: formatAlertToEcsSignal(item) };
-    } else if (Array.isArray(item) || isString(item) || isNumber(item)) {
-      return { ...accumulator, [key]: toStringArray(item) };
-    }
-    return accumulator;
-  }, {} as Ecs);
+const formatAlertItem = (item: unknown): Ecs => {
+  if (item != null && isPlainObject(item)) {
+    return Object.keys(item as object).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: formatAlertItem((item as Record<string, unknown>)[key]),
+      }),
+      {} as Ecs
+    );
+  } else if (Array.isArray(item)) {
+    return item.map((arrayItem): Ecs => formatAlertItem(arrayItem)) as unknown as Ecs;
+  }
+  return item as Ecs;
+};
+
+const expandDottedField = (dottedFieldName: string, val: unknown): object => {
+  const parts = dottedFieldName.split('.');
+  if (parts.length === 1) {
+    return { [parts[0]]: val };
+  } else {
+    return { [parts[0]]: expandDottedField(parts.slice(1).join('.'), val) };
+  }
+};
+
+/*
+ * Expands an object with "dotted" fields to a nested object with unflattened fields.
+ *
+ * Example:
+ *   expandDottedObject({
+ *     "kibana.alert.depth": 1,
+ *     "kibana.alert.ancestors": [{
+ *       id: "d5e8eb51-a6a0-456d-8a15-4b79bfec3d71",
+ *       type: "event",
+ *       index: "signal_index",
+ *       depth: 0,
+ *     }],
+ *   })
+ *
+ *   => {
+ *     kibana: {
+ *       alert: {
+ *         ancestors: [
+ *           id: "d5e8eb51-a6a0-456d-8a15-4b79bfec3d71",
+ *           type: "event",
+ *           index: "signal_index",
+ *           depth: 0,
+ *         ],
+ *         depth: 1,
+ *       },
+ *     },
+ *   }
+ */
+export const expandDottedObject = (dottedObj: object) => {
+  if (Array.isArray(dottedObj)) {
+    return dottedObj;
+  }
+  return Object.entries(dottedObj).reduce(
+    (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
+    {}
+  );
+};
+
+export const formatAlertToEcsSignal = (alert: Record<string, unknown>): Ecs => {
+  return expandDottedObject(alert) as Ecs;
+};
+
 interface Signal {
   rule: {
     id: string;

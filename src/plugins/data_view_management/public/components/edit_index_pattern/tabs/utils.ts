@@ -8,17 +8,17 @@
 
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
+import { DataView, DataViewField } from '../../../../../../plugins/data_views/public';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 import { areScriptedFieldsEnabled } from '../../utils';
 
-function filterByName(items: IndexPatternField[], filter: string) {
+function filterByName(items: DataViewField[], filter: string) {
   const lowercaseFilter = (filter || '').toLowerCase();
   return items.filter((item) => item.name.toLowerCase().includes(lowercaseFilter));
 }
 
 function getCounts(
-  fields: IndexPatternField[],
+  fields: DataViewField[],
   sourceFilters: {
     excludes: string[];
   },
@@ -68,7 +68,7 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
   return title + count;
 }
 
-export function getTabs(indexPattern: IndexPattern, fieldFilter: string) {
+export function getTabs(indexPattern: DataView, fieldFilter: string) {
   const totalCount = getCounts(indexPattern.fields.getAll(), indexPattern.getSourceFiltering());
   const filteredCount = getCounts(
     indexPattern.fields.getAll(),
@@ -101,40 +101,15 @@ export function getTabs(indexPattern: IndexPattern, fieldFilter: string) {
   return tabs;
 }
 
-export function getPath(field: IndexPatternField, indexPattern: IndexPattern) {
+export function getPath(field: DataViewField, indexPattern: DataView) {
   return `/dataView/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
-const allTypesDropDown = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.allTypesDropDown',
-  {
-    defaultMessage: 'All field types',
-  }
-);
-
-const allLangsDropDown = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.allLangsDropDown',
-  {
-    defaultMessage: 'All languages',
-  }
-);
-
-export function convertToEuiSelectOption(options: string[], type: string) {
-  const euiOptions =
-    options.length > 0
-      ? [
-          {
-            value: '',
-            text: type === 'scriptedFieldLanguages' ? allLangsDropDown : allTypesDropDown,
-          },
-        ]
-      : [];
-  return euiOptions.concat(
-    uniq(options).map((option) => {
-      return {
-        value: option,
-        text: option,
-      };
-    })
-  );
+export function convertToEuiFilterOptions(options: string[]) {
+  return uniq(options).map((option) => {
+    return {
+      value: option,
+      name: option,
+    };
+  });
 }

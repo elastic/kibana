@@ -1,0 +1,70 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects PowerShell scripts that can take screenshots, which is a common feature in post-exploitation kits and remote access tools (RATs).",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "PowerShell Suspicious Script with Screenshot Capabilities",
+  "query": "event.category:process and \n  powershell.file.script_block_text : (\n    CopyFromScreen and\n    (System.Drawing.Bitmap or Drawing.Bitmap)\n  )\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/dotnet/api/system.drawing.graphics.copyfromscreen"
+  ],
+  "risk_score": 47,
+  "rule_id": "959a7353-1129-4aa7-9084-30746b256a70",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Collection"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0009",
+        "name": "Collection",
+        "reference": "https://attack.mitre.org/tactics/TA0009/"
+      },
+      "technique": [
+        {
+          "id": "T1113",
+          "name": "Screen Capture",
+          "reference": "https://attack.mitre.org/techniques/T1113/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

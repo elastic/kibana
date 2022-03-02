@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useReducer } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
@@ -31,7 +31,7 @@ import {
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 
 import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { AndOrBadge } from '../and_or_badge';
@@ -77,7 +77,7 @@ export interface ExceptionBuilderProps {
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
   osTypes?: OsTypeArray;
-  indexPatterns: IndexPatternBase;
+  indexPatterns: DataViewBase;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
@@ -86,9 +86,9 @@ export interface ExceptionBuilderProps {
   listNamespaceType: NamespaceType;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IndexPatternBase,
+    pattern: DataViewBase,
     type: ExceptionListType
-  ) => IndexPatternBase;
+  ) => DataViewBase;
   onChange: (arg: OnChangeProps) => void;
   ruleName: string;
   isDisabled?: boolean;
@@ -424,6 +424,8 @@ export const ExceptionBuilderComponent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       ))}
+
+      <EuiSpacer size="m" />
 
       <MyButtonsContainer data-test-subj={`andOrOperatorButtons`}>
         <EuiFlexGroup gutterSize="s">

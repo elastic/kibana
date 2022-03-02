@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from 'src/core/public/mocks';
+import { Comparator } from '../../../../common/alerting/metrics';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
-import React from 'react';
 import { Expressions } from './expression';
-import { act } from 'react-dom/test-utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
@@ -34,7 +33,7 @@ describe('Expression', () => {
     filterQuery?: string;
     groupBy?: string;
   }) {
-    const alertParams = {
+    const ruleParams = {
       criteria: [],
       groupBy: undefined,
       filterQueryText: '',
@@ -42,13 +41,13 @@ describe('Expression', () => {
     };
     const wrapper = mountWithIntl(
       <Expressions
-        alertInterval="1m"
-        alertThrottle="1m"
+        ruleInterval="1m"
+        ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         errors={{}}
-        setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
-        setAlertProperty={() => {}}
+        setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
+        setRuleProperty={() => {}}
         metadata={{
           currentOptions,
         }}
@@ -63,7 +62,7 @@ describe('Expression', () => {
 
     await update();
 
-    return { wrapper, update, alertParams };
+    return { wrapper, update, ruleParams };
   }
 
   it('should prefill the alert using the context metadata', async () => {
@@ -75,10 +74,10 @@ describe('Expression', () => {
         { aggregation: 'cardinality', field: 'system.cpu.user.pct' },
       ] as MetricsExplorerMetric[],
     };
-    const { alertParams } = await setup(currentOptions);
-    expect(alertParams.groupBy).toBe('host.hostname');
-    expect(alertParams.filterQueryText).toBe('foo');
-    expect(alertParams.criteria).toEqual([
+    const { ruleParams } = await setup(currentOptions);
+    expect(ruleParams.groupBy).toBe('host.hostname');
+    expect(ruleParams.filterQueryText).toBe('foo');
+    expect(ruleParams.criteria).toEqual([
       {
         metric: 'system.load.1',
         comparator: Comparator.GT,

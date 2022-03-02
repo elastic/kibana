@@ -9,7 +9,7 @@ import { ESTooltipProperty } from './es_tooltip_property';
 import { AGG_TYPE } from '../../../common/constants';
 import { ITooltipProperty } from './tooltip_property';
 import { IESAggField } from '../fields/agg';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../src/plugins/data/common';
 
 export class ESAggTooltipProperty extends ESTooltipProperty {
   private readonly _aggType: AGG_TYPE;
@@ -17,7 +17,7 @@ export class ESAggTooltipProperty extends ESTooltipProperty {
 
   constructor(
     tooltipProperty: ITooltipProperty,
-    indexPattern: IndexPattern,
+    indexPattern: DataView,
     field: IESAggField,
     aggType: AGG_TYPE,
     applyGlobalQuery: boolean

@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/flot-charts",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./index.js",
+  "license": "SSPL-1.0 OR Elastic License 2.0"
+}

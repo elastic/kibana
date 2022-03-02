@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / [typedoc_interfaces](../modules/typedoc_interfaces.md) / IAllCommentsResponse
+[Cases Client API Interface](../README.md) / [typedoc\_interfaces](../modules/typedoc_interfaces.md) / IAllCommentsResponse
 
 # Interface: IAllCommentsResponse
 
@@ -6,6 +6,6 @@
 
 ## Hierarchy
 
-- *AllCommentsResponse*
+- [`AllCommentsResponse`](../modules/typedoc_interfaces._internal_namespace.md#allcommentsresponse)
 
-  ↳ **IAllCommentsResponse**
+  ↳ **`IAllCommentsResponse`**

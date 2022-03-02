@@ -131,6 +131,6 @@ This guide is an introduction to {kib}'s security features. Check out these addi
 
 * View the <<kibana-authentication, authentication guide>> to learn more about single-sign on and other login features.
 
-* View the <<xpack-kibana-role-management, authorization guide>> to learn more about authorizing access to {kib}'s features.
+* View the <<kibana-role-management, authorization guide>> to learn more about authorizing access to {kib}'s features.
 
 Still have questions? Ask  on our https://discuss.elastic.co/c/kibana[Kibana discuss forum] and a fellow community member or Elastic engineer will help out.

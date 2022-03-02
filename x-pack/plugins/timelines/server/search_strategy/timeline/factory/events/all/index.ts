@@ -17,9 +17,10 @@ import {
 } from '../../../../../../common/search_strategy';
 import { TimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
-import { TIMELINE_EVENTS_FIELDS } from './constants';
-import { buildFieldsRequest, formatTimelineData } from './helpers';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
+import { buildFieldsRequest } from '../../helpers/build_fields_request';
+import { formatTimelineData } from '../../helpers/format_timeline_data';
+import { TIMELINE_EVENTS_FIELDS } from '../../helpers/constants';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
   buildDsl: ({ authFilter, ...options }: TimelineEventsAllRequestOptions) => {

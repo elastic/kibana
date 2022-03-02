@@ -71,7 +71,9 @@ export function getSuggestions({
 
   if (
     (incompleteTable && state && !subVisualizationId) ||
-    table.columns.some((col) => col.operation.isStaticValue)
+    table.columns.some((col) => col.operation.isStaticValue) ||
+    // do not use suggestions with non-numeric metrics
+    table.columns.some((col) => !col.operation.isBucketed && col.operation.dataType !== 'number')
   ) {
     // reject incomplete configurations if the sub visualization isn't specifically requested
     // this allows to switch chart types via switcher with incomplete configurations, but won't

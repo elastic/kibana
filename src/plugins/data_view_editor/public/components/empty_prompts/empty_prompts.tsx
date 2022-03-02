@@ -98,7 +98,7 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
           <EmptyIndexPatternPrompt
             goToCreate={() => setGoToForm(true)}
             indexPatternsIntroUrl={docLinks.links.indexPatterns.introduction}
-            canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
+            canSaveIndexPattern={dataViews.getCanSaveSync()}
           />
           <PromptFooter onCancel={onCancel} />
         </>

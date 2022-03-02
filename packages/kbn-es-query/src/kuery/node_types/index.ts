@@ -8,7 +8,6 @@
 
 import * as functionType from './function';
 import * as literal from './literal';
-import * as namedArg from './named_arg';
 import * as wildcard from './wildcard';
 import { FunctionTypeBuildNode, NodeTypes } from './types';
 
@@ -23,6 +22,5 @@ export const nodeTypes: NodeTypes = {
   // @ts-ignore
   function: functionType,
   literal,
-  namedArg,
   wildcard,
 };

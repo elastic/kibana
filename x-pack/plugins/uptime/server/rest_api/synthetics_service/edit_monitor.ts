@@ -4,12 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { MonitorFields, SyntheticsMonitor, ConfigKey } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
+import { validateMonitor } from './monitor_validation';
+import { getMonitorNotFoundResponse } from './service_errors';
+import {
+  sendTelemetryEvents,
+  formatTelemetryUpdateEvent,
+} from './telemetry/monitor_upgrade_sender';
 
+// Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'PUT',
   path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
@@ -19,26 +29,66 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     }),
     body: schema.any(),
   },
-  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
-    const monitor = request.body as SyntheticsMonitorSavedObject['attributes'];
+  handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
+    const monitor = request.body as SyntheticsMonitor;
+
+    const validationResult = validateMonitor(monitor as MonitorFields);
+
+    if (!validationResult.valid) {
+      const { reason: message, details, payload } = validationResult;
+      return response.badRequest({ body: { message, attributes: { details, ...payload } } });
+    }
 
     const { monitorId } = request.params;
 
     const { syntheticsService } = server;
 
-    const editMonitor = await savedObjectsClient.update(syntheticsMonitorType, monitorId, monitor);
+    try {
+      const previousMonitor: SavedObject<MonitorFields> = await savedObjectsClient.get(
+        syntheticsMonitorType,
+        monitorId
+      );
+      const monitorWithRevision = {
+        ...monitor,
+        revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
+      };
 
-    const errors = await syntheticsService.pushConfigs(request, [
-      {
-        ...(editMonitor.attributes as SyntheticsMonitorSavedObject['attributes']),
-        id: editMonitor.id,
-      },
-    ]);
+      const editMonitor: SavedObjectsUpdateResponse<MonitorFields> =
+        await savedObjectsClient.update<MonitorFields>(
+          syntheticsMonitorType,
+          monitorId,
+          monitor.type === 'browser' ? { ...monitorWithRevision, urls: '' } : monitorWithRevision
+        );
 
-    if (errors) {
-      return errors;
+      const errors = await syntheticsService.pushConfigs(request, [
+        {
+          ...(editMonitor.attributes as SyntheticsMonitor),
+          id: editMonitor.id,
+          fields: {
+            config_id: editMonitor.id,
+          },
+          fields_under_root: true,
+        },
+      ]);
+
+      sendTelemetryEvents(
+        server.logger,
+        server.telemetry,
+        formatTelemetryUpdateEvent(editMonitor, previousMonitor, server.kibanaVersion, errors)
+      );
+
+      // Return service sync errors in OK response
+      if (errors) {
+        return errors;
+      }
+
+      return editMonitor;
+    } catch (updateErr) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(updateErr)) {
+        return getMonitorNotFoundResponse(response, monitorId);
+      }
+
+      throw updateErr;
     }
-
-    return editMonitor;
   },
 });

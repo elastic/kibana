@@ -23,6 +23,12 @@ jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 
+jest.mock('../../../common/lib/kibana/hooks', () => ({
+  useNavigateTo: () => ({
+    navigateTo: jest.fn(),
+  }),
+}));
+
 jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
 }));

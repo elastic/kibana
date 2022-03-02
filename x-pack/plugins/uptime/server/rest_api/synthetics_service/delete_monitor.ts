@@ -6,26 +6,31 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { getMonitorNotFoundResponse } from './service_errors';
+import {
+  sendTelemetryEvents,
+  formatTelemetryDeleteEvent,
+} from './telemetry/monitor_upgrade_sender';
 
 export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {
     params: schema.object({
-      monitorId: schema.string(),
+      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
+  handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
     const { monitorId } = request.params;
 
     const { syntheticsService } = server;
 
     try {
-      const monitor = await savedObjectsClient.get<SyntheticsMonitorSavedObject['attributes']>(
+      const monitor = await savedObjectsClient.get<SyntheticsMonitor>(
         syntheticsMonitorType,
         monitorId
       );
@@ -34,14 +39,23 @@ export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       const errors = await syntheticsService.deleteConfigs(request, [
         { ...monitor.attributes, id: monitorId },
       ]);
+
+      sendTelemetryEvents(
+        server.logger,
+        server.telemetry,
+        formatTelemetryDeleteEvent(monitor, server.kibanaVersion, new Date().toISOString(), errors)
+      );
+
       if (errors) {
         return errors;
       }
+
       return monitorId;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-        return 'Not found';
+        return getMonitorNotFoundResponse(response, monitorId);
       }
+
       throw getErr;
     }
   },

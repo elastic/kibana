@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ALERT_REASON } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslations } from '../../../common/translations';
@@ -25,9 +25,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   documentationUrl(docLinks) {
     return `${docLinks.links.observability.tlsCertificate}`;
   },
-  alertParamsExpression: (params: any) => (
-    <TLSAlert core={core} plugins={plugins} params={params} />
-  ),
+  ruleParamsExpression: (params: any) => <TLSAlert core={core} plugins={plugins} params={params} />,
   description,
   validate: () => ({ errors: {} }),
   defaultActionMessage,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getRandomString, getRandomNumber } from '@kbn/test/jest';
+import { getRandomString, getRandomNumber } from '@kbn/test-jest-helpers';
 import { TemplateDeserialized, TemplateType, TemplateListItem } from '../../common';
 
 const objHasProperties = (obj?: Record<string, any>): boolean => {

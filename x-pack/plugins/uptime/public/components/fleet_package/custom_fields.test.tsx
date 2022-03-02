@@ -57,10 +57,13 @@ const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
 const defaultTCPConfig = defaultConfig[DataStream.TCP];
 
 describe('<CustomFields />', () => {
+  let onFieldBlurMock: jest.Mock | undefined;
+
   const WrappedComponent = ({
     validate = defaultValidation,
     isEditable = false,
     dataStreams = [DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER],
+    onFieldBlur = onFieldBlurMock,
   }) => {
     return (
       <HTTPContextProvider>
@@ -69,7 +72,11 @@ describe('<CustomFields />', () => {
             <BrowserContextProvider>
               <ICMPSimpleFieldsContextProvider>
                 <TLSFieldsContextProvider>
-                  <CustomFields validate={validate} dataStreams={dataStreams} />
+                  <CustomFields
+                    validate={validate}
+                    dataStreams={dataStreams}
+                    onFieldBlur={onFieldBlur}
+                  />
                 </TLSFieldsContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </BrowserContextProvider>
@@ -79,8 +86,15 @@ describe('<CustomFields />', () => {
     );
   };
 
+  beforeEach(() => {
+    onFieldBlurMock = undefined;
+    jest.resetAllMocks();
+  });
+
   it('renders CustomFields', async () => {
-    const { getByText, getByLabelText, queryByLabelText } = render(<WrappedComponent />);
+    const { getByText, getByLabelText, queryByLabelText } = render(
+      <WrappedComponent onFieldBlur={undefined} />
+    );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     const url = getByLabelText('URL') as HTMLInputElement;
     const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
@@ -255,6 +269,28 @@ describe('<CustomFields />', () => {
     expect(queryByLabelText('Wait in seconds')).not.toBeInTheDocument();
   });
 
+  it('does not show timeout for browser monitors', () => {
+    const { getByLabelText, queryByLabelText } = render(<WrappedComponent />);
+    const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
+    let timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
+    expect(monitorType).toBeInTheDocument();
+    expect(monitorType.value).toEqual(defaultHTTPConfig[ConfigKey.MONITOR_TYPE]);
+    expect(timeout.value).toEqual(defaultHTTPConfig[ConfigKey.TIMEOUT]);
+
+    // change to browser monitor
+    fireEvent.change(monitorType, { target: { value: DataStream.BROWSER } });
+
+    // expect timeout not to be in the DOM
+    expect(queryByLabelText('Timeout in seconds')).not.toBeInTheDocument();
+
+    // change back to HTTP
+    fireEvent.change(monitorType, { target: { value: DataStream.HTTP } });
+
+    // expect timeout value to be present with the correct value
+    timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
+    expect(timeout.value).toEqual(defaultHTTPConfig[ConfigKey.TIMEOUT]);
+  });
+
   it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {
     const { getByLabelText, queryByLabelText } = render(<WrappedComponent />);
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
@@ -283,7 +319,7 @@ describe('<CustomFields />', () => {
     fireEvent.change(timeout, { target: { value: '-1' } });
 
     const urlError = getByText('URL is required');
-    const monitorIntervalError = getByText('Monitor interval is required');
+    const monitorIntervalError = getByText('Monitor frequency is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
     const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
@@ -299,7 +335,7 @@ describe('<CustomFields />', () => {
     fireEvent.change(timeout, { target: { value: '1' } });
 
     expect(queryByText('URL is required')).not.toBeInTheDocument();
-    expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+    expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
     expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
     expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
 
@@ -307,7 +343,7 @@ describe('<CustomFields />', () => {
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } }); // 1 minute
     fireEvent.change(timeout, { target: { value: '611' } }); // timeout cannot be more than monitor interval
 
-    const timeoutError2 = getByText('Timeout must be less than the monitor interval');
+    const timeoutError2 = getByText('Timeout must be less than the monitor frequency');
 
     expect(timeoutError2).toBeInTheDocument();
   });
@@ -343,5 +379,20 @@ describe('<CustomFields />', () => {
     await waitFor(() => {
       expect(enabled).not.toBeChecked();
     });
+  });
+
+  it('calls onFieldBlur on fields', () => {
+    onFieldBlurMock = jest.fn();
+    const { queryByLabelText } = render(
+      <WrappedComponent
+        dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP]}
+        onFieldBlur={onFieldBlurMock}
+      />
+    );
+
+    const monitorTypeSelect = queryByLabelText('Monitor Type') as HTMLInputElement;
+    fireEvent.click(monitorTypeSelect);
+    fireEvent.blur(monitorTypeSelect);
+    expect(onFieldBlurMock).toHaveBeenCalledWith(ConfigKey.MONITOR_TYPE);
   });
 });

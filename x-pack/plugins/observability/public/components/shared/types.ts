@@ -12,6 +12,7 @@ import { UXMetrics } from './core_web_vitals';
 export interface HeaderMenuPortalProps {
   children: ReactNode;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
 }
 
 export interface CoreVitalProps {

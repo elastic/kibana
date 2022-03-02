@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertType } from '../../common';
+import { RuleType } from '../../common';
 import { AlertNavigationHandler } from './types';
 
 const DEFAULT_HANDLER = Symbol('*');
@@ -14,7 +14,7 @@ export class AlertNavigationRegistry {
   private readonly alertNavigations: Map<string, Map<string | symbol, AlertNavigationHandler>> =
     new Map();
 
-  public has(consumer: string, alertType: AlertType) {
+  public has(consumer: string, alertType: RuleType) {
     return this.hasTypedHandler(consumer, alertType.id) || this.hasDefaultHandler(consumer);
   }
 
@@ -70,7 +70,7 @@ export class AlertNavigationRegistry {
     consumerNavigations.set(ruleTypeId, handler);
   }
 
-  public get(consumer: string, alertType: AlertType): AlertNavigationHandler {
+  public get(consumer: string, alertType: RuleType): AlertNavigationHandler {
     if (this.has(consumer, alertType)) {
       const consumerHandlers = this.alertNavigations.get(consumer)!;
       return (consumerHandlers.get(alertType.id) ?? consumerHandlers.get(DEFAULT_HANDLER))!;

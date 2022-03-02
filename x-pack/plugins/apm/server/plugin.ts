@@ -16,6 +16,7 @@ import {
 } from 'src/core/server';
 import { isEmpty, mapValues } from 'lodash';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
 import { Dataset } from '../../rule_registry/server';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
@@ -47,7 +48,7 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
-import { getDeprecations } from './deprecations';
+import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 
 export class APMPlugin
   implements
@@ -111,6 +112,7 @@ export class APMPlugin
           name: 'mappings',
           mappings: mappingFromFieldMap(
             {
+              ...experimentalRuleFieldMap,
               [SERVICE_NAME]: {
                 type: 'keyword',
               },
@@ -197,14 +199,6 @@ export class APMPlugin
       kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
-    core.deprecations.registerDeprecations({
-      getDeprecations: getDeprecations({
-        cloudSetup: plugins.cloud,
-        fleet: resourcePlugins.fleet,
-        branch: this.initContext.env.packageInfo.branch,
-      }),
-    });
-
     return {
       config$,
       getApmIndices: boundGetApmIndices,
@@ -252,6 +246,11 @@ export class APMPlugin
     createApmCustomLinkIndex({
       client: core.elasticsearch.client.asInternalUser,
       config: this.currentConfig,
+      logger: this.logger,
+    });
+
+    migrateLegacyAPMIndicesToSpaceAware({
+      coreStart: core,
       logger: this.logger,
     });
   }

@@ -73,7 +73,7 @@ export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
     </EuiFormRow>
   );
 
-  const triggersFragment = !!triggers && triggers.items.length > 1 && (
+  const triggersFragment = !!triggers && triggers.items.length > 0 && (
     <EuiFormRow label={txtTrigger} fullWidth={true}>
       <TriggerPicker {...triggers} disabled={disabled} />
     </EuiFormRow>

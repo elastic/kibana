@@ -123,7 +123,12 @@ export const WorkpadConfig: FC<Props> = (props) => {
   return (
     <div>
       <EuiFormRow label={strings.getNameLabel()} display="rowCompressed">
-        <EuiFieldText compressed value={name} onChange={(e) => setName(e.target.value)} />
+        <EuiFieldText
+          compressed
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          data-test-subj="canvas-workpad-name-text-field"
+        />
       </EuiFormRow>
 
       <EuiSpacer size="s" />

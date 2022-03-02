@@ -6,8 +6,8 @@
  */
 
 import { ResourceInstaller } from './resource_installer';
-import { loggerMock } from '@kbn/logging/mocks';
-import { AlertConsumers } from '@kbn/rule-data-utils/alerts_as_data_rbac';
+import { loggerMock } from '@kbn/logging-mocks';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';

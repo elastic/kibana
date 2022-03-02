@@ -29,8 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard filtering', function () {
-    this.tags('includeFirefox');
-
     const populateDashboard = async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultDataRange();
@@ -67,8 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/120195
-    describe.skip('adding a filter that excludes all data', () => {
+    describe('adding a filter that excludes all data', () => {
       before(async () => {
         await populateDashboard();
         await addFilterAndRefresh();

@@ -156,16 +156,18 @@ async function getArtifactSpecForSnapshot(
   const arch = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
 
   const archive = manifest.archives.find(
-    (a) =>
-      a.version === desiredVersion &&
-      a.platform === platform &&
-      a.license === desiredLicense &&
-      a.architecture === arch
+    (a) => a.platform === platform && a.license === desiredLicense && a.architecture === arch
   );
 
   if (!archive) {
     throw createCliError(
-      `Snapshots for ${desiredVersion} are available, but couldn't find an artifact in the manifest for [${desiredVersion}, ${desiredLicense}, ${platform}]`
+      `Snapshots are available, but couldn't find an artifact in the manifest for [${desiredLicense}, ${platform}, ${arch}]`
+    );
+  }
+
+  if (archive.version !== desiredVersion) {
+    log.warning(
+      `Snapshot found, but version does not match Kibana. Kibana: ${desiredVersion}, Snapshot: ${archive.version}`
     );
   }
 

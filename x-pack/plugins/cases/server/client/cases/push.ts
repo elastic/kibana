@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsFindResponse, SavedObject } from 'kibana/server';
+import { SavedObjectsFindResponse } from 'kibana/server';
 
 import {
   ActionConnector,
@@ -14,12 +14,9 @@ import {
   CaseResponse,
   CaseStatuses,
   ExternalServiceResponse,
-  CaseType,
   CasesConfigureAttributes,
-  CaseAttributes,
+  ActionTypes,
 } from '../../../common/api';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
 import { createCaseError } from '../../common/error';
@@ -30,18 +27,14 @@ import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 
 /**
- * Returns true if the case should be closed based on the configuration settings and whether the case
- * is a collection. Collections are not closable because we aren't allowing their status to be changed.
- * In the future we could allow push to close all the sub cases of a collection but that's not currently supported.
+ * Returns true if the case should be closed based on the configuration settings.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>,
-  caseInfo: SavedObject<CaseAttributes>
+  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&
-    configureSettings.saved_objects[0].attributes.closure_type === 'close-by-pushing' &&
-    caseInfo.attributes.type !== CaseType.collection
+    configureSettings.saved_objects[0].attributes.closure_type === 'close-by-pushing'
   );
 }
 
@@ -88,7 +81,6 @@ export const push = async (
       casesClient.cases.get({
         id: caseId,
         includeComments: true,
-        includeSubCaseComments: ENABLE_CASE_CONNECTOR,
       }),
       actionsClient.get({ id: connectorId }),
       casesClient.userActions.getAll({ caseId }),
@@ -99,7 +91,6 @@ export const push = async (
       operation: Operations.pushCase,
     });
 
-    // We need to change the logic when we support subcases
     if (theCase?.status === CaseStatuses.closed) {
       throw Boom.conflict(
         `The ${theCase.title} case is closed. Pushing a closed case is not allowed.`
@@ -151,19 +142,16 @@ export const push = async (
     /* Start of update case with push information */
     const [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
-        unsecuredSavedObjectsClient,
         id: caseId,
       }),
       caseConfigureService.find({ unsecuredSavedObjectsClient }),
       caseService.getAllCaseComments({
-        unsecuredSavedObjectsClient,
         id: caseId,
         options: {
           fields: [],
           page: 1,
           perPage: theCase?.totalComment ?? 0,
         },
-        includeSubCaseComments: ENABLE_CASE_CONNECTOR,
       }),
     ]);
 
@@ -182,12 +170,11 @@ export const push = async (
       external_url: externalServiceResponse.url,
     };
 
-    const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure, myCase);
+    const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure);
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
         originalCase: myCase,
-        unsecuredSavedObjectsClient,
         caseId,
         updatedAttributes: {
           ...(shouldMarkAsClosed
@@ -217,36 +204,27 @@ export const push = async (
             version: comment.version,
           })),
       }),
-
-      userActionService.bulkCreate({
-        unsecuredSavedObjectsClient,
-        actions: [
-          ...(shouldMarkAsClosed
-            ? [
-                buildCaseUserActionItem({
-                  action: 'update',
-                  actionAt: pushedDate,
-                  actionBy: { username, full_name, email },
-                  caseId,
-                  fields: ['status'],
-                  newValue: CaseStatuses.closed,
-                  oldValue: myCase.attributes.status,
-                  owner: myCase.attributes.owner,
-                }),
-              ]
-            : []),
-          buildCaseUserActionItem({
-            action: 'push-to-service',
-            actionAt: pushedDate,
-            actionBy: { username, full_name, email },
-            caseId,
-            fields: ['pushed'],
-            newValue: externalService,
-            owner: myCase.attributes.owner,
-          }),
-        ],
-      }),
     ]);
+
+    if (shouldMarkAsClosed) {
+      await userActionService.createUserAction({
+        type: ActionTypes.status,
+        unsecuredSavedObjectsClient,
+        payload: { status: CaseStatuses.closed },
+        user,
+        caseId,
+        owner: myCase.attributes.owner,
+      });
+    }
+
+    await userActionService.createUserAction({
+      type: ActionTypes.pushed,
+      unsecuredSavedObjectsClient,
+      payload: { externalService },
+      user,
+      caseId,
+      owner: myCase.attributes.owner,
+    });
 
     /* End of update case with push information */
 

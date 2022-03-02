@@ -26,6 +26,7 @@ import { throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import {
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
@@ -1479,6 +1480,43 @@ describe('TaskManagerRunner', () => {
         expect(onTaskEvent).toHaveBeenCalledTimes(1);
       });
     });
+
+    test('does not update saved object if task expires', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const error = new Error('Dangit!');
+      const { runner, store, usageCounter, logger } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          startedAt: moment().subtract(5, 'm').toDate(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '1m',
+            getRetry: () => false,
+            createTaskRunner: () => ({
+              async run() {
+                return { error, state: {}, runAt: moment().add(1, 'm').toDate() };
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(store.update).not.toHaveBeenCalled();
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'taskManagerUpdateSkippedDueToTaskExpiration',
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Skipping reschedule for task bar \"${id}\" due to the task expiring`
+      );
+    });
   });
 
   interface TestOpts {
@@ -1503,7 +1541,7 @@ describe('TaskManagerRunner', () => {
         primaryTerm: 32,
         runAt: new Date(),
         scheduledAt: new Date(),
-        startedAt: null,
+        startedAt: new Date(),
         retryAt: null,
         attempts: 0,
         params: {},
@@ -1526,6 +1564,7 @@ describe('TaskManagerRunner', () => {
     const instance = mockInstance(opts.instance);
 
     const store = taskStoreMock.create();
+    const usageCounter = usageCountersServiceMock.createSetupContract().createUsageCounter('test');
 
     store.update.mockResolvedValue(instance);
 
@@ -1550,6 +1589,7 @@ describe('TaskManagerRunner', () => {
       definitions,
       onTaskEvent: opts.onTaskEvent,
       executionContext,
+      usageCounter,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {
@@ -1568,6 +1608,7 @@ describe('TaskManagerRunner', () => {
       logger,
       store,
       instance,
+      usageCounter,
     };
   }
 });

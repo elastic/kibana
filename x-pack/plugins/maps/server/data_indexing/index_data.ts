@@ -15,7 +15,7 @@ export async function writeDataToIndex(
   asCurrentUser: ElasticsearchClient
 ) {
   try {
-    const { body: indexExists } = await asCurrentUser.indices.exists({ index });
+    const indexExists = await asCurrentUser.indices.exists({ index });
     if (!indexExists) {
       throw new Error(
         i18n.translate('xpack.maps.indexData.indexExists', {
@@ -27,7 +27,8 @@ export async function writeDataToIndex(
       );
     }
     const settings: WriteSettings = { index, body: data, refresh: true };
-    const { body: resp } = await asCurrentUser.index(settings);
+    const resp = await asCurrentUser.index(settings);
+    // @ts-expect-error always false
     if (resp.result === 'Error') {
       throw resp;
     } else {

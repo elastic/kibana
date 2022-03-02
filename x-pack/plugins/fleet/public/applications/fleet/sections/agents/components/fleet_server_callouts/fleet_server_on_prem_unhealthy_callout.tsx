@@ -14,45 +14,47 @@ import { useStartServices } from '../../../../hooks';
 export interface FleetServerOnPremUnhealthyCalloutProps {
   onClickAddFleetServer: () => void;
 }
-export const FleetServerOnPremUnhealthyCallout: React.FunctionComponent<FleetServerOnPremUnhealthyCalloutProps> =
-  ({ onClickAddFleetServer }) => {
-    const { docLinks } = useStartServices();
-    return (
-      <EuiCallOut
-        iconType="alert"
+export const FleetServerOnPremUnhealthyCallout: React.FunctionComponent<
+  FleetServerOnPremUnhealthyCalloutProps
+> = ({ onClickAddFleetServer }) => {
+  const { docLinks } = useStartServices();
+  return (
+    <EuiCallOut
+      iconType="alert"
+      color="warning"
+      title={
+        <FormattedMessage
+          id="xpack.fleet.fleetServerOnPremUnhealthyCallout.calloutTitle"
+          defaultMessage="Fleet Server is not Healthy"
+        />
+      }
+    >
+      <FormattedMessage
+        id="xpack.fleet.fleetServerOnPremUnhealthyCallout.calloutDescription"
+        defaultMessage="A healthy Fleet server is required before you can enroll agents with Fleet.  For more information see the {guideLink}."
+        values={{
+          guideLink: (
+            <EuiLink href={docLinks.links.fleet.fleetServerAddFleetServer} target="_blank" external>
+              <FormattedMessage
+                id="xpack.fleet.fleetServerOnPremUnhealthyCallout.guideLink"
+                defaultMessage="Fleet and Elastic Agent Guide"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+      <EuiSpacer size="m" />
+      <EuiButton
+        onClick={onClickAddFleetServer}
         color="warning"
-        title={
-          <FormattedMessage
-            id="xpack.fleet.fleetServerOnPremUnhealthyCallout.calloutTitle"
-            defaultMessage="Fleet Server is not Healthy"
-          />
-        }
+        fill
+        data-test-subj="addFleetServerBtn"
       >
         <FormattedMessage
-          id="xpack.fleet.fleetServerOnPremUnhealthyCallout.calloutDescription"
-          defaultMessage="A healthy Fleet server is required before you can enroll agents with Fleet.  For more information see the {guideLink}."
-          values={{
-            guideLink: (
-              <EuiLink
-                href={docLinks.links.fleet.fleetServerAddFleetServer}
-                target="_blank"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.fleet.fleetServerOnPremUnhealthyCallout.guideLink"
-                  defaultMessage="Fleet and Elastic Agent Guide"
-                />
-              </EuiLink>
-            ),
-          }}
+          id="xpack.fleet.fleetServerOnPremUnhealthyCallout.addFleetServerButtonLabel"
+          defaultMessage="Add Fleet Server"
         />
-        <EuiSpacer size="m" />
-        <EuiButton onClick={onClickAddFleetServer} color="warning" fill>
-          <FormattedMessage
-            id="xpack.fleet.fleetServerOnPremUnhealthyCallout.addFleetServerButtonLabel"
-            defaultMessage="Add Fleet Server"
-          />
-        </EuiButton>
-      </EuiCallOut>
-    );
-  };
+      </EuiButton>
+    </EuiCallOut>
+  );
+};

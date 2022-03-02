@@ -186,7 +186,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return createResponse.id;
     },
 
-    async createSavedSearchIfNeeded(savedSearch: any): Promise<string> {
+    async createSavedSearchIfNeeded(savedSearch: any, indexPatternTitle: string): Promise<string> {
       const title = savedSearch.requestBody.attributes.title;
       const savedSearchId = await this.getSavedSearchId(title);
       if (savedSearchId !== undefined) {
@@ -195,7 +195,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       } else {
         const body = await this.updateSavedSearchRequestBody(
           savedSearch.requestBody,
-          savedSearch.indexPatternTitle
+          indexPatternTitle
         );
         return await this.createSavedSearch(title, body);
       }
@@ -226,8 +226,8 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return updatedBody;
     },
 
-    async createSavedSearchFarequoteFilterIfNeeded() {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter);
+    async createSavedSearchFarequoteFilterIfNeeded(indexPatternTitle: string = 'ft_farequote') {
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, indexPatternTitle);
     },
 
     async createMLTestDashboardIfNeeded() {
@@ -249,20 +249,30 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       }
     },
 
-    async createSavedSearchFarequoteLuceneIfNeeded() {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteLucene);
+    async createSavedSearchFarequoteLuceneIfNeeded(indexPatternTitle: string = 'ft_farequote') {
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteLucene, indexPatternTitle);
     },
 
-    async createSavedSearchFarequoteKueryIfNeeded() {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteKuery);
+    async createSavedSearchFarequoteKueryIfNeeded(indexPatternTitle: string = 'ft_farequote') {
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteKuery, indexPatternTitle);
     },
 
-    async createSavedSearchFarequoteFilterAndLuceneIfNeeded() {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilterAndLucene);
+    async createSavedSearchFarequoteFilterAndLuceneIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterAndLucene,
+        indexPatternTitle
+      );
     },
 
-    async createSavedSearchFarequoteFilterAndKueryIfNeeded() {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilterAndKuery);
+    async createSavedSearchFarequoteFilterAndKueryIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterAndKuery,
+        indexPatternTitle
+      );
     },
 
     async deleteSavedObjectById(id: string, objectType: SavedObjectType, force: boolean = false) {
@@ -536,6 +546,40 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
     async clearAdvancedSettingProperty(propertyName: string) {
       await kibanaServer.uiSettings.unset(propertyName);
+    },
+
+    async installKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
+      log.debug(`Installing Kibana sample data '${sampleDataId}'`);
+
+      await supertest
+        .post(`/api/sample_data/${sampleDataId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      log.debug(` > Installed`);
+    },
+
+    async removeKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
+      log.debug(`Removing Kibana sample data '${sampleDataId}'`);
+
+      await supertest
+        .delete(`/api/sample_data/${sampleDataId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(204); // No Content
+
+      log.debug(` > Removed`);
+    },
+
+    async installAllKibanaSampleData() {
+      await this.installKibanaSampleData('ecommerce');
+      await this.installKibanaSampleData('flights');
+      await this.installKibanaSampleData('logs');
+    },
+
+    async removeAllKibanaSampleData() {
+      await this.removeKibanaSampleData('ecommerce');
+      await this.removeKibanaSampleData('flights');
+      await this.removeKibanaSampleData('logs');
     },
   };
 }

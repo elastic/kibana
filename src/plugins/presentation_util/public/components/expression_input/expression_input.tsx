@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { debounce } from 'lodash';
 
 import type { monaco } from '@kbn/monaco';
+import usePrevious from 'react-use/lib/usePrevious';
 
 import { CodeEditor } from '../../../../kibana_react/public';
 
@@ -35,6 +36,13 @@ export const ExpressionInput = (props: ExpressionInputProps) => {
     ...rest
   } = props;
   const [expression, setExpression] = useState(initialExpression);
+  const prevExpression = usePrevious(initialExpression);
+
+  useEffect(() => {
+    if (prevExpression !== initialExpression) {
+      setExpression(initialExpression);
+    }
+  }, [prevExpression, initialExpression]);
 
   const suggestionProvider = useMemo(
     () => getSuggestionProvider(expressionFunctions),

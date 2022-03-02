@@ -9,4 +9,4 @@ import { Subject } from 'rxjs';
 
 import { Refresh } from '../routing/use_refresh';
 
-export const mlTimefilterRefresh$ = new Subject<Required<Refresh>>();
+export const mlTimefilterRefresh$ = new Subject<Refresh>();

@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
-import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -113,8 +112,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  let latencyMetricValues: PromiseReturnType<typeof getLatencyValues>;
-  let latencyTransactionValues: PromiseReturnType<typeof getLatencyValues>;
+  let latencyMetricValues: Awaited<ReturnType<typeof getLatencyValues>>;
+  let latencyTransactionValues: Awaited<ReturnType<typeof getLatencyValues>>;
 
   registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
     describe('when data is loaded ', () => {

@@ -13,7 +13,7 @@ export const getSortWithTieBreaker = ({
 }: {
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-}): estypes.SearchSortCombinations[] => {
+}): estypes.SortCombinations[] => {
   const ascOrDesc = sortOrder ?? ('asc' as const);
   if (sortField != null) {
     return [{ [sortField]: ascOrDesc, tie_breaker_id: 'asc' as const }];

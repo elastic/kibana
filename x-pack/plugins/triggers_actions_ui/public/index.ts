@@ -11,19 +11,19 @@
 import { Plugin } from './plugin';
 
 export type {
-  AlertAction,
-  Alert,
-  AlertTypeModel,
+  RuleAction,
+  Rule,
+  RuleTypeModel,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
   ValidationResult,
   ActionVariables,
   ActionConnector,
   IErrorObject,
-  AlertFlyoutCloseReason,
-  AlertTypeParams,
+  RuleFlyoutCloseReason,
+  RuleTypeParams,
   AsApiContract,
 } from './types';
 
@@ -45,7 +45,7 @@ export function plugin() {
 
 export { Plugin };
 export * from './plugin';
-export { loadAlertAggregations } from './application/lib/alert_api/aggregate';
+export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
 
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 

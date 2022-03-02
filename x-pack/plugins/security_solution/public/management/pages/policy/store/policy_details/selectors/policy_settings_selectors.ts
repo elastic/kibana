@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
+import { createSelector } from 'reselect';
 import { ILicense } from '../../../../../../../../licensing/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../../types';
@@ -20,11 +20,18 @@ import {
 import { policyFactory as policyConfigFactory } from '../../../../../../../common/endpoint/models/policy_config';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
 } from '../../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../../types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
-import { isOnPolicyTrustedAppsView, isOnPolicyFormView } from './policy_common_selectors';
+import {
+  isOnPolicyTrustedAppsView,
+  isOnPolicyEventFiltersView,
+  isOnHostIsolationExceptionsView,
+  isOnPolicyFormView,
+} from './policy_common_selectors';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -83,7 +90,10 @@ export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean =>
 
 /** Returns a boolean of whether the user is on some of the policy details page or not */
 export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) =>
-  isOnPolicyFormView(state) || isOnPolicyTrustedAppsView(state);
+  isOnPolicyFormView(state) ||
+  isOnPolicyTrustedAppsView(state) ||
+  isOnPolicyEventFiltersView(state) ||
+  isOnHostIsolationExceptionsView(state);
 
 /** Returns the license info fetched from the license service */
 export const license = (state: Immutable<PolicyDetailsState>) => {
@@ -99,6 +109,8 @@ export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => strin
         path: [
           MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
         ],
         exact: true,
       })?.params?.policyId ?? ''

@@ -79,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(url).to.contain(`/rules`);
 
           // Verify content
-          await testSubjects.existOrFail('alertsList');
+          await testSubjects.existOrFail('rulesList');
         });
 
         it('navigates to an alert details page', async () => {
@@ -103,7 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.header.waitUntilLoadingHasFinished();
 
           // Verify content
-          await testSubjects.existOrFail('alertsList');
+          await testSubjects.existOrFail('rulesList');
 
           // click on first alert
           await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdAlert.name);

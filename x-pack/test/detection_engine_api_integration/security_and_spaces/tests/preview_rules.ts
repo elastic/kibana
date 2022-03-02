@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send(getSimplePreviewRule())
             .expect(200);
-          expect(body).to.eql(getSimpleRulePreviewOutput(body.previewId));
+          expect(body).to.eql(getSimpleRulePreviewOutput(body.previewId, body.logs));
         });
 
         it("shouldn't cause a 409 conflict if we attempt to create the same rule_id twice", async () => {
@@ -64,8 +64,10 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send(getSimplePreviewRule('', 3))
             .expect(200);
-          const { errors } = getSimpleRulePreviewOutput(undefined, ['Invalid invocation count']);
-          expect(body).to.eql({ errors });
+          const { logs } = getSimpleRulePreviewOutput(undefined, [
+            { errors: ['Invalid invocation count'], warnings: [] },
+          ]);
+          expect(body).to.eql({ logs });
         });
       });
 

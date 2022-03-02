@@ -46,6 +46,9 @@ export const createTimeline = (timeline: CompleteTimeline) =>
         description: timeline.description,
         title: timeline.title,
         savedQueryId: null,
+        ...(timeline.dataViewId != null && timeline.indexNames != null
+          ? { dataViewId: timeline.dataViewId, indexNames: timeline.indexNames }
+          : {}),
       },
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },

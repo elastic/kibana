@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
@@ -14,8 +12,6 @@ import {
   ConnectorTypes,
   ConnectorJiraTypeFields,
   CaseStatuses,
-  CaseUserActionResponse,
-  CaseType,
 } from '../../../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
@@ -111,41 +107,22 @@ export default ({ getService }: FtrProviderContext): void => {
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
         const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[0]);
 
-        const { new_value, ...rest } = creationUserAction as CaseUserActionResponse;
-        const parsedNewValue = JSON.parse(new_value!);
-
-        const { id: connectorId, ...restCaseConnector } = postedCase.connector;
-
-        expect(rest).to.eql({
-          action_field: [
-            'description',
-            'status',
-            'tags',
-            'title',
-            'connector',
-            'settings',
-            'owner',
-          ],
+        expect(creationUserAction).to.eql({
           action: 'create',
-          action_by: defaultUser,
-          old_value: null,
-          old_val_connector_id: null,
-          // the connector id will be null here because it the connector is none
-          new_val_connector_id: null,
-          case_id: `${postedCase.id}`,
+          type: 'create_case',
+          created_by: defaultUser,
+          case_id: postedCase.id,
           comment_id: null,
-          sub_case_id: '',
           owner: 'securitySolutionFixture',
-        });
-
-        expect(parsedNewValue).to.eql({
-          type: postedCase.type,
-          description: postedCase.description,
-          title: postedCase.title,
-          tags: postedCase.tags,
-          connector: restCaseConnector,
-          settings: postedCase.settings,
-          owner: postedCase.owner,
+          payload: {
+            description: postedCase.description,
+            title: postedCase.title,
+            tags: postedCase.tags,
+            connector: postedCase.connector,
+            settings: postedCase.settings,
+            owner: postedCase.owner,
+            status: CaseStatuses.open,
+          },
         });
       });
 
@@ -158,10 +135,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('unhappy path', () => {
-      it('should not allow creating a collection style case', async () => {
-        await createCase(supertest, getPostCaseRequest({ type: CaseType.collection }), 400);
-      });
-
       it('400s when bad query supplied', async () => {
         await supertest
           .post(CASES_URL)
@@ -249,6 +222,20 @@ export default ({ getService }: FtrProviderContext): void => {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nulla enim, rutrum sit amet euismod venenatis, blandit et massa. Nulla id consectetur enim.';
 
         await createCase(supertest, getPostCaseRequest({ title: longTitle }), 400);
+      });
+
+      describe('tags', async () => {
+        it('400s if the a tag is a whitespace', async () => {
+          const tags = ['test', ' '];
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
+
+        it('400s if the a tag is an empty string', async () => {
+          const tags = ['test', ''];
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
       });
     });
 

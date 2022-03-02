@@ -50,7 +50,6 @@ export const getSearchListMock = (): estypes.SearchResponse<SearchEsListSchema> 
         _index: LIST_INDEX,
         _score: 0,
         _source: getSearchEsListMock(),
-        _type: '',
       },
     ],
     max_score: 0,

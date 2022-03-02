@@ -111,7 +111,7 @@ describe('HasDataContextProvider', () => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: false }) },
           { appName: 'infra_logs', hasData: async () => false },
-          { appName: 'infra_metrics', hasData: async () => false },
+          { appName: 'infra_metrics', hasData: async () => ({ hasData: false }) },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: false }),
@@ -167,7 +167,10 @@ describe('HasDataContextProvider', () => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: true }) },
           { appName: 'infra_logs', hasData: async () => false },
-          { appName: 'infra_metrics', hasData: async () => false },
+          {
+            appName: 'infra_metrics',
+            hasData: async () => ({ hasData: false, indices: 'metric-*' }),
+          },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: false, indices: 'heartbeat-*, synthetics-*' }),
@@ -204,7 +207,7 @@ describe('HasDataContextProvider', () => {
               status: 'success',
             },
             infra_logs: { hasData: false, status: 'success' },
-            infra_metrics: { hasData: false, status: 'success' },
+            infra_metrics: { hasData: false, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: false,
               indices: 'apm-*',
@@ -225,7 +228,10 @@ describe('HasDataContextProvider', () => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: true }) },
           { appName: 'infra_logs', hasData: async () => true },
-          { appName: 'infra_metrics', hasData: async () => true },
+          {
+            appName: 'infra_metrics',
+            hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+          },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: true, indices: 'heartbeat-*, synthetics-*' }),
@@ -265,7 +271,7 @@ describe('HasDataContextProvider', () => {
               status: 'success',
             },
             infra_logs: { hasData: true, status: 'success' },
-            infra_metrics: { hasData: true, status: 'success' },
+            infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: true,
               serviceName: 'ux',
@@ -385,7 +391,10 @@ describe('HasDataContextProvider', () => {
             },
           },
           { appName: 'infra_logs', hasData: async () => true },
-          { appName: 'infra_metrics', hasData: async () => true },
+          {
+            appName: 'infra_metrics',
+            hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+          },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: true, indices: 'heartbeat-*, synthetics-*' }),
@@ -422,7 +431,7 @@ describe('HasDataContextProvider', () => {
               status: 'success',
             },
             infra_logs: { hasData: true, status: 'success' },
-            infra_metrics: { hasData: true, status: 'success' },
+            infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: true,
               serviceName: 'ux',

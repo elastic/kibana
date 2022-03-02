@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { isEmpty, orderBy, uniq } from 'lodash';
+import { first, isEmpty, last, orderBy, uniq } from 'lodash';
 import { ServiceConnectionNode } from '../../../../plugins/apm/common/service_map';
 import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
@@ -90,11 +90,11 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
       it('returns an object with nulls', async () => {
         [
-          response.body.failedTransactionsRate?.value,
-          response.body.memoryUsage?.value,
-          response.body.cpuUsage?.value,
-          response.body.transactionStats?.latency?.value,
-          response.body.transactionStats?.throughput?.value,
+          response.body.currentPeriod?.failedTransactionsRate?.value,
+          response.body.currentPeriod?.memoryUsage?.value,
+          response.body.currentPeriod?.cpuUsage?.value,
+          response.body.currentPeriod?.transactionStats?.latency?.value,
+          response.body.currentPeriod?.transactionStats?.throughput?.value,
         ].forEach((value) => {
           expect(value).to.be.eql(null);
         });
@@ -122,7 +122,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
 
       it('returns undefined values', () => {
-        expect(response.body).to.eql({ transactionStats: {} });
+        expect(response.body.currentPeriod).to.eql({ transactionStats: {} });
       });
     });
   });
@@ -343,23 +343,31 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
 
       it('returns some error rate', () => {
-        expect(response.body.failedTransactionsRate?.value).to.eql(0);
-        expect(response.body.failedTransactionsRate?.timeseries?.length).to.be.greaterThan(0);
+        expect(response.body.currentPeriod?.failedTransactionsRate?.value).to.eql(0);
+        expect(
+          response.body.currentPeriod?.failedTransactionsRate?.timeseries?.length
+        ).to.be.greaterThan(0);
       });
 
       it('returns some latency', () => {
-        expect(response.body.transactionStats?.latency?.value).to.be.greaterThan(0);
-        expect(response.body.transactionStats?.latency?.timeseries?.length).to.be.greaterThan(0);
+        expect(response.body.currentPeriod?.transactionStats?.latency?.value).to.be.greaterThan(0);
+        expect(
+          response.body.currentPeriod?.transactionStats?.latency?.timeseries?.length
+        ).to.be.greaterThan(0);
       });
 
       it('returns some throughput', () => {
-        expect(response.body.transactionStats?.throughput?.value).to.be.greaterThan(0);
-        expect(response.body.transactionStats?.throughput?.timeseries?.length).to.be.greaterThan(0);
+        expect(response.body.currentPeriod?.transactionStats?.throughput?.value).to.be.greaterThan(
+          0
+        );
+        expect(
+          response.body.currentPeriod?.transactionStats?.throughput?.timeseries?.length
+        ).to.be.greaterThan(0);
       });
 
       it('returns some cpu usage', () => {
-        expect(response.body.cpuUsage?.value).to.be.greaterThan(0);
-        expect(response.body.cpuUsage?.timeseries?.length).to.be.greaterThan(0);
+        expect(response.body.currentPeriod?.cpuUsage?.value).to.be.greaterThan(0);
+        expect(response.body.currentPeriod?.cpuUsage?.timeseries?.length).to.be.greaterThan(0);
       });
     });
 
@@ -384,18 +392,134 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
 
       it('returns some error rate', () => {
-        expect(response.body.failedTransactionsRate?.value).to.eql(0);
-        expect(response.body.failedTransactionsRate?.timeseries?.length).to.be.greaterThan(0);
+        expect(response.body.currentPeriod?.failedTransactionsRate?.value).to.eql(0);
+        expect(
+          response.body.currentPeriod?.failedTransactionsRate?.timeseries?.length
+        ).to.be.greaterThan(0);
       });
 
       it('returns some latency', () => {
-        expect(response.body.transactionStats?.latency?.value).to.be.greaterThan(0);
-        expect(response.body.transactionStats?.latency?.timeseries?.length).to.be.greaterThan(0);
+        expect(response.body.currentPeriod?.transactionStats?.latency?.value).to.be.greaterThan(0);
+        expect(
+          response.body.currentPeriod?.transactionStats?.latency?.timeseries?.length
+        ).to.be.greaterThan(0);
       });
 
       it('returns some throughput', () => {
-        expect(response.body.transactionStats?.throughput?.value).to.be.greaterThan(0);
-        expect(response.body.transactionStats?.throughput?.timeseries?.length).to.be.greaterThan(0);
+        expect(response.body.currentPeriod?.transactionStats?.throughput?.value).to.be.greaterThan(
+          0
+        );
+        expect(
+          response.body.currentPeriod?.transactionStats?.throughput?.timeseries?.length
+        ).to.be.greaterThan(0);
+      });
+    });
+
+    describe('With comparison', () => {
+      describe('/internal/apm/service-map/backend', () => {
+        let response: BackendResponse;
+        before(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: `GET /internal/apm/service-map/backend`,
+            params: {
+              query: {
+                backendName: 'postgresql',
+                start: metadata.start,
+                end: metadata.end,
+                environment: 'ENVIRONMENT_ALL',
+                offset: '5m',
+              },
+            },
+          });
+        });
+
+        it('returns some data', () => {
+          const { currentPeriod, previousPeriod } = response.body;
+          [
+            currentPeriod.failedTransactionsRate,
+            previousPeriod?.failedTransactionsRate,
+            currentPeriod.transactionStats?.latency,
+            previousPeriod?.transactionStats?.latency,
+            currentPeriod.transactionStats?.throughput,
+            previousPeriod?.transactionStats?.throughput,
+          ].map((value) => expect(value?.timeseries?.length).to.be.greaterThan(0));
+        });
+
+        it('has same start time for both periods', () => {
+          const { currentPeriod, previousPeriod } = response.body;
+          expect(first(currentPeriod.failedTransactionsRate?.timeseries)?.x).to.equal(
+            first(previousPeriod?.failedTransactionsRate?.timeseries)?.x
+          );
+        });
+
+        it('has same end time for both periods', () => {
+          const { currentPeriod, previousPeriod } = response.body;
+          expect(last(currentPeriod.failedTransactionsRate?.timeseries)?.x).to.equal(
+            last(previousPeriod?.failedTransactionsRate?.timeseries)?.x
+          );
+        });
+
+        it('returns same number of buckets for both periods', () => {
+          const { currentPeriod, previousPeriod } = response.body;
+          expect(currentPeriod.failedTransactionsRate?.timeseries?.length).to.be(
+            previousPeriod?.failedTransactionsRate?.timeseries?.length
+          );
+        });
+      });
+
+      describe('/internal/apm/service-map/service/{serviceName}', () => {
+        let response: ServiceNodeResponse;
+        before(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
+            params: {
+              path: { serviceName: 'opbeans-node' },
+              query: {
+                start: metadata.start,
+                end: metadata.end,
+                environment: 'ENVIRONMENT_ALL',
+                offset: '5m',
+              },
+            },
+          });
+        });
+
+        it('returns some data', () => {
+          const { currentPeriod, previousPeriod } = response.body;
+          [
+            currentPeriod.failedTransactionsRate,
+            previousPeriod?.failedTransactionsRate,
+            currentPeriod.transactionStats?.latency,
+            previousPeriod?.transactionStats?.latency,
+            currentPeriod.transactionStats?.throughput,
+            previousPeriod?.transactionStats?.throughput,
+            currentPeriod.cpuUsage,
+            previousPeriod?.cpuUsage,
+            currentPeriod.memoryUsage,
+            previousPeriod?.memoryUsage,
+          ].map((value) => expect(value?.timeseries?.length).to.be.greaterThan(0));
+        });
+
+        it('has same start time for both periods', () => {
+          const { currentPeriod, previousPeriod } = response.body;
+          expect(first(currentPeriod.failedTransactionsRate?.timeseries)?.x).to.equal(
+            first(previousPeriod?.failedTransactionsRate?.timeseries)?.x
+          );
+        });
+
+        it('has same end time for both periods', () => {
+          const { currentPeriod, previousPeriod } = response.body;
+          expect(last(currentPeriod.failedTransactionsRate?.timeseries)?.x).to.equal(
+            last(previousPeriod?.failedTransactionsRate?.timeseries)?.x
+          );
+        });
+
+        it('returns same number of buckets for both periods', () => {
+          const { currentPeriod, previousPeriod } = response.body;
+          expect(currentPeriod.failedTransactionsRate?.timeseries?.length).to.be(
+            previousPeriod?.failedTransactionsRate?.timeseries?.length
+          );
+        });
       });
     });
   });

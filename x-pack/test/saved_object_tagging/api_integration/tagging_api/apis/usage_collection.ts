@@ -42,6 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('collects the expected data', async () => {
       const [{ stats: telemetryStats }] = (await usageAPI.getTelemetryStats({
         unencrypted: true,
+        refreshCache: true,
       })) as any;
 
       const taggingStats = telemetryStats.stack_stats.kibana.plugins.saved_objects_tagging;

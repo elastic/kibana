@@ -7,7 +7,7 @@
  */
 
 import { useMemo } from 'react';
-import type { IndexPattern, IndexPatternsContract } from 'src/plugins/data/common';
+import type { DataView, DataViewsContract } from 'src/plugins/data_views/public';
 
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import {
@@ -23,8 +23,8 @@ import { getStateColumnActions } from '../components/doc_table/actions/columns';
 interface UseColumnsProps {
   capabilities: Capabilities;
   config: IUiSettingsClient;
-  indexPattern: IndexPattern;
-  indexPatterns: IndexPatternsContract;
+  indexPattern: DataView;
+  indexPatterns: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
   state: DiscoverState | ContextState;

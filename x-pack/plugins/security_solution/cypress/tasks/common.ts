@@ -92,16 +92,6 @@ export const cleanKibana = () => {
               type: 'alert',
             },
           },
-          {
-            match: {
-              'alert.alertTypeId': 'siem.signals',
-            },
-          },
-          {
-            match: {
-              'alert.consumer': 'siem',
-            },
-          },
         ],
       },
     },
@@ -127,7 +117,7 @@ export const cleanKibana = () => {
     'POST',
     `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/.lists-*,.items-*,.siem-signals-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
+    )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
     {
       query: {
         match_all: {},
@@ -152,6 +142,22 @@ export const deleteCases = () => {
         ],
       },
     },
+  });
+};
+
+export const postDataView = (indexPattern: string) => {
+  cy.request({
+    method: 'POST',
+    url: `/api/index_patterns/index_pattern`,
+    body: {
+      index_pattern: {
+        fieldAttrs: '{}',
+        title: indexPattern,
+        timeFieldName: '@timestamp',
+        fields: '{}',
+      },
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
   });
 };
 

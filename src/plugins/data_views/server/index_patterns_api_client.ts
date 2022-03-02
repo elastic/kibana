@@ -9,14 +9,14 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import {
   GetFieldsOptions,
-  IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
+  IDataViewsApiClient,
 } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
 import { IndexPatternsFetcher } from './fetcher';
 import { hasUserIndexPattern } from './has_user_index_pattern';
 
-export class IndexPatternsApiServer implements IIndexPatternsApiClient {
+export class IndexPatternsApiServer implements IDataViewsApiClient {
   esClient: ElasticsearchClient;
   constructor(
     elasticsearchClient: ElasticsearchClient,
@@ -30,6 +30,7 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     type,
     rollupIndex,
     allowNoIndex,
+    filter,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
     return await indexPatterns
@@ -38,6 +39,7 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
         metaFields,
         type,
         rollupIndex,
+        filter,
       })
       .catch((err) => {
         if (

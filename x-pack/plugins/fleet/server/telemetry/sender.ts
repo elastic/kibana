@@ -110,8 +110,7 @@ export class TelemetryEventsSender {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
-    const { body } = await this.esClient.info();
-    return body;
+    return await this.esClient.info();
   }
 
   public async sendEvents(
@@ -176,7 +175,7 @@ export class TelemetryEventsSender {
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
       this.logger.debug(
-        `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
+        `Error sending events: ${err?.response?.status} ${JSON.stringify(err.response.data)}`
       );
     }
   }

@@ -5,10 +5,13 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { SavedObject } from 'kibana/server';
+import { MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
+import { validateMonitor } from './monitor_validation';
+import { sendTelemetryEvents, formatTelemetryEvent } from './telemetry/monitor_upgrade_sender';
 
 export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
@@ -16,16 +19,40 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   validate: {
     body: schema.any(),
   },
-  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
-    const monitor = request.body as SyntheticsMonitorSavedObject['attributes'];
+  handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
+    const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
 
-    const newMonitor = await savedObjectsClient.create(syntheticsMonitorType, monitor);
+    const validationResult = validateMonitor(monitor as MonitorFields);
+
+    if (!validationResult.valid) {
+      const { reason: message, details, payload } = validationResult;
+      return response.badRequest({ body: { message, attributes: { details, ...payload } } });
+    }
+
+    const newMonitor: SavedObject<SyntheticsMonitor> =
+      await savedObjectsClient.create<SyntheticsMonitor>(syntheticsMonitorType, {
+        ...monitor,
+        revision: 1,
+      });
 
     const { syntheticsService } = server;
 
     const errors = await syntheticsService.pushConfigs(request, [
-      { ...newMonitor.attributes, id: newMonitor.id },
+      {
+        ...newMonitor.attributes,
+        id: newMonitor.id,
+        fields: {
+          config_id: newMonitor.id,
+        },
+        fields_under_root: true,
+      },
     ]);
+
+    sendTelemetryEvents(
+      server.logger,
+      server.telemetry,
+      formatTelemetryEvent({ monitor: newMonitor, errors, kibanaVersion: server.kibanaVersion })
+    );
 
     if (errors) {
       return errors;

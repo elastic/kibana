@@ -10,7 +10,6 @@ import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { Logger } from 'kibana/server';
 
 import type { ConfigType } from '../../../../../config';
-import { buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { RACAlert, WrappedRACAlert } from '../../types';
 import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
@@ -72,8 +71,9 @@ export const buildAlertGroupFromSequence = (
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
   const doc = buildAlertRoot(wrappedBuildingBlocks, completeRule, spaceId, buildReasonMessage);
+  const sequenceAlertId = generateAlertId(doc);
   const sequenceAlert = {
-    _id: generateAlertId(doc),
+    _id: sequenceAlertId,
     _index: '',
     _source: doc,
   };
@@ -82,6 +82,8 @@ export const buildAlertGroupFromSequence = (
     block._source[ALERT_GROUP_ID] = sequenceAlert._source[ALERT_GROUP_ID];
     block._source[ALERT_GROUP_INDEX] = i;
   });
+
+  sequenceAlert._source[ALERT_UUID] = sequenceAlertId;
 
   return [...wrappedBuildingBlocks, sequenceAlert];
 };
@@ -99,10 +101,13 @@ export const buildAlertRoot = (
         (block2._source[ALERT_ORIGINAL_TIME] as number)
     )
     .map((alert) => alert._source[ALERT_ORIGINAL_TIME]);
-  const rule = buildRuleWithoutOverrides(completeRule);
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
-  const reason = buildReasonMessage({ rule, mergedDoc: mergedAlerts as SignalSourceHit });
-  const doc = buildAlert(wrappedBuildingBlocks, rule, spaceId, reason);
+  const reason = buildReasonMessage({
+    name: completeRule.ruleConfig.name,
+    severity: completeRule.ruleParams.severity,
+    mergedDoc: mergedAlerts as SignalSourceHit,
+  });
+  const doc = buildAlert(wrappedBuildingBlocks, completeRule, spaceId, reason);
   return {
     ...mergedAlerts,
     event: {
@@ -110,7 +115,6 @@ export const buildAlertRoot = (
     },
     ...doc,
     [ALERT_ORIGINAL_TIME]: timestamps[0],
-    [ALERT_BUILDING_BLOCK_TYPE]: undefined,
     [ALERT_GROUP_ID]: generateAlertId(doc),
   };
 };

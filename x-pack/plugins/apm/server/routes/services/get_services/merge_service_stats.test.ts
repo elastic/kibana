@@ -5,12 +5,11 @@
  * 2.0.
  */
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
-type ServiceTransactionStat = PromiseReturnType<
-  typeof getServiceTransactionStats
+type ServiceTransactionStat = Awaited<
+  ReturnType<typeof getServiceTransactionStats>
 >[number];
 
 function stat(values: Partial<ServiceTransactionStat>): ServiceTransactionStat {
@@ -41,7 +40,7 @@ describe('mergeServiceStats', () => {
             throughput: 4,
           }),
         ],
-        servicesFromMetricDocuments: [
+        servicesFromErrorAndMetricDocuments: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',
@@ -87,7 +86,7 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesFromMetricDocuments: [
+        servicesFromErrorAndMetricDocuments: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',
@@ -129,7 +128,7 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesFromMetricDocuments: [],
+        servicesFromErrorAndMetricDocuments: [],
         healthStatuses: [
           {
             healthStatus: ServiceHealthStatus.healthy,
@@ -159,7 +158,7 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesFromMetricDocuments: [
+        servicesFromErrorAndMetricDocuments: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ImportExceptionListItemSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ImportExceptionListItemSchemaDecoded,
+  NamespaceType,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
@@ -42,12 +45,18 @@ export const importExceptionListItems = async ({
   for await (const itemsChunk of itemsChunks) {
     // sort by namespaceType
     const [agnosticListItems, nonAgnosticListItems] = sortItemsImportsByNamespace(itemsChunk);
+    const mapList = (
+      list: ImportExceptionListItemSchemaDecoded
+    ): { listId: string; namespaceType: NamespaceType } => ({
+      listId: list.list_id,
+      namespaceType: list.namespace_type,
+    });
 
     // Gather lists referenced by items
     // Dictionary of found lists
     const foundLists = await getAllListTypes(
-      agnosticListItems,
-      nonAgnosticListItems,
+      agnosticListItems.map(mapList),
+      nonAgnosticListItems.map(mapList),
       savedObjectsClient
     );
 

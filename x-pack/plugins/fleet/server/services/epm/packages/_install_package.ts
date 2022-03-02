@@ -56,6 +56,7 @@ export async function _installPackage({
   packageInfo,
   installType,
   installSource,
+  spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -66,6 +67,7 @@ export async function _installPackage({
   packageInfo: InstallablePackage;
   installType: InstallType;
   installSource: InstallSource;
+  spaceId: string;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion } = packageInfo;
 
@@ -99,15 +101,12 @@ export async function _installPackage({
         savedObjectsClient,
         packageInfo,
         installSource,
+        spaceId,
       });
     }
 
     const kibanaAssets = await getKibanaAssets(paths);
-    if (installedPkg)
-      await deleteKibanaSavedObjectsAssets(
-        savedObjectsClient,
-        installedPkg.attributes.installed_kibana
-      );
+    if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
     // save new kibana refs before installing the assets
     const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
       savedObjectsClient,

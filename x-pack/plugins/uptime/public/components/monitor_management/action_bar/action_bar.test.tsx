@@ -10,27 +10,32 @@ import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
 import * as fetchers from '../../../state/api/monitor_management';
-import { DataStream, ScheduleUnit } from '../../fleet_package/types';
+import {
+  DataStream,
+  HTTPFields,
+  ScheduleUnit,
+  SyntheticsMonitor,
+} from '../../../../common/runtime_types';
 import { ActionBar } from './action_bar';
 
 describe('<ActionBar />', () => {
   const setMonitor = jest.spyOn(fetchers, 'setMonitor');
-  const monitor = {
+  const monitor: SyntheticsMonitor = {
     name: 'test-monitor',
     schedule: {
       unit: ScheduleUnit.MINUTES,
       number: '2',
     },
     urls: 'https://elastic.co',
-    type: DataStream.BROWSER,
-  };
+    type: DataStream.HTTP,
+  } as unknown as HTTPFields;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('only calls setMonitor when valid and after submission', () => {
-    render(<ActionBar monitor={monitor} isValid={true} />);
+    render(<ActionBar monitor={monitor} isTestRunInProgress={false} isValid={true} />);
 
     act(() => {
       userEvent.click(screen.getByText('Save monitor'));
@@ -40,7 +45,7 @@ describe('<ActionBar />', () => {
   });
 
   it('does not call setMonitor until submission', () => {
-    render(<ActionBar monitor={monitor} isValid={true} />);
+    render(<ActionBar monitor={monitor} isTestRunInProgress={false} isValid={true} />);
 
     expect(setMonitor).not.toBeCalled();
 
@@ -52,7 +57,7 @@ describe('<ActionBar />', () => {
   });
 
   it('does not call setMonitor if invalid', () => {
-    render(<ActionBar monitor={monitor} isValid={false} />);
+    render(<ActionBar monitor={monitor} isTestRunInProgress={false} isValid={false} />);
 
     expect(setMonitor).not.toBeCalled();
 
@@ -64,7 +69,7 @@ describe('<ActionBar />', () => {
   });
 
   it('disables button and displays help text when form is invalid after first submission', async () => {
-    render(<ActionBar monitor={monitor} isValid={false} />);
+    render(<ActionBar monitor={monitor} isTestRunInProgress={false} isValid={false} />);
 
     expect(
       screen.queryByText('Your monitor has errors. Please fix them before saving.')
@@ -85,7 +90,9 @@ describe('<ActionBar />', () => {
 
   it('calls option onSave when saving monitor', () => {
     const onSave = jest.fn();
-    render(<ActionBar monitor={monitor} isValid={false} onSave={onSave} />);
+    render(
+      <ActionBar monitor={monitor} isTestRunInProgress={false} isValid={false} onSave={onSave} />
+    );
 
     act(() => {
       userEvent.click(screen.getByText('Save monitor'));

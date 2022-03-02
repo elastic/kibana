@@ -14,7 +14,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_SEVERITY,
   ALERT_REASON,
-} from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getSeverity } from '../../../common/anomaly_detection';
@@ -85,6 +85,7 @@ export function registerTransactionDurationAnomalyAlertType({
           apmActionVariables.environment,
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
+          apmActionVariables.reason,
         ],
       },
       producer: 'apm',
@@ -94,7 +95,7 @@ export function registerTransactionDurationAnomalyAlertType({
         if (!ml) {
           return {};
         }
-        const alertParams = params;
+        const ruleParams = params;
         const request = {} as KibanaRequest;
         const { mlAnomalySearch } = ml.mlSystemProvider(
           request,
@@ -107,16 +108,16 @@ export function registerTransactionDurationAnomalyAlertType({
 
         const mlJobs = await getMLJobs(
           anomalyDetectors,
-          alertParams.environment
+          ruleParams.environment
         );
 
         const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
-          (option) => option.type === alertParams.anomalySeverityType
+          (option) => option.type === ruleParams.anomalySeverityType
         );
 
         if (!selectedOption) {
           throw new Error(
-            `Anomaly alert severity type ${alertParams.anomalySeverityType} is not supported.`
+            `Anomaly alert severity type ${ruleParams.anomalySeverityType} is not supported.`
           );
         }
 
@@ -139,16 +140,13 @@ export function registerTransactionDurationAnomalyAlertType({
                   {
                     range: {
                       timestamp: {
-                        gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
                         format: 'epoch_millis',
                       },
                     },
                   },
-                  ...termQuery(
-                    'partition_field_value',
-                    alertParams.serviceName
-                  ),
-                  ...termQuery('by_field_value', alertParams.transactionType),
+                  ...termQuery('partition_field_value', ruleParams.serviceName),
+                  ...termQuery('by_field_value', ruleParams.transactionType),
                 ] as QueryDslQueryContainer[],
               },
             },
@@ -213,7 +211,13 @@ export function registerTransactionDurationAnomalyAlertType({
         compact(anomalies).forEach((anomaly) => {
           const { serviceName, environment, transactionType, score } = anomaly;
           const severityLevel = getSeverity(score);
-
+          const reasonMessage = formatTransactionDurationAnomalyReason({
+            measured: score,
+            serviceName,
+            severityLevel,
+            windowSize: params.windowSize,
+            windowUnit: params.windowUnit,
+          });
           services
             .alertWithLifecycle({
               id: [
@@ -232,11 +236,7 @@ export function registerTransactionDurationAnomalyAlertType({
                 [ALERT_SEVERITY]: severityLevel,
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
-                [ALERT_REASON]: formatTransactionDurationAnomalyReason({
-                  measured: score,
-                  serviceName,
-                  severityLevel,
-                }),
+                [ALERT_REASON]: reasonMessage,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -245,6 +245,7 @@ export function registerTransactionDurationAnomalyAlertType({
               environment: getEnvironmentLabel(environment),
               threshold: selectedOption?.label,
               triggerValue: severityLevel,
+              reason: reasonMessage,
             });
         });
 

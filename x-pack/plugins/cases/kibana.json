@@ -11,11 +11,12 @@
   "kibanaVersion":"kibana",
   "optionalPlugins":[
      "security",
-     "spaces"
+     "spaces",
+     "usageCollection"
   ],
   "owner":{
-     "githubTeam":"security-threat-hunting",
-     "name":"Security Solution Threat Hunting"
+     "githubTeam":"response-ops",
+     "name":"ResponseOps"
   },
   "requiredPlugins":[
      "actions",

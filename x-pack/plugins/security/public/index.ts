@@ -19,6 +19,8 @@ export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';
 export type { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
 export type { UserMenuLink, SecurityNavControlServiceStart } from '../public/nav_control';
+export type { UiApi } from './ui_api';
+export type { PersonalInfoProps, ChangePasswordProps } from './account_management';
 
 export type { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
 

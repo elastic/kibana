@@ -48,33 +48,35 @@ export const getTransactionDurationPercentilesRequest = (
   };
 };
 
+interface Aggs extends estypes.AggregationsTDigestPercentilesAggregate {
+  values: Record<string, number>;
+}
+
 export const fetchTransactionDurationPercentiles = async (
   esClient: ElasticsearchClient,
   params: CorrelationsParams,
   percents?: number[],
   termFilters?: FieldValuePair[]
 ): Promise<{ totalDocs: number; percentiles: Record<string, number> }> => {
-  const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationPercentilesRequest(params, percents, termFilters)
-  );
+  const resp = await esClient.search<
+    ResponseHit,
+    { transaction_duration_percentiles: Aggs }
+  >(getTransactionDurationPercentilesRequest(params, percents, termFilters));
 
   // return early with no results if the search didn't return any documents
-  if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
+  if ((resp.hits.total as estypes.SearchTotalHits).value === 0) {
     return { totalDocs: 0, percentiles: {} };
   }
 
-  if (resp.body.aggregations === undefined) {
+  if (resp.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationPercentiles failed, did not return aggregations.'
     );
   }
 
   return {
-    totalDocs: (resp.body.hits.total as estypes.SearchTotalHits).value,
+    totalDocs: (resp.hits.total as estypes.SearchTotalHits).value,
     percentiles:
-      (
-        resp.body.aggregations
-          .transaction_duration_percentiles as estypes.AggregationsTDigestPercentilesAggregate
-      ).values ?? {},
+      resp.aggregations.transaction_duration_percentiles.values ?? {},
   };
 };

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 
 jest.mock('../../kibana_services', () => {
   return {

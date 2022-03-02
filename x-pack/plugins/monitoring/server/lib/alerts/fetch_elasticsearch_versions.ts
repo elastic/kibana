@@ -6,21 +6,32 @@
  */
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
-import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
+import { ElasticsearchSource } from '../../../common/types/es';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 export async function fetchElasticsearchVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   size: number,
   filterQuery?: string
 ): Promise<AlertVersions[]> {
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'cluster_stats',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: [
       'hits.hits._source.cluster_stats.nodes.versions',
+      'hits.hits._source.elasticsearch.cluster.stats.nodes.versions',
       'hits.hits._index',
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
     ],
     body: {
       size: clusters.length,
@@ -40,11 +51,7 @@ export async function fetchElasticsearchVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'cluster_stats',
-              },
-            },
+            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {
@@ -70,13 +77,15 @@ export async function fetchElasticsearchVersions(
     // meh
   }
 
-  const result = await esClient.search<ElasticsearchSource>(params);
-  const response: ElasticsearchResponse = result.body as ElasticsearchResponse;
+  const response = await esClient.search<ElasticsearchSource>(params);
   return (response.hits?.hits ?? []).map((hit) => {
-    const versions = hit._source!.cluster_stats?.nodes?.versions ?? [];
+    const versions =
+      hit._source!.cluster_stats?.nodes?.versions ??
+      hit._source!.elasticsearch?.cluster?.stats?.nodes?.versions ??
+      [];
     return {
       versions,
-      clusterUuid: hit._source!.cluster_uuid,
+      clusterUuid: hit._source!.elasticsearch?.cluster?.id || hit._source!.cluster_uuid,
       ccs: hit._index.includes(':') ? hit._index.split(':')[0] : undefined,
     };
   });

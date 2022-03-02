@@ -74,5 +74,24 @@ describe('Console Proxy Route', () => {
       expect(headers).toHaveProperty('x-forwarded-host');
       expect(headers['x-forwarded-host']).toBe('test');
     });
+
+    it('sends product-origin header when withProductOrigin query param is set', async () => {
+      await handler(
+        {} as any,
+        {
+          headers: {},
+          query: {
+            method: 'POST',
+            path: '/api/console/proxy?path=_aliases&method=GET',
+            withProductOrigin: true,
+          },
+        } as any,
+        kibanaResponseFactory
+      );
+
+      const [[{ headers }]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
+      expect(headers).toHaveProperty('x-elastic-product-origin');
+      expect(headers['x-elastic-product-origin']).toBe('kibana');
+    });
   });
 });

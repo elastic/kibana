@@ -10,14 +10,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPage,
   EuiPageBody,
-  EuiPageContent,
   EuiSpacer,
   EuiSteps,
   EuiStepStatus,
   EuiSwitch,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,6 +30,7 @@ import {
   ValidationStepWrapper,
 } from './components';
 import { DataFrameAnalyticsId } from '../../../../../common/types/data_frame_analytics';
+import { MlPageHeader } from '../../../components/page_header';
 
 export enum ANALYTICS_STEPS {
   CONFIGURATION,
@@ -162,89 +160,79 @@ export const Page: FC<Props> = ({ jobId }) => {
   ];
 
   return (
-    <EuiPage data-test-subj="mlAnalyticsCreationContainer">
-      <EuiPageBody restrictWidth={1200}>
-        <EuiPageContent>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="m" data-test-subj="mlDataFrameAnalyticsWizardHeaderTitle">
-                    <h1>
-                      {jobId === undefined && (
-                        <FormattedMessage
-                          id="xpack.ml.dataframe.analytics.creationPageTitle"
-                          defaultMessage="Create job"
-                        />
-                      )}
-                      {jobId !== undefined && (
-                        <FormattedMessage
-                          id="xpack.ml.dataframe.analytics.clone.creationPageTitle"
-                          defaultMessage="Clone job from {jobId}"
-                          values={{ jobId }}
-                        />
-                      )}
-                    </h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
-                      defaultMessage="Source data view: {dataViewTitle}"
-                      values={{ dataViewTitle: currentDataView.title }}
-                    />
-                  </h2>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiFormRow
-                helpText={
-                  disableSwitchToForm &&
-                  i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.jsonEditorDisabledSwitchText',
-                    {
-                      defaultMessage:
-                        'Configuration contains advanced fields not supported by the form. You cannot switch back to the form.',
-                    }
-                  )
-                }
-              >
-                <EuiSwitch
-                  disabled={jobType === undefined || disableSwitchToForm || isJobCreated}
-                  label={i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
-                    {
-                      defaultMessage: 'Switch to json editor',
-                    }
-                  )}
-                  checked={isAdvancedEditorEnabled}
-                  onChange={(e) => {
-                    if (e.target.checked === true) {
-                      switchToAdvancedEditor();
-                    } else {
-                      switchToForm();
-                    }
-                  }}
-                  data-test-subj="mlAnalyticsCreateJobWizardAdvancedEditorSwitch"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-          {isAdvancedEditorEnabled === true && (
-            <CreateAnalyticsAdvancedEditor {...createAnalyticsForm} />
-          )}
-          {isAdvancedEditorEnabled === false && (
-            <EuiSteps
-              data-test-subj="mlAnalyticsCreateJobWizardSteps"
-              steps={analyticsWizardSteps}
+    <div data-test-subj="mlAnalyticsCreationContainer">
+      <MlPageHeader>
+        <span data-test-subj="mlDataFrameAnalyticsWizardHeaderTitle">
+          {jobId === undefined && (
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.creationPageTitle"
+              defaultMessage="Create job"
             />
           )}
-        </EuiPageContent>
+          {jobId !== undefined && (
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.clone.creationPageTitle"
+              defaultMessage="Clone job from {jobId}"
+              values={{ jobId }}
+            />
+          )}
+        </span>
+      </MlPageHeader>
+      <EuiPageBody restrictWidth={1200}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
+                    defaultMessage="Source data view: {dataViewTitle}"
+                    values={{ dataViewTitle: currentDataView.title }}
+                  />
+                </h2>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              helpText={
+                disableSwitchToForm &&
+                i18n.translate('xpack.ml.dataframe.analytics.create.jsonEditorDisabledSwitchText', {
+                  defaultMessage:
+                    'Configuration contains advanced fields not supported by the form. You cannot switch back to the form.',
+                })
+              }
+            >
+              <EuiSwitch
+                disabled={jobType === undefined || disableSwitchToForm || isJobCreated}
+                label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
+                  {
+                    defaultMessage: 'Switch to json editor',
+                  }
+                )}
+                checked={isAdvancedEditorEnabled}
+                onChange={(e) => {
+                  if (e.target.checked === true) {
+                    switchToAdvancedEditor();
+                  } else {
+                    switchToForm();
+                  }
+                }}
+                data-test-subj="mlAnalyticsCreateJobWizardAdvancedEditorSwitch"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        {isAdvancedEditorEnabled === true && (
+          <CreateAnalyticsAdvancedEditor {...createAnalyticsForm} />
+        )}
+        {isAdvancedEditorEnabled === false && (
+          <EuiSteps data-test-subj="mlAnalyticsCreateJobWizardSteps" steps={analyticsWizardSteps} />
+        )}
       </EuiPageBody>
-    </EuiPage>
+    </div>
   );
 };

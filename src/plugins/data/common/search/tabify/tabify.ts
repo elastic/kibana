@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
-import { TabbedResponseWriterOptions } from './types';
+import type { TabbedResponseWriterOptions } from './types';
 import { AggResponseBucket } from './types';
 import { AggGroupNames, IAggConfigs } from '../aggs';
 
@@ -37,8 +37,10 @@ export function tabifyAggResponse(
 
     if (column) {
       const agg = column.aggConfig;
-      const aggInfo = agg.write(aggs);
-      aggScale *= aggInfo.metricScale || 1;
+      if (agg.getParam('scaleMetricValues')) {
+        const aggInfo = agg.write(aggs);
+        aggScale *= aggInfo.metricScale || 1;
+      }
 
       switch (agg.type.type) {
         case AggGroupNames.Buckets:

@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { ServiceLocations } from '../../../../common/runtime_types/monitor_management';
+import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
+import { ScheduleUnit, ServiceLocations } from '../../../../common/runtime_types';
 import { DataStream } from '../types';
 
 interface IPolicyConfigContext {
@@ -15,10 +16,12 @@ interface IPolicyConfigContext {
   setLocations: React.Dispatch<React.SetStateAction<ServiceLocations>>;
   setIsTLSEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setIsZipUrlTLSEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  setNamespace: React.Dispatch<React.SetStateAction<string>>;
   monitorType: DataStream;
   defaultMonitorType: DataStream;
   isTLSEnabled?: boolean;
   isZipUrlTLSEnabled?: boolean;
+  isZipUrlSourceEnabled?: boolean;
   defaultIsTLSEnabled?: boolean;
   defaultIsZipUrlTLSEnabled?: boolean;
   isEditable?: boolean;
@@ -26,6 +29,9 @@ interface IPolicyConfigContext {
   name?: string;
   defaultLocations?: ServiceLocations;
   locations?: ServiceLocations;
+  allowedScheduleUnits?: ScheduleUnit[];
+  defaultNamespace?: string;
+  namespace?: string;
 }
 
 export interface IPolicyConfigContextProvider {
@@ -35,7 +41,10 @@ export interface IPolicyConfigContextProvider {
   defaultIsZipUrlTLSEnabled?: boolean;
   defaultName?: string;
   defaultLocations?: ServiceLocations;
+  defaultNamespace?: string;
   isEditable?: boolean;
+  isZipUrlSourceEnabled?: boolean;
+  allowedScheduleUnits?: ScheduleUnit[];
 }
 
 export const initialValue = DataStream.HTTP;
@@ -58,6 +67,9 @@ const defaultContext: IPolicyConfigContext = {
       'setIsZipUrlTLSEnabled was not initialized, set it when you invoke the context'
     );
   },
+  setNamespace: (_namespace: React.SetStateAction<string>) => {
+    throw new Error('setNamespace was not initialized, set it when you invoke the context');
+  },
   monitorType: initialValue, // mutable
   defaultMonitorType: initialValue, // immutable,
   defaultIsTLSEnabled: false,
@@ -65,6 +77,9 @@ const defaultContext: IPolicyConfigContext = {
   defaultName: '',
   defaultLocations: [],
   isEditable: false,
+  isZipUrlSourceEnabled: true,
+  allowedScheduleUnits: [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
+  defaultNamespace: DEFAULT_NAMESPACE_STRING,
 };
 
 export const PolicyConfigContext = createContext(defaultContext);
@@ -76,13 +91,17 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   defaultIsZipUrlTLSEnabled = false,
   defaultName = '',
   defaultLocations = [],
+  defaultNamespace = DEFAULT_NAMESPACE_STRING,
   isEditable = false,
+  isZipUrlSourceEnabled = true,
+  allowedScheduleUnits = [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
 }: IPolicyConfigContextProvider) {
   const [monitorType, setMonitorType] = useState<DataStream>(defaultMonitorType);
   const [name, setName] = useState<string>(defaultName);
   const [locations, setLocations] = useState<ServiceLocations>(defaultLocations);
   const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
   const [isZipUrlTLSEnabled, setIsZipUrlTLSEnabled] = useState<boolean>(defaultIsZipUrlTLSEnabled);
+  const [namespace, setNamespace] = useState<string>(defaultNamespace);
 
   const value = useMemo(() => {
     return {
@@ -102,11 +121,16 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
       defaultLocations,
       locations,
       setLocations,
-    };
+      isZipUrlSourceEnabled,
+      allowedScheduleUnits,
+      namespace,
+      setNamespace,
+    } as IPolicyConfigContext;
   }, [
     monitorType,
     defaultMonitorType,
     isTLSEnabled,
+    isZipUrlSourceEnabled,
     isZipUrlTLSEnabled,
     defaultIsTLSEnabled,
     defaultIsZipUrlTLSEnabled,
@@ -115,6 +139,8 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
     defaultName,
     locations,
     defaultLocations,
+    allowedScheduleUnits,
+    namespace,
   ]);
 
   return <PolicyConfigContext.Provider value={value} children={children} />;

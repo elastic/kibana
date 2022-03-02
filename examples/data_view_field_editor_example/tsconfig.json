@@ -14,6 +14,7 @@
     { "path": "../../src/core/tsconfig.json" },
     { "path": "../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../src/plugins/data/tsconfig.json" },
+    { "path": "../../src/plugins/data_views/tsconfig.json" },
     { "path": "../../src/plugins/data_view_field_editor/tsconfig.json" },
     { "path": "../developer_examples/tsconfig.json" },
   ]

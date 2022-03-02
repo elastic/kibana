@@ -49,13 +49,21 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     }).then((resp: any) => resp.fields);
   }
 
-  getFieldsForWildcard({ pattern, metaFields, type, rollupIndex, allowNoIndex }: GetFieldsOptions) {
+  getFieldsForWildcard({
+    pattern,
+    metaFields,
+    type,
+    rollupIndex,
+    allowNoIndex,
+    filter,
+  }: GetFieldsOptions) {
     return this._request(this._getUrl(['_fields_for_wildcard']), {
       pattern,
       meta_fields: metaFields,
       type,
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
+      filter,
     }).then((resp: any) => resp.fields || []);
   }
 

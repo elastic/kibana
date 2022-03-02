@@ -10,12 +10,12 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { RangeFilterParams } from '@kbn/es-query';
 import { KibanaContextProvider, KibanaThemeProvider } from '../../../kibana_react/public';
 import { VisualizationContainer } from '../../../visualizations/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
 import { UI_SETTINGS } from '../common/constants';
-import { RangeFilterParams } from '../../../data/public';
 
 const LazyTimelionVisComponent = lazy(() =>
   import('./async_services').then(({ TimelionVisComponent }) => ({ default: TimelionVisComponent }))
@@ -33,7 +33,7 @@ export const getTimelionVisRenderer: (
       unmountComponentAtNode(domNode);
     });
 
-    const [seriesList] = visData.sheet;
+    const seriesList = visData?.sheet[0];
     const showNoResult = !seriesList || !seriesList.list.length;
 
     const VisComponent = deps.uiSettings.get(UI_SETTINGS.LEGACY_CHARTS_LIBRARY, false)
@@ -62,12 +62,15 @@ export const getTimelionVisRenderer: (
       <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
         <KibanaThemeProvider theme$={deps.theme.theme$}>
           <KibanaContextProvider services={{ ...deps }}>
-            <VisComponent
-              interval={visParams.interval}
-              seriesList={seriesList}
-              renderComplete={handlers.done}
-              onBrushEvent={onBrushEvent}
-            />
+            {seriesList && (
+              <VisComponent
+                interval={visParams.interval}
+                ariaLabel={visParams.ariaLabel}
+                seriesList={seriesList}
+                renderComplete={handlers.done}
+                onBrushEvent={onBrushEvent}
+              />
+            )}
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </VisualizationContainer>,

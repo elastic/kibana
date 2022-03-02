@@ -14,6 +14,7 @@ import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '../../../../..
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
+  KibanaThemeProvider,
   RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
@@ -58,7 +59,7 @@ export const renderApp = ({
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
 }) => {
-  const { element, history } = appMountParameters;
+  const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
 
@@ -73,30 +74,32 @@ export const renderApp = ({
   element.classList.add(APP_WRAPPER_CLASS);
 
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
-      <PluginContext.Provider
-        value={{
-          appMountParameters,
-          config,
-          core,
-          plugins,
-          observabilityRuleTypeRegistry,
-          ObservabilityPageTemplate,
-        }}
-      >
-        <Router history={history}>
-          <EuiThemeProvider darkMode={isDarkMode}>
-            <i18nCore.Context>
-              <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                <HasDataContextProvider>
-                  <App />
-                </HasDataContextProvider>
-              </RedirectAppLinks>
-            </i18nCore.Context>
-          </EuiThemeProvider>
-        </Router>
-      </PluginContext.Provider>
-    </KibanaContextProvider>,
+    <KibanaThemeProvider theme$={theme$}>
+      <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
+        <PluginContext.Provider
+          value={{
+            appMountParameters,
+            config,
+            core,
+            plugins,
+            observabilityRuleTypeRegistry,
+            ObservabilityPageTemplate,
+          }}
+        >
+          <Router history={history}>
+            <EuiThemeProvider darkMode={isDarkMode}>
+              <i18nCore.Context>
+                <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
+                  <HasDataContextProvider>
+                    <App />
+                  </HasDataContextProvider>
+                </RedirectAppLinks>
+              </i18nCore.Context>
+            </EuiThemeProvider>
+          </Router>
+        </PluginContext.Provider>
+      </KibanaContextProvider>
+    </KibanaThemeProvider>,
     element
   );
   return () => {

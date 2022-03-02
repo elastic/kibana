@@ -8,8 +8,8 @@
 import type { AlertsStackByOption } from './types';
 
 export const alertsStackByOptions: AlertsStackByOption[] = [
-  { text: 'kibana.alert.rule.risk_score', value: 'kibana.alert.rule.risk_score' },
-  { text: 'kibana.alert.rule.severity', value: 'kibana.alert.rule.severity' },
+  { text: 'kibana.alert.risk_score', value: 'kibana.alert.risk_score' },
+  { text: 'kibana.alert.severity', value: 'kibana.alert.severity' },
   { text: 'kibana.alert.rule.threat.tactic.name', value: 'kibana.alert.rule.threat.tactic.name' },
   { text: 'destination.ip', value: 'destination.ip' },
   { text: 'event.action', value: 'event.action' },

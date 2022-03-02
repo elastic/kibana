@@ -19,7 +19,6 @@ import {
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases, patchCase } from './api';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 export interface UseGetCasesState {
   data: AllCases;
@@ -105,7 +104,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   reporters: [],
   status: StatusAll,
   tags: [],
-  onlyCollectionType: false,
+  owner: [],
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
@@ -145,7 +144,6 @@ export const useGetCases = (
     initialFilterOptions?: Partial<FilterOptions>;
   } = {}
 ): UseGetCases => {
-  const { owner } = useCasesContext();
   const { initialQueryParams = empty, initialFilterOptions = empty } = params;
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
@@ -185,7 +183,7 @@ export const useGetCases = (
         dispatch({ type: 'FETCH_INIT', payload: 'cases' });
 
         const response = await getCases({
-          filterOptions: { ...filterOptions, owner },
+          filterOptions,
           queryParams,
           signal: abortCtrlFetchCases.current.signal,
         });
@@ -208,11 +206,12 @@ export const useGetCases = (
         }
       }
     },
-    [owner, toasts]
+    [toasts]
   );
 
   const dispatchUpdateCaseProperty = useCallback(
     async ({ updateKey, updateValue, caseId, refetchCasesStatus, version }: UpdateCase) => {
+      const caseData = state.data.cases.find((caseInfo) => caseInfo.id === caseId);
       try {
         didCancelUpdateCases.current = false;
         abortCtrlUpdateCases.current.abort();
@@ -231,6 +230,15 @@ export const useGetCases = (
           dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
           fetchCases(state.filterOptions, state.queryParams);
           refetchCasesStatus();
+          if (caseData) {
+            toasts.addSuccess({
+              title: i18n.UPDATED_CASE(caseData.title),
+              text:
+                updateKey === 'status' && caseData.totalAlerts > 0 && caseData.settings.syncAlerts
+                  ? i18n.STATUS_CHANGED_TOASTER_TEXT
+                  : undefined,
+            });
+          }
         }
       } catch (error) {
         if (!didCancelUpdateCases.current) {
@@ -241,8 +249,7 @@ export const useGetCases = (
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.filterOptions, state.queryParams]
+    [fetchCases, state.data, state.filterOptions, state.queryParams, toasts]
   );
 
   const refetchCases = useCallback(() => {

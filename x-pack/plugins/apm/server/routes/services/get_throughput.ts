@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AggregationsDateInterval } from '@elastic/elasticsearch/lib/api/types';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -83,7 +82,7 @@ export async function getThroughput({
           },
           aggs: {
             throughput: {
-              rate: { unit: 'minute' as AggregationsDateInterval },
+              rate: { unit: 'minute' as const },
             },
           },
         },

@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data/common';
 import {
   getIndexPatternSelectComponent,
   getIndexPatternService,
@@ -19,7 +19,7 @@ import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../common/i18
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../../common/constants';
 
 interface Props {
-  onChange: (indexPattern: IndexPattern) => void;
+  onChange: (indexPattern: DataView) => void;
   value: string | null;
   isGeoPointsOnly?: boolean;
 }
@@ -139,6 +139,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             placeholder={getDataViewSelectPlaceholder()}
             onNoIndexPatterns={this._onNoIndexPatterns}
             isClearable={false}
+            data-test-subj="mapGeoIndexPatternSelect"
           />
         </EuiFormRow>
       </>

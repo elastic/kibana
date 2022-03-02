@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import './jest.mocks';
 
 import React, { FunctionComponent } from 'react';
@@ -19,10 +20,12 @@ import { FieldEditorProvider, Context } from '../../../public/components/field_e
 import { FieldPreviewProvider } from '../../../public/components/preview';
 import { initApi, ApiService } from '../../../public/lib';
 import { init as initHttpRequests } from './http_requests';
+import { fieldFormatsMock as fieldFormats } from '../../../../field_formats/common/mocks';
+import { FieldFormat } from '../../../../field_formats/common';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const dataStart = dataPluginMock.createStartContract();
-const { search, fieldFormats } = dataStart;
+const { search } = dataStart;
 
 export const spySearchQuery = jest.fn();
 export const spySearchQueryResponse = jest.fn(() => Promise.resolve({}));
@@ -68,8 +71,20 @@ export const setupEnvironment = () => {
   };
 };
 
+class MockDefaultFieldFormat extends FieldFormat {
+  static id = 'testDefaultFormat';
+  static title = 'TestDefaultFormat';
+}
+
+class MockCustomFieldFormat extends FieldFormat {
+  static id = 'upper';
+  static title = 'UpperCaseString';
+
+  htmlConvert = (value: string) => `<span>${value.toUpperCase()}</span>`;
+}
+
 // The format options available in the dropdown select for our tests.
-export const fieldFormatsOptions = [{ id: 'upper', title: 'UpperCaseString' } as any];
+export const fieldFormatsOptions = [MockCustomFieldFormat];
 
 export const indexPatternNameForTest = 'testIndexPattern';
 
@@ -86,20 +101,22 @@ export const WithFieldEditorDependencies =
 
     (
       fieldFormats.getDefaultType as jest.MockedFunction<typeof fieldFormats['getDefaultType']>
-    ).mockReturnValue({ id: 'testDefaultFormat', title: 'TestDefaultFormat' } as any);
+    ).mockReturnValue(MockDefaultFieldFormat);
 
     (
       fieldFormats.getInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
     ).mockImplementation((id: string) => {
-      if (id === 'upper') {
-        return {
-          convertObject: {
-            html(value: string = '') {
-              return `<span>${value.toUpperCase()}</span>`;
-            },
-          },
-        } as any;
+      if (id === MockCustomFieldFormat.id) {
+        return new MockCustomFieldFormat();
+      } else {
+        return new MockDefaultFieldFormat();
       }
+    });
+
+    (
+      fieldFormats.getDefaultInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
+    ).mockImplementation(() => {
+      return new MockDefaultFieldFormat();
     });
 
     const dependencies: Context = {

@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { PluginServiceProvider, PluginServiceProviders } from './provider';
+import { PluginServiceProvidersMediator } from './providers_mediator';
 
 /**
  * A `PluginServiceRegistry` maintains a set of service providers which can be collectively
@@ -19,10 +20,12 @@ import { PluginServiceProvider, PluginServiceProviders } from './provider';
  */
 export class PluginServiceRegistry<Services, StartParameters = {}> {
   private providers: PluginServiceProviders<Services, StartParameters>;
+  private providersMediator: PluginServiceProvidersMediator<Services, StartParameters>;
   private _isStarted = false;
 
   constructor(providers: PluginServiceProviders<Services, StartParameters>) {
     this.providers = providers;
+    this.providersMediator = new PluginServiceProvidersMediator(providers);
   }
 
   /**
@@ -69,8 +72,7 @@ export class PluginServiceRegistry<Services, StartParameters = {}> {
    * @param params Parameters used to start the registry.
    */
   start(params: StartParameters) {
-    const providerNames = Object.keys(this.providers) as Array<keyof Services>;
-    providerNames.forEach((providerName) => this.providers[providerName].start(params));
+    this.providersMediator.start(params);
     this._isStarted = true;
     return this;
   }
@@ -79,8 +81,7 @@ export class PluginServiceRegistry<Services, StartParameters = {}> {
    * Stop the registry.
    */
   stop() {
-    const providerNames = Object.keys(this.providers) as Array<keyof Services>;
-    providerNames.forEach((providerName) => this.providers[providerName].stop());
+    this.providersMediator.stop();
     this._isStarted = false;
     return this;
   }

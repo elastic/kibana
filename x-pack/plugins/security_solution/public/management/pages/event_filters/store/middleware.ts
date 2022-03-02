@@ -35,7 +35,7 @@ import {
   getDeletionState,
 } from './selector';
 
-import { parseQueryFilterToKQL } from '../../../common/utils';
+import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../constants';
 import {
   EventFiltersListPageData,
@@ -136,25 +136,6 @@ const eventFiltersUpdate = async (
       getNewComment(store.getState())
     ) as UpdateExceptionListItemSchema;
 
-    // Clean unnecessary fields for update action
-    [
-      'created_at',
-      'created_by',
-      'created_at',
-      'created_by',
-      'list_id',
-      'tie_breaker_id',
-      'updated_at',
-      'updated_by',
-    ].forEach((field) => {
-      delete updatedCommentsEntry[field as keyof UpdateExceptionListItemSchema];
-    });
-
-    updatedCommentsEntry.comments = updatedCommentsEntry.comments?.map((comment) => ({
-      comment: comment.comment,
-      id: comment.id,
-    }));
-
     const exception = await eventFiltersService.updateOne(updatedCommentsEntry);
     store.dispatch({
       type: 'eventFiltersUpdateSuccess',
@@ -238,13 +219,24 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       },
     });
 
-    const { page_size: pageSize, page_index: pageIndex, filter } = getCurrentLocation(state);
+    const {
+      page_size: pageSize,
+      page_index: pageIndex,
+      filter,
+      included_policies: includedPolicies,
+    } = getCurrentLocation(state);
+
+    const kuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
+
     const query: EventFiltersServiceGetListOptions = {
       page: pageIndex + 1,
       perPage: pageSize,
       sortField: 'created_at',
       sortOrder: 'desc',
-      filter: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
+      filter: parsePoliciesAndFilterToKql({
+        kuery,
+        policies: includedPolicies ? includedPolicies.split(',') : [],
+      }),
     };
 
     try {
@@ -346,5 +338,6 @@ export const createEventFiltersPageMiddleware = (
   };
 };
 
-export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> =
-  (coreStart) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));
+export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<
+  EventFiltersListPageState
+> = (coreStart) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));

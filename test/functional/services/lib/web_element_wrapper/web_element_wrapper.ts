@@ -203,6 +203,18 @@ export class WebElementWrapper {
   }
 
   /**
+   * If possible, opens 'href' of this element directly through the URL
+   *
+   * @return {Promise<void>}
+   */
+  public async openHref() {
+    const href = await this.getAttribute('href');
+    if (href) {
+      await this.driver.get(href);
+    }
+  }
+
+  /**
    * Check if webelement wrapper has a specific class.
    *
    * @return {Promise<boolean>}
@@ -490,8 +502,7 @@ export class WebElementWrapper {
   public async findByTestSubject(selector: string) {
     return await this.retryCall(async function find(wrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector))),
-        wrapper.By.css(selector)
+        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector)))
       );
     });
   }

@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultDataRange();
       await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('should expand the detail row when the toggle arrow is clicked', async function () {

@@ -42,6 +42,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   "ip": { "id": "ip", "params": {} },
   "date": { "id": "date", "params": {} },
   "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
+  "geo_point": { "id": "geo_point", "params": { "transform": "wkt" } },
   "number": { "id": "number", "params": {} },
   "boolean": { "id": "boolean", "params": {} },
   "histogram": { "id": "histogram", "params": {} },
@@ -70,6 +71,12 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           id: schema.string(),
           params: schema.object({}),
           es: schema.boolean(),
+        }),
+        geo_point: schema.object({
+          id: schema.string(),
+          params: schema.object({
+            transform: schema.string(),
+          }),
         }),
         number: schema.object({
           id: schema.string(),

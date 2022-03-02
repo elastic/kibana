@@ -229,6 +229,7 @@ describe('Case Configuration API', () => {
     });
 
     test('should return correct response', async () => {
+      fetchMock.mockResolvedValue(allCasesSnake);
       const resp = await getCases({
         filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,

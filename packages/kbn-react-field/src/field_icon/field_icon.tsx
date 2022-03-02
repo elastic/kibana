@@ -26,7 +26,8 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | '_source'
     | 'string'
     | string
-    | 'nested';
+    | 'nested'
+    | 'version';
   label?: string;
   scripted?: boolean;
 }
@@ -54,6 +55,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   text: { iconType: 'tokenString' },
   keyword: { iconType: 'tokenKeyword' },
   nested: { iconType: 'tokenNested' },
+  version: { iconType: 'tokenTag' },
 };
 
 /**

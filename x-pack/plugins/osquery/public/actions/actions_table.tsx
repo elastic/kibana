@@ -19,11 +19,11 @@ interface ActionTableResultsButtonProps {
   actionId: string;
 }
 
-const ActionTableResultsButton = React.memo<ActionTableResultsButtonProps>(({ actionId }) => {
+const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
   const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
   return <EuiButtonIcon iconType="visTable" {...navProps} />;
-});
+};
 
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 

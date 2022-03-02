@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { IScopedSearchSessionsClient } from './types';
+import type { IScopedSearchSessionsClient } from './types';
 import { SearchSessionsConfigSchema } from '../../../config';
 
 export function createSearchSessionsClientMock<T = unknown>(): jest.Mocked<

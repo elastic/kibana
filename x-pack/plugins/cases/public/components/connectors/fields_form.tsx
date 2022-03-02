@@ -51,5 +51,6 @@ const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onCh
     </>
   );
 };
+ConnectorFieldsFormComponent.displayName = 'ConnectorFieldsForm';
 
 export const ConnectorFieldsForm = memo(ConnectorFieldsFormComponent);

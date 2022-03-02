@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
-import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
+import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import type { IndexPatternState } from '../hooks/use_app_index_pattern';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
@@ -33,7 +33,7 @@ export function getExploratoryViewEmbeddable(
     const [indexPatterns, setIndexPatterns] = useState<IndexPatternState>({} as IndexPatternState);
     const [loading, setLoading] = useState(false);
 
-    const series = props.attributes[0];
+    const series = props.attributes && props.attributes[0];
 
     const isDarkMode = core.uiSettings.get('theme:darkMode');
 
@@ -43,8 +43,8 @@ export function getExploratoryViewEmbeddable(
 
         setLoading(true);
         try {
-          const obsvIndexP = new ObservabilityIndexPatterns(plugins.data);
-          const indPattern = await obsvIndexP.getIndexPattern(
+          const obsvIndexP = new ObservabilityDataViews(plugins.dataViews);
+          const indPattern = await obsvIndexP.getDataView(
             dataType,
             dataTypesIndexPatterns?.[dataType]
           );
@@ -59,8 +59,10 @@ export function getExploratoryViewEmbeddable(
     );
 
     useEffect(() => {
-      loadIndexPattern({ dataType: series.dataType });
-    }, [series.dataType, loadIndexPattern]);
+      if (series?.dataType) {
+        loadIndexPattern({ dataType: series.dataType });
+      }
+    }, [series?.dataType, loadIndexPattern]);
 
     if (Object.keys(indexPatterns).length === 0 || loading) {
       return <EuiLoadingSpinner />;

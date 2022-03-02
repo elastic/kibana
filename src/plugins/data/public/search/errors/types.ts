@@ -32,7 +32,7 @@ export interface Reason {
   };
 }
 
-export interface IEsErrorAttributes {
+interface IEsErrorAttributes {
   type: string;
   reason: string;
   root_cause?: Reason[];

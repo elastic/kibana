@@ -19,9 +19,13 @@ import { AppSearchPageTemplate } from '../layout';
 
 import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
 import { AddDomainForm } from './components/add_domain/add_domain_form';
+import { AddDomainFormErrors } from './components/add_domain/add_domain_form_errors';
 import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_form_submit_button';
+import { AddDomainLogic } from './components/add_domain/add_domain_logic';
+import { CrawlCustomSettingsFlyout } from './components/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { CrawlDetailsFlyout } from './components/crawl_details_flyout';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
+import { CrawlSelectDomainsModal } from './components/crawl_select_domains_modal/crawl_select_domains_modal';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DomainsTable } from './components/domains_table';
@@ -31,6 +35,7 @@ import { CrawlerLogic } from './crawler_logic';
 
 export const CrawlerOverview: React.FC = () => {
   const { events, dataLoading, domains } = useValues(CrawlerLogic);
+  const { errors: addDomainErrors } = useValues(AddDomainLogic);
 
   return (
     <AppSearchPageTemplate
@@ -87,6 +92,12 @@ export const CrawlerOverview: React.FC = () => {
               </EuiLink>
             </p>
           </EuiText>
+          {addDomainErrors && (
+            <>
+              <EuiSpacer size="l" />
+              <AddDomainFormErrors />
+            </>
+          )}
           <EuiSpacer size="l" />
           <AddDomainForm />
           <EuiSpacer />
@@ -129,6 +140,8 @@ export const CrawlerOverview: React.FC = () => {
         </>
       )}
       <CrawlDetailsFlyout />
+      <CrawlSelectDomainsModal />
+      <CrawlCustomSettingsFlyout />
     </AppSearchPageTemplate>
   );
 };

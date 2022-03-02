@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test/jest';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 
 import { FormatEditorSamples } from './samples';
 

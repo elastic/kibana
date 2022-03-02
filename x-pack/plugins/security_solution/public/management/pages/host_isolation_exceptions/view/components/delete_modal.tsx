@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -16,11 +15,17 @@ import {
   EuiModalHeaderTitle,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { memo } from 'react';
 import { useMutation } from 'react-query';
+import { AutoFocusButton } from '../../../../../common/components/autofocus_button/autofocus_button';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
+import {
+  getArtifactPoliciesIdByTag,
+  isGlobalPolicyEffected,
+} from '../../../../components/effected_policy_select/utils';
 import { deleteOneHostIsolationExceptionItem } from '../../service';
 
 export const HostIsolationExceptionDeleteModal = memo(
@@ -45,7 +50,7 @@ export const HostIsolationExceptionDeleteModal = memo(
               'xpack.securitySolution.hostIsolationExceptions.deletionDialog.deleteFailure',
               {
                 defaultMessage:
-                  'Unable to remove "{name}" from the Host isolation exceptions list. Reason: {message}',
+                  'Unable to remove "{name}" from the host isolation exceptions list. Reason: {message}',
                 values: { name: item?.name, message: error.message },
               }
             )
@@ -58,7 +63,7 @@ export const HostIsolationExceptionDeleteModal = memo(
               'xpack.securitySolution.hostIsolationExceptions.deletionDialog.deleteSuccess',
               {
                 defaultMessage:
-                  '"{name}" has been removed from the Host isolation exceptions list.',
+                  '"{name}" has been removed from the host isolation exceptions list.',
                 values: { name: item?.name },
               }
             )
@@ -82,20 +87,36 @@ export const HostIsolationExceptionDeleteModal = memo(
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.title"
-              defaultMessage="Delete Host isolation exception"
+              defaultMessage="Delete host isolation exception"
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody data-test-subj="hostIsolationExceptionsFilterDeleteModalBody">
           <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.subtitle"
-                defaultMessage='You are deleting exception "{name}".'
-                values={{ name: <b className="eui-textBreakWord">{item?.name}</b> }}
-              />
-            </p>
+            <EuiCallOut
+              data-test-subj="hostIsolationExceptionsDeleteModalCallout"
+              title={i18n.translate(
+                'xpack.securitySolution.hostIsolationExceptions.deletionDialog.calloutTitle',
+                {
+                  defaultMessage: 'Warning',
+                }
+              )}
+              color="danger"
+              iconType="alert"
+            >
+              <p data-test-subj="hostIsolationExceptionsDeleteModalCalloutMessage">
+                <FormattedMessage
+                  id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.calloutMessage"
+                  defaultMessage="Deleting this entry will remove it from {count} associated {count, plural, one {policy} other {policies}}."
+                  values={{
+                    count: isGlobalPolicyEffected(Array.from(item.tags || []))
+                      ? 'all'
+                      : getArtifactPoliciesIdByTag(item.tags).length,
+                  }}
+                />
+              </p>
+            </EuiCallOut>
             <p>
               <FormattedMessage
                 id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.confirmation"
@@ -117,7 +138,7 @@ export const HostIsolationExceptionDeleteModal = memo(
             />
           </EuiButtonEmpty>
 
-          <EuiButton
+          <AutoFocusButton
             fill
             color="danger"
             onClick={handleConfirmButton}
@@ -126,9 +147,9 @@ export const HostIsolationExceptionDeleteModal = memo(
           >
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.confirmButton"
-              defaultMessage="Remove exception"
+              defaultMessage="Delete"
             />
-          </EuiButton>
+          </AutoFocusButton>
         </EuiModalFooter>
       </EuiModal>
     );

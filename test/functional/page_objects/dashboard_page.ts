@@ -291,6 +291,24 @@ export class DashboardPageObject extends FtrService {
     });
   }
 
+  public async clearUnsavedChanges() {
+    this.log.debug('clearUnsavedChanges');
+    let switchMode = false;
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+      switchMode = true;
+    }
+    await this.retry.try(async () => {
+      // avoid flaky test by surrounding in retry
+      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      await this.clickQuickSave();
+      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+    });
+    if (switchMode) {
+      await this.clickCancelOutOfEditMode();
+    }
+  }
+
   public async clickNewDashboard(continueEditing = false) {
     const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
     if (!continueEditing && discardButtonExists) {
@@ -532,6 +550,27 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('in getPanelTitles');
     const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle');
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
+  }
+
+  // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
+  public async getVisibilityOfPanelTitles() {
+    this.log.debug('in getVisibilityOfPanels');
+    // only works if the dashboard is in view mode
+    const inViewMode = await this.getIsInViewMode();
+    if (!inViewMode) {
+      await this.clickCancelOutOfEditMode();
+    }
+    const visibilities: boolean[] = [];
+    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
+    for (const titleObject of titleObjects) {
+      const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
+      visibilities.push(exists);
+    }
+    // return to edit mode if a switch to view mode above was necessary
+    if (!inViewMode) {
+      await this.switchToEditMode();
+    }
+    return visibilities;
   }
 
   public async getPanelDimensions() {

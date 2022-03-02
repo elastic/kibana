@@ -18,9 +18,7 @@ describe('isInlineScriptingEnabled', () => {
   });
 
   const mockSettingsValue = (settings: estypes.ClusterGetSettingsResponse) => {
-    client.cluster.getSettings.mockReturnValue(
-      elasticsearchServiceMock.createSuccessTransportRequestPromise(settings)
-    );
+    client.cluster.getSettings.mockResolvedValue(settings);
   };
 
   it('returns `true` if all settings are empty', async () => {

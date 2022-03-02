@@ -4,6 +4,5 @@
   "description": "security solution utilities to use across plugins such lists, security_solution, cases, etc...",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "main": "./target_node/index.js",
-  "types": "./target_types/index.d.ts",
   "private": true
 }

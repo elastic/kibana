@@ -11,7 +11,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
-} from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   ENVIRONMENT_NOT_DEFINED,
@@ -74,6 +74,7 @@ export function registerErrorCountAlertType({
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.interval,
+          apmActionVariables.reason,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
@@ -81,7 +82,7 @@ export function registerErrorCountAlertType({
       isExportable: true,
       executor: async ({ services, params }) => {
         const config = await config$.pipe(take(1)).toPromise();
-        const alertParams = params;
+        const ruleParams = params;
         const indices = await getApmIndices({
           config,
           savedObjectsClient: services.savedObjectsClient,
@@ -97,13 +98,13 @@ export function registerErrorCountAlertType({
                   {
                     range: {
                       '@timestamp': {
-                        gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
                       },
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  ...termQuery(SERVICE_NAME, alertParams.serviceName),
-                  ...environmentQuery(alertParams.environment),
+                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
+                  ...environmentQuery(ruleParams.environment),
                 ],
               },
             },
@@ -136,10 +137,16 @@ export function registerErrorCountAlertType({
           }) ?? [];
 
         errorCountResults
-          .filter((result) => result.errorCount >= alertParams.threshold)
+          .filter((result) => result.errorCount >= ruleParams.threshold)
           .forEach((result) => {
             const { serviceName, environment, errorCount } = result;
-
+            const alertReason = formatErrorCountReason({
+              serviceName,
+              threshold: ruleParams.threshold,
+              measured: errorCount,
+              windowSize: ruleParams.windowSize,
+              windowUnit: ruleParams.windowUnit,
+            });
             services
               .alertWithLifecycle({
                 id: [AlertType.ErrorCount, serviceName, environment]
@@ -150,20 +157,17 @@ export function registerErrorCountAlertType({
                   ...getEnvironmentEsField(environment),
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
                   [ALERT_EVALUATION_VALUE]: errorCount,
-                  [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
-                  [ALERT_REASON]: formatErrorCountReason({
-                    serviceName,
-                    threshold: alertParams.threshold,
-                    measured: errorCount,
-                  }),
+                  [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
+                  [ALERT_REASON]: alertReason,
                 },
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {
                 serviceName,
                 environment: getEnvironmentLabel(environment),
-                threshold: alertParams.threshold,
+                threshold: ruleParams.threshold,
                 triggerValue: errorCount,
-                interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+                interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                reason: alertReason,
               });
           });
 

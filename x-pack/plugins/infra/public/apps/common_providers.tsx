@@ -18,7 +18,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions
 import { createKibanaContextForPlugin } from '../hooks/use_kibana';
 import { InfraClientStartDeps } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
-import { NavigationWarningPromptProvider } from '../utils/navigation_warning_prompt';
+import { NavigationWarningPromptProvider } from '../../../observability/public';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 
 export const CommonInfraProviders: React.FC<{
@@ -26,14 +26,15 @@ export const CommonInfraProviders: React.FC<{
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage }) => {
+  theme$: AppMountParameters['theme$'];
+}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
       <EuiThemeProvider darkMode={darkMode}>
         <DataUIProviders appName={appName} storage={storage}>
-          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu}>
+          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
             <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
           </HeaderActionMenuProvider>
         </DataUIProviders>

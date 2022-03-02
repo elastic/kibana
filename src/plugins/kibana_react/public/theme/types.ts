@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 
-export type EuiTheme = ReturnType<typeof useEuiTheme>;
+export type EuiTheme = UseEuiTheme;

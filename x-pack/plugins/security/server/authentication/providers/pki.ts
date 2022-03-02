@@ -277,13 +277,11 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      result = (
-        await this.options.client.asInternalUser.transport.request({
-          method: 'POST',
-          path: '/_security/delegate_pki',
-          body: { x509_certificate_chain: certificateChain },
-        })
-      ).body as any;
+      result = (await this.options.client.asInternalUser.transport.request({
+        method: 'POST',
+        path: '/_security/delegate_pki',
+        body: { x509_certificate_chain: certificateChain },
+      })) as any;
     } catch (err) {
       this.logger.debug(
         `Failed to exchange peer certificate chain to an access token: ${err.message}`

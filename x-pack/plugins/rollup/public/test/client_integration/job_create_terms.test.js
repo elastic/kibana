@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { pageHelpers, mockHttpRequest } from './helpers';
-import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn) => fn,
-}));
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
+import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
 const { setup } = pageHelpers.jobCreate;
 
@@ -26,9 +22,14 @@ describe('Create Rollup Job, step 3: Terms', () => {
   let startMock;
 
   beforeAll(() => {
+    jest.useFakeTimers();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   beforeEach(() => {

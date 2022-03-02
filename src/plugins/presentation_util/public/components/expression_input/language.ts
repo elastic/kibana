@@ -72,6 +72,9 @@ const expressionsLanguage: ExpressionsLanguage = {
       [/'/, 'string', '@string_single'],
 
       [/@symbols/, 'delimiter'],
+
+      [/\/\*/, 'comment', '@multiline_comment'],
+      [/\/\/.*$/, 'comment'],
     ],
 
     string_double: [
@@ -92,6 +95,12 @@ const expressionsLanguage: ExpressionsLanguage = {
       [/\{/, 'delimiter.bracket', '@bracketCounting'],
       [/\}/, 'delimiter.bracket', '@pop'],
       { include: 'common' },
+    ],
+
+    multiline_comment: [
+      [/[^\/*]+/, 'comment'],
+      ['\\*/', 'comment', '@pop'],
+      [/[\/*]/, 'comment'],
     ],
   },
 };

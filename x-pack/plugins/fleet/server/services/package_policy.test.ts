@@ -10,8 +10,12 @@ import {
   savedObjectsClientMock,
   httpServerMock,
 } from 'src/core/server/mocks';
-
-import type { SavedObjectsClient, SavedObjectsUpdateResponse } from 'src/core/server';
+import { produce } from 'immer';
+import type {
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsUpdateResponse,
+} from 'src/core/server';
 import type { KibanaRequest } from 'kibana/server';
 
 import type {
@@ -21,6 +25,7 @@ import type {
   PostPackagePolicyDeleteCallback,
   RegistryDataStream,
   PackagePolicyInputStream,
+  PackagePolicy,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -34,20 +39,21 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackagePolicyPackage,
-  RegistryPackage,
 } from '../../common';
 import { packageToPackagePolicy } from '../../common';
 
-import { IngestManagerError } from '../errors';
+import { IngestManagerError, PackagePolicyIneligibleForUpgradeError } from '../errors';
 
 import {
   preconfigurePackageInputs,
   updatePackageInputs,
   packagePolicyService,
   _applyIndexPrivileges,
+  _compilePackagePolicyInputs,
 } from './package_policy';
 import { appContextService } from './app_context';
-import { fetchInfo } from './epm/registry';
+
+import { getPackageInfo } from './epm/packages';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -93,8 +99,19 @@ hosts:
   ];
 }
 
-function mockedRegistryInfo(): RegistryPackage {
-  return {} as RegistryPackage;
+async function mockedGetInstallation(params: any) {
+  let pkg;
+  if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
+  if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
+  return Promise.resolve(pkg);
+}
+
+async function mockedGetPackageInfo(params: any) {
+  let pkg;
+  if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
+  if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
+  if (params.pkgName === 'endpoint') pkg = {};
+  return Promise.resolve(pkg);
 }
 
 jest.mock('./epm/packages/assets', () => {
@@ -105,7 +122,8 @@ jest.mock('./epm/packages/assets', () => {
 
 jest.mock('./epm/packages', () => {
   return {
-    getPackageInfo: () => ({}),
+    getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
+    getInstallation: mockedGetInstallation,
   };
 });
 
@@ -149,18 +167,12 @@ jest.mock('./upgrade_sender', () => {
   };
 });
 
-const mockedFetchInfo = fetchInfo as jest.Mock<ReturnType<typeof fetchInfo>>;
-
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
 describe('Package policy service', () => {
-  beforeEach(() => {
-    mockedFetchInfo.mockResolvedValue({} as RegistryPackage);
-  });
   describe('_compilePackagePolicyInputs', () => {
     it('should work with config variables from the stream', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -223,8 +235,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with a two level dataset name', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -276,8 +287,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with config variables at the input level', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -340,8 +350,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with config variables at the package level', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -409,8 +418,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with an input with a template and no streams', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [],
           policy_templates: [
@@ -452,8 +460,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with an input with a template and streams', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -558,8 +565,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with a package without input', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           policy_templates: [
             {
@@ -575,8 +581,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with a package with a empty inputs array', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           policy_templates: [
             {
@@ -885,14 +890,16 @@ describe('Package policy service', () => {
         ...mockPackagePolicy,
         inputs: [],
       };
-
-      mockedFetchInfo.mockResolvedValue({
-        elasticsearch: {
-          privileges: {
-            cluster: ['monitor'],
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
           },
-        },
-      } as RegistryPackage);
+        } as PackageInfo);
+      });
 
       savedObjectsClient.get.mockResolvedValue({
         id: 'test',
@@ -928,6 +935,55 @@ describe('Package policy service', () => {
       );
 
       expect(result.elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
+    });
+
+    it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        // this mimics the way that OSQuery plugin create immutable objects
+        produce<PackagePolicy>(
+          { ...mockPackagePolicy, name: '  test  ', inputs: [] },
+          (draft) => draft
+        )
+      );
+
+      expect(result.name).toEqual('test');
     });
   });
 
@@ -1634,8 +1690,8 @@ describe('Package policy service', () => {
       });
     });
 
-    describe('when an input or stream is disabled on the original policy object', () => {
-      it('remains disabled on the resulting policy object', () => {
+    describe('when an input or stream is disabled by default in the package', () => {
+      it('allow preconfiguration to enable it', () => {
         const basePackagePolicy: NewPackagePolicy = {
           name: 'base-package-policy',
           description: 'Base Package Policy',
@@ -1844,13 +1900,13 @@ describe('Package policy service', () => {
         expect(template2Inputs).toHaveLength(1);
 
         const logsInput = template1Inputs?.find((input) => input.type === 'logs');
-        expect(logsInput?.enabled).toBe(false);
+        expect(logsInput?.enabled).toBe(true);
 
         const logfileStream = logsInput?.streams.find(
           (stream) => stream.data_stream.type === 'logfile'
         );
 
-        expect(logfileStream?.enabled).toBe(false);
+        expect(logfileStream?.enabled).toBe(true);
       });
     });
 
@@ -1973,6 +2029,10 @@ describe('Package policy service', () => {
                   type: 'text',
                   value: ['/var/log/logfile.log'],
                 },
+                is_value_enabled: {
+                  type: 'bool',
+                  value: false,
+                },
               },
               streams: [],
             },
@@ -2003,6 +2063,10 @@ describe('Package policy service', () => {
                       name: 'path',
                       type: 'text',
                     },
+                    {
+                      name: 'is_value_enabled',
+                      type: 'bool',
+                    },
                   ],
                 },
               ],
@@ -2022,6 +2086,10 @@ describe('Package policy service', () => {
                 type: 'text',
                 value: '/var/log/new-logfile.log',
               },
+              is_value_enabled: {
+                type: 'bool',
+                value: 'true',
+              },
             },
           },
         ];
@@ -2035,6 +2103,7 @@ describe('Package policy service', () => {
           false
         );
         expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
+        expect(result.inputs[0]?.vars?.is_value_enabled.value).toEqual(false);
       });
     });
 
@@ -2858,6 +2927,7 @@ describe('Package policy service', () => {
         name: 'apache-1',
         inputs: [{ type: 'logfile', enabled: false }],
         package: { name: 'apache', version: '0.3.3' },
+        policy_id: '1',
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
         savedObjectsClientMock.create(),
@@ -2934,6 +3004,7 @@ describe('Package policy service', () => {
         name: 'aws-1',
         inputs: [{ type: 'aws/metrics', policy_template: 'cloudwatch', enabled: true }],
         package: { name: 'aws', version: '1.0.0' },
+        policy_id: '1',
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
         savedObjectsClientMock.create(),
@@ -3031,6 +3102,63 @@ describe('Package policy service', () => {
           },
         },
       });
+    });
+  });
+
+  describe('upgrade package policy info', () => {
+    let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+    beforeEach(() => {
+      savedObjectsClient = savedObjectsClientMock.create();
+    });
+    function mockPackage(pkgName: string) {
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+        package: {
+          ...mockPackagePolicy.package,
+          name: pkgName,
+        },
+      };
+
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: 'package-policy-id',
+        type: 'abcd',
+        references: [],
+        version: '1.3.2',
+        attributes,
+      });
+    }
+    it('should return success if package and policy versions match', async () => {
+      mockPackage('apache');
+
+      const response = await packagePolicyService.getUpgradePackagePolicyInfo(
+        savedObjectsClient,
+        'package-policy-id'
+      );
+
+      expect(response).toBeDefined();
+    });
+
+    it('should return error if package policy newer than package version', async () => {
+      mockPackage('aws');
+
+      expect(
+        packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
+      ).rejects.toEqual(
+        new PackagePolicyIneligibleForUpgradeError(
+          "Package policy c6d16e42-c32d-4dce-8a88-113cfe276ad1's package version 0.9.0 of package aws is newer than the installed package version. Please install the latest version of aws."
+        )
+      );
+    });
+
+    it('should return error if package not installed', async () => {
+      mockPackage('notinstalled');
+
+      expect(
+        packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
+      ).rejects.toEqual(new IngestManagerError('Package notinstalled is not installed'));
     });
   });
 });

@@ -88,7 +88,7 @@ class TableVis extends Component {
     }
 
     if (model.drilldown_url) {
-      const url = replaceVars(model.drilldown_url, {}, { key: row.key });
+      const url = replaceVars(model.drilldown_url, {}, { key: row.key }, { noEscape: true });
       const handleDrilldownUrlClick = this.createDrilldownUrlClickHandler(url);
       rowDisplay = (
         <a
@@ -240,31 +240,15 @@ class TableVis extends Component {
   closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
-    const { visData, model } = this.props;
+    const { visData } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
     const header = this.renderHeader();
-    let rows;
+    let rows = null;
 
     if (isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
-    } else {
-      const message = model.pivot_id ? (
-        <FormattedMessage
-          id="visTypeTimeseries.table.noResultsAvailableMessage"
-          defaultMessage="No results available."
-        />
-      ) : (
-        <FormattedMessage
-          id="visTypeTimeseries.table.noResultsAvailableWithDescriptionMessage"
-          defaultMessage="No results available. You must choose a group by field for this visualization."
-        />
-      );
-      rows = (
-        <tr>
-          <td colSpan={this.visibleSeries.length + 1}>{message}</td>
-        </tr>
-      );
     }
+
     return (
       <>
         <RedirectAppLinks

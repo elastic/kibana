@@ -17,10 +17,10 @@ import {
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   VERSION,
-  TAGS,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
+import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -69,7 +69,8 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  describe('create_threat_matching', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('create_threat_matching', () => {
     describe('creating threat match rule', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -105,7 +106,12 @@ export default ({ getService }: FtrProviderContext) => {
           getCreateThreatMatchRulesSchemaMock('rule-1', true)
         );
 
-        await waitForRuleSuccessOrStatus(supertest, log, ruleResponse.id, 'succeeded');
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          ruleResponse.id,
+          RuleExecutionStatus.succeeded
+        );
 
         const { body: rule } = await supertest
           .get(DETECTION_ENGINE_RULES_URL)
@@ -115,7 +121,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock(true));
-        expect(rule.status).to.eql('succeeded');
+
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        expect(rule?.execution_summary?.last_execution.status).to.eql('succeeded');
       });
     });
 
@@ -285,7 +293,6 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_WORKFLOW_STATUS]: 'open',
           [SPACE_IDS]: ['default'],
           [VERSION]: fullSignal[VERSION],
-          [TAGS]: [`__internal_rule_id:${createdRule.rule_id}`, '__internal_immutable:false'],
           threat: {
             enrichments: get(fullSignal, 'threat.enrichments'),
           },
@@ -302,13 +309,10 @@ export default ({ getService }: FtrProviderContext) => {
             false_positives: [],
             from: '1900-01-01T00:00:00.000Z',
             immutable: false,
-            index: ['auditbeat-*'],
             interval: '5m',
-            language: 'kuery',
             max_signals: 100,
             name: 'Query with a rule id',
             producer: 'siem',
-            query: '*:*',
             references: [],
             risk_score: 55,
             risk_score_mapping: [],
@@ -318,20 +322,6 @@ export default ({ getService }: FtrProviderContext) => {
             severity_mapping: [],
             tags: [],
             threat: [],
-            threat_filters: [],
-            threat_index: ['auditbeat-*'],
-            threat_mapping: [
-              {
-                entries: [
-                  {
-                    field: 'host.name',
-                    type: 'mapping',
-                    value: 'host.name',
-                  },
-                ],
-              },
-            ],
-            threat_query: 'source.ip: "188.166.120.93"',
             to: 'now',
             type: 'threat_match',
             updated_at: fullSignal[ALERT_RULE_UPDATED_AT],
@@ -489,14 +479,16 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id, 'failed');
+          await waitForRuleSuccessOrStatus(supertest, log, id, RuleExecutionStatus.failed);
 
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
             .query({ id })
             .expect(200);
-          expect(body.last_failure_message).to.contain(
+
+          // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+          expect(body?.execution_summary?.last_execution.message).to.contain(
             'execution has exceeded its allotted interval'
           );
         });

@@ -12,7 +12,9 @@ import {
 } from '../../../common/source_configuration/source_configuration';
 import { SavedObjectReferenceResolutionError } from './errors';
 
-const logIndexPatternReferenceName = 'log_index_pattern_0';
+export const logIndexPatternReferenceName = 'log_index_pattern_0';
+export const inventoryDefaultViewReferenceName = 'inventory-saved-view-0';
+export const metricsExplorerDefaultViewReferenceName = 'metrics-explorer-saved-view-0';
 
 interface SavedObjectAttributesWithReferences<SavedObjectAttributes> {
   attributes: SavedObjectAttributes;
@@ -91,15 +93,19 @@ const extractLogIndicesSavedObjectReferences = (
   }
 };
 
-const extractInventorySavedViewReferences = (
+export const extractInventorySavedViewReferences = (
   sourceConfiguration: InfraSourceConfiguration
 ): SavedObjectAttributesWithReferences<InfraSourceConfiguration> => {
   const { inventoryDefaultView } = sourceConfiguration;
-  if (inventoryDefaultView && inventoryDefaultView !== '0') {
+  if (
+    inventoryDefaultView &&
+    inventoryDefaultView !== '0' &&
+    inventoryDefaultView !== inventoryDefaultViewReferenceName
+  ) {
     const inventoryDefaultViewReference: SavedObjectReference = {
       id: inventoryDefaultView,
       type: 'inventory-view',
-      name: 'inventory-saved-view-0',
+      name: inventoryDefaultViewReferenceName,
     };
     const attributes: InfraSourceConfiguration = {
       ...sourceConfiguration,
@@ -117,15 +123,19 @@ const extractInventorySavedViewReferences = (
   }
 };
 
-const extractMetricsExplorerSavedViewReferences = (
+export const extractMetricsExplorerSavedViewReferences = (
   sourceConfiguration: InfraSourceConfiguration
 ): SavedObjectAttributesWithReferences<InfraSourceConfiguration> => {
   const { metricsExplorerDefaultView } = sourceConfiguration;
-  if (metricsExplorerDefaultView && metricsExplorerDefaultView !== '0') {
+  if (
+    metricsExplorerDefaultView &&
+    metricsExplorerDefaultView !== '0' &&
+    metricsExplorerDefaultView !== metricsExplorerDefaultViewReferenceName
+  ) {
     const metricsExplorerDefaultViewReference: SavedObjectReference = {
       id: metricsExplorerDefaultView,
       type: 'metrics-explorer-view',
-      name: 'metrics-explorer-saved-view-0',
+      name: metricsExplorerDefaultViewReferenceName,
     };
     const attributes: InfraSourceConfiguration = {
       ...sourceConfiguration,
@@ -176,12 +186,12 @@ const resolveInventoryViewSavedObjectReferences = (
 ): InfraSavedSourceConfiguration => {
   if (attributes.inventoryDefaultView && attributes.inventoryDefaultView !== '0') {
     const inventoryViewReference = references.find(
-      (reference) => reference.name === 'inventory-saved-view-0'
+      (reference) => reference.name === inventoryDefaultViewReferenceName
     );
 
     if (inventoryViewReference == null) {
       throw new SavedObjectReferenceResolutionError(
-        'Failed to resolve Inventory default view "inventory-saved-view-0".'
+        `Failed to resolve Inventory default view "${inventoryDefaultViewReferenceName}".`
       );
     }
 
@@ -200,12 +210,12 @@ const resolveMetricsExplorerSavedObjectReferences = (
 ): InfraSavedSourceConfiguration => {
   if (attributes.metricsExplorerDefaultView && attributes.metricsExplorerDefaultView !== '0') {
     const metricsExplorerViewReference = references.find(
-      (reference) => reference.name === 'metrics-explorer-saved-view-0'
+      (reference) => reference.name === metricsExplorerDefaultViewReferenceName
     );
 
     if (metricsExplorerViewReference == null) {
       throw new SavedObjectReferenceResolutionError(
-        'Failed to resolve Metrics Explorer default view "metrics-explorer-saved-view-0".'
+        `Failed to resolve Metrics Explorer default view "${metricsExplorerDefaultViewReferenceName}".`
       );
     }
 

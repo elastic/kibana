@@ -102,6 +102,7 @@ export function ListingRoute({
         tableListTitle={i18n.translate('xpack.graph.listing.graphsTitle', {
           defaultMessage: 'Graphs',
         })}
+        theme={coreStart.theme}
       />
     </I18nProvider>
   );

@@ -10,7 +10,10 @@ import ReactDOM from 'react-dom';
 import { CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { Embeddable, IContainer } from '../../../../../../src/plugins/embeddable/public';
 import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
@@ -58,22 +61,25 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     this.node = node;
 
     const I18nContext = this.services[0].i18n.Context;
+    const theme$ = this.services[0].theme.theme$;
 
     ReactDOM.render(
       <I18nContext>
-        <KibanaContextProvider services={{ ...this.services[0] }}>
-          <Suspense fallback={<EmbeddableLoading />}>
-            <EmbeddableSwimLaneContainer
-              id={this.input.id}
-              embeddableContext={this}
-              embeddableInput={this.getInput$()}
-              services={this.services}
-              refresh={this.reload$.asObservable()}
-              onInputChange={this.updateInput.bind(this)}
-              onOutputChange={this.updateOutput.bind(this)}
-            />
-          </Suspense>
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={theme$}>
+          <KibanaContextProvider services={{ ...this.services[0] }}>
+            <Suspense fallback={<EmbeddableLoading />}>
+              <EmbeddableSwimLaneContainer
+                id={this.input.id}
+                embeddableContext={this}
+                embeddableInput={this.getInput$()}
+                services={this.services}
+                refresh={this.reload$.asObservable()}
+                onInputChange={this.updateInput.bind(this)}
+                onOutputChange={this.updateOutput.bind(this)}
+              />
+            </Suspense>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
       </I18nContext>,
       node
     );

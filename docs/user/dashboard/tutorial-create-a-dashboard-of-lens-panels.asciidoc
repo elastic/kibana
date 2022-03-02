@@ -41,7 +41,7 @@ Open the visualization editor, then make sure the correct fields appear.
 . Make sure the *kibana_sample_data_logs* index appears.
 +
 [role="screenshot"]
-image::images/lens_indexPatternDropDown_7.16.png[Index pattern dropdown]
+image::images/lens_dataViewDropDown_8.0.png[Data view dropdown]
 
 To create the visualizations in this tutorial, you'll use the following fields:
 
@@ -68,7 +68,7 @@ The only number function that you can use with *clientip* is *Unique count*, als
 . Open the *Visualization type* dropdown, then select *Metric*.
 +
 [role="screenshot"]
-image::images/lens_visualizationTypeDropdown_7.16.png[Visualization type dropdown]
+image::images/lens_visualizationTypeDropdown_8.0.png[Visualization type dropdown]
 
 . From the *Available fields* list, drag *clientip* to the workspace or layer pane.
 +
@@ -96,7 +96,7 @@ image::images/lens_metricUniqueVisitors_7.16.png[Metric visualization that displ
 
 There are two shortcuts you can use to view metrics over time. 
 When you drag a numeric field to the workspace, the visualization editor adds the default
-time field from the index pattern. When you use the *Date histogram* function, you can
+time field from the {data-source}. When you use the *Date histogram* function, you can
 replace the time field by dragging the field to the workspace.
 
 To visualize the *bytes* field over time:

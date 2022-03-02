@@ -10,9 +10,9 @@ import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { renderWithTheme } from '../../../utils/testHelpers';
-import { CytoscapeContext } from './Cytoscape';
-import { EmptyBanner } from './EmptyBanner';
+import { renderWithTheme } from '../../../utils/test_helpers';
+import { CytoscapeContext } from './cytoscape';
+import { EmptyBanner } from './empty_banner';
 
 const cy = cytoscape({});
 

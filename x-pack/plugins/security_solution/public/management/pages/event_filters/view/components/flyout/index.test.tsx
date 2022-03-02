@@ -13,20 +13,22 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_utils';
-
+import { sendGetEndpointSpecificPackagePolicies } from '../../../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utilts';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EventFiltersHttpService } from '../../../service';
-import { createdEventFilterEntryMock, ecsEventMock, esResponseData } from '../../../test_utils';
+import { ecsEventMock, esResponseData, eventFiltersListQueryHttpMock } from '../../../test_utils';
 import { getFormEntryState, isUninitialisedForm } from '../../../store/selector';
 import { EventFiltersListPageState } from '../../../types';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { licenseService } from '../../../../../../common/hooks/use_license';
+import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../form');
-jest.mock('../../../service');
+jest.mock('../../../../../services/policies/policies');
 
 jest.mock('../../hooks', () => {
   const originalModule = jest.requireActual('../../hooks');
@@ -38,6 +40,22 @@ jest.mock('../../hooks', () => {
   };
 });
 
+jest.mock('../../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
+
+(sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
+  sendGetEndpointSpecificPackagePoliciesMock
+);
+
 let component: reactTestingLibrary.RenderResult;
 let mockedContext: AppContextTestRender;
 let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
@@ -46,29 +64,31 @@ let render: (
 ) => ReturnType<AppContextTestRender['render']>;
 const act = reactTestingLibrary.act;
 let onCancelMock: jest.Mock;
-const EventFiltersHttpServiceMock = EventFiltersHttpService as jest.Mock;
 let getState: () => EventFiltersListPageState;
+let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
 
 describe('Event filter flyout', () => {
-  beforeAll(() => {
-    EventFiltersHttpServiceMock.mockImplementation(() => {
-      return {
-        getOne: () => createdEventFilterEntryMock(),
-        addEventFilters: () => createdEventFilterEntryMock(),
-        updateOne: () => createdEventFilterEntryMock(),
-      };
-    });
-  });
   beforeEach(() => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     onCancelMock = jest.fn();
     getState = () => mockedContext.store.getState().management.eventFilters;
-    render = (props) =>
-      mockedContext.render(<EventFiltersFlyout {...props} onCancel={onCancelMock} />);
+    mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
+
+    render = (props) => {
+      return mockedContext.render(<EventFiltersFlyout {...props} onCancel={onCancelMock} />);
+    };
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {
+        docLinks: {
+          links: {
+            securitySolution: {
+              eventFilters: '',
+            },
+          },
+        },
         http: {},
         data: {
           search: {
@@ -118,6 +138,7 @@ describe('Event filter flyout', () => {
 
   it('should confirm form when button is enabled', async () => {
     component = render();
+
     mockedContext.store.dispatch({
       type: 'eventFiltersChangeForm',
       payload: {
@@ -129,6 +150,9 @@ describe('Event filter flyout', () => {
         hasNameError: false,
         hasOSError: false,
       },
+    });
+    await reactTestingLibrary.waitFor(() => {
+      expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
     });
     const confirmButton = component.getByTestId('add-exception-confirm-button');
 
@@ -217,6 +241,46 @@ describe('Event filter flyout', () => {
     });
 
     expect(getFormEntryState(getState())).not.toBeUndefined();
-    expect(getFormEntryState(getState())?.item_id).toBe(createdEventFilterEntryMock().item_id);
+    expect(getFormEntryState(getState())?.item_id).toBe(
+      mockedApi.responseProvider.eventFiltersGetOne.getMockImplementation()!().item_id
+    );
+  });
+
+  it('should not display banner when platinum license', async () => {
+    await act(async () => {
+      component = render({ id: 'fakeId', type: 'edit' });
+      await waitForAction('eventFiltersInitFromId');
+    });
+
+    expect(component.queryByTestId('expired-license-callout')).toBeNull();
+  });
+
+  it('should not display banner when under platinum license and create mode', async () => {
+    component = render();
+    expect(component.queryByTestId('expired-license-callout')).toBeNull();
+  });
+
+  it('should not display banner when under platinum license and edit mode with global assignment', async () => {
+    mockedApi.responseProvider.eventFiltersGetOne.mockReturnValue({
+      ...getExceptionListItemSchemaMock(),
+      tags: ['policy:all'],
+    });
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    await act(async () => {
+      component = render({ id: 'fakeId', type: 'edit' });
+      await waitForAction('eventFiltersInitFromId');
+    });
+
+    expect(component.queryByTestId('expired-license-callout')).toBeNull();
+  });
+
+  it('should display banner when under platinum license and edit mode with by policy assignment', async () => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    await act(async () => {
+      component = render({ id: 'fakeId', type: 'edit' });
+      await waitForAction('eventFiltersInitFromId');
+    });
+
+    expect(component.queryByTestId('expired-license-callout')).not.toBeNull();
   });
 });

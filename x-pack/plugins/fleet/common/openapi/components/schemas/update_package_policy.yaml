@@ -54,3 +54,7 @@ properties:
   description:
     type: string
 required:
+  - name
+  - namespace
+  - policy_id
+  - enabled

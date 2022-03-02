@@ -35,7 +35,7 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
 }) => (
   <FormattedMessage
     id="xpack.fleet.settings.deleteOutput.confirmModalText"
-    defaultMessage="This action will delete {outputName} output. It will update {policies} agent policies and {agents}. This action can not be undone. Are you sure you wish to continue?"
+    defaultMessage="This action will delete {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
     values={{
       outputName: <strong>{output.name}</strong>,
       agents: (

@@ -95,7 +95,6 @@ export const generateArtifactEsGetSingleHitMock = (
     _index: '.fleet-artifacts_1',
     _id: id,
     _version: 1,
-    _type: '',
     _score: 1,
     _source,
   };

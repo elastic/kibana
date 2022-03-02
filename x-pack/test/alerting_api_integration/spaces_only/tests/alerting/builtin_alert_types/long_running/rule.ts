@@ -18,7 +18,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('rule', async () => {
+  describe('long running rule', async () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
@@ -29,10 +29,18 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       const ruleId = await createRule({
         name: 'long running rule',
         ruleTypeId: 'test.patternLongRunning.cancelAlertsOnRuleTimeout',
-        pattern: [true, true, true, true],
+        pattern: [true, true, true, true, true],
       });
+      const errorStatuses: Array<{ status: string; error: { message: string; reason: string } }> =
+        [];
       // get the events we're expecting
       const events = await retry.try(async () => {
+        const { body: rule } = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`
+        );
+        if (rule.execution_status.status === 'error') {
+          errorStatuses.push(rule.execution_status);
+        }
         return await getEventLog({
           getService,
           spaceId: Spaces.space1.id,
@@ -40,9 +48,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           id: ruleId,
           provider: 'alerting',
           actions: new Map([
-            // make sure the counts of the # of events per type are as expected
-            ['execute-start', { gte: 4 }],
             ['execute', { gte: 4 }],
+            // by the time we see 4 "execute" events, we should also see the following:
+            ['execute-start', { gte: 4 }],
             ['execute-timeout', { gte: 4 }],
           ]),
         });
@@ -58,15 +66,18 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       ).to.equal(0);
 
       // rule execution status should be in error with reason timeout
-      const { status, body: rule } = await supertest.get(
+      const { status } = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`
       );
       expect(status).to.eql(200);
-      expect(rule.execution_status.status).to.eql('error');
-      expect(rule.execution_status.error.message).to.eql(
+
+      expect(errorStatuses.length).to.be.greaterThan(0);
+      const lastErrorStatus = errorStatuses.pop();
+      expect(lastErrorStatus?.status).to.eql('error');
+      expect(lastErrorStatus?.error.message).to.eql(
         `test.patternLongRunning.cancelAlertsOnRuleTimeout:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`
       );
-      expect(rule.execution_status.error.reason).to.eql('timeout');
+      expect(lastErrorStatus?.error.reason).to.eql('timeout');
     });
 
     it('writes event log document for timeout for each rule execution that ends in timeout - some executions times out', async () => {
@@ -75,6 +86,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         ruleTypeId: 'test.patternLongRunning.cancelAlertsOnRuleTimeout',
         pattern: [false, true, false, false],
       });
+
       // get the events we're expecting
       await retry.try(async () => {
         return await getEventLog({
@@ -85,10 +97,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           provider: 'alerting',
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
-            ['execute-start', { gte: 4 }],
             ['execute', { gte: 4 }],
+            // by the time we see 4 "execute" events, we should also see the following:
+            ['execute-start', { gte: 4 }],
             ['execute-timeout', { gte: 1 }],
-            ['new-instance', { equal: 1 }],
+            ['new-instance', { gte: 1 }],
             ['active-instance', { gte: 2 }],
           ]),
         });

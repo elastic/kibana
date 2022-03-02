@@ -23,7 +23,7 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { ActionConnector, CaseType } from '../../../common/api';
+import { ActionConnector } from '../../../common/api';
 import { Case } from '../../containers/types';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
@@ -31,6 +31,10 @@ import { UsePostComment } from '../../containers/use_post_comment';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { CreateCaseOwnerSelector } from './owner_selector';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { CaseAttachments } from '../../types';
 
 interface ContainerProps {
   big?: boolean;
@@ -52,23 +56,25 @@ const MySpinner = styled(EuiLoadingSpinner)`
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
   isLoadingConnectors: boolean;
-  hideConnectorServiceNowSir: boolean;
   withSteps: boolean;
 }
-export interface CreateCaseFormProps
-  extends Pick<Partial<CreateCaseFormFieldsProps>, 'hideConnectorServiceNowSir' | 'withSteps'> {
+export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
-  caseType?: CaseType;
   timelineIntegration?: CasesTimelineIntegration;
+  attachments?: CaseAttachments;
 }
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ connectors, isLoadingConnectors, hideConnectorServiceNowSir, withSteps }) => {
+  ({ connectors, isLoadingConnectors, withSteps }) => {
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled } = useCasesFeatures();
+
+    const { owner } = useCasesContext();
+    const availableOwners = useAvailableCasesOwners();
+    const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
 
     const firstStep = useMemo(
       () => ({
@@ -79,13 +85,21 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
+            {canShowCaseSolutionSelection && (
+              <Container big>
+                <CreateCaseOwnerSelector
+                  availableOwners={availableOwners}
+                  isLoading={isSubmitting}
+                />
+              </Container>
+            )}
             <Container big>
               <Description isLoading={isSubmitting} />
             </Container>
           </>
         ),
       }),
-      [isSubmitting]
+      [isSubmitting, canShowCaseSolutionSelection, availableOwners]
     );
 
     const secondStep = useMemo(
@@ -107,14 +121,13 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           <Container>
             <Connector
               connectors={connectors}
-              hideConnectorServiceNowSir={hideConnectorServiceNowSir}
               isLoadingConnectors={isLoadingConnectors}
               isLoading={isSubmitting}
             />
           </Container>
         ),
       }),
-      [connectors, hideConnectorServiceNowSir, isLoadingConnectors, isSubmitting]
+      [connectors, isLoadingConnectors, isSubmitting]
     );
 
     const allSteps = useMemo(
@@ -147,25 +160,22 @@ CreateCaseFormFields.displayName = 'CreateCaseFormFields';
 
 export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
   ({
-    hideConnectorServiceNowSir = false,
     withSteps = true,
     afterCaseCreated,
-    caseType,
     onCancel,
     onSuccess,
     timelineIntegration,
+    attachments,
   }) => (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
       <FormContext
         afterCaseCreated={afterCaseCreated}
-        caseType={caseType}
-        hideConnectorServiceNowSir={hideConnectorServiceNowSir}
         onSuccess={onSuccess}
+        attachments={attachments}
       >
         <CreateCaseFormFields
           connectors={empty}
           isLoadingConnectors={false}
-          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
           withSteps={withSteps}
         />
         <Container>

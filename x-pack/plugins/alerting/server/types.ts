@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
+import { Client } from '@elastic/elasticsearch';
+import type {
+  IRouter,
+  RequestHandlerContext,
+  SavedObjectReference,
+  ElasticsearchClient,
+} from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicAlertInstance } from './alert_instance';
+import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
 export * from '../common';
 import {
   IScopedClusterClient,
-  KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '../../../../src/core/server';
@@ -33,12 +38,17 @@ import {
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
+  RuleMonitoring,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
+import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
-export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
+
+export interface ElasticsearchClientWithChild extends ElasticsearchClient {
+  child: Client['child'];
+}
 
 /**
  * @public
@@ -62,20 +72,20 @@ export interface AlertingRequestHandlerContext extends RequestHandlerContext {
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
-export interface Services {
-  savedObjectsClient: SavedObjectsClientContract;
-  scopedClusterClient: IScopedClusterClient;
-}
-
 export interface AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
-> extends Services {
-  alertInstanceFactory: (
-    id: string
-  ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+> {
+  savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: IScopedClusterClient;
+  alertFactory: {
+    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
+    done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
+  };
   shouldWriteAlerts: () => boolean;
+  shouldStopExecution: () => boolean;
+  search: IAbortableClusterClient;
 }
 
 export interface AlertExecutorOptions<
@@ -86,6 +96,7 @@ export interface AlertExecutorOptions<
   ActionGroupIds extends string = never
 > {
   alertId: string;
+  executionId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
   services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
@@ -118,7 +129,7 @@ export type ExecutorType<
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
   validate: (object: unknown) => Params;
 }
-export interface AlertType<
+export interface RuleType<
   Params extends AlertTypeParams = never,
   ExtractedParams extends AlertTypeParams = never,
   State extends AlertTypeState = never,
@@ -159,11 +170,11 @@ export interface AlertType<
   };
   isExportable: boolean;
   defaultScheduleInterval?: string;
-  minimumScheduleInterval?: string;
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
+  doesSetRecoveryContext?: boolean;
 }
-export type UntypedAlertType = AlertType<
+export type UntypedRuleType = RuleType<
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
@@ -184,8 +195,9 @@ export interface AlertMeta extends SavedObjectAttributes {
 // note that the `error` property is "null-able", as we're doing a partial
 // update on the alert when we update this data, but need to ensure we
 // delete any previous error if the current status has no error
-export interface RawAlertExecutionStatus extends SavedObjectAttributes {
+export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
+  numberOfTriggeredActions?: number;
   lastExecutionDate: string;
   lastDuration?: number;
   error: null | {
@@ -201,7 +213,7 @@ export interface AlertWithLegacyId<Params extends AlertTypeParams = never> exten
   legacyId: string | null;
 }
 
-export type SanitizedAlertWithLegacyId<Params extends AlertTypeParams = never> = Omit<
+export type SanitizedRuleWithLegacyId<Params extends AlertTypeParams = never> = Omit<
   AlertWithLegacyId<Params>,
   'apiKey'
 >;
@@ -212,11 +224,11 @@ export type PartialAlertWithLegacyId<Params extends AlertTypeParams = never> = P
 > &
   Partial<Omit<AlertWithLegacyId<Params>, 'id'>>;
 
-export interface RawAlert extends SavedObjectAttributes {
+export interface RawRule extends SavedObjectAttributes {
   enabled: boolean;
   name: string;
   tags: string[];
-  alertTypeId: string;
+  alertTypeId: string; // this cannot be renamed since it is in the saved object
   consumer: string;
   legacyId: string | null;
   schedule: SavedObjectAttributes;
@@ -234,11 +246,12 @@ export interface RawAlert extends SavedObjectAttributes {
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: AlertMeta;
-  executionStatus: RawAlertExecutionStatus;
+  executionStatus: RawRuleExecutionStatus;
+  monitoring?: RuleMonitoring;
 }
 
 export type AlertInfoParams = Pick<
-  RawAlert,
+  RawRule,
   | 'params'
   | 'throttle'
   | 'notifyWhen'

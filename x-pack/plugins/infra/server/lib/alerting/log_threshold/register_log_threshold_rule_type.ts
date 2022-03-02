@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '../../../../../alerting/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
-  LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-  alertParamsRT,
+  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
+  ruleParamsRT,
 } from '../../../../common/alerting/logs/log_threshold';
 import { InfraBackendLibs } from '../../infra_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
@@ -71,6 +71,13 @@ const denominatorConditionsActionVariableDescription = i18n.translate(
   }
 );
 
+const alertReasonMessageActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.alertReasonMessageActionVariableDescription',
+  {
+    defaultMessage: 'A concise description of the reason for the alert',
+  }
+);
+
 export async function registerLogThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
@@ -82,13 +89,13 @@ export async function registerLogThresholdRuleType(
   }
 
   alertingPlugin.registerType({
-    id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+    id: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
     name: i18n.translate('xpack.infra.logs.alertName', {
       defaultMessage: 'Log threshold',
     }),
     validate: {
       params: {
-        validate: (params) => decodeOrThrow(alertParamsRT)(params),
+        validate: (params) => decodeOrThrow(ruleParamsRT)(params),
       },
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
@@ -104,6 +111,7 @@ export async function registerLogThresholdRuleType(
         { name: 'group', description: groupByActionVariableDescription },
         // Ratio alerts
         { name: 'isRatio', description: isRatioActionVariableDescription },
+        { name: 'reason', description: alertReasonMessageActionVariableDescription },
         { name: 'ratio', description: ratioActionVariableDescription },
         { name: 'numeratorConditions', description: numeratorConditionsActionVariableDescription },
         {

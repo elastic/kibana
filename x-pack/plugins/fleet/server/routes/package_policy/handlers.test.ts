@@ -7,7 +7,7 @@
 
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
 import type { KibanaRequest } from 'kibana/server';
-import type { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
+import type { RouteConfig } from 'kibana/server';
 
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
@@ -16,31 +16,28 @@ import type {
   PackagePolicyServiceInterface,
   PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
+  FleetRequestHandlerContext,
 } from '../..';
 import type {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
 } from '../../types/rest_spec';
-
+import type { FleetAuthzRouter } from '../security';
+import type { FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
 import { registerRoutes } from './index';
-
-type PackagePolicyServicePublicInterface = Omit<
-  PackagePolicyServiceInterface,
-  'getUpgradePackagePolicyInfo'
->;
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
 jest.mock(
   '../../services/package_policy',
   (): {
-    packagePolicyService: jest.Mocked<PackagePolicyServicePublicInterface>;
+    packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
   } => {
     return {
       packagePolicyService: {
-        _compilePackagePolicyInputs: jest.fn((registryPkgInfo, packageInfo, vars, dataInputs) =>
+        _compilePackagePolicyInputs: jest.fn((packageInfo, vars, dataInputs) =>
           Promise.resolve(dataInputs)
         ),
         buildPackagePolicyFromPackage: jest.fn(),
@@ -88,25 +85,25 @@ jest.mock(
 jest.mock('../../services/epm/packages', () => {
   return {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
-    getPackageInfo: jest.fn(() => Promise.resolve()),
+    getPackageInfoFromRegistry: jest.fn(() => Promise.resolve()),
   };
 });
 
 describe('When calling package policy', () => {
-  let routerMock: jest.Mocked<IRouter>;
-  let routeHandler: RequestHandler<any, any, any>;
+  let routerMock: jest.Mocked<FleetAuthzRouter>;
+  let routeHandler: FleetRequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
-  let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+  let context: jest.Mocked<FleetRequestHandlerContext>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
 
   beforeEach(() => {
-    routerMock = httpServiceMock.createRouter();
+    routerMock = httpServiceMock.createRouter() as unknown as jest.Mocked<FleetAuthzRouter>;
     registerRoutes(routerMock);
   });
 
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    context = xpackMocks.createRequestHandlerContext();
+    context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     response = httpServerMock.createResponseFactory();
   });
 

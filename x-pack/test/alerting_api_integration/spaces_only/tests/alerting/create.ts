@@ -17,7 +17,7 @@ import {
   TaskManagerDoc,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { RawAlert } from '../../../../../plugins/alerting/server/types';
+import { RawRule } from '../../../../../plugins/alerting/server/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
@@ -190,7 +190,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         execution_status: response.body.execution_status,
       });
 
-      const esResponse = await es.get<SavedObject<RawAlert>>(
+      const esResponse = await es.get<SavedObject<RawRule>>(
         {
           index: '.kibana',
           id: `alert:${response.body.id}`,

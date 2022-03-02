@@ -7,7 +7,7 @@
 
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -22,7 +22,7 @@ import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
@@ -60,6 +60,7 @@ export class TaskManagerPlugin
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private taskManagerId?: string;
+  private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
@@ -98,7 +99,7 @@ export class TaskManagerPlugin
       elasticsearch: coreServices.elasticsearch,
     }));
 
-    const usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
 
     // Routes
     const router = core.http.createRouter();
@@ -108,7 +109,7 @@ export class TaskManagerPlugin
       logger: this.logger,
       taskManagerId: this.taskManagerId,
       config: this.config!,
-      usageCounter,
+      usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
       kibanaIndexName: core.savedObjects.getKibanaIndex(),
       getClusterClient: () =>
@@ -188,9 +189,11 @@ export class TaskManagerPlugin
     this.taskPollingLifecycle = new TaskPollingLifecycle({
       config: this.config!,
       definitions: this.definitions,
+      unusedTypes: REMOVED_TYPES,
       logger: this.logger,
       executionContext,
       taskStore,
+      usageCounter: this.usageCounter,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       ...managedConfiguration,
