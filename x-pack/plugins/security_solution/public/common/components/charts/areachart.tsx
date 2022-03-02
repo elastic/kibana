@@ -164,7 +164,7 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
   return (
     <Wrapper>
       <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
-        {isVlidSeriesExist && (
+        {isVlidSeriesExist && areaChart && (
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem grow={true}>
               <WrappedByAutoSizer ref={measureRef} height={chartHeight}>

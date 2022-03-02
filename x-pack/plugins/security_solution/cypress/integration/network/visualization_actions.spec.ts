@@ -11,7 +11,6 @@ import {
   SAVE_LENS_MODAL,
   SELECT_CASE_MODAL,
   VIZ_ACTIONS_BUTTONS_IN_SECURITY,
-  VIZ_ACTIONS_HOSTS_BUTTONS_IN_SECURITY,
 } from '../../screens/visualization_actions';
 import { cleanKibana } from '../../tasks/common';
 

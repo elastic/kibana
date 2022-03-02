@@ -20,7 +20,7 @@ interface UseInspectModalProps {
   onClick?: () => void;
   onCloseInspect?: () => void;
   queryId: string;
-  vizType: string;
+  vizType?: string | null;
 }
 
 export const useInspect = ({
@@ -31,7 +31,7 @@ export const useInspect = ({
   onClick,
   onCloseInspect,
   queryId,
-  vizType,
+  vizType = null,
 }: UseInspectModalProps) => {
   const dispatch = useDispatch();
 

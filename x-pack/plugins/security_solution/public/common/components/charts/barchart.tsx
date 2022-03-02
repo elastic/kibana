@@ -187,7 +187,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   return (
     <Wrapper>
       <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
-        {isVlidSeriesExist && (
+        {isVlidSeriesExist && barChart && (
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem grow={true}>
               <WrappedByAutoSizer ref={measureRef} height={chartHeight}>

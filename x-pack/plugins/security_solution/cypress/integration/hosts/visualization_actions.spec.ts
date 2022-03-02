@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { INSPECT_MODAL, VIZ_INSPECT_BUTTON } from '../../screens/inspect';
-import { HOST_OVERVIEW } from '../../screens/hosts/main';
+import { INSPECT_MODAL } from '../../screens/inspect';
 import { cleanKibana } from '../../tasks/common';
 
 import { closesModal } from '../../tasks/inspect';
