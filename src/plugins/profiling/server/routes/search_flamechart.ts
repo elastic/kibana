@@ -164,10 +164,10 @@ async function queryFlameGraph(
     docCount += item.doc_count;
     bucketCount++;
   });
-  console.log('took', resEvents.body.took);
-  console.log('docs', docCount);
-  console.log('total events', totalCount);
-  console.log('unique events', bucketCount);
+  logger.info('query time registered by ES on events ' + resEvents.body.took + 'ms');
+  logger.info('events document count ' + docCount);
+  logger.info('total events count ' + totalCount);
+  logger.info('unique events ' + bucketCount);
 
   const resStackTraces = await logExecutionLatency(
     logger,
@@ -196,7 +196,7 @@ async function queryFlameGraph(
       });
     }
   }
-  console.log('unique stacktraces', stackTraces.size);
+  logger.info('unique stacktraces ' + stackTraces.size);
 
   // Create the set of unique FrameIDs.
   const stackFrameDocIDs = new Set<string>();
@@ -205,7 +205,7 @@ async function queryFlameGraph(
       stackFrameDocIDs.add(frameID);
     }
   }
-  console.log('unique frames', stackFrameDocIDs.size);
+  logger.info('unique frames ' + stackFrameDocIDs.size);
 
   const resStackFrames = await logExecutionLatency(
     logger,
@@ -241,7 +241,7 @@ async function queryFlameGraph(
       executableDocIDs.add(fileID);
     }
   }
-  console.log('unique executable IDs', executableDocIDs.size);
+  logger.info('unique executable IDs ' + executableDocIDs.size);
 
   const resExecutables = await logExecutionLatency(
     logger,
