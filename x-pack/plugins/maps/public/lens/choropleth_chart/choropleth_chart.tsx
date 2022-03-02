@@ -17,6 +17,7 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
+  VECTOR_STYLES,
 } from '../../../common';
 import { ChoroplethChartProps } from './types';
 import { Icon } from './icon';
@@ -94,7 +95,7 @@ export function ChoroplethChart({
       type: 'VECTOR',
       // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated
       properties: {
-        fillColor: {
+        [VECTOR_STYLES.FILL_COLOR]: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             color: 'Blue to Red',
@@ -108,7 +109,13 @@ export function ChoroplethChart({
             useCustomColorRamp: false,
           },
         },
-        lineWidth: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
+        [VECTOR_STYLES.LINE_COLOR]: {
+          type: STYLE_TYPE.STATIC,
+          options: {
+            color: '#3d3d3d',
+          },
+        },
+        [VECTOR_STYLES.LINE_WIDTH]: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
       },
       isTimeAware: false,
     },
