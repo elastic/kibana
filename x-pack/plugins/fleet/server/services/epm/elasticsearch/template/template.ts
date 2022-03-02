@@ -477,10 +477,8 @@ const getTemplateWithNameEndingIn = (composedOfTemplates: TemplateMap, suffix: s
 const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
   try {
     // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-    const path = `/${dataStreamName}/_rollover`;
-    return esClient.transport.request({
-      method: 'POST',
-      path,
+    return esClient.indices.rollover({
+      alias: dataStreamName,
     });
   } catch (error) {
     throw new Error(`cannot rollover data stream ${dataStreamName} - ${error}`);
