@@ -13,4 +13,9 @@ export default () => ({
   mochaReporter: {
     sendToCiStats: false,
   },
+  servers: {
+    elasticsearch: {
+      port: 1234,
+    },
+  },
 });
