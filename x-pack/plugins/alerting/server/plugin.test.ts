@@ -126,6 +126,7 @@ describe('Alerting Plugin', () => {
         eventLog: eventLogServiceMock.create(),
         actions: actionsMock.createSetup(),
         statusService: statusServiceMock.createSetupContract(),
+        monitoringCollection: monitoringCollectionMock.createSetup(),
       });
 
       expect(setupContract.getConfig()).toEqual({ minimumScheduleInterval: '1m' });
