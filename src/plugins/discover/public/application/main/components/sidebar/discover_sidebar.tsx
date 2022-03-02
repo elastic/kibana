@@ -8,14 +8,10 @@
 
 import './discover_sidebar.scss';
 import { throttle } from 'lodash';
-import classNames from 'classnames';
 import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
-  EuiCallOut,
-  EuiButtonIcon,
-  EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
   EuiText,
@@ -48,6 +44,7 @@ import { DiscoverIndexPatternManagement } from './discover_index_pattern_managem
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
 import { DataViewField } from '../../../../../../data_views/common';
+import { FieldTypesCallout } from './discover_field_types_callout';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -126,14 +123,11 @@ export function DiscoverSidebarComponent({
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isCalloutOpen, setIsCalloutOpen] = useState(true);
 
-  const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
-  const closePopover = () => setIsPopoverOpen(false);
-  const closeCallout = () => {
-    setIsCalloutOpen(false);
-    setIsPopoverOpen(false);
+  const onButtonClick = () => {
+    setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
   };
+  const closePopover = () => setIsPopoverOpen(false);
 
   useEffect(() => {
     if (documents) {
@@ -327,22 +321,6 @@ export function DiscoverSidebarComponent({
     );
   }
 
-  const calloutClasses = classNames('dscLearnCallout', { hide: !isCalloutOpen });
-  const callout = (
-    <EuiCallOut className={calloutClasses} size="s" title="">
-      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-        <EuiFlexItem>
-          <EuiButtonEmpty className="dscLearnBtn" size="xs" onClick={onButtonClick}>
-            Learn about field types
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon color="primary" size="s" iconType="cross" onClick={closeCallout} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiCallOut>
-  );
-
   const columnsSidebar = [
     {
       field: 'type',
@@ -412,7 +390,7 @@ export function DiscoverSidebarComponent({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+          <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
               <DiscoverIndexPattern
                 selectedIndexPattern={selectedIndexPattern}
@@ -438,6 +416,27 @@ export function DiscoverSidebarComponent({
               types={fieldTypes}
             />
           </form>
+        </EuiFlexItem>
+        <EuiFlexItem className="eui-hideFor--xs" grow={false}>
+          <EuiPopover
+            anchorPosition="rightDown"
+            display="block"
+            button={<FieldTypesCallout togglePopover={onButtonClick} />}
+            isOpen={isPopoverOpen}
+            panelPaddingSize="s"
+            closePopover={closePopover}
+          >
+            <EuiPopoverTitle paddingSize="s">Field types</EuiPopoverTitle>
+            <EuiBasicTable
+              style={{ width: 350 }}
+              tableCaption="Description of field types"
+              items={items}
+              compressed={true}
+              rowHeader="firstName"
+              columns={columnsSidebar}
+            />
+            <EuiSpacer size="s" />
+          </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem className="eui-yScroll">
           <div
@@ -526,27 +525,6 @@ export function DiscoverSidebarComponent({
                     </EuiNotificationBadge>
                   }
                 >
-                  <EuiSpacer size="xs" />
-                  <EuiPopover
-                    anchorPosition="rightDown"
-                    display="block"
-                    button={callout}
-                    isOpen={isPopoverOpen}
-                    panelPaddingSize="m"
-                    closePopover={closePopover}
-                  >
-                    <EuiPopoverTitle paddingSize="s">Field types</EuiPopoverTitle>
-                    <EuiBasicTable
-                      style={{ width: 350 }}
-                      tableCaption="Description of field types"
-                      items={items}
-                      compressed={true}
-                      rowHeader="firstName"
-                      columns={columnsSidebar}
-                    />
-                    <EuiSpacer size="s" />
-                  </EuiPopover>
-
                   <EuiSpacer size="s" />
                   {popularFields.length > 0 && (
                     <>
