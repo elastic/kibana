@@ -12,13 +12,11 @@ import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
 
 export function getPreferredServiceAnomalyTimeseries({
   environment,
-  environments,
   detectorType,
   allAnomalyTimeseries,
   fallbackToTransactions,
 }: {
   environment: Environment;
-  environments: Environment[];
   detectorType: ApmMlDetectorType;
   allAnomalyTimeseries: ServiceAnomalyTimeseries[];
   fallbackToTransactions: boolean;
@@ -28,9 +26,7 @@ export function getPreferredServiceAnomalyTimeseries({
   );
 
   const preferredEnvironment =
-    environment === ENVIRONMENT_ALL.value && environments.length === 1
-      ? environments[0]
-      : environment;
+    environment === ENVIRONMENT_ALL.value ? ENVIRONMENT_ALL.label : environment;
 
   return seriesForType.find(
     (serie) =>

@@ -14,12 +14,11 @@ import { useTimeRange } from '../../hooks/use_time_range';
 
 export const EnvironmentsContext = React.createContext<{
   environment: Environment;
-  environments: Environment[];
-  status: FETCH_STATUS;
+  serviceName?: string;
+  start?: string;
+  end?: string;
 }>({
   environment: ENVIRONMENT_ALL.value,
-  environments: [],
-  status: FETCH_STATUS.NOT_INITIATED,
 });
 
 export function EnvironmentsContextProvider({
@@ -39,18 +38,13 @@ export function EnvironmentsContextProvider({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
-  const { environments, status } = useEnvironmentsFetcher({
-    serviceName,
-    start,
-    end,
-  });
-
   return (
     <EnvironmentsContext.Provider
       value={{
-        environments,
-        status,
         environment,
+        serviceName,
+        start,
+        end,
       }}
     >
       {children}

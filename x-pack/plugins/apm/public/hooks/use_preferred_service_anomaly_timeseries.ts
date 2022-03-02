@@ -16,13 +16,12 @@ export function usePreferredServiceAnomalyTimeseries(
 ) {
   const { allAnomalyTimeseries } = useServiceAnomalyTimeseriesContext();
 
-  const { environment, environments } = useEnvironmentsContext();
+  const { environment } = useEnvironmentsContext();
 
   const { fallbackToTransactions } = useApmServiceContext();
 
   return getPreferredServiceAnomalyTimeseries({
     environment,
-    environments,
     fallbackToTransactions,
     detectorType,
     allAnomalyTimeseries,

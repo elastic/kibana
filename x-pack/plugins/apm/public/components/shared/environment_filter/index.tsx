@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
-  ENVIRONMENT_ALL_SELECT_OPTION,
+  ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '../../../../common/elasticsearch_fieldnames';
 import { fromQuery, toQuery } from '../links/url_helpers';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { Environment } from '../../../../common/environment_rt';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
+import { SuggestionsSelect } from '../suggestions_select';
+import { SuggestionsSelectWithTerm } from '../suggestions_select/suggestions_select_with_term';
 
 function updateEnvironmentUrl(
   history: History,
@@ -34,76 +38,88 @@ function updateEnvironmentUrl(
   });
 }
 
-const SEPARATOR_OPTION = {
-  text: `- ${i18n.translate(
-    'xpack.apm.filter.environment.selectEnvironmentLabel',
-    { defaultMessage: 'Select environment' }
-  )} -`,
-  disabled: true,
-};
-
-function getOptions(environments: string[]) {
-  const environmentOptions = environments
-    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
-    .map((environment) => ({
-      value: environment,
-      text: environment,
-    }));
-
-  return [
-    ENVIRONMENT_ALL_SELECT_OPTION,
-    ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value)
-      ? [ENVIRONMENT_NOT_DEFINED]
-      : []),
-    ...(environmentOptions.length > 0 ? [SEPARATOR_OPTION] : []),
-    ...environmentOptions,
-  ];
-}
+// #NOTE do we want ENVIRONMENT_NOT_DEFINED with suggestionSelect
 
 export function ApmEnvironmentFilter() {
-  const { status, environments, environment } = useEnvironmentsContext();
+  const { environment, serviceName, start, end } = useEnvironmentsContext();
 
-  return (
-    <EnvironmentFilter
-      status={status}
+  return serviceName ? (
+    <ServiceEnvironmentFilter
+      start={start}
+      end={end}
       environment={environment}
-      environments={environments}
+      termValue={serviceName}
     />
+  ) : (
+    <EnvironmentFilter start={start} end={end} environment={environment} />
   );
 }
 
 export function EnvironmentFilter({
   environment,
-  environments,
-  status,
+  start,
+  end,
 }: {
   environment: Environment;
-  environments: Environment[];
-  status: FETCH_STATUS;
+  start?: string;
+  end?: string;
 }) {
   const history = useHistory();
   const location = useLocation();
 
-  // Set the min-width so we don't see as much collapsing of the select during
-  // the loading state. 200px is what is looks like if "production" is
-  // the contents.
-  const minWidth = 200;
-
-  const options = getOptions(environments);
-
   return (
-    <EuiSelect
-      fullWidth
+    <SuggestionsSelect
+      allOption={ENVIRONMENT_ALL}
+      placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
+        defaultMessage: 'Select environment',
+      })}
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
         defaultMessage: 'Environment',
       })}
-      options={options}
-      value={environment}
-      onChange={(event) => {
-        updateEnvironmentUrl(history, location, event.target.value);
-      }}
-      isLoading={status === FETCH_STATUS.LOADING}
-      style={{ minWidth }}
+      onChange={(changeValue) =>
+        updateEnvironmentUrl(history, location, changeValue as string)
+      }
+      defaultValue={getEnvironmentLabel(environment)}
+      field={SERVICE_ENVIRONMENT}
+      start={start}
+      end={end}
+      data-test-subj="environmentFilter"
+    />
+  );
+}
+
+export function ServiceEnvironmentFilter({
+  environment,
+  start,
+  end,
+  termValue,
+}: {
+  environment: Environment;
+  start?: string;
+  end?: string;
+  termValue: string;
+}) {
+  const history = useHistory();
+  const location = useLocation();
+
+  return (
+    <SuggestionsSelectWithTerm
+      allOption={ENVIRONMENT_ALL}
+      placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
+        defaultMessage: 'Select environment',
+      })}
+      prepend={i18n.translate('xpack.apm.filter.environment.label', {
+        defaultMessage: 'Environment',
+      })}
+      onChange={(changeValue) =>
+        updateEnvironmentUrl(history, location, changeValue as string)
+      }
+      defaultValue={getEnvironmentLabel(environment)}
+      field={SERVICE_ENVIRONMENT}
+      termField={SERVICE_NAME}
+      termValue={termValue}
+      start={start}
+      end={end}
       data-test-subj="environmentFilter"
     />
   );

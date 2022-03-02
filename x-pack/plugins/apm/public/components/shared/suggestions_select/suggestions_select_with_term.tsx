@@ -6,41 +6,43 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { throttle } from 'lodash';
+import { debounce } from 'lodash';
 import React, { useCallback, useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
-interface SuggestionsSelectProps {
+interface SuggestionsSelecttWithTermProps {
   allOption?: EuiComboBoxOptionOption<string>;
   customOptionText?: string;
   defaultValue?: string;
   field: string;
+  termField: string;
+  termValue: string;
   start?: string;
   end?: string;
   onChange: (value?: string) => void;
-  isClearable?: boolean;
-  isInvalid?: boolean;
   placeholder: string;
-  dataTestSubj?: string;
   prepend?: string;
 }
 
-export function SuggestionsSelect({
+export function SuggestionsSelectWithTerm({
   allOption,
   customOptionText,
   defaultValue,
   field,
+  termField,
+  termValue,
   start,
   end,
   onChange,
   placeholder,
-  isInvalid,
-  dataTestSubj,
-  isClearable = true,
   prepend,
-}: SuggestionsSelectProps) {
+}: SuggestionsSelecttWithTermProps) {
+  const allowAll = !!allOption;
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
+  if (allowAll && !defaultValue) {
+    defaultOption = allOption;
+  }
   if (defaultValue) {
     defaultOption = { label: defaultValue, value: defaultValue };
   }
@@ -52,9 +54,16 @@ export function SuggestionsSelect({
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/suggestions', {
+      return callApmApi('GET /internal/apm/suggestions_with_terms', {
         params: {
-          query: { field, string: searchValue, start, end },
+          query: {
+            field,
+            string: searchValue,
+            start,
+            end,
+            termField,
+            termValue,
+          },
         },
       });
     },
@@ -65,11 +74,6 @@ export function SuggestionsSelect({
   const handleChange = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedOptions(changedOptions);
-
-      if (changedOptions.length === 0) {
-        onChange('');
-      }
-
       if (changedOptions.length === 1) {
         onChange(
           changedOptions[0].value
@@ -104,19 +108,17 @@ export function SuggestionsSelect({
   return (
     <EuiComboBox
       async={true}
+      compressed={true}
       customOptionText={customOptionText}
-      isClearable={isClearable}
       isLoading={status === FETCH_STATUS.LOADING}
       onChange={handleChange}
-      onSearchChange={throttle(setSearchValue, 500)}
+      onCreateOption={handleCreateOption}
+      onSearchChange={debounce(setSearchValue, 500)}
       options={options}
       placeholder={placeholder}
       selectedOptions={selectedOptions}
       singleSelection={{ asPlainText: true }}
-      isInvalid={isInvalid}
       style={{ minWidth: '256px' }}
-      onCreateOption={handleCreateOption}
-      data-test-subj={dataTestSubj}
       prepend={prepend}
     />
   );
