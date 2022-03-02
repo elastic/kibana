@@ -81,6 +81,7 @@ const createMatchesIndicesValidator = ({
   isRollup,
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ value }) => {
+    console.log('running validator');
     const { matchedIndicesResult, newRollupIndexName } = await refreshMatchedIndices(value);
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
 

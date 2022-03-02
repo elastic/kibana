@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects }) {
         await new Promise((e) => setTimeout(e(), 5000));
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
 
+        console.log('THIS IS A COMMENT FROM THE TEST CODE');
         //sometimes the initial click fails.
         if (await PageObjects.settings.getSaveIndexPatternButton()) {
           await (await PageObjects.settings.getSaveIndexPatternButton()).click();
