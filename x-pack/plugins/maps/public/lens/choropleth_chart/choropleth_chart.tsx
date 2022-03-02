@@ -40,9 +40,6 @@ export function ChoroplethChart({
   emsFileLayers,
   mapEmbeddableFactory,
 }: Props) {
-  console.log('data', data);
-  console.log('args', args);
-  console.log(emsFileLayers);
   if (args.isPreview) {
     return <Icon />;
   }
