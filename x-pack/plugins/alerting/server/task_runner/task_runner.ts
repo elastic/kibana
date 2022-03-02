@@ -352,14 +352,17 @@ export class TaskRunner<
         }] namespace`,
       };
 
+      const savedObjectsClient = this.context.savedObjects.getScopedClient(fakeRequest, {
+        includedHiddenTypes: ['alert', 'action'],
+      });
+
       updatedRuleTypeState = await this.context.executionContext.withContext(ctx, () =>
         this.ruleType.executor({
           alertId: ruleId,
           executionId: this.executionId,
           services: {
-            savedObjectsClient: this.context.savedObjects.getScopedClient(fakeRequest, {
-              includedHiddenTypes: ['alert', 'action'],
-            }),
+            savedObjectsClient,
+            uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
             alertFactory: createAlertFactory<
               InstanceState,
