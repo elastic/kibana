@@ -100,7 +100,6 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleDataClient: IRuleDataClient;
   eventLogService: IEventLogService;
   ruleExecutionLoggerFactory: RuleExecutionLogForExecutorsFactory;
-  version: string;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

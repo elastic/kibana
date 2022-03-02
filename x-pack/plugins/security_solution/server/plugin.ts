@@ -234,7 +234,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataClient,
       eventLogService,
       ruleExecutionLoggerFactory: ruleExecutionLogForExecutorsFactory,
-      version: pluginContext.env.packageInfo.version,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
