@@ -85,7 +85,7 @@ node x-pack/plugins/apm/scripts/test/e2e.js --open
 
 ### A11y checks
 
-Accessibility test are added on the e2e with `checkA11y()`, they will run together with cypress.
+Accessibility tests are added on the e2e with `checkA11y()`, they will run together with cypress.
 
 ---
 
