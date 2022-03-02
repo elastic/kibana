@@ -285,7 +285,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                           inspectIndex={index}
                           timerange={timerange}
                           title={`KPI ${description}`}
-                          className="kpi-matrix-histogram-actions"
+                          className="viz-actions"
                         />
                       )}
                     </HoverVisibilityContainer>

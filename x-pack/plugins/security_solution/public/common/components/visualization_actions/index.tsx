@@ -25,7 +25,7 @@ import { useAddToNewCase } from './use_add_to_new_case';
 import { VisualizationActionsProps } from './types';
 
 const Wrapper = styled.div`
-  &.kpi-matrix-histogram-actions {
+  &.viz-actions {
     position: absolute;
     top: 0;
     right: 0;
@@ -77,10 +77,10 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     stackByField,
   });
 
-  const dataTestSubj = ['stat', queryId, vizType].join('-');
+  const dataTestSubj = ['stat', queryId, vizType].filter((i) => i != null).join('-');
 
   const {
-    disabled: isAddToCaseDisabled,
+    disabled: isAddToExistingCaseDisabled,
     closeAllCaseModal,
     isAllCaseModalOpen,
     onCaseClicked,
@@ -98,6 +98,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     attachments: chartAddedToCase,
     onAddToNewCaseClicked,
     isCreateCaseFlyoutOpen,
+    disabled: isAddToNewCaseDisabled,
   } = useAddToNewCase({
     onClick: closePopover,
     timeRange: timerange,
@@ -168,68 +169,87 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     vizType,
   });
 
-  const items = [
-    <EuiContextMenuItem
-      icon="visArea"
-      key="visualizationActionsOpenInLens"
-      data-test-subj="viz-actions-open-in-lens"
-      disabled={!canUseEditor() || attributes == null}
-      onClick={onOpenInLens}
-    >
-      <FormattedMessage
-        id="xpack.securitySolution.visualizationActions.openInLens"
-        defaultMessage="Open in Lens"
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      icon="save"
-      key="visualizationActionsSaveVisualization"
-      data-test-subj="viz-actions-save"
-      disabled={!userCanCrud}
-      onClick={onSaveVisualization}
-    >
-      <FormattedMessage
-        id="xpack.securitySolution.visualizationActions.saveVisualization"
-        defaultMessage="Save Visualization"
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      icon="search"
-      key="visualizationActionsInspect"
-      onClick={handleInspectButtonClick}
-      disabled={disableInspectButton}
-      data-test-subj="viz-actions-inspect"
-    >
-      <FormattedMessage
-        id="xpack.securitySolution.visualizationActions.inspect"
-        defaultMessage="Inspect"
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      disabled={attributes == null || !userCanCrud}
-      icon="plusInCircle"
-      key="visualizationActionsAddToNewCase"
-      onClick={onAddToNewCaseClicked}
-      data-test-subj="viz-actions-add-to-new-case"
-    >
-      <FormattedMessage
-        id="xpack.securitySolution.visualizationActions.addToNewCase"
-        defaultMessage="Add to new Case"
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      disabled={isAddToCaseDisabled}
-      data-test-subj="viz-actions-add-to-existing-case"
-      icon="plusInCircle"
-      key="visualizationActionsAddToExistingCase"
-      onClick={onAddToExistingCaseClicked}
-    >
-      <FormattedMessage
-        id="xpack.securitySolution.visualizationActions.addToExistingCase"
-        defaultMessage="Add to Existing Case"
-      />
-    </EuiContextMenuItem>,
-  ];
+  const disaledOpenInLens = useMemo(
+    () => !canUseEditor() || attributes == null,
+    [attributes, canUseEditor]
+  );
+
+  const items = useMemo(
+    () => [
+      <EuiContextMenuItem
+        icon="visArea"
+        key="visualizationActionsOpenInLens"
+        data-test-subj="viz-actions-open-in-lens"
+        disabled={disaledOpenInLens}
+        onClick={onOpenInLens}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.visualizationActions.openInLens"
+          defaultMessage="Open in Lens"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        icon="save"
+        key="visualizationActionsSaveVisualization"
+        data-test-subj="viz-actions-save"
+        disabled={!userCanCrud}
+        onClick={onSaveVisualization}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.visualizationActions.saveVisualization"
+          defaultMessage="Save Visualization"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        icon="search"
+        key="visualizationActionsInspect"
+        onClick={handleInspectButtonClick}
+        disabled={disableInspectButton}
+        data-test-subj="viz-actions-inspect"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.visualizationActions.inspect"
+          defaultMessage="Inspect"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        disabled={isAddToNewCaseDisabled}
+        icon="plusInCircle"
+        key="visualizationActionsAddToNewCase"
+        onClick={onAddToNewCaseClicked}
+        data-test-subj="viz-actions-add-to-new-case"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.visualizationActions.addToNewCase"
+          defaultMessage="Add to new Case"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        disabled={isAddToExistingCaseDisabled}
+        data-test-subj="viz-actions-add-to-existing-case"
+        icon="plusInCircle"
+        key="visualizationActionsAddToExistingCase"
+        onClick={onAddToExistingCaseClicked}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.visualizationActions.addToExistingCase"
+          defaultMessage="Add to Existing Case"
+        />
+      </EuiContextMenuItem>,
+    ],
+    [
+      disableInspectButton,
+      disaledOpenInLens,
+      handleInspectButtonClick,
+      isAddToExistingCaseDisabled,
+      isAddToNewCaseDisabled,
+      onAddToExistingCaseClicked,
+      onAddToNewCaseClicked,
+      onOpenInLens,
+      onSaveVisualization,
+      userCanCrud,
+    ]
+  );
 
   const button = (
     <EuiButtonIcon
@@ -248,16 +268,18 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
           onClose={closeSaveModalVisible}
         />
       )}
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        panelClassName="withHoverActions__popover"
-      >
-        <EuiContextMenuPanel data-test-subj="viz-actions-panel" size="s" items={items} />
-      </EuiPopover>
+      {request !== null && response !== null && (
+        <EuiPopover
+          button={button}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+          panelClassName="withHoverActions__popover"
+        >
+          <EuiContextMenuPanel data-test-subj="viz-actions-panel" size="s" items={items} />
+        </EuiPopover>
+      )}
       {isShowingModal && request !== null && response !== null && (
         <ModalInspectQuery
           additionalRequests={additionalRequests}

@@ -10,6 +10,7 @@ import { cleanKibana } from '../../tasks/common';
 
 import { closesModal } from '../../tasks/inspect';
 import { loginAndWaitForPage } from '../../tasks/login';
+import { clickVizActionsInspect } from '../../tasks/visualization_actions';
 
 import { NETWORK_URL } from '../../urls/navigation';
 
@@ -27,7 +28,7 @@ describe('Visualization actions', () => {
       it(`inspects the ${button.title}`, () => {
         cy.get(button.id).click({ force: true });
 
-        cy.get('[data-test-subj="viz-actions-inspect"]').click({ force: true });
+        clickVizActionsInspect();
         cy.get(INSPECT_MODAL).should('be.visible');
       })
     );

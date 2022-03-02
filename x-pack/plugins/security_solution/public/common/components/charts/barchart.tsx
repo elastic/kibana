@@ -211,10 +211,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
         )}
         {visualizationActionsOptions != null && (
-          <VisualizationActions
-            {...visualizationActionsOptions}
-            className="kpi-matrix-histogram-actions"
-          />
+          <VisualizationActions {...visualizationActionsOptions} className="viz-actions" />
         )}
       </HoverVisibilityContainer>
     </Wrapper>

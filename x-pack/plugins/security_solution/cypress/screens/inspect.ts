@@ -7,6 +7,7 @@
 
 export const INSPECT_BUTTON_ICON = '[data-test-subj="inspect-icon-button"]';
 export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
+export const VIZ_INSPECT_BUTTON = '[data-test-subj="viz-actions-inspect"]';
 
 export interface InspectButtonMetadata {
   altInspectId?: string;
@@ -15,15 +16,115 @@ export interface InspectButtonMetadata {
   tabId?: string;
 }
 
-export const INSPECT_HOSTS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
+export const VIZ_ACTIONS_HOSTS_DETAILS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   {
-    id: '[data-test-subj="stat-hosts"]',
+    id: '[data-test-subj="stat-hostsKpiAuthenticationsQuery-authenticationsSuccess-metric"]',
+    title: 'Unique IPs Stat - Success',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiAuthenticationsQuery-authenticationsFailure-metric"]',
+    title: 'Unique IPs Stat - Failure',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiAuthenticationsQuery-bar_horizontal_stacked"]',
+    title: 'User authentication - bar',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiAuthenticationsQuery-area"]',
+    title: 'User authentication - area',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiUniqueIpsQuery-uniqueSourceIps-metric"]',
+    title: 'Unique IPs - source',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiUniqueIpsQuery-uniqueDestinationIps-metric"]',
+    title: 'Unique IPs - destination',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiUniqueIpsQuery-bar_horizontal_stacked"]',
+    title: 'Unique IPs - bar',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiUniqueIpsQuery-area"]',
+    title: 'Unique IPs - area',
+  },
+  {
+    id: '[data-test-subj="stat-authenticationsHistogramQuery"]',
+    title: 'Authentications histogram',
+    tabId: '[data-test-subj="navigation-authentications"]',
+  },
+  {
+    id: '[data-test-subj="stat-eventsHistogramQuery"]',
+    title: 'Events histogram',
+    tabId: '[data-test-subj="navigation-events"]',
+  },
+  {
+    id: '[data-test-subj="stat-alertsHistogramQuery"]',
+    title: 'External alert trend histogram',
+    tabId: '[data-test-subj="navigation-externalAlerts"]',
+  },
+];
+
+export const VIZ_ACTIONS_HOSTS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
+  {
+    id: '[data-test-subj="stat-hostsKpiHostsQuery-hosts-metric"]',
     title: 'Hosts Stat',
   },
   {
-    id: '[data-test-subj="stat-uniqueIps"]',
-    title: 'Unique IPs Stat',
+    id: '[data-test-subj="stat-hostsKpiHostsQuery-area"]',
+    title: 'Hosts Stat - area',
   },
+  {
+    id: '[data-test-subj="stat-hostsKpiAuthenticationsQuery-authenticationsSuccess-metric"]',
+    title: 'Unique IPs Stat - Success',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiAuthenticationsQuery-authenticationsFailure-metric"]',
+    title: 'Unique IPs Stat - Failure',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiAuthenticationsQuery-bar_horizontal_stacked"]',
+    title: 'User authentication - bar',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiAuthenticationsQuery-area"]',
+    title: 'User authentication - area',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiUniqueIpsQuery-uniqueSourceIps-metric"]',
+    title: 'Unique IPs - source',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiUniqueIpsQuery-uniqueDestinationIps-metric"]',
+    title: 'Unique IPs - destination',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiUniqueIpsQuery-bar_horizontal_stacked"]',
+    title: 'Unique IPs - bar',
+  },
+  {
+    id: '[data-test-subj="stat-hostsKpiUniqueIpsQuery-area"]',
+    title: 'Unique IPs - area',
+  },
+  {
+    id: '[data-test-subj="stat-authenticationsHistogramQuery"]',
+    title: 'Authentications histogram',
+    tabId: '[data-test-subj="navigation-authentications"]',
+  },
+  {
+    id: '[data-test-subj="stat-eventsHistogramQuery"]',
+    title: 'Events histogram',
+    tabId: '[data-test-subj="navigation-events"]',
+  },
+  {
+    id: '[data-test-subj="stat-alertsHistogramQuery"]',
+    title: 'External alert trend histogram',
+    tabId: '[data-test-subj="navigation-externalAlerts"]',
+  },
+];
+
+export const INSPECT_HOSTS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   {
     id: '[data-test-subj="table-allHosts-loading-false"]',
     title: 'All Hosts Table',

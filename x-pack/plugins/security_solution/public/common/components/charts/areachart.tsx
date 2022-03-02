@@ -182,10 +182,7 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={areaChart} />
         )}
         {visualizationActionsOptions != null && (
-          <VisualizationActions
-            {...visualizationActionsOptions}
-            className="kpi-matrix-histogram-actions"
-          />
+          <VisualizationActions {...visualizationActionsOptions} className="viz-actions" />
         )}
       </HoverVisibilityContainer>
     </Wrapper>
