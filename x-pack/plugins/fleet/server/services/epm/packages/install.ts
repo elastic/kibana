@@ -424,6 +424,7 @@ async function installPackageByUpload({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
+    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
@@ -661,6 +662,7 @@ export async function ensurePackagesCompletedInstall(
       // reinstall package
       if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
         acc.push(
+          // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
           installPackage({
             installSource: 'registry',
             savedObjectsClient,

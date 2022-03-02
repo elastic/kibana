@@ -83,7 +83,7 @@ describe('install', () => {
       .mockImplementation(() => Promise.resolve({ packageInfo: { license: 'basic' } } as any));
 
     mockGetBundledPackages.mockReset();
-    install._installPackage.mockClear();
+    (install._installPackage as jest.Mock).mockClear();
   });
 
   describe('registry', () => {
