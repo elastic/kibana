@@ -29,9 +29,9 @@ REST APIs should be documented using the following recommended formats:
 
 ## Developer documentation
 
-We separate developer documentation into two types: internal plugin information, and information about extending Kibana (if someone wants to build a plugin, they don't need to know about internal architectural details). Our [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/getting-started/welcome) is meant to serve the latter. It is currently only accessible internally, though the content is still viewable by external developers as most of the raw content exists in the [public repository]((https://github.com/elastic/kibana/tree/main/dev_docs)) in `mdx` files. We hope to eventually make this system public for the benefit of external developers as well.
+Developer documentation can be segmented into two types: internal plugin details, and information on extending Kibana. Our [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/getting-started/welcome) is meant to serve the latter. The guide can only be accessed internally, though the raw content is public in our [public repository]((https://github.com/elastic/kibana/tree/main/dev_docs)). We hope to eventually make this system public for the benefit of external developers as well.
 
-Internal plugin information should be written in `md` or `mdx` and kept alongside the code it describes. Information about extending Kibana may go in the root of your plugin folder, or inside the top-level [dev_docs](https://github.com/elastic/kibana/tree/main/dev_docs) folder. 
+Internal plugin details can be kept alongside the code it describes. Information about extending Kibana may go in the root of your plugin folder, or inside the top-level [dev_docs](https://github.com/elastic/kibana/tree/main/dev_docs) folder. 
 
 <DocCallOut title="Internal only">
 
@@ -175,17 +175,17 @@ There are three great ways to debug issues with the API infrastructure.
 
 Edit the code inside `__fixtures__` to replicate the bug, write a test to track what should happen, then run `yarn jest api_doc_suite`.
 
-Once you've verified the bug is reproducible, I use debug messages to narrow down the problem. I often move on to the next two steps depending on what the issue is.
+Once you've verified the bug is reproducible, use debug messages to narrow down the problem. This is much faster than running the entire suite to debug.
 
 2. Use [ts-ast-viewer.com](https://ts-ast-viewer.com/#code/KYDwDg9gTgLgBASwHY2FAZgQwMbDgMQgjgG8AoOSudJAfgC44AKdIxgZximQHMBKOAF4AfHE7ckPANxkAvkA)
 
 This nifty website will let you add some types and see how the system parses it. For example, the link above shows there is a `QuestionToken` as a sibling to the `FunctionType` which is why [this bug](https://github.com/elastic/kibana/issues/107145) reported children being lost. The API infra system didn't categorize the node as a function type node.
 
-3. My last advice in figuring out how to use `ts-morph` to get what you want is to play around with a Code Sandbox.
+3. Play around with `ts-morph` in a Code Sandbox.
 
-You can fork [this Code Sandbox example](https://codesandbox.io/s/typescript-compiler-issue-0lkwx?file=/src/use_ts_compiler.ts) that was used to explore how various ways to create the node signature returns different results (e.g. `node.getType.getText()` shows different results than `node.getType.getText(node)`). I also use [this one](https://codesandbox.io/s/admiring-field-5btxs) which is a lot messier but has more examples.
+You can fork [this Code Sandbox example](https://codesandbox.io/s/typescript-compiler-issue-0lkwx?file=/src/use_ts_compiler.ts) that was used to explore how various ways to create the node signature returns different results (e.g. `node.getType.getText()` shows different results than `node.getType.getText(node)`).  Here is [another messy example](https://codesandbox.io/s/admiring-field-5btxs).
 
-I found the code sandbox to be a lot faster to iterate compared to tweaking code and running it in Kibana.
+The code sandbox approach can be a lot faster to iterate compared to running it in Kibana.
 
 ## Example plugins
 

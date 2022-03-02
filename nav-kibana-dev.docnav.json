@@ -12,17 +12,17 @@
         { "id": "kibDevTutorialSetupDevEnv" },
         { "id": "kibHelloWorldApp" },
         { "id": "kibDevAddData" },
-        { "id": "kibRepoStructure" },
         { "id": "kibTroubleshooting" }
       ]
     },
     {
-      "catlabelegory": "Contributing",
+      "label": "Contributing",
       "items": [
         { "id": "kibDevPrinciples" },
-        { "id": "kibDocumentation" },
+        { "id": "kibRepoStructure" },
         { "id": "kibStandards" },
         { "id": "kibBestPractices" },
+        { "id": "kibDocumentation" },
         { "id": "kibStyleGuide" },
         { "id": "ktRFCProcess" },
         { "id": "kibGitHub" }
