@@ -26,9 +26,9 @@ function getDefaultOutput(defaultOutputName?: string) {
 
 export function useOutputOptions() {
   const outputsRequest = useGetOutputs();
-  const { isPlatinium: isPlatiniumFn } = useLicense();
+  const licenseService = useLicense();
 
-  const isPlatinium = useMemo(() => isPlatiniumFn(), [isPlatiniumFn]);
+  const isPlatinium = useMemo(() => licenseService.isPlatinium(), [licenseService]);
 
   const outputOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
     if (outputsRequest.isLoading || !outputsRequest.data) {
