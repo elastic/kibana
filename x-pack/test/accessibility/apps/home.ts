@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Enterprise search overview page meets a11y requirements ', async () => {
       await home.clickGoHome();
-      await testSubjects.click('homSolutionPanel homSolutionPanel_enterpriseSearch');
+      await testSubjects.click('homSolutionPanel homSolutionPanel_enterpriseSearchOverview');
       await a11y.testAppSnapshot();
     });
 
