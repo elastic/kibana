@@ -11,6 +11,7 @@ export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
 export const outputType = {
   Elasticsearch: 'elasticsearch',
+  Logstash: 'logstash',
 } as const;
 
 export const DEFAULT_OUTPUT_ID = 'fleet-default-output';

@@ -20,6 +20,7 @@ const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
     getSecurityHealth: jest.fn(),
+    getConfig: jest.fn(),
   };
   return mock;
 };
