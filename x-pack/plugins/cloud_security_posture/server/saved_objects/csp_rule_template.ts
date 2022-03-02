@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '../../../../../../src/core/server';
+import { SavedObjectsType } from '../../../../../src/core/server';
 import {
   type CspRuleTemplateSchema,
   cspRuleTemplateSavedObjectType,
-} from '../../../common/schemas/csp_rule_template';
+} from '../../common/schemas/csp_rule_template';
 
 const ruleTemplateAssetSavedObjectMappings: SavedObjectsType<CspRuleTemplateSchema>['mappings'] = {
   dynamic: false,

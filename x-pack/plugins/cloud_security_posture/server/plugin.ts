@@ -19,7 +19,7 @@ import type {
   CspServerPluginStartDeps,
 } from './types';
 import { defineRoutes } from './routes';
-import { cspRuleTemplateAssetType } from './saved_objects/cis_1_4_1/csp_rule_template';
+import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
 
 export class CspPlugin
   implements
