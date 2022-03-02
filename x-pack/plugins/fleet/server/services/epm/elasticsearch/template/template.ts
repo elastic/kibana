@@ -518,23 +518,18 @@ const updateExistingDataStream = async ({
   const mappings = mappingComponentTemplate?.template?.mappings;
 
   try {
-    if (!mappingComponentTemplate || !mappings?.properties) {
-      // if there is no mapping component template then something has
-      // gone wrong, so rollover the stream to get the new mapping.
-      await rolloverDataStream(dataStreamName, esClient);
-      return;
-    }
-
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
     // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
     // to skip updating and assume the value in the index mapping is correct
-    delete mappings.properties.stream;
-    delete mappings.properties.data_stream;
+    if (mappings && mappings.properties) {
+      delete mappings.properties.stream;
+      delete mappings.properties.data_stream;
+    }
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
           index: dataStreamName,
-          body: mappings,
+          body: mappings || {},
           write_index_only: true,
         }),
       { logger }
