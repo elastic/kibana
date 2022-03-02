@@ -17,6 +17,7 @@ import type {
   SavedObjectsStart,
   ThemeServiceStart,
 } from 'kibana/public';
+import type { SavedObjectsStart as SavedObjectsPluginStart } from 'src/plugins/saved_objects/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { ScopedHistory } from 'kibana/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
@@ -42,7 +43,7 @@ export interface AppDependencies {
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   history: ScopedHistory;
-  savedObjectsPlugin: SavedObjectsStart;
+  savedObjectsPlugin: SavedObjectsPluginStart;
   share: SharePluginStart;
   ml: GetMlSharedImportsReturnType;
   spaces?: SpacesPluginStart;

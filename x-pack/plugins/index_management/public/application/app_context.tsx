@@ -16,8 +16,8 @@ import {
   FatalErrorsStart,
   ScopedHistory,
   DocLinksStart,
-} from 'kibana/public';
-import { IUiSettingsClient } from 'kibana/server';
+  IUiSettingsClient,
+} from 'src/core/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 
 import { ExtensionsService } from '../services';
