@@ -11,6 +11,7 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import { ConfigSchema } from '../config';
+import { DatatableUtilitiesService } from './datatable_utilities';
 import type { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
@@ -48,6 +49,11 @@ export interface DataPluginStart {
    */
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
+
+  /**
+   * Datatable type utility functions.
+   */
+  datatableUtilities: DatatableUtilitiesService;
 }
 
 export interface DataPluginSetupDependencies {
@@ -115,10 +121,19 @@ export class DataServerPlugin
   }
 
   public start(core: CoreStart, { fieldFormats, dataViews }: DataPluginStartDependencies) {
+    const search = this.searchService.start(core, { fieldFormats, indexPatterns: dataViews });
+    const datatableUtilities = new DatatableUtilitiesService(
+      search.aggs,
+      dataViews,
+      fieldFormats,
+      core.uiSettings
+    );
+
     return {
+      datatableUtilities,
+      search,
       fieldFormats,
       indexPatterns: dataViews,
-      search: this.searchService.start(core, { fieldFormats, indexPatterns: dataViews }),
     };
   }
 

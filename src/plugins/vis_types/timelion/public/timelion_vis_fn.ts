@@ -18,7 +18,7 @@ import { KibanaContext, Query, TimeRange } from '../../../data/public';
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimelionRenderValue>>;
 export interface TimelionRenderValue {
-  visData: TimelionSuccessResponse;
+  visData?: TimelionSuccessResponse;
   visType: 'timelion';
   visParams: TimelionVisParams;
 }
@@ -65,10 +65,12 @@ export const getTimelionVisualizationConfig = (
       required: false,
     },
   },
-  async fn(input, args, { getSearchSessionId, getExecutionContext, variables }) {
+  async fn(
+    input,
+    args,
+    { getSearchSessionId, getExecutionContext, variables, abortSignal: expressionAbortSignal }
+  ) {
     const { getTimelionRequestHandler } = await import('./async_services');
-    const timelionRequestHandler = getTimelionRequestHandler(dependencies);
-
     const visParams = {
       expression: args.expression,
       interval: args.interval,
@@ -77,17 +79,25 @@ export const getTimelionVisualizationConfig = (
         (variables?.embeddableTitle as string) ??
         getExecutionContext?.()?.description,
     };
+    let visData: TimelionRenderValue['visData'];
 
-    const response = await timelionRequestHandler({
-      timeRange: get(input, 'timeRange') as TimeRange,
-      query: get(input, 'query') as Query,
-      filters: get(input, 'filters') as Filter[],
-      visParams,
-      searchSessionId: getSearchSessionId(),
-      executionContext: getExecutionContext(),
-    });
+    if (!expressionAbortSignal.aborted) {
+      const timelionRequestHandler = getTimelionRequestHandler({
+        ...dependencies,
+        expressionAbortSignal,
+      });
 
-    response.visType = TIMELION_VIS_NAME;
+      visData = await timelionRequestHandler({
+        timeRange: get(input, 'timeRange') as TimeRange,
+        query: get(input, 'query') as Query,
+        filters: get(input, 'filters') as Filter[],
+        visParams,
+        searchSessionId: getSearchSessionId(),
+        executionContext: getExecutionContext(),
+      });
+
+      visData.visType = TIMELION_VIS_NAME;
+    }
 
     return {
       type: 'render',
@@ -95,7 +105,7 @@ export const getTimelionVisualizationConfig = (
       value: {
         visParams,
         visType: TIMELION_VIS_NAME,
-        visData: response,
+        visData,
       },
     };
   },

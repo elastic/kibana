@@ -18,6 +18,7 @@ import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../plugins/securit
 import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
 import { EVENT_FILTER_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/event_filters/constants';
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/host_isolation_exceptions/constants';
+import { BLOCKLISTS_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/blocklist/constants';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;
@@ -107,5 +108,14 @@ export class EndpointArtifactsTestResources extends FtrService {
     const artifact = this.exceptionsGenerator.generateHostIsolationExceptionForCreate(overrides);
 
     return this.createExceptionItem(artifact);
+  }
+
+  async createBlocklist(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): Promise<ArtifactTestData> {
+    await this.ensureListExists(BLOCKLISTS_LIST_DEFINITION);
+    const blocklist = this.exceptionsGenerator.generateBlocklistForCreate(overrides);
+
+    return this.createExceptionItem(blocklist);
   }
 }
