@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
             'dashboard',
             'dev_tools',
             'actions',
-            'enterpriseSearch',
+            'enterpriseSearchOverview',
             'advancedSettings',
             'indexPatterns',
             'graph',
