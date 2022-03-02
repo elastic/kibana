@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
 import { CSP_EVALUATION_BADGE_FAILED, CSP_EVALUATION_BADGE_PASSED } from './translations';
 
 interface Props {
