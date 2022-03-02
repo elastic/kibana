@@ -7,11 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import type {
-  FieldValuePair,
-  HistogramItem,
-} from '../../../../common/correlations/types';
+import type { HistogramItem } from '../../../../common/correlations/types';
 import { TransactionDistributionChartData } from '../../shared/charts/transaction_distribution_chart';
+import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
 export function getTransactionDistributionChartData({
   euiTheme,
@@ -22,7 +21,7 @@ export function getTransactionDistributionChartData({
   euiTheme: EuiTheme;
   allTransactionsHistogram?: HistogramItem[];
   failedTransactionsHistogram?: HistogramItem[];
-  selectedTerm?: FieldValuePair & { histogram: HistogramItem[] };
+  selectedTerm?: LatencyCorrelation | FailedTransactionsCorrelation | undefined;
 }) {
   const transactionDistributionChartData: TransactionDistributionChartData[] =
     [];

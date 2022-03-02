@@ -50,10 +50,7 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { useTheme } from '../../../hooks/use_theme';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { MIN_TAB_TITLE_HEIGHT } from '../transaction_details/distribution';
-import {
-  getFailedTransactionsCorrelationImpactLabel,
-  getLatencyCorrelationImpactLabel,
-} from './utils/get_failed_transactions_correlation_impact_label';
+import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 
 export function FallbackCorrelationBadge() {
   return (

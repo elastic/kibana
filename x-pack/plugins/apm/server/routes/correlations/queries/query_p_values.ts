@@ -57,7 +57,7 @@ export const fetchPValues = async (
       // If there's no result matching the criteria
       // Find the next highest/closest result to the threshold
       // to use as a fallback result
-      if (fallbackResult === null) {
+      if (!fallbackResult) {
         fallbackResult = record;
       } else {
         if (

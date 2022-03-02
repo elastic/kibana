@@ -31,4 +31,5 @@ export interface FailedTransactionsCorrelationsResponse {
   overallHistogram?: HistogramItem[];
   errorHistogram?: HistogramItem[];
   fieldStats?: FieldStats[];
+  fallbackResult?: FailedTransactionsCorrelation;
 }
