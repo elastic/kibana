@@ -122,7 +122,9 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         context,
         ...params,
         Object.assign(
-          { hash: {} }, // TODO: Figure out what actual value to put in hash
+          {
+            hash: getHash(sexpr),
+          },
           this.defaultHelperOptions
         )
       );
@@ -153,7 +155,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         return ''; // TODO: supposed to return a string
       },
       inverse: noop,
-      hash: {}, // TODO: Figure out what actual value to put in hash
+      hash: getHash(block),
     };
     helper.call(context, ...params, options);
   }
@@ -204,6 +206,17 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
 function noop() {
   return '';
+}
+
+function getHash(statement: { hash?: hbs.AST.Hash }) {
+  const result: { [key: string]: any } = {};
+  if (!statement.hash) return result;
+  for (const { key, value } of statement.hash.pairs) {
+    result[key] = (
+      value as hbs.AST.StringLiteral | hbs.AST.BooleanLiteral | hbs.AST.NumberLiteral
+    ).value; // TODO: I'm not sure if value can be any other type
+  }
+  return result;
 }
 
 // liftet from handlebars lib/handlebars/compiler/compiler.js
