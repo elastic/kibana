@@ -243,7 +243,8 @@ Querying & Filtering::
 Improves the version field type {kibana-pull}123739[#123739]
 
 Security::
-Removes the audit space {kibana-pull}124145[#124145]
+* Audit logs now include records for individual saved objects when an entire space is deleted {kibana-pull}124145[#124145]
+* User login audit events now include the session ID for better correlation, and single sign-on flows no longer result in an extra `user_logout` event {kibana-pull}124299[#124299]
 
 [float]
 [[fixes-v8.1.0]]
