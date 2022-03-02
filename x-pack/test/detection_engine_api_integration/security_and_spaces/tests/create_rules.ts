@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(rule?.execution_summary?.last_execution.status).to.eql('partial failure');
           expect(rule?.execution_summary?.last_execution.message).to.eql(
-            'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.'
+            'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
           );
         });
 
