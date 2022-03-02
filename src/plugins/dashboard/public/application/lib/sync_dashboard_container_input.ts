@@ -78,6 +78,11 @@ export const syncDashboardContainerInput = (
       )
       .subscribe(() => {
         applyStateChangesToContainer({ ...syncDashboardContainerProps, force: forceRefresh });
+
+        // If this dashboard has a control group, reload the control group when the refresh button is manually pressed.
+        if (forceRefresh && dashboardContainer.controlGroup) {
+          dashboardContainer.controlGroup.reload();
+        }
         forceRefresh = false;
       })
   );
