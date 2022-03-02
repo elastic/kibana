@@ -214,6 +214,17 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadNodeDiskSpaceResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/node_disk_space`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   const setClusterSettingsResponse = (response?: object, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
@@ -242,6 +253,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setLoadMlUpgradeModeResponse,
     setGetUpgradeStatusResponse,
     setLoadRemoteClustersResponse,
+    setLoadNodeDiskSpaceResponse,
     setClusterSettingsResponse,
   };
 };
