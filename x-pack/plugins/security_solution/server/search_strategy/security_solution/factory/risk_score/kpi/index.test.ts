@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { hostsKpiRiskyHosts } from '.';
-import * as buildQuery from './query.hosts_kpi_risky_hosts.dsl';
+import { kpiRiskScore } from '.';
+import * as buildQuery from './query.kpi_risk_score.dsl';
+
 import { mockOptions } from './__mocks__';
 
-describe('buildHostsKpiRiskyHostsQuery search strategy', () => {
-  const buildHostsKpiRiskyHostsQuery = jest.spyOn(buildQuery, 'buildHostsKpiRiskyHostsQuery');
+describe('buildKpiRiskScoreQuery search strategy', () => {
+  const buildKpiRiskScoreQuery = jest.spyOn(buildQuery, 'buildKpiRiskScoreQuery');
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
-      hostsKpiRiskyHosts.buildDsl(mockOptions);
-      expect(buildHostsKpiRiskyHostsQuery).toHaveBeenCalledWith(mockOptions);
+      kpiRiskScore.buildDsl(mockOptions);
+      expect(buildKpiRiskScoreQuery).toHaveBeenCalledWith(mockOptions);
     });
   });
 });

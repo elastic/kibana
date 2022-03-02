@@ -75,10 +75,12 @@ import {
 } from './cti';
 
 import {
-  HostsKpiRiskyHostsRequestOptions,
-  HostsKpiRiskyHostsStrategyResponse,
-} from './hosts/kpi/risky_hosts';
-import { RiskScoreStrategyResponse, RiskQueries, RiskScoreRequestOptions } from './risk_score';
+  RiskScoreStrategyResponse,
+  RiskQueries,
+  RiskScoreRequestOptions,
+  KpiRiskScoreStrategyResponse,
+  KpiRiskScoreRequestOptions,
+} from './risk_score';
 
 export * from './cti';
 export * from './hosts';
@@ -132,8 +134,6 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsStrategyResponse
-  : T extends HostsKpiQueries.kpiRiskyHosts
-  ? HostsKpiRiskyHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsStrategyResponse
   : T extends NetworkQueries.details
@@ -170,6 +170,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? CtiDataSourceStrategyResponse
   : T extends RiskQueries.riskScore
   ? RiskScoreStrategyResponse
+  : T extends RiskQueries.kpiRiskScore
+  ? KpiRiskScoreStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -190,8 +192,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsRequestOptions
-  : T extends HostsKpiQueries.kpiRiskyHosts
-  ? HostsKpiRiskyHostsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
@@ -226,6 +226,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? CtiDataSourceRequestOptions
   : T extends RiskQueries.riskScore
   ? RiskScoreRequestOptions
+  : T extends RiskQueries.kpiRiskScore
+  ? KpiRiskScoreRequestOptions
   : never;
 
 export interface DocValueFieldsInput {

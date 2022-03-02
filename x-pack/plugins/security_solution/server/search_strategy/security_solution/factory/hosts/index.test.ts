@@ -17,7 +17,6 @@ import { authentications, authenticationsEntities } from './authentications';
 import { hostsKpiAuthentications, hostsKpiAuthenticationsEntities } from './kpi/authentications';
 import { hostsKpiHosts, hostsKpiHostsEntities } from './kpi/hosts';
 import { hostsKpiUniqueIps, hostsKpiUniqueIpsEntities } from './kpi/unique_ips';
-import { hostsKpiRiskyHosts } from './kpi/risky_hosts';
 
 jest.mock('./all');
 jest.mock('./details');
@@ -43,7 +42,6 @@ describe('hostsFactory', () => {
       [HostsKpiQueries.kpiAuthenticationsEntities]: hostsKpiAuthenticationsEntities,
       [HostsKpiQueries.kpiHosts]: hostsKpiHosts,
       [HostsKpiQueries.kpiHostsEntities]: hostsKpiHostsEntities,
-      [HostsKpiQueries.kpiRiskyHosts]: hostsKpiRiskyHosts,
       [HostsKpiQueries.kpiUniqueIpsEntities]: hostsKpiUniqueIpsEntities,
       [HostsKpiQueries.kpiUniqueIps]: hostsKpiUniqueIps,
     };

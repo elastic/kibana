@@ -6,11 +6,11 @@
  */
 
 import {
-  HostsKpiQueries,
-  HostsKpiRiskyHostsRequestOptions,
-} from '../../../../../../../../common/search_strategy';
+  KpiRiskScoreRequestOptions,
+  RiskQueries,
+} from '../../../../../../../common/search_strategy';
 
-export const mockOptions: HostsKpiRiskyHostsRequestOptions = {
+export const mockOptions: KpiRiskScoreRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -21,8 +21,8 @@ export const mockOptions: HostsKpiRiskyHostsRequestOptions = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  factoryQueryType: HostsKpiQueries.kpiRiskyHosts,
+  factoryQueryType: RiskQueries.kpiRiskScore,
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
-  timerange: { interval: '12h', from: '2020-09-07T09:47:28.606Z', to: '2020-09-08T09:47:28.606Z' },
+  aggBy: 'host.name',
 };

@@ -22,7 +22,7 @@ import {
 } from '../../../common/mock';
 import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
-import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
+import { useHostRiskScore } from '../../../hosts/containers/risk_score/all';
 
 jest.mock('../../../common/lib/kibana');
 

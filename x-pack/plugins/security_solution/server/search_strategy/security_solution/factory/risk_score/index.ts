@@ -5,45 +5,12 @@
  * 2.0.
  */
 
+import { FactoryQueryTypes, RiskQueries } from '../../../../../common/search_strategy';
 import { SecuritySolutionFactory } from '../types';
-import {
-  RiskScoreRequestOptions,
-  RiskScoreStrategyResponse,
-  RiskQueries,
-  FactoryQueryTypes,
-} from '../../../../../common/search_strategy';
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { inspectStringifyObject } from '../../../../utils/build_query';
-import { buildRiskScoreQuery } from './query.risk_score.dsl';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
-import { getTotalCount } from '../cti/event_enrichment/helpers';
-
-export const riskScore: SecuritySolutionFactory<RiskQueries.riskScore> = {
-  buildDsl: (options: RiskScoreRequestOptions) => {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-
-    return buildRiskScoreQuery(options);
-  },
-  parse: async (
-    options: RiskScoreRequestOptions,
-    response: IEsSearchResponse<unknown>
-  ): Promise<RiskScoreStrategyResponse> => {
-    const inspect = {
-      dsl: [inspectStringifyObject(buildRiskScoreQuery(options))],
-    };
-
-    const totalCount = getTotalCount(response.rawResponse.hits.total);
-
-    return {
-      ...response,
-      inspect,
-      totalCount,
-    };
-  },
-};
+import { riskScore } from './all';
+import { kpiRiskScore } from './kpi';
 
 export const riskScoreFactory: Record<RiskQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
   [RiskQueries.riskScore]: riskScore,
+  [RiskQueries.kpiRiskScore]: kpiRiskScore,
 };

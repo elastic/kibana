@@ -14,19 +14,18 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { State } from '../../../common/store';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 
-import { useUserRiskScore } from '../../../hosts/containers/host_risk_score';
-import { useRiskScoreKpi } from '../../../hosts/containers/kpi_hosts/risky_hosts';
+import { useUserRiskScore } from '../../../hosts/containers/risk_score/all';
+
 import { UserRiskScoreTable } from '../../components/user_risk_score_table';
 import { usersSelectors } from '../../store';
+import { useUserRiskScoreKpi } from '../../../hosts/containers/risk_score/kpi';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
 export const UserRiskScoreQueryTabBody = ({
-  endDate,
   filterQuery,
   skip,
   setQuery,
-  startDate,
   type,
   deleteQuery,
 }: UsersComponentsQueryProps) => {
@@ -50,10 +49,8 @@ export const UserRiskScoreQueryTabBody = ({
     sort,
   });
 
-  const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
+  const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpi({
     filterQuery,
-    from: startDate,
-    to: endDate,
   });
 
   return (

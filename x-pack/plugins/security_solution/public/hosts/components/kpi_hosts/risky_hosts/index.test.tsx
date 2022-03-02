@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 
 import { RiskyHosts } from './';
 import { TestProviders } from '../../../../common/mock';
-import { HostsKpiRiskyHostsStrategyResponse } from '../../../../../common/search_strategy';
+import { KpiRiskScoreStrategyResponse } from '../../../../../common/search_strategy';
 
 jest.mock('../../../containers/kpi_hosts/risky_hosts');
 
@@ -54,9 +54,9 @@ describe('RiskyHosts', () => {
   });
 
   test('it displays risky hosts quantity returned by the API', () => {
-    const data: HostsKpiRiskyHostsStrategyResponse = {
-      rawResponse: {} as HostsKpiRiskyHostsStrategyResponse['rawResponse'],
-      riskyHosts: {
+    const data: KpiRiskScoreStrategyResponse = {
+      rawResponse: {} as KpiRiskScoreStrategyResponse['rawResponse'],
+      kpiRiskScore: {
         Critical: 1,
         High: 1,
         Unknown: 0,

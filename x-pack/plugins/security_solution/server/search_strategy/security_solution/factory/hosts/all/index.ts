@@ -29,10 +29,9 @@ import { buildHostsQuery } from './query.all_hosts.dsl';
 import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
 import { IScopedClusterClient } from '../../../../../../../../../src/core/server';
 
-import { buildRiskScoreQuery } from '../../risk_score/query.risk_score.dsl';
-
 import { buildHostsQueryEntities } from './query.all_hosts_entities.dsl';
 import { EndpointAppContext } from '../../../../../endpoint/types';
+import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
   buildDsl: (options: HostsRequestOptions) => {

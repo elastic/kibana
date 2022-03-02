@@ -12,7 +12,7 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
 import { HostOverview } from './index';
-import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
+import { useHostRiskScore } from '../../../hosts/containers/risk_score/all';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
 

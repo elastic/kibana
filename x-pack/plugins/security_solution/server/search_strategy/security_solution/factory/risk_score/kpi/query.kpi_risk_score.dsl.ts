@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { HostsKpiRiskyHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/kpi/risky_hosts';
-import { createQueryFilterClauses } from '../../../../../../utils/build_query';
+import { KpiRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
+import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-export const buildHostsKpiRiskyHostsQuery = ({
+export const buildKpiRiskScoreQuery = ({
   defaultIndex,
   filterQuery,
-}: HostsKpiRiskyHostsRequestOptions) => {
+  aggBy,
+}: KpiRiskScoreRequestOptions) => {
   const filter = [...createQueryFilterClauses(filterQuery)];
 
   const dslQuery = {
@@ -26,9 +27,9 @@ export const buildHostsKpiRiskyHostsQuery = ({
             field: 'risk.keyword',
           },
           aggs: {
-            unique_hosts: {
+            unique_entries: {
               cardinality: {
-                field: 'host.name',
+                field: aggBy,
               },
             },
           },

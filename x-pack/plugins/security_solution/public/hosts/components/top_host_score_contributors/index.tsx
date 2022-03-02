@@ -21,7 +21,7 @@ import * as i18n from './translations';
 import { Direction } from '../../../../../timelines/common';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 import { buildHostNamesFilter, RiskScoreFields } from '../../../../common/search_strategy';
-import { useHostRiskScore } from '../../containers/host_risk_score';
+import { useHostRiskScore } from '../../containers/risk_score/all';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 

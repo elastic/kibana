@@ -9,7 +9,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 
 import { HostsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import * as buildQuery from './query.all_hosts.dsl';
-import * as buildRiskQuery from '../../risk_score/query.risk_score.dsl';
+import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
 import { allHosts } from '.';
 import {
   mockOptions,

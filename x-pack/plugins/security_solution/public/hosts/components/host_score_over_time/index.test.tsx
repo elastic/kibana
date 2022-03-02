@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { HostRiskScoreOverTime } from '.';
 import { TestProviders } from '../../../common/mock';
-import { useHostRiskScore } from '../../containers/host_risk_score';
+import { useHostRiskScore } from '../../containers/risk_score/all';
 
 jest.mock('../../containers/host_risk_score');
 const useHostRiskScoreMock = useHostRiskScore as jest.Mock;

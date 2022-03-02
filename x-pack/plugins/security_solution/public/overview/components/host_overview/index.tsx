@@ -40,7 +40,7 @@ import {
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
+import { useHostRiskScore } from '../../../hosts/containers/risk_score/all';
 import { RiskScore } from '../../../common/components/severity/common';
 
 interface HostSummaryProps {

@@ -11,9 +11,8 @@ import {
   RiskScoreRequestOptions,
   RiskScoreFields,
   RiskScoreSortField,
-} from '../../../../../common/search_strategy';
-
-import { createQueryFilterClauses } from '../../../../utils/build_query';
+} from '../../../../../../common/search_strategy';
+import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const QUERY_SIZE = 10;
 

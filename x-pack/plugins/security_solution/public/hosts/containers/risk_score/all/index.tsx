@@ -10,9 +10,8 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { inputsModel } from '../../../common/store';
-import { createFilter } from '../../../common/containers/helpers';
-import { useKibana } from '../../../common/lib/kibana';
+import { createFilter } from '../../../../common/containers/helpers';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   RiskScoreStrategyResponse,
   getHostRiskIndex,
@@ -22,17 +21,21 @@ import {
   RiskScoreRequestOptions,
   RiskQueries,
   getUserRiskIndex,
-} from '../../../../common/search_strategy';
-import { ESQuery } from '../../../../common/typed_json';
+} from '../../../../../common/search_strategy';
+import { ESQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
-import { useTransforms } from '../../../transforms/containers/use_transforms';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { isIndexNotFoundError } from '../../../common/utils/exceptions';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import {
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../../src/plugins/data/common';
+import { getInspectResponse } from '../../../../helpers';
+import { InspectResponse } from '../../../../types';
+import { useTransforms } from '../../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { inputsModel } from '../../../../common/store';
 
 export interface RiskScoreState<RiskScoreType extends HostsRiskScore[] | UsersRiskScore[]> {
   data?: RiskScoreType;
