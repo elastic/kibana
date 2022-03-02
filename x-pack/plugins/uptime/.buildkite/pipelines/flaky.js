@@ -20,12 +20,15 @@ const pipeline = {
 const concurrency = 25;
 const defaultCount = 50;
 const initialJobs = 2;
-const BUILD_UUID = 'build';
+
 const UUID = process.env.UUID;
+const KIBANA_BUILD_ID = 'KIBANA_BUILD_ID';
+const BUILD_UUID = 'build';
 
 // Metada keys, should match the ones specified in pipeline step configuration
 const E2E_COUNT = 'e2e/count';
 const E2E_GREP = 'e2e/grep';
+const E2E_ARTIFACTS_ID = 'e2e/build-id';
 
 const env = getEnvFromMetadata();
 
@@ -41,6 +44,9 @@ if (totalJobs > 500) {
   process.exit(1);
 }
 
+// If build id is provided, export it so build step is skipped
+pipeline.env[KIBANA_BUILD_ID] = env[E2E_ARTIFACTS_ID];
+
 // Build job first
 steps.push(getBuildJob());
 steps.push(getGroupRunnerJob(env));
@@ -53,7 +59,7 @@ function getBuildJob() {
     label: 'Build Kibana Distribution and Plugins',
     agents: { queue: 'c2-8' },
     key: BUILD_UUID,
-    if: "build.env('BUILD_ID_FOR_ARTIFACTS') == null || build.env('BUILD_ID_FOR_ARTIFACTS') == ''",
+    if: `build.env('${KIBANA_BUILD_ID}') == null || build.env('${KIBANA_BUILD_ID}') == ''`,
   };
 }
 
@@ -86,6 +92,12 @@ function getEnvFromMetadata() {
   }
 
   env[E2E_GREP] = execSync(`buildkite-agent meta-data get '${E2E_GREP}' --default ''`)
+    .toString()
+    .trim();
+
+  env[E2E_ARTIFACTS_ID] = execSync(
+    `buildkite-agent meta-data get '${E2E_ARTIFACTS_ID}' --default ''`
+  )
     .toString()
     .trim();
 
