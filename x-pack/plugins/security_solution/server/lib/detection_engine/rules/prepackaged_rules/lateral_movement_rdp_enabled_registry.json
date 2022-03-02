@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "RDP Enabled via Registry",
-  "query": "registry where\nregistry.path : \"HKLM\\\\SYSTEM\\\\ControlSet*\\\\Control\\\\Terminal Server\\\\fDenyTSConnections\" and\nregistry.data.strings == \"0\" and not (process.name : \"svchost.exe\" and user.domain == \"NT AUTHORITY\") and\nnot process.executable : \"C:\\\\Windows\\\\System32\\\\SystemPropertiesRemote.exe\"\n",
+  "query": "registry where event.type in (\"creation\", \"change\") and\n  registry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Terminal Server\\\\fDenyTSConnections\" and\n  registry.data.strings : (\"0\", \"0x00000000\") and not (process.name : \"svchost.exe\" and user.domain == \"NT AUTHORITY\") and\n  not process.executable : \"C:\\\\Windows\\\\System32\\\\SystemPropertiesRemote.exe\"\n",
   "risk_score": 47,
   "rule_id": "58aa72ca-d968-4f34-b9f7-bea51d75eb50",
   "severity": "medium",
@@ -49,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

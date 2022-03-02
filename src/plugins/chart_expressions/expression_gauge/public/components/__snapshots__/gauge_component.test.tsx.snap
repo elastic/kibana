@@ -7,7 +7,16 @@ exports[`GaugeComponent renders the chart 1`] = `
   <Settings
     ariaUseDefaultSummary={true}
     debugState={false}
-    theme={Object {}}
+    theme={
+      Array [
+        Object {
+          "background": Object {
+            "color": "transparent",
+          },
+        },
+        Object {},
+      ]
+    }
   />
   <Component
     actual={3}

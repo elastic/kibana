@@ -81,10 +81,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * @param params - Optional query params
      */
     getTrainedModelStats(modelId?: string | string[], params?: InferenceStatsQueryParams) {
-      let model = modelId ?? '_all';
-      if (Array.isArray(modelId)) {
-        model = modelId.join(',');
-      }
+      const model = (Array.isArray(modelId) ? modelId.join(',') : modelId) || '_all';
 
       return httpService.http<InferenceStatsResponse>({
         path: `${apiBasePath}/trained_models/${model}/_stats`,

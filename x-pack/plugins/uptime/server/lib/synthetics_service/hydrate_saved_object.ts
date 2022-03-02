@@ -18,39 +18,43 @@ export const hydrateSavedObjects = async ({
   monitors: SyntheticsMonitorSavedObject[];
   server: UptimeServerSetup;
 }) => {
-  const missingUrlInfoIds: string[] = [];
+  try {
+    const missingUrlInfoIds: string[] = [];
 
-  monitors
-    .filter((monitor) => monitor.attributes.type === 'browser')
-    .forEach(({ attributes, id }) => {
-      const monitor = attributes as MonitorFields;
-      if (!monitor || !monitor.urls) {
-        missingUrlInfoIds.push(id);
-      }
-    });
-
-  if (missingUrlInfoIds.length > 0 && server.uptimeEsClient) {
-    const esDocs: Ping[] = await fetchSampleMonitorDocuments(
-      server.uptimeEsClient,
-      missingUrlInfoIds
-    );
-    const updatedObjects = monitors
-      .filter((monitor) => missingUrlInfoIds.includes(monitor.id))
-      .map((monitor) => {
-        let url = '';
-        esDocs.forEach((doc) => {
-          // to make sure the document is ingested after the latest update of the monitor
-          const diff = moment(monitor.updated_at).diff(moment(doc.timestamp), 'minutes');
-          if (doc.config_id === monitor.id && doc.url?.full && diff > 1) {
-            url = doc.url?.full;
-          }
-        });
-        if (url) {
-          return { ...monitor, attributes: { ...monitor.attributes, urls: url } };
+    monitors
+      .filter((monitor) => monitor.attributes.type === 'browser')
+      .forEach(({ attributes, id }) => {
+        const monitor = attributes as MonitorFields;
+        if (!monitor || !monitor.urls) {
+          missingUrlInfoIds.push(id);
         }
-        return monitor;
       });
-    await server.authSavedObjectsClient?.bulkUpdate(updatedObjects);
+
+    if (missingUrlInfoIds.length > 0 && server.uptimeEsClient) {
+      const esDocs: Ping[] = await fetchSampleMonitorDocuments(
+        server.uptimeEsClient,
+        missingUrlInfoIds
+      );
+      const updatedObjects = monitors
+        .filter((monitor) => missingUrlInfoIds.includes(monitor.id))
+        .map((monitor) => {
+          let url = '';
+          esDocs.forEach((doc) => {
+            // to make sure the document is ingested after the latest update of the monitor
+            const diff = moment(monitor.updated_at).diff(moment(doc.timestamp), 'minutes');
+            if (doc.config_id === monitor.id && doc.url?.full && diff > 1) {
+              url = doc.url?.full;
+            }
+          });
+          if (url) {
+            return { ...monitor, attributes: { ...monitor.attributes, urls: url } };
+          }
+          return monitor;
+        });
+      await server.authSavedObjectsClient?.bulkUpdate(updatedObjects);
+    }
+  } catch (e) {
+    server.logger.error(e);
   }
 };
 

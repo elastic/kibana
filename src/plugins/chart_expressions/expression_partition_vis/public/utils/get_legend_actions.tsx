@@ -13,16 +13,16 @@ import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } fr
 import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { PartitionVisParams } from '../../common/types';
-import { ClickTriggerEvent } from '../../../../charts/public';
 import { FieldFormatsStart } from '../../../../field_formats/public';
+import { FilterEvent } from '../types';
 
 export const getLegendActions = (
   canFilter: (
-    data: ClickTriggerEvent | null,
+    data: FilterEvent | null,
     actions: DataPublicPluginStart['actions']
   ) => Promise<boolean>,
-  getFilterEventData: (series: SeriesIdentifier) => ClickTriggerEvent | null,
-  onFilter: (data: ClickTriggerEvent, negate?: any) => void,
+  getFilterEventData: (series: SeriesIdentifier) => FilterEvent | null,
+  onFilter: (data: FilterEvent, negate?: any) => void,
   visParams: PartitionVisParams,
   actions: DataPublicPluginStart['actions'],
   formatter: FieldFormatsStart

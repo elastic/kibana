@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { i18n } from '@kbn/i18n';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import type { IScopedSearchClient } from 'src/plugins/data/server';
 import type { Datatable } from 'src/plugins/expressions/server';
@@ -30,12 +30,18 @@ import type {
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
+import {
+  AuthenticationExpiredError,
+  UnknownError,
+  ReportingError,
+} from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import type { LevelLogger } from '../../../lib';
 import type { TaskRunResult } from '../../../lib/tasks';
 import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
+import { i18nTexts } from './i18n_texts';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -86,13 +92,11 @@ export class CsvGenerator {
 
   private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
     this.logger.debug(`executing scroll request`);
-    const results = (
-      await this.clients.es.asCurrentUser.scroll({
-        scroll: scrollSettings.duration,
-        scroll_id: scrollId,
-      })
-    ).body;
-    return results;
+
+    return await this.clients.es.asCurrentUser.scroll({
+      scroll: scrollSettings.duration,
+      scroll_id: scrollId,
+    });
   }
 
   /*
@@ -257,6 +261,7 @@ export class CsvGenerator {
       ),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
+    let reportingError: undefined | ReportingError;
 
     const index = searchSource.getField('index');
 
@@ -360,16 +365,19 @@ export class CsvGenerator {
 
       // Add warnings to be logged
       if (this.csvContainsFormulas && escapeFormulaValues) {
-        warnings.push(
-          i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues', {
-            defaultMessage: 'CSV may contain formulas whose values have been escaped',
-          })
-        );
+        warnings.push(i18nTexts.escapedFormulaValuesMessage);
       }
     } catch (err) {
       this.logger.error(err);
       if (err instanceof KbnServerError && err.errBody) {
         throw JSON.stringify(err.errBody.error);
+      }
+
+      if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
+        reportingError = new AuthenticationExpiredError();
+        warnings.push(i18nTexts.authenticationError.partialResultsMessage);
+      } else {
+        throw new UnknownError(err.message);
       }
     } finally {
       // clear scrollID
@@ -398,7 +406,11 @@ export class CsvGenerator {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
+      metrics: {
+        csv: { rows: this.csvRowCount },
+      },
       warnings,
+      error_code: reportingError?.code,
     };
   }
 }

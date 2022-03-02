@@ -107,7 +107,7 @@ describe('rollupUsageCollectorHelpers', () => {
   const mockIndex = 'mock_index';
   const getMockCallCluster = (hits: unknown[]) =>
     ({
-      search: () => Promise.resolve({ body: { hits: { hits } } }) as unknown,
+      search: () => Promise.resolve({ hits: { hits } }) as unknown,
     } as ElasticsearchClient);
 
   describe('fetchRollupIndexPatterns', () => {

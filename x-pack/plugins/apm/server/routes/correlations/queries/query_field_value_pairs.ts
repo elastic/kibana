@@ -55,13 +55,13 @@ const fetchTransactionDurationFieldTerms = async (
     getTermsAggRequest(params, fieldName)
   );
 
-  if (resp.body.aggregations === undefined) {
+  if (resp.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationFieldTerms failed, did not return aggregations.'
     );
   }
 
-  const buckets = resp.body.aggregations.attribute_terms?.buckets;
+  const buckets = resp.aggregations.attribute_terms?.buckets;
   if (buckets?.length >= 1) {
     return buckets.map((d) => ({
       fieldName,

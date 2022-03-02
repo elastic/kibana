@@ -69,8 +69,7 @@ export async function fetchElasticsearchStats(
     },
   };
 
-  const { body: response } = await callCluster.search<ESClusterStats>(params);
-  return response;
+  return await callCluster.search<ESClusterStats>(params);
 }
 
 export interface ESClusterStats {

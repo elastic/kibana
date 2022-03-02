@@ -35,8 +35,8 @@ describe('SeriesActions', function () {
       expect(screen.getByLabelText('Series actions list')).toBeVisible();
     });
 
-    it('should display a view sample link', function () {
-      expect(screen.getByLabelText('View sample documents')).toBeVisible();
+    it('should display a view transaction link', function () {
+      expect(screen.getByLabelText('View transaction in Discover')).toBeVisible();
     });
 
     it('should display a hide series link', function () {

@@ -432,7 +432,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '360,000',
           'CN',
         ].sort();
-        if (await PageObjects.visChart.isNewLibraryChart('visTypePieChart')) {
+        if (await PageObjects.visChart.isNewLibraryChart('partitionVisChart')) {
           await PageObjects.visEditor.clickOptionsTab();
           await PageObjects.visEditor.togglePieLegend();
           await PageObjects.visEditor.togglePieNestedLegend();

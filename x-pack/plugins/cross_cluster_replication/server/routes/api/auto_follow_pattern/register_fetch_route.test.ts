@@ -33,19 +33,17 @@ describe('[CCR API] Fetch all auto-follow patterns', () => {
 
   it('deserializes the response from Elasticsearch', async () => {
     const ccrAutoFollowPatternResponseMock = {
-      body: {
-        patterns: [
-          {
-            name: 'autoFollowPattern',
-            pattern: {
-              active: true,
-              remote_cluster: 'remoteCluster',
-              leader_index_patterns: ['leader*'],
-              follow_index_pattern: 'follow',
-            },
+      patterns: [
+        {
+          name: 'autoFollowPattern',
+          pattern: {
+            active: true,
+            remote_cluster: 'remoteCluster',
+            leader_index_patterns: ['leader*'],
+            follow_index_pattern: 'follow',
           },
-        ],
-      },
+        },
+      ],
     };
 
     const routeContextMock = mockRouteContext({

@@ -11,6 +11,7 @@ import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import {
   DataViewField,
   DataView,
@@ -51,7 +52,7 @@ export interface Props {
   apiService: ApiService;
   /** Field format */
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];
 }
 

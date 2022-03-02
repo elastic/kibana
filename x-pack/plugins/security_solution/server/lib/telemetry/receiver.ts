@@ -125,6 +125,7 @@ export interface ITelemetryReceiver {
     type: string;
   };
 }
+
 export class TelemetryReceiver implements ITelemetryReceiver {
   private readonly logger: Logger;
   private agentClient?: AgentClient;
@@ -219,7 +220,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    return this.esClient.search(query);
+    return this.esClient.search(query, { meta: true });
   }
 
   public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
@@ -266,7 +267,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    return this.esClient.search(query);
+    return this.esClient.search(query, { meta: true });
   }
 
   public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
@@ -298,7 +299,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
 
-    return (await this.esClient.search<TelemetryEvent>(query)).body;
+    return this.esClient.search<TelemetryEvent>(query);
   }
 
   public async fetchPolicyConfigs(id: string) {
@@ -412,7 +413,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         },
       },
     };
-    return this.esClient.search<RuleSearchResult>(query);
+    return this.esClient.search<RuleSearchResult>(query, { meta: true });
   }
 
   public async fetchDetectionExceptionList(listId: string, ruleVersion: number) {
@@ -446,8 +447,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
-    const { body } = await this.esClient.info();
-    return body;
+    return this.esClient.info();
   }
 
   public async fetchLicenseInfo(): Promise<ESLicense | undefined> {
@@ -456,17 +456,15 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     try {
-      const ret = (
-        await this.esClient.transport.request({
-          method: 'GET',
-          path: '/_license',
-          querystring: {
-            local: true,
-          },
-        })
-      ).body as Promise<{ license: ESLicense }>;
+      const ret = (await this.esClient.transport.request({
+        method: 'GET',
+        path: '/_license',
+        querystring: {
+          local: true,
+        },
+      })) as { license: ESLicense };
 
-      return (await ret).license;
+      return ret.license;
     } catch (err) {
       this.logger.debug(`failed retrieving license: ${err}`);
       return undefined;

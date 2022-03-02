@@ -74,7 +74,7 @@ export function createUptimeESClient({
       let esRequestStatus: RequestStatus = RequestStatus.PENDING;
 
       try {
-        res = await esClient.search(esParams);
+        res = await esClient.search(esParams, { meta: true });
         esRequestStatus = RequestStatus.OK;
       } catch (e) {
         esError = e;
@@ -117,7 +117,7 @@ export function createUptimeESClient({
       const startTime = process.hrtime();
 
       try {
-        res = await esClient.count(esParams);
+        res = await esClient.count(esParams, { meta: true });
       } catch (e) {
         esError = e;
       }

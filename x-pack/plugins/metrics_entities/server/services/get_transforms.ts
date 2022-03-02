@@ -16,7 +16,7 @@ interface GetTransformsOptions {
 
 // TODO: Type the Promise<unknown> to a stronger type
 export const getTransforms = async ({ esClient }: GetTransformsOptions): Promise<unknown> => {
-  const { body } = await esClient.transform.getTransform({
+  const body = await esClient.transform.getTransform({
     size: 1000,
     transform_id: '*',
   });

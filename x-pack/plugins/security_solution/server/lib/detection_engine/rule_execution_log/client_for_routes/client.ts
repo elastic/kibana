@@ -30,7 +30,7 @@ export const createClientForRoutes = (
   return {
     /**
      * Get the current rule execution summary for each of the given rule IDs.
-     * This method splits work into chunks so not to owerwhelm Elasticsearch
+     * This method splits work into chunks so not to overwhelm Elasticsearch
      * when fetching statuses for a big number of rules.
      *
      * @param ruleIds A list of rule IDs (`rule.id`) to fetch summaries for
@@ -71,7 +71,7 @@ export const createClientForRoutes = (
           }
 
           // Merge all rule statuses into a single dict
-          return Object.assign({}, ...results);
+          return Object.assign({}, ...results.map(({ result }) => result));
         } catch (e) {
           const ruleIdsString = `[${truncateList(ruleIds).join(', ')}]`;
 

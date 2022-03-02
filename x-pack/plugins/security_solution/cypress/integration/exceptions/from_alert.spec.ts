@@ -18,7 +18,7 @@ import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
-  activatesRule,
+  enablesRule,
   addsException,
   goToAlertsTab,
   goToExceptionsTab,
@@ -29,20 +29,20 @@ import {
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { cleanKibana, reload } from '../../tasks/common';
 
-describe('From alert', () => {
+describe.skip('From alert', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
 
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule(getNewRule(), 'rule_testing', '10s');
+    createCustomRule({ ...getNewRule(), index: ['exceptions-*'] }, 'rule_testing');
     reload();
     goToRuleDetails();
 
     cy.get(RULE_STATUS).should('have.text', '—');
 
     esArchiverLoad('auditbeat_for_exceptions');
-    activatesRule();
+    enablesRule();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 

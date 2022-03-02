@@ -103,6 +103,7 @@ export interface MapsPluginStartDependencies {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
+  usageCollection?: UsageCollectionSetup;
 }
 
 /**

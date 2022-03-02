@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MlNodesPanelProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertNodesOverviewPanelExists(expectPanelExits: boolean = true) {
@@ -25,11 +26,13 @@ export function MlNodesPanelProvider({ getService }: FtrProviderContext) {
     },
 
     async assertMlNodesCount(minCount: number = 1) {
-      const actualCount = parseInt(await testSubjects.getVisibleText('mlTotalNodesCount'), 10);
-      expect(actualCount).to.not.be.lessThan(
-        minCount,
-        `Total ML nodes count should be at least '${minCount}' (got '${actualCount}')`
-      );
+      await retry.try(async () => {
+        const actualCount = parseInt(await testSubjects.getVisibleText('mlTotalNodesCount'), 10);
+        expect(actualCount).to.not.be.lessThan(
+          minCount,
+          `Total ML nodes count should be at least '${minCount}' (got '${actualCount}')`
+        );
+      });
     },
 
     async assertNodeOverviewPanel() {

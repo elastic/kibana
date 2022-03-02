@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState, useEffect, Dispatch } from 'react';
-
+import { camelCase } from 'lodash';
 import { EuiFlexGroup, EuiTextColor, EuiFlexItem } from '@elastic/eui';
 
 import { ColorRangesExtraActions } from './color_ranges_extra_actions';
@@ -84,7 +84,9 @@ export function ColorRanges({
       ) : null}
       <EuiFlexItem grow={false}>
         {errors.map((error) => (
-          <EuiTextColor color="danger">{error}</EuiTextColor>
+          <EuiTextColor color="danger" key={`${camelCase(error)}`}>
+            {error}
+          </EuiTextColor>
         ))}
       </EuiFlexItem>
       {showExtraActions ? (

@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -46,6 +47,7 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
   operationType: 'date_histogram';
   params: {
     interval: string;
+    ignoreTimeRange?: boolean;
   };
 }
 
@@ -189,7 +191,14 @@ export const dateHistogramOperation: OperationDefinition<
       const value = ev.target.checked
         ? data.search.aggs.calculateAutoTimeExpression({ from: fromDate, to: toDate }) || '1h'
         : autoInterval;
-      updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
+      updateLayer(
+        updateColumnParam({
+          layer: updateColumnParam({ layer, columnId, paramName: 'interval', value }),
+          columnId,
+          paramName: 'ignoreTimeRange',
+          value: false,
+        })
+      );
     }
 
     const setInterval = (newInterval: typeof interval) => {
@@ -214,128 +223,176 @@ export const dateHistogramOperation: OperationDefinition<
           </EuiFormRow>
         )}
         {currentColumn.params.interval !== autoInterval && (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
-              defaultMessage: 'Minimum interval',
-            })}
-            fullWidth
-            display="rowCompressed"
-          >
-            {intervalIsRestricted ? (
-              <FormattedMessage
-                id="xpack.lens.indexPattern.dateHistogram.restrictedInterval"
-                defaultMessage="Interval fixed to {intervalValue} due to aggregation restrictions."
-                values={{
-                  intervalValue: restrictedInterval(field!.aggregationRestrictions),
-                }}
-              />
-            ) : (
-              <>
-                <EuiFlexGroup responsive={false} gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiFieldNumber
-                      compressed
-                      data-test-subj="lensDateHistogramValue"
-                      value={
-                        typeof interval.value === 'number' || interval.value === ''
-                          ? interval.value
-                          : parseInt(interval.value, 10)
-                      }
-                      disabled={calendarOnlyIntervals.has(interval.unit)}
-                      isInvalid={!isValid}
-                      onChange={(e) => {
-                        const newInterval = {
-                          ...interval,
-                          value: e.target.value,
-                        };
-                        setInterval(newInterval);
-                      }}
-                      step={1}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiSelect
-                      compressed
-                      data-test-subj="lensDateHistogramUnit"
-                      value={interval.unit}
-                      onChange={(e) => {
-                        const newInterval = {
-                          ...interval,
-                          unit: e.target.value,
-                        };
-                        setInterval(newInterval);
-                      }}
-                      isInvalid={!isValid}
-                      options={[
-                        {
-                          value: 'ms',
-                          text: i18n.translate(
-                            'xpack.lens.indexPattern.dateHistogram.milliseconds',
-                            {
-                              defaultMessage: 'milliseconds',
-                            }
-                          ),
-                        },
-                        {
-                          value: 's',
-                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.seconds', {
-                            defaultMessage: 'seconds',
-                          }),
-                        },
-                        {
-                          value: 'm',
-                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.minutes', {
-                            defaultMessage: 'minutes',
-                          }),
-                        },
-                        {
-                          value: 'h',
-                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.hours', {
-                            defaultMessage: 'hours',
-                          }),
-                        },
-                        {
-                          value: 'd',
-                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.days', {
-                            defaultMessage: 'days',
-                          }),
-                        },
-                        {
-                          value: 'w',
-                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.week', {
-                            defaultMessage: 'week',
-                          }),
-                        },
-                        {
-                          value: 'M',
-                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.month', {
-                            defaultMessage: 'month',
-                          }),
-                        },
-                        // Quarterly intervals appear to be unsupported by esaggs
-                        {
-                          value: 'y',
-                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.year', {
-                            defaultMessage: 'year',
-                          }),
-                        },
-                      ]}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                {!isValid && (
+          <>
+            <EuiFormRow
+              label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
+                defaultMessage: 'Minimum interval',
+              })}
+              fullWidth
+              display="rowCompressed"
+            >
+              {intervalIsRestricted ? (
+                <FormattedMessage
+                  id="xpack.lens.indexPattern.dateHistogram.restrictedInterval"
+                  defaultMessage="Interval fixed to {intervalValue} due to aggregation restrictions."
+                  values={{
+                    intervalValue: restrictedInterval(field!.aggregationRestrictions),
+                  }}
+                />
+              ) : (
+                <>
+                  <EuiFlexGroup responsive={false} gutterSize="s">
+                    <EuiFlexItem>
+                      <EuiFieldNumber
+                        compressed
+                        data-test-subj="lensDateHistogramValue"
+                        value={
+                          typeof interval.value === 'number' || interval.value === ''
+                            ? interval.value
+                            : parseInt(interval.value, 10)
+                        }
+                        disabled={calendarOnlyIntervals.has(interval.unit)}
+                        isInvalid={!isValid}
+                        onChange={(e) => {
+                          const newInterval = {
+                            ...interval,
+                            value: e.target.value,
+                          };
+                          setInterval(newInterval);
+                        }}
+                        step={1}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiSelect
+                        compressed
+                        data-test-subj="lensDateHistogramUnit"
+                        value={interval.unit}
+                        onChange={(e) => {
+                          const newInterval = {
+                            ...interval,
+                            unit: e.target.value,
+                          };
+                          setInterval(newInterval);
+                        }}
+                        isInvalid={!isValid}
+                        options={[
+                          {
+                            value: 'ms',
+                            text: i18n.translate(
+                              'xpack.lens.indexPattern.dateHistogram.milliseconds',
+                              {
+                                defaultMessage: 'milliseconds',
+                              }
+                            ),
+                          },
+                          {
+                            value: 's',
+                            text: i18n.translate('xpack.lens.indexPattern.dateHistogram.seconds', {
+                              defaultMessage: 'seconds',
+                            }),
+                          },
+                          {
+                            value: 'm',
+                            text: i18n.translate('xpack.lens.indexPattern.dateHistogram.minutes', {
+                              defaultMessage: 'minutes',
+                            }),
+                          },
+                          {
+                            value: 'h',
+                            text: i18n.translate('xpack.lens.indexPattern.dateHistogram.hours', {
+                              defaultMessage: 'hours',
+                            }),
+                          },
+                          {
+                            value: 'd',
+                            text: i18n.translate('xpack.lens.indexPattern.dateHistogram.days', {
+                              defaultMessage: 'days',
+                            }),
+                          },
+                          {
+                            value: 'w',
+                            text: i18n.translate('xpack.lens.indexPattern.dateHistogram.week', {
+                              defaultMessage: 'week',
+                            }),
+                          },
+                          {
+                            value: 'M',
+                            text: i18n.translate('xpack.lens.indexPattern.dateHistogram.month', {
+                              defaultMessage: 'month',
+                            }),
+                          },
+                          // Quarterly intervals appear to be unsupported by esaggs
+                          {
+                            value: 'y',
+                            text: i18n.translate('xpack.lens.indexPattern.dateHistogram.year', {
+                              defaultMessage: 'year',
+                            }),
+                          },
+                        ]}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  {!isValid && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiTextColor color="danger" data-test-subj="lensDateHistogramError">
+                        {i18n.translate('xpack.lens.indexPattern.invalidInterval', {
+                          defaultMessage: 'Invalid interval value',
+                        })}
+                      </EuiTextColor>
+                    </>
+                  )}
+                </>
+              )}
+            </EuiFormRow>
+            <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+              <EuiSwitch
+                label={
                   <>
-                    <EuiSpacer size="s" />
-                    <EuiTextColor color="danger" data-test-subj="lensDateHistogramError">
-                      {i18n.translate('xpack.lens.indexPattern.invalidInterval', {
-                        defaultMessage: 'Invalid interval value',
-                      })}
-                    </EuiTextColor>
+                    {i18n.translate(
+                      'xpack.lens.indexPattern.dateHistogram.bindToGlobalTimePicker',
+                      {
+                        defaultMessage: 'Bind to global time picker',
+                      }
+                    )}{' '}
+                    <EuiIconTip
+                      color="subdued"
+                      content={i18n.translate(
+                        'xpack.lens.indexPattern.dateHistogram.globalTimePickerHelp',
+                        {
+                          defaultMessage:
+                            "Filter the selected field by the global time picker in the top right. This setting can't be turned off for the default time field of the current data view.",
+                        }
+                      )}
+                      iconProps={{
+                        className: 'eui-alignTop',
+                      }}
+                      position="top"
+                      size="s"
+                      type="questionInCircle"
+                    />
                   </>
-                )}
-              </>
-            )}
-          </EuiFormRow>
+                }
+                disabled={indexPattern.timeFieldName === field?.name}
+                checked={
+                  indexPattern.timeFieldName === field?.name ||
+                  !currentColumn.params.ignoreTimeRange
+                }
+                onChange={() => {
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'ignoreTimeRange',
+                      value: !currentColumn.params.ignoreTimeRange,
+                    })
+                  );
+                }}
+                compressed
+              />
+            </EuiFormRow>
+          </>
         )}
       </>
     );

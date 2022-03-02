@@ -8,7 +8,7 @@
 
 import { Position } from '@elastic/charts';
 import { EmptySizeRatios, LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
+import { prepareLogTable } from '../../../../visualizations/common/utils';
 import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,

@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`IndexPattern addRuntimeField and removeRuntimeField add and remove composite runtime field as new fields 1`] = `
+Object {
+  "fields": Object {
+    "a": Object {
+      "type": "keyword",
+    },
+    "b": Object {
+      "type": "long",
+    },
+  },
+  "script": Object {
+    "source": "emit('hello world');",
+  },
+  "type": "composite",
+}
+`;
+
+exports[`IndexPattern addRuntimeField and removeRuntimeField add and remove runtime field as new field 1`] = `
+Object {
+  "script": Object {
+    "source": "emit('hello world');",
+  },
+  "type": "keyword",
+}
+`;
+
 exports[`IndexPattern toSpec should match snapshot 1`] = `
 Object {
   "allowNoIndex": false,
