@@ -56,6 +56,7 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
+      objectRemover.add(space, createdConnector.id, 'action', 'actions');
       return createdConnector.id;
     }
 
@@ -209,7 +210,6 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
       });
       const taskState = telemetryTask?._source?.task?.state;
       expect(taskState).not.to.be(undefined);
-      console.log(`TASK STATE: ${JSON.stringify(taskState)}`);
       const telemetry = JSON.parse(taskState!);
 
       // total number of rules
