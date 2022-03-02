@@ -88,7 +88,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, secrets);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Cannot use user and password with URL authentication. Specify user/password or URL."`
+      `"error validating action type secrets: Cannot use username/password for URL authentication. Provide valid URL or use Basic Authentication."`
     );
   });
 
@@ -100,7 +100,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, secrets);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Cannot use user and password with URL authentication. Specify user/password or URL."`
+      `"error validating action type secrets: Cannot use username/password for URL authentication. Provide valid URL or use Basic Authentication."`
     );
   });
 
@@ -113,7 +113,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, secrets);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Cannot use user and password with URL authentication. Specify user/password or URL."`
+      `"error validating action type secrets: Cannot use username/password for URL authentication. Provide valid URL or use Basic Authentication."`
     );
   });
 
@@ -137,7 +137,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Either user and password or URL authentication must be specified."`
+      `"error validating action type secrets: Provide either URL link or username/password to authenticate"`
     );
   });
 
@@ -263,7 +263,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(actionType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: Username must be provided"`
+      `"error validating action type connector: Provide valid Username"`
     );
   });
 
@@ -278,7 +278,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(actionType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: Password must be provided"`
+      `"error validating action type connector: Provide valid Password"`
     );
   });
 
@@ -293,7 +293,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(actionType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: configUrl must be provided"`
+      `"error validating action type connector: Provide valid URL"`
     );
   });
 

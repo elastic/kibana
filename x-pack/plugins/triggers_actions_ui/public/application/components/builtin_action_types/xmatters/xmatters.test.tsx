@@ -168,7 +168,7 @@ describe('xmatters action params validation', () => {
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { alertActionGroupName: [], signalId: [], ruleName: [], date: [], spaceId: [] },
+      errors: { alertActionGroupName: [], signalId: [] },
     });
   });
 });
