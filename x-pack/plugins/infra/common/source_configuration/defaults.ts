@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { defaultSourceConfiguration } from '../source_configuration/defaults';
-import { LogViewAttributes, LogViewsStaticConfig } from './types';
+import { LOGS_INDEX_PATTERN, METRICS_INDEX_PATTERN } from '../constants';
+import { InfraSourceConfiguration } from './source_configuration';
 
-export const defaultLogViewAttributes: LogViewAttributes = {
-  name: 'Log View',
-  description: 'A default log view',
+export const defaultSourceConfiguration: InfraSourceConfiguration = {
+  name: 'Default',
+  description: '',
+  metricAlias: METRICS_INDEX_PATTERN,
   logIndices: {
     type: 'index_name',
-    indexName: 'logs-*,filebeat-*',
+    indexName: LOGS_INDEX_PATTERN,
   },
+  fields: {
+    message: ['message', '@message'],
+  },
+  inventoryDefaultView: '0',
+  metricsExplorerDefaultView: '0',
   logColumns: [
     {
       timestampColumn: {
@@ -23,7 +29,7 @@ export const defaultLogViewAttributes: LogViewAttributes = {
     },
     {
       fieldColumn: {
-        id: 'eb9777a8-fcd3-420e-ba7d-172fff6da7a2',
+        id: ' eb9777a8-fcd3-420e-ba7d-172fff6da7a2',
         field: 'event.dataset',
       },
     },
@@ -33,8 +39,5 @@ export const defaultLogViewAttributes: LogViewAttributes = {
       },
     },
   ],
-};
-
-export const defaultLogViewsStaticConfig: LogViewsStaticConfig = {
-  messageFields: defaultSourceConfiguration.fields.message,
+  anomalyThreshold: 50,
 };
