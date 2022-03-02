@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
 import React from 'react';
 import type { FileLayer } from '@elastic/ems-client';
 import { IUiSettingsClient } from 'kibana/public';
 import type { EmbeddableFactory } from 'src/plugins/embeddable/public';
+import type { Datatable } from 'src/plugins/expressions/public';
 import type { FormatFactory } from 'src/plugins/field_formats/common';
 import {
   FIELD_ORIGIN,
@@ -42,6 +42,7 @@ export function ChoroplethChart({
 }: Props) {
   console.log('data', data);
   console.log('args', args);
+  console.log(emsFileLayers);
   if (args.isPreview) {
     return <Icon />;
   }
@@ -75,10 +76,12 @@ export function ChoroplethChart({
           __columns: [
             {
               name: args.regionAccessor,
+              label: getAccessorLabel(table, args.regionAccessor),
               type: 'string',
             },
             {
               name: args.valueAccessor,
+              label: getAccessorLabel(table, args.valueAccessor),
               type: 'number',
             },
           ],
@@ -90,6 +93,7 @@ export function ChoroplethChart({
     sourceDescriptor: {
       type: SOURCE_TYPES.EMS_FILE,
       id: emsLayerId,
+      tooltipProperties: [emsField],
     },
     style: {
       type: 'VECTOR',
@@ -123,4 +127,11 @@ export function ChoroplethChart({
   };
 
   return <PassiveMap passiveLayer={choroplethLayer} factory={mapEmbeddableFactory} />;
+}
+
+function getAccessorLabel(table: Datatable, accessor: string) {
+  const column = table.columns.find((column) => {
+    return column.id === accessor;
+  });
+  return column ? column.name : accessor;
 }

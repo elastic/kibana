@@ -42,7 +42,12 @@ import {
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
-import { autoFitToBounds, clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
+import {
+  autoFitToBounds,
+  clearDataRequests,
+  syncDataForLayerId,
+  updateStyleMeta,
+} from './data_request_actions';
 import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,

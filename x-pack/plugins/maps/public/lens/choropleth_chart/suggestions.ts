@@ -44,7 +44,7 @@ export function getSuggestions(
                   metricLabel: metric.operation.label.toLowerCase(),
                 },
               }),
-              score: 0.5,
+              score: 0.7,
               state: {
                 layerId: tableId,
                 emsLayerId: emsSuggestion.layerId,
