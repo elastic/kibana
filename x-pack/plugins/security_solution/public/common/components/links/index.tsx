@@ -66,7 +66,7 @@ const UserDetailsLinkComponent: React.FC<{
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
-        path: getUsersDetailsUrl(encodeURIComponent(encodedUserName), search),
+        path: getUsersDetailsUrl(encodedUserName, search),
       });
     },
     [encodedUserName, navigateToApp, search]
@@ -76,7 +76,7 @@ const UserDetailsLinkComponent: React.FC<{
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-user-details"
-      href={formatUrl(getUsersDetailsUrl(encodeURIComponent(encodedUserName)))}
+      href={formatUrl(getUsersDetailsUrl(encodedUserName))}
       onClick={onClick ?? goToUsersDetails}
       title={title ?? encodedUserName}
     >
@@ -86,7 +86,7 @@ const UserDetailsLinkComponent: React.FC<{
     <LinkAnchor
       data-test-subj="users-link-anchor"
       onClick={onClick ?? goToUsersDetails}
-      href={formatUrl(getUsersDetailsUrl(encodeURIComponent(encodedUserName)))}
+      href={formatUrl(getUsersDetailsUrl(encodedUserName))}
     >
       {children ? children : userName}
     </LinkAnchor>
