@@ -58,6 +58,8 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       rule_id: ruleId,
       risk_score: parseInt(rule.riskScore, 10),
       description: rule.description,
+      // Default interval is 1m, our tests config overwrite this to 1s
+      // See https://github.com/elastic/kibana/pull/125396 for details
       interval: '10s',
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
