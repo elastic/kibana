@@ -18,9 +18,13 @@ import { Fields } from '../../entity';
 
 export interface StreamToBulkOptions<TFields extends Fields = ApmFields> {
   concurrency?: number;
+  // the maximum number of documents to process
   maxDocs?: number;
+  // the number of documents to flush the bulk operation defaults to 10k
+  flushInterval?: number;
   mapToIndex?: (document: Record<string, any>) => string;
-  dryRunCallBack?: (yielded: number, item: TFields | undefined, done: boolean) => void;
+  dryRun: boolean;
+  itemStartStopCallback?: (item: TFields | null, done: boolean) => void;
 }
 
 export class ApmSynthtraceEsClient {
@@ -80,29 +84,33 @@ export class ApmSynthtraceEsClient {
 
   async index<TFields>(
     events: EntityIterable<TFields> | Array<EntityIterable<TFields>>,
-    options?: StreamToBulkOptions
+    options?: StreamToBulkOptions,
+    streamProcessor?: StreamProcessor
   ) {
     const dataStream = Array.isArray(events) ? new EntityStreams(events) : events;
 
-    const source = new StreamProcessor({
-      processors: StreamProcessor.apmProcessors,
-      maxSourceEvents: options?.maxDocs,
-      logger: this.logger,
-    });
-    // TODO https://github.com/elastic/elasticsearch-js/issues/1610
-    // having to map here is awkward, it'd be better to map just before serialization.
+    const source =
+      streamProcessor != null
+        ? streamProcessor
+        : new StreamProcessor({
+            processors: StreamProcessor.apmProcessors,
+            maxSourceEvents: options?.maxDocs,
+            logger: this.logger,
+          });
 
-    if (options?.dryRunCallBack) {
-      this.logger.perf('enumerate_scenario', () => {
+    let item: Record<any, any> | null = null;
+    let yielded = 0;
+    if (options?.dryRun) {
+      await this.logger.perf('enumerate_scenario', async () => {
         // @ts-ignore
         // We just want to enumerate
-        let yielded = 0;
-        let item;
-        for (item of source.streamToDocument(StreamProcessor.toDocument, dataStream)) {
-          options.dryRunCallBack!(yielded, item, false);
-          yielded++;
+        for await (item of source.streamToDocumentAsync(StreamProcessor.toDocument, dataStream)) {
+          if (yielded === 0) {
+            options.itemStartStopCallback?.apply(this, [item, false]);
+            yielded++;
+          }
         }
-        options.dryRunCallBack!(yielded, item, true);
+        options.itemStartStopCallback?.apply(this, [item, true]);
       });
       return;
     }
@@ -113,6 +121,9 @@ export class ApmSynthtraceEsClient {
       concurrency: options?.concurrency ?? 10,
       refresh: false,
       refreshOnCompletion: false,
+      flushInterval: options?.flushInterval ?? StreamProcessor.defaultFlushInterval,
+      // TODO https://github.com/elastic/elasticsearch-js/issues/1610
+      // having to map here is awkward, it'd be better to map just before serialization.
       datasource: source.streamToDocumentAsync(StreamProcessor.toDocument, dataStream),
       onDrop: (doc) => {
         this.logger.info(doc);
@@ -120,15 +131,20 @@ export class ApmSynthtraceEsClient {
       // TODO bug in client not passing generic to BulkHelperOptions<>
       // https://github.com/elastic/elasticsearch-js/issues/1611
       onDocument: (doc: unknown) => {
-        const d = doc as Record<string, any>;
+        item = doc as Record<string, any>;
+        if (yielded === 0) {
+          options?.itemStartStopCallback!(item, false);
+          yielded++;
+        }
         const index = options?.mapToIndex
-          ? options?.mapToIndex(d)
+          ? options?.mapToIndex(item)
           : this.forceDataStreams
-          ? StreamProcessor.getDataStreamForEvent(d, writeTargets)
-          : StreamProcessor.getIndexForEvent(d, writeTargets);
+          ? StreamProcessor.getDataStreamForEvent(item, writeTargets)
+          : StreamProcessor.getIndexForEvent(item, writeTargets);
         return { create: { _index: index } };
       },
     });
+    options?.itemStartStopCallback?.apply(this, [item, true]);
 
     const indices = Object.values(writeTargets);
     this.logger.info(`Indexed all data attempting to refresh: ${indices}`);

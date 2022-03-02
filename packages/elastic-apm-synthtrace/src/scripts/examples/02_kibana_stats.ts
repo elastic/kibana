@@ -8,12 +8,12 @@
 
 import { stackMonitoring, timerange } from '../../index';
 import { Scenario } from '../scenario';
-import { getCommonServices } from '../utils/get_common_services';
+import { getLogger } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
 import { ApmFields } from '../../lib/apm/apm_fields';
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
-  const { logger } = getCommonServices(runOptions);
+  const logger = getLogger(runOptions);
 
   if (!runOptions.writeTarget) {
     throw new Error('Write target is not defined');

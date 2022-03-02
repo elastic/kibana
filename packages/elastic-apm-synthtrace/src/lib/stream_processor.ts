@@ -21,10 +21,14 @@ import { Fields } from './entity';
 export interface StreamProcessorOptions<TFields extends Fields = ApmFields> {
   processors: Array<(events: TFields[]) => TFields[]>;
   flushInterval?: string;
+  // defaults to 10k
   maxBufferSize?: number;
   // the maximum source events to process, not the maximum documents outputted by the processor
   maxSourceEvents?: number;
   logger?: Logger;
+  name?: string;
+  // called everytime maxBufferSize is processed
+  processedCallback?: (processedDocuments: number) => void;
 }
 
 export class StreamProcessor<TFields extends Fields = ApmFields> {
@@ -33,25 +37,28 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     getSpanDestinationMetrics,
     getBreakdownMetrics,
   ];
+  public static defaultFlushInterval: number = 10000;
 
   constructor(private readonly options: StreamProcessorOptions<TFields>) {
     [this.intervalAmount, this.intervalUnit] = this.options.flushInterval
       ? parseInterval(this.options.flushInterval)
       : parseInterval('1m');
+    this.name = this.options?.name ?? 'StreamProcessor';
   }
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
+  private readonly name: string;
 
   // TODO move away from chunking and feed this data one by one to processors
   *stream(...eventSources: Array<EntityIterable<TFields>>) {
-    const maxBufferSize = this.options.maxBufferSize ?? 10000;
+    const maxBufferSize = this.options.maxBufferSize ?? StreamProcessor.defaultFlushInterval;
     const maxSourceEvents = this.options.maxSourceEvents;
     let localBuffer = [];
     let flushAfter: number | null = null;
     let sourceEventsYielded = 0;
     for (const eventSource of eventSources) {
       const order = eventSource.order();
-      this.options.logger?.info(`order: ${order}`);
+      this.options.logger?.debug(`order: ${order}`);
       for (const event of eventSource) {
         const eventDate = event['@timestamp'] as number;
         localBuffer.push(event);
@@ -61,8 +68,13 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
 
         yield StreamProcessor.enrich(event);
         sourceEventsYielded++;
-        if (maxSourceEvents && sourceEventsYielded % (maxSourceEvents / 10) === 0) {
-          this.options.logger?.info(`Yielded ${sourceEventsYielded} events`);
+        if (sourceEventsYielded % maxBufferSize === 0) {
+          if (this.options?.processedCallback) {
+            this.options.processedCallback(maxBufferSize);
+          }
+        }
+        if (maxSourceEvents && sourceEventsYielded % maxBufferSize === 0) {
+          this.options.logger?.debug(`${this.name} yielded ${sourceEventsYielded} events`);
         }
         if (maxSourceEvents && sourceEventsYielded >= maxSourceEvents) {
           // yielded the maximum source events, we still want the local buffer to generate derivative documents
@@ -77,7 +89,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
           const e = new Date(eventDate).toISOString();
           const f = new Date(flushAfter!).toISOString();
           this.options.logger?.debug(
-            `flush ${localBuffer.length} documents ${order}: ${e} => ${f}`
+            `${this.name} flush ${localBuffer.length} documents ${order}: ${e} => ${f}`
           );
           for (const processor of this.options.processors) {
             yield* processor(localBuffer).map(StreamProcessor.enrich);
@@ -87,15 +99,20 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
         }
       }
       if (maxSourceEvents && sourceEventsYielded >= maxSourceEvents) {
-        this.options.logger?.info(`Yielded maximum number of documents: ${maxSourceEvents}`);
+        this.options.logger?.info(
+          `${this.name} yielded maximum number of documents: ${maxSourceEvents}`
+        );
         break;
       }
     }
     if (localBuffer.length > 0) {
-      this.options.logger?.info(`Processing remaining buffer: ${localBuffer.length} items left`);
+      this.options.logger?.info(
+        `${this.name} processing remaining buffer: ${localBuffer.length} items left`
+      );
       for (const processor of this.options.processors) {
         yield* processor(localBuffer).map(StreamProcessor.enrich);
       }
+      this.options.processedCallback?.apply(this, [localBuffer.length]);
     }
   }
 
@@ -107,13 +124,14 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     }
   }
 
-  async *streamAsync(...eventSources: Array<EntityIterable<TFields>>): AsyncIterator<ApmFields> {
+  async *streamAsync(...eventSources: Array<EntityIterable<TFields>>): AsyncIterable<ApmFields> {
     yield* this.stream(...eventSources);
   }
+
   *streamToDocument<TDocument>(
     map: (d: ApmFields) => TDocument,
     ...eventSources: Array<EntityIterable<TFields>>
-  ): Generator<ApmFields> {
+  ): Generator<TDocument> {
     for (const apmFields of this.stream(...eventSources)) {
       yield map(apmFields);
     }
@@ -121,8 +139,8 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   async *streamToDocumentAsync<TDocument>(
     map: (d: ApmFields) => TDocument,
     ...eventSources: Array<EntityIterable<TFields>>
-  ): AsyncIterator<ApmFields> {
-    for (const apmFields of this.stream(...eventSources)) {
+  ): AsyncIterable<TDocument> & AsyncIterator<TDocument> {
+    for await (const apmFields of this.stream(...eventSources)) {
       yield map(apmFields);
     }
   }

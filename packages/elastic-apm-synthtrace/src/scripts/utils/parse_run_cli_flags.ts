@@ -50,6 +50,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
     ...pick(
       flags,
       'maxDocs',
+      'maxDocsConfidence',
       'target',
       'cloudId',
       'username',

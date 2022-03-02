@@ -10,12 +10,12 @@
 
 import { stackMonitoring, timerange } from '../../index';
 import { Scenario } from '../scenario';
-import { getCommonServices } from '../utils/get_common_services';
+import { getLogger } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
 import { StackMonitoringFields } from '../../lib/stack_monitoring/stack_monitoring_fields';
 
 const scenario: Scenario<StackMonitoringFields> = async (runOptions: RunOptions) => {
-  const { logger } = getCommonServices(runOptions);
+  const logger = getLogger(runOptions);
 
   return {
     mapToIndex: (data) => {

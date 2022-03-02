@@ -11,11 +11,11 @@ import { apm, timerange } from '../../index';
 import { ApmFields } from '../../lib/apm/apm_fields';
 import { Instance } from '../../lib/apm/instance';
 import { Scenario } from '../scenario';
-import { getCommonServices } from '../utils/get_common_services';
+import { getLogger } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
-  const { logger } = getCommonServices(runOptions);
+  const logger = getLogger(runOptions);
 
   const numServices = 3;
   const languages = ['go', 'dotnet', 'java', 'python'];

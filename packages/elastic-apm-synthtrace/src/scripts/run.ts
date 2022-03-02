@@ -14,7 +14,6 @@ import { startLiveDataUpload } from './utils/start_live_data_upload';
 import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { getCommonServices } from './utils/get_common_services';
 import { ApmSynthtraceKibanaClient } from '../lib/apm/client/apm_synthtrace_kibana_client';
-import { ApmSynthtraceEsClient } from '../lib/apm/client/apm_synthtrace_es_client';
 
 function options(y: Argv) {
   return y
@@ -57,9 +56,14 @@ function options(y: Argv) {
       boolean: true,
     })
     .option('maxDocs', {
-      description:
-        'The maximum number of documents we are allowed to generate, should be multiple of 10.000',
+      description: 'The maximum number of documents we are allowed to generate',
       number: true,
+    })
+    .option('maxDocsConfidence', {
+      description:
+        'Expert setting: --maxDocs relies on accurate tpm reporting of generators setting this to >1 will widen the estimated data generation range',
+      number: true,
+      default: 1,
     })
     .option('numShards', {
       description:
@@ -116,7 +120,7 @@ yargs(process.argv.slice(2))
   .command('*', 'Generate data and index into Elasticsearch', options, async (argv) => {
     const runOptions = parseRunCliFlags(argv);
 
-    const { logger, client } = getCommonServices(runOptions);
+    const { logger, apmEsClient } = getCommonServices(runOptions);
 
     const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
     const to = new Date(toMs);
@@ -128,10 +132,8 @@ yargs(process.argv.slice(2))
 
     const live = argv.live;
 
-    const forceDataStreams = !!runOptions.cloudId;
-    const esClient = new ApmSynthtraceEsClient(client, logger, forceDataStreams);
     if (runOptions.dryRun) {
-      await startHistoricalDataUpload(esClient, logger, runOptions, from, to);
+      await startHistoricalDataUpload(runOptions, from, to);
       return;
     }
     if (runOptions.cloudId) {
@@ -144,11 +146,11 @@ yargs(process.argv.slice(2))
     }
 
     if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
-      await esClient.updateComponentTemplates(runOptions.numShards);
+      await apmEsClient.updateComponentTemplates(runOptions.numShards);
     }
 
     if (argv.clean) {
-      await esClient.clean();
+      await apmEsClient.clean();
     }
 
     logger.info(
@@ -163,10 +165,10 @@ yargs(process.argv.slice(2))
       )}`
     );
 
-    await startHistoricalDataUpload(esClient, logger, runOptions, from, to);
+    await startHistoricalDataUpload(runOptions, from, to);
 
     if (live) {
-      await startLiveDataUpload(esClient, logger, runOptions, to);
+      await startLiveDataUpload(apmEsClient, logger, runOptions, to);
     }
   })
   .parse();

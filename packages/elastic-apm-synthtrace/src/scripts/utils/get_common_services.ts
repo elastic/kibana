@@ -7,10 +7,18 @@
  */
 
 import { Client, ClientOptions } from '@elastic/elasticsearch';
-import { createLogger } from '../../lib/utils/create_logger';
+import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
+import { createLogger, Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 
-export function getCommonServices({ target, cloudId, username, password, logLevel }: RunOptions) {
+export function getLogger({ logLevel }: RunOptions) {
+  return createLogger(logLevel);
+}
+
+export function getCommonServices(
+  { target, cloudId, username, password, logLevel }: RunOptions,
+  logger?: Logger
+) {
   if (!target && !cloudId) {
     throw Error('target or cloudId needs to be specified');
   }
@@ -22,11 +30,14 @@ export function getCommonServices({ target, cloudId, username, password, logLeve
 
   const client = new Client(options);
 
-  const logger = createLogger(logLevel);
+  logger = logger ?? createLogger(logLevel);
+
+  const forceDataStreams = !!cloudId;
+  const apmEsClient = new ApmSynthtraceEsClient(client, logger, forceDataStreams);
 
   return {
     logger,
-    client,
+    apmEsClient,
   };
 }
 
