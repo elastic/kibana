@@ -14,6 +14,7 @@ import { artifactListPageLabels } from './translations';
 import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ArtifactFormComponentProps } from './types';
+import { HttpFetchError } from 'kibana/public';
 
 describe('When using the ArtifactListPage component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -65,7 +66,7 @@ describe('When using the ArtifactListPage component', () => {
           <div>{`Is Disabled: ${disabled}`}</div>
           {error && (
             <>
-              <div>{error.message}</div>
+              <div data-test-subj="formError">{error.message}</div>
               <div>{JSON.stringify(error.body)}</div>
             </>
           )}
@@ -259,11 +260,6 @@ describe('When using the ArtifactListPage component', () => {
       describe('and submit is successful', () => {
         beforeEach(async () => {
           act(() => {
-            const lastProps = getLastFormComponentProps();
-            lastProps.onChange({ item: { ...lastProps.item, name: 'some name' }, isValid: true });
-          });
-
-          act(() => {
             userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
           });
 
@@ -285,14 +281,53 @@ describe('When using the ArtifactListPage component', () => {
         });
       });
 
-      describe('and submit fails', () => {
-        it.todo('should re-enable `Cancel` and `Submit` buttons');
+      // FIXME:PT revisit these tests. having hard time making them work
+      describe.skip('and submit fails', () => {
+        beforeEach(async () => {
+          mockedApi.responseProvider.trustedAppCreate.mockImplementation(() => {
+            // eslint-disable-next-line no-throw-literal
+            throw new Error('oh oh. no good!') as HttpFetchError;
+          });
+
+          act(() => {
+            userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+          });
+        });
+
+        it('should re-enable `Cancel` and `Submit` buttons', async () => {
+          await act(async () => {
+            await waitFor(
+              () => expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled(),
+              { timeout: 3000 }
+            );
+          });
+
+          await act(async () => {
+            await waitFor(() => {
+              expect(renderResult.getByTestId('formError')).toBeTruthy();
+            });
+          });
+
+          const cancelButtonDisabledState = (
+            renderResult.getByTestId('testPage-flyout-cancelButton') as HTMLButtonElement
+          ).disabled;
+
+          expect(cancelButtonDisabledState).toBe(false);
+
+          const submitButtonDisabledState = (
+            renderResult.getByTestId('testPage-flyout-submitButton') as HTMLButtonElement
+          ).disabled;
+
+          expect(submitButtonDisabledState).toBe(false);
+        });
 
         it.todo('should pass error along to the Form component and reset disabled back to `false`');
       });
 
       describe('and a custom Submit handler is used', () => {
-        it.todo('should use custom submit handler when submit button is used');
+        it.todo('should use custom submit handler when submit button is used'); // loading and button disabled checks
+
+        it.todo('should catch and show error if one is encountered');
       });
     });
 
@@ -303,7 +338,7 @@ describe('When using the ArtifactListPage component', () => {
         'should show expired license warning when unsupported features are being used (downgrade scenario)'
       );
 
-      it.todo('should provide Form component with the item for exit');
+      it.todo('should provide Form component with the item for edit');
 
       it.todo('should show error toast and close flyout if item for edit does not exist');
     });

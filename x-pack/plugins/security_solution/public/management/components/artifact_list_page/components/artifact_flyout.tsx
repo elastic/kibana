@@ -193,6 +193,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         ..._labels,
       };
     }, [_labels]);
+    const [externalIsSubmittingData, setExternalIsSubmittingData] = useState<boolean>(false);
     const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
       HttpFetchError | undefined
     >(undefined);
@@ -201,10 +202,14 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
 
     const {
-      isLoading: isSubmittingData,
+      isLoading: internalIsSubmittingData,
       mutateAsync: submitData,
       error: internalSubmitError,
     } = useWithArtifactSubmitData(apiClient, formMode);
+
+    const isSubmittingData = useMemo(() => {
+      return submitHandler ? externalIsSubmittingData : internalIsSubmittingData;
+    }, [externalIsSubmittingData, internalIsSubmittingData, submitHandler]);
 
     const submitError = useMemo(() => {
       return submitHandler ? externalSubmitHandlerError : internalSubmitError;
@@ -276,11 +281,18 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     const handleSubmitClick = useCallback(() => {
       if (submitHandler) {
+        setExternalIsSubmittingData(true);
+
         submitHandler(formState.item, formMode)
           .then(handleSuccess)
           .catch((submitHandlerError) => {
             if (isMounted) {
               setExternalSubmitHandlerError(submitHandlerError);
+            }
+          })
+          .finally(() => {
+            if (isMounted) {
+              setExternalIsSubmittingData(false);
             }
           });
       } else {
