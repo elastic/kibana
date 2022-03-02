@@ -91,6 +91,7 @@ interface WorkspaceState {
     fixAction?: DatasourceFixAction<unknown>;
   }>;
   expandError: boolean;
+  expressionToRender: string | null | undefined;
 }
 
 const dropProps = {
@@ -145,9 +146,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
+    expressionToRender: undefined,
   });
 
-  const expressionToRender = useRef<null | undefined | string>();
+  // const expressionToRender = useRef<null | undefined | string>();
   const initialRenderComplete = useRef<boolean>();
 
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
@@ -253,26 +255,28 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     dispatchLens(setSaveable(Boolean(_expression)));
   }, [_expression, dispatchLens]);
 
-  if (shouldApplyExpression) {
-    expressionToRender.current = _expression;
-  }
-
   useEffect(() => {
     if (!autoApplyEnabled) {
-      dispatchLens(setChangesApplied(_expression === expressionToRender.current));
+      dispatchLens(setChangesApplied(_expression === localState.expressionToRender));
     }
   });
 
-  const expressionExists = Boolean(expressionToRender.current);
+  useEffect(() => {
+    if (shouldApplyExpression) {
+      setLocalState((s) => ({ ...s, expressionToRender: _expression }));
+    }
+  }, [_expression, shouldApplyExpression]);
+
+  const expressionExists = Boolean(localState.expressionToRender);
   useEffect(() => {
     // null signals an empty workspace which should count as an initial render
     if (
-      (expressionExists || expressionToRender.current === null) &&
+      (expressionExists || localState.expressionToRender === null) &&
       !initialRenderComplete.current
     ) {
       initialRenderComplete.current = true;
     }
-  }, [expressionExists]);
+  }, [expressionExists, localState.expressionToRender]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -374,12 +378,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderVisualization = () => {
-    if (expressionToRender.current === null) {
+    if (localState.expressionToRender === null) {
       return renderEmptyWorkspace();
     }
     return (
       <VisualizationWrapper
-        expression={expressionToRender.current}
+        expression={localState.expressionToRender}
         framePublicAPI={framePublicAPI}
         lensInspector={lensInspector}
         onEvent={onEvent}
