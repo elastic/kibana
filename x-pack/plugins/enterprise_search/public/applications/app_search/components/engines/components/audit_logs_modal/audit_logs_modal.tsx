@@ -16,10 +16,13 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID } from '../../../../../../../common/constants';
 import { EntSearchLogStream } from '../../../../../shared/log_stream';
 
 import { AuditLogsModalLogic } from './audit_logs_modal_logic';
@@ -33,9 +36,9 @@ export const AuditLogsModal: React.FC = () => {
 
   const filters = [
     'event.kind: event',
-    'event.dataset: enterprise-search-audit',
+    'event.action: audit',
     `enterprisesearch.data_repository.name: ${engineName}`,
-  ];
+  ].join(' and ');
 
   return !isModalVisible ? null : (
     <EuiModal onClose={hideModal} className="auditLogsModal" maxWidth={false}>
@@ -44,9 +47,15 @@ export const AuditLogsModal: React.FC = () => {
           <h1>{engineName}</h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-
       <EuiModalBody>
+        <EuiText size="s">
+          {i18n.translate('xpack.enterpriseSearch.appSearch.engines.auditLogsModal.eventTip', {
+            defaultMessage: 'Showing events from last 24 hours',
+          })}
+        </EuiText>
+        <EuiSpacer size="m" />
         <EntSearchLogStream
+          sourceId={ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID}
           columns={[
             {
               type: 'timestamp',
@@ -93,9 +102,10 @@ export const AuditLogsModal: React.FC = () => {
             },
             {
               type: 'message',
+              width: '50%',
             },
           ]}
-          query={filters.join(' and ')}
+          query={filters}
         />
       </EuiModalBody>
 

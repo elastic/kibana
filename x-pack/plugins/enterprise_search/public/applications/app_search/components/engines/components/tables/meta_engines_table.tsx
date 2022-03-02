@@ -14,6 +14,9 @@ import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { AppLogic } from '../../../../app_logic';
 import { EngineDetails } from '../../../engine/types';
 
+import { AuditLogsModalLogic } from '../audit_logs_modal/audit_logs_modal_logic';
+
+import { renderLastChangeLink } from './engine_link_helpers';
 import { MetaEnginesTableExpandedRow } from './meta_engines_table_expanded_row';
 import { MetaEnginesTableLogic } from './meta_engines_table_logic';
 import { MetaEnginesTableNameColumnContent } from './meta_engines_table_name_column_content';
@@ -28,10 +31,6 @@ import {
 } from './shared_columns';
 import { EnginesTableProps } from './types';
 import { getConflictingEnginesSet } from './utils';
-
-import { renderLastChangeLink } from './engine_link_helpers';
-
-import { AuditLogsModalLogic } from '../audit_logs_modal/audit_logs_modal_logic';
 
 interface IItemIdToExpandedRowMap {
   [id: string]: ReactNode;

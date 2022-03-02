@@ -7,9 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiLink
-} from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
@@ -17,7 +15,6 @@ import { TelemetryLogic } from '../../../../../shared/telemetry';
 import { ENGINE_PATH } from '../../../../routes';
 import { generateEncodedPath } from '../../../../utils/encode_path_params';
 import { FormattedDateTime } from '../../../../utils/formatted_date_time';
-
 
 const sendEngineTableLinkClickTelemetry = () => {
   TelemetryLogic.actions.sendAppSearchTelemetry({
