@@ -59,7 +59,7 @@ export function useOutputOptions() {
     const defaultOutputName = outputsRequest.data.items.find(
       (item) => item.is_default_monitoring
     )?.name;
-    return [getDefaultOutput(defaultOutputName), , ...outputOptions]; // TODO translations
+    return [getDefaultOutput(defaultOutputName), ...outputOptions];
   }, [outputsRequest, outputOptions]);
 
   return useMemo(
