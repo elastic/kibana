@@ -85,7 +85,9 @@ function getEnvFromMetadata() {
     console.error(`+++ Failed parsing run count, found: ${value}`);
   }
 
-  env[E2E_GREP] = execSync(`buildkite-agent meta-data get '${E2E_GREP}'`).toString().trim();
+  env[E2E_GREP] = execSync(`buildkite-agent meta-data get '${E2E_GREP}' --default ''`)
+    .toString()
+    .trim();
 
   return env;
 }
