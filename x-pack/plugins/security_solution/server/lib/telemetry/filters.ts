@@ -44,7 +44,6 @@ const allowlistProcessFields: AllowlistFields = {
 
 // Allow list for event-related fields, which can also be nested under events[]
 const allowlistBaseEventFields: AllowlistFields = {
-  signal_id: true,
   dll: {
     name: true,
     path: true,
@@ -109,6 +108,7 @@ const allowlistBaseEventFields: AllowlistFields = {
 export const allowlistEventFields: AllowlistFields = {
   _id: true,
   '@timestamp': true,
+  signal_id: true,
   agent: true,
   Endpoint: true,
   /* eslint-disable @typescript-eslint/naming-convention */
