@@ -18,17 +18,14 @@ import {
   PhraseFilter,
 } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
-import {
-  IndexPatternsContract,
-  FilterManager as QueryFilterManager,
-} from '../../../../data/public';
+import { DataViewsContract, FilterManager as QueryFilterManager } from '../../../../data/public';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(
     controlId: string,
     fieldName: string,
     indexPatternId: string,
-    indexPatternsService: IndexPatternsContract,
+    indexPatternsService: DataViewsContract,
     queryFilter: QueryFilterManager
   ) {
     super(controlId, fieldName, indexPatternId, indexPatternsService, queryFilter);

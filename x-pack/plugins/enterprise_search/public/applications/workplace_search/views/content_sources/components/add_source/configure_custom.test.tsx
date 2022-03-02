@@ -14,45 +14,45 @@ import { shallow } from 'enzyme';
 
 import { EuiForm, EuiFieldText } from '@elastic/eui';
 
+import { staticSourceData } from '../../source_data';
+
 import { ConfigureCustom } from './configure_custom';
 
 describe('ConfigureCustom', () => {
-  const advanceStep = jest.fn();
   const setCustomSourceNameValue = jest.fn();
-
-  const props = {
-    header: <h1>Header</h1>,
-    helpText: 'I bet you could use a hand.',
-    advanceStep,
-  };
+  const createContentSource = jest.fn();
 
   beforeEach(() => {
-    setMockActions({ setCustomSourceNameValue });
-    setMockValues({ customSourceNameValue: 'name', buttonLoading: false });
+    setMockActions({ setCustomSourceNameValue, createContentSource });
+    setMockValues({
+      customSourceNameValue: 'name',
+      buttonLoading: false,
+      sourceData: staticSourceData[1],
+    });
   });
 
   it('renders', () => {
-    const wrapper = shallow(<ConfigureCustom {...props} />);
+    const wrapper = shallow(<ConfigureCustom />);
 
     expect(wrapper.find(EuiForm)).toHaveLength(1);
   });
 
   it('handles input change', () => {
-    const wrapper = shallow(<ConfigureCustom {...props} />);
-    const TEXT = 'changed for the better';
+    const wrapper = shallow(<ConfigureCustom />);
+    const text = 'changed for the better';
     const input = wrapper.find(EuiFieldText);
-    input.simulate('change', { target: { value: TEXT } });
+    input.simulate('change', { target: { value: text } });
 
-    expect(setCustomSourceNameValue).toHaveBeenCalledWith(TEXT);
+    expect(setCustomSourceNameValue).toHaveBeenCalledWith(text);
   });
 
   it('handles form submission', () => {
-    const wrapper = shallow(<ConfigureCustom {...props} />);
+    const wrapper = shallow(<ConfigureCustom />);
 
     const preventDefault = jest.fn();
     wrapper.find('form').simulate('submit', { preventDefault });
 
     expect(preventDefault).toHaveBeenCalled();
-    expect(advanceStep).toHaveBeenCalled();
+    expect(createContentSource).toHaveBeenCalled();
   });
 });

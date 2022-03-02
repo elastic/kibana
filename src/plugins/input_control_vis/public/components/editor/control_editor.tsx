@@ -22,7 +22,7 @@ import {
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
-import { IndexPattern } from '../../../../data/public';
+import { DataView } from '../../../../data_views/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 import './control_editor.scss';
@@ -35,7 +35,7 @@ interface ControlEditorUiProps {
   handleRemoveControl: (controlIndex: number) => void;
   handleIndexPatternChange: (controlIndex: number, indexPatternId: string) => void;
   handleFieldNameChange: (controlIndex: number, fieldName: string) => void;
-  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<DataView>;
   handleOptionsChange: <T extends keyof ControlParamsOptions>(
     controlIndex: number,
     optionName: T,
