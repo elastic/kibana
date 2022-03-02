@@ -41,11 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should ignore the top values column if other category is enabled', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
-
+      // Make the breakdown dimention be ignored
       await PageObjects.lens.openDimensionEditor(
         'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
       );
@@ -69,10 +65,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the open button for a compatible saved visualization with a lucene query', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
+      // Make the breakdown dimention contribute to filters again
+      await PageObjects.lens.openDimensionEditor(
+        'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
+      );
+      await testSubjects.click('indexPattern-terms-advanced');
+      await testSubjects.click('indexPattern-terms-other-bucket');
+      await PageObjects.lens.closeDimensionEditor();
 
       // add a lucene query to the yDimension
       await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
@@ -81,11 +80,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('indexPattern-filter-by-input > switchQueryLanguageButton');
       await testSubjects.click('languageToggle');
       await testSubjects.click('indexPattern-filter-by-input > switchQueryLanguageButton');
+      // apparently setting a filter requires some time before and after typing to work properly
+      await PageObjects.common.sleep(1000);
       await PageObjects.lens.setFilterBy('memory');
+      await PageObjects.common.sleep(1000);
+
+      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.waitForVisualization();
-      // expect the button is shown and enabled
-      //   await PageObjects.common.sleep(15000);
 
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
 
@@ -95,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('discoverChart');
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
-        '( ( ip: 220.120.146.16 ) OR ( ip: 220.120.146.16 ) OR ( ip: 220.120.146.16 ) OR ( ip: 220.120.146.16 ) OR ( ip: 220.120.146.16 ) OR ( ip: 220.120.146.16 ) OR ( ip: 152.56.56.106 ) OR ( ip: 152.56.56.106 ) OR ( ip: 111.55.80.52 ) OR ( ip: 111.55.80.52 ) OR ( ip: 111.55.80.52 ) OR ( ip: 111.55.80.52 ) OR ( ip: 111.55.80.52 ) OR ( ip: 111.55.80.52 ) )'
+        '( ( ip: "220.120.146.16" ) OR ( ip: "152.56.56.106" ) OR ( ip: "111.55.80.52" ) )'
       );
       const filterPills = await filterBar.getFiltersLabel();
       expect(filterPills.length).to.be(1);
@@ -104,16 +106,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(lensWindowHandler);
     });
 
-    it('should show the underlying data extracting all filters and columsn from a formula', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
+    it('should show the underlying data extracting all filters and columns from a formula', async () => {
+      await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'formula',
-        formula: `median(bytes) + average(memory, kql=`,
+        formula: `average(memory, kql=`,
         keepOpen: true,
       });
 
@@ -131,20 +130,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('discoverChart');
       // check the columns
       const columns = await PageObjects.discover.getColumnHeaders();
-      expect(columns).to.eql(['ip', '@timestamp', 'bytes', 'memory']);
+      expect(columns).to.eql(['ip', '@timestamp', 'memory']);
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
-        '( ( bytes > 6000 ) AND ( ( ip: 97.220.3.248 ) OR ( ip: 169.228.188.120 ) OR ( ip: 78.83.247.30 ) ) )'
+        '( ( bytes > 6000 ) AND ( ( ip: "0.53.251.53" ) OR ( ip: "0.108.3.2" ) OR ( ip: "0.209.80.244" ) ) )'
       );
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
     });
 
     it('should extract a filter from a formula global filter', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -154,7 +150,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.enableFilter();
+      // apparently setting a filter requires some time before and after typing to work properly
+      await PageObjects.common.sleep(1000);
       await PageObjects.lens.setFilterBy('bytes > 4000');
+      await PageObjects.common.sleep(1000);
+
+      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.waitForVisualization();
       // expect the button is shown and enabled
@@ -167,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
-        '( ( bytes > 4000 ) AND ( ( ip: 97.220.3.248 ) OR ( ip: 169.228.188.120 ) OR ( ip: 78.83.247.30 ) ) )'
+        '( ( bytes > 4000 ) AND ( ( ip: "0.53.251.53" ) OR ( ip: "0.108.3.2" ) OR ( ip: "0.209.80.244" ) ) )'
       );
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
