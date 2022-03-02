@@ -23,9 +23,8 @@ import { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
-
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { HostRisk } from '../../../../common/containers/hosts_risk/types';
+import { HostRisk } from '../../../../risk_score/containers';
 
 export type HandleOnEventClosed = () => void;
 interface Props {

@@ -40,7 +40,7 @@ import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
-import { HostRisk } from '../../containers/hosts_risk/types';
+import { HostRisk } from '../../../risk_score/containers';
 
 type EventViewTab = EuiTabbedContentTab;
 

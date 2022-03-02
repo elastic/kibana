@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { useEffect, useMemo } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-import { createFilter } from '../../../../common/containers/helpers';
+import { createFilter } from '../../../common/containers/helpers';
 
 import {
   getHostRiskIndex,
@@ -19,20 +19,17 @@ import {
   RiskQueries,
   RiskScoreAggByFields,
   RiskSeverity,
-} from '../../../../../common/search_strategy';
+} from '../../../../common/search_strategy';
 
-import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../../src/plugins/data/common';
-import type { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 
-import { useKibana } from '../../../../common/lib/kibana';
-import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
-import { ESTermQuery } from '../../../../../common/typed_json';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { SeverityCount } from '../../../../common/components/severity/types';
-import { useSpaceId } from '../all';
+import { useKibana } from '../../../common/lib/kibana';
+import { isIndexNotFoundError } from '../../../common/utils/exceptions';
+import { ESTermQuery } from '../../../../common/typed_json';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { SeverityCount } from '../../../common/components/severity/types';
+import { useSpaceId } from '../common';
 
 type GetHostsRiskScoreProps = KpiRiskScoreRequestOptions & {
   data: DataPublicPluginStart;

@@ -19,13 +19,14 @@ import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
 import { Direction } from '../../../../../timelines/common';
-import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
+
 import { buildHostNamesFilter, RiskScoreFields } from '../../../../common/search_strategy';
-import { useHostRiskScore } from '../../containers/risk_score/all';
+
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
 import { RuleLink } from '../../../detections/pages/detection_engine/rules/all/use_columns';
+import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
 
 export interface TopHostScoreContributorsProps
   extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
@@ -36,7 +37,7 @@ export interface TopHostScoreContributorsProps
 interface TableItem {
   rank: number;
   name: string;
-  id?: string; // TODO Remove the '?' when the new transform is delivered
+  id: string;
 }
 
 const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [

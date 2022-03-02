@@ -12,13 +12,14 @@ import { UsersComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { State } from '../../../common/store';
-import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
-
-import { useUserRiskScore } from '../../../hosts/containers/risk_score/all';
 
 import { UserRiskScoreTable } from '../../components/user_risk_score_table';
 import { usersSelectors } from '../../store';
-import { useUserRiskScoreKpi } from '../../../hosts/containers/risk_score/kpi';
+import {
+  UserRiskScoreQueryId,
+  useUserRiskScore,
+  useUserRiskScoreKpi,
+} from '../../../risk_score/containers';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -57,7 +58,7 @@ export const UserRiskScoreQueryTabBody = ({
     <UserRiskScoreTableManage
       deleteQuery={deleteQuery}
       data={data ?? []}
-      id={HostRiskScoreQueryId.HOSTS_BY_RISK}
+      id={UserRiskScoreQueryId.USERS_BY_RISK}
       inspect={inspect}
       isInspect={isInspected}
       loading={loading || isKpiLoading}

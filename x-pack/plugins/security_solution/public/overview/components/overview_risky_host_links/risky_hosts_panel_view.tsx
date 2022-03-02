@@ -15,7 +15,7 @@ import { Link } from '../link_panel/link';
 import * as i18n from './translations';
 import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
 import { NavigateToHost } from './navigate_to_host';
-import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
+import { HostRiskScoreQueryId } from '../../../risk_score/containers';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   {

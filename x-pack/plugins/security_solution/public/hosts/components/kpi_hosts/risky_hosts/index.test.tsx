@@ -13,8 +13,6 @@ import { RiskyHosts } from './';
 import { TestProviders } from '../../../../common/mock';
 import { KpiRiskScoreStrategyResponse } from '../../../../../common/search_strategy';
 
-jest.mock('../../../containers/kpi_hosts/risky_hosts');
-
 describe('RiskyHosts', () => {
   const defaultProps = {
     error: undefined,

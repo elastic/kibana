@@ -56,7 +56,7 @@ export interface UsersRiskScore extends RiskScore {
 export interface RuleRisk {
   rule_name: string;
   rule_risk: number;
-  rule_id?: string; // TODO Remove the '?' when the new transform is delivered
+  rule_id: string;
 }
 
 export type RiskScoreSortField = SortField<RiskScoreFields>;
@@ -67,8 +67,6 @@ export const enum RiskScoreFields {
   userName = 'user.name',
   riskScore = 'risk_stats.risk_score',
   risk = 'risk',
-  // TODO: Steph/Host Risk
-  // ruleRisks = 'rule_risks',
 }
 
 export interface RiskScoreItem {
@@ -77,8 +75,6 @@ export interface RiskScoreItem {
   [RiskScoreFields.userName]: Maybe<string>;
   [RiskScoreFields.risk]: Maybe<RiskSeverity>;
   [RiskScoreFields.riskScore]: Maybe<number>;
-  // TODO: Steph/Host Risk
-  // [RiskScoreFields.ruleRisks]: Maybe<RuleRisk[]>;
 }
 
 export const enum RiskSeverity {

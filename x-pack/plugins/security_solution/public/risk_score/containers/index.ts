@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { HostsRiskScore } from '../../../../common/search_strategy';
+import { HostsRiskScore } from '../../../common/search_strategy';
 
+export * from './all';
+export * from './kpi';
+
+export const enum UserRiskScoreQueryId {
+  USERS_BY_RISK = 'HostsByRisk',
+}
 export const enum HostRiskScoreQueryId {
   DEFAULT = 'HostRiskScore',
   HOST_RISK_SCORE_OVER_TIME = 'HostRiskScoreOverTimeQuery',

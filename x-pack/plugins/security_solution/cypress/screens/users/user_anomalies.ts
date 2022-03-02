@@ -6,4 +6,4 @@
  */
 
 export const ANOMALIES_TAB = '[data-test-subj="navigation-anomalies"]';
-export const ANOMALIES_TAB_CONTENT = '[data-test-subj="user-anamolies-tab"]';
+export const ANOMALIES_TAB_CONTENT = '[data-test-subj="user-anomalies-tab"]';
