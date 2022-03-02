@@ -8,8 +8,8 @@
 
 import { Position } from '@elastic/charts';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
+import { oneOf } from '../../../../expressions/common';
 import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
-import { validateOptions } from '../../../../charts/common';
 import { ChartTypes, TreemapVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -53,14 +53,14 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
     legendDisplay: {
       types: ['string'],
       help: strings.getLegendDisplayArgHelp(),
-      options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
+      validate: oneOf(LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT),
       default: LegendDisplay.HIDE,
     },
     legendPosition: {
       types: ['string'],
       default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
-      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      validate: oneOf(Position.Top, Position.Right, Position.Bottom, Position.Left),
     },
     nestedLegend: {
       types: ['boolean'],
@@ -112,9 +112,6 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
     if (args.splitRow) {
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
-
-    validateOptions(args.legendDisplay, LegendDisplay, errors.invalidLegendDisplayError);
-    validateOptions(args.legendPosition, Position, errors.invalidLegendPositionError);
 
     const visConfig: PartitionVisParams = {
       ...args,

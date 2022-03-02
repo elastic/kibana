@@ -14,22 +14,12 @@ import {
   Dimension,
   validateAccessor,
 } from '../../../../visualizations/common/utils';
-import { ColorMode, validateOptions } from '../../../../charts/common';
+import { ColorMode } from '../../../../charts/common';
+import { oneOf } from '../../../../expressions/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
 
 const errors = {
-  invalidColorModeError: () =>
-    i18n.translate('expressionMetricVis.function.errors.invalidColorModeError', {
-      defaultMessage: 'Invalid color mode is specified. Supported color modes: {colorModes}',
-      values: { colorModes: Object.values(ColorMode).join(', ') },
-    }),
-  invalidLabelPositionError: () =>
-    i18n.translate('expressionMetricVis.function.errors.invalidLabelPositionError', {
-      defaultMessage:
-        'Invalid label position is specified. Supported label positions: {labelPosition}',
-      values: { labelPosition: Object.values(LabelPosition).join(', ') },
-    }),
   severalMetricsAndColorFullBackgroundSpecifiedError: () =>
     i18n.translate(
       'expressionMetricVis.function.errors.severalMetricsAndColorFullBackgroundSpecified',
@@ -66,7 +56,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     colorMode: {
       types: ['string'],
       default: `"${ColorMode.None}"`,
-      options: [ColorMode.None, ColorMode.Labels, ColorMode.Background],
+      validate: oneOf(ColorMode.None, ColorMode.Labels, ColorMode.Background),
       help: i18n.translate('expressionMetricVis.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
       }),
@@ -107,7 +97,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     labelPosition: {
       types: ['string'],
-      options: [LabelPosition.BOTTOM, LabelPosition.TOP],
+      validate: oneOf(LabelPosition.BOTTOM, LabelPosition.TOP),
       help: i18n.translate('expressionMetricVis.function.labelPosition.help', {
         defaultMessage: 'Label position',
       }),
@@ -150,9 +140,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         throw new Error(errors.severalMetricsAndColorFullBackgroundSpecifiedError());
       }
     }
-
-    validateOptions(args.colorMode, ColorMode, errors.invalidColorModeError);
-    validateOptions(args.labelPosition, LabelPosition, errors.invalidLabelPositionError);
 
     args.metric.forEach((metric) => validateAccessor(metric, input.columns));
     validateAccessor(args.bucket, input.columns);
