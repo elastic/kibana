@@ -55,7 +55,7 @@ export function AlertingFlyout(props: Props) {
       services.triggersActionsUi.getAddAlertFlyout({
         consumer: APM_SERVER_FEATURE_ID,
         onClose: onCloseAddFlyout,
-        alertTypeId: alertType,
+        ruleTypeId: alertType,
         canChangeTrigger: false,
         initialValues,
         metadata: {

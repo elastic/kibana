@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { findAccessorOrFail } from '../../../../visualizations/common/utils';
 import type { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { prepareLogTable } from '../../../../visualizations/common/utils';
 import type { DatatableColumn } from '../../../../expressions';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
@@ -47,6 +48,25 @@ export const errors = {
       defaultMessage:
         'Fields "centralMajor" and "centralMajorMode" are not supported by the shape "{shape}"',
       values: { shape },
+    }),
+};
+
+const strings = {
+  getMetricHelp: () =>
+    i18n.translate('expressionGauge.logDatatable.metric', {
+      defaultMessage: 'Metric',
+    }),
+  getMinHelp: () =>
+    i18n.translate('expressionGauge.logDatatable.min', {
+      defaultMessage: 'Min',
+    }),
+  getMaxHelp: () =>
+    i18n.translate('expressionGauge.logDatatable.max', {
+      defaultMessage: 'Max',
+    }),
+  getGoalHelp: () =>
+    i18n.translate('expressionGauge.logDatatable.goal', {
+      defaultMessage: 'Goal',
     }),
 };
 
@@ -189,9 +209,21 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     validateAccessor(args.goal, data.columns);
 
     const { centralMajor, centralMajorMode, ...restArgs } = args;
+    const { metric, min, max, goal } = restArgs;
 
     if (!isRoundShape(args.shape) && (centralMajorMode || centralMajor)) {
       throw new Error(errors.centralMajorNotSupportedForShapeError(args.shape));
+    }
+
+    if (handlers?.inspectorAdapters?.tables) {
+      const logTable = prepareLogTable(data, [
+        [metric ? [metric] : undefined, strings.getMetricHelp()],
+        [min ? [min] : undefined, strings.getMinHelp()],
+        [max ? [max] : undefined, strings.getMaxHelp()],
+        [goal ? [goal] : undefined, strings.getGoalHelp()],
+      ]);
+
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
     const centralMajorArgs = isRoundShape(args.shape)

@@ -54,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
             .send({
               runtimeField: {
+                type: 'keyword',
                 script: {
                   source: "doc['something_new'].value",
                 },

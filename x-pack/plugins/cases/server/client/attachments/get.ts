@@ -25,7 +25,7 @@ import {
   getIDsAndIndicesAsArrays,
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
-import { defaultPage, defaultPerPage } from '../../routes/api';
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';
 import { Operations } from '../../authorization';
@@ -170,8 +170,8 @@ export async function find(
             // We need this because the default behavior of getAllCaseComments is to return all the comments
             // unless the page and/or perPage is specified. Since we're spreading the query after the request can
             // still override this behavior.
-            page: defaultPage,
-            perPage: defaultPerPage,
+            page: DEFAULT_PAGE,
+            perPage: DEFAULT_PER_PAGE,
             sortField: 'created_at',
             filter: combinedFilter,
             ...queryWithoutFilter,
@@ -183,8 +183,8 @@ export async function find(
           unsecuredSavedObjectsClient,
           id,
           options: {
-            page: defaultPage,
-            perPage: defaultPerPage,
+            page: DEFAULT_PAGE,
+            perPage: DEFAULT_PER_PAGE,
             sortField: 'created_at',
             filter: combinedFilter,
           },
