@@ -27,14 +27,12 @@ export function getInvalidFieldMessage(
   const fieldNames =
     hasField(column) && operationDefinition
       ? operationDefinition?.getCurrentFields?.(column) ?? [column.sourceField]
-      : undefined;
-  const fields = fieldNames?.length
-    ? fieldNames.map((fieldName) => indexPattern.getFieldByName(fieldName))
-    : undefined;
-  const filteredFields = (fields?.filter(Boolean) ?? []) as IndexPatternField[];
+      : [];
+  const fields = fieldNames.map((fieldName) => indexPattern.getFieldByName(fieldName));
+  const filteredFields = fields.filter(Boolean) as IndexPatternField[];
 
   const isInvalid = Boolean(
-    filteredFields.length &&
+    fields.length > filteredFields.length ||
       !(
         operationDefinition?.input === 'field' &&
         filteredFields.every(
@@ -51,51 +49,39 @@ export function getInvalidFieldMessage(
         operationDefinitionMap
       )
   );
+
   if (isInvalid) {
+    // Missing fields have priority over wrong type
+    // This has been moved as some transferable checks also perform exist checks internally and fail eventually
+    // but that would make type mismatch error appear in place of missing fields scenarios
+    const missingFields = fields.map((field, i) => (field ? null : fieldNames[i])).filter(Boolean);
+    if (missingFields.length) {
+      return [
+        i18n.translate('xpack.lens.indexPattern.fieldsNotFound', {
+          defaultMessage:
+            '{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found',
+          values: {
+            count: missingFields.length,
+            missingFields: missingFields.join(', '),
+          },
+        }),
+      ];
+    }
     if (isWrongType) {
       // as fallback show all the fields as invalid?
       const wrongTypeFields =
-        operationDefinition?.getNonTransferableFields?.(column, indexPattern) ??
-        filteredFields.map((field) => field.displayName);
-
-      if (wrongTypeFields.length > 1) {
-        return [
-          i18n.translate('xpack.lens.indexPattern.fieldsWrongType', {
-            defaultMessage: 'Fields {invalidFields} are of the wrong type',
-            values: {
-              invalidFields: wrongTypeFields.join(', '),
-            },
-          }),
-        ];
-      }
+        operationDefinition?.getNonTransferableFields?.(column, indexPattern) ?? fieldNames;
       return [
-        i18n.translate('xpack.lens.indexPattern.fieldWrongType', {
-          defaultMessage: 'Field {invalidField} is of the wrong type',
+        i18n.translate('xpack.lens.indexPattern.fieldsWrongType', {
+          defaultMessage:
+            '{count, plural, one {Field} other {Fields}} {invalidFields} {count, plural, one {is} other {are}} of the wrong type',
           values: {
-            invalidField: wrongTypeFields[0],
+            count: wrongTypeFields.length,
+            invalidFields: wrongTypeFields.join(', '),
           },
         }),
       ];
     }
-    if (fieldNames && fieldNames.length > 1) {
-      return [
-        i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
-          defaultMessage: 'Fields {invalidFields} were not found',
-          values: {
-            invalidFields: fieldNames
-              ?.map((fieldName, i) => (!fields?.[i] ? fieldName : null))
-              .filter(Boolean)
-              .join(', '),
-          },
-        }),
-      ];
-    }
-    return [
-      i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
-        defaultMessage: 'Field {invalidField} was not found',
-        values: { invalidField: filteredFields[0].displayName },
-      }),
-    ];
   }
 
   return undefined;

@@ -59,7 +59,8 @@ const defaultProps = {
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
-  operationDefinitionMap: {},
+  // need to provide the terms operation as some helpers use operation specific features
+  operationDefinitionMap: { terms: termsOperation as unknown as GenericOperationDefinition },
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
