@@ -6,3 +6,4 @@
  */
 
 export { PolicyArtifactsFlyout } from './policy_artifacts_flyout';
+export { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';

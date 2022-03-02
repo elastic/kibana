@@ -6,3 +6,4 @@
  */
 
 export { PolicyArtifactsDeleteModal } from './policy_artifacts_delete_modal';
+export { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';

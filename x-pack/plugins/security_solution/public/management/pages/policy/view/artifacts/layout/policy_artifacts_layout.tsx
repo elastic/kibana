@@ -48,18 +48,28 @@ import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exc
 import { PolicyArtifactsEmptyUnassigned, PolicyArtifactsEmptyUnexisting } from '../empty';
 import { PolicyArtifactsList } from '../list';
 import { PolicyArtifactsFlyout } from '../flyout';
+import { PolicyArtifactsPageLabels, policyArtifactsPageLabels } from '../translations';
 
 interface PolicyArtifactsLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
   listId: string;
+  /** A list of labels for the given policy artifact page. Not all have to be defined, only those that should override the defaults */
+  labels: PolicyArtifactsPageLabels;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
-  ({ policyItem, listId }) => {
+  ({ policyItem, listId, labels: _labels = {} }) => {
     const http = useHttp();
     const { getAppUrl } = useAppUrl();
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(listId);
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+
+    const labels = useMemo<typeof policyArtifactsPageLabels>(() => {
+      return {
+        ...policyArtifactsPageLabels,
+        ..._labels,
+      };
+    }, [_labels]);
 
     const [exceptionsListApiClient, searcheableFields, getArtifactPath] = useMemo((): [
       ExceptionsListApiClient,
@@ -87,18 +97,25 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
       }
     }, [http, listId]);
 
-    const { data: allAssigned, isLoading: isLoadingAllAssigned } = useListArtifact(
+    const {
+      data: allAssigned,
+      isLoading: isLoadingAllAssigned,
+      isRefetching: isRefetchingAllAssigned,
+    } = useListArtifact(
       exceptionsListApiClient,
       [...searcheableFields],
       {
         policies: policyItem ? [policyItem.id, 'global'] : [],
-      }
+      },
+      {},
+      ['allAssigned']
     );
 
-    const { data: allArtifacts, isLoading: isLoadingAllArtifacts } = useListArtifact(
-      exceptionsListApiClient,
-      [...searcheableFields]
-    );
+    const {
+      data: allArtifacts,
+      isLoading: isLoadingAllArtifacts,
+      isRefetching: isRefetchingAllArtifacts,
+    } = useListArtifact(exceptionsListApiClient, [...searcheableFields], {}, {}, ['allExisting']);
 
     const handleOnClickAssignButton = useCallback(() => {
       navigateCallback({ show: 'list' });
@@ -115,42 +132,38 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
           data-test-subj="artifacts-assign-button"
           onClick={handleOnClickAssignButton}
         >
-          {i18n.translate(
-            'xpack.securitySolution.endpoint.policy.artifacts.layout.assignToPolicy',
-            {
-              defaultMessage: 'Assign [artifact] to policy',
-            }
-          )}
+          {labels.layoutAssignButtonTitle}
         </EuiButton>
       ),
-      [handleOnClickAssignButton]
+      [handleOnClickAssignButton, labels.layoutAssignButtonTitle]
     );
 
     const aboutInfo = useMemo(() => {
       const link = (
         <EuiLink href={getAppUrl({ appId: APP_UI_ID, path: getArtifactPath() })} target="_blank">
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.artifacts.layout.about.viewAllLinkLabel"
-            defaultMessage="view all [artifacts]"
-          />
+          {labels.layoutViewAllLinkMessage}
         </EuiLink>
       );
 
       return (
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.artifacts.layout.about"
-          defaultMessage="There {count, plural, one {is} other {are}} {count} [{count, plural, =1 {artifact} other {artifacts}}] associated with this policy. Click here to {link}"
-          values={{
-            count: allAssigned?.total || 0,
-            link,
-          }}
-        />
+        <>
+          {labels.layoutAboutMessage(allAssigned?.total || 0)} {link}
+        </>
       );
-    }, [getAppUrl, allAssigned, getArtifactPath]);
+    }, [getAppUrl, getArtifactPath, labels, allAssigned?.total]);
 
     const isGlobalLoading = useMemo(
-      () => isLoadingAllAssigned || isLoadingAllArtifacts,
-      [isLoadingAllAssigned, isLoadingAllArtifacts]
+      () =>
+        isLoadingAllAssigned ||
+        isRefetchingAllAssigned ||
+        isLoadingAllArtifacts ||
+        isRefetchingAllArtifacts,
+      [
+        isLoadingAllAssigned,
+        isRefetchingAllAssigned,
+        isLoadingAllArtifacts,
+        isRefetchingAllArtifacts,
+      ]
     );
 
     const isEmptyState = useMemo(() => allAssigned && allAssigned.total === 0, [allAssigned]);
@@ -168,6 +181,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               apiClient={exceptionsListApiClient}
               searcheableFields={[...searcheableFields]}
               onClose={handleOnCloseFlyout}
+              labels={labels}
             />
           )}
           {allArtifacts && allArtifacts.total !== 0 ? (
@@ -175,12 +189,14 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               policyId={policyItem.id}
               policyName={policyItem.name}
               listId={listId}
+              labels={labels}
             />
           ) : (
             <PolicyArtifactsEmptyUnexisting
               policyId={policyItem.id}
               policyName={policyItem.name}
               listId={listId}
+              labels={labels}
             />
           )}
         </>
@@ -192,11 +208,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
         <EuiPageHeader alignItems="center">
           <EuiPageHeaderSection data-test-subj="policy-artifacts-header-section">
             <EuiTitle size="m">
-              <h2>
-                {i18n.translate('xpack.securitySolution.endpoint.policy.artifacts.layout.title', {
-                  defaultMessage: 'Assigned [artifacts]',
-                })}
-              </h2>
+              <h2>{labels.layoutTitle}</h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />
@@ -215,6 +227,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             apiClient={exceptionsListApiClient}
             searcheableFields={[...searcheableFields]}
             onClose={handleOnCloseFlyout}
+            labels={labels}
           />
         )}
         <EuiSpacer size="l" />
@@ -230,6 +243,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             apiClient={exceptionsListApiClient}
             searcheableFields={[...searcheableFields]}
             artifactPathFn={getArtifactPath}
+            labels={labels}
           />
         </EuiPageContent>
       </div>

@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, Pagination } from '@elastic/eui';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
@@ -34,16 +33,19 @@ import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { useListArtifact } from '../../../../../hooks/artifacts';
 import { PolicyArtifactsDeleteModal } from '../delete_modal';
+import { PolicyArtifactsPageLabels } from '../translations';
+import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
 
 interface PolicyArtifactsListProps {
   policy: ImmutableObject<PolicyData>;
   apiClient: ExceptionsListApiClient;
   searcheableFields: string[];
   artifactPathFn: (location: object) => string;
+  labels: typeof POLICY_ARTIFACT_LIST_LABELS & PolicyArtifactsPageLabels;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
-  ({ policy, apiClient, searcheableFields, artifactPathFn }) => {
+  ({ policy, apiClient, searcheableFields, artifactPathFn, labels }) => {
     const { getAppUrl } = useAppUrl();
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const policiesRequest = useGetEndpointSpecificPolicies({ perPage: 1000 });
@@ -101,15 +103,8 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     );
 
     const totalItemsCountLabel = useMemo<string>(() => {
-      return i18n.translate(
-        'xpack.securitySolution.endpoint.policy.artifacts.list.totalItemCount',
-        {
-          defaultMessage:
-            'Showing [{totalItemsCount, plural, one {# artifact} other {# artifacts}}]',
-          values: { totalItemsCount: artifacts?.data.length || 0 },
-        }
-      );
-    }, [artifacts?.data.length]);
+      return labels.listTotalItemCountMessage(artifacts?.data.length || 0);
+    }, [artifacts?.data.length, labels]);
 
     const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
     const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (artifact) => {
@@ -118,10 +113,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       });
       const fullDetailsAction = {
         icon: 'controlsHorizontal',
-        children: i18n.translate(
-          'xpack.securitySolution.endpoint.policy.artifacts.list.fullDetailsAction',
-          { defaultMessage: 'View full details' }
-        ),
+        children: labels.listFullDetailsActionTitle,
         href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
         navigateAppId: APP_UI_ID,
         navigateOptions: { path: viewUrlPath, state },
@@ -132,22 +124,12 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       const isGlobal = isGlobalPolicyEffected(item.tags);
       const deleteAction = {
         icon: 'trash',
-        children: i18n.translate(
-          'xpack.securitySolution.endpoint.policy.artifacts.list.removeAction',
-          { defaultMessage: 'Remove from policy' }
-        ),
+        children: labels.listRemoveActionTitle,
         onClick: () => {
           setExceptionItemToDelete(item);
         },
         disabled: isGlobal,
-        toolTipContent: isGlobal
-          ? i18n.translate(
-              'xpack.securitySolution.endpoint.policy.artifacts.list.removeActionNotAllowed',
-              {
-                defaultMessage: 'Globally applied [artifact] cannot be removed from policy.',
-              }
-            )
-          : undefined,
+        toolTipContent: isGlobal ? labels.listRemoveActionNotAllowedMessage : undefined,
         toolTipPosition: 'top' as const,
         'data-test-subj': 'remove-from-policy-action',
       };
@@ -173,15 +155,11 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
             apiClient={apiClient}
             exception={exceptionItemToDelete}
             onCancel={handleDeleteModalClose}
+            labels={labels}
           />
         )}
         <SearchExceptions
-          placeholder={i18n.translate(
-            'xpack.securitySolution.endpoint.policy.artifacts.list.search.placeholder',
-            {
-              defaultMessage: `Search on the fields below: [artifacts fields]`,
-            }
-          )}
+          placeholder={labels.listSearchPlaceholderMessage}
           defaultValue={urlParams.filter}
           hideRefreshButton
           onSearch={handleOnSearch}

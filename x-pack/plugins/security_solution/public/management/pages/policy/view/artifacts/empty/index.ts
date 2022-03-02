@@ -7,3 +7,7 @@
 
 export { PolicyArtifactsEmptyUnassigned } from './policy_artifacts_empty_unassigned';
 export { PolicyArtifactsEmptyUnexisting } from './policy_artifacts_empty_unexisting';
+export {
+  POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS,
+  POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS,
+} from './translations';

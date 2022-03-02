@@ -32,12 +32,13 @@ export function useListArtifact(
   customQueryOptions: UseQueryOptions<
     FoundExceptionListItemSchema,
     HttpFetchError
-  > = DEFAULT_OPTIONS
+  > = DEFAULT_OPTIONS,
+  customQueryIds: string[] = []
 ): QueryObserverResult<FoundExceptionListItemSchema, HttpFetchError> {
   const { filter, page, perPage, policies, excludedPolicies } = options;
 
   return useQuery<FoundExceptionListItemSchema, HttpFetchError>(
-    ['list', exceptionListApiClient, options],
+    [...customQueryIds, 'list', exceptionListApiClient, options],
     () => {
       return exceptionListApiClient.find({
         filter: parsePoliciesAndFilterToKql({

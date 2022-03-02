@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useQueryClient } from 'react-query';
 import { isEmpty, without } from 'lodash/fp';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -31,18 +30,20 @@ import { useToasts } from '../../../../../../common/lib/kibana';
 import { PolicyArtifactsAssignableList } from '../../artifacts/assignable';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { useListArtifact, useBulkUpdateArtifact } from '../../../../../hooks/artifacts';
+import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 
 interface PolicyArtifactsFlyoutProps {
   policyItem: ImmutableObject<PolicyData>;
   apiClient: ExceptionsListApiClient;
   searcheableFields: string[];
   onClose: () => void;
+  labels: typeof POLICY_ARTIFACT_FLYOUT_LABELS;
 }
 
 const MAX_ALLOWED_RESULTS = 100;
 
 export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
-  ({ policyItem, apiClient, searcheableFields, onClose }) => {
+  ({ policyItem, apiClient, searcheableFields, onClose, labels }) => {
     const toasts = useToasts();
     const queryClient = useQueryClient();
     const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
@@ -51,39 +52,12 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
     const bulkUpdateMutation = useBulkUpdateArtifact(apiClient, {
       onSuccess: (updatedExceptions: ExceptionListItemSchema[]) => {
         toasts.addSuccess({
-          title: i18n.translate(
-            'xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.toastSuccess.title',
-            {
-              defaultMessage: 'Success',
-            }
-          ),
-          text:
-            updatedExceptions.length > 1
-              ? i18n.translate(
-                  'xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.toastSuccess.textMultiples',
-                  {
-                    defaultMessage: '{count} [artifacts] have been added to your list.',
-                    values: { count: updatedExceptions.length },
-                  }
-                )
-              : i18n.translate(
-                  'xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.toastSuccess.textSingle',
-                  {
-                    defaultMessage: '"{name}" has been added to your [artifacts] list.',
-                    values: { name: updatedExceptions[0].name },
-                  }
-                ),
+          title: labels.flyoutSuccessMessageTitle,
+          text: labels.flyoutSuccessMessageText(updatedExceptions),
         });
       },
       onError: () => {
-        toasts.addDanger(
-          i18n.translate(
-            'xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.toastError.text',
-            {
-              defaultMessage: `An error occurred updating artifacts`,
-            }
-          )
-        );
+        toasts.addDanger(labels.flyoutErrorMessage);
       },
       onSettled: () => {
         queryClient.invalidateQueries(['list', apiClient]);
@@ -148,25 +122,14 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
             color="warning"
             size="s"
             heading="h4"
-            title={i18n.translate(
-              'xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.searchWarning.title',
-              {
-                defaultMessage: 'Limited search results',
-              }
-            )}
+            title={labels.flyoutWarningCalloutTitle}
           >
-            {i18n.translate(
-              'xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.searchWarning.text',
-              {
-                defaultMessage:
-                  'Only the first 100 [artifacts] are displayed. Please use the search bar to refine the results.',
-              }
-            )}
+            {labels.flyoutWarningCalloutMessage}
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
       ),
-      []
+      [labels.flyoutWarningCalloutTitle, labels.flyoutWarningCalloutMessage]
     );
 
     const noItemsMessage = useMemo(() => {
@@ -179,12 +142,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
         return (
           <EuiEmptyPrompt
             data-test-subj="artifacts-no-assignable-items"
-            title={
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.noAssignable"
-                defaultMessage="There are no [artifacts] that can be assigned to this policy."
-              />
-            }
+            title={<p>{labels.flyoutNoArtifactsToBeAssignedMessage}</p>}
           />
         );
       }
@@ -194,52 +152,35 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
         return (
           <EuiEmptyPrompt
             data-test-subj="artifacts-no-items-found"
-            title={
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.noResults"
-                defaultMessage="No items found"
-              />
-            }
+            title={<p>{labels.flyoutNoSearchResultsMessage}</p>}
           />
         );
       }
     }, [
-      allNotAssigned?.total,
-      currentFilter,
-      artifacts?.total,
-      isLoadingAllNotAssigned,
       isLoadingArtifacts,
       isRefetchingArtifacts,
+      isLoadingAllNotAssigned,
+      allNotAssigned?.total,
+      artifacts?.total,
+      currentFilter,
+      labels.flyoutNoArtifactsToBeAssignedMessage,
+      labels.flyoutNoSearchResultsMessage,
     ]);
 
     return (
       <EuiFlyout onClose={onClose} data-test-subj="artifacts-assign-flyout">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.title"
-                defaultMessage="Assign [artifacts]"
-              />
-            </h2>
+            <h2>{labels.flyoutTitle}</h2>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.subtitle"
-            defaultMessage="Select [artifacts] to add to {policyName}"
-            values={{ policyName: policyItem.name }}
-          />
+          {labels.flyoutSubtitle(policyItem.name)}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {(artifacts?.total || 0) > MAX_ALLOWED_RESULTS ? searchWarningMessage : null}
           <SearchExceptions
             onSearch={handleOnSearch}
-            placeholder={i18n.translate(
-              'xpack.securitySolution.endpoint.policy.artifacts.layout.searh.label',
-              {
-                defaultMessage: 'Search [artifacts]',
-              }
-            )}
+            placeholder={labels.flyoutSearchPlaceholder}
             hideRefreshButton
           />
           <EuiSpacer size="m" />
@@ -258,10 +199,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty data-test-subj="artifacts-assign-cancel-button" onClick={onClose}>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.cancel"
-                  defaultMessage="Cancel"
-                />
+                {labels.flyoutCancelButtonTitle}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -277,13 +215,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
                 disabled={isEmpty(selectedArtifactIds)}
                 title={policyItem.name}
               >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.confirm"
-                  defaultMessage="Assign to {policyName}"
-                  values={{
-                    policyName: policyItem.name,
-                  }}
-                />
+                {labels.flyoutSubmitButtonTitle(policyItem.name)}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

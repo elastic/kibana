@@ -6,3 +6,4 @@
  */
 
 export { PolicyArtifactsLayout } from './policy_artifacts_layout';
+export { POLICY_ARTIFACT_LAYOUT_LABELS } from './translations';

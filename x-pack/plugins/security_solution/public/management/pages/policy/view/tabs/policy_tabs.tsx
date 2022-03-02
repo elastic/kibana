@@ -34,6 +34,9 @@ import {
 import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
 import { PolicyFormLayout } from '../policy_forms/components';
 import { usePolicyDetailsSelector } from '../policy_hooks';
+import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from './event_filters_translations';
+import { POLICY_ARTIFACT_TRUSTED_APPS_LABELS } from './trusted_apps_translations';
+import { POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS } from './host_isolation_exceptions_translations';
 
 const enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -100,7 +103,11 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyArtifactsLayout policyItem={policyItem} listId={ENDPOINT_TRUSTED_APPS_LIST_ID} />
+            <PolicyArtifactsLayout
+              policyItem={policyItem}
+              listId={ENDPOINT_TRUSTED_APPS_LIST_ID}
+              labels={POLICY_ARTIFACT_TRUSTED_APPS_LABELS}
+            />
           </>
         ),
       },
@@ -115,6 +122,7 @@ export const PolicyTabs = React.memo(() => {
             <PolicyArtifactsLayout
               policyItem={policyItem}
               listId={ENDPOINT_EVENT_FILTERS_LIST_ID}
+              labels={POLICY_ARTIFACT_EVENT_FILTERS_LABELS}
             />
           </>
         ),
@@ -134,6 +142,7 @@ export const PolicyTabs = React.memo(() => {
                 <PolicyArtifactsLayout
                   policyItem={policyItem}
                   listId={ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID}
+                  labels={POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS}
                 />
               </>
             ),
