@@ -34,6 +34,8 @@ export async function backportRun(
 ): Promise<BackportResponse> {
   const argv = yargsParser(processArgs) as ConfigFileOptions;
   const ci = argv.ci ?? optionsFromModule.ci;
+  const ls = argv.ls ?? optionsFromModule.ls;
+
   const logFilePath = argv.logFilePath ?? optionsFromModule.logFilePath;
 
   initLogger({ ci, logFilePath });
@@ -109,7 +111,7 @@ export async function backportRun(
       });
     }
 
-    if (!options?.ls) {
+    if (!ls) {
       outputError({ e, logFilePath });
     }
 
