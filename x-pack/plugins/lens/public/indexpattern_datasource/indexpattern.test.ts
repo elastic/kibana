@@ -1878,6 +1878,115 @@ describe('IndexPattern Data Source', () => {
           ],
         });
       });
+      it('should ignore filtered metrics if at least one metric is unfiltered', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'kuery', query: 'bytes > 1000' },
+                  } as GenericIndexPatternColumn,
+                  col2: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                  } as GenericIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          kuery: [],
+          lucene: [],
+        });
+      });
+      it('should ignore filtered metrics if at least one metric is unfiltered in formula', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['formula'],
+                columns: {
+                  formula: {
+                    label: 'Formula',
+                    dataType: 'number',
+                    operationType: 'formula',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    params: {
+                      formula: "count(kql='memory > 5000') + count()",
+                      isFormulaBroken: false,
+                    },
+                    references: ['math'],
+                  } as FormulaIndexPatternColumn,
+                  countX0: {
+                    label: 'countX0',
+                    dataType: 'number',
+                    operationType: 'count',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                    customLabel: true,
+                    filter: { language: 'kuery', query: 'memory > 5000' },
+                  },
+                  countX1: {
+                    label: 'countX1',
+                    dataType: 'number',
+                    operationType: 'count',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                    customLabel: true,
+                  },
+                  math: {
+                    label: 'math',
+                    dataType: 'number',
+                    operationType: 'math',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    params: {
+                      tinymathAst: {
+                        type: 'function',
+                        name: 'add',
+                        args: ['countX0', 'countX1'] as unknown as TinymathAST[],
+                        location: {
+                          min: 0,
+                          max: 17,
+                        },
+                        text: "count(kql='memory > 5000') + count()",
+                      },
+                    },
+                    references: ['countX0', 'countX1'],
+                    customLabel: true,
+                  } as MathIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          kuery: [],
+          lucene: [],
+        });
+      });
       it('should support complete scenarios', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {

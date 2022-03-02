@@ -326,6 +326,48 @@ function shouldUseTermsFallback(
   return !dataId || dataId !== colId;
 }
 
+/**
+ * Collect filters from metrics:
+ * * if there's at least one unfiltered metric, then just return an empty list of filters
+ * * otherwise get all the filters, with the only exception of those from formula (referenced columns will have it anyway)
+ */
+function collectFiltersFromMetrics(layer: IndexPatternLayer) {
+  // Isolate filtered metrics first
+  // mind to ignore non-filterable columns
+  const metricColumns = Object.keys(layer.columns).filter((colId) => {
+    const column = layer.columns[colId];
+    const operationDefinition = operationDefinitionMap[column?.operationType];
+    return !column?.isBucketed && operationDefinition?.filterable;
+  });
+  const { filtered = [], unfiltered = [] } = groupBy(metricColumns, (colId) =>
+    layer.columns[colId]?.filter ? 'filtered' : 'unfiltered'
+  );
+
+  // extract filters from filtered metrics
+  // consider all the columns, included referenced ones to cover also the formula case
+  return (
+    filtered
+      // if there are metric columns not filtered, then ignore filtered columns completely
+      .filter(() => !unfiltered.length)
+      .map((colId) => {
+        // there's a special case to handle when a formula has a global filter applied
+        // in this case ignore the filter on the formula column and only use the filter
+        // applied to the referenced columns.
+        // This will avoid duplicate filters and issues when a global formula filter is
+        // combine to specific referenced columns filters
+        if (
+          isColumnOfType<FormulaIndexPatternColumn>('formula', layer.columns[colId]) &&
+          layer.columns[colId]?.filter
+        ) {
+          return null;
+        }
+        return layer.columns[colId]?.filter;
+      })
+      // filter out empty filters as well
+      .filter((filter) => filter?.query?.trim()) as Query[]
+  );
+}
+
 interface GroupedQueries {
   kuery?: Query[];
   lucene?: Query[];
@@ -347,28 +389,8 @@ export function getFiltersInLayer(
   columnIds: string[],
   layerData: NonNullable<FramePublicAPI['activeData']>[string] | undefined
 ) {
-  // extract filters from filtered metrics
-  // consider all the columns, included referenced ones to cover also the formula case
-  const filteredMetrics = Object.keys(layer.columns)
-    .map((colId) => {
-      // there's a special case to handle when a formula has a global filter applied
-      // in this case ignore the filter on the formula column and only use the filter
-      // applied to the referenced columns.
-      // This will avoid duplicate filters and issues when a global formula filter is
-      // combine to specific referenced columns filters
-      if (
-        isColumnOfType<FormulaIndexPatternColumn>('formula', layer.columns[colId]) &&
-        layer.columns[colId]?.filter
-      ) {
-        return null;
-      }
-      return layer.columns[colId]?.filter;
-    })
-    // filter out empty filters as well
-    .filter((filter) => filter?.query?.trim()) as Query[];
-
-  const filteredQueriesByLanguage = groupBy(
-    filteredMetrics,
+  const filtersFromMetricsByLanguage = groupBy(
+    collectFiltersFromMetrics(layer),
     'language'
   ) as unknown as GroupedQueries;
 
@@ -416,7 +438,7 @@ export function getFiltersInLayer(
     })
     .filter(Boolean) as GroupedQueries[];
   return {
-    kuery: collectOnlyValidQueries(filteredQueriesByLanguage, filterOperation, 'kuery'),
-    lucene: collectOnlyValidQueries(filteredQueriesByLanguage, filterOperation, 'lucene'),
+    kuery: collectOnlyValidQueries(filtersFromMetricsByLanguage, filterOperation, 'kuery'),
+    lucene: collectOnlyValidQueries(filtersFromMetricsByLanguage, filterOperation, 'lucene'),
   };
 }
