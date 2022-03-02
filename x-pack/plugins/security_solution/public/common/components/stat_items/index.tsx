@@ -134,7 +134,7 @@ export const addValueToAreaChart = (
 ): ChartSeriesData[] =>
   fields
     .filter((field) => get(`${field.key}Histogram`, data) != null)
-    .map((field) => ({
+    .map(({ lensAttributes, ...field }) => ({
       ...field,
       value: get(`${field.key}Histogram`, data),
       key: `${field.key}Histogram`,
