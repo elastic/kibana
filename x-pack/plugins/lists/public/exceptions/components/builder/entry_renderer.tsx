@@ -24,6 +24,7 @@ import {
   getEntryOnMatchAnyChange,
   getEntryOnMatchChange,
   getEntryOnOperatorChange,
+  getEntryOnWildcardChange,
   getFilteredIndexPatterns,
   getOperatorOptions,
 } from '@kbn/securitysolution-list-utils';
@@ -32,9 +33,11 @@ import {
   AutocompleteFieldListsComponent,
   AutocompleteFieldMatchAnyComponent,
   AutocompleteFieldMatchComponent,
+  AutocompleteFieldWildcardComponent,
   FieldComponent,
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
+import { OperatingSystem, validateFilePathInput } from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
@@ -64,6 +67,7 @@ export interface EntryItemProps {
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: boolean) => void;
+  setWarningsExist: (arg: boolean) => void;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
 }
@@ -80,6 +84,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   onChange,
   onlyShowListOperators = false,
   setErrorsExist,
+  setWarningsExist,
   showLabel,
   isDisabled = false,
   operatorsList,
@@ -89,6 +94,12 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       setErrorsExist(err);
     },
     [setErrorsExist]
+  );
+  const handleWarning = useCallback(
+    (warn: boolean): void => {
+      setWarningsExist(warn);
+    },
+    [setWarningsExist]
   );
 
   const handleFieldChange = useCallback(
@@ -120,6 +131,15 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const handleFieldMatchAnyValueChange = useCallback(
     (newField: string[]): void => {
       const { updatedEntry, index } = getEntryOnMatchAnyChange(entry, newField);
+
+      onChange(updatedEntry, index);
+    },
+    [onChange, entry]
+  );
+
+  const handleFieldWildcardValueChange = useCallback(
+    (newField: string): void => {
+      const { updatedEntry, index } = getEntryOnWildcardChange(entry, newField);
 
       onChange(updatedEntry, index);
     },
@@ -199,8 +219,17 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
-    const operatorOptions = operatorsList
-      ? operatorsList
+    // for event filters forms
+    // show extra operators for wildcards when field is `file.path.text`
+    const isFilePathTextField = entry.field !== undefined && entry.field.name === 'file.path.text';
+    const isEventFilterList = listType === 'endpoint_events';
+    const augmentedOperatorsList =
+      operatorsList && isFilePathTextField && isEventFilterList
+        ? operatorsList
+        : operatorsList?.filter((operator) => operator.type !== OperatorTypeEnum.WILDCARD);
+
+    const operatorOptions = augmentedOperatorsList
+      ? augmentedOperatorsList
       : onlyShowListOperators
       ? EXCEPTION_OPERATORS_ONLY_LISTS
       : getOperatorOptions(
@@ -209,6 +238,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry.field != null && entry.field.type === 'boolean',
           isFirst && allowLargeValueLists
         );
+
     const comboBox = (
       <OperatorComponent
         placeholder={i18n.EXCEPTION_OPERATOR_PLACEHOLDER}
@@ -280,6 +310,32 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             onChange={handleFieldMatchAnyValueChange}
             isRequired
             data-test-subj="exceptionBuilderEntryFieldMatchAny"
+          />
+        );
+      case OperatorTypeEnum.WILDCARD:
+        const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
+        let os: OperatingSystem = OperatingSystem.WINDOWS;
+        if (osTypes) {
+          [os] = osTypes as OperatingSystem[];
+        }
+        const warning = validateFilePathInput({ os, value: wildcardValue });
+        return (
+          <AutocompleteFieldWildcardComponent
+            autocompleteService={autocompleteService}
+            data-test-subj="exceptionBuilderEntryFieldWildcard"
+            isRequired
+            isDisabled={isFieldComponentDisabled}
+            isLoading={false}
+            isClearable={false}
+            indexPattern={indexPattern}
+            onError={handleError}
+            onChange={handleFieldWildcardValueChange}
+            onWarning={handleWarning}
+            warning={warning}
+            placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
+            rowLabel={isFirst ? i18n.VALUE : undefined}
+            selectedField={entry.correspondingKeywordField ?? entry.field}
+            selectedValue={wildcardValue}
           />
         );
       case OperatorTypeEnum.LIST:

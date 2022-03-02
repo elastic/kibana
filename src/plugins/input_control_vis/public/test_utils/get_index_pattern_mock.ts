@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 
 /**
  * Returns forced **Partial** IndexPattern for use in tests
  */
-export const getIndexPatternMock = (): Promise<IndexPattern> => {
+export const getIndexPatternMock = (): Promise<DataView> => {
   return Promise.resolve({
     id: 'mockIndexPattern',
     title: 'mockIndexPattern',
@@ -20,5 +20,5 @@ export const getIndexPatternMock = (): Promise<IndexPattern> => {
       { name: 'textField', type: 'string', aggregatable: false },
       { name: 'numberField', type: 'number', aggregatable: true },
     ],
-  } as IndexPattern);
+  } as DataView);
 };
