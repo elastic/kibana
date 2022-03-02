@@ -5,7 +5,7 @@
 <titleabbrev>Enterprise Search settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use Enterprise Search in {kib}. It is enabled by default.
+On Elastic Cloud, you do not need to configure any settings to use Enterprise Search in {kib}. It is enabled by default. On self-managed installations, you must configure `enterpriseSearch.host`.
 
 `enterpriseSearch.host`::
 The http(s) URL of your Enterprise Search instance. For example, in a local self-managed setup,
