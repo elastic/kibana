@@ -19,9 +19,6 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
       await tearDown(getService);
     });
 
-    // run telemetry tests before anything else
-    loadTestFile(require.resolve('./telemetry'));
-
     loadTestFile(require.resolve('./builtin_action_types/email'));
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
     loadTestFile(require.resolve('./builtin_action_types/es_index_preconfigured'));
