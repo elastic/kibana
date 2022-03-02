@@ -74,6 +74,18 @@ describe('Dependencies', () => {
 
       cy.contains('h1', 'opbeans-java');
     });
+
+    it('has no detectable a11y violations on load', () => {
+      cy.visit(
+        `/app/apm/backends/overview?${new URLSearchParams({
+          ...timeRange,
+          backendName: 'postgresql',
+        })}`
+      );
+      cy.contains('h1', 'postgresql');
+      // set skipFailures to true to not fail the test when there are accessibility failures
+      checkA11y(true);
+    });
   });
 
   describe('service overview page', () => {
@@ -105,9 +117,6 @@ describe('Dependencies', () => {
       cy.contains('a', 'postgresql').click({ force: true });
 
       cy.contains('h1', 'postgresql');
-
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y(true);
     });
   });
 });
