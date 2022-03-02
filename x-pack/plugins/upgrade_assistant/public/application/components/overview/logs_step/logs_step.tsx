@@ -7,13 +7,20 @@
 
 import React, { useEffect } from 'react';
 
-import { EuiText, EuiSpacer, EuiButton, EuiCallOut, EuiLoadingContent } from '@elastic/eui';
+import {
+  EuiText,
+  EuiSpacer,
+  EuiButton,
+  EuiCallOut,
+  EuiLoadingContent,
+  EuiCode,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
-import { WithPrivileges } from '../../../../shared_imports';
+import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { loadLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import type { OverviewStepProps } from '../../types';
@@ -21,11 +28,10 @@ import { useDeprecationLogging } from '../../es_deprecation_logs';
 
 const i18nTexts = {
   logsStepTitle: i18n.translate('xpack.upgradeAssistant.overview.logsStep.title', {
-    defaultMessage: 'Address deprecation logs',
+    defaultMessage: 'Address API deprecations',
   }),
   logsStepDescription: i18n.translate('xpack.upgradeAssistant.overview.logsStep.description', {
-    defaultMessage:
-      'Review the Elasticsearch deprecation logs to make sure you are not using deprecated APIs.',
+    defaultMessage: `Review the Elasticsearch deprecation logs to ensure you're not using deprecated APIs.`,
   }),
   viewLogsButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.logsStep.viewLogsButtonLabel',
@@ -36,7 +42,7 @@ const i18nTexts = {
   enableLogsButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.logsStep.enableLogsButtonLabel',
     {
-      defaultMessage: 'Enable logs',
+      defaultMessage: 'Enable logging',
     }
   ),
   logsCountDescription: (deprecationCount: number, checkpoint: string) => (
@@ -60,8 +66,20 @@ const i18nTexts = {
       defaultMessage: 'You require index privileges to analyze the deprecation logs',
     }
   ),
+  missingPrivilegesDescription: (privilegesMissing: MissingPrivileges) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.logsStep.missingPrivilegesDescription"
+      defaultMessage="The deprecation logs will continue to be indexed, but you won't be able to analyze them until you have the read index {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}"
+      values={{
+        missingPrivileges: (
+          <EuiCode transparentBackground={true}>{privilegesMissing?.index?.join(', ')}</EuiCode>
+        ),
+        privilegesCount: privilegesMissing?.index?.length,
+      }}
+    />
+  ),
   loadingError: i18n.translate('xpack.upgradeAssistant.overview.logsStep.loadingError', {
-    defaultMessage: 'An error occurred while retrieving the count of deprecation logs',
+    defaultMessage: 'An error occurred while retrieving the deprecation log count',
   }),
   retryButton: i18n.translate('xpack.upgradeAssistant.overview.logsStep.retryButton', {
     defaultMessage: 'Try again',
@@ -71,6 +89,7 @@ const i18nTexts = {
 interface LogStepProps {
   setIsComplete: (isComplete: boolean) => void;
   hasPrivileges: boolean;
+  privilegesMissing: MissingPrivileges;
   navigateToEsDeprecationLogs: () => void;
 }
 
@@ -80,7 +99,12 @@ const LogStepDescription = () => (
   </EuiText>
 );
 
-const LogsStep = ({ setIsComplete, hasPrivileges, navigateToEsDeprecationLogs }: LogStepProps) => {
+const LogsStep = ({
+  setIsComplete,
+  hasPrivileges,
+  privilegesMissing,
+  navigateToEsDeprecationLogs,
+}: LogStepProps) => {
   const {
     services: { api },
   } = useAppContext();
@@ -120,7 +144,9 @@ const LogsStep = ({ setIsComplete, hasPrivileges, navigateToEsDeprecationLogs }:
           color="warning"
           title={i18nTexts.missingPrivilegesTitle}
           data-test-subj="missingPrivilegesCallout"
-        />
+        >
+          <p>{i18nTexts.missingPrivilegesDescription(privilegesMissing)}</p>
+        </EuiCallOut>
       </>
     );
   }
@@ -203,11 +229,12 @@ export const getLogsStep = ({
     'data-test-subj': `logsStep-${status}`,
     children: (
       <WithPrivileges privileges={`index.${DEPRECATION_LOGS_INDEX}`}>
-        {({ hasPrivileges, isLoading }) => (
+        {({ hasPrivileges, isLoading, privilegesMissing }) => (
           <LogsStep
             setIsComplete={setIsComplete}
             hasPrivileges={!isLoading && hasPrivileges}
             navigateToEsDeprecationLogs={navigateToEsDeprecationLogs}
+            privilegesMissing={privilegesMissing}
           />
         )}
       </WithPrivileges>

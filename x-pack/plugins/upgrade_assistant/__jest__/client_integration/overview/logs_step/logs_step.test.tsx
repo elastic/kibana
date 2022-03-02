@@ -122,7 +122,7 @@ describe('Overview - Logs Step', () => {
         const { find, exists } = testBed;
 
         expect(exists('logsCountDescription')).toBe(false);
-        expect(find('enableLogsLink').text()).toContain('Enable logs');
+        expect(find('enableLogsLink').text()).toContain('Enable logging');
       });
     });
   });
