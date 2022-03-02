@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export default function () {
-  return {
-    screenshots: {
-      directory: 'bar',
-    },
-  };
-}
+export * from './datatable_utilities_service';
