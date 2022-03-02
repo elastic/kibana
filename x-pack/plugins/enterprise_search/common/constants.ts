@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ENTERPRISE_SEARCH_PLUGIN = {
+export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.productName', {
     defaultMessage: 'Enterprise Search',
