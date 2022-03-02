@@ -110,19 +110,19 @@ export const useBulkActions = ({
         !hasActionsPrivileges &&
         selectedRules.some((rule) => !canEditRuleWithActions(rule, hasActionsPrivileges));
 
-      const handleActivateAction = async () => {
+      const handleEnableAction = async () => {
         closePopover();
-        const deactivatedRules = selectedRules.filter(({ enabled }) => !enabled);
-        const deactivatedRulesNoML = deactivatedRules.filter(({ type }) => !isMlRule(type));
+        const disabledRules = selectedRules.filter(({ enabled }) => !enabled);
+        const disabledRulesNoML = disabledRules.filter(({ type }) => !isMlRule(type));
 
-        const mlRuleCount = deactivatedRules.length - deactivatedRulesNoML.length;
+        const mlRuleCount = disabledRules.length - disabledRulesNoML.length;
         if (!hasMlPermissions && mlRuleCount > 0) {
           displayWarningToast(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount), dispatchToaster);
         }
 
         const ruleIds = hasMlPermissions
-          ? deactivatedRules.map(({ id }) => id)
-          : deactivatedRulesNoML.map(({ id }) => id);
+          ? disabledRules.map(({ id }) => id)
+          : disabledRulesNoML.map(({ id }) => id);
 
         if (isAllSelected) {
           const rulesBulkAction = initRulesBulkAction({
@@ -139,12 +139,12 @@ export const useBulkActions = ({
         invalidateRules();
       };
 
-      const handleDeactivateActions = async () => {
+      const handleDisableActions = async () => {
         closePopover();
-        const activatedIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
+        const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
         if (isAllSelected) {
           const rulesBulkAction = initRulesBulkAction({
-            visibleRuleIds: activatedIds,
+            visibleRuleIds: enabledIds,
             action: BulkAction.disable,
             setLoadingRules,
             toasts,
@@ -152,7 +152,7 @@ export const useBulkActions = ({
 
           await rulesBulkAction.byQuery(filterQuery);
         } else {
-          await enableRulesAction(activatedIds, false, dispatchToaster, setLoadingRules);
+          await enableRulesAction(enabledIds, false, dispatchToaster, setLoadingRules);
         }
         invalidateRules();
       };
@@ -345,10 +345,10 @@ export const useBulkActions = ({
             {
               key: i18n.BULK_ACTION_ENABLE,
               name: i18n.BULK_ACTION_ENABLE,
-              'data-test-subj': 'activateRuleBulk',
+              'data-test-subj': 'enableRuleBulk',
               disabled:
                 missingActionPrivileges || containsLoading || (!containsDisabled && !isAllSelected),
-              onClick: handleActivateAction,
+              onClick: handleEnableAction,
               toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
               toolTipPosition: 'right',
               icon: undefined,
@@ -391,10 +391,10 @@ export const useBulkActions = ({
             {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
-              'data-test-subj': 'deactivateRuleBulk',
+              'data-test-subj': 'disableRuleBulk',
               disabled:
                 missingActionPrivileges || containsLoading || (!containsEnabled && !isAllSelected),
-              onClick: handleDeactivateActions,
+              onClick: handleDisableActions,
               toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
               toolTipPosition: 'right',
               icon: undefined,
