@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiEmptyPrompt,
   EuiButton,
@@ -37,9 +37,9 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
   const styles = useStyles({ height });
 
-  const onProcessSelected = (process: Process) => {
+  const onProcessSelected = useCallback((process: Process) => {
     setSelectedProcess(process);
-  };
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
@@ -95,7 +95,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
           <SessionViewSearchBar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            setSelectedProcess={setSelectedProcess}
+            onProcessSelected={onProcessSelected}
             searchResults={searchResults}
           />
         </EuiFlexItem>
@@ -190,7 +190,9 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                 </EuiResizablePanel>
               </>
             ) : (
-              <>{/* Returning an empty element here (instead of false) to avoid a bug in EuiResizableContainer */}</>
+              <>
+                {/* Returning an empty element here (instead of false) to avoid a bug in EuiResizableContainer */}
+              </>
             )}
           </>
         )}
