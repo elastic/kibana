@@ -180,7 +180,7 @@ describe('Closing alerts with read only role', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
-    createCustomRuleActivated(getNewRule(), '1', '100m', 100);
+    createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
     refreshPage();
     waitForAlertsToPopulate(100);
     deleteCustomRule();
