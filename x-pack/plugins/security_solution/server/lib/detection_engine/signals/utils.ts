@@ -27,6 +27,7 @@ import {
 } from '../../../../common/detection_engine/schemas/common';
 import type {
   ElasticsearchClient,
+  IUiSettingsClient,
   Logger,
   SavedObjectsClientContract,
 } from '../../../../../../../src/core/server';
@@ -94,19 +95,12 @@ export const hasReadIndexPrivileges = async (args: {
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  savedObjectsClient: SavedObjectsClientContract;
-  version: string;
+  uiSettingsClient: IUiSettingsClient;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, savedObjectsClient, version } =
-    args;
-  const config = await withSecuritySpan('getCcsWarningEnabled', () =>
-    savedObjectsClient.get<{ 'securitySolution:enableCcsWarning': boolean }>('config', version)
-  );
+  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, uiSettingsClient } = args;
 
-  let isCcsPermissionWarningEnabled = true;
-  if (config.attributes != null && config.attributes[ENABLE_CCS_READ_WARNING_SETTING] != null) {
-    isCcsPermissionWarningEnabled = config.attributes[ENABLE_CCS_READ_WARNING_SETTING];
-  }
+  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
+
   const indexNames = Object.keys(privileges.index);
   const filteredIndexNames = isCcsPermissionWarningEnabled
     ? indexNames

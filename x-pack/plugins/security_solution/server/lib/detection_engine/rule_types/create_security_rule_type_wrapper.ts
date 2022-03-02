@@ -80,7 +80,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } = options;
           let runState = state;
           const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
-          const { alertWithPersistence, savedObjectsClient, scopedClusterClient } = services;
+          const {
+            alertWithPersistence,
+            savedObjectsClient,
+            scopedClusterClient,
+            uiSettingsClient,
+          } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
           const esClient = scopedClusterClient.asCurrentUser;
@@ -163,8 +168,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 logger,
                 buildRuleMessage,
                 ruleExecutionLogger,
-                savedObjectsClient,
-                version,
+                uiSettingsClient,
               });
 
               if (!wroteWarningStatus) {
