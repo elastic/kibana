@@ -388,7 +388,7 @@ describe('ManifestManager', () => {
       expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
-      expect(getArtifactObject(artifacts[14])).toStrictEqual({
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
         entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
       });
       expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
