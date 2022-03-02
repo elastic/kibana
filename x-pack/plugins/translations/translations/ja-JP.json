@@ -22715,7 +22715,6 @@
     "xpack.securitySolution.artifactCard.conditions.matchOperator.not": "IS NOT",
     "xpack.securitySolution.artifactCard.conditions.nestedOperator": "がある",
     "xpack.securitySolution.artifactCard.conditions.os": "OS",
-    "xpack.securitySolution.artifactCard.conditions.wildcardOperator": "一致",
     "xpack.securitySolution.artifactCard.conditions.windows": "Windows",
     "xpack.securitySolution.artifactCard.created": "作成済み",
     "xpack.securitySolution.artifactCard.createdBy": "作成者",
