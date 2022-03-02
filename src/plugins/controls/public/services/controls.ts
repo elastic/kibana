@@ -26,29 +26,3 @@ export interface ControlsService {
 
   getControlTypes: () => string[];
 }
-
-export const getCommonControlsService = () => {
-  const controlsFactoriesMap: ControlTypeRegistry = {};
-
-  const registerControlType = (factory: ControlFactory) => {
-    controlsFactoriesMap[factory.type] = factory;
-  };
-
-  const getControlFactory = <
-    I extends ControlInput = ControlInput,
-    O extends ControlOutput = ControlOutput,
-    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>
-  >(
-    type: string
-  ) => {
-    return controlsFactoriesMap[type] as EmbeddableFactory<I, O, E>;
-  };
-
-  const getControlTypes = () => Object.keys(controlsFactoriesMap);
-
-  return {
-    registerControlType,
-    getControlFactory,
-    getControlTypes,
-  };
-};

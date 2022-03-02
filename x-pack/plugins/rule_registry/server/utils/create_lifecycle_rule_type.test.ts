@@ -112,6 +112,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         services: {
           alertFactory,
           savedObjectsClient: {} as any,
+          uiSettingsClient: {} as any,
           scopedClusterClient: {} as any,
           shouldWriteAlerts: () => shouldWriteAlerts,
           shouldStopExecution: () => false,
