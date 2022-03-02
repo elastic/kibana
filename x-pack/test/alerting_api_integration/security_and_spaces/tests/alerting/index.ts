@@ -32,6 +32,9 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
         await tearDown(getService);
       });
 
+      // run telemetry tests before anything else
+      loadTestFile(require.resolve('./telemetry'));
+
       loadTestFile(require.resolve('./find'));
       loadTestFile(require.resolve('./create'));
       loadTestFile(require.resolve('./delete'));
@@ -53,7 +56,6 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./mustache_templates'));
       loadTestFile(require.resolve('./health'));
       loadTestFile(require.resolve('./excluded'));
-      loadTestFile(require.resolve('./telemetry'));
     });
   });
 }

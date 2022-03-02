@@ -19,6 +19,9 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
       await tearDown(getService);
     });
 
+    // run telemetry tests before anything else
+    loadTestFile(require.resolve('./telemetry'));
+
     loadTestFile(require.resolve('./builtin_action_types/email'));
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
     loadTestFile(require.resolve('./builtin_action_types/es_index_preconfigured'));
@@ -39,6 +42,5 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
     loadTestFile(require.resolve('./update'));
-    loadTestFile(require.resolve('./telemetry'));
   });
 }
