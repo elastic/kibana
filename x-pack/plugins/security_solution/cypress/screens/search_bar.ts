@@ -28,3 +28,13 @@ export const ADD_FILTER_FORM_FILTER_VALUE_INPUT = '[data-test-subj="filterParams
 export const ADD_FILTER_FORM_SAVE_BUTTON = '[data-test-subj="saveFilter"]';
 
 export const GLOBAL_SEARCH_BAR_FILTER_ITEM = '#popoverFor_filter0';
+
+export const GLOBAL_SEARCH_BAR_SAVE_QUERY =
+  '[data-test-subj="saved-query-management-popover-button"]';
+
+export const GLOBAL_SEARCH_BAR_SAVE_BUTTON =
+  '[data-test-subj="saved-query-management-save-button"]';
+
+export const ADD_SAVED_QUERY_FORM_TITLE_INPUT = '[data-test-subj="saveQueryFormTitle"]';
+
+export const ADD_SAVED_QUERY_FORM_SAVE_BUTTON = '[data-test-subj="savedQueryFormSaveButton"]';
