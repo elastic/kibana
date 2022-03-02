@@ -206,11 +206,10 @@ describe('Aggs service', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = service.start(startDeps);
-      expect(Object.keys(start).length).toBe(4);
+      expect(Object.keys(start).length).toBe(3);
       expect(start).toHaveProperty('calculateAutoTimeExpression');
       expect(start).toHaveProperty('createAggConfigs');
       expect(start).toHaveProperty('types');
-      expect(start).toHaveProperty('datatableUtilities');
     });
 
     test('types registry returns uninitialized type providers', () => {

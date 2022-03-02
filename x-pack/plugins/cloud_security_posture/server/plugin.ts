@@ -12,6 +12,7 @@ import type {
   Plugin,
   Logger,
 } from '../../../../src/core/server';
+import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
   CspServerPluginStart,
@@ -19,7 +20,14 @@ import type {
   CspServerPluginStartDeps,
 } from './types';
 import { defineRoutes } from './routes';
-import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
+import { cspRuleTemplateAssetType } from './saved_objects/cis_1_4_1/csp_rule_template';
+import { cspRuleAssetType } from './saved_objects/cis_1_4_1/csp_rule_type';
+import { initializeCspRules } from './saved_objects/cis_1_4_1/initialize_rules';
+
+export interface CspAppContext {
+  logger: Logger;
+  service: CspAppService;
+}
 
 export class CspPlugin
   implements
@@ -34,22 +42,35 @@ export class CspPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
+  private readonly CspAppService = new CspAppService();
 
   public setup(
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
+    const cspAppContext: CspAppContext = {
+      logger: this.logger,
+      service: this.CspAppService,
+    };
+
+    core.savedObjects.registerType(cspRuleAssetType);
     core.savedObjects.registerType(cspRuleTemplateAssetType);
 
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router, this.logger);
+    defineRoutes(router, cspAppContext);
 
     return {};
   }
 
   public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
+    this.CspAppService.start({
+      ...plugins.fleet,
+    });
+
+    initializeCspRules(core.savedObjects.createInternalRepository());
+
     return {};
   }
   public stop() {}
