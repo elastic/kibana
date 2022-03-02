@@ -335,19 +335,17 @@ export function defineRoutes(
       path: `/api/alerting_actions_telemetry/run_now`,
       validate: {
         body: schema.object({
-          task: schema.object({
-            id: schema.string({
-              validate: (telemetryTaskId: string) => {
-                if (
-                  ['Alerting-alerting_telemetry', 'Actions-actions_telemetry'].includes(
-                    telemetryTaskId
-                  )
-                ) {
-                  return;
-                }
-                return 'invalid telemetry task id';
-              },
-            }),
+          taskId: schema.string({
+            validate: (telemetryTaskId: string) => {
+              if (
+                ['Alerting-alerting_telemetry', 'Actions-actions_telemetry'].includes(
+                  telemetryTaskId
+                )
+              ) {
+                return;
+              }
+              return 'invalid telemetry task id';
+            },
           }),
         }),
       },
@@ -357,14 +355,12 @@ export function defineRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      const {
-        task: { id },
-      } = req.body;
+      const { taskId } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.runNow(id) });
+        return res.ok({ body: await taskManager.runNow(taskId) });
       } catch (err) {
-        return res.ok({ body: { id, error: `${err}` } });
+        return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }
   );
