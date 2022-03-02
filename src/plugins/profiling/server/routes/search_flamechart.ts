@@ -279,17 +279,25 @@ export function registerFlameChartSearchRoute(
           }
         }
 
-        const responseBody = logExecutionLatency(logger, 'building Flamegraph data', () => {
-          return new FlameGraph(
-            eventsIndex.sampleRate,
-            totalCount,
-            stackTraceEvents,
-            stackTraces,
-            stackFrames,
-            executables,
-            logger
-          ).toElastic();
-        });
+        const responseBody = await logExecutionLatency<any>(
+          logger,
+          'building Flamegraph data',
+          () => {
+            return new Promise((resolve, _) => {
+              return resolve(
+                new FlameGraph(
+                  eventsIndex.sampleRate,
+                  totalCount,
+                  stackTraceEvents,
+                  stackTraces,
+                  stackFrames,
+                  executables,
+                  logger
+                ).toElastic()
+              );
+            });
+          }
+        );
 
         return response.ok({
           body: responseBody,
@@ -307,9 +315,14 @@ export function registerFlameChartSearchRoute(
   );
 }
 
-function logExecutionLatency<T>(logger: Logger, activity: string, func: () => T): T {
+async function logExecutionLatency<T>(
+  logger: Logger,
+  activity: string,
+  func: () => Promise<T>
+): Promise<T> {
   const start = new Date().getTime();
-  const result = func();
-  logger.info(activity + ' took ' + (new Date().getTime() - start) + 'ms');
-  return result;
+  return await func().then((res) => {
+    logger.info(activity + ' took ' + (new Date().getTime() - start) + 'ms');
+    return res;
+  });
 }
