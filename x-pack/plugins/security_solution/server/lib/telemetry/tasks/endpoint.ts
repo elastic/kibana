@@ -280,7 +280,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             },
             endpoint_metadata: {
               capabilities:
-                endpointMetadataById !== null
+                endpointMetadataById !== null && endpointMetadataById !== undefined
                   ? endpointMetadataById._source.Endpoint.capabilities
                   : [],
             },
