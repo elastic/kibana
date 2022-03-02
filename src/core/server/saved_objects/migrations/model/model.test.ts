@@ -299,7 +299,7 @@ describe('migrations v2 model', () => {
 
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"Cluster routing allocation is not enabled."`
+          `"Cluster routing allocation is not enabled. To proceed, please enable routing."`
         );
       });
       test("INIT -> FATAL when .kibana points to newer version's index", () => {
