@@ -449,6 +449,7 @@ describe('ManifestManager', () => {
       }
     });
 
+    //
     test('Builds manifest with policy specific exception list items for trusted apps', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
