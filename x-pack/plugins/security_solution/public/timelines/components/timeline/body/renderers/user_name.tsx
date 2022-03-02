@@ -83,7 +83,7 @@ const UserNameComponent: React.FC<Props> = ({
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
-  // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the Host Details page
+  // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the User Details page
   const content = useMemo(
     () => (
       <UserDetailsLink
