@@ -14,7 +14,7 @@ import { Root } from '../../../root';
 import { LogRecord } from '@kbn/logging';
 import { retryAsync } from '../test_helpers/retry_async';
 
-const logFilePath = Path.join(__dirname, 'cluste_routing_allocation_disabled.log');
+const logFilePath = Path.join(__dirname, 'cluster_routing_allocation_disabled.log');
 
 describe('cluster_routing_allocation_disabled', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
@@ -45,7 +45,7 @@ describe('cluster_routing_allocation_disabled', () => {
     return startES();
   };
 
-  it('fails with a descriptive message when a routing allocation is disabled as a transient setting', async () => {
+  it('fails with a descriptive message when a routing allocation is disabled', async () => {
     root = createRoot({});
     esServer = await startEsServer({ esArgs: ['cluster.routing.allocation.enable=none'] });
     await root.preboot();

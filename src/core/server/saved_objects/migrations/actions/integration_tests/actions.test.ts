@@ -14,7 +14,6 @@ import {
   cloneIndex,
   closePit,
   createIndex,
-  fetchIndices,
   openPit,
   OpenPitResponse,
   reindex,
