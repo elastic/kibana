@@ -27,6 +27,20 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
     const alwaysFiringRuleId: { [key: string]: string } = {};
     const objectRemover = new ObjectRemover(supertest);
 
+    before(async () => {
+      // reset the state in the telemetry task
+      await es.update({
+        id: `task:Alerting-alerting_telemetry`,
+        index: '.kibana_task_manager',
+        body: {
+          doc: {
+            task: {
+              state: '{}',
+            },
+          },
+        },
+      });
+    });
     after(() => objectRemover.removeAll());
 
     async function createConnector(opts: { name: string; space: string; connectorTypeId: string }) {
