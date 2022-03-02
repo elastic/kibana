@@ -16,11 +16,18 @@ import {
   createFieldFormatsStartMock,
 } from '../../field_formats/server/mocks';
 import { createIndexPatternsStartMock } from './data_views/mocks';
+import { createDatatableUtilitiesMock } from './datatable_utilities/mock';
 import { DataRequestHandlerContext } from './search';
+import { AutocompleteSetup } from './autocomplete';
+
+const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
+  getAutocompleteSettings: jest.fn(),
+};
 
 function createSetupContract() {
   return {
     search: createSearchSetupMock(),
+    autocomplete: autocompleteSetupMock,
     /**
      * @deprecated - use directly from "fieldFormats" plugin instead
      */
@@ -36,6 +43,7 @@ function createStartContract() {
      */
     fieldFormats: createFieldFormatsStartMock(),
     indexPatterns: createIndexPatternsStartMock(),
+    datatableUtilities: createDatatableUtilitiesMock(),
   };
 }
 
