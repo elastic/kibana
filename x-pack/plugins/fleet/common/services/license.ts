@@ -53,6 +53,13 @@ export class LicenseService {
       this.licenseInformation?.hasAtLeast('enterprise')
     );
   }
+  public isPlatinium() {
+    return (
+      this.licenseInformation?.isAvailable &&
+      this.licenseInformation?.isActive &&
+      this.licenseInformation?.hasAtLeast('platinum')
+    );
+  }
   public hasAtLeast(licenseType: LicenseType) {
     return (
       this.licenseInformation?.isAvailable &&

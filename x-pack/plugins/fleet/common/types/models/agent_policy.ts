@@ -25,8 +25,8 @@ export interface NewAgentPolicy {
   monitoring_enabled?: MonitoringType;
   unenroll_timeout?: number;
   is_preconfigured?: boolean;
-  data_output_id?: string;
-  monitoring_output_id?: string;
+  data_output_id?: string | null;
+  monitoring_output_id?: string | null;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
