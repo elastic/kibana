@@ -41,21 +41,12 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
     `;
 
     const children: CSSObject = {
+      position: 'relative',
       color: colors.ghost,
-      marginLeft: size.s,
+      marginLeft: size.base,
       paddingLeft: size.s,
       borderLeft: border.editable,
       marginTop: size.s,
-      '&:after': {
-        position: 'absolute',
-        content: `''`,
-        bottom: 0,
-        left: size.xs,
-        backgroundColor: colors.lightShade,
-        width: size.s,
-        height: size.xxs,
-        borderRadius: size.xxs,
-      },
     };
 
     const button: CSSObject = {
@@ -119,6 +110,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       display: 'block',
       cursor: 'pointer',
       position: 'relative',
+      margin: `${size.s} 0px`,
       '&:not(:first-child)': {
         marginTop: size.s,
       },
@@ -151,14 +143,6 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       color: colors.successText,
     };
 
-    const userEnteredIcon: CSSObject = {
-      position: 'absolute',
-      width: '9px',
-      height: '9px',
-      marginLeft: '-11px',
-      marginTop: size.s,
-    };
-
     const alertDetails: CSSObject = {
       padding: size.s,
       border: border.editable,
@@ -172,7 +156,6 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       processNode,
       wrapper,
       workingDir,
-      userEnteredIcon,
       buttonArrow,
       getButtonStyle,
       alertDetails,

@@ -36,7 +36,7 @@ describe('ProcessTreeNode component', () => {
         <ProcessTreeNode isSessionLeader process={processMock} />
       );
 
-      expect(renderResult.container.textContent).toEqual(' bash started by  vagrant');
+      expect(renderResult.container.textContent).toEqual(' bash started by  vagrant');
     });
 
     // commented out until we get new UX for orphans treatment aka disjointed tree
@@ -44,17 +44,6 @@ describe('ProcessTreeNode component', () => {
     //   renderResult = mockedContext.render(<ProcessTreeNode process={processMock} />);
     //   expect(renderResult.queryByText(/orphaned/i)).toBeTruthy();
     // });
-
-    it('renders user icon for user entered process', async () => {
-      const userEnteredProcessMock: typeof processMock = {
-        ...processMock,
-        isUserEntered: () => true,
-      };
-
-      renderResult = mockedContext.render(<ProcessTreeNode process={userEnteredProcessMock} />);
-
-      expect(renderResult.queryByTestId('sessionView:processTreeNodeUserIcon')).toBeTruthy();
-    });
 
     it('renders Exec icon and exit code for executed process', async () => {
       const executedProcessMock: typeof processMock = {

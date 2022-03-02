@@ -209,7 +209,7 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
   const [orphans, setOrphans] = useState<Process[]>([]);
 
   useEffect(() => {
-    let eventsProcessMap: ProcessMap = processMap;
+    let updatedProcessMap: ProcessMap = processMap;
     let newOrphans: Process[] = orphans;
     const newProcessedPages: ProcessEventsPage[] = [];
 
@@ -220,29 +220,26 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
         const backwards = i < processedPages.length;
 
         const result = processNewEvents(
-          eventsProcessMap,
+          updatedProcessMap,
           page.events,
           orphans,
           sessionEntityId,
           backwards
-        ) as [ProcessMap, Process[]];
+        );
 
-        eventsProcessMap = result[0];
+        updatedProcessMap = result[0];
         newOrphans = result[1];
 
         newProcessedPages.push(page);
       }
     });
 
-    setProcessMap({ ...eventsProcessMap });
-    setProcessedPages([...processedPages, ...newProcessedPages]);
-    setOrphans(newOrphans);
-
-    // we disable this eslint rule since this hook will mutate orphans, processMap and processedPages
-    // by including those in the dependency array we create an infinite useEffect loop.
-    // the only time this useEffect should run is if data changes and there are new pages of events to process.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+    if (newProcessedPages.length > 0) {
+      setProcessMap({ ...updatedProcessMap });
+      setProcessedPages([...processedPages, ...newProcessedPages]);
+      setOrphans(newOrphans);
+    }
+  }, [data, processMap, orphans, processedPages, sessionEntityId]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));

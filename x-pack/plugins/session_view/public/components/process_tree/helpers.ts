@@ -152,9 +152,9 @@ export const processNewEvents = (
   orphans: Process[],
   sessionEntityId: string,
   backwardDirection: boolean = false
-) => {
+): [ProcessMap, Process[]] => {
   if (!events || events.length === 0) {
-    return eventsProcessMap;
+    return [eventsProcessMap, orphans];
   }
 
   const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
