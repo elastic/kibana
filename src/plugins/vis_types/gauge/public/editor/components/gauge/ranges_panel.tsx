@@ -116,7 +116,7 @@ function RangesPanel({
                 'visTypeGauge.controls.gaugeOptions.showOutlineNotAvailable',
                 {
                   defaultMessage:
-                    'The outile is not supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
+                    'The outline is not supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
                 }
               ),
             }
