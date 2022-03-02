@@ -43,7 +43,7 @@ if (totalJobs > 500) {
 
 // Build job first
 steps.push(getBuildJob());
-steps.push(getRunnerJob(env));
+steps.push(getGroupRunnerJob(env));
 
 console.log(JSON.stringify(pipeline, null, 2));
 
@@ -57,7 +57,7 @@ function getBuildJob() {
   };
 }
 
-function getRunnerJob(env) {
+function getGroupRunnerJob(env) {
   return {
     command: `${
       env[E2E_GREP] ? `GREP="${env[E2E_GREP]}" ` : ''
