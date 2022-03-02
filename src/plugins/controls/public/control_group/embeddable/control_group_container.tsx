@@ -14,7 +14,6 @@ import { Filter, uniqFilters } from '@kbn/es-query';
 import { EMPTY, merge, pipe, Subscription } from 'rxjs';
 import { distinctUntilChanged, debounceTime, catchError, switchMap, map } from 'rxjs/operators';
 import { EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import {
   ControlGroupInput,
@@ -69,7 +68,7 @@ export class ControlGroupContainer extends Container<
     return Promise.resolve();
   };
 
-  private getCreateControlButton = (
+  private getCreateControlButtons = (
     buttonType: CreateControlButtonTypes,
     closePopover: () => void
   ) => {
@@ -115,9 +114,8 @@ export class ControlGroupContainer extends Container<
       >
         {({ closePopover }: { closePopover: () => void }) => (
           <EuiContextMenuPanel
-            size="m"
             items={[
-              this.getCreateControlButton('toolbar', closePopover),
+              this.getCreateControlButtons('toolbar', closePopover),
               <EuiHorizontalRule margin="none" />,
               this.getEditControlGroupButton(closePopover),
             ]}

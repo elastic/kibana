@@ -165,9 +165,9 @@ export const CreateControlButton = ({
         data-test-subj="control-type-picker"
         closePopover={() => setIsControlTypePopoverOpen(false)}
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
     );
   }
-  return <EuiContextMenuPanel size="s" items={items} />;
+  return <EuiContextMenuPanel items={items} />;
 };
