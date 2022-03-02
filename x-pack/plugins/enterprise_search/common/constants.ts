@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
-  ID: 'enterpriseSearch',
-  NAME: i18n.translate('xpack.enterpriseSearch.productName', {
+  ID: 'enterpriseSearchOveriew',
+  NAME: i18n.translate('xpack.enterpriseSearch.overview.productName', {
     defaultMessage: 'Enterprise Search',
   }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.navTitle', {
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
     defaultMessage: 'Overview',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.FeatureCatalogue.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.overview.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
   URL: '/app/enterprise_search/overview',
