@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useQueryClient } from 'react-query';
 import { isEmpty, without } from 'lodash/fp';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';

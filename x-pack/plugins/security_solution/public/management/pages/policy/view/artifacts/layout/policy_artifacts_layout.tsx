@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EuiTitle,
   EuiPageHeader,
@@ -49,6 +48,7 @@ import { PolicyArtifactsEmptyUnassigned, PolicyArtifactsEmptyUnexisting } from '
 import { PolicyArtifactsList } from '../list';
 import { PolicyArtifactsFlyout } from '../flyout';
 import { PolicyArtifactsPageLabels, policyArtifactsPageLabels } from '../translations';
+import { PolicyArtifactsDeleteModal } from '../delete_modal';
 
 interface PolicyArtifactsLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
@@ -63,6 +63,9 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(listId);
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+    const [exceptionItemToDelete, setExceptionItemToDelete] = useState<
+      ExceptionListItemSchema | undefined
+    >();
 
     const labels = useMemo<typeof policyArtifactsPageLabels>(() => {
       return {
@@ -97,18 +100,12 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
       }
     }, [http, listId]);
 
-    const {
-      data: allAssigned,
-      isLoading: isLoadingAllAssigned,
-      isRefetching: isRefetchingAllAssigned,
-    } = useListArtifact(
+    const { data: allAssigned, isLoading: isLoadingAllAssigned } = useListArtifact(
       exceptionsListApiClient,
       [...searcheableFields],
       {
         policies: policyItem ? [policyItem.id, 'global'] : [],
-      },
-      {},
-      ['allAssigned']
+      }
     );
 
     const {
@@ -123,6 +120,17 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     const handleOnCloseFlyout = useCallback(() => {
       navigateCallback({ show: undefined });
     }, [navigateCallback]);
+
+    const handleDeleteModalClose = useCallback(() => {
+      setExceptionItemToDelete(undefined);
+    }, [setExceptionItemToDelete]);
+
+    const handleOnDeleteActionCallback = useCallback(
+      (item) => {
+        setExceptionItemToDelete(item);
+      },
+      [setExceptionItemToDelete]
+    );
 
     const assignToPolicyButton = useMemo(
       () => (
@@ -153,17 +161,8 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     }, [getAppUrl, getArtifactPath, labels, allAssigned?.total]);
 
     const isGlobalLoading = useMemo(
-      () =>
-        isLoadingAllAssigned ||
-        isRefetchingAllAssigned ||
-        isLoadingAllArtifacts ||
-        isRefetchingAllArtifacts,
-      [
-        isLoadingAllAssigned,
-        isRefetchingAllAssigned,
-        isLoadingAllArtifacts,
-        isRefetchingAllArtifacts,
-      ]
+      () => isLoadingAllAssigned || isLoadingAllArtifacts || isRefetchingAllArtifacts,
+      [isLoadingAllAssigned, isLoadingAllArtifacts, isRefetchingAllArtifacts]
     );
 
     const isEmptyState = useMemo(() => allAssigned && allAssigned.total === 0, [allAssigned]);
@@ -230,6 +229,16 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             labels={labels}
           />
         )}
+        {exceptionItemToDelete && (
+          <PolicyArtifactsDeleteModal
+            policyId={policyItem.id}
+            policyName={policyItem.name}
+            apiClient={exceptionsListApiClient}
+            exception={exceptionItemToDelete}
+            onCancel={handleDeleteModalClose}
+            labels={labels}
+          />
+        )}
         <EuiSpacer size="l" />
         <EuiPageContent
           hasBorder={false}
@@ -244,6 +253,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             searcheableFields={[...searcheableFields]}
             artifactPathFn={getArtifactPath}
             labels={labels}
+            onDeleteActionCallback={handleOnDeleteActionCallback}
           />
         </EuiPageContent>
       </div>

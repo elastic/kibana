@@ -32,8 +32,6 @@ import { useUserPrivileges } from '../../../../../../common/components/user_priv
 import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { useListArtifact } from '../../../../../hooks/artifacts';
-import { PolicyArtifactsDeleteModal } from '../delete_modal';
-import { PolicyArtifactsPageLabels } from '../translations';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
 
 interface PolicyArtifactsListProps {
@@ -41,20 +39,19 @@ interface PolicyArtifactsListProps {
   apiClient: ExceptionsListApiClient;
   searcheableFields: string[];
   artifactPathFn: (location: object) => string;
-  labels: typeof POLICY_ARTIFACT_LIST_LABELS & PolicyArtifactsPageLabels;
+  labels: typeof POLICY_ARTIFACT_LIST_LABELS;
+  onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
-  ({ policy, apiClient, searcheableFields, artifactPathFn, labels }) => {
+  ({ policy, apiClient, searcheableFields, artifactPathFn, labels, onDeleteActionCallback }) => {
     const { getAppUrl } = useAppUrl();
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const policiesRequest = useGetEndpointSpecificPolicies({ perPage: 1000 });
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(apiClient.listId);
     const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
     const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
-    const [exceptionItemToDelete, setExceptionItemToDelete] = useState<
-      ExceptionListItemSchema | undefined
-    >();
+
     const { state } = useGetLinkTo(policy.id, policy.name, apiClient.listId);
 
     const {
@@ -126,7 +123,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
         icon: 'trash',
         children: labels.listRemoveActionTitle,
         onClick: () => {
-          setExceptionItemToDelete(item);
+          onDeleteActionCallback(item);
         },
         disabled: isGlobal,
         toolTipContent: isGlobal ? labels.listRemoveActionNotAllowedMessage : undefined,
@@ -142,22 +139,8 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       };
     };
 
-    const handleDeleteModalClose = useCallback(() => {
-      setExceptionItemToDelete(undefined);
-    }, [setExceptionItemToDelete]);
-
     return (
       <>
-        {exceptionItemToDelete && (
-          <PolicyArtifactsDeleteModal
-            policyId={policy.id}
-            policyName={policy.name}
-            apiClient={apiClient}
-            exception={exceptionItemToDelete}
-            onCancel={handleDeleteModalClose}
-            labels={labels}
-          />
-        )}
         <SearchExceptions
           placeholder={labels.listSearchPlaceholderMessage}
           defaultValue={urlParams.filter}
