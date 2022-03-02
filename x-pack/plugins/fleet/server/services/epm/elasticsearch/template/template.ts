@@ -85,12 +85,13 @@ export function getTemplate({
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
 
-  const fleetTemplatesToAdd = [FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME];
-
-  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
-    fleetTemplatesToAdd.push(FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME);
-  }
-  template.composed_of = [...(template.composed_of || []), ...fleetTemplatesToAdd];
+  template.composed_of = [
+    ...(template.composed_of || []),
+    FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+    ...(appContextService.getConfig()?.agentIdVerificationEnabled
+      ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
+      : []),
+  ];
 
   return template;
 }
