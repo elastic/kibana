@@ -140,14 +140,14 @@ export class IconSelect extends Component {
         label: 'Maki icons',
         isGroupLabel: true,
       },
-      ...SYMBOL_OPTIONS.map(({ key, label }) => {
+      ...SYMBOL_OPTIONS.map(({ value, label }) => {
         return {
-          key,
+          key: value,
           label,
           prepend: (
             <SymbolIcon
-              key={key}
-              symbolId={key}
+              key={value}
+              symbolId={value}
               fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
             />
           ),
@@ -155,23 +155,29 @@ export class IconSelect extends Component {
       }),
     ];
 
-    const customOptions = this.props.customIcons.map(({ symbolId, svg, name, cutoff, radius }) => {
-      return {
-        key: symbolId,
-        label: name,
-        svg,
-        cutoff,
-        radius,
-        prepend: (
-          <SymbolIcon
-            key={symbolId}
-            symbolId={symbolId}
-            svg={svg}
-            fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-          />
-        ),
-      };
-    });
+    let customOptions = [];
+
+    if (this.props.customIcons) {
+      this.props.customIcons.forEach(
+        ({ symbolId, svg, name, cutoff, radius }) => {
+          customOptions.push({
+            key: symbolId,
+            label: name,
+            svg,
+            cutoff,
+            radius,
+            prepend: (
+              <SymbolIcon
+                key={symbolId}
+                symbolId={symbolId}
+                svg={svg}
+                fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+              />
+            ),
+          });
+        }
+      );
+    }
 
     if (customOptions.length)
       customOptions.splice(0, 0, {

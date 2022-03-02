@@ -1,76 +1,204 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Should render icon select 1`] = `
-<EuiPopover
-  anchorPosition="downLeft"
-  button={
-    <EuiFormControlLayout
-      compressed={true}
-      fullWidth={true}
-      icon={
-        Object {
-          "side": "right",
-          "type": "arrowDown",
-        }
-      }
-      onKeyDown={[Function]}
-      readOnly={true}
-    >
-      <EuiFieldText
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiFormControlLayout
         compressed={true}
         fullWidth={true}
-        onClick={[Function]}
-        onKeyDown={[Function]}
-        prepend={
-          <SymbolIcon
-            className="mapIconSelectSymbol__inputButton"
-            fill="rgb(52, 55, 65)"
-            symbolId="symbol1"
-          />
-        }
-        readOnly={true}
-        value="symbol1"
-      />
-    </EuiFormControlLayout>
-  }
-  closePopover={[Function]}
-  display="block"
-  hasArrow={true}
-  isOpen={false}
-  ownFocus={true}
-  panelPaddingSize="s"
->
-  <EuiFocusTrap
-    clickOutsideDisables={true}
-  >
-    <EuiSelectable
-      isPreFiltered={false}
-      onChange={[Function]}
-      options={
-        Array [
+        icon={
           Object {
-            "label": "symbol1",
-            "prepend": <SymbolIcon
+            "side": "right",
+            "type": "arrowDown",
+          }
+        }
+        onKeyDown={[Function]}
+        readOnly={true}
+      >
+        <EuiFieldText
+          compressed={true}
+          fullWidth={true}
+          onClick={[Function]}
+          onKeyDown={[Function]}
+          prepend={
+            <SymbolIcon
+              className="mapIconSelectSymbol__inputButton"
               fill="rgb(52, 55, 65)"
               symbolId="symbol1"
-            />,
-            "value": "symbol1",
-          },
-          Object {
-            "label": "symbol2",
-            "prepend": <SymbolIcon
-              fill="rgb(52, 55, 65)"
-              symbolId="symbol2"
-            />,
-            "value": "symbol2",
-          },
-        ]
-      }
-      searchable={true}
-      singleSelection={false}
+            />
+          }
+          readOnly={true}
+          value="symbol1"
+        />
+      </EuiFormControlLayout>
+    }
+    closePopover={[Function]}
+    display="block"
+    hasArrow={true}
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="s"
+  >
+    <EuiFocusTrap
+      clickOutsideDisables={true}
     >
-      <Component />
-    </EuiSelectable>
-  </EuiFocusTrap>
-</EuiPopover>
+      <EuiSelectable
+        isPreFiltered={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "isGroupLabel": true,
+              "label": "Maki icons",
+            },
+            Object {
+              "key": "symbol1",
+              "label": "symbol1",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                symbolId="symbol1"
+              />,
+            },
+            Object {
+              "key": "symbol2",
+              "label": "symbol2",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                symbolId="symbol2"
+              />,
+            },
+          ]
+        }
+        searchable={true}
+        singleSelection={false}
+      >
+        <Component />
+      </EuiSelectable>
+      <EuiButton
+        fullWidth={true}
+        onClick={[Function]}
+      >
+        Add custom icon
+      </EuiButton>
+    </EuiFocusTrap>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`Should render icon select with custom icons 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiFormControlLayout
+        compressed={true}
+        fullWidth={true}
+        icon={
+          Object {
+            "side": "right",
+            "type": "arrowDown",
+          }
+        }
+        onKeyDown={[Function]}
+        readOnly={true}
+      >
+        <EuiFieldText
+          compressed={true}
+          fullWidth={true}
+          onClick={[Function]}
+          onKeyDown={[Function]}
+          prepend={
+            <SymbolIcon
+              className="mapIconSelectSymbol__inputButton"
+              fill="rgb(52, 55, 65)"
+              svg="<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>"
+              symbolId="__kbn__custom_icon_sdf__foobar"
+            />
+          }
+          readOnly={true}
+          value="My Custom Icon"
+        />
+      </EuiFormControlLayout>
+    }
+    closePopover={[Function]}
+    display="block"
+    hasArrow={true}
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="s"
+  >
+    <EuiFocusTrap
+      clickOutsideDisables={true}
+    >
+      <EuiSelectable
+        isPreFiltered={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "isGroupLabel": true,
+              "label": "Custom icons",
+            },
+            Object {
+              "cutoff": 0.25,
+              "key": "__kbn__custom_icon_sdf__foobar",
+              "label": "My Custom Icon",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                svg="<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>"
+                symbolId="__kbn__custom_icon_sdf__foobar"
+              />,
+              "radius": 0.25,
+              "svg": "<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>",
+            },
+            Object {
+              "cutoff": 0.3,
+              "key": "__kbn__custom_icon_sdf__bizzbuzz",
+              "label": "My Other Custom Icon",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"531.74\\" height=\\"460.5\\" overflow=\\"visible\\" xml:space=\\"preserve\\"><path stroke=\\"#000\\" d=\\"M.866 460 265.87 1l265.004 459z\\"/></svg>"
+                symbolId="__kbn__custom_icon_sdf__bizzbuzz"
+              />,
+              "radius": 0.15,
+              "svg": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"531.74\\" height=\\"460.5\\" overflow=\\"visible\\" xml:space=\\"preserve\\"><path stroke=\\"#000\\" d=\\"M.866 460 265.87 1l265.004 459z\\"/></svg>",
+            },
+            Object {
+              "isGroupLabel": true,
+              "label": "Maki icons",
+            },
+            Object {
+              "key": "symbol1",
+              "label": "symbol1",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                symbolId="symbol1"
+              />,
+            },
+            Object {
+              "key": "symbol2",
+              "label": "symbol2",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                symbolId="symbol2"
+              />,
+            },
+          ]
+        }
+        searchable={true}
+        singleSelection={false}
+      >
+        <Component />
+      </EuiSelectable>
+      <EuiButton
+        fullWidth={true}
+        onClick={[Function]}
+      >
+        Add custom icon
+      </EuiButton>
+    </EuiFocusTrap>
+  </EuiPopover>
+</Fragment>
 `;

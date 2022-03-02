@@ -122,3 +122,40 @@ exports[`Should render default props 1`] = `
   />
 </Fragment>
 `;
+
+exports[`Should render icon map select with custom icons 1`] = `
+<Fragment>
+  <EuiSuperSelect
+    compressed={true}
+    fullWidth={false}
+    hasDividers={true}
+    isInvalid={false}
+    isLoading={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "inputDisplay": "Custom icon palette",
+          "value": "CUSTOM_MAP_ID",
+        },
+        Object {
+          "inputDisplay": <div>
+            mock filledShapes option
+          </div>,
+          "value": "filledShapes",
+        },
+        Object {
+          "inputDisplay": <div>
+            mock hollowShapes option
+          </div>,
+          "value": "hollowShapes",
+        },
+      ]
+    }
+    valueOfSelected="filledShapes"
+  />
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

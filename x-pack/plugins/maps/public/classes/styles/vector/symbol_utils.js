@@ -21,7 +21,7 @@ export const CUSTOM_ICON_PIXEL_RATIO = Math.floor((window.devicePixelRatio) * (C
 
 export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
   return {
-    key: symbolId,
+    value: symbolId,
     label: symbolId,
   };
 });
