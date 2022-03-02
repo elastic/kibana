@@ -37,7 +37,6 @@ import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/pub
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
 import {
   applyChanges,
-  LensRootStore,
   setState,
   updateDatasourceState,
   updateVisualizationState,
