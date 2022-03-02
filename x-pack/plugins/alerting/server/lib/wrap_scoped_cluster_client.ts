@@ -158,7 +158,7 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
         took = (result as SearchResponse<TDocument, TAggregations>).took;
       }
 
-      opts.logMetricsFn({ esSearchDuration: took, totalSearchDuration: durationMs });
+      opts.logMetricsFn({ esSearchDuration: took ?? 0, totalSearchDuration: durationMs });
       return result;
     } catch (e) {
       throw e;
