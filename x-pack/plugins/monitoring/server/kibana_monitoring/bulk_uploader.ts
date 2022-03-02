@@ -22,7 +22,6 @@ import { sendBulkPayload } from './lib';
 import { getKibanaSettings } from './collectors';
 import type { MonitoringConfig } from '../config';
 import type { IBulkUploader } from '../types';
-import { MonitoringCollectionSetup } from '../../../monitoring_collection/server';
 
 export interface BulkUploaderOptions {
   log: Logger;
@@ -31,7 +30,6 @@ export interface BulkUploaderOptions {
   statusGetter$: Observable<ServiceStatus>;
   opsMetrics$: Observable<OpsMetrics>;
   kibanaStats: KibanaStats;
-  monitoringCollection?: MonitoringCollectionSetup;
 }
 
 export interface KibanaStats {
@@ -72,7 +70,6 @@ export class BulkUploader implements IBulkUploader {
   private _timer: NodeJS.Timer | null;
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
-  private readonly monitoringCollection?: MonitoringCollectionSetup;
 
   constructor({
     log,
@@ -81,7 +78,6 @@ export class BulkUploader implements IBulkUploader {
     statusGetter$,
     opsMetrics$,
     kibanaStats,
-    monitoringCollection,
   }: BulkUploaderOptions) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
@@ -98,8 +94,6 @@ export class BulkUploader implements IBulkUploader {
 
     this.kibanaStatus = null;
     this.kibanaStatusGetter$ = statusGetter$;
-
-    this.monitoringCollection = monitoringCollection;
   }
 
   /*
@@ -170,50 +164,10 @@ export class BulkUploader implements IBulkUploader {
     };
   }
 
-  private async getKibanaMetrics() {
-    const kibanaMetrics = await this.monitoringCollection?.getMetrics();
-    if (!kibanaMetrics) {
-      return [];
-    }
-    const metrics = Object.keys(kibanaMetrics).reduce(
-      (
-        accum: Array<{ type: string; result: { timestamp: Date; [type: string]: unknown } }>,
-        type
-      ) => {
-        const result = kibanaMetrics[type];
-        if (Array.isArray(result)) {
-          accum.push(
-            ...result.map((item) => {
-              return {
-                type: `kibana_${type}`,
-                result: {
-                  timestamp: new Date(),
-                  ...item,
-                },
-              };
-            })
-          );
-        } else {
-          accum.push({
-            type: `kibana_${type}`,
-            result: {
-              timestamp: new Date(),
-              ...result,
-            },
-          });
-        }
-        return accum;
-      },
-      []
-    );
-    return metrics;
-  }
-
   private async _fetchAndUpload(esClient: ElasticsearchClient) {
     const data = await Promise.all([
       { type: KIBANA_STATS_TYPE_MONITORING, result: await this.getOpsMetrics() },
       { type: KIBANA_SETTINGS_TYPE, result: await getKibanaSettings(this._log, this.config) },
-      ...(await this.getKibanaMetrics()),
     ]);
 
     const payload = this.toBulkUploadFormat(data);
