@@ -79,8 +79,6 @@ import { dashboardFeatureCatalog } from './dashboard_strings';
 import { replaceUrlHashQuery } from '../../kibana_utils/public';
 import { SpacesPluginStart } from './services/spaces';
 
-import './print.scss';
-
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
 }

@@ -237,15 +237,19 @@ export class CoreSystem {
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
-      // HACKS: scope all current <link> tags to screen or projection media
+      // HACKS: scope all current styles to screen or projection media
       const setTargetMedia = (el: HTMLElement) => {
         el.setAttribute('media', 'screen, projection');
       };
       document.querySelectorAll('link').forEach(setTargetMedia);
+      document.querySelectorAll('style').forEach(setTargetMedia);
       new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           mutation.addedNodes.forEach((node) => {
-            if (node instanceof HTMLElement && node.tagName.toLowerCase() === 'link') {
+            if (
+              node instanceof HTMLElement &&
+              (node.tagName.toLowerCase() === 'link' || node.tagName.toLowerCase() === 'style')
+            ) {
               setTargetMedia(node);
             }
           });
