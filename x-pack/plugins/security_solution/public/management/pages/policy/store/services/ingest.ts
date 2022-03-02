@@ -102,6 +102,7 @@ export const sendGetFleetAgentStatusForPolicy = (
   policyId: string,
   options: Exclude<HttpFetchOptions, 'query'> = {}
 ): Promise<GetAgentStatusResponse> => {
+  console.log('we in here');
   return http.get(INGEST_API_FLEET_AGENT_STATUS, {
     ...options,
     query: {

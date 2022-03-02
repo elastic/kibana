@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
   CriteriaWithPagination,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,10 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { PolicyData } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
-import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
+import {
+  useGetAgentCountForPolicy,
+  useGetEndpointSpecificPolicies,
+} from '../../../services/policies/hooks';
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -33,6 +37,11 @@ export const PolicyList = memo(() => {
     page: pagination.page,
     perPage: pagination.pageSize,
   });
+
+  // endpoint count per policy
+  /* const { data: endpointCount  } = useGetAgentCountForPolicy({
+data.items[].policy_id
+});*/
 
   const totalItemCount = data?.total ?? 0;
 

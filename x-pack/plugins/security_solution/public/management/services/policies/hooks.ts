@@ -5,9 +5,14 @@
  * 2.0.
  */
 import { QueryObserverResult, useQuery } from 'react-query';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  GetAgentPoliciesResponse,
+} from '../../../../../fleet/common';
 import { useHttp } from '../../../common/lib/kibana/hooks';
 import { ServerApiError } from '../../../common/types';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
+import { sendGetAgentPolicyList } from '../../pages/policy/store/services/ingest';
 import { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 
@@ -30,6 +35,32 @@ export function useGetEndpointSpecificPolicies(
         query: {
           page,
           perPage,
+        },
+      });
+    },
+    {
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      onError,
+    }
+  );
+}
+
+export function useGetAgentCountForPolicy({
+  onError,
+  policyIds,
+}: {
+  onError?: (error: ServerApiError) => void;
+  policyIds: string[];
+}): QueryObserverResult<GetAgentPoliciesResponse> {
+  const http = useHttp();
+  return useQuery<GetAgentPoliciesResponse, ServerApiError>(
+    // is this too generic for a key?
+    ['endpointCountForPolicy'],
+    () => {
+      return sendGetAgentPolicyList(http, {
+        query: {
+          kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIds.join(' or ')})`,
         },
       });
     },
