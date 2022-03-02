@@ -17,7 +17,7 @@ import { LegacyRequest, LegacyServer } from '../../../../types';
 // TODO: Replace this LegacyServer call with the "new platform" core Kibana route method
 export function checkAccessRoute(server: LegacyServer) {
   server.route({
-    method: 'get',
+    method: 'GET',
     path: '/api/monitoring/v1/check_access',
     handler: async (req: LegacyRequest) => {
       const response: { has_access?: boolean } = {};
