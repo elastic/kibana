@@ -78,8 +78,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `Cluster routing allocation is not enabled.`,
-          logs: [...stateP.logs, { level: 'error', message: `You should enable routing` }],
+          reason: `Cluster routing allocation is not enabled. To proceed, please enable routing.`,
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'error',
+              message: `'cluster.routing.allocation.enable' is set to 'none'. You should enable routing.`,
+            },
+          ],
         };
       } else {
         return throwBadResponse(stateP, left);
