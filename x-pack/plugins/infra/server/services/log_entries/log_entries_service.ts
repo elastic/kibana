@@ -28,7 +28,7 @@ export class LogEntriesService {
       );
       setupDeps.data.search.registerSearchStrategy(
         LOG_ENTRY_SEARCH_STRATEGY,
-        logEntrySearchStrategyProvider({ ...setupDeps, ...startDeps })
+        logEntrySearchStrategyProvider({ ...setupDeps, ...startDeps, ...selfStartDeps })
       );
     });
   }

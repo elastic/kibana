@@ -39,7 +39,6 @@ import {
   LogEntriesSearchResponsePayload,
   logEntriesSearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entries';
-import type { IInfraSources } from '../../lib/sources';
 import {
   createAsyncRequestRTs,
   createErrorFromShardFailure,
@@ -67,7 +66,6 @@ export const logEntriesSearchStrategyProvider = ({
 }: {
   data: DataPluginStart;
   logViews: LogViewsServiceStart;
-  sources: IInfraSources;
 }): ISearchStrategy<LogEntriesSearchRequest, LogEntriesSearchResponse> => {
   const esSearchStrategy = data.search.getSearchStrategy('ese');
 

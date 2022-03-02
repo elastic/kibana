@@ -18,6 +18,7 @@ import {
 } from 'src/core/server';
 import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
+import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
@@ -35,11 +36,7 @@ import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
-import {
-  defaultSourceConfiguration,
-  infraSourceConfigurationSavedObjectType,
-  InfraSources,
-} from './lib/sources';
+import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { initLogViewRoutes } from './routes/log_views';
 import { logViewSavedObjectType } from './saved_objects';
@@ -220,7 +217,7 @@ export class InfraServerPlugin
     UsageCollector.registerUsageCollector(plugins.usageCollection);
 
     const logEntriesService = new LogEntriesService();
-    logEntriesService.setup(core, { ...plugins, sources });
+    logEntriesService.setup(core, plugins);
 
     // register deprecated source configuration fields
     core.deprecations.registerDeprecations({
@@ -242,7 +239,7 @@ export class InfraServerPlugin
       config: {
         messageFields:
           this.config.sources?.default?.fields?.message ??
-          defaultSourceConfiguration.fields.message,
+          defaultLogViewsStaticConfig.messageFields,
       },
     });
 
