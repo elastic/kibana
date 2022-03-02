@@ -13,7 +13,7 @@ describe('getESClusterUuid', () => {
     const esClientMock = elasticsearchClientMock.createScopedClusterClient();
     // @ts-ignore
     esClientMock.asCurrentUser.info.mockImplementation(() => {
-      return { body: { cluster_uuid: '1abc' } };
+      return { cluster_uuid: '1abc' };
     });
     const clusterUuid = await getESClusterUuid(esClientMock);
     expect(esClientMock.asCurrentUser.info).toHaveBeenCalledWith({ filter_path: 'cluster_uuid' });
