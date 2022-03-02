@@ -167,4 +167,29 @@ describe('wrapScopedClusterClient', () => {
       `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
     );
   });
+
+  test('throws error when search throws abort error', async () => {
+    const abortController = new AbortController();
+    abortController.abort();
+    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    (
+      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
+    ).child.mockReturnValue(childClient as unknown as Client);
+    childClient.search.mockRejectedValueOnce(new Error('Request has been aborted by the user'));
+
+    const abortableSearchClient = createWrappedScopedClusterClientFactory({
+      scopedClusterClient,
+      rule,
+      logger,
+      abortController,
+    }).client();
+
+    await expect(
+      abortableSearchClient.asInternalUser.search
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Search has been aborted due to cancelled execution"`
+    );
+  });
 });
