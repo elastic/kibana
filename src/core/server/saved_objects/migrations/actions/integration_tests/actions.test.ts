@@ -117,7 +117,7 @@ describe('migration actions', () => {
       await client.cluster.putSettings({
         body: {
           persistent: {
-            // Disable all routing allocation
+            // Enable all routing allocation again
             cluster: { routing: { allocation: { enable: 'all' } } },
           },
         },
