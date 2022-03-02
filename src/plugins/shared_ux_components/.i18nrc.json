@@ -1,7 +1,7 @@
 {
-  "prefix": "sharedUxcomponents",
+  "prefix": "sharedUXComponents",
   "paths": {
-    "sharedUxcomponents": "."
+    "sharedUXComponents": "."
   },
   "translations": ["translations/ja-JP.json"]
 }
