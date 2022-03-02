@@ -7,14 +7,12 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiSelectable,
-  EuiPagination,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
@@ -24,7 +22,6 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 
-const perPage = 50;
 interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
@@ -32,8 +29,7 @@ interface Props {
   onLoad: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
   onClose: () => void;
-  saveFormComponent: JSX.Element;
-  saveAsNewFormComponent: JSX.Element;
+  hasFiltersOrQuery: boolean;
 }
 
 interface SelectableProps {
@@ -50,13 +46,10 @@ export function SavedQueryManagementList({
   onClearSavedQuery,
   savedQueryService,
   onClose,
-  saveFormComponent,
-  saveAsNewFormComponent,
+  hasFiltersOrQuery,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
-  const [count, setTotalCount] = useState(0);
-  const [activePage, setActivePage] = useState(0);
-  const [renderedComponent, setRenderedComponent] = useState('list');
+  const [selectedSavedQuery, setSelectedSavedQuery] = useState(null as SavedQuery | null);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
   useEffect(() => {
@@ -67,32 +60,26 @@ export function SavedQueryManagementList({
         requestGotCancelled = true;
       };
 
-      const { total: savedQueryCount, queries: savedQueryItems } =
-        await savedQueryService.findSavedQueries('', perPage, activePage + 1);
+      const { queries: savedQueryItems } = await savedQueryService.findSavedQueries();
 
       if (requestGotCancelled) return;
 
       const sortedSavedQueryItems = sortBy(savedQueryItems, 'attributes.title');
-      setTotalCount(savedQueryCount);
       setSavedQueries(sortedSavedQueryItems);
     };
     fetchCountAndSavedQueries();
-  }, [activePage, savedQueryService]);
+  }, [savedQueryService]);
 
-  const handleSave = useCallback(() => {
-    setRenderedComponent('saveForm');
+  const handleLoad = useCallback(() => {
+    if (selectedSavedQuery) {
+      onLoad(selectedSavedQuery);
+      onClose();
+    }
+  }, [onLoad, selectedSavedQuery, onClose]);
+
+  const handleSelect = useCallback((savedQueryToSelect) => {
+    setSelectedSavedQuery(savedQueryToSelect);
   }, []);
-
-  const handleSaveAsNew = useCallback(() => {
-    setRenderedComponent('saveAsNewForm');
-  }, []);
-
-  const handleSelect = useCallback(
-    (savedQueryToSelect) => {
-      onLoad(savedQueryToSelect);
-    },
-    [onLoad]
-  );
 
   const handleDelete = useCallback(
     (savedQueryToDelete: string) => {
@@ -107,7 +94,6 @@ export function SavedQueryManagementList({
         }
 
         await savedQueryService.deleteSavedQuery(savedQueryId);
-        setActivePage(0);
       };
 
       onDeleteSavedQuery(savedQueryToDelete);
@@ -128,10 +114,6 @@ export function SavedQueryManagementList({
     }) +
     ' ' +
     savedQueryDescriptionText;
-
-  const goToPage = (pageNumber: number) => {
-    setActivePage(pageNumber);
-  };
 
   const savedQueriesOptions = () => {
     const savedQueriesWithoutCurrent = savedQueries.filter((savedQuery) => {
@@ -178,6 +160,10 @@ export function SavedQueryManagementList({
                   defaultMessage: 'Find a filter set',
                 }),
               }}
+              listProps={{
+                rowHeight: 40,
+                isVirtualized: true,
+              }}
             >
               {(list, search) => (
                 <EuiPanel color="transparent" paddingSize="s">
@@ -187,12 +173,6 @@ export function SavedQueryManagementList({
               )}
             </EuiSelectable>
           </div>
-          <EuiPagination
-            className="kbnSavedQueryManagement__pagination"
-            pageCount={Math.ceil(count / perPage)}
-            activePage={activePage}
-            onPageClick={goToPage}
-          />
         </>
       ) : (
         <>
@@ -203,105 +183,39 @@ export function SavedQueryManagementList({
         </>
       )}
       <EuiFlexGroup
-        direction="rowReverse"
+        direction="row"
         gutterSize="s"
         alignItems="center"
         justifyContent="flexEnd"
         responsive={false}
         wrap={false}
       >
-        {showSaveQuery && loadedSavedQuery && (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                fill
-                onClick={handleSave}
-                aria-label={i18n.translate(
-                  'data.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
-                  {
-                    defaultMessage: 'Save changes to {title}',
-                    values: { title: loadedSavedQuery.attributes.title },
-                  }
-                )}
-                data-test-subj="saved-query-management-save-changes-button"
-              >
-                {i18n.translate('data.search.searchBar.savedQueryPopoverSaveChangesButtonText', {
-                  defaultMessage: 'Save changes',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                onClick={handleSaveAsNew}
-                aria-label={i18n.translate(
-                  'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
-                  {
-                    defaultMessage: 'Save as new saved query',
-                  }
-                )}
-                data-test-subj="saved-query-management-save-as-new-button"
-              >
-                {i18n.translate('data.search.searchBar.savedQueryPopoverSaveAsNewButtonText', {
-                  defaultMessage: 'Save as new',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </>
-        )}
-        {showSaveQuery && !loadedSavedQuery && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              fill
-              onClick={handleSave}
-              aria-label={i18n.translate(
-                'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
-                { defaultMessage: 'Save a new saved query' }
-              )}
-              data-test-subj="saved-query-management-save-button"
-            >
-              {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
-                defaultMessage: 'Save current query',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
-      <EuiFlexItem grow={false}>
-        {loadedSavedQuery && (
-          <EuiButtonEmpty
+        <EuiFlexItem grow={false}>
+          <EuiButton
             size="s"
-            flush="left"
-            onClick={onClearSavedQuery}
+            fill
+            onClick={handleLoad}
+            disabled={!selectedSavedQuery}
             aria-label={i18n.translate(
-              'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
-              { defaultMessage: 'Clear current saved query' }
+              'data.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+              {
+                defaultMessage: 'Apply filter set',
+              }
             )}
-            data-test-subj="saved-query-management-clear-button"
+            data-test-subj="saved-query-management-apply-changes-button"
           >
-            {i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
-              defaultMessage: 'Clear',
-            })}
-          </EuiButtonEmpty>
-        )}
-      </EuiFlexItem>
+            {hasFiltersOrQuery
+              ? i18n.translate('data.search.searchBar.savedQueryPopoverApplyFilterSetLabel', {
+                  defaultMessage: 'Replace with selected filter set',
+                })
+              : i18n.translate('data.search.searchBar.savedQueryPopoverApplyFilterSetLabel', {
+                  defaultMessage: 'Apply filter set',
+                })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 
-  const renderComponent = () => {
-    switch (renderedComponent) {
-      case 'list':
-      default:
-        return listComponent;
-      case 'saveForm':
-        return saveFormComponent;
-      case 'saveAsNewForm':
-        return saveAsNewFormComponent;
-    }
-  };
-
-  return renderComponent();
+  return listComponent;
 }

@@ -6,14 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
-
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { isEqual } from 'lodash';
 import {
   EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanel,
   EuiPopover,
   useGeneratedHtmlId,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -46,11 +51,14 @@ interface Props {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   savedQueryService: SavedQueryService;
-  applySelectedQuery: (selectedSavedQuery: SavedQuery) => void;
-  saveQueryFormComponent?: JSX.Element;
+  saveAsNewQueryFormComponent?: JSX.Element;
+  saveFormComponent?: JSX.Element;
   manageFilterSetComponent?: JSX.Element;
   onFiltersUpdated?: (filters: Filter[]) => void;
   filters?: Filter[];
+  query?: Query;
+  savedQuery?: SavedQuery;
+  onClearSavedQuery?: () => void;
 }
 
 export function QueryBarMenu({
@@ -63,15 +71,21 @@ export function QueryBarMenu({
   onQueryChange,
   onQueryBarSubmit,
   savedQueryService,
-  applySelectedQuery,
-  saveQueryFormComponent,
+  saveAsNewQueryFormComponent,
+  saveFormComponent,
   manageFilterSetComponent,
   openQueryBarMenu,
   toggleFilterBarMenuPopover,
   onFiltersUpdated,
   filters,
+  query,
+  savedQuery,
+  onClearSavedQuery,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+  const [hasFiltersOrQuery, setHasFiltersOrQuery] = useState(false);
+  const [renderedComponent, setRenderedComponent] = useState('menu');
+  const [savedQueryHasChanged, setSavedQueryHasChanged] = useState(false);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection } = kibana.services;
@@ -91,10 +105,37 @@ export function QueryBarMenu({
 
       setSavedQueries(savedQueryItems.reverse().slice(0, 5));
     };
-    if (openQueryBarMenu) {
-      fetchSavedSearched();
+    fetchSavedSearched();
+  }, [savedQueryService]);
+
+  useEffect(() => {
+    if (savedQuery) {
+      let filtersHaveChanged = filters?.length !== savedQuery.attributes?.filters?.length;
+      if (filters?.length === savedQuery.attributes?.filters?.length) {
+        filtersHaveChanged = Boolean(
+          filters?.some(
+            (filter, index) =>
+              !isEqual(filter.query, savedQuery.attributes?.filters?.[index]?.query)
+          )
+        );
+      }
+      if (filtersHaveChanged || !isEqual(query, savedQuery?.attributes.query)) {
+        setSavedQueryHasChanged(true);
+      }
     }
-  }, [openQueryBarMenu, savedQueryService]);
+  }, [filters, query, savedQuery, savedQuery?.attributes.filters, savedQuery?.attributes.query]);
+
+  useEffect(() => {
+    const hasFilters = Boolean(filters && filters.length > 0);
+    const hasQuery = Boolean(query && query.query);
+    setHasFiltersOrQuery(hasFilters || hasQuery);
+  }, [filters, query]);
+
+  useEffect(() => {
+    if (openQueryBarMenu) {
+      setRenderedComponent('menu');
+    }
+  }, [openQueryBarMenu]);
 
   const normalContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'normalContextMenuPopover',
@@ -106,6 +147,14 @@ export function QueryBarMenu({
   const closePopover = () => {
     toggleFilterBarMenuPopover(false);
   };
+
+  const handleSaveAsNew = useCallback(() => {
+    setRenderedComponent('saveAsNewForm');
+  }, []);
+
+  const handleSave = useCallback(() => {
+    setRenderedComponent('saveForm');
+  }, []);
 
   const onEnableAll = () => {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:enable_all`);
@@ -193,32 +242,86 @@ export function QueryBarMenu({
   const panels = [
     {
       id: 0,
-      title: savedQueries.length ? 'Filter set' : undefined,
+      title: (
+        <>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiText color={savedQuery ? '#0071c2' : 'default'} size="s">
+                <strong>{savedQuery ? savedQuery.attributes.title : 'Filter set'}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            {savedQuery && savedQueryHasChanged && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup
+                  direction="row"
+                  gutterSize="s"
+                  alignItems="center"
+                  justifyContent="center"
+                  responsive={false}
+                  wrap={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      fill
+                      onClick={handleSave}
+                      aria-label={i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
+                        {
+                          defaultMessage: 'Save changes to {title}',
+                          values: { title: savedQuery?.attributes.title },
+                        }
+                      )}
+                      data-test-subj="saved-query-management-save-changes-button"
+                    >
+                      {i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
+                        {
+                          defaultMessage: 'Save changes',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      onClick={handleSaveAsNew}
+                      aria-label={i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
+                        {
+                          defaultMessage: 'Save as new saved query',
+                        }
+                      )}
+                      data-test-subj="saved-query-management-save-as-new-button"
+                    >
+                      {i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
+                        {
+                          defaultMessage: 'Save as new',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </>
+      ),
       items: [
-        {
-          name: i18n.translate('data.filter.options.loadCurrentFilterSetLabel', {
-            defaultMessage: 'Load filter set...',
-          }),
-          panel: 4,
-        },
-        {
-          name: i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
-            defaultMessage: 'Save current filter set',
-          }),
-          icon: 'save',
-          panel: 1,
-        },
         {
           name: i18n.translate('data.filter.options.applyAllFiltersButtonLabel', {
             defaultMessage: 'Apply to all',
           }),
           icon: 'filter',
           panel: 2,
+          disabled: !Boolean(filters && filters.length > 0),
         },
         {
           name: i18n.translate('data.filter.options.clearllFiltersButtonLabel', {
             defaultMessage: 'Clear all',
           }),
+          disabled: !hasFiltersOrQuery,
           icon: 'crossInACircleFilled',
           onClick: () => {
             closePopover();
@@ -227,7 +330,34 @@ export function QueryBarMenu({
               dateRange: getDateRange(),
             });
             onRemoveAll();
+            onClearSavedQuery?.();
           },
+        },
+        { isSeparator: true },
+        {
+          name: savedQuery
+            ? i18n.translate('data.filter.options.loadOtherFilterSetLabel', {
+                defaultMessage: 'Load other filter set',
+              })
+            : i18n.translate('data.filter.options.loadCurrentFilterSetLabel', {
+                defaultMessage: 'Load filter set',
+              }),
+          panel: 4,
+          width: 350,
+          icon: 'filter',
+          disabled: !savedQueries.length,
+        },
+        {
+          name: savedQuery
+            ? i18n.translate('data.filter.options.saveAsNewFilterSetLabel', {
+                defaultMessage: 'Save as new',
+              })
+            : i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
+                defaultMessage: 'Save filter set',
+              }),
+          icon: 'save',
+          disabled: !hasFiltersOrQuery,
+          panel: 1,
         },
         { isSeparator: true },
         {
@@ -241,7 +371,7 @@ export function QueryBarMenu({
       title: i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
         defaultMessage: 'Save current filter set',
       }),
-      content: <div style={{ padding: 16 }}>{saveQueryFormComponent}</div>,
+      content: <div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>,
     },
     {
       id: 2,
@@ -318,6 +448,7 @@ export function QueryBarMenu({
       title: i18n.translate('data.filter.options.loadCurrentFilterSetLabel', {
         defaultMessage: 'Load filter set...',
       }),
+      width: 400,
       content: <div style={{ padding: 8 }}>{manageFilterSetComponent}</div>,
     },
   ] as EuiContextMenuPanelDescriptor[];
@@ -338,6 +469,24 @@ export function QueryBarMenu({
     />
   );
 
+  const renderComponent = () => {
+    switch (renderedComponent) {
+      case 'menu':
+      default:
+        return <EuiContextMenu initialPanelId={0} panels={panels} />;
+      case 'saveForm':
+        return (
+          <EuiContextMenuPanel items={[<div style={{ padding: 16 }}>{saveFormComponent}</div>]} />
+        );
+      case 'saveAsNewForm':
+        return (
+          <EuiContextMenuPanel
+            items={[<div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>]}
+          />
+        );
+    }
+  };
+
   return (
     <>
       <EuiPopover
@@ -349,7 +498,8 @@ export function QueryBarMenu({
         anchorPosition="rightUp"
         repositionOnScroll
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        {/* <EuiContextMenu initialPanelId={0} panels={panels} /> */}
+        {renderComponent()}
       </EuiPopover>
     </>
   );

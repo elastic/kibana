@@ -83,13 +83,13 @@ export function SaveQueryForm({
       errors.push(titleConflictErrorText);
     }
 
+    if (!title) {
+      errors.push(titleExistsErrorText);
+    }
+
     if (!isEqual(errors, formErrors)) {
       setFormErrors(errors);
       return false;
-    }
-
-    if (!title) {
-      errors.push(titleExistsErrorText);
     }
 
     return !formErrors.length;
@@ -104,8 +104,17 @@ export function SaveQueryForm({
         shouldIncludeFilters,
         shouldIncludeTimefilter,
       });
+      onClose();
     }
-  }, [validate, onSave, savedQuery?.id, title, shouldIncludeFilters, shouldIncludeTimefilter]);
+  }, [
+    validate,
+    onSave,
+    onClose,
+    savedQuery?.id,
+    title,
+    shouldIncludeFilters,
+    shouldIncludeTimefilter,
+  ]);
 
   const onInputChange = useCallback((event) => {
     setFormErrors([]);
