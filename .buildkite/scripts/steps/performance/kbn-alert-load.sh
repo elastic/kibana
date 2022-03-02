@@ -36,7 +36,7 @@ echo "--- Run IM tests"
 export TEST_ALERT_LOAD_KBN_ES=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$ELASTIC_HOST
 export TEST_ALERT_LOAD_KBN_KB=https://$DEPLOYMENT_USERNAME:$DEPLOYMENT_PASSWORD@$KIBANA_HOST
 
-npx test-alert-load-kbn runSequence im-test  -r 'report-im.html' -o 'reports'
+npx test-alert-load-kbn runSequence im-test --type='im'  -r 'report-im.html' -o 'reports'
 
 buildkite-agent artifact upload './reports'
 
