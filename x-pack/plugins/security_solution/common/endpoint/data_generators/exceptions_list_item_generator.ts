@@ -256,7 +256,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     return this.generate({
       name: `Blocklist ${this.randomString(5)}`,
       list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
-      item_id: `generator_endpoint_blocklist_${this.randomUUID()}`,
+      item_id: `generator_endpoint_blocklist_${this.seededUUIDv4()}`,
       os_types: ['windows'],
       entries: [
         this.randomChoice([
