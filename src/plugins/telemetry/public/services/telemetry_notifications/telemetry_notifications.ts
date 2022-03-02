@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'kibana/public';
+import { DocLinksStart, HttpStart, OverlayStart } from 'kibana/public';
 import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
 import { renderOptInBanner } from './render_opt_in_banner';
 import { TelemetryService } from '../telemetry_service';
 
 interface TelemetryNotificationsConstructor {
-  http: CoreStart['http'];
-  overlays: CoreStart['overlays'];
+  http: HttpStart;
+  overlays: OverlayStart;
   telemetryService: TelemetryService;
-  docLinks: CoreStart['docLinks'];
+  docLinks: DocLinksStart;
 }
 
 /**
  * Helpers to the Telemetry banners spread through the code base in Welcome and Home landing pages.
  */
 export class TelemetryNotifications {
-  private readonly http: CoreStart['http'];
-  private readonly overlays: CoreStart['overlays'];
-  private readonly docLinks: CoreStart['docLinks'];
+  private readonly http: HttpStart;
+  private readonly overlays: OverlayStart;
+  private readonly docLinks: DocLinksStart;
   private readonly telemetryService: TelemetryService;
   private optedInNoticeBannerId?: string;
   private optInBannerId?: string;

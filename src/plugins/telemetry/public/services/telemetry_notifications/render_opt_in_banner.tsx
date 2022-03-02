@@ -7,14 +7,14 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'kibana/public';
+import { OverlayStart, DocLinksStart } from 'kibana/public';
 import { OptInBanner } from '../../components/opt_in_banner';
 import { toMountPoint } from '../../../../kibana_react/public';
 
 interface RenderBannerConfig {
-  overlays: CoreStart['overlays'];
+  overlays: OverlayStart;
   setOptIn: (isOptIn: boolean) => Promise<unknown>;
-  docLinks: CoreStart['docLinks'];
+  docLinks: DocLinksStart;
 }
 
 export function renderOptInBanner({ setOptIn, overlays, docLinks }: RenderBannerConfig) {

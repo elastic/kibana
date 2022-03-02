@@ -6,17 +6,13 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { overlayServiceMock } from '../../../core/public/overlays/overlay_service.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { httpServiceMock } from '../../../core/public/http/http_service.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { notificationServiceMock } from '../../../core/public/notifications/notifications_service.mock';
+import { overlayServiceMock } from '../../../core/public/mocks';
+import { httpServiceMock } from '../../../core/public/mocks';
+import { notificationServiceMock } from '../../../core/public/mocks';
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
 import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { docLinksServiceMock } from '../../../core/public/doc_links/doc_links_service.mock';
+import { docLinksServiceMock } from '../../../core/public/mocks';
 
 // The following is to be able to access private methods
 /* eslint-disable dot-notation */

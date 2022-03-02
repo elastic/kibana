@@ -9,12 +9,12 @@
 import * as React from 'react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from 'kibana/public';
+import { DocLinksStart } from 'kibana/public';
 import { OptInMessage } from './opt_in_message';
 
 interface Props {
   onChangeOptInClick: (isOptIn: boolean) => void;
-  docLinks: CoreStart['docLinks'];
+  docLinks: DocLinksStart;
 }
 
 export class OptInBanner extends React.PureComponent<Props> {

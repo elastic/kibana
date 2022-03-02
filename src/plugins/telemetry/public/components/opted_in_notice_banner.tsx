@@ -12,12 +12,12 @@ import * as React from 'react';
 import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { DocLinksStart, HttpSetup } from 'kibana/public';
 import { PATH_TO_ADVANCED_SETTINGS } from '../../common/constants';
-import { CoreStart, HttpSetup } from '../../../../core/public';
 
 interface Props {
   http: HttpSetup;
-  docLinks: CoreStart['docLinks'];
+  docLinks: DocLinksStart;
   onSeenBanner: () => unknown;
 }
 

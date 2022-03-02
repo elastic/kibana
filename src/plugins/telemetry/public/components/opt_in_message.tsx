@@ -9,10 +9,10 @@
 import * as React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from 'kibana/public';
+import { DocLinksStart } from 'kibana/public';
 
 interface Props {
-  docLinks: CoreStart['docLinks'];
+  docLinks: DocLinksStart;
 }
 
 export class OptInMessage extends React.PureComponent<Props> {

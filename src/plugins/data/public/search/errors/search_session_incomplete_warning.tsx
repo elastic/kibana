@@ -7,11 +7,11 @@
  */
 
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { CoreStart } from 'kibana/public';
+import { DocLinksStart } from 'kibana/public';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const SearchSessionIncompleteWarning = (docLinks: CoreStart['docLinks']) => (
+export const SearchSessionIncompleteWarning = (docLinks: DocLinksStart) => (
   <>
     <EuiSpacer size="s" />
     It needs more time to fully render. You can wait here or come back to it later.

@@ -7,14 +7,14 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'kibana/public';
+import { HttpStart, DocLinksStart, OverlayStart } from 'kibana/public';
 import { OptedInNoticeBanner } from '../../components/opted_in_notice_banner';
 import { toMountPoint } from '../../../../kibana_react/public';
 
 interface RenderBannerConfig {
-  http: CoreStart['http'];
-  docLinks: CoreStart['docLinks'];
-  overlays: CoreStart['overlays'];
+  http: HttpStart;
+  docLinks: DocLinksStart;
+  overlays: OverlayStart;
   onSeen: () => void;
 }
 export function renderOptedInNoticeBanner({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import { DocLinksStart } from 'kibana/public';
 import Mustache from 'mustache';
 
 const TEMPLATE_TAGS = ['{', '}'];
@@ -15,7 +15,7 @@ export function renderMustache({
   docLinks,
 }: {
   text: string | string[];
-  docLinks?: CoreStart['docLinks'];
+  docLinks?: DocLinksStart;
 }) {
   const template = Array.isArray(text) ? text.join('\n') : text;
 
