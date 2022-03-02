@@ -6,6 +6,7 @@
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeQuery } from '../../../../observability/server';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 
@@ -15,12 +16,16 @@ export async function getSuggestions({
   setup,
   size,
   string,
+  start,
+  end,
 }: {
   field: string;
   searchAggregatedTransactions: boolean;
   setup: Setup;
   size: number;
   string: string;
+  start?: number;
+  end?: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -37,6 +42,10 @@ export async function getSuggestions({
       field,
       size,
       string,
+      ...(start &&
+        end && {
+          index_filter: rangeQuery(start, end)[0],
+        }),
     },
   });
 
