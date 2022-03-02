@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { AnomaliesByHost, AnomaliesByNetwork } from '../types';
+import { Anomaly } from '../types';
 
-export const createCompoundHostKey = (anomaliesByHost: AnomaliesByHost): string =>
-  `${anomaliesByHost.hostName}-${anomaliesByHost.anomaly.entityName}-${anomaliesByHost.anomaly.entityValue}-${anomaliesByHost.anomaly.severity}-${anomaliesByHost.anomaly.jobId}`;
-
-export const createCompoundNetworkKey = (anomaliesByNetwork: AnomaliesByNetwork): string =>
-  `${anomaliesByNetwork.ip}-${anomaliesByNetwork.anomaly.entityName}-${anomaliesByNetwork.anomaly.entityValue}-${anomaliesByNetwork.anomaly.severity}-${anomaliesByNetwork.anomaly.jobId}`;
+export const createCompoundAnomalyKey = (anomaly: Anomaly): string =>
+  `${anomaly.entityName}-${anomaly.entityValue}-${anomaly.severity}-${anomaly.jobId}`;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hostEquality } from './host_equality';
+import { anomaliesTableDefaultEquality } from './default_equality';
 import { AnomaliesHostTableProps } from '../types';
 import { HostsType } from '../../../../hosts/store/model';
 
@@ -25,7 +25,7 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = hostEquality(prev, next);
+    const equal = anomaliesTableDefaultEquality(prev, next);
     expect(equal).toEqual(true);
   });
 
@@ -44,7 +44,7 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = hostEquality(prev, next);
+    const equal = anomaliesTableDefaultEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -63,7 +63,7 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = hostEquality(prev, next);
+    const equal = anomaliesTableDefaultEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -82,7 +82,7 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = hostEquality(prev, next);
+    const equal = anomaliesTableDefaultEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -101,7 +101,7 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = hostEquality(prev, next);
+    const equal = anomaliesTableDefaultEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -120,7 +120,7 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = hostEquality(prev, next);
+    const equal = anomaliesTableDefaultEquality(prev, next);
     expect(equal).toEqual(false);
   });
 });
