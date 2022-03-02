@@ -56,7 +56,7 @@ describe('Processor: Dot Expander', () => {
     expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
   });
 
-  test('prevents form submission if field does not contain a . for the dot notation', async () => {
+  test('prevents form submission if field for the dot notation does not contain a . and not equal to *', async () => {
     const {
       actions: { saveNewProcessor },
       form,
@@ -77,9 +77,28 @@ describe('Processor: Dot Expander', () => {
 
     // Expect form error as "field" does not contain '.'
     expect(form.getErrorsMessages()).toEqual([
-      'A field value requires at least one dot character.',
+      'The field name must be an asterisk or contain a dot character.',
     ]);
   });
+
+  test('allows form submission if the field for the dot notation is equal to *', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
+
+    // Set "field" value to a * for expanding all top-level dotted field names
+    form.setInputValue('fieldNameField.input', '*');
+
+    // Save the field
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, DOT_EXPANDER_TYPE);
+    expect(processors[0][DOT_EXPANDER_TYPE]).toEqual({
+      field: '*',
+    });
+  });
+
   test('saves with default parameter values', async () => {
     const {
       actions: { saveNewProcessor },

@@ -58,7 +58,7 @@ export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
-export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
+export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
