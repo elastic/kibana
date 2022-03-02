@@ -10,6 +10,7 @@ import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -18,6 +19,7 @@ import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embedd
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
+import { LogViewsService } from './services/log_views';
 import {
   InfraClientCoreSetup,
   InfraClientCoreStart,
@@ -29,9 +31,14 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
+  private logViews: LogViewsService;
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
     this.config = context.config.get();
+    this.logViews = new LogViewsService({
+      messageFields:
+        this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
+    });
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
@@ -209,8 +216,15 @@ export class Plugin implements InfraClientPluginClass {
     });
   }
 
-  start(_core: InfraClientCoreStart, _plugins: InfraClientStartDeps) {
-    // TODO: start and return log views service
+  start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
+    const logViews = this.logViews.start({
+      http: core.http,
+      dataViews: plugins.dataViews,
+    });
+
+    return {
+      logViews,
+    };
   }
 
   stop() {}

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { SavedObjectsStart } from 'kibana/public';
-
-export type LogViewsServiceSetup = void;
-
-export type LogViewsServiceStart = void;
-
-export interface LogViewsServiceCoreStart {
-  savedObjects: SavedObjectsStart;
-}
+import { LogViewsStaticConfig } from '../../../common/log_views';
+import { LogViewsClient } from './log_views_client';
+import { LogViewsServiceStartDeps, LogViewsServiceSetup, LogViewsServiceStart } from './types';
 
 export class LogViewsService {
+  constructor(private readonly config: LogViewsStaticConfig) {}
+
   public setup(): LogViewsServiceSetup {}
-  public start(core: LogViewsServiceCoreStart): LogViewsServiceStart {
-    // TODO: initialize and return client
+
+  public start({ dataViews, http }: LogViewsServiceStartDeps): LogViewsServiceStart {
+    const client = new LogViewsClient(dataViews, http, this.config);
+
+    return {
+      client,
+    };
   }
 }
