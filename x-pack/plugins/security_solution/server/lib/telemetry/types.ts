@@ -60,6 +60,7 @@ export interface TelemetryEvent {
   license?: ESLicense;
   event?: {
     id?: string;
+    kind?: string;
   };
 }
 
