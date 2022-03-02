@@ -88,16 +88,20 @@ Cypress.Commands.add(
 
 const axeConfig = {
   ...AXE_CONFIG,
-  rules: [...AXE_CONFIG.rules],
 };
 const axeOptions = {
   ...AXE_OPTIONS,
   runOnly: [...AXE_OPTIONS.runOnly, 'best-practice'],
 };
 
-export const checkA11y = (skipFailures: boolean) => {
+export const checkA11y = ({ skipFailures }: { skipFailures: boolean }) => {
+  // https://github.com/component-driven/cypress-axe#cychecka11y
   cy.injectAxe();
   cy.configureAxe(axeConfig);
   const context = '.kbnAppWrapper'; // Scopes a11y checks to only our app
+  /**
+   * We can get rid of the last two params when we don't need to add skipFailures
+   * params = (context, options, violationCallback, skipFailures)
+   */
   cy.checkA11y(context, axeOptions, undefined, skipFailures);
 };

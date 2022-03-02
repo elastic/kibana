@@ -46,7 +46,7 @@ describe('Errors page', () => {
       cy.visit(javaServiceErrorsPageHref);
       cy.contains('Error occurrences');
       // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y(true);
+      checkA11y({ skipFailures: true });
     });
 
     describe('when service has no errors', () => {

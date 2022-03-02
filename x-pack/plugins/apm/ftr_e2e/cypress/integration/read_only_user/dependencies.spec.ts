@@ -53,7 +53,7 @@ describe('Dependencies', () => {
       );
       cy.contains('a[role="tab"]', 'Dependencies');
       // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y(true);
+      checkA11y({ skipFailures: true });
     });
   });
 
@@ -84,7 +84,7 @@ describe('Dependencies', () => {
       );
       cy.contains('h1', 'postgresql');
       // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y(true);
+      checkA11y({ skipFailures: true });
     });
   });
 

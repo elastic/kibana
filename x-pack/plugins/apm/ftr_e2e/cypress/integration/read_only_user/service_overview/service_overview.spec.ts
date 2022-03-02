@@ -107,7 +107,7 @@ describe('Service Overview', () => {
     it('has no detectable a11y violations on load', () => {
       cy.contains('opbeans-node');
       // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y(true);
+      checkA11y({ skipFailures: true });
     });
 
     it('transaction latency chart', () => {

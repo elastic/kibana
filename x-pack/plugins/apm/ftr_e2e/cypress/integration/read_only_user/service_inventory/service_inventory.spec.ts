@@ -55,9 +55,9 @@ describe('When navigating to the service inventory', () => {
   });
 
   it('has no detectable a11y violations on load', () => {
-    cy.contains('Services');
+    cy.contains('h1', 'Services');
     // set skipFailures to true to not fail the test when there are accessibility failures
-    checkA11y(true);
+    checkA11y({ skipFailures: true });
   });
 
   it('has a list of services', () => {

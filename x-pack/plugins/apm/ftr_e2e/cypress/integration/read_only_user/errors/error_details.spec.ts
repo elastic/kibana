@@ -44,7 +44,7 @@ describe('Error details', () => {
       cy.visit(errorDetailsPageHref);
       cy.contains('Error group 00000');
       // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y(true);
+      checkA11y({ skipFailures: true });
     });
 
     describe('when error has no occurrences', () => {

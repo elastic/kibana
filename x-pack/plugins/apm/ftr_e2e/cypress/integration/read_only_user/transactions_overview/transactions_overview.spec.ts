@@ -38,12 +38,12 @@ describe('Transactions Overview', () => {
 
   it('has no detectable a11y violations on load', () => {
     cy.visit(serviceTransactionsHref);
-    cy.contains('a[role="tab"]', 'Transactions').should(
+    cy.contains('aria-selected="true"', 'Transactions').should(
       'have.class',
       'euiTab-isSelected'
     );
     // set skipFailures to true to not fail the test when there are accessibility failures
-    checkA11y(true);
+    checkA11y({ skipFailures: true });
   });
 
   it('persists transaction type selected when navigating to Overview tab', () => {
