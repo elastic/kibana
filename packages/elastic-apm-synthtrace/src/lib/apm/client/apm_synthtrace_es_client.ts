@@ -38,7 +38,14 @@ export class ApmSynthtraceEsClient {
     return getApmWriteTargets({ client: this.client, forceDataStreams: this.forceDataStreams });
   }
 
-  clean() {
+  async runningVersion() {
+    const info = await this.client.info();
+    console.log(info.version);
+    return info.version.number;
+
+  }
+
+  async clean() {
     return this.getWriteTargets().then(async (writeTargets) => {
       const indices = Object.values(writeTargets);
       this.logger.info(`Attempting to clean: ${indices}`);
@@ -82,6 +89,20 @@ export class ApmSynthtraceEsClient {
     }
   }
 
+  async refresh() {
+
+    const writeTargets = await this.getWriteTargets();
+
+    const indices = Object.values(writeTargets);
+    this.logger.info(`Indexed all data attempting to refresh: ${indices}`);
+
+    return this.client.indices.refresh({
+      index: indices,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+    });
+  }
+
   async index<TFields>(
     events: EntityIterable<TFields> | Array<EntityIterable<TFields>>,
     options?: StreamToBulkOptions,
@@ -89,7 +110,7 @@ export class ApmSynthtraceEsClient {
   ) {
     const dataStream = Array.isArray(events) ? new EntityStreams(events) : events;
 
-    const source =
+    const sp =
       streamProcessor != null
         ? streamProcessor
         : new StreamProcessor({
@@ -104,7 +125,7 @@ export class ApmSynthtraceEsClient {
       await this.logger.perf('enumerate_scenario', async () => {
         // @ts-ignore
         // We just want to enumerate
-        for await (item of source.streamToDocumentAsync(StreamProcessor.toDocument, dataStream)) {
+        for await (item of sp.streamToDocumentAsync(StreamProcessor.toDocument, dataStream)) {
           if (yielded === 0) {
             options.itemStartStopCallback?.apply(this, [item, false]);
             yielded++;
@@ -121,12 +142,15 @@ export class ApmSynthtraceEsClient {
       concurrency: options?.concurrency ?? 10,
       refresh: false,
       refreshOnCompletion: false,
-      flushInterval: options?.flushInterval ?? StreamProcessor.defaultFlushInterval,
+      //flushInterval: 1000,
+      //flushBytes: 5000000,
+      flushBytes: 500000,
+      // flushInterval: options?.flushInterval ?? StreamProcessor.defaultFlushInterval,
       // TODO https://github.com/elastic/elasticsearch-js/issues/1610
       // having to map here is awkward, it'd be better to map just before serialization.
-      datasource: source.streamToDocumentAsync(StreamProcessor.toDocument, dataStream),
+      datasource: sp.streamToDocumentAsync(StreamProcessor.toDocument, dataStream),
       onDrop: (doc) => {
-        this.logger.info(doc);
+        this.logger.info(JSON.stringify(doc, null, 2));
       },
       // TODO bug in client not passing generic to BulkHelperOptions<>
       // https://github.com/elastic/elasticsearch-js/issues/1611
@@ -145,14 +169,5 @@ export class ApmSynthtraceEsClient {
       },
     });
     options?.itemStartStopCallback?.apply(this, [item, true]);
-
-    const indices = Object.values(writeTargets);
-    this.logger.info(`Indexed all data attempting to refresh: ${indices}`);
-
-    return this.client.indices.refresh({
-      index: indices,
-      allow_no_indices: true,
-      ignore_unavailable: true,
-    });
   }
 }

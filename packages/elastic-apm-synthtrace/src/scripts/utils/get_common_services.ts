@@ -16,24 +16,32 @@ export function getLogger({ logLevel }: RunOptions) {
 }
 
 export function getCommonServices(
-  { target, cloudId, username, password, logLevel }: RunOptions,
+  { target, cloudId, username, password, logLevel, forceDataStreams }: RunOptions,
   logger?: Logger
 ) {
   if (!target && !cloudId) {
     throw Error('target or cloudId needs to be specified');
   }
+  const useDataStreams =  forceDataStreams ?? !!cloudId;
   const options: ClientOptions = !!target ? { node: target } : { cloud: { id: cloudId! } };
   options.auth = {
     username,
     password,
+  };
+  //options.Connection = HttpConnection;
+  // Useful when debugging trough mitmproxy
+  /*
+  options.proxy = "http://localhost:8080";
+   */
+  options.tls = {
+    rejectUnauthorized: false
   };
 
   const client = new Client(options);
 
   logger = logger ?? createLogger(logLevel);
 
-  const forceDataStreams = !!cloudId;
-  const apmEsClient = new ApmSynthtraceEsClient(client, logger, forceDataStreams);
+  const apmEsClient = new ApmSynthtraceEsClient(client, logger, useDataStreams);
 
   return {
     logger,

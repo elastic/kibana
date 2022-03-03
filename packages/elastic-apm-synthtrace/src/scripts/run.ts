@@ -26,10 +26,19 @@ function options(y: Argv) {
       describe: 'Elasticsearch target',
       string: true,
     })
+    .option('kibana', {
+      describe: 'Kibana target, used to bootstrap datastreams/mappings/templates/settings',
+      string: true,
+    })
     .option('cloudId', {
       describe:
         'Provide connection information and will force APM on the cloud to migrate to run as a Fleet integration',
       string: true,
+    })
+    .option('local', {
+      describe:
+        'Shortcut during development, assumes `yarn es snapshot` and `yarn start` are running',
+      boolean: true,
     })
     .option('username', {
       describe: 'Basic authentication username',
@@ -77,7 +86,7 @@ function options(y: Argv) {
     })
     .option('workers', {
       describe: 'Amount of Node.js worker threads',
-      default: 5,
+      number: true,
     })
     .option('bucketSize', {
       describe: 'Size of bucket for which to generate data',
@@ -91,13 +100,22 @@ function options(y: Argv) {
       describe: 'Number of concurrently connected ES clients',
       default: 5,
     })
-    .option('batchSize', {
+    .option('flushSizeBulk', {
       describe: 'Number of documents per bulk index request',
-      default: 1000,
+      number: true,
+    })
+    .option('flushSize', {
+      describe: 'Max size for the StreamProcessor local buffer',
+      number: true,
+      default: 10000
     })
     .option('logLevel', {
       describe: 'Log level',
       default: 'info',
+    })
+    .option('forceDataStreams', {
+      describe: 'Force writing to datastreams, default if --cloudId is specified',
+      boolean: true,
     })
     .option('writeTarget', {
       describe: 'Target to index',
@@ -111,13 +129,21 @@ function options(y: Argv) {
     })
     .conflicts('to', 'live')
     .conflicts('maxDocs', 'live')
-    .conflicts('target', 'cloudId');
+    .conflicts('target', 'cloudId')
+    .conflicts('kibana', 'cloudId')
+    .conflicts('local', 'target')
+    .conflicts('local', 'kibana')
+    .conflicts('local', 'cloudId');
 }
 
 export type RunCliFlags = ReturnType<typeof options>['argv'];
 
 yargs(process.argv.slice(2))
-  .command('*', 'Generate data and index into Elasticsearch', options, async (argv) => {
+  .command('*', 'Generate data and index into Elasticsearch', options, async (argv: RunCliFlags) => {
+    if (argv.local) {
+      argv.target = "http://localhost:9200"
+    }
+
     const runOptions = parseRunCliFlags(argv);
 
     const { logger, apmEsClient } = getCommonServices(runOptions);
@@ -133,16 +159,32 @@ yargs(process.argv.slice(2))
     const live = argv.live;
 
     if (runOptions.dryRun) {
-      await startHistoricalDataUpload(runOptions, from, to);
+      await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, "8.0.0");
       return;
     }
-    if (runOptions.cloudId) {
+
+    // we need to know the running version to generate events that satisfy the min version requirements
+    let version = await apmEsClient.runningVersion();
+    logger.info(`Discovered Elasticsearch running version: ${version}`);
+    version = version.replace("-SNAPSHOT", "");
+
+    // We automatically set up managed APM either by migrating on cloud or installing the package locally
+    if (runOptions.cloudId || argv.local || argv.kibana) {
       const kibanaClient = new ApmSynthtraceKibanaClient(logger);
-      await kibanaClient.migrateCloudToManagedApm(
-        runOptions.cloudId,
-        runOptions.username,
-        runOptions.password
-      );
+      if (runOptions.cloudId) {
+        await kibanaClient.migrateCloudToManagedApm(
+          runOptions.cloudId,
+          runOptions.username,
+          runOptions.password
+        );
+      } else {
+        let kibanaUrl: string | null = argv.kibana ?? null;
+        if (argv.local) {
+          kibanaUrl = await kibanaClient.discoverLocalKibana();
+        }
+        if (!kibanaUrl) throw Error("kibanaUrl could not be determined")
+        await kibanaClient.installApmPackage(kibanaUrl, version, runOptions.username, runOptions.password);
+      }
     }
 
     if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
@@ -165,7 +207,7 @@ yargs(process.argv.slice(2))
       )}`
     );
 
-    await startHistoricalDataUpload(runOptions, from, to);
+    await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, version);
 
     if (live) {
       await startLiveDataUpload(apmEsClient, logger, runOptions, to);

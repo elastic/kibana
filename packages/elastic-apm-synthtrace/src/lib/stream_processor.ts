@@ -19,6 +19,7 @@ import { Logger } from './utils/create_logger';
 import { Fields } from './entity';
 
 export interface StreamProcessorOptions<TFields extends Fields = ApmFields> {
+  version?: string;
   processors: Array<(events: TFields[]) => TFields[]>;
   flushInterval?: string;
   // defaults to 10k
@@ -44,13 +45,17 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
       ? parseInterval(this.options.flushInterval)
       : parseInterval('1m');
     this.name = this.options?.name ?? 'StreamProcessor';
+    this.version =  this.options.version ?? "8.0.0";
+    this.versionMajor =  Number.parseInt(this.version.split('.')[0]);
   }
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
   private readonly name: string;
+  private readonly version: string;
+  private readonly versionMajor: number;
 
   // TODO move away from chunking and feed this data one by one to processors
-  *stream(...eventSources: Array<EntityIterable<TFields>>) {
+  async *stream(...eventSources: Array<EntityIterable<TFields>>) : AsyncGenerator<ApmFields, any, any> {
     const maxBufferSize = this.options.maxBufferSize ?? StreamProcessor.defaultFlushInterval;
     const maxSourceEvents = this.options.maxSourceEvents;
     let localBuffer = [];
@@ -66,7 +71,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
           flushAfter = this.calculateFlushAfter(eventDate, order);
         }
 
-        yield StreamProcessor.enrich(event);
+        yield StreamProcessor.enrich(event, this.version, this.versionMajor);
         sourceEventsYielded++;
         if (sourceEventsYielded % maxBufferSize === 0) {
           if (this.options?.processedCallback) {
@@ -92,7 +97,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
             `${this.name} flush ${localBuffer.length} documents ${order}: ${e} => ${f}`
           );
           for (const processor of this.options.processors) {
-            yield* processor(localBuffer).map(StreamProcessor.enrich);
+            yield* processor(localBuffer).map((d) => StreamProcessor.enrich(d, this.version, this.versionMajor));
           }
           localBuffer = [];
           flushAfter = this.calculateFlushAfter(flushAfter, order);
@@ -110,7 +115,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
         `${this.name} processing remaining buffer: ${localBuffer.length} items left`
       );
       for (const processor of this.options.processors) {
-        yield* processor(localBuffer).map(StreamProcessor.enrich);
+        yield* processor(localBuffer).map((d) => StreamProcessor.enrich(d, this.version, this.versionMajor));
       }
       this.options.processedCallback?.apply(this, [localBuffer.length]);
     }
@@ -132,9 +137,9 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     map: (d: ApmFields) => TDocument,
     ...eventSources: Array<EntityIterable<TFields>>
   ): Generator<TDocument> {
-    for (const apmFields of this.stream(...eventSources)) {
-      yield map(apmFields);
-    }
+    //for (const apmFields of this.stream(...eventSources)) {
+      //yield map(apmFields);
+    //}
   }
   async *streamToDocumentAsync<TDocument>(
     map: (d: ApmFields) => TDocument,
@@ -145,14 +150,14 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     }
   }
   streamToArray(...eventSources: Array<EntityIterable<TFields>>) {
-    return Array.from<ApmFields>(this.stream(...eventSources));
+    //return Array.from<ApmFields>(this.stream(...eventSources));
   }
 
-  static enrich(document: ApmFields): ApmFields {
+  private static enrich(document: ApmFields, version: string, versionMajor:number): ApmFields {
     // see https://github.com/elastic/apm-server/issues/7088 can not be provided as flat key/values
     document.observer = {
-      version: '8.0.0',
-      version_major: 8,
+      version: version ?? '8.2.0',
+      version_major:  versionMajor,
     };
     document['service.node.name'] =
       document['service.node.name'] || document['container.id'] || document['host.name'];
@@ -165,9 +170,6 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   }
 
   static toDocument(document: ApmFields): Record<string, any> {
-    if (!document.observer) {
-      document = StreamProcessor.enrich(document);
-    }
     const newDoc: Record<string, any> = {};
     dedot(document, newDoc);
     if (typeof newDoc['@timestamp'] === 'number') {

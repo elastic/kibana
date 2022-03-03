@@ -57,10 +57,12 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'password',
       'workers',
       'clientWorkers',
-      'batchSize',
+      'flushSizeBulk',
+      'flushSize',
       'writeTarget',
       'numShards',
       'scenarioOpts',
+      'forceDataStreams',
       'dryRun'
     ),
     intervalInMs,

@@ -61,6 +61,7 @@ export async function startLiveDataUpload(
         concurrency: runOptions.clientWorkers,
         maxDocs: runOptions.maxDocs,
         mapToIndex,
+        dryRun: false
       })
     );
   }

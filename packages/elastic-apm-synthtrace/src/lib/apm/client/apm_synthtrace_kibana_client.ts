@@ -40,4 +40,37 @@ export class ApmSynthtraceKibanaClient {
       }
     });
   }
+
+  async discoverLocalKibana() {
+    return await fetch("http://localhost:5601", { method: "HEAD", follow: 1, redirect: "manual"})
+      .then((res) => {
+        console.log(Array.from(res.headers.keys()));
+        console.log(Array.from(res.headers.values()));
+        return res.headers.get('location');
+      })
+  }
+
+  async installApmPackage(kibanaUrl: string, version:string, username: string, password: string) {
+    const response = await fetch(
+      kibanaUrl + '/api/fleet/epm/packages/apm/' + version,
+      {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+          Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'kbn-xsrf': 'kibana',
+        },
+        body: '{"force":true}'
+      }
+    );
+    const responseJson = await response.json();
+    if (responseJson.statusCode) {
+      throw Error(`unable to install apm package ${version}`)
+    }
+    if (responseJson.items) {
+      this.logger.info(`Installed apm package ${version}`);
+    }
+    else this.logger.error(responseJson)
+  }
 }
