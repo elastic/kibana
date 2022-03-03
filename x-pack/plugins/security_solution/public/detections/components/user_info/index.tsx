@@ -378,6 +378,6 @@ export const useUserInfo = (): State => {
     hasIndexUpdateDelete,
     signalIndexName,
     signalIndexMappingOutdated,
-    isKibanaReadOnly: (hasKibanaREAD && !canUserCRUD) || false,
+    isKibanaReadOnly: (hasKibanaREAD && !canUserCRUD) || null,
   };
 };
