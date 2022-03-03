@@ -44,6 +44,8 @@ export const BottomDrawer: React.FC<{
     changeTimelineOpen(!isOpen);
   }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
+  const hideButtonStyle = { zIndex: 1, marginTop: 105 };
+
   return (
     <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen} outerWidth={width}>
       <BottomActionTopBar ref={isOpen ? null : measureRef}>
@@ -53,6 +55,7 @@ export const BottomDrawer: React.FC<{
             iconType={isOpen ? 'arrowDown' : 'arrowRight'}
             onClick={onClick}
             data-test-subj="toggleTimelineButton"
+            style={isOpen ? hideButtonStyle : {}}
           >
             {isOpen ? hideHistory : showHistory}
           </ShowHideButton>
