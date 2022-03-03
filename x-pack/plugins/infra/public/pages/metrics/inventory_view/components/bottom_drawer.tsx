@@ -81,6 +81,7 @@ const BottomActionTopBar = euiStyled(EuiFlexGroup).attrs({
 })`
  margin-bottom: 0;
  height: 48px;
+ flex-flow: row-reverse;
 `;
 
 const ShowHideButton = euiStyled(EuiButtonEmpty).attrs({ size: 's' })`
