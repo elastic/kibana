@@ -153,12 +153,12 @@ async function queryFlameGraph(
     }
   );
 
-  const totalCount: number = resEvents.body.aggregations.total_count.value;
+  const totalCount: number = resEvents.body.aggregations?.total_count.value;
   const stackTraceEvents = new Map<StackTraceID, number>();
 
   let docCount = 0;
   let bucketCount = 0;
-  resEvents.body.aggregations.group_by.buckets.forEach((item: any) => {
+  resEvents.body.aggregations?.group_by.buckets.forEach((item: any) => {
     const traceid: StackTraceID = item.key.traceid;
     stackTraceEvents.set(traceid, item.sum_count.value);
     docCount += item.doc_count;
@@ -186,7 +186,7 @@ async function queryFlameGraph(
   // Also, ES doesn't know about transactions.
 
   // Create a lookup map StackTraceID -> StackTrace.
-  let stackTraces = new Map<StackTraceID, StackTrace>();
+  const stackTraces = new Map<StackTraceID, StackTrace>();
   for (const trace of resStackTraces.body.docs) {
     if (trace.found) {
       stackTraces.set(trace._id, {
@@ -267,20 +267,18 @@ async function queryFlameGraph(
     }
   }
 
-  return logExecutionLatency<any>(logger, 'building Flamegraph data', () => {
-    return new Promise((resolve, _) => {
-      return resolve(
-        new FlameGraph(
-          eventsIndex.sampleRate,
-          totalCount,
-          stackTraceEvents,
-          stackTraces,
-          stackFrames,
-          executables,
-          logger
-        )
-      );
-    });
+  return new Promise<FlameGraph>((resolve, _) => {
+    return resolve(
+      new FlameGraph(
+        eventsIndex.sampleRate,
+        totalCount,
+        stackTraceEvents,
+        stackTraces,
+        stackFrames,
+        executables,
+        logger
+      )
+    );
   });
 }
 
@@ -298,7 +296,7 @@ export function registerFlameChartElasticSearchRoute(
           projectID: schema.maybe(schema.string()),
           timeFrom: schema.maybe(schema.string()),
           timeTo: schema.maybe(schema.string()),
-          n: schema.maybe(schema.number()),
+          n: schema.maybe(schema.number({ defaultValue: 200 })),
         }),
       },
     },
@@ -311,6 +309,7 @@ export function registerFlameChartElasticSearchRoute(
         const filter = newProjectTimeQuery(projectID!, timeFrom!, timeTo!);
 
         const flamegraph = await queryFlameGraph(logger, esClient, filter, targetSampleSize);
+        logger.info('returning payload response to client');
 
         return response.ok({
           body: flamegraph.toElastic(),
