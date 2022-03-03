@@ -288,14 +288,25 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setScriptedFieldLanguageFilter(language: string) {
-    await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+      return await this.find.byCssSelector('div.euiPopover__panel-isOpen');
+    });
     await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
+    const filterBox = await this.testSubjects.find('scriptedFieldLanguageFilterDropdown-popover');
+    // class="euiPopover euiPopover--anchorDownCenter euiPopover-isOpen"
+    this.log.debug(
+      `++++++++++++++++++++++++filterBox.classes = ${await filterBox.getAttribute('class')}`
+    );
     await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${language}`);
     await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${language}`);
     await this.testSubjects.existOrFail(
       `scriptedFieldLanguageFilterDropdown-option-${language}-checked`
     );
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    this.log.debug(
+      `===========================filterBox.classes = ${await filterBox.getAttribute('class')}`
+    );
   }
 
   async filterField(name: string) {
