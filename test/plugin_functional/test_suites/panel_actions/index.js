@@ -15,7 +15,10 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   describe('pluggable panel actions', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
@@ -26,7 +29,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
 
     after(async function () {
       await PageObjects.dashboard.clearSavedObjectsFromAppLinks();
-      await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
     });
 
