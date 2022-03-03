@@ -30,10 +30,6 @@ export const FINDINGS = i18n.translate('xpack.csp.findings', {
   defaultMessage: 'Findings',
 });
 
-export const MISSING_KUBEBEAT = i18n.translate('xpack.csp.kubebeatDataViewIsMissing', {
-  defaultMessage: 'Kubebeat DataView is missing',
-});
-
 export const RESOURCE = i18n.translate('xpack.csp.resource', {
   defaultMessage: 'Resource',
 });

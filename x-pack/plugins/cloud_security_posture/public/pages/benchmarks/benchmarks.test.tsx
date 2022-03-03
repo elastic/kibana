@@ -7,6 +7,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { UseQueryResult } from 'react-query/types/react/types';
+import { createStubDataView } from '../../../../../../src/plugins/data_views/public/data_views/data_view.stub';
+import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
+import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
@@ -15,10 +18,22 @@ import { ADD_A_CIS_INTEGRATION, BENCHMARK_INTEGRATIONS, LOADING_BENCHMARKS } fro
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
 
 jest.mock('./use_csp_benchmark_integrations');
+jest.mock('../../common/api/use_kubebeat_data_view');
 
 describe('<Benchmarks />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    // Required for the page template to render the benchmarks page
+    (useKubebeatDataView as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: createStubDataView({
+          spec: {
+            id: CSP_KUBEBEAT_INDEX_PATTERN,
+          },
+        }),
+      })
+    );
   });
 
   const renderBenchmarks = (
