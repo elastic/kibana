@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme, transparentize } from '@elastic/eui';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { CSSObject } from '@emotion/react';
 
 interface StylesDeps {
@@ -15,18 +14,11 @@ interface StylesDeps {
   hasAlerts: boolean;
 }
 
-export const enum ButtonType {
-  children = 'children',
-  alerts = 'alerts',
-  output = 'output',
-  userChanged = 'user',
-}
-
 export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { colors, border, font, size } = euiTheme;
+    const { colors, border, size } = euiTheme;
 
     const TREE_INDENT = euiTheme.base * 2;
 
@@ -47,44 +39,6 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       paddingLeft: size.s,
       borderLeft: border.editable,
       marginTop: size.s,
-    };
-
-    const button: CSSObject = {
-      lineHeight: '18px',
-      height: '20px',
-      fontSize: '11px',
-      fontFamily: font.familyCode,
-      borderRadius: border.radius.medium,
-      color: colors.text,
-      marginLeft: size.s,
-      minWidth: 0,
-    };
-
-    const buttonArrow: CSSObject = {
-      marginLeft: size.s,
-    };
-
-    const getButtonStyle = (type: string): CSSObject => {
-      let background = transparentize(theme.euiColorVis6, 0.04);
-      let borderStyle = `${border.width.thin} solid ${transparentize(theme.euiColorVis6, 0.48)}`;
-
-      switch (type) {
-        case ButtonType.alerts:
-          background = transparentize(colors.dangerText, 0.04);
-          borderStyle = `${border.width.thin} solid ${transparentize(colors.dangerText, 0.48)}`;
-          break;
-        case ButtonType.userChanged:
-        case ButtonType.output:
-          background = transparentize(theme.euiColorVis1, 0.04);
-          borderStyle = `${border.width.thin} solid ${transparentize(theme.euiColorVis1, 0.48)}`;
-          break;
-      }
-
-      return {
-        ...button,
-        background,
-        border: borderStyle,
-      };
     };
 
     /**
@@ -156,8 +110,6 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       processNode,
       wrapper,
       workingDir,
-      buttonArrow,
-      getButtonStyle,
       alertDetails,
     };
   }, [depth, euiTheme, hasAlerts]);

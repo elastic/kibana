@@ -19,12 +19,13 @@ import React, {
   MouseEvent,
   useCallback,
 } from 'react';
-import { EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
-import { useStyles, ButtonType } from './styles';
+import { useStyles } from './styles';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
-
+import { SessionLeaderButton, AlertButton, ChildrenProcessesButton } from './buttons';
+import { useButtonStyles } from './useButtonStyles';
 interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
@@ -54,6 +55,7 @@ export function ProcessTreeNode({
 
   const alerts = process.getAlerts();
   const styles = useStyles({ depth, hasAlerts: !!alerts.length });
+  const buttonStyles = useButtonStyles();
 
   useLayoutEffect(() => {
     if (searchMatched !== null && textRef.current) {
@@ -75,106 +77,13 @@ export function ProcessTreeNode({
     setShowGroupLeadersOnly(!showGroupLeadersOnly);
   }, [showGroupLeadersOnly]);
 
-  const toggleChildren = useCallback(() => {
+  const onChildrenToggle = useCallback(() => {
     setChildrenExpanded(!childrenExpanded);
   }, [childrenExpanded]);
 
-  const toggleAlerts = useCallback(() => {
+  const onAlertsToggle = useCallback(() => {
     setAlertsExpanded(!alertsExpanded);
   }, [alertsExpanded]);
-
-  const getExpandedIcon = (expanded: boolean) => {
-    return expanded ? 'arrowUp' : 'arrowDown';
-  };
-
-  const renderButtons = useCallback(() => {
-    const buttons = [];
-    const childCount = process.getChildren(true).length;
-
-    if (isSessionLeader) {
-      const groupLeaderCount = process.getChildren(false).length;
-      const sameGroupCount = childCount - groupLeaderCount;
-
-      if (sameGroupCount > 0) {
-        buttons.push(
-          <EuiToolTip
-            key="samePgidTooltip"
-            position="top"
-            content={
-              <p>
-                <FormattedMessage
-                  id="xpack.sessionView.groupLeaderTooltip"
-                  defaultMessage="Hide or show other processes in the same 'process group' (pgid) as the session leader. This typically includes forks from bash builtins, auto completions and other shell startup activity."
-                />
-              </p>
-            }
-          >
-            <EuiButton
-              key="group-leaders-only-button"
-              css={styles.getButtonStyle(ButtonType.children)}
-              onClick={onShowGroupLeaderOnlyClick}
-              data-test-subj="sessionView:processTreeNodeChildProcessesButton"
-            >
-              <FormattedMessage
-                id="xpack.sessionView.plusCountMore"
-                defaultMessage="+{count} more"
-                values={{
-                  count: sameGroupCount,
-                }}
-              />
-              <EuiIcon
-                css={styles.buttonArrow}
-                size="s"
-                type={getExpandedIcon(showGroupLeadersOnly)}
-              />
-            </EuiButton>
-          </EuiToolTip>
-        );
-      }
-    } else if (childCount > 0) {
-      buttons.push(
-        <EuiButton
-          key="child-processes-button"
-          css={styles.getButtonStyle(ButtonType.children)}
-          onClick={toggleChildren}
-          data-test-subj="sessionView:processTreeNodeChildProcessesButton"
-        >
-          <FormattedMessage
-            id="xpack.sessionView.childProcesses"
-            defaultMessage="Child processes"
-          />
-          <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(childrenExpanded)} />
-        </EuiButton>
-      );
-    }
-
-    if (alerts.length) {
-      buttons.push(
-        <EuiButton
-          key="alert-button"
-          css={styles.getButtonStyle(ButtonType.alerts)}
-          onClick={toggleAlerts}
-          data-test-subj="processTreeNodeAlertButton"
-        >
-          <FormattedMessage id="xpack.sessionView.alerts" defaultMessage="Alerts" />
-          <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(alertsExpanded)} />
-        </EuiButton>
-      );
-    }
-
-    return buttons;
-  }, [
-    process,
-    showGroupLeadersOnly,
-    styles,
-    alerts.length,
-    alertsExpanded,
-    childrenExpanded,
-    isSessionLeader,
-    onShowGroupLeaderOnlyClick,
-    toggleAlerts,
-    toggleChildren,
-  ]);
 
   const onProcessClicked = (e: MouseEvent) => {
     e.stopPropagation();
@@ -207,6 +116,7 @@ export function ProcessTreeNode({
   } = processDetails.process;
 
   const children = process.getChildren(!showGroupLeadersOnly);
+  const childCount = process.getChildren(true).length;
   const shouldRenderChildren = childrenExpanded && children && children.length > 0;
   const childrenTreeDepth = depth + 1;
 
@@ -238,6 +148,12 @@ export function ProcessTreeNode({
               <EuiIcon type={sessionIcon} /> <b css={styles.darkText}>{name || args[0]}</b>{' '}
               <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
               <EuiIcon type="user" /> <b css={styles.darkText}>{user.name}</b>
+              <SessionLeaderButton
+                process={process}
+                childCount={childCount}
+                onClick={onShowGroupLeaderOnlyClick}
+                showGroupLeadersOnly={showGroupLeadersOnly}
+              />
             </>
           ) : (
             <span>
@@ -259,7 +175,7 @@ export function ProcessTreeNode({
           {showRootEscalation && (
             <EuiButton
               data-test-subj="sessionView:processTreeNodeRootEscalationFlag"
-              css={styles.getButtonStyle(ButtonType.userChanged)}
+              css={buttonStyles.userChangedButton}
             >
               <FormattedMessage
                 id="xpack.sessionView.execUserChange"
@@ -267,8 +183,12 @@ export function ProcessTreeNode({
               />
             </EuiButton>
           )}
-
-          {renderButtons()}
+          {!isSessionLeader && childCount > 0 && (
+            <ChildrenProcessesButton isExpanded={childrenExpanded} onToggle={onChildrenToggle} />
+          )}
+          {alerts.length > 0 && (
+            <AlertButton onToggle={onAlertsToggle} isExpanded={alertsExpanded} />
+          )}
         </div>
       </div>
 
