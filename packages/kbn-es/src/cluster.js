@@ -59,13 +59,10 @@ exports.Cluster = class Cluster {
    */
   async installSource(options = {}) {
     this._log.info(chalk.bold('Installing from source'));
-    this._log.indent(4);
-
-    const { installPath } = await installSource({ log: this._log, ...options });
-
-    this._log.indent(-4);
-
-    return { installPath };
+    return await this._log.indent(4, async () => {
+      const { installPath } = await installSource({ log: this._log, ...options });
+      return { installPath };
+    });
   }
 
   /**
@@ -78,16 +75,14 @@ exports.Cluster = class Cluster {
    */
   async downloadSnapshot(options = {}) {
     this._log.info(chalk.bold('Downloading snapshot'));
-    this._log.indent(4);
+    return await this._log.indent(4, async () => {
+      const { installPath } = await downloadSnapshot({
+        log: this._log,
+        ...options,
+      });
 
-    const { installPath } = await downloadSnapshot({
-      log: this._log,
-      ...options,
+      return { installPath };
     });
-
-    this._log.indent(-4);
-
-    return { installPath };
   }
 
   /**
@@ -100,16 +95,14 @@ exports.Cluster = class Cluster {
    */
   async installSnapshot(options = {}) {
     this._log.info(chalk.bold('Installing from snapshot'));
-    this._log.indent(4);
+    return await this._log.indent(4, async () => {
+      const { installPath } = await installSnapshot({
+        log: this._log,
+        ...options,
+      });
 
-    const { installPath } = await installSnapshot({
-      log: this._log,
-      ...options,
+      return { installPath };
     });
-
-    this._log.indent(-4);
-
-    return { installPath };
   }
 
   /**
@@ -122,16 +115,14 @@ exports.Cluster = class Cluster {
    */
   async installArchive(path, options = {}) {
     this._log.info(chalk.bold('Installing from an archive'));
-    this._log.indent(4);
+    return await this._log.indent(4, async () => {
+      const { installPath } = await installArchive(path, {
+        log: this._log,
+        ...options,
+      });
 
-    const { installPath } = await installArchive(path, {
-      log: this._log,
-      ...options,
+      return { installPath };
     });
-
-    this._log.indent(-4);
-
-    return { installPath };
   }
 
   /**
@@ -144,21 +135,19 @@ exports.Cluster = class Cluster {
    */
   async extractDataDirectory(installPath, archivePath, extractDirName = 'data') {
     this._log.info(chalk.bold(`Extracting data directory`));
-    this._log.indent(4);
+    await this._log.indent(4, async () => {
+      // stripComponents=1 excludes the root directory as that is how our archives are
+      // structured. This works in our favor as we can explicitly extract into the data dir
+      const extractPath = path.resolve(installPath, extractDirName);
+      this._log.info(`Data archive: ${archivePath}`);
+      this._log.info(`Extract path: ${extractPath}`);
 
-    // stripComponents=1 excludes the root directory as that is how our archives are
-    // structured. This works in our favor as we can explicitly extract into the data dir
-    const extractPath = path.resolve(installPath, extractDirName);
-    this._log.info(`Data archive: ${archivePath}`);
-    this._log.info(`Extract path: ${extractPath}`);
-
-    await extract({
-      archivePath,
-      targetDir: extractPath,
-      stripComponents: 1,
+      await extract({
+        archivePath,
+        targetDir: extractPath,
+        stripComponents: 1,
+      });
     });
-
-    this._log.indent(-4);
   }
 
   /**
@@ -169,24 +158,27 @@ exports.Cluster = class Cluster {
    * @returns {Promise<void>}
    */
   async start(installPath, options = {}) {
-    this._exec(installPath, options);
+    // _exec indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
+    await this._log.indent(0, async () => {
+      this._exec(installPath, options);
 
-    await Promise.race([
-      // wait for native realm to be setup and es to be started
-      Promise.all([
-        first(this._process.stdout, (data) => {
-          if (/started/.test(data)) {
-            return true;
-          }
+      await Promise.race([
+        // wait for native realm to be setup and es to be started
+        Promise.all([
+          first(this._process.stdout, (data) => {
+            if (/started/.test(data)) {
+              return true;
+            }
+          }),
+          this._setupPromise,
+        ]),
+
+        // await the outcome of the process in case it exits before starting
+        this._outcome.then(() => {
+          throw createCliError('ES exited without starting');
         }),
-        this._setupPromise,
-      ]),
-
-      // await the outcome of the process in case it exits before starting
-      this._outcome.then(() => {
-        throw createCliError('ES exited without starting');
-      }),
-    ]);
+      ]);
+    });
   }
 
   /**
@@ -197,16 +189,19 @@ exports.Cluster = class Cluster {
    * @returns {Promise<void>}
    */
   async run(installPath, options = {}) {
-    this._exec(installPath, options);
+    // _exec indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
+    await this._log.indent(0, async () => {
+      this._exec(installPath, options);
 
-    // log native realm setup errors so they aren't uncaught
-    this._setupPromise.catch((error) => {
-      this._log.error(error);
-      this.stop();
+      // log native realm setup errors so they aren't uncaught
+      this._setupPromise.catch((error) => {
+        this._log.error(error);
+        this.stop();
+      });
+
+      // await the final outcome of the process
+      await this._outcome;
     });
-
-    // await the final outcome of the process
-    await this._outcome;
   }
 
   /**
@@ -261,6 +256,7 @@ exports.Cluster = class Cluster {
       'action.destructive_requires_name=true',
       'ingest.geoip.downloader.enabled=false',
       'search.check_ccs_compatibility=true',
+      'cluster.routing.allocation.disk.threshold_enabled=false',
     ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled

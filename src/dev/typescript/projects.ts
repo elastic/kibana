@@ -45,7 +45,7 @@ export const PROJECTS = [
     { name: 'enterprise_search/shared/cypress' }
   ),
   createProject(
-    'x-pack/plugins/enterprise_search/public/applications/enterprise_search/cypress/tsconfig.json',
+    'x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/cypress/tsconfig.json',
     { name: 'enterprise_search/overview/cypress' }
   ),
   createProject(
