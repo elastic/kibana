@@ -80,7 +80,7 @@ const mockVectorSource = {
       },
       getLabel: () => {
         return LEFT_FIELD;
-      }
+      },
     } as IField;
   },
 } as unknown as IVectorSource;
