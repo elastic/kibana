@@ -118,9 +118,7 @@ describe('wrapScopedClusterClient', () => {
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    (
-      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
-    ).child.mockReturnValue(childClient as unknown as Client);
+    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     const asInternalUserWrappedSearchFn = childClient.search;
     // @ts-ignore incomplete return type
     asInternalUserWrappedSearchFn.mockResolvedValue({});
