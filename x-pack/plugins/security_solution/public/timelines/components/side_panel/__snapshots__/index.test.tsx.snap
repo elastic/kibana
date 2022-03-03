@@ -505,6 +505,7 @@ Array [
                 "loading": false,
                 "refetch": null,
                 "selectedInspectIndex": 0,
+                "vizType": null,
               }
             }
           >
@@ -789,6 +790,7 @@ Array [
               "loading": false,
               "refetch": null,
               "selectedInspectIndex": 0,
+              "vizType": null,
             }
           }
         >

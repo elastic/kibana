@@ -54,6 +54,11 @@ jest.mock('../../../common/components/query_bar', () => ({
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
+jest.mock('../../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => (
+    <div data-test-subj="mock-viz-actions">{'mockVizAction'}</div>
+  )),
+}));
 
 describe('body', () => {
   const scenariosMap = {
