@@ -83,7 +83,7 @@ const packages: Package[] = [
       },
 
       'win32-x64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/win-x64-93.gz',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/win32-x64-93.gz',
         sha256: '0320d0c0385432944c6fb3c8c8fcd78d440ce5626f7618f9ec71d88e44820674',
       },
     },
