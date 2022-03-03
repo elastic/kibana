@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutBody } from './flyout_body';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers';
-import { layersForRegistration } from '../../classes/layers/wizards/load_layer_wizards';
+import { getWizardById } from '../../classes/layers/wizards/layer_wizard_registry';
 
 export const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
 const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
@@ -64,13 +64,16 @@ export class AddLayerPanel extends Component<Props, State> {
 
   componentDidMount() {
     if (this.props.layerWizardId) {
-      const selectedWizard = layersForRegistration.find(
-        (wizard) => wizard.id === this.props.layerWizardId
-      );
-      if (selectedWizard) {
-        this._onWizardSelect(selectedWizard);
-        this.props.clearLayerWizard();
-      }
+      this._openWizard();
+    }
+  }
+
+  async _openWizard() {
+    const wizard = await getWizardById(this.props.layerWizardId);
+
+    if (wizard) {
+      this._onWizardSelect(wizard);
+      this.props.clearLayerWizard();
     }
   }
 

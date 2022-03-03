@@ -91,3 +91,8 @@ export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
       return wizard1.order - wizard2.order;
     });
 }
+
+export async function getWizardById(layerWizardId: string) {
+  await registry;
+  return registry.find((wizard) => wizard.id === layerWizardId);
+}

@@ -8,10 +8,12 @@
 import { OPEN_WIZARD_URL } from '../../../../common/constants';
 
 export function getOpenLayerWizardFromUrlParam() {
-  const locationSplit = window.location.href.split('?');
+  const locationSplit = window.location.href.split(/[?#]+/);
+
   if (locationSplit.length <= 1) {
     return '';
   }
+
   const mapAppParams = new URLSearchParams(locationSplit[1]);
   if (!mapAppParams.has(OPEN_WIZARD_URL)) {
     return '';
