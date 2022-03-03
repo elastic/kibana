@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-// We don't export the "useField" hook as it is for internal use.
-// The consumer of the library must use the <UseField /> component to create a field
+// We don't export the "useField()" hook as it created internally.
+// Consumers must use the <UseField /> component to create a field hook.
 export { useForm, useFormData, useFormIsModified, useBehaviorSubject } from './hooks';
 
 export { getFieldValidityAndErrorMessage } from './helpers';
@@ -38,6 +38,7 @@ export type {
   FormOptions,
   FormSchema,
   FormSubmitHandler,
+  OnFormUpdateArg,
   OnUpdateHandler,
   SerializerFunc,
   ValidationCancelablePromise,
