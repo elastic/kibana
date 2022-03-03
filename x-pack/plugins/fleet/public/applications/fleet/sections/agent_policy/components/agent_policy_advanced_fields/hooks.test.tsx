@@ -66,7 +66,7 @@ describe('useOutputOptions', () => {
   it('should generate enabled options if the licence is platinium', async () => {
     const testRenderer = createFleetTestRendererMock();
     mockedUseLicence.mockReturnValue({
-      isPlatinium: () => true,
+      hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithOutputs(testRenderer.startServices.http);
     const { result, waitForNextUpdate } = testRenderer.renderHook(() => useOutputOptions());
@@ -124,7 +124,7 @@ describe('useOutputOptions', () => {
   it('should only enable the default options if the licence is not platinium', async () => {
     const testRenderer = createFleetTestRendererMock();
     mockedUseLicence.mockReturnValue({
-      isPlatinium: () => false,
+      hasAtLeast: () => false,
     } as unknown as LicenseService);
     mockApiCallsWithOutputs(testRenderer.startServices.http);
     const { result, waitForNextUpdate } = testRenderer.renderHook(() => useOutputOptions());

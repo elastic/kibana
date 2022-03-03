@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 
 import { useGetOutputs, useLicense } from '../../../../hooks';
+import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common';
 
 // The super select component do not support null or '' as a value
 export const DEFAULT_OUTPUT_VALUE = '@@##DEFAULT_OUTPUT_VALUE##@@';
@@ -28,7 +29,7 @@ export function useOutputOptions() {
   const outputsRequest = useGetOutputs();
   const licenseService = useLicense();
 
-  const isPlatinium = useMemo(() => licenseService.isPlatinium(), [licenseService]);
+  const isLicenceAllowingPolicyPerOutput = licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT);
 
   const outputOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
     if (outputsRequest.isLoading || !outputsRequest.data) {
@@ -38,9 +39,9 @@ export function useOutputOptions() {
     return outputsRequest.data.items.map((item) => ({
       value: item.id,
       inputDisplay: item.name,
-      disabled: !isPlatinium,
+      disabled: !isLicenceAllowingPolicyPerOutput,
     }));
-  }, [outputsRequest, isPlatinium]);
+  }, [outputsRequest, isLicenceAllowingPolicyPerOutput]);
 
   const dataOutputOptions = useMemo(() => {
     if (outputsRequest.isLoading || !outputsRequest.data) {

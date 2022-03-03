@@ -25,6 +25,7 @@ export interface NewAgentPolicy {
   monitoring_enabled?: MonitoringType;
   unenroll_timeout?: number;
   is_preconfigured?: boolean;
+  // Nullable to allow user to reset to default outputs
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
 }
