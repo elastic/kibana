@@ -51,8 +51,6 @@ export function RulesPage() {
   } = core;
   const [rules, setRules] = useState<RuleState>({ data: [], totalItemsCount: 0 });
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
-
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   async function loadObservabilityRules() {
@@ -113,8 +111,7 @@ export function RulesPage() {
 
   useEffect(() => {
     loadObservabilityRules();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   useBreadcrumbs([
     {
@@ -194,7 +191,6 @@ export function RulesPage() {
       ],
     },
   ];
-  console.log(rules.data, '!!data');
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -202,18 +198,6 @@ export function RulesPage() {
           <>{i18n.translate('xpack.observability.rulesTitle', { defaultMessage: 'Rules' })} </>
         ),
         rightSideItems: [
-          <EuiButton
-            iconType="plusInCircle"
-            key="create-alert"
-            data-test-subj="createRuleButton"
-            fill
-            onClick={() => setRuleFlyoutVisibility(true)}
-          >
-            <FormattedMessage
-              id="xpack.observability.rules.addRuleButtonLabel"
-              defaultMessage="Create rule"
-            />
-          </EuiButton>,
           <EuiButtonEmpty
             href={docLinks.links.alerting.guide}
             target="_blank"
