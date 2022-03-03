@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
 import { Stream } from 'stream';
 import { schema } from '@kbn/config-schema';
-import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
+import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import {
@@ -17,6 +16,7 @@ import {
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
 } from '../../common/constants';
+import { decodeMvtResponseBody } from '../../common/mvt_request_body';
 import { getEsTile } from './get_tile';
 import { getEsGridTile } from './get_grid_tile';
 
@@ -25,9 +25,11 @@ const CACHE_TIMEOUT_SECONDS = 60 * 60;
 export function initMVTRoutes({
   router,
   logger,
+  core,
 }: {
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
+  core: CoreStart;
 }) {
   router.get(
     {
@@ -55,9 +57,9 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const requestBodyDSL = rison.decode(query.requestBody as string);
-
       const gzippedTile = await getEsTile({
+        url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+        core,
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -65,7 +67,7 @@ export function initMVTRoutes({
         y: parseInt((params as any).y, 10) as number,
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
-        requestBody: requestBodyDSL as any,
+        requestBody: decodeMvtResponseBody(query.requestBody as string) as any,
         abortController,
       });
 
@@ -101,9 +103,9 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const requestBodyDSL = rison.decode(query.requestBody as string);
-
       const gzipTileStream = await getEsGridTile({
+        url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+        core,
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -111,7 +113,7 @@ export function initMVTRoutes({
         y: parseInt((params as any).y, 10) as number,
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
-        requestBody: requestBodyDSL as any,
+        requestBody: decodeMvtResponseBody(query.requestBody as string) as any,
         requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
         gridPrecision: parseInt(query.gridPrecision, 10),
         abortController,

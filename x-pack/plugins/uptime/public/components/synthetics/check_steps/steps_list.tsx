@@ -26,6 +26,7 @@ import { VIEW_PERFORMANCE } from '../../monitor/synthetics/translations';
 import { StepImage } from './step_image';
 import { useExpandedRow } from './use_expanded_row';
 import { StepDuration } from './step_duration';
+import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const SpanWithMargin = styled.span`
   margin-right: 16px;
@@ -35,6 +36,8 @@ interface Props {
   data: JourneyStep[];
   error?: Error;
   loading: boolean;
+  compactView?: boolean;
+  showStepDurationTrend?: boolean;
 }
 
 interface StepStatusCount {
@@ -43,7 +46,7 @@ interface StepStatusCount {
   succeeded: number;
 }
 
-function isStepEnd(step: JourneyStep) {
+export function isStepEnd(step: JourneyStep) {
   return step.synthetics?.type === 'step/end';
 }
 
@@ -83,12 +86,19 @@ function reduceStepStatus(prev: StepStatusCount, cur: JourneyStep): StepStatusCo
   return prev;
 }
 
-export const StepsList = ({ data, error, loading }: Props) => {
+export const StepsList = ({
+  data,
+  error,
+  loading,
+  showStepDurationTrend = true,
+  compactView = false,
+}: Props) => {
   const steps: JourneyStep[] = data.filter(isStepEnd);
 
   const { expandedRows, toggleExpand } = useExpandedRow({ steps, allSteps: data, loading });
 
   const [durationPopoverOpenIndex, setDurationPopoverOpenIndex] = useState<number | null>(null);
+  const { basePath } = useUptimeSettingsContext();
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     {
@@ -116,7 +126,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
       align: 'left',
       field: 'timestamp',
       name: STEP_NAME_LABEL,
-      render: (_timestamp: string, item) => <StepImage step={item} />,
+      render: (_timestamp: string, item) => <StepImage step={item} compactView={compactView} />,
       mobileOptions: {
         render: (item: JourneyStep) => (
           <EuiText>
@@ -137,6 +147,8 @@ export const StepsList = ({ data, error, loading }: Props) => {
             step={item}
             durationPopoverOpenIndex={durationPopoverOpenIndex}
             setDurationPopoverOpenIndex={setDurationPopoverOpenIndex}
+            showStepDurationTrend={showStepDurationTrend}
+            compactView={compactView}
           />
         );
       },
@@ -151,17 +163,23 @@ export const StepsList = ({ data, error, loading }: Props) => {
       align: 'left',
       field: 'timestamp',
       name: '',
-      render: (_val: string, item) => (
-        <StepDetailLink
-          checkGroupId={item.monitor.check_group!}
-          stepIndex={item.synthetics?.step?.index!}
-        >
-          {VIEW_PERFORMANCE}
-        </StepDetailLink>
-      ),
       mobileOptions: { show: false },
+      render: (_val: string, item) =>
+        compactView ? (
+          <EuiButtonIcon
+            href={`${basePath}/app/uptime/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
+            target="_blank"
+            iconType="visArea"
+          />
+        ) : (
+          <StepDetailLink
+            checkGroupId={item.monitor.check_group!}
+            stepIndex={item.synthetics?.step?.index!}
+          >
+            {VIEW_PERFORMANCE}
+          </StepDetailLink>
+        ),
     },
-
     {
       width: '40px',
       align: RIGHT_ALIGNMENT,
@@ -203,15 +221,18 @@ export const StepsList = ({ data, error, loading }: Props) => {
 
   return (
     <>
-      <EuiTitle size="s">
-        <h2>
-          {statusMessage(
-            steps.reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 }),
-            loading
-          )}
-        </h2>
-      </EuiTitle>
+      {!compactView && (
+        <EuiTitle size="s">
+          <h2>
+            {statusMessage(
+              steps.reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 }),
+              loading
+            )}
+          </h2>
+        </EuiTitle>
+      )}
       <EuiBasicTable
+        compressed={compactView}
         loading={loading}
         columns={columns}
         error={error?.message}

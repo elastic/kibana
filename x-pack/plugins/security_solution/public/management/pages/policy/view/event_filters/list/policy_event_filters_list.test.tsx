@@ -20,6 +20,7 @@ import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_ut
 import { PolicyEventFiltersList } from './policy_event_filters_list';
 import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
@@ -65,7 +66,7 @@ describe('Policy details event filters list', () => {
     );
     await render();
     expect(renderResult.getByTestId('policyDetailsEventFiltersSearchCount')).toHaveTextContent(
-      'Showing 0 exceptions'
+      'Showing 0 event filters'
     );
     expect(renderResult.getByTestId('searchField')).toBeTruthy();
   });
@@ -132,5 +133,20 @@ describe('Policy details event filters list', () => {
       renderResult.getByTestId('eventFilters-collapsed-list-card-header-actions-button')
     );
     expect(renderResult.queryByTestId('view-full-details-action')).toBeTruthy();
+  });
+
+  it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
+    getEndpointPrivilegesInitialStateMock({
+      canCreateArtifactsByPolicy: false,
+    });
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock()
+    );
+    await render();
+    userEvent.click(
+      renderResult.getByTestId('eventFilters-collapsed-list-card-header-actions-button')
+    );
+
+    expect(renderResult.queryByTestId('remove-from-policy-action')).toBeNull();
   });
 });

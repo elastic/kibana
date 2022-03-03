@@ -15,6 +15,7 @@ export function useLocations() {
   const {
     error: { serviceLocations: serviceLocationsError },
     loading: { serviceLocations: serviceLocationsLoading },
+    locations,
   } = useSelector(monitorManagementListSelector);
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export function useLocations() {
   }, [dispatch]);
 
   return {
+    locations,
     error: serviceLocationsError,
     loading: serviceLocationsLoading,
   };

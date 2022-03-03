@@ -200,6 +200,17 @@ describe('Policy Details', () => {
         expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(0);
       });
 
+      it('should not display the host isolation exceptions tab with no privileges and no data', async () => {
+        getHostIsolationExceptionItemsMock.mockReturnValue({ total: 0 });
+        policyView = render();
+        await asyncActions;
+        policyView.update();
+        await waitFor(() => {
+          expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
+        });
+        expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(0);
+      });
+
       it('should display the host isolation exceptions tab with no privileges if there are assigned exceptions', async () => {
         // simulate existing assigned policies
         getHostIsolationExceptionItemsMock.mockReturnValue(getFoundExceptionListItemSchemaMock(1));

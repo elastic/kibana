@@ -30,7 +30,7 @@ function executeWatch(dataClient: IScopedClusterClient, executeDetails: any, wat
     .executeWatch({
       body,
     })
-    .then(({ body: returnValue }) => returnValue);
+    .then((returnValue) => returnValue);
 }
 
 export function registerExecuteRoute({

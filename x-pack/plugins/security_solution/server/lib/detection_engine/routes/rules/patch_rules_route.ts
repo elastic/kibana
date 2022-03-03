@@ -17,7 +17,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';
 import { buildSiemResponse } from '../utils';
 
@@ -106,13 +106,9 @@ export const patchRulesRoute = (
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
 
-        const rulesClient = context.alerting?.getRulesClient();
-        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const rulesClient = context.alerting.getRulesClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = context.core.savedObjects.client;
-
-        if (!rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -122,7 +118,7 @@ export const patchRulesRoute = (
         });
         if (type) {
           // reject an unauthorized "promotion" to ML
-          throwHttpError(await mlAuthz.validateRuleType(type));
+          throwAuthzError(await mlAuthz.validateRuleType(type));
         }
 
         const existingRule = await readRules({
@@ -133,7 +129,7 @@ export const patchRulesRoute = (
         });
         if (existingRule?.params.type) {
           // reject an unauthorized modification of an ML rule
-          throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
+          throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
         }
 
         const migratedRule = await legacyMigrate({
@@ -194,12 +190,13 @@ export const patchRulesRoute = (
           exceptionsList,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
-          const ruleStatus = await ruleStatusClient.getCurrentStatus({
-            ruleId: rule.id,
-            spaceId: context.securitySolution.getSpaceId(),
-          });
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
 
-          const [validated, errors] = transformValidate(rule, ruleStatus, isRuleRegistryEnabled);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleExecutionSummary,
+            isRuleRegistryEnabled
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

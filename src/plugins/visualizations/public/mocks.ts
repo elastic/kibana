@@ -19,12 +19,17 @@ import { usageCollectionPluginMock } from '../../../plugins/usage_collection/pub
 import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
 import { savedObjectsPluginMock } from '../../../plugins/saved_objects/public/mocks';
+import { urlForwardingPluginMock } from '../../../plugins/url_forwarding/public/mocks';
+import { navigationPluginMock } from '../../../plugins/navigation/public/mocks';
+import { presentationUtilPluginMock } from '../../../plugins/presentation_util/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '../../saved_objects_tagging_oss/public/mocks';
+import { screenshotModePluginMock } from '../../screenshot_mode/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
   registerAlias: jest.fn(),
   hideTypes: jest.fn(),
+  visEditorsRegistry: { registerDefault: jest.fn(), register: jest.fn(), get: jest.fn() },
 });
 
 const createStartContract = (): VisualizationsStart => ({
@@ -33,16 +38,7 @@ const createStartContract = (): VisualizationsStart => ({
   getAliases: jest.fn(),
   getByGroup: jest.fn(),
   unRegisterAlias: jest.fn(),
-  getSavedVisualization: jest.fn(),
-  saveVisualization: jest.fn(),
-  findListItems: jest.fn(),
   showNewVisModal: jest.fn(),
-  createVis: jest.fn(),
-  convertFromSerializedVis: jest.fn(),
-  convertToSerializedVis: jest.fn(),
-  __LEGACY: {
-    createVisEmbeddableFromObject: jest.fn(),
-  },
 });
 
 const createInstance = async () => {
@@ -54,6 +50,8 @@ const createInstance = async () => {
     expressions: expressionsPluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
+    urlForwarding: urlForwardingPluginMock.createSetupContract(),
+    uiActions: uiActionsPluginMock.createSetupContract(),
   });
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
@@ -68,6 +66,10 @@ const createInstance = async () => {
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjects: savedObjectsPluginMock.createStartContract(),
       savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
+      navigation: navigationPluginMock.createStartContract(),
+      presentationUtil: presentationUtilPluginMock.createStartContract(coreMock.createStart()),
+      urlForwarding: urlForwardingPluginMock.createStartContract(),
+      screenshotMode: screenshotModePluginMock.createStartContract(),
     });
 
   return {

@@ -33,6 +33,7 @@
 
   &__header {
     padding: 0 !important;
+    @include euiTextBreakWord;
   }
 
   &__content {

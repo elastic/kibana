@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { EuiRange } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { withDebounceArg } from '../../../public/components/with_debounce_arg';
 import { ArgumentStrings } from '../../../i18n';
 
 const { Range: strings } = ArgumentStrings;
 
 const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
   const { min, max, step } = typeInstance.options;
-  const handleChange = (ev) => {
-    return onValueChange(Number(ev.target.value));
-  };
+  const [value, setValue] = useState(argValue);
+
+  const handleChange = useCallback(
+    (ev) => {
+      const { value } = ev.target;
+      const numberVal = Number(value);
+      setValue(numberVal);
+      onValueChange(numberVal);
+    },
+    [onValueChange]
+  );
 
   return (
     <EuiRange
@@ -27,7 +36,7 @@ const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
       step={step}
       showLabels
       showInput
-      value={argValue}
+      value={value}
       onChange={handleChange}
     />
   );
@@ -50,5 +59,5 @@ export const range = () => ({
   name: 'range',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  simpleTemplate: templateFromReactComponent(RangeArgInput),
+  simpleTemplate: templateFromReactComponent(withDebounceArg(RangeArgInput, 50)),
 });

@@ -23,14 +23,14 @@ export const getAllMigrations = (
     uniqueVersions.add(baseMigrationVersion);
   }
   for (const factory of factories) {
-    Object.keys((factory as PersistableState).migrations).forEach((version) =>
-      uniqueVersions.add(version)
-    );
+    const migrations = (factory as PersistableState).migrations;
+    const factoryMigrations = typeof migrations === 'function' ? migrations() : migrations;
+    Object.keys(factoryMigrations).forEach((version) => uniqueVersions.add(version));
   }
   for (const enhancement of enhancements) {
-    Object.keys((enhancement as PersistableState).migrations).forEach((version) =>
-      uniqueVersions.add(version)
-    );
+    const migrations = (enhancement as PersistableState).migrations;
+    const enhancementMigrations = typeof migrations === 'function' ? migrations() : migrations;
+    Object.keys(enhancementMigrations).forEach((version) => uniqueVersions.add(version));
   }
 
   const migrations: MigrateFunctionsObject = {};

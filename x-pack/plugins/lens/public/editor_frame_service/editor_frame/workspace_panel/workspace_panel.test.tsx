@@ -27,8 +27,9 @@ import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter';
+import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from 'src/core/public/mocks';
-import { esFilters, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
@@ -203,11 +204,11 @@ describe('workspace_panel', () => {
 
     const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
 
-    const eventData = {};
+    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
     onEvent({ name: 'brush', data: eventData });
 
     expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
-    expect(trigger.exec).toHaveBeenCalledWith({ data: eventData });
+    expect(trigger.exec).toHaveBeenCalledWith({ data: { ...eventData, timeFieldName: undefined } });
   });
 
   it('should push add current data table to state on data$ emitting value', async () => {
@@ -415,7 +416,7 @@ describe('workspace_panel', () => {
       instance.setProps({
         framePublicAPI: {
           ...framePublicAPI,
-          filters: [esFilters.buildExistsFilter(field, indexPattern)],
+          filters: [buildExistsFilter(field, indexPattern)],
         },
       });
     });

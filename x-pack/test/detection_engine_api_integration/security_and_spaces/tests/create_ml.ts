@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import {
   ALERT_REASON,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAMESPACE,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_UPDATED_AT,
@@ -91,7 +92,8 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('Generating signals from ml anomalies', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('Generating signals from ml anomalies', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
@@ -120,6 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(signal._source).eql({
         '@timestamp': signal._source['@timestamp'],
+        [ALERT_RULE_EXECUTION_UUID]: signal._source[ALERT_RULE_EXECUTION_UUID],
         [ALERT_UUID]: signal._source[ALERT_UUID],
         [VERSION]: signal._source[VERSION],
         actual: [1],

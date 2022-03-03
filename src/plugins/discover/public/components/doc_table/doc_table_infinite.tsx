@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { SAMPLE_SIZE_SETTING } from '../../../common';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../../application/main/components/skip_bottom_button';
 import { shouldLoadNextDocPatch } from './lib/should_load_next_doc_patch';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 const FOOTER_PADDING = { padding: 0 };
 
@@ -28,7 +30,6 @@ interface DocTableInfiniteContentProps extends DocTableRenderProps {
 const DocTableInfiniteContent = ({
   rows,
   columnLength,
-  sampleSize,
   limit,
   onSkipBottomButtonClick,
   renderHeader,
@@ -36,6 +37,10 @@ const DocTableInfiniteContent = ({
   onSetMaxLimit,
   onBackToTop,
 }: DocTableInfiniteContentProps) => {
+  const { uiSettings } = useDiscoverServices();
+
+  const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING, 500), [uiSettings]);
+
   const onSkipBottomButton = useCallback(() => {
     onSetMaxLimit();
     onSkipBottomButtonClick();
@@ -118,7 +123,7 @@ export const DocTableInfinite = (props: DocTableProps) => {
 
   const onBackToTop = useCallback(() => {
     const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
-    const focusElem = document.querySelector('.dscTable') as HTMLElement;
+    const focusElem = document.querySelector('.dscSkipButton') as HTMLElement;
     focusElem.focus();
 
     // Only the desktop one needs to target a specific container

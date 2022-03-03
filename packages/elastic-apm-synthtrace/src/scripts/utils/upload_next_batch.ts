@@ -17,6 +17,7 @@ export interface WorkerData {
   bucketFrom: number;
   bucketTo: number;
   file: string;
+  scenarioOpts: Record<string, any> | undefined;
   logLevel: LogLevel;
   clientWorkers: number;
   batchSize: number;
@@ -39,6 +40,7 @@ const {
   workers,
   target,
   writeTarget,
+  scenarioOpts,
 } = workerData as WorkerData;
 
 async function uploadNextBatch() {
@@ -63,6 +65,7 @@ async function uploadNextBatch() {
     target,
     workers,
     writeTarget,
+    scenarioOpts,
   });
 
   const events = logger.perf('execute_scenario', () =>

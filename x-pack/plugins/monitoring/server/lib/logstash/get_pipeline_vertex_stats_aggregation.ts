@@ -6,8 +6,10 @@
  */
 
 import { LegacyRequest, PipelineVersion } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
+import { Globals } from '../../static_globals';
 
 function scalarCounterAggregation(
   field: string,
@@ -147,7 +149,6 @@ function createTimeSeriesAgg(timeSeriesIntervalInSeconds: number, ...aggsList: o
 
 function fetchPipelineVertexTimeSeriesStats({
   query,
-  logstashIndexPattern,
   pipelineId,
   version,
   vertexId,
@@ -157,7 +158,6 @@ function fetchPipelineVertexTimeSeriesStats({
   req,
 }: {
   query: object;
-  logstashIndexPattern: string;
   pipelineId: string;
   version: PipelineVersion;
   vertexId: string;
@@ -174,8 +174,14 @@ function fetchPipelineVertexTimeSeriesStats({
     }),
   };
 
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType: 'logstash',
+  });
+
   const params = {
-    index: logstashIndexPattern,
+    index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
     filter_path: [
@@ -202,7 +208,6 @@ function fetchPipelineVertexTimeSeriesStats({
 
 export function getPipelineVertexStatsAggregation({
   req,
-  logstashIndexPattern,
   timeSeriesIntervalInSeconds,
   clusterUuid,
   pipelineId,
@@ -210,7 +215,6 @@ export function getPipelineVertexStatsAggregation({
   vertexId,
 }: {
   req: LegacyRequest;
-  logstashIndexPattern: string;
   timeSeriesIntervalInSeconds: number;
   clusterUuid: string;
   pipelineId: string;
@@ -252,8 +256,14 @@ export function getPipelineVertexStatsAggregation({
   const start = version.firstSeen;
   const end = version.lastSeen;
 
+  const moduleType = 'logstash';
+  const dataset = 'node_stats';
+  const type = 'logstash_stats';
+
   const query = createQuery({
-    types: ['node_stats', 'logstash_stats'],
+    type,
+    dsDataset: `${moduleType}.${dataset}`,
+    metricset: dataset,
     start,
     end,
     metric: LogstashMetric.getMetricFields(),
@@ -261,18 +271,15 @@ export function getPipelineVertexStatsAggregation({
     filters,
   });
 
-  const config = req.server.config();
+  const config = req.server.config;
 
   return fetchPipelineVertexTimeSeriesStats({
     query,
-    logstashIndexPattern,
     pipelineId,
     version,
     vertexId,
     timeSeriesIntervalInSeconds,
-    // @ts-ignore not undefined, need to get correct config
-    // https://github.com/elastic/kibana/issues/112146
-    maxBucketSize: config.get('monitoring.ui.max_bucket_size'),
+    maxBucketSize: config.ui.max_bucket_size,
     callWithRequest,
     req,
   });

@@ -29,7 +29,7 @@ export const useCreateWorkpad = () => {
         history.push(`/workpad/${workpad.id}/page/1`);
       } catch (err) {
         notifyService.error(err, {
-          title: errors.getUploadFailureErrorMessage(),
+          title: errors.getCreateFailureErrorMessage(),
         });
       }
       return;
@@ -39,8 +39,8 @@ export const useCreateWorkpad = () => {
 };
 
 const errors = {
-  getUploadFailureErrorMessage: () =>
-    i18n.translate('xpack.canvas.error.useCreateWorkpad.uploadFailureErrorMessage', {
-      defaultMessage: `Couldn't upload workpad`,
+  getCreateFailureErrorMessage: () =>
+    i18n.translate('xpack.canvas.error.useCreateWorkpad.createFailureErrorMessage', {
+      defaultMessage: `Couldn't create workpad`,
     }),
 };

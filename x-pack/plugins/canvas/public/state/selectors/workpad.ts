@@ -27,6 +27,7 @@ import {
   ExpressionAstFunction,
   ExpressionAstExpression,
 } from '../../../types';
+import { isExpressionWithFilters } from '../../lib/filter';
 
 type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R;
 type WorkpadInfo = Modify<CanvasWorkpad, { pages: undefined }>;
@@ -248,7 +249,7 @@ function extractFilterGroups(
     // TODO: we always get a function here, right?
     const { function: fn, arguments: args } = item;
 
-    if (fn === 'filters') {
+    if (isExpressionWithFilters(fn)) {
       // we have a filter function, extract groups from args
       return groups.concat(
         buildGroupValues(args, (argValue) => {
@@ -456,7 +457,7 @@ export function getResolvedArgs(state: State, elementId: string, path: any): any
   return args;
 }
 
-export function getSelectedResolvedArgs(state: State, path: any): any {
+export function getSelectedResolvedArgs(state: State, path: Array<string | number>): any {
   const elementId = getSelectedElementId(state);
 
   if (elementId) {
@@ -464,8 +465,12 @@ export function getSelectedResolvedArgs(state: State, path: any): any {
   }
 }
 
-export function getContextForIndex(state: State, index: number): ExpressionContext {
-  return getSelectedResolvedArgs(state, ['expressionContext', index - 1]);
+export function getContextForIndex(
+  state: State,
+  parentPath: string,
+  index: number
+): ExpressionContext {
+  return getSelectedResolvedArgs(state, ['expressionContext', parentPath, index - 1]);
 }
 
 export function getRefreshInterval(state: State): number {

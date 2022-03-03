@@ -48,8 +48,10 @@ import { IStyleProperty } from '../properties/style_property';
 import { SymbolizeAsProperty } from '../properties/symbolize_as_property';
 import { LabelBorderSizeProperty } from '../properties/label_border_size_property';
 import { StaticTextProperty } from '../properties/static_text_property';
+import { DynamicTextProperty } from '../properties/dynamic_text_property';
 import { StaticSizeProperty } from '../properties/static_size_property';
 import { IVectorLayer } from '../../../layers/vector_layer';
+import { getHasLabel } from '../style_util';
 
 export interface StyleProperties {
   [key: string]: IStyleProperty<StylePropertyOptions>;
@@ -167,14 +169,6 @@ export class VectorStyleEditor extends Component<Props, State> {
     return iconSize.isDynamic() || (iconSize as StaticSizeProperty).getOptions().size > 0;
   }
 
-  _hasLabel() {
-    const label = this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT];
-    return label.isDynamic()
-      ? label.isComplete()
-      : (label as StaticTextProperty).getOptions().value != null &&
-          (label as StaticTextProperty).getOptions().value.length;
-  }
-
   _hasLabelBorder() {
     const labelBorderSize = this.props.styleProperties[
       VECTOR_STYLES.LABEL_BORDER_SIZE
@@ -258,7 +252,11 @@ export class VectorStyleEditor extends Component<Props, State> {
   }
 
   _renderLabelProperties() {
-    const hasLabel = this._hasLabel();
+    const hasLabel = getHasLabel(
+      this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT] as
+        | StaticTextProperty
+        | DynamicTextProperty
+    );
     const hasLabelBorder = this._hasLabelBorder();
     return (
       <Fragment>

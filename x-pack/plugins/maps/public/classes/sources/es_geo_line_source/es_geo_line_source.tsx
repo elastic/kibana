@@ -10,7 +10,7 @@ import React from 'react';
 
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
+import { type Filter, buildPhraseFilter } from '@kbn/es-query';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -36,9 +36,9 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+import { makePublicExecutionContext } from '../../../util';
 
 type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
 
@@ -203,7 +203,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       },
     });
     if (splitField.type === 'string') {
-      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(splitField, '', indexPattern);
+      const entityIsNotEmptyFilter = buildPhraseFilter(splitField, '', indexPattern);
       entityIsNotEmptyFilter.meta.negate = true;
       entitySearchSource.setField('filter', [
         ...(entitySearchSource.getField('filter') as Filter[]),
@@ -225,6 +225,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_geo_line:entities'),
     });
     const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
       entityResp,
@@ -251,7 +252,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     //
     const entityFilters: { [key: string]: unknown } = {};
     for (let i = 0; i < entityBuckets.length; i++) {
-      entityFilters[entityBuckets[i].key] = esFilters.buildPhraseFilter(
+      entityFilters[entityBuckets[i].key] = buildPhraseFilter(
         splitField,
         entityBuckets[i].key,
         indexPattern
@@ -296,6 +297,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
           'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_geo_line:tracks'),
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,

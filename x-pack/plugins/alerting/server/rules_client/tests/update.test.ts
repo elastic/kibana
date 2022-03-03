@@ -20,8 +20,7 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { resolvable } from '../../test_utils';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
 jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
@@ -36,7 +35,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -55,6 +54,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  minimumScheduleInterval: '1m',
 };
 
 beforeEach(() => {
@@ -74,7 +74,7 @@ describe('update()', () => {
       enabled: true,
       tags: ['foo'],
       alertTypeId: 'myType',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
       params: {},
@@ -140,7 +140,6 @@ describe('update()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       async executor() {},
       producer: 'alerts',
-      minimumScheduleInterval: '5s',
     });
   });
 
@@ -183,7 +182,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -248,7 +247,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -317,7 +316,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -372,7 +371,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -469,7 +468,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -520,7 +519,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -593,7 +592,7 @@ describe('update()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
         throttle: null,
@@ -644,7 +643,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -699,7 +698,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
           parameterThatIsSavedObjectRef: 'soRef_0',
@@ -735,7 +734,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: ruleParams,
@@ -769,7 +768,7 @@ describe('update()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
         throttle: null,
@@ -815,7 +814,7 @@ describe('update()', () => {
           "parameterThatIsSavedObjectId": "9",
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -833,7 +832,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -883,7 +882,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -923,7 +922,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -958,7 +957,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -998,7 +997,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: false,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1039,7 +1038,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -1080,7 +1079,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -1115,7 +1114,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -1151,7 +1150,7 @@ describe('update()', () => {
         await rulesClient.update({
           id: '1',
           data: {
-            schedule: { interval: '10s' },
+            schedule: { interval: '1m' },
             name: 'abc',
             tags: ['foo'],
             params: {
@@ -1210,7 +1209,7 @@ describe('update()', () => {
       rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1241,7 +1240,7 @@ describe('update()', () => {
       attributes: {
         enabled: false,
         name: ' my alert name ',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1285,7 +1284,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1313,7 +1312,7 @@ describe('update()', () => {
     await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -1377,7 +1376,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1432,7 +1431,7 @@ describe('update()', () => {
     await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -1481,7 +1480,7 @@ describe('update()', () => {
       rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1586,12 +1585,12 @@ describe('update()', () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
-      mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '10s' });
+      mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '1m' });
 
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1618,12 +1617,12 @@ describe('update()', () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
-      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '10s' });
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1650,7 +1649,7 @@ describe('update()', () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
-      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '30s' });
 
       const resolveAfterAlertUpdatedCompletes = resolvable<{ id: string }>();
 
@@ -1660,7 +1659,7 @@ describe('update()', () => {
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1688,7 +1687,7 @@ describe('update()', () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
-      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '30s' });
 
       taskManager.runNow.mockReset();
       taskManager.runNow.mockRejectedValue(new Error('Failed to run alert'));
@@ -1696,7 +1695,7 @@ describe('update()', () => {
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1764,7 +1763,7 @@ describe('update()', () => {
       rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1800,172 +1799,6 @@ describe('update()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid connectors: another connector"`);
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
-  });
-
-  describe('authorization', () => {
-    beforeEach(() => {
-      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          alertTypeId: 'myType',
-          consumer: 'myApp',
-          enabled: true,
-          schedule: { interval: '10s' },
-          params: {
-            bar: true,
-          },
-          actions: [],
-          scheduledTaskId: 'task-123',
-          createdAt: new Date().toISOString(),
-        },
-        updated_at: new Date().toISOString(),
-        references: [],
-      });
-    });
-
-    test('ensures user is authorised to update this type of alert under the consumer', async () => {
-      await rulesClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '10s' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-          },
-          throttle: null,
-          notifyWhen: null,
-          actions: [],
-        },
-      });
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        entity: 'rule',
-        consumer: 'myApp',
-        operation: 'update',
-        ruleTypeId: 'myType',
-      });
-    });
-
-    test('throws when user is not authorised to update this type of alert', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to update a "myType" alert for "myApp"`)
-      );
-
-      await expect(
-        rulesClient.update({
-          id: '1',
-          data: {
-            schedule: { interval: '10s' },
-            name: 'abc',
-            tags: ['foo'],
-            params: {
-              bar: true,
-            },
-            throttle: null,
-            notifyWhen: null,
-            actions: [],
-          },
-        })
-      ).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to update a "myType" alert for "myApp"]`
-      );
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        entity: 'rule',
-        consumer: 'myApp',
-        operation: 'update',
-        ruleTypeId: 'myType',
-      });
-    });
-  });
-
-  describe('auditLogger', () => {
-    beforeEach(() => {
-      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          enabled: true,
-          schedule: { interval: '10s' },
-          params: {
-            bar: true,
-          },
-          actions: [],
-          scheduledTaskId: 'task-123',
-          createdAt: new Date().toISOString(),
-        },
-        updated_at: new Date().toISOString(),
-        references: [],
-      });
-    });
-
-    test('logs audit event when updating a rule', async () => {
-      await rulesClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '10s' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-          },
-          throttle: null,
-          actions: [],
-          notifyWhen: null,
-        },
-      });
-
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'rule_update',
-            outcome: 'unknown',
-          }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
-        })
-      );
-    });
-
-    test('logs audit event when not authorised to update a rule', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
-
-      await expect(
-        rulesClient.update({
-          id: '1',
-          data: {
-            schedule: { interval: '10s' },
-            name: 'abc',
-            tags: ['foo'],
-            params: {
-              bar: true,
-            },
-            throttle: null,
-            actions: [],
-            notifyWhen: null,
-          },
-        })
-      ).rejects.toThrow();
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            outcome: 'failure',
-            action: 'rule_update',
-          }),
-          kibana: {
-            saved_object: {
-              id: '1',
-              type: 'alert',
-            },
-          },
-          error: {
-            code: 'Error',
-            message: 'Unauthorized',
-          },
-        })
-      );
-    });
   });
 
   test('throws error when updating with an interval less than the minimum configured one', async () => {
@@ -2007,9 +1840,175 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error updating rule: the interval is less than the minimum interval of 5s"`
+      `"Error updating rule: the interval is less than the allowed minimum interval of 1m"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  describe('authorization', () => {
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+        },
+        updated_at: new Date().toISOString(),
+        references: [],
+      });
+    });
+
+    test('ensures user is authorised to update this type of alert under the consumer', async () => {
+      await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: null,
+          actions: [],
+        },
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'update',
+        ruleTypeId: 'myType',
+      });
+    });
+
+    test('throws when user is not authorised to update this type of alert', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to update a "myType" alert for "myApp"`)
+      );
+
+      await expect(
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: null,
+            actions: [],
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to update a "myType" alert for "myApp"]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'update',
+        ruleTypeId: 'myType',
+      });
+    });
+  });
+
+  describe('auditLogger', () => {
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+        },
+        updated_at: new Date().toISOString(),
+        references: [],
+      });
+    });
+
+    test('logs audit event when updating a rule', async () => {
+      await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          actions: [],
+          notifyWhen: null,
+        },
+      });
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_update',
+            outcome: 'unknown',
+          }),
+          kibana: { saved_object: { id: '1', type: 'alert' } },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to update a rule', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            actions: [],
+            notifyWhen: null,
+          },
+        })
+      ).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            outcome: 'failure',
+            action: 'rule_update',
+          }),
+          kibana: {
+            saved_object: {
+              id: '1',
+              type: 'alert',
+            },
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
+    });
   });
 });

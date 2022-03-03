@@ -12,6 +12,7 @@ import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
+import { mockCasesContract } from '../../../../../../cases/public/mocks';
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -20,6 +21,7 @@ const ecsRowData: Ecs = {
     alert: {
       workflow_status: ['open'],
       rule: {
+        parameters: {},
         uuid: ['testId'],
       },
     },
@@ -50,6 +52,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
       application: {
         capabilities: { siem: { crud_alerts: true, read_alerts: true } },
       },
+      cases: mockCasesContract(),
     },
   }),
   useGetUserCasesPermissions: jest.fn().mockReturnValue({

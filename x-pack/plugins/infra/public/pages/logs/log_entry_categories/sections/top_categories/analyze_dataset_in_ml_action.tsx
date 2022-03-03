@@ -13,7 +13,7 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { useMlHref, ML_PAGES } from '../../../../../../../ml/public';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
-import { shouldHandleLinkEvent } from '../../../../../hooks/use_link_props';
+import { shouldHandleLinkEvent } from '../../../../../../../observability/public';
 
 export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   categorizationJobId: string;

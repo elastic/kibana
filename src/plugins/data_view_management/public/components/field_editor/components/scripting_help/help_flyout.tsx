@@ -13,10 +13,10 @@ import { ScriptingSyntax } from './scripting_syntax';
 import { TestScript } from './test_script';
 
 import { ExecuteScript } from '../../types';
-import { IndexPattern } from '../../../../../../data/public';
+import { DataView } from '../../../../../../data_views/public';
 
 interface ScriptingHelpFlyoutProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   lang: string;
   name?: string;
   script?: string;

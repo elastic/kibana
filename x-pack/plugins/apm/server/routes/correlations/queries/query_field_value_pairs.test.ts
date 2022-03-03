@@ -42,20 +42,14 @@ describe('query_field_value_pairs', () => {
       ];
 
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              aggregations: {
-                attribute_terms: {
-                  buckets: [{ key: 'myValue1' }, { key: 'myValue2' }],
-                },
+            aggregations: {
+              attribute_terms: {
+                buckets: [{ key: 'myValue1' }, { key: 'myValue2' }],
               },
-            } as unknown as estypes.SearchResponse,
-          };
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

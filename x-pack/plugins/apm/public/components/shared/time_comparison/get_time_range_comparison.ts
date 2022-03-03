@@ -5,24 +5,22 @@
  * 2.0.
  */
 
+import { PartialTheme } from '@elastic/charts';
 import moment from 'moment';
-import { EuiTheme } from 'src/plugins/kibana_react/common';
 import {
   TimeRangeComparisonType,
   TimeRangeComparisonEnum,
 } from '../../../../common/runtime_types/comparison_type_rt';
 import { getDateDifference } from '../../../../common/utils/formatters';
 
-export function getComparisonChartTheme(theme: EuiTheme) {
+export function getComparisonChartTheme(): PartialTheme {
   return {
     areaSeriesStyle: {
       area: {
-        fill: theme.eui.euiColorLightShade,
         visible: true,
         opacity: 0.5,
       },
       line: {
-        stroke: theme.eui.euiColorMediumShade,
         strokeWidth: 1,
         visible: true,
       },

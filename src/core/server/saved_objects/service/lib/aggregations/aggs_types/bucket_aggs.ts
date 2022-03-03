@@ -19,6 +19,10 @@ import { sortOrderSchema } from './common_schemas';
  * - reverse_nested
  * - terms
  *
+ * Not fully supported:
+ * - filter
+ * - filters
+ *
  * Not implemented:
  * - adjacency_matrix
  * - auto_date_histogram
@@ -27,7 +31,6 @@ import { sortOrderSchema } from './common_schemas';
  * - date_histogram
  * - date_range
  * - diversified_sampler
- * - filters
  * - geo_distance
  * - geohash_grid
  * - geotile_grid
@@ -44,9 +47,26 @@ import { sortOrderSchema } from './common_schemas';
  * - variable_width_histogram
  */
 
+// TODO: it would be great if we could recursively build the schema since the aggregation have be nested
+// For more details see how the types are defined in the elasticsearch javascript client:
+// https://github.com/elastic/elasticsearch-js/blob/4ad5daeaf401ce8ebb28b940075e0a67e56ff9ce/src/api/typesWithBodyKey.ts#L5295
+const termSchema = s.object({
+  term: s.recordOf(s.string(), s.oneOf([s.string(), s.boolean(), s.number()])),
+});
+
+// TODO: it would be great if we could recursively build the schema since the aggregation have be nested
+// For more details see how the types are defined in the elasticsearch javascript client:
+// https://github.com/elastic/elasticsearch-js/blob/4ad5daeaf401ce8ebb28b940075e0a67e56ff9ce/src/api/typesWithBodyKey.ts#L5295
+const boolSchema = s.object({
+  bool: s.object({
+    must_not: s.oneOf([termSchema]),
+  }),
+});
+
 export const bucketAggsSchemas: Record<string, ObjectType> = {
-  filter: s.object({
-    term: s.recordOf(s.string(), s.oneOf([s.string(), s.boolean(), s.number()])),
+  filter: termSchema,
+  filters: s.object({
+    filters: s.recordOf(s.string(), s.oneOf([termSchema, boolSchema])),
   }),
   histogram: s.object({
     field: s.maybe(s.string()),

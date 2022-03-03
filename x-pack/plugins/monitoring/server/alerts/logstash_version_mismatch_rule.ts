@@ -17,18 +17,12 @@ import {
   CommonAlertParams,
   AlertVersions,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
-import {
-  RULE_LOGSTASH_VERSION_MISMATCH,
-  LEGACY_RULE_DETAILS,
-  INDEX_PATTERN_LOGSTASH,
-} from '../../common/constants';
+import { Alert } from '../../../alerting/server';
+import { RULE_LOGSTASH_VERSION_MISMATCH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
 
 export class LogstashVersionMismatchRule extends BaseRule {
@@ -55,17 +49,11 @@ export class LogstashVersionMismatchRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: boolean
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let logstashIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_LOGSTASH);
-    if (availableCcs) {
-      logstashIndexPattern = getCcsIndexPattern(logstashIndexPattern, availableCcs);
-    }
     const logstashVersions = await fetchLogstashVersions(
       esClient,
       clusters,
-      logstashIndexPattern,
       Globals.app.config.ui.max_bucket_size,
       params.filterQuery
     );
@@ -99,7 +87,7 @@ export class LogstashVersionMismatchRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

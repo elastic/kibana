@@ -1,4 +1,0 @@
-{
-  "main": "../target_node/to_json_schema",
-  "types": "../target_types/to_json_schema"
-}

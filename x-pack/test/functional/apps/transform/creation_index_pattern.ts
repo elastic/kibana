@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation_index_pattern', function () {
+  // Failing ES Promotion: https://github.com/elastic/kibana/issues/126812
+  describe.skip('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -32,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
@@ -337,6 +339,64 @@ export default function ({ getService }: FtrProviderContext) {
         },
       } as PivotTransformTestData,
       {
+        type: 'pivot',
+        suiteTitle: 'batch transform with terms group and terms agg',
+        source: 'ft_ecommerce',
+        groupByEntries: [
+          {
+            identifier: 'terms(customer_gender)',
+            label: 'customer_gender',
+          } as GroupByEntry,
+        ],
+        aggregationEntries: [
+          {
+            identifier: 'terms(geoip.city_name)',
+            label: 'geoip.city_name.terms',
+          },
+        ],
+        transformId: `ec_3_${Date.now()}`,
+        transformDescription:
+          'ecommerce batch transform with group by terms(customer_gender) and aggregation terms(geoip.city_name)',
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        discoverAdjustSuperDatePicker: false,
+        expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "customer_gender": {'],
+          pivotAdvancedEditorValue: {
+            group_by: {
+              customer_gender: {
+                terms: {
+                  field: 'customer_gender',
+                },
+              },
+            },
+            aggregations: {
+              'geoip.city_name': {
+                terms: {
+                  field: 'geoip.city_name',
+                  size: 3,
+                },
+              },
+            },
+          },
+          transformPreview: {
+            column: 0,
+            values: ['FEMALE', 'MALE'],
+          },
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            mode: 'batch',
+            progress: '100',
+          },
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          discoverQueryHits: '2',
+        },
+      } as PivotTransformTestData,
+      {
         type: 'latest',
         suiteTitle: 'batch transform with the latest function',
         source: 'ft_ecommerce',
@@ -350,7 +410,7 @@ export default function ({ getService }: FtrProviderContext) {
           identifier: 'order_date',
           label: 'order_date',
         },
-        transformId: `ec_3_${Date.now()}`,
+        transformId: `ec_4_${Date.now()}`,
 
         transformDescription:
           'ecommerce batch transform with the latest function config, sort by order_data, country code as unique key',

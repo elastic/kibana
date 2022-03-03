@@ -14,5 +14,11 @@ declare module 'mocha' {
      * Assign tags to the test suite to determine in which CI job it should be run.
      */
     tags(tags: string[] | string): void;
+    /**
+     * Define the ES versions for which this test requires, any version which doesn't meet this range will
+     * cause these tests to be skipped
+     * @param semver any valid semver range, like ">=8"
+     */
+    onlyEsVersion(semver: string): void;
   }
 }

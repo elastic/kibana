@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import { EMS_APP_NAME, FONTS_API_PATH } from '../common/constants';
-import { getHttp, getTilemap, getKibanaVersion, getEMSSettings } from './kibana_services';
+import type { KibanaExecutionContext } from 'kibana/public';
+import { FONTS_API_PATH } from '../common/constants';
+import {
+  getHttp,
+  getTilemap,
+  getEMSSettings,
+  getMapsEmsStart,
+  getExecutionContext,
+} from './kibana_services';
 import { getLicenseId } from './licensed_features';
+import { makeExecutionContext } from '../common/execution_context';
 
 export function getKibanaTileMap(): unknown {
   return getTilemap();
@@ -20,7 +27,7 @@ export async function getEmsFileLayers(): Promise<FileLayer[]> {
     return [];
   }
 
-  return getEMSClient().getFileLayers();
+  return (await getEMSClient()).getFileLayers();
 }
 
 export async function getEmsTmsServices(): Promise<TMSService[]> {
@@ -28,31 +35,23 @@ export async function getEmsTmsServices(): Promise<TMSService[]> {
     return [];
   }
 
-  return getEMSClient().getTMSServices();
+  return (await getEMSClient()).getTMSServices();
 }
 
-let emsClient: EMSClient | null = null;
+let emsClientPromise: Promise<EMSClient> | null = null;
 let latestLicenseId: string | undefined;
-export function getEMSClient(): EMSClient {
-  if (!emsClient) {
-    const emsSettings = getEMSSettings();
-    const proxyPath = '';
-    const tileApiUrl = emsSettings!.getEMSTileApiUrl();
-    const fileApiUrl = emsSettings!.getEMSFileApiUrl();
-
-    emsClient = new EMSClient({
-      language: i18n.getLocale(),
-      appVersion: getKibanaVersion(),
-      appName: EMS_APP_NAME,
-      tileApiUrl,
-      fileApiUrl,
-      landingPageUrl: emsSettings!.getEMSLandingPageUrl(),
-      fetchFunction(url: string) {
-        return fetch(url);
-      },
-      proxyPath,
+async function getEMSClient(): Promise<EMSClient> {
+  if (!emsClientPromise) {
+    emsClientPromise = new Promise(async (resolve, reject) => {
+      try {
+        const emsClient = await getMapsEmsStart().createEMSClient();
+        resolve(emsClient);
+      } catch (error) {
+        reject(error);
+      }
     });
   }
+  const emsClient = await emsClientPromise;
   const licenseId = getLicenseId();
   if (latestLicenseId !== licenseId) {
     latestLicenseId = licenseId;
@@ -72,4 +71,23 @@ export function getGlyphUrl(): string {
 
 export function isRetina(): boolean {
   return window.devicePixelRatio === 2;
+}
+
+export function makePublicExecutionContext(description: string): KibanaExecutionContext {
+  const topLevelContext = getExecutionContext().get();
+  const context = makeExecutionContext({
+    url: window.location.pathname,
+    description,
+  });
+
+  // Distinguish between running in maps app vs. embedded
+  return topLevelContext.name !== undefined && topLevelContext.name !== context.name
+    ? {
+        ...topLevelContext,
+        child: context,
+      }
+    : {
+        ...topLevelContext,
+        ...context,
+      };
 }

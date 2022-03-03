@@ -39,7 +39,7 @@ jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/use_get_case_metrics');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../user_action_tree/user_action_timestamp');
+jest.mock('../user_actions/timestamp');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
@@ -263,7 +263,7 @@ describe('CaseView', () => {
     );
     wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
     await waitFor(() => {
-      expect(fetchCaseUserActions).toBeCalledWith(caseData.id, 'resilient-2', undefined);
+      expect(fetchCaseUserActions).toBeCalledWith(caseData.id, 'resilient-2');
       expect(fetchCaseMetrics).toBeCalled();
       expect(fetchCase).toBeCalled();
     });
@@ -303,7 +303,7 @@ describe('CaseView', () => {
     it('should refresh actions and comments', async () => {
       refreshRef!.current!.refreshCase();
       await waitFor(() => {
-        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2', undefined);
+        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2');
         expect(fetchCaseMetrics).toBeCalledWith(true);
         expect(fetchCase).toBeCalledWith(true);
       });

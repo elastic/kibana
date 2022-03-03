@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
@@ -43,10 +42,7 @@ export const getRenderErrors = async (
 
   if (errorsFound?.length) {
     logger.warn(
-      i18n.translate('xpack.screenshotting.screencapture.renderErrorsFound', {
-        defaultMessage: 'Found {count} error messages. See report object for more information.',
-        values: { count: errorsFound.length },
-      })
+      `Found ${errorsFound.length} error messages. See report object for more information.`
     );
   }
 

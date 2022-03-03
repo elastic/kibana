@@ -74,7 +74,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.ruleRegistry.write.cache.enabled=false',
           '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
           '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'ruleRegistryEnabled',
+            'previewTelemetryUrlEnabled',
+          ])}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

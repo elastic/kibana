@@ -47,6 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           expect(response2.status).to.be(200);
+          expect(response2.body[config.serviceKey]).to.not.be.empty();
+
           const field =
             config.serviceKey === 'index_pattern' ? response2.body.field : response2.body.fields[0];
 
@@ -82,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           expect(response2.status).to.be(200);
+          expect(response2.body[config.serviceKey]).to.not.be.empty();
 
           const field = response2.body[config.serviceKey].fields.runtimeBar;
 
@@ -89,7 +92,104 @@ export default function ({ getService }: FtrProviderContext) {
           expect(field.runtimeField.type).to.be('long');
           expect(field.runtimeField.script.source).to.be("emit(doc['field_name'].value)");
           expect(field.scripted).to.be(false);
+
+          const response3 = await supertest
+            .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field`)
+            .send({
+              name: 'runtimeBar',
+              runtimeField: {
+                type: 'long',
+                script: {
+                  source: "emit(doc['field_name'].value)",
+                },
+              },
+            });
+
+          expect(response3.status).to.be(400);
+
           await supertest.delete(`${config.path}/${response1.body[config.serviceKey].id}`);
+        });
+
+        it('prevents field name collisions', async () => {
+          const title = `basic*`;
+          const response1 = await supertest.post(config.path).send({
+            override: true,
+            [config.serviceKey]: {
+              title,
+            },
+          });
+
+          const response2 = await supertest
+            .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field`)
+            .send({
+              name: 'runtimeBar',
+              runtimeField: {
+                type: 'long',
+                script: {
+                  source: "emit(doc['field_name'].value)",
+                },
+              },
+            });
+
+          expect(response2.status).to.be(200);
+
+          const response3 = await supertest
+            .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field`)
+            .send({
+              name: 'runtimeBar',
+              runtimeField: {
+                type: 'long',
+                script: {
+                  source: "emit(doc['field_name'].value)",
+                },
+              },
+            });
+
+          expect(response3.status).to.be(400);
+
+          const response4 = await supertest
+            .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field`)
+            .send({
+              name: 'runtimeComposite',
+              runtimeField: {
+                type: 'composite',
+                script: {
+                  source: 'emit("a","a"); emit("b","b")',
+                },
+                fields: {
+                  a: {
+                    type: 'keyword',
+                  },
+                  b: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            });
+
+          expect(response4.status).to.be(200);
+
+          const response5 = await supertest
+            .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field`)
+            .send({
+              name: 'runtimeComposite',
+              runtimeField: {
+                type: 'composite',
+                script: {
+                  source: 'emit("a","a"); emit("b","b")',
+                },
+                fields: {
+                  a: {
+                    type: 'keyword',
+                  },
+                  b: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            });
+
+          expect(response5.status).to.be(400);
         });
       });
     });

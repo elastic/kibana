@@ -58,7 +58,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     input: 'field',
     buildColumn: buildGenericColumn('count'),
     getPossibleOperationForField: (field: IndexPatternField) =>
-      field.name === 'Records' ? numericOperation() : null,
+      field.name === '___records___' ? numericOperation() : null,
   } as unknown as GenericOperationDefinition,
   last_value: {
     type: 'last_value',

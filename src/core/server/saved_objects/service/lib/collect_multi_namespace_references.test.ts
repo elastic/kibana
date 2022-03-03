@@ -11,9 +11,6 @@ import {
   mockRawDocExistsInNamespace,
 } from './collect_multi_namespace_references.test.mock';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-
-import type { ElasticsearchClient } from '../../../elasticsearch';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
@@ -43,7 +40,7 @@ beforeEach(() => {
 });
 
 describe('collectMultiNamespaceReferences', () => {
-  let client: DeeplyMockedKeys<ElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `collectMultiNamespaceReferences` */
   function setup(
@@ -88,30 +85,28 @@ describe('collectMultiNamespaceReferences', () => {
       references?: Array<{ type: string; id: string }>;
     }>
   ) {
-    client.mget.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        docs: results.map((x) => {
-          const references =
-            x.references?.map(({ type, id }) => ({ type, id, name: 'ref-name' })) ?? [];
-          return x.found
-            ? {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                _source: {
-                  namespaces: SPACES,
-                  references,
-                },
-                ...VERSION_PROPS,
-                found: true,
-              }
-            : {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                found: false,
-              };
-        }),
-      })
-    );
+    client.mget.mockResponseOnce({
+      docs: results.map((x) => {
+        const references =
+          x.references?.map(({ type, id }) => ({ type, id, name: 'ref-name' })) ?? [];
+        return x.found
+          ? {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              _source: {
+                namespaces: SPACES,
+                references,
+              },
+              ...VERSION_PROPS,
+              found: true,
+            }
+          : {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              found: false,
+            };
+      }),
+    });
   }
 
   /** Asserts that mget is called for the given objects */

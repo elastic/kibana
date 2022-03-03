@@ -64,3 +64,4 @@ export const CasesTableHeader: FunctionComponent<Props> = ({
     </EuiFlexGroup>
   </HeaderPage>
 );
+CasesTableHeader.displayName = 'CasesTableHeader';

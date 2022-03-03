@@ -18,19 +18,19 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import {
-  ConditionEntry,
   ConditionEntryField,
+  OperatingSystem,
+  TrustedAppEntryTypes,
+} from '@kbn/securitysolution-utils';
+import {
+  ConditionEntry,
   EffectScope,
   NewTrustedApp,
-  OperatingSystem,
   TrustedApp,
-  TrustedAppEntryTypes,
   UpdateTrustedApp,
 } from '../../../../../common/endpoint/types';
-import {
-  POLICY_REFERENCE_PREFIX,
-  tagsToEffectScope,
-} from '../../../../../common/endpoint/service/trusted_apps/mapping';
+import { tagsToEffectScope } from '../../../../../common/endpoint/service/trusted_apps/mapping';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../common/endpoint/service/artifacts/constants';
 
 type ConditionEntriesMap = { [K in ConditionEntryField]?: ConditionEntry<K> };
 type Mapping<T extends string, U> = { [K in T]: U };
@@ -177,9 +177,9 @@ const createEntryNested = (field: string, entries: NestedEntriesArray): EntryNes
 
 const effectScopeToTags = (effectScope: EffectScope) => {
   if (effectScope.type === 'policy') {
-    return effectScope.policies.map((policy) => `${POLICY_REFERENCE_PREFIX}${policy}`);
+    return effectScope.policies.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy}`);
   } else {
-    return [`${POLICY_REFERENCE_PREFIX}all`];
+    return [`${BY_POLICY_ARTIFACT_TAG_PREFIX}all`];
   }
 };
 

@@ -80,6 +80,10 @@ export function formatValues(obj) {
         typeof value === 'number' ? roundToDecimalPlace(value, 3).toLocaleString() : value,
       ];
 
+    // boolean
+    case 'managed':
+      return [key, value.toString()];
+
     default:
       return [key, value];
   }

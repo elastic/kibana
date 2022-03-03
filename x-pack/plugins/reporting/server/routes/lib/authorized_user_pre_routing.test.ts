@@ -8,13 +8,20 @@
 import { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../../';
-import { ReportingInternalSetup } from '../../core';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import { ReportingInternalSetup, ReportingInternalStart } from '../../core';
+import {
+  createMockConfigSchema,
+  createMockPluginSetup,
+  createMockPluginStart,
+  createMockReportingCore,
+} from '../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../types';
 import { authorizedUserPreRouting } from './authorized_user_pre_routing';
 
 let mockCore: ReportingCore;
-const mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
+let mockSetupDeps: ReportingInternalSetup;
+let mockStartDeps: ReportingInternalStart;
+let mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
 
 const getMockContext = () =>
   ({
@@ -36,20 +43,30 @@ const getMockResponseFactory = () =>
 
 describe('authorized_user_pre_routing', function () {
   beforeEach(async () => {
-    mockCore = await createMockReportingCore(mockReportingConfig);
+    mockSetupDeps = createMockPluginSetup({
+      security: { license: { isEnabled: () => true } },
+    });
+
+    mockStartDeps = await createMockPluginStart(
+      {
+        security: {
+          authc: {
+            getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
+          },
+        },
+      },
+      mockReportingConfig
+    );
+    mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
   });
 
   it('should return from handler with a "false" user when security plugin is not found', async function () {
-    mockCore.getPluginSetupDeps = () =>
-      ({
-        // @ts-ignore
-        ...mockCore.pluginSetupDeps,
-        security: undefined, // disable security
-      } as unknown as ReportingInternalSetup);
+    mockSetupDeps = createMockPluginSetup({ security: undefined });
+    mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
     const mockResponseFactory = httpServerMock.createResponseFactory() as KibanaResponseFactory;
 
     let handlerCalled = false;
-    authorizedUserPreRouting(mockCore, (user: unknown) => {
+    await authorizedUserPreRouting(mockCore, (user: unknown) => {
       expect(user).toBe(false); // verify the user is a false value
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
@@ -59,20 +76,14 @@ describe('authorized_user_pre_routing', function () {
   });
 
   it('should return from handler with a "false" user when security is disabled', async function () {
-    mockCore.getPluginSetupDeps = () =>
-      ({
-        // @ts-ignore
-        ...mockCore.pluginSetupDeps,
-        security: {
-          license: {
-            isEnabled: () => false,
-          },
-        }, // disable security
-      } as unknown as ReportingInternalSetup);
+    mockSetupDeps = createMockPluginSetup({
+      security: { license: { isEnabled: () => false } }, // disable security
+    });
+    mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
     const mockResponseFactory = httpServerMock.createResponseFactory() as KibanaResponseFactory;
 
     let handlerCalled = false;
-    authorizedUserPreRouting(mockCore, (user: unknown) => {
+    await authorizedUserPreRouting(mockCore, (user: unknown) => {
       expect(user).toBe(false); // verify the user is a false value
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
@@ -82,82 +93,104 @@ describe('authorized_user_pre_routing', function () {
   });
 
   it('should return with 401 when security is enabled and the request is unauthenticated', async function () {
-    mockCore.getPluginSetupDeps = () =>
-      ({
-        // @ts-ignore
-        ...mockCore.pluginSetupDeps,
-        security: {
-          license: { isEnabled: () => true },
-          authc: { getCurrentUser: () => null },
-        },
-      } as unknown as ReportingInternalSetup);
+    mockSetupDeps = createMockPluginSetup({
+      security: { license: { isEnabled: () => true } },
+    });
+    mockStartDeps = await createMockPluginStart(
+      { security: { authc: { getCurrentUser: () => null } } },
+      mockReportingConfig
+    );
+    mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
     const mockHandler = () => {
       throw new Error('Handler callback should not be called');
     };
     const requestHandler = authorizedUserPreRouting(mockCore, mockHandler);
-    const mockResponseFactory = getMockResponseFactory();
 
-    expect(requestHandler(getMockContext(), getMockRequest(), mockResponseFactory)).toMatchObject({
+    await expect(
+      requestHandler(getMockContext(), getMockRequest(), getMockResponseFactory())
+    ).resolves.toMatchObject({
       body: `Sorry, you aren't authenticated`,
     });
   });
 
   describe('Deprecated: security roles for access control', () => {
     beforeEach(async () => {
-      const mockReportingConfigDeprecated = createMockConfigSchema({
+      mockReportingConfig = createMockConfigSchema({
         roles: {
           allow: ['reporting_user'],
           enabled: true,
         },
       });
-      mockCore = await createMockReportingCore(mockReportingConfigDeprecated);
     });
 
     it(`should return with 403 when security is enabled but user doesn't have the allowed role`, async function () {
-      mockCore.getPluginSetupDeps = () =>
-        ({
-          // @ts-ignore
-          ...mockCore.pluginSetupDeps,
+      mockStartDeps = await createMockPluginStart(
+        {
           security: {
-            license: { isEnabled: () => true },
-            authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['cowboy'] }) },
+            authc: {
+              getCurrentUser: () => ({ id: '123', roles: ['peasant'], username: 'Tom Riddle' }),
+            },
           },
-        } as unknown as ReportingInternalSetup);
-      const mockResponseFactory = getMockResponseFactory();
-
+        },
+        mockReportingConfig
+      );
+      mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
       const mockHandler = () => {
         throw new Error('Handler callback should not be called');
       };
+
       expect(
-        authorizedUserPreRouting(mockCore, mockHandler)(
+        await authorizedUserPreRouting(mockCore, mockHandler)(
           getMockContext(),
           getMockRequest(),
-          mockResponseFactory
+          getMockResponseFactory()
         )
       ).toMatchObject({ body: `Sorry, you don't have access to Reporting` });
     });
 
-    it('should return from handler when security is enabled and user has explicitly allowed role', function (done) {
-      mockCore.getPluginSetupDeps = () =>
-        ({
-          // @ts-ignore
-          ...mockCore.pluginSetupDeps,
+    it('should return from handler when security is enabled and user has explicitly allowed role', async function () {
+      mockStartDeps = await createMockPluginStart(
+        {
           security: {
-            license: { isEnabled: () => true },
             authc: {
               getCurrentUser: () => ({ username: 'friendlyuser', roles: ['reporting_user'] }),
             },
           },
-        } as unknown as ReportingInternalSetup);
-      const mockResponseFactory = getMockResponseFactory();
+        },
+        mockReportingConfig
+      );
+      mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
 
-      authorizedUserPreRouting(mockCore, (user) => {
+      let handlerCalled = false;
+      await authorizedUserPreRouting(mockCore, (user: unknown) => {
         expect(user).toMatchObject({ roles: ['reporting_user'], username: 'friendlyuser' });
-        done();
+        handlerCalled = true;
         return Promise.resolve({ status: 200, options: {} });
-      })(getMockContext(), getMockRequest(), mockResponseFactory);
+      })(getMockContext(), getMockRequest(), getMockResponseFactory());
+      expect(handlerCalled).toBe(true);
     });
 
-    it('should return from handler when security is enabled and user has superuser role', async function () {});
+    it('should return from handler when security is enabled and user has superuser role', async function () {
+      mockStartDeps = await createMockPluginStart(
+        {
+          security: {
+            authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['superuser'] }) },
+          },
+        },
+        mockReportingConfig
+      );
+      mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
+
+      const handler = jest.fn().mockResolvedValue({ status: 200, options: {} });
+      await authorizedUserPreRouting(mockCore, handler)(
+        getMockContext(),
+        getMockRequest(),
+        getMockResponseFactory()
+      );
+
+      expect(handler).toHaveBeenCalled();
+      const [[user]] = handler.mock.calls;
+      expect(user).toMatchObject({ roles: ['superuser'], username: 'friendlyuser' });
+    });
   });
 });

@@ -35,6 +35,7 @@ import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
+import { useExecutionContext } from '../../../../kibana_react/public';
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -66,6 +67,11 @@ export const DashboardListing = ({
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'list',
+  });
 
   // Set breadcrumbs useEffect
   useEffect(() => {
@@ -297,6 +303,7 @@ export const DashboardListing = ({
         listingLimit,
         tableColumns,
       }}
+      theme={core.theme}
     >
       <DashboardUnsavedListing
         redirectTo={redirectTo}

@@ -13,7 +13,7 @@ import {
   CreateTestEsClusterOptions,
   esTestConfig,
   kibanaServerTestUser,
-  kibanaTestUser,
+  systemIndicesSuperuser,
 } from '@kbn/test';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
@@ -76,7 +76,9 @@ export function createRootWithSettings(
  * @param path
  */
 export function getSupertest(root: Root, method: HttpMethod, path: string) {
-  const testUserCredentials = Buffer.from(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
+  const testUserCredentials = Buffer.from(
+    `${systemIndicesSuperuser.username}:${systemIndicesSuperuser.password}`
+  );
   return supertest((root as any).server.http.httpServer.server.listener)
     [method](path)
     .set('Authorization', `Basic ${testUserCredentials.toString('base64')}`);
@@ -106,6 +108,25 @@ export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArg
       hosts: [esTestConfig.getUrl()],
       username: kibanaServerTestUser.username,
       password: kibanaServerTestUser.password,
+    },
+    // Log ES deprecations to surface these in CI
+    logging: {
+      loggers: [
+        {
+          name: 'root',
+          level: 'error',
+          appenders: ['console'],
+        },
+        {
+          name: 'elasticsearch.deprecation',
+          level: 'all',
+          appenders: ['deprecation'],
+        },
+      ],
+      appenders: {
+        deprecation: { type: 'console', layout: { type: 'json' } },
+        console: { type: 'console', layout: { type: 'pattern' } },
+      },
     },
     // createRootWithSettings sets default value to "true", so undefined should be threatened as "true".
     ...(cliArgs.oss === false
@@ -208,18 +229,12 @@ export function createTestServers({
     writeTo: process.stdout,
   });
 
-  log.indent(6);
-  log.info('starting elasticsearch');
-  log.indent(4);
-
   const es = createTestEsCluster(
     defaultsDeep({}, settings.es ?? {}, {
       log,
       license,
     })
   );
-
-  log.indent(-4);
 
   // Add time for KBN and adding users
   adjustTimeout(es.getStartTimeout() + 100000);

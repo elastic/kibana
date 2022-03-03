@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 /**
  * This is the effective width in pixels of an action button used with

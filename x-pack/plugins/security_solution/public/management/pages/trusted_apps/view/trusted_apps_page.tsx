@@ -31,9 +31,11 @@ import { AppAction } from '../../../../common/store/actions';
 import { ABOUT_TRUSTED_APPS, SEARCH_TRUSTED_APP_PLACEHOLDER } from './translations';
 import { EmptyState } from './components/empty_state';
 import { SearchExceptions } from '../../../components/search_exceptions';
+import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
 import { ManagementPageLoader } from '../../../components/management_page_loader';
+import { useMemoizedRouteState } from '../../../common/hooks';
 
 export const TrustedAppsPage = memo(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
@@ -50,6 +52,20 @@ export const TrustedAppsPage = memo(() => {
       included_policies: includedPolicies,
     })
   );
+
+  const memoizedRouteState = useMemoizedRouteState(routeState);
+
+  const backButtonEmptyComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
+    }
+  }, [memoizedRouteState]);
+
+  const backButtonHeaderComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...memoizedRouteState} />;
+    }
+  }, [memoizedRouteState]);
 
   const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
     show: 'create',
@@ -74,13 +90,6 @@ export const TrustedAppsPage = memo(() => {
     () => doEntriesExist || (isCheckingIfEntriesExists && didEntriesExist),
     [didEntriesExist, doEntriesExist, isCheckingIfEntriesExists]
   );
-
-  const backButton = useMemo(() => {
-    if (routeState && routeState.onBackButtonNavigateTo) {
-      return <BackToExternalAppButton {...routeState} />;
-    }
-    return null;
-  }, [routeState]);
 
   const addButton = (
     <EuiButton
@@ -142,7 +151,11 @@ export const TrustedAppsPage = memo(() => {
           </EuiFlexGroup>
         </>
       ) : (
-        <EmptyState onAdd={handleAddButtonClick} isAddDisabled={showCreateFlyout} />
+        <EmptyState
+          onAdd={handleAddButtonClick}
+          isAddDisabled={showCreateFlyout}
+          backComponent={backButtonEmptyComponent}
+        />
       )}
     </>
   );
@@ -150,13 +163,13 @@ export const TrustedAppsPage = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="trustedAppsListPage"
+      headerBackComponent={backButtonHeaderComponent}
       title={
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.list.pageTitle"
           defaultMessage="Trusted applications"
         />
       }
-      headerBackComponent={backButton}
       subtitle={ABOUT_TRUSTED_APPS}
       actions={addButton}
       hideHeader={!canDisplayContent()}

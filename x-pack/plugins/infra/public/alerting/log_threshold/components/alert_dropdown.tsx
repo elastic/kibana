@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertFlyout } from './alert_flyout';
-import { useLinkProps } from '../../../hooks/use_link_props';
+import { useRulesLink } from '../../../../../observability/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const readOnlyUserTooltipContent = i18n.translate(
@@ -36,15 +36,10 @@ export const AlertDropdown = () => {
   const canCreateAlerts = capabilities?.logs?.save ?? false;
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
-  const manageAlertsLinkProps = useLinkProps(
-    {
-      app: 'management',
-      pathname: '/insightsAndAlerting/triggersActions/alerts',
-    },
-    {
-      hrefOnly: true,
-    }
-  );
+
+  const manageRulesLinkProps = useRulesLink({
+    hrefOnly: true,
+  });
 
   const closePopover = useCallback(() => {
     setPopoverOpen(false);
@@ -74,14 +69,14 @@ export const AlertDropdown = () => {
           defaultMessage="Create rule"
         />
       </EuiContextMenuItem>,
-      <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageAlertsLinkProps}>
+      <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageRulesLinkProps}>
         <FormattedMessage
           id="xpack.infra.alerting.logs.manageAlerts"
           defaultMessage="Manage rules"
         />
       </EuiContextMenuItem>,
     ];
-  }, [manageAlertsLinkProps, canCreateAlerts, openFlyout]);
+  }, [manageRulesLinkProps, canCreateAlerts, openFlyout]);
 
   return (
     <>

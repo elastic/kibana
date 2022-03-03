@@ -1,44 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CalendarForm CalendarId shown as title when editing 1`] = `
-<EuiTitle
-  data-test-subj="mlCalendarTitle"
->
-  <h1
-    className="euiTitle euiTitle--medium"
-    data-test-subj="mlCalendarTitle"
-  >
-    <FormattedMessage
-      defaultMessage="Calendar {calendarId}"
-      id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
-      values={
-        Object {
-          "calendarId": "test-calendar",
-        }
-      }
-    >
-      Calendar test-calendar
-    </FormattedMessage>
-  </h1>
-</EuiTitle>
-`;
+exports[`CalendarForm CalendarId shown as title when editing 1`] = `null`;
 
 exports[`CalendarForm Renders calendar form 1`] = `
 <EuiForm
   data-test-subj="mlCalendarFormNew"
 >
-  <EuiTitle>
-    <h1>
-      <FormattedMessage
-        defaultMessage="Create new calendar"
-        id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
-        values={Object {}}
-      />
-    </h1>
-  </EuiTitle>
-  <EuiSpacer
-    size="m"
-  />
+  <MlPageHeader>
+    <FormattedMessage
+      defaultMessage="Create new calendar"
+      id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+      values={Object {}}
+    />
+  </MlPageHeader>
   <EuiFormRow
     describedByIds={Array []}
     display="row"
@@ -92,7 +66,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     />
   </EuiFormRow>
   <EuiSpacer
-    size="xl"
+    size="m"
   />
   <EuiSwitch
     checked={false}

@@ -7,7 +7,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { OverlayModalStart } from 'src/core/public';
+import { OverlayModalStart, ThemeServiceStart } from 'src/core/public';
 
 import {
   EuiIcon,
@@ -30,8 +30,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '../../../../../../../kibana_react/public';
 
-import { IIndexPattern } from '../../../../../../../data/public';
+import { DataView } from '../../../../../../../data_views/public';
 import { IndexedFieldItem } from '../../types';
+
+export const showDelete = (field: IndexedFieldItem) =>
+  !field.isMapped && field.isUserEditable && field.runtimeField?.type !== 'composite';
 
 // localized labels
 const additionalInfoAriaLabel = i18n.translate(
@@ -174,11 +177,12 @@ const conflictType = i18n.translate(
 );
 
 interface IndexedFieldProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string) => void;
   openModal: OverlayModalStart['open'];
+  theme: ThemeServiceStart;
 }
 
 const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']) => {
@@ -311,7 +315,8 @@ export const getConflictModalContent = ({
 const getConflictBtn = (
   fieldName: string,
   conflictDescriptions: IndexedFieldItem['conflictDescriptions'],
-  openModal: IndexedFieldProps['openModal']
+  openModal: IndexedFieldProps['openModal'],
+  theme: ThemeServiceStart
 ) => {
   const onClick = () => {
     const overlayRef = openModal(
@@ -322,7 +327,8 @@ const getConflictBtn = (
           },
           fieldName,
           conflictDescriptions,
-        })
+        }),
+        { theme$: theme.theme$ }
       )
     );
   };
@@ -355,7 +361,12 @@ export class Table extends PureComponent<IndexedFieldProps> {
       <span>
         {type === 'conflict' && conflictDescription ? '' : type}
         {field.conflictDescriptions
-          ? getConflictBtn(field.name, field.conflictDescriptions, this.props.openModal)
+          ? getConflictBtn(
+              field.name,
+              field.conflictDescriptions,
+              this.props.openModal,
+              this.props.theme
+            )
           : ''}
       </span>
     );
@@ -446,7 +457,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
             onClick: (field) => deleteField(field.name),
             type: 'icon',
             'data-test-subj': 'deleteField',
-            available: (field) => !field.isMapped && field.isUserEditable,
+            available: showDelete,
           },
         ],
         width: '40px',

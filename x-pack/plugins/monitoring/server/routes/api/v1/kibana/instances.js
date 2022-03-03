@@ -6,11 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getKibanas } from '../../../../lib/kibana/get_kibanas';
 import { handleError } from '../../../../lib/errors';
-import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
 
 export function kibanaInstancesRoute(server) {
   /**
@@ -34,15 +32,12 @@ export function kibanaInstancesRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
         const [clusterStatus, kibanas] = await Promise.all([
-          getKibanaClusterStatus(req, kbnIndexPattern, { clusterUuid }),
-          getKibanas(req, kbnIndexPattern, { clusterUuid }),
+          getKibanaClusterStatus(req, { clusterUuid }),
+          getKibanas(req, { clusterUuid }),
         ]);
 
         return {

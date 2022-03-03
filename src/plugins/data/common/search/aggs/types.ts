@@ -7,7 +7,6 @@
  */
 
 import { Assign } from '@kbn/utility-types';
-import { DatatableColumn } from 'src/plugins/expressions';
 import { IndexPattern } from '../..';
 import {
   aggAvg,
@@ -68,6 +67,7 @@ import {
   AggParamsSum,
   AggParamsTerms,
   AggParamsMultiTerms,
+  AggParamsRareTerms,
   AggParamsTopHit,
   aggPercentileRanks,
   aggPercentiles,
@@ -78,6 +78,7 @@ import {
   aggSum,
   aggTerms,
   aggMultiTerms,
+  aggRareTerms,
   aggTopHit,
   AggTypesRegistry,
   AggTypesRegistrySetup,
@@ -86,7 +87,6 @@ import {
   CreateAggConfigParams,
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
-  AggConfig,
   aggFilteredMetric,
   aggSinglePercentile,
 } from './';
@@ -109,11 +109,6 @@ export interface AggsCommonSetup {
 
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
-  datatableUtilities: {
-    getIndexPattern: (column: DatatableColumn) => Promise<IndexPattern | undefined>;
-    getAggConfig: (column: DatatableColumn) => Promise<AggConfig | undefined>;
-    isFilterable: (column: DatatableColumn) => boolean;
-  };
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[]
@@ -166,6 +161,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
+  [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
   [BUCKET_TYPES.DIVERSIFIED_SAMPLER]: AggParamsDiversifiedSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
@@ -209,6 +205,7 @@ export interface AggFunctionsMapping {
   aggDateHistogram: ReturnType<typeof aggDateHistogram>;
   aggTerms: ReturnType<typeof aggTerms>;
   aggMultiTerms: ReturnType<typeof aggMultiTerms>;
+  aggRareTerms: ReturnType<typeof aggRareTerms>;
   aggAvg: ReturnType<typeof aggAvg>;
   aggBucketAvg: ReturnType<typeof aggBucketAvg>;
   aggBucketMax: ReturnType<typeof aggBucketMax>;

@@ -68,13 +68,13 @@ describe('CreateCaseForm', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     useGetTagsMock.mockReturnValue({ tags: ['test'] });
     useConnectorsMock.mockReturnValue({ loading: false, connectors: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
-  it('it renders with steps', async () => {
+  it('renders with steps', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
         <CreateCaseForm {...casesFormProps} />
@@ -84,7 +84,7 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="case-creation-form-steps"]`).exists()).toBeTruthy();
   });
 
-  it('it renders without steps', async () => {
+  it('renders without steps', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
         <CreateCaseForm {...casesFormProps} withSteps={false} />
@@ -94,7 +94,7 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="case-creation-form-steps"]`).exists()).toBeFalsy();
   });
 
-  it('it renders all form fields except case selection', async () => {
+  it('renders all form fields except case selection', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
         <CreateCaseForm {...casesFormProps} />

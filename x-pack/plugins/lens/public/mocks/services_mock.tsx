@@ -40,7 +40,7 @@ export const defaultDoc = {
   visualizationType: 'testVis',
   state: {
     query: 'kuery',
-    filters: [{ query: { match_phrase: { src: 'test' } } }],
+    filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
     datasourceStates: {
       testDatasource: 'datasource',
     },
@@ -112,6 +112,7 @@ export function makeDefaultServices(
     chrome: core.chrome,
     overlays: core.overlays,
     uiSettings: core.uiSettings,
+    executionContext: core.executionContext,
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),

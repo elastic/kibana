@@ -26,7 +26,8 @@ Options:
   --verbose                      Log everything. 
   --debug                        Run in debug mode. 
   --quiet                        Only log errors. 
-  --silent                       Log nothing."
+  --silent                       Log nothing. 
+  --dry-run                      Report tests without executing them."
 `;
 
 exports[`process options for run tests CLI accepts boolean value for updateBaselines 1`] = `
@@ -37,6 +38,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -58,6 +60,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -80,6 +83,7 @@ Object {
   "createLogger": [Function],
   "debug": true,
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -101,6 +105,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -124,6 +129,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": Object {
     "server.foo": "bar",
   },
@@ -146,6 +152,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "quiet": true,
   "suiteFiles": Object {
@@ -167,6 +174,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "silent": true,
   "suiteFiles": Object {
@@ -188,6 +196,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "source",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -208,6 +217,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "source",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -228,6 +238,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "installDir": "foo",
   "suiteFiles": Object {
@@ -249,6 +260,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "grep": "management",
   "suiteFiles": Object {
@@ -270,6 +282,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -291,6 +304,7 @@ Object {
   ],
   "createLogger": [Function],
   "esFrom": "snapshot",
+  "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "suiteFiles": Object {
     "exclude": Array [],

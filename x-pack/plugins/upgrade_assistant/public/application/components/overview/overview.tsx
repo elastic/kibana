@@ -107,6 +107,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               setIsComplete: setCompletedStep.bind(null, 'backup'),
             }),
             getMigrateSystemIndicesStep({
+              docLinks,
               isComplete: isStepComplete('migrate_system_indices'),
               setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
             }),

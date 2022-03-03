@@ -9,7 +9,7 @@ import { EuiContextMenuItem, EuiHeaderSectionItemButton, EuiPopover } from '@ela
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import type { AuthenticatedUser } from '../../common/model';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';

@@ -9,7 +9,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
-import { StubBrowserStorage, mountWithIntl } from '@kbn/test/jest';
+import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';

@@ -53,6 +53,7 @@ import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
@@ -119,6 +120,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+
   return (
     <>
       {indicesExist ? (
@@ -175,6 +178,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     setQuery={setQuery}
                     refetch={refetch}
                     inspect={inspect}
+                    hostName={detailName}
                   />
                 )}
               </AnomalyTableProvider>
@@ -194,7 +198,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation
-                navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
+                navTabs={navTabsHostDetails(
+                  detailName,
+                  hasMlUserPermissions(capabilities),
+                  riskyHostsFeatureEnabled
+                )}
               />
 
               <EuiSpacer />

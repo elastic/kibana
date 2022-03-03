@@ -36,6 +36,12 @@ export const mockAlertDetailsData = [
   },
   { category: 'agent', field: 'agent.version', values: ['7.10.0'], originalValue: '7.10.0' },
   {
+    category: 'agent',
+    field: 'agent.status',
+    values: ['inactive'],
+    originalValue: ['inactive'],
+  },
+  {
     category: 'winlog',
     field: 'winlog.computer_name',
     values: ['windows-native'],
@@ -179,6 +185,18 @@ export const mockAlertDetailsData = [
     originalValue: 'Microsoft-Windows-Security-Auditing',
   },
   { category: 'log', field: 'log.level', values: ['information'], originalValue: 'information' },
+  {
+    category: 'destination',
+    field: 'destination.address',
+    values: ['google.com'],
+    originalValue: 'google.com',
+  },
+  {
+    category: 'source',
+    field: 'source.address',
+    values: ['185.156.74.3'],
+    originalValue: '185.156.74.3',
+  },
   { category: 'source', field: 'source.port', values: [0], originalValue: 0 },
   { category: 'source', field: 'source.domain', values: ['-'], originalValue: '-' },
   {
@@ -332,22 +350,6 @@ export const mockAlertDetailsData = [
     originalValue: 'administrator',
   },
   { category: 'user', field: 'user.id', values: ['S-1-0-0'], originalValue: 'S-1-0-0' },
-  // TODO: The `parents` field no longer exists... use `ancestors` and `depth`
-  {
-    category: 'kibana',
-    field: 'kibana.alert.parents',
-    values: [
-      '{"id":"688MAHYB7WTwW_Glsi_d","type":"event","index":"winlogbeat-7.10.0-2020.11.12-000001","depth":0}',
-    ],
-    originalValue: [
-      {
-        id: '688MAHYB7WTwW_Glsi_d',
-        type: 'event',
-        index: 'winlogbeat-7.10.0-2020.11.12-000001',
-        depth: 0,
-      },
-    ],
-  },
   {
     category: 'kibana',
     field: 'kibana.alert.ancestors',
@@ -401,12 +403,6 @@ export const mockAlertDetailsData = [
   },
   {
     category: 'kibana',
-    field: 'kibana.alert.rule.output_index',
-    values: ['.siem-signals-angelachuang-default'],
-    originalValue: '.siem-signals-angelachuang-default',
-  },
-  {
-    category: 'kibana',
     field: 'kibana.alert.rule.description',
     values: ['xxx'],
     originalValue: 'xxx',
@@ -417,45 +413,9 @@ export const mockAlertDetailsData = [
     values: ['now-360s'],
     originalValue: 'now-360s',
   },
-  {
-    category: 'kibana',
-    field: 'kibana.alert.rule.index',
-    values: [
-      'apm-*-transaction*',
-      'traces-apm*',
-      'auditbeat-*',
-      'endgame-*',
-      'filebeat-*',
-      'logs-*',
-      'packetbeat-*',
-      'winlogbeat-*',
-    ],
-    originalValue: [
-      'apm-*-transaction*',
-      'traces-apm*',
-      'auditbeat-*',
-      'endgame-*',
-      'filebeat-*',
-      'logs-*',
-      'packetbeat-*',
-      'winlogbeat-*',
-    ],
-  },
   { category: 'kibana', field: 'kibana.alert.rule.interval', values: ['5m'], originalValue: '5m' },
-  {
-    category: 'kibana',
-    field: 'kibana.alert.rule.language',
-    values: ['kuery'],
-    originalValue: 'kuery',
-  },
   { category: 'kibana', field: 'kibana.alert.rule.license', values: [''], originalValue: '' },
   { category: 'kibana', field: 'kibana.alert.rule.name', values: ['xxx'], originalValue: 'xxx' },
-  {
-    category: 'kibana',
-    field: 'kibana.alert.rule.query',
-    values: ['@timestamp : * '],
-    originalValue: '@timestamp : * ',
-  },
   { category: 'kibana', field: 'kibana.alert.rule.references', values: [], originalValue: [] },
   {
     category: 'kibana',
@@ -477,27 +437,6 @@ export const mockAlertDetailsData = [
     originalValue: 'query',
   },
   { category: 'kibana', field: 'kibana.alert.rule.to', values: ['now'], originalValue: 'now' },
-  {
-    category: 'kibana',
-    field: 'kibana.alert.rule.filters',
-    values: [
-      '{"meta":{"alias":null,"negate":false,"disabled":false,"type":"exists","key":"message","value":"exists"},"exists":{"field":"message"},"$state":{"store":"appState"}}',
-    ],
-    originalValue: [
-      {
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'exists',
-          key: 'message',
-          value: 'exists',
-        },
-        exists: { field: 'message' },
-        $state: { store: 'appState' },
-      },
-    ],
-  },
   {
     category: 'kibana',
     field: 'kibana.alert.rule.created_by',
@@ -526,28 +465,6 @@ export const mockAlertDetailsData = [
   },
   { category: 'kibana', field: 'kibana.alert.rule.exceptions_list', values: [], originalValue: [] },
   { category: 'kibana', field: 'kibana.alert.depth', values: [1], originalValue: 1 },
-  // TODO: The `parent` no longer exists. Use `ancestors` and `depth`
-  {
-    category: 'kibana',
-    field: 'kibana.alert.parent.id',
-    values: ['688MAHYB7WTwW_Glsi_d'],
-    originalValue: '688MAHYB7WTwW_Glsi_d',
-  },
-  // TODO: The `parent` no longer exists. Use `ancestors` and `depth`
-  {
-    category: 'kibana',
-    field: 'kibana.alert.parent.type',
-    values: ['event'],
-    originalValue: 'event',
-  },
-  // TODO: The `parent` no longer exists. Use `ancestors` and `depth`
-  {
-    category: 'kibana',
-    field: 'kibana.alert.parent.index',
-    values: ['winlogbeat-7.10.0-2020.11.12-000001'],
-    originalValue: 'winlogbeat-7.10.0-2020.11.12-000001',
-  },
-  { category: 'kibana', field: 'kibana.alert.parent.depth', values: [0], originalValue: 0 },
   {
     category: 'kibana',
     field: 'kibana.alert.original_time',
@@ -717,5 +634,11 @@ export const mockAlertDetailsData = [
     field: 'threat.enrichments.matched.field',
     values: ['host.name'],
     originalValue: ['host.name'],
+  },
+  {
+    category: 'Target',
+    field: 'Target.process.executable',
+    values: ['dummy.exe'],
+    originalValue: ['dummy.exe'],
   },
 ];

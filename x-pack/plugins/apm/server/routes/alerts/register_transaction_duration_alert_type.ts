@@ -86,6 +86,7 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
         apmActionVariables.interval,
+        apmActionVariables.reason,
       ],
     },
     producer: APM_SERVER_FEATURE_ID,
@@ -178,7 +179,15 @@ export function registerTransactionDurationAlertType({
         const durationFormatter = getDurationFormatter(transactionDuration);
         const transactionDurationFormatted =
           durationFormatter(transactionDuration).formatted;
-
+        const reasonMessage = formatTransactionDurationReason({
+          measured: transactionDuration,
+          serviceName: ruleParams.serviceName,
+          threshold: thresholdMicroseconds,
+          asDuration,
+          aggregationType: String(ruleParams.aggregationType),
+          windowSize: ruleParams.windowSize,
+          windowUnit: ruleParams.windowUnit,
+        });
         services
           .alertWithLifecycle({
             id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(
@@ -191,12 +200,7 @@ export function registerTransactionDurationAlertType({
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
               [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
-              [ALERT_REASON]: formatTransactionDurationReason({
-                measured: transactionDuration,
-                serviceName: ruleParams.serviceName,
-                threshold: thresholdMicroseconds,
-                asDuration,
-              }),
+              [ALERT_REASON]: reasonMessage,
             },
           })
           .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -206,6 +210,7 @@ export function registerTransactionDurationAlertType({
             threshold: thresholdMicroseconds,
             triggerValue: transactionDurationFormatted,
             interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+            reason: reasonMessage,
           });
       }
 

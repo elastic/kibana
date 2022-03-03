@@ -11,7 +11,6 @@ import type { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/
 
 const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
   {
-    // @ts-expect-error not full interface
     job: {
       job_id: 'fq_single_1_smv',
       groups: ['farequote', 'automated', 'single-metric'],
@@ -64,7 +63,6 @@ const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
     },
   },
   {
-    // @ts-expect-error not full interface
     job: {
       job_id: 'fq_single_2_smv',
       groups: ['farequote', 'automated', 'single-metric'],
@@ -117,7 +115,6 @@ const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
     },
   },
   {
-    // @ts-expect-error not full interface
     job: {
       job_id: 'fq_single_3_smv',
       groups: ['farequote', 'automated', 'single-metric'],
@@ -293,6 +290,10 @@ export default function ({ getService }: FtrProviderContext) {
         'anomaly_detection_jobs',
         'data_frame_analytics_jobs',
       ]);
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
+      await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
     });
 
     it('opens export flyout and exports anomaly detector jobs', async () => {

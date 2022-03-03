@@ -16,7 +16,7 @@ export function registerNodesRoute({ router, lib: { handleEsError } }: RouteDepe
       const { client } = context.core.elasticsearch;
 
       try {
-        const { body } = await client.asCurrentUser.nodes.info();
+        const body = await client.asCurrentUser.nodes.info();
         const plugins: Set<string> = Object.values(body.nodes).reduce((acc, nodeInfo) => {
           nodeInfo.plugins?.forEach(({ name }) => {
             acc.add(name);

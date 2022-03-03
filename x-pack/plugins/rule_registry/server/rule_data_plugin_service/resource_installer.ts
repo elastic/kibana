@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 
+import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,
@@ -31,6 +32,7 @@ interface ConstructorOptions {
   disabledRegistrationContexts: string[];
 }
 
+export type IResourceInstaller = PublicMethodsOf<ResourceInstaller>;
 export class ResourceInstaller {
   constructor(private readonly options: ConstructorOptions) {}
 
@@ -161,7 +163,7 @@ export class ResourceInstaller {
     const simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
       name: index,
     });
-    const simulatedMapping = get(simulatedIndexMapping, ['body', 'template', 'mappings']);
+    const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
 
     try {
       await clusterClient.indices.putMapping({
@@ -309,13 +311,12 @@ export class ResourceInstaller {
         template: {
           settings: {
             hidden: true,
+            // @ts-expect-error type only defines nested structure
             'index.lifecycle': {
               name: ilmPolicyName,
-              // TODO: fix the types in the ES package, they don't include rollover_alias???
-              // @ts-expect-error
               rollover_alias: primaryNamespacedAlias,
             },
-            'index.mapping.total_fields.limit': 1200,
+            'index.mapping.total_fields.limit': 1700,
           },
           mappings: {
             dynamic: false,
@@ -365,7 +366,7 @@ export class ResourceInstaller {
       // something else created it so suppress the error. If it's not the write
       // index, that's bad, throw an error.
       if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
-        const { body: existingIndices } = await clusterClient.indices.get({
+        const existingIndices = await clusterClient.indices.get({
           index: initialIndexName,
         });
         if (!existingIndices[initialIndexName]?.aliases?.[primaryNamespacedAlias]?.is_write_index) {
@@ -406,7 +407,7 @@ export class ResourceInstaller {
 
     logger.debug(`Installing index template ${template.name}`);
 
-    const { body: simulateResponse } = await clusterClient.indices.simulateTemplate(template);
+    const simulateResponse = await clusterClient.indices.simulateTemplate(template);
     const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
 
     if (isEmpty(mappings)) {
@@ -434,7 +435,7 @@ export class ResourceInstaller {
       // finding legacy .siem-signals indices that we add the alias to for backwards compatibility reasons. Together,
       // the index pattern and alias should ensure that we retrieve only the "new" backing indices for this
       // particular alias.
-      const { body: response } = await clusterClient.indices.getAlias({
+      const response = await clusterClient.indices.getAlias({
         index: indexPatternForBackingIndices,
         name: aliasOrPatternForAliases,
       });

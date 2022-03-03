@@ -12,7 +12,7 @@ import { CasesProvider, CasesContextProps } from '../components/cases_context';
 
 export type GetCreateCaseFlyoutProps = CreateCaseFlyoutProps & CasesContextProps;
 
-const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
+export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
   () => import('../components/create/flyout')
 );
 export const getCreateCaseFlyoutLazy = ({
@@ -22,6 +22,7 @@ export const getCreateCaseFlyoutLazy = ({
   afterCaseCreated,
   onClose,
   onSuccess,
+  attachments,
 }: GetCreateCaseFlyoutProps) => (
   <CasesProvider value={{ owner, userCanCrud, features }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
@@ -29,7 +30,14 @@ export const getCreateCaseFlyoutLazy = ({
         afterCaseCreated={afterCaseCreated}
         onClose={onClose}
         onSuccess={onSuccess}
+        attachments={attachments}
       />
     </Suspense>
   </CasesProvider>
+);
+
+export const getCreateCaseFlyoutLazyNoProvider = (props: CreateCaseFlyoutProps) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <CreateCaseFlyoutLazy {...props} />
+  </Suspense>
 );

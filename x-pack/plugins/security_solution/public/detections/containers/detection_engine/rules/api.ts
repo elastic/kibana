@@ -6,11 +6,8 @@
  */
 
 import { camelCase } from 'lodash';
-import {
-  FullResponseSchema,
-  PreviewResponse,
-} from '../../../../../common/detection_engine/schemas/request';
-import { HttpStart } from '../../../../../../../../src/core/public';
+import { HttpStart } from 'src/core/public';
+
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
@@ -18,8 +15,18 @@ import {
   DETECTION_ENGINE_TAGS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
-  INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
+  detectionEngineRuleExecutionEventsUrl,
 } from '../../../../../common/constants';
+import { BulkAction } from '../../../../../common/detection_engine/schemas/common';
+import {
+  FullResponseSchema,
+  PreviewResponse,
+} from '../../../../../common/detection_engine/schemas/request';
+import {
+  RulesSchema,
+  GetRuleExecutionEventsResponse,
+} from '../../../../../common/detection_engine/schemas/response';
+
 import {
   UpdateRulesProps,
   CreateRulesProps,
@@ -33,20 +40,17 @@ import {
   BasicFetchProps,
   ImportDataProps,
   ExportDocumentsProps,
-  RuleStatusResponse,
   ImportDataResponse,
   PrePackagedRulesStatusResponse,
   BulkRuleResponse,
   PatchRuleProps,
   BulkActionProps,
-  BulkActionResponse,
+  BulkActionResponseMap,
   PreviewRulesProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { convertRulesFilterToKQL } from './utils';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 /**
  * Create provided Rule
@@ -123,16 +127,17 @@ export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
-    sortField: 'enabled',
-    sortOrder: 'desc',
     showCustomRules: false,
     showElasticRules: false,
     tags: [],
   },
+  sortingOptions = {
+    field: 'enabled',
+    order: 'desc',
+  },
   pagination = {
     page: 1,
     perPage: 20,
-    total: 0,
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
@@ -146,8 +151,8 @@ export const fetchRules = async ({
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: getFieldNameForSortField(filterOptions.sortField),
-    sort_order: filterOptions.sortOrder,
+    sort_field: getFieldNameForSortField(sortingOptions.field),
+    sort_order: sortingOptions.order,
     ...(filterString !== '' ? { filter: filterString } : {}),
   };
 
@@ -241,15 +246,7 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
         updated_by: undefined,
         enabled: false,
         immutable: undefined,
-        last_success_at: undefined,
-        last_success_message: undefined,
-        last_failure_at: undefined,
-        last_failure_message: undefined,
-        last_gap: undefined,
-        bulk_create_time_durations: undefined,
-        search_after_time_durations: undefined,
-        status: undefined,
-        status_date: undefined,
+        execution_summary: undefined,
       }))
     ),
   });
@@ -258,6 +255,8 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
  * Perform bulk action with rules selected by a filter query
  *
  * @param query filter query to select rules to perform bulk action with
+ * @param ids string[] rule ids to select rules to perform bulk action with
+ * @param edit BulkEditActionPayload edit action payload
  * @param action bulk action to perform
  *
  * @throws An error if response is not OK
@@ -265,11 +264,21 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
 export const performBulkAction = async <Action extends BulkAction>({
   action,
   query,
-}: BulkActionProps<Action>): Promise<BulkActionResponse<Action>> =>
-  KibanaServices.get().http.fetch<BulkActionResponse<Action>>(DETECTION_ENGINE_RULES_BULK_ACTION, {
-    method: 'POST',
-    body: JSON.stringify({ action, query }),
-  });
+  edit,
+  ids,
+}: BulkActionProps<Action>): Promise<BulkActionResponseMap<Action>> =>
+  KibanaServices.get().http.fetch<BulkActionResponseMap<Action>>(
+    DETECTION_ENGINE_RULES_BULK_ACTION,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        action,
+        ...(edit ? { edit } : {}),
+        ...(ids ? { ids } : {}),
+        ...(query !== undefined ? { query } : {}),
+      }),
+    }
+  );
 
 /**
  * Create Prepackaged Rules
@@ -362,25 +371,26 @@ export const exportRules = async ({
 };
 
 /**
- * Get Rule Status provided Rule ID
+ * Fetch rule execution events (e.g. status changes) from Event Log.
  *
- * @param id string of Rule ID's (not rule_id)
- * @param signal AbortSignal for cancelling request
+ * @param ruleId string Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
+ * @param signal AbortSignal Optional signal for cancelling the request
  *
  * @throws An error if response is not OK
  */
-export const getRuleStatusById = async ({
-  id,
+export const fetchRuleExecutionEvents = async ({
+  ruleId,
   signal,
 }: {
-  id: string;
-  signal: AbortSignal;
-}): Promise<RuleStatusResponse> =>
-  KibanaServices.get().http.fetch<RuleStatusResponse>(INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL, {
-    method: 'POST',
-    body: JSON.stringify({ ruleId: id }),
+  ruleId: string;
+  signal?: AbortSignal;
+}): Promise<GetRuleExecutionEventsResponse> => {
+  const url = detectionEngineRuleExecutionEventsUrl(ruleId);
+  return KibanaServices.get().http.fetch<GetRuleExecutionEventsResponse>(url, {
+    method: 'GET',
     signal,
   });
+};
 
 /**
  * Fetch all unique Tags used by Rules

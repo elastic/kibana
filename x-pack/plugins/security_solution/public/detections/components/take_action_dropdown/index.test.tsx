@@ -17,9 +17,10 @@ import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useKibana } from '../../../common/lib/kibana';
+import { mockCasesContract } from '../../../../../cases/public/mocks';
 
-jest.mock('../../../common/hooks/endpoint/use_isolate_privileges', () => ({
-  useIsolationPrivileges: jest.fn().mockReturnValue({ isAllowed: true }),
+jest.mock('../user_info', () => ({
+  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -57,6 +58,8 @@ jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', 
   };
 });
 
+jest.mock('../../../common/components/user_privileges');
+
 describe('take action dropdown', () => {
   const defaultProps: TakeActionDropdownProps = {
     detailsData: mockAlertDetailsData as TimelineEventsDetailsItem[],
@@ -80,6 +83,7 @@ describe('take action dropdown', () => {
         services: {
           ...mockStartServicesMock,
           timelines: { ...mockTimelines },
+          cases: mockCasesContract(),
           application: {
             capabilities: { siem: { crud_alerts: true, read_alerts: true } },
           },

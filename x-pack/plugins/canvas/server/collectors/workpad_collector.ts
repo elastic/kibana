@@ -386,7 +386,7 @@ const workpadCollector: TelemetryCollector = async function (kibanaIndex, esClie
     body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
   };
 
-  const { body: esResponse } = await esClient.search<WorkpadSearch>(searchParams);
+  const esResponse = await esClient.search<WorkpadSearch>(searchParams);
 
   if (get(esResponse, 'hits.hits.length') > 0) {
     const workpads = esResponse.hits.hits.map((hit) => hit._source![CANVAS_TYPE]);

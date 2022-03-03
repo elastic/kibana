@@ -8,7 +8,7 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { StartServicesAccessor } from 'src/core/server';
-import { DataViewsService } from '../common';
+import { DataViewsContract } from '../common';
 import { SavedObjectsClient } from '../../../core/server';
 import { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from './types';
 
@@ -57,7 +57,7 @@ export const updateMax = (currentMax: number | undefined, newVal: number): numbe
   }
 };
 
-export async function getIndexPatternTelemetry(indexPatterns: DataViewsService) {
+export async function getIndexPatternTelemetry(indexPatterns: DataViewsContract) {
   const ids = await indexPatterns.getIds();
 
   const countSummaryDefaults: CountSummary = {

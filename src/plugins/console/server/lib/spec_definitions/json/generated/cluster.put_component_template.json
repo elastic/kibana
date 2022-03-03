@@ -9,7 +9,7 @@
       "POST"
     ],
     "patterns": [
-      "_component_template/{name}"
+      "_component_template/{component_template}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-component-template.html"
   }

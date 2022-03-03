@@ -14,7 +14,6 @@ import {
   isValidExperimentalValue,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
-import { UnderlyingLogClient } from './lib/detection_engine/rule_execution_log/types';
 
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
@@ -103,19 +102,6 @@ export const configSchema = schema.object({
         }
       }
     },
-  }),
-
-  /**
-   * Rule Execution Log Configuration
-   */
-  ruleExecutionLog: schema.object({
-    underlyingClient: schema.oneOf(
-      [
-        schema.literal(UnderlyingLogClient.eventLog),
-        schema.literal(UnderlyingLogClient.savedObjects),
-      ],
-      { defaultValue: UnderlyingLogClient.eventLog }
-    ),
   }),
 
   /**

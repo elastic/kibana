@@ -12,14 +12,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import { Filter, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import type { SavedObjectAttributes, KibanaExecutionContext } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IndexPattern,
   TimeRange,
   Query,
-  esFilters,
   TimefilterContract,
 } from '../../../../plugins/data/public';
 import {
@@ -39,10 +39,9 @@ import {
   ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
 import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getTheme, getUiActions } from '../services';
+import { getExecutionContext, getExpressions, getTheme, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { SavedObjectAttributes } from '../../../../core/types';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
@@ -98,6 +97,7 @@ export class VisualizeEmbeddable
   private filters?: Filter[];
   private searchSessionId?: string;
   private syncColors?: boolean;
+  private embeddableTitle?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression?: ExpressionAstExpression;
@@ -141,6 +141,7 @@ export class VisualizeEmbeddable
     this.syncColors = this.input.syncColors;
     this.searchSessionId = this.input.searchSessionId;
     this.query = this.input.query;
+    this.embeddableTitle = this.getTitle();
 
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
@@ -239,7 +240,7 @@ export class VisualizeEmbeddable
     }
 
     // Check if filters has changed
-    if (!esFilters.onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
+    if (!onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
       this.filters = this.input.filters;
       dirty = true;
     }
@@ -257,6 +258,11 @@ export class VisualizeEmbeddable
 
     if (this.syncColors !== this.input.syncColors) {
       this.syncColors = this.input.syncColors;
+      dirty = true;
+    }
+
+    if (this.embeddableTitle !== this.getTitle()) {
+      this.embeddableTitle = this.getTitle();
       dirty = true;
     }
 
@@ -392,13 +398,17 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
-    const context = {
+    const parentContext = this.parent?.getInput().executionContext || getExecutionContext().get();
+    const child: KibanaExecutionContext = {
       type: 'visualization',
-      name: this.vis.type.title,
-      id: this.vis.id ?? 'an_unsaved_vis',
+      name: this.vis.type.name,
+      id: this.vis.id ?? 'new',
       description: this.vis.title || this.input.title || this.vis.type.name,
       url: this.output.editUrl,
-      parent: this.parent?.getInput().executionContext,
+    };
+    const context = {
+      ...parentContext,
+      child,
     };
 
     const expressionParams: IExpressionLoaderParams = {
@@ -406,6 +416,9 @@ export class VisualizeEmbeddable
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
+      },
+      variables: {
+        embeddableTitle: this.getTitle(),
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
@@ -456,10 +469,8 @@ export class VisualizeEmbeddable
     const input = {
       savedVis: this.vis.serialize(),
     };
-    if (this.getTitle()) {
-      input.savedVis.title = this.getTitle();
-    }
     delete input.savedVis.id;
+    _.unset(input, 'savedVis.title');
     return new Promise<VisualizeByValueInput>((resolve) => {
       resolve({ ...(input as VisualizeByValueInput) });
     });

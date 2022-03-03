@@ -23,6 +23,7 @@ export interface UsageStats {
   /**
    * non-sensitive settings
    */
+  'bfetch:disable': boolean;
   'bfetch:disableCompression': boolean;
   'autocomplete:useTimeRange': boolean;
   'autocomplete:valueSuggestionMethod': string;
@@ -39,6 +40,7 @@ export interface UsageStats {
   'observability:enableInspectEsQueries': boolean;
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
+  'observability:enableInfrastructureView': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;

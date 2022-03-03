@@ -6,12 +6,13 @@
  */
 
 import moment from 'moment';
-import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { calculateAvailability } from '../calculate_availability';
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 interface Logstash {
   jvm?: {
@@ -64,28 +65,38 @@ interface Logstash {
  *  - events
  *  - config reloads
  */
-export async function getNodes(
-  req: LegacyRequest,
-  lsIndexPattern: string,
-  { clusterUuid }: { clusterUuid: string }
-) {
-  checkParam(lsIndexPattern, 'lsIndexPattern in getNodes');
+export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUuid: string }) {
+  const dataset = 'node_stats';
+  const type = 'logstash_stats';
+  const moduleType = 'logstash';
 
-  const config = req.server.config();
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
+
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
+  const filters = [{ exists: { field: 'logstash_stats.logstash.uuid' } }];
+
   const params = {
-    index: lsIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'), // FIXME
+    index: indexPatterns,
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     body: {
       query: createQuery({
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
+        filters,
         start,
         end,
         clusterUuid,
         metric: LogstashMetric.getMetricFields(),
-        types: ['node_stats', 'logstash_stats'],
       }),
       collapse: {
         field: 'logstash_stats.logstash.uuid',

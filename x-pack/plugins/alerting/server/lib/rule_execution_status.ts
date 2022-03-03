@@ -6,14 +6,16 @@
  */
 
 import { Logger } from 'src/core/server';
-import { RuleTaskState, AlertExecutionStatus, RawRuleExecutionStatus } from '../types';
+import { AlertExecutionStatus, RawRuleExecutionStatus, RuleExecutionState } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import { AlertExecutionStatuses } from '../../common';
 
-export function executionStatusFromState(state: RuleTaskState): AlertExecutionStatus {
+export function executionStatusFromState(state: RuleExecutionState): AlertExecutionStatus {
   const alertIds = Object.keys(state.alertInstances ?? {});
   return {
+    metrics: state.metrics,
+    numberOfTriggeredActions: state.triggeredActions?.length ?? 0,
     lastExecutionDate: new Date(),
     status: alertIds.length === 0 ? 'ok' : 'active',
   };
@@ -52,7 +54,13 @@ export function ruleExecutionStatusFromRaw(
 ): AlertExecutionStatus | undefined {
   if (!rawRuleExecutionStatus) return undefined;
 
-  const { lastExecutionDate, lastDuration, status = 'unknown', error } = rawRuleExecutionStatus;
+  const {
+    lastExecutionDate,
+    lastDuration,
+    numberOfTriggeredActions,
+    status = 'unknown',
+    error,
+  } = rawRuleExecutionStatus;
 
   let parsedDateMillis = lastExecutionDate ? Date.parse(lastExecutionDate) : Date.now();
   if (isNaN(parsedDateMillis)) {
@@ -69,6 +77,10 @@ export function ruleExecutionStatusFromRaw(
 
   if (null != lastDuration) {
     executionStatus.lastDuration = lastDuration;
+  }
+
+  if (null != numberOfTriggeredActions) {
+    executionStatus.numberOfTriggeredActions = numberOfTriggeredActions;
   }
 
   if (error) {

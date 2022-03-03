@@ -80,7 +80,7 @@ export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDecla
     Node.isVariableDeclaration(node)
   ) {
     return buildVariableDec(node, opts);
-  } else if (Node.isTypeLiteralNode(node)) {
+  } else if (Node.isTypeLiteral(node)) {
     return buildTypeLiteralDec(node, opts);
   }
 

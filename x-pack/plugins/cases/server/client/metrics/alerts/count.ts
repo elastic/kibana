@@ -8,31 +8,25 @@
 import { CaseMetricsResponse } from '../../../../common/api';
 import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common/error';
-import { CasesClient } from '../../client';
-import { CasesClientArgs } from '../../types';
-import { MetricsHandler } from '../types';
+import { BaseHandler } from '../base_handler';
+import { BaseHandlerCommonOptions } from '../types';
 
-export class AlertsCount implements MetricsHandler {
-  constructor(
-    private readonly caseId: string,
-    private readonly casesClient: CasesClient,
-    private readonly clientArgs: CasesClientArgs
-  ) {}
-
-  public getFeatures(): Set<string> {
-    return new Set(['alerts.count']);
+export class AlertsCount extends BaseHandler {
+  constructor(options: BaseHandlerCommonOptions) {
+    super(options, ['alerts.count']);
   }
 
   public async compute(): Promise<CaseMetricsResponse> {
     const { unsecuredSavedObjectsClient, authorization, attachmentService, logger } =
-      this.clientArgs;
+      this.options.clientArgs;
+
+    const { caseId, casesClient } = this.options;
 
     try {
       // This will perform an authorization check to ensure the user has access to the parent case
-      const theCase = await this.casesClient.cases.get({
-        id: this.caseId,
+      const theCase = await casesClient.cases.get({
+        id: caseId,
         includeComments: false,
-        includeSubCaseComments: false,
       });
 
       const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
@@ -52,7 +46,7 @@ export class AlertsCount implements MetricsHandler {
       };
     } catch (error) {
       throw createCaseError({
-        message: `Failed to count alerts attached case id: ${this.caseId}: ${error}`,
+        message: `Failed to count alerts attached case id: ${caseId}: ${error}`,
         error,
         logger,
       });

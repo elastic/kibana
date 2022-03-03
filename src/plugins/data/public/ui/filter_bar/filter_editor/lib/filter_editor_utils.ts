@@ -8,6 +8,8 @@
 
 import dateMath from '@elastic/datemath';
 import { Filter, FieldFilter } from '@kbn/es-query';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import isSemverValid from 'semver/functions/valid';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../common';
 
@@ -27,12 +29,14 @@ export function getFilterableFields(indexPattern: IIndexPattern) {
 
 export function getOperatorOptions(field: IFieldType) {
   return FILTER_OPERATORS.filter((operator) => {
-    return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
+    if (operator.field) return operator.field(field);
+    if (operator.fieldTypes) return operator.fieldTypes.includes(field.type);
+    return true;
   });
 }
 
-export function validateParams(params: any, type: string) {
-  switch (type) {
+export function validateParams(params: any, field: IFieldType) {
+  switch (field.type) {
     case 'date':
       const moment = typeof params === 'string' ? dateMath.parse(params) : null;
       return Boolean(typeof params === 'string' && moment && moment.isValid());
@@ -42,6 +46,11 @@ export function validateParams(params: any, type: string) {
       } catch (e) {
         return false;
       }
+    case 'string':
+      if (field.esTypes?.includes(ES_FIELD_TYPES.VERSION)) {
+        return isSemverValid(params);
+      }
+      return true;
     default:
       return true;
   }
@@ -58,19 +67,19 @@ export function isFilterValid(
   }
   switch (operator.type) {
     case 'phrase':
-      return validateParams(params, field.type);
+      return validateParams(params, field);
     case 'phrases':
       if (!Array.isArray(params) || !params.length) {
         return false;
       }
-      return params.every((phrase) => validateParams(phrase, field.type));
+      return params.every((phrase) => validateParams(phrase, field));
     case 'range':
       if (typeof params !== 'object') {
         return false;
       }
       return (
-        (!params.from || validateParams(params.from, field.type)) &&
-        (!params.to || validateParams(params.to, field.type))
+        (!params.from || validateParams(params.from, field)) &&
+        (!params.to || validateParams(params.to, field))
       );
     case 'exists':
       return true;

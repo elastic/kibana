@@ -20,8 +20,8 @@ import * as useServiceAgentNameHook from '../../../context/apm_service/use_servi
 import {
   disableConsoleWarning,
   renderWithTheme,
-} from '../../../utils/testHelpers';
-import { fromQuery } from '../../shared/Links/url_helpers';
+} from '../../../utils/test_helpers';
+import { fromQuery } from '../../shared/links/url_helpers';
 import { TransactionOverview } from './';
 
 const KibanaReactContext = createKibanaReactContext({

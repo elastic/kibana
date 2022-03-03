@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
 import { ToolbarPopover } from '../../shared_components';
 import { layerTypes } from '../../../common';
@@ -44,18 +44,6 @@ describe('Axes Settings', () => {
   it('should disable the popover if the isDisabled property is true', () => {
     const component = shallow(<AxisSettingsPopover {...props} isDisabled />);
     expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
-  });
-
-  it('should show the axes title on the corresponding input text', () => {
-    const component = shallow(<AxisSettingsPopover {...props} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').prop('value')).toBe(
-      'My custom X axis title'
-    );
-  });
-
-  it('should disable the input text if the switch is off', () => {
-    const component = shallow(<AxisSettingsPopover {...props} isAxisTitleVisible={false} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').prop('disabled')).toBe(true);
   });
 
   it('has the tickLabels switch on by default', () => {

@@ -12,8 +12,8 @@ import {
 } from '../../../plugins/reporting/common/constants';
 import { JobParamsCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource/types';
 import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
-import { JobParamsPNG } from '../../../plugins/reporting/server/export_types/png/types';
-import { JobParamsPDF } from '../../../plugins/reporting/server/export_types/printable_pdf/types';
+import { JobParamsPNGDeprecated } from '../../../plugins/reporting/server/export_types/png/types';
+import { JobParamsPDFDeprecated } from '../../../plugins/reporting/server/export_types/printable_pdf/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -37,6 +37,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
+  const REPORTING_ROLE = 'test_reporting_user';
 
   const logTaskManagerHealth = async () => {
     // Check task manager health for analyzing test failures. See https://github.com/elastic/kibana/issues/114946
@@ -90,7 +91,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   const createTestReportingUserRole = async () => {
-    await security.role.create('test_reporting_user', {
+    await security.role.create(REPORTING_ROLE, {
       metadata: {},
       elasticsearch: {
         cluster: [],
@@ -127,9 +128,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   const createTestReportingUser = async () => {
-    await security.user.create('reporting_user', {
-      password: 'reporting_user-password',
-      roles: ['test_reporting_user'],
+    await security.user.create(REPORTING_USER_USERNAME, {
+      password: REPORTING_USER_PASSWORD,
+      roles: [REPORTING_ROLE],
       full_name: 'Reporting User',
     });
   };
@@ -141,7 +142,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send(job);
   };
-  const generatePdf = async (username: string, password: string, job: JobParamsPDF) => {
+  const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
     const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/printablePdf`)
@@ -149,7 +150,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generatePng = async (username: string, password: string, job: JobParamsPNG) => {
+  const generatePng = async (username: string, password: string, job: JobParamsPNGDeprecated) => {
     const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/png`)
@@ -163,6 +164,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     password = process.env.TEST_KIBANA_PASS || 'changeme'
   ) => {
     const jobParams = rison.encode(job as object as RisonValue);
+
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/csv_searchsource`)
       .auth(username, password)
@@ -190,6 +192,22 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return response.text as unknown;
   };
 
+  const getJobErrorCode = async (
+    id: string,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ): Promise<undefined | string> => {
+    const {
+      body: [job],
+    } = await supertestWithoutAuth
+      .get(`/api/reporting/jobs/list?page=0&ids=${id}`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send()
+      .expect(200);
+    return job?.output?.error_code;
+  };
+
   const deleteAllReports = async () => {
     log.debug('ReportingAPI.deleteAllReports');
 
@@ -202,18 +220,29 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
-  const checkIlmMigrationStatus = async () => {
+  const checkIlmMigrationStatus = async (username: string, password: string) => {
     log.debug('ReportingAPI.checkIlmMigrationStatus');
-    const { body } = await supertest
+    const { body } = await supertestWithoutAuth
       .get(API_GET_ILM_POLICY_STATUS)
+      .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .expect(200);
     return body.status;
   };
 
-  const migrateReportingIndices = async () => {
+  const migrateReportingIndices = async (username: string, password: string) => {
     log.debug('ReportingAPI.migrateReportingIndices');
-    await supertest.put(API_MIGRATE_ILM_POLICY_URL).set('kbn-xsrf', 'xxx').expect(200);
+    try {
+      await supertestWithoutAuth
+        .put(API_MIGRATE_ILM_POLICY_URL)
+        .auth(username, password)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+    } catch (err) {
+      log.error(`Could not migrate Reporting indices!`);
+      log.error(err);
+      throw err;
+    }
   };
 
   const makeAllReportingIndicesUnmanaged = async () => {
@@ -239,6 +268,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     DATA_ANALYST_PASSWORD,
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
+    REPORTING_ROLE,
     routes: {
       API_GET_ILM_POLICY_STATUS,
       API_MIGRATE_ILM_POLICY_URL,
@@ -258,5 +288,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     checkIlmMigrationStatus,
     migrateReportingIndices,
     makeAllReportingIndicesUnmanaged,
+    getJobErrorCode,
   };
 }

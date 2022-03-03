@@ -11,7 +11,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/98463
   describe('Kibana overview', () => {
     const esArchiver = getService('esArchiver');
 

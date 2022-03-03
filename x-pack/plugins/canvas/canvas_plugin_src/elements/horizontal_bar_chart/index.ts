@@ -13,7 +13,8 @@ export const horizontalBarChart: ElementFactory = () => ({
   type: 'chart',
   help: 'A customizable horizontal bar chart',
   icon: 'visBarHorizontal',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | pointseries x="size(cost)" y="project" color="project"
 | plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} legend=false

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { FullTimeRangeSelector } from './index';
 import type { Query } from 'src/plugins/data/public';
 import type { DataView } from '../../../../../../../src/plugins/data_views/public';
@@ -19,6 +19,12 @@ jest.mock('./full_time_range_selector_service', () => ({
   setFullTimeRange: (indexPattern: DataView, query: Query) =>
     mockSetFullTimeRange(indexPattern, query),
 }));
+
+jest.mock('../../contexts/ml/use_storage', () => {
+  return {
+    useStorage: jest.fn(() => 'exclude-frozen'),
+  };
+});
 
 describe('FullTimeRangeSelector', () => {
   const dataView = {

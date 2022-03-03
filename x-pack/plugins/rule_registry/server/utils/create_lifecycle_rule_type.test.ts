@@ -13,7 +13,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { castArray, omit } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
@@ -66,10 +66,13 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
   const scheduleActions = jest.fn();
 
-  const alertInstanceFactory = () => {
-    return {
-      scheduleActions,
-    } as any;
+  const alertFactory = {
+    create: () => {
+      return {
+        scheduleActions,
+      } as any;
+    },
+    done: () => ({ getRecoveredAlerts: () => [] }),
   };
 
   return {
@@ -107,8 +110,9 @@ function createRule(shouldWriteAlerts: boolean = true) {
           updatedBy: 'updatedBy',
         },
         services: {
-          alertInstanceFactory,
+          alertFactory,
           savedObjectsClient: {} as any,
+          uiSettingsClient: {} as any,
           scopedClusterClient: {} as any,
           shouldWriteAlerts: () => shouldWriteAlerts,
           shouldStopExecution: () => false,
@@ -119,6 +123,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         tags: ['tags'],
         updatedBy: 'updatedBy',
         namespace: 'namespace',
+        executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;
@@ -224,6 +229,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.instance.id": "opbeans-java",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
+              "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
@@ -251,6 +257,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.instance.id": "opbeans-node",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
+              "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",

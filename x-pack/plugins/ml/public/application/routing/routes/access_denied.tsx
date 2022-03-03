@@ -16,12 +16,14 @@ const breadcrumbs = [
     text: i18n.translate('xpack.ml.accessDeniedLabel', {
       defaultMessage: 'Access denied',
     }),
-    href: '',
   },
 ];
 
 export const accessDeniedRouteFactory = (): MlRoute => ({
   path: '/access-denied',
+  title: i18n.translate('xpack.ml.accessDeniedLabel', {
+    defaultMessage: 'Access denied',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 });

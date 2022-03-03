@@ -51,7 +51,6 @@ beforeEach(async () => {
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
 
   const mockReportingConfig = createMockConfigSchema({
-    index: '.reporting-2018.10.10',
     encryptionKey: mockEncryptionKey,
     queue: {
       indexInterval: 'daily',
@@ -88,10 +87,7 @@ test(`passes browserTimezone to generatePng`, async () => {
     expect.objectContaining({
       urls: ['localhost:80undefined/app/kibana#/something'],
       browserTimezone: 'UTC',
-      conditionalHeaders: expect.objectContaining({
-        conditions: expect.any(Object),
-        headers: {},
-      }),
+      headers: {},
     })
   );
 });

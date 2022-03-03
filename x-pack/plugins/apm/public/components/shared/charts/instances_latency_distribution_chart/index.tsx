@@ -30,8 +30,8 @@ import {
 } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import * as urlHelpers from '../../Links/url_helpers';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import * as urlHelpers from '../../links/url_helpers';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { CustomTooltip } from './custom_tooltip';
@@ -114,8 +114,13 @@ export function InstancesLatencyDistributionChart({
           })}
         </h2>
       </EuiTitle>
-      <ChartContainer hasData={hasData} height={height} status={status}>
-        <Chart id="instances-latency-distribution">
+      <ChartContainer
+        hasData={hasData}
+        height={height}
+        status={status}
+        id="instancesLatencyDistribution"
+      >
+        <Chart>
           <Settings
             legendPosition={Position.Bottom}
             onElementClick={handleElementClick}

@@ -39,6 +39,7 @@ const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
 const browserBinaryPath: string = process.env.TEST_BROWSER_BINARY_PATH as string;
 const remoteDebug: string = process.env.TEST_REMOTE_DEBUG as string;
 const certValidation: string = process.env.NODE_TLS_REJECT_UNAUTHORIZED as string;
+const noCache: string = process.env.TEST_DISABLE_CACHE as string;
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
@@ -116,6 +117,11 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
 
   if (browserBinaryPath) {
     options.setChromeBinaryPath(browserBinaryPath);
+  }
+
+  if (noCache === '1') {
+    options.addArguments('disk-cache-size', '0');
+    options.addArguments('disk-cache-dir', '/dev/null');
   }
 
   const prefs = new logging.Preferences();
@@ -291,12 +297,12 @@ async function attemptToCreateCommand(
   const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
-    const { KBN_NETWORK_TEST_PROFILE = 'DEFAULT' } = process.env;
+    const { KBN_NETWORK_TEST_PROFILE = 'CLOUD_USER' } = process.env;
 
     const profile =
       KBN_NETWORK_TEST_PROFILE in Object.keys(NETWORK_PROFILES)
         ? KBN_NETWORK_TEST_PROFILE
-        : 'DEFAULT';
+        : 'CLOUD_USER';
 
     const {
       DOWNLOAD: downloadThroughput,
@@ -306,8 +312,15 @@ async function attemptToCreateCommand(
 
     // Only chrome supports this option.
     log.debug(
-      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput}kbps down, ${uploadThroughput}kbps up, ${latency} ms latency.`
+      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput} B/s down, ${uploadThroughput} B/s up, ${latency} ms latency.`
     );
+
+    if (noCache) {
+      // @ts-expect-error
+      await session.sendDevToolsCommand('Network.setCacheDisabled', {
+        cacheDisabled: true,
+      });
+    }
 
     // @ts-expect-error
     session.setNetworkConditions({

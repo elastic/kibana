@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { mapValues } from 'lodash';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import {
+  ExpressionFunctionDefinition,
+  ExpressionAstFunction,
+} from 'src/plugins/expressions/common';
+import {
+  MigrateFunction,
+  MigrateFunctionsObject,
+} from '../../../../../../src/plugins/kibana_utils/common';
 import { ExpressionValueFilter, EmbeddableInput } from '../../../types';
 import { EmbeddableExpressionType, EmbeddableExpression } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
@@ -44,6 +53,22 @@ export function embeddableFunctionFactory({
 }: InitializeArguments): () => EmbeddableFunction {
   return function embeddable(): EmbeddableFunction {
     const { help, args: argHelp } = getFunctionHelp().embeddable;
+
+    const migrateByValueEmbeddable =
+      (
+        migrateFn: MigrateFunction<EmbeddableStateWithType, EmbeddableStateWithType>
+      ): MigrateFunction<ExpressionAstFunction, ExpressionAstFunction> =>
+      (state: ExpressionAstFunction): ExpressionAstFunction => {
+        const embeddableInput = decode(state.arguments.config[0] as string);
+
+        const embeddableType = state.arguments.type[0];
+        const migratedInput = migrateFn({ ...embeddableInput, type: embeddableType });
+
+        state.arguments.config[0] = encode(migratedInput);
+        state.arguments.type[0] = migratedInput.type as string;
+
+        return state;
+      };
 
     return {
       name: 'embeddable',
@@ -140,6 +165,11 @@ export function embeddableFunctionFactory({
         }
         return state;
       },
+
+      migrations: mapValues<
+        MigrateFunctionsObject,
+        MigrateFunction<ExpressionAstFunction, ExpressionAstFunction>
+      >(embeddablePersistableStateService.getAllMigrations(), migrateByValueEmbeddable),
     };
   };
 }

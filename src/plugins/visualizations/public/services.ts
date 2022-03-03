@@ -16,6 +16,7 @@ import type {
   SavedObjectsStart,
   DocLinksStart,
   ThemeServiceStart,
+  ExecutionContextSetup,
 } from '../../../core/public';
 import type { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
@@ -64,5 +65,8 @@ export const [getAggs, setAggs] =
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
+
+export const [getExecutionContext, setExecutionContext] =
+  createGetterSetter<ExecutionContextSetup>('ExecutionContext');
 
 export const [getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spaces', false);

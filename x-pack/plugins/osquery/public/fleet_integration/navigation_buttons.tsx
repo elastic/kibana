@@ -30,7 +30,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
       getUrlForApp(PLUGIN_ID, {
         path: agentPolicyId
           ? `/live_queries/new?agentPolicyId=${agentPolicyId}`
-          : ' `/live_queries/new',
+          : '/live_queries/new',
       }),
     [agentPolicyId, getUrlForApp]
   );
@@ -42,7 +42,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
         navigateToApp(PLUGIN_ID, {
           path: agentPolicyId
             ? `/live_queries/new?agentPolicyId=${agentPolicyId}`
-            : ' `/live_queries/new',
+            : '/live_queries/new',
         });
       }
     },

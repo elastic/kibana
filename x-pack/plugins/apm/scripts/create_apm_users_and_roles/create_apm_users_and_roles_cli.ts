@@ -9,7 +9,7 @@
 
 import { argv } from 'yargs';
 import { AbortError, isAxiosError } from './helpers/call_kibana';
-import { createApmUsersAndRoles } from './create_apm_users_and_roles';
+import { createApmAndObsUsersAndRoles } from './create_apm_users_and_roles';
 import { getKibanaVersion } from './helpers/get_version';
 
 async function init() {
@@ -57,7 +57,7 @@ async function init() {
   const version = await getKibanaVersion({ elasticsearch, kibana });
   console.log(`Connected to Kibana ${version}`);
 
-  const users = await createApmUsersAndRoles({ elasticsearch, kibana });
+  const users = await createApmAndObsUsersAndRoles({ elasticsearch, kibana });
   const credentials = users
     .map((u) => ` - ${u.username} / ${esPassword}`)
     .join('\n');

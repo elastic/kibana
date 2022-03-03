@@ -7,14 +7,14 @@
 
 import React, { memo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { ManagementEmptyStateWraper } from './management_empty_state_wraper';
+import { ManagementEmptyStateWrapper } from './management_empty_state_wrapper';
 
-export const ManagementPageLoader = memo<{ 'data-test-subj': string }>(
+export const ManagementPageLoader = memo<{ 'data-test-subj'?: string }>(
   ({ 'data-test-subj': dataTestSubj }) => {
     return (
-      <ManagementEmptyStateWraper>
+      <ManagementEmptyStateWrapper>
         <EuiLoadingSpinner data-test-subj={dataTestSubj} size="l" />
-      </ManagementEmptyStateWraper>
+      </ManagementEmptyStateWrapper>
     );
   }
 );
