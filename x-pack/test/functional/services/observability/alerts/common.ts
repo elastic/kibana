@@ -75,6 +75,14 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.findAll('dataGridRowCell');
   };
 
+  const getAllDisabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:disabled');
+  };
+
+  const getAllEnabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:enabled');
+  };
+
   const getExperimentalDisclaimer = async () => {
     return testSubjects.existOrFail('o11yExperimentalDisclaimer');
   };
@@ -287,6 +295,8 @@ export function ObservabilityAlertsCommonProvider({
     getAlertsFlyoutOrFail,
     getAlertsFlyoutTitle,
     getAlertsFlyoutViewInAppButtonOrFail,
+    getAllDisabledCheckBoxInTable,
+    getAllEnabledCheckBoxInTable,
     getFilterForValueButton,
     getNoDataPageOrFail,
     getNoDataStateOrFail,
