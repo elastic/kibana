@@ -15,7 +15,7 @@ import {
 import { HOSTS_NAMES } from '../../screens/hosts/all_hosts';
 import { ANOMALIES_TAB } from '../../screens/hosts/main';
 import { BREADCRUMBS, HOSTS, KQL_INPUT, NETWORK } from '../../screens/security_header';
-import { TIMELINE_TITLE } from '../../screens/timeline';
+import { PINNED_TAB_BUTTON, TIMELINE_TITLE } from '../../screens/timeline';
 
 import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
@@ -204,12 +204,13 @@ describe('url state', () => {
     it('should update the url with the saved query', () => {
       loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
       cy.url().should('not.include', `savedQuery=`);
+      cy.intercept('POST', '/api/saved_query/_create').as('savedQuery');
       kqlSearch('host.ip: "1.1.1.1"');
       openAddSavedQueryForm();
       fillAddSavedQueryForm();
-      // We can't provide the value as a savedObjectId is created that we are unable to track
-      // For now we'll check that the param for the savedQuery was added
-      cy.url().should('include', `savedQuery=`);
+      cy.wait('@savedQuery').then(({ response }) => {
+        cy.url().should('include', `savedQuery=${response?.body.id}`);
+      });
     });
   });
 
@@ -304,7 +305,7 @@ describe('url state', () => {
       cy.intercept('PATCH', '/api/timeline').as('timeline');
     });
 
-    it('sets and reads the url state for timeline by id', () => {
+    it('sets and reads the url timelineId state for timeline by id', () => {
       loginAndWaitForPage(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();
@@ -318,12 +319,17 @@ describe('url state', () => {
         cy.wrap(response?.statusCode).should('eql', 200);
         const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
         cy.visit('/app/home');
+        // Validate id & isOpen timeline state property
         cy.visit(`/app/security/alerts?timeline=(id:'${timelineId}',isOpen:!t)`);
-        cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
+        cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('be.visible');
         cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
         cy.get(TIMELINE).should('be.visible');
         cy.get(TIMELINE_TITLE).should('be.visible');
         cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
+        cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
+        // Validate activeTab timeline state property
+        cy.visit(`/app/security/alerts?timeline=(id:'${timelineId}',isOpen:!t,activeTab:pinned)`);
+        cy.get(PINNED_TAB_BUTTON).should('have.attr', 'aria-selected', 'true');
       });
     });
   });
