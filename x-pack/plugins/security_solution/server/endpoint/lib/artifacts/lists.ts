@@ -13,6 +13,7 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { hasSimpleExecutableName, OperatingSystem } from '@kbn/securitysolution-utils';
 
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -20,7 +21,6 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { OperatingSystem } from '../../../../common/endpoint/types';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
   InternalArtifactCompleteSchema,
@@ -40,7 +40,6 @@ import {
   WrappedTranslatedExceptionList,
   wrappedTranslatedExceptionList,
 } from '../../schemas';
-import { hasSimpleExecutableName } from '../../../../common/endpoint/service/trusted_apps/validations';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
@@ -227,7 +226,7 @@ function getMatcherWildcardFunction({
   field: string;
   os: ExceptionListItemSchema['os_types'][number];
 }): TranslatedEntryMatchWildcardMatcher {
-  return field.endsWith('.caseless')
+  return field.endsWith('.caseless') || field.endsWith('.text')
     ? os === 'linux'
       ? 'wildcard_cased'
       : 'wildcard_caseless'

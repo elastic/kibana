@@ -6,16 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { LegacyRequest, LegacyServer } from '../../../../types';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 
-export function clustersRoute(server) {
+export function clustersRoute(server: LegacyServer) {
   /*
    * Monitoring Home
    * Route Init (for checking license and compatibility for multi-cluster monitoring
    */
+
+  // TODO switch from the LegacyServer route() method to the "new platform" route methods
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters',
@@ -30,7 +33,7 @@ export function clustersRoute(server) {
         }),
       },
     },
-    handler: async (req) => {
+    handler: async (req: LegacyRequest) => {
       let clusters = [];
       const config = server.config;
 
@@ -43,7 +46,7 @@ export function clustersRoute(server) {
           filebeatIndexPattern: config.ui.logs.index,
         });
         clusters = await getClustersFromRequest(req, indexPatterns, {
-          codePaths: req.payload.codePaths,
+          codePaths: req.payload.codePaths as string[], // TODO remove this cast when we can properly type req by using the right route handler
         });
       } catch (err) {
         throw handleError(err, req);

@@ -22744,7 +22744,6 @@
     "xpack.securitySolution.artifactCard.conditions.matchOperator.not": "不是",
     "xpack.securitySolution.artifactCard.conditions.nestedOperator": "具有",
     "xpack.securitySolution.artifactCard.conditions.os": "OS",
-    "xpack.securitySolution.artifactCard.conditions.wildcardOperator": "匹配",
     "xpack.securitySolution.artifactCard.conditions.windows": "Windows",
     "xpack.securitySolution.artifactCard.created": "创建时间",
     "xpack.securitySolution.artifactCard.createdBy": "创建者",
