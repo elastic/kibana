@@ -11,7 +11,6 @@ export interface ChoroplethChartState {
   layerId: string;
   emsLayerId?: string;
   emsField?: string;
-  accessor?: string;
   regionAccessor?: string;
   valueAccessor?: string;
   isPreview?: boolean;

@@ -54,10 +54,12 @@ export const getVisualization = ({
   },
 
   clearLayer(state) {
-    return {
-      ...state,
-      accessor: undefined,
-    };
+    const newState = { ...state };
+    delete newState.emsLayerId;
+    delete newState.emsField;
+    delete newState.regionAccessor;
+    delete newState.valueAccessor;
+    return newState;
   },
 
   getLayerIds(state) {
@@ -121,7 +123,7 @@ export const getVisualization = ({
     return [
       {
         type: layerTypes.DATA,
-        label: i18n.translate('xpack.lens.metric.addLayer', {
+        label: i18n.translate('xpack.maps.lens.choroplethChart.addLayer', {
           defaultMessage: 'Add visualization layer',
         }),
       },
@@ -219,7 +221,6 @@ export const getVisualization = ({
   },
 
   getErrorMessages(state) {
-    // Is it possible to break it?
     return undefined;
   },
 });

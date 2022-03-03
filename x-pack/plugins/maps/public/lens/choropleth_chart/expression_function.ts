@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import type { LensMultiTable } from '../../../../lens/common';
 import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';
@@ -25,13 +24,11 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
 > => ({
   name: 'lens_choropleth_chart',
   type: 'render',
-  help: 'A choropleth chart',
+  help: 'A choropleth chart. Metrics are joined to vector features to compare values across political boundaries',
   args: {
     title: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.metric.title.help', {
-        defaultMessage: 'The chart title.',
-      }),
+      help: '',
     },
     description: {
       types: ['string'],
@@ -43,23 +40,23 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
     },
     emsField: {
       types: ['string'],
-      help: 'emsField',
+      help: 'Elastic Map Service boundaries layer field provides the vector feature join key',
     },
     emsLayerId: {
       types: ['string'],
-      help: 'emsLayerId',
+      help: 'Elastic Map Service boundaries layer id that provides vector features',
     },
     regionAccessor: {
       types: ['string'],
-      help: 'regionAccessor',
+      help: 'Bucket accessor identifies the region key column',
     },
     valueAccessor: {
       types: ['string'],
-      help: 'Metric',
+      help: 'Value accessor identifies the value column',
     },
     isPreview: {
       types: ['boolean'],
-      help: 'When true, map is displayed as lens preview',
+      help: 'When true, display as lens preview',
     },
   },
   inputTypes: ['lens_multitable'],
