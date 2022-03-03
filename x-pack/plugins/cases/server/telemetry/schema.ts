@@ -29,26 +29,29 @@ export const casesSchema: CasesTelemetrySchema = {
     obs: countSchema,
     main: countSchema,
   },
-  userActions: { all: countSchema, maxOnACase: long },
-  comments: { all: countSchema, maxOnACase: long },
-  alerts: { all: countSchema, maxOnACase: long },
+  userActions: { all: { ...countSchema, maxOnACase: long } },
+  comments: { all: { ...countSchema, maxOnACase: long } },
+  alerts: { all: { ...countSchema, maxOnACase: long } },
   connectors: {
-    all: { totalAttached: long },
-    itsm: { totalAttached: long },
-    sir: { totalAttached: long },
-    jira: { totalAttached: long },
-    resilient: { totalAttached: long },
-    swimlane: { totalAttached: long },
-    maxAttachedToACase: long,
+    all: {
+      all: { totalAttached: long },
+      itsm: { totalAttached: long },
+      sir: { totalAttached: long },
+      jira: { totalAttached: long },
+      resilient: { totalAttached: long },
+      swimlane: { totalAttached: long },
+      maxAttachedToACase: long,
+    },
   },
   pushes: {
-    all: { total: long },
-    maxOnACase: long,
+    all: { total: long, maxOnACase: long },
   },
   configuration: {
-    closure: {
-      manually: long,
-      automatic: long,
+    all: {
+      closure: {
+        manually: long,
+        automatic: long,
+      },
     },
   },
 };

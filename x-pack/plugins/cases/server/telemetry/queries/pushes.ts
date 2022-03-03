@@ -36,7 +36,6 @@ export const getPushedTelemetryData = async ({
   const maxOnACase = res.aggregations?.references?.cases.max.value ?? 0;
 
   return {
-    all: { total: res.total },
-    maxOnACase,
+    all: { total: res.total, maxOnACase },
   };
 };

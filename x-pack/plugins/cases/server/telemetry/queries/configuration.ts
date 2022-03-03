@@ -31,9 +31,11 @@ export const getConfigurationTelemetryData = async ({
   const closureBuckets = res.aggregations?.closureType?.buckets ?? [];
 
   return {
-    closure: {
-      manually: findValueInBuckets(closureBuckets, 'close-by-user'),
-      automatic: findValueInBuckets(closureBuckets, 'close-by-pushing'),
+    all: {
+      closure: {
+        manually: findValueInBuckets(closureBuckets, 'close-by-user'),
+        automatic: findValueInBuckets(closureBuckets, 'close-by-pushing'),
+      },
     },
   };
 };

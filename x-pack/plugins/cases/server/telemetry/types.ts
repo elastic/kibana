@@ -43,26 +43,29 @@ export interface CasesTelemetry {
     obs: Count;
     main: Count;
   };
-  userActions: { all: Count; maxOnACase: number };
-  comments: { all: Count; maxOnACase: number };
-  alerts: { all: Count; maxOnACase: number };
+  userActions: { all: Count & { maxOnACase: number } };
+  comments: { all: Count & { maxOnACase: number } };
+  alerts: { all: Count & { maxOnACase: number } };
   connectors: {
-    all: { totalAttached: number };
-    itsm: { totalAttached: number };
-    sir: { totalAttached: number };
-    jira: { totalAttached: number };
-    resilient: { totalAttached: number };
-    swimlane: { totalAttached: number };
-    maxAttachedToACase: number;
+    all: {
+      all: { totalAttached: number };
+      itsm: { totalAttached: number };
+      sir: { totalAttached: number };
+      jira: { totalAttached: number };
+      resilient: { totalAttached: number };
+      swimlane: { totalAttached: number };
+      maxAttachedToACase: number;
+    };
   };
   pushes: {
-    all: { total: number };
-    maxOnACase: number;
+    all: { total: number; maxOnACase: number };
   };
   configuration: {
-    closure: {
-      manually: number;
-      automatic: number;
+    all: {
+      closure: {
+        manually: number;
+        automatic: number;
+      };
     };
   };
 }

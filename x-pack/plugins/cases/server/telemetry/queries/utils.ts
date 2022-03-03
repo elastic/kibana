@@ -114,8 +114,8 @@ export const getCountsAndMaxData = async ({
     all: {
       total: res.total,
       ...getCountsFromBuckets(countsBuckets),
+      maxOnACase,
     },
-    maxOnACase,
   };
 };
 

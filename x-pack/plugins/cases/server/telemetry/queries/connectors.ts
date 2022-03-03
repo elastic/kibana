@@ -70,12 +70,14 @@ export const getConnectorsTelemetryData = async ({
   const allAttached = all[0].aggregations?.references?.connectors?.uniqueConnectors?.value ?? 0;
 
   return {
-    all: { totalAttached: allAttached },
-    itsm: { totalAttached: data['.servicenow'] },
-    sir: { totalAttached: data['.servicenow-sir'] },
-    jira: { totalAttached: data['.jira'] },
-    resilient: { totalAttached: data['.resilient'] },
-    swimlane: { totalAttached: data['.swimlane'] },
-    maxAttachedToACase: 0,
+    all: {
+      all: { totalAttached: allAttached },
+      itsm: { totalAttached: data['.servicenow'] },
+      sir: { totalAttached: data['.servicenow-sir'] },
+      jira: { totalAttached: data['.jira'] },
+      resilient: { totalAttached: data['.resilient'] },
+      swimlane: { totalAttached: data['.swimlane'] },
+      maxAttachedToACase: 0,
+    },
   };
 };
