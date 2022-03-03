@@ -16,7 +16,12 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableSetup,
+  EmbeddableStart,
+  IEmbeddable,
+} from '../../../../src/plugins/embeddable/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import type {
@@ -67,9 +72,15 @@ import {
   UiActionsStart,
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
+  createAction,
 } from '../../../../src/plugins/ui_actions/public';
 import { VISUALIZE_EDITOR_TRIGGER } from '../../../../src/plugins/visualizations/public';
-import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
+import {
+  APP_ID,
+  DOC_TYPE,
+  getEditPath,
+  NOT_INTERNATIONALIZED_PRODUCT_NAME,
+} from '../common/constants';
 import type { FormatFactory } from '../common/types';
 import type {
   Visualization,
@@ -252,6 +263,7 @@ export class LensPlugin {
         plugins.fieldFormats.deserialize
       );
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
+      const datasourceMap = await this.editorFrameService!.loadDatasources();
 
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
@@ -262,6 +274,7 @@ export class LensPlugin {
         documentToExpression: this.editorFrameService!.documentToExpression,
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
+        datasourceMap,
         indexPatternService: plugins.data.indexPatterns,
         uiActions: plugins.uiActions,
         usageCollection,
@@ -428,6 +441,21 @@ export class LensPlugin {
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_EDITOR_TRIGGER,
       visualizeTSVBAction(core.application)
+    );
+
+    startDependencies.uiActions.addTriggerAction(
+      CONTEXT_MENU_TRIGGER,
+      createAction<{ embeddable: IEmbeddable }>({
+        type: 'VIEW_UNDERLYING_DATA',
+        id: 'VIEW_UNDERLYING_DATA',
+        getDisplayName: () => 'Open in Discover',
+        isCompatible: async (context: { embeddable: IEmbeddable }) => {
+          return context.embeddable.type === DOC_TYPE;
+        },
+        execute: async (context: { embeddable: IEmbeddable }) => {
+          alert('FOOBAR');
+        },
+      })
     );
 
     return {

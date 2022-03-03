@@ -56,21 +56,24 @@ import {
   LensTableRowContextMenuEvent,
   VisualizationMap,
   Visualization,
+  DatasourceMap,
 } from '../types';
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
 import type {
+  Capabilities,
   IBasePath,
   KibanaExecutionContext,
   ThemeServiceStart,
 } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
-import type { ErrorMessage } from '../editor_frame_service/types';
+import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps } from '../types';
 import type { SpacesPluginStart } from '../../../spaces/public';
-import { inferTimeField } from '../utils';
+import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
+import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -115,6 +118,7 @@ export interface LensEmbeddableDeps {
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
+  datasourceMap: DatasourceMap;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
@@ -122,7 +126,12 @@ export interface LensEmbeddableDeps {
   inspector: InspectorStart;
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
-  capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
+  capabilities: {
+    canSaveVisualizations: boolean;
+    canSaveDashboards: boolean;
+    navLinks: Capabilities['navLinks'];
+    discover?: Capabilities['discover'];
+  };
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
@@ -388,7 +397,10 @@ export class Embeddable
     return isDirty;
   }
 
-  private updateActiveData: ExpressionWrapperProps['onData$'] = () => {
+  private updateActiveData: ExpressionWrapperProps['onData$'] = (data) => {
+    this.getViewUnderlyingDataArgs(data?.value?.data?.tables as TableInspectorAdapter).then(
+      console.log
+    );
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
@@ -596,6 +608,42 @@ export class Embeddable
     if (this.domNode) {
       this.render(this.domNode);
     }
+  }
+
+  async getViewUnderlyingDataArgs(activeData: TableInspectorAdapter) {
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+
+    if (!activeDatasourceId) {
+      return;
+    }
+
+    const { error, meta } = getLayerMetaInfo(
+      this.deps.datasourceMap[activeDatasourceId],
+      (this.savedVis?.state.datasourceStates[activeDatasourceId] as { state: unknown }).state,
+      activeData,
+      this.deps.capabilities
+    );
+
+    if (error || !meta) {
+      return;
+    }
+
+    const { indexPatterns } = await getIndexPatternsObjects([], this.deps.indexPatternService);
+
+    const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+      this.input.query,
+      this.input.filters || [],
+      meta,
+      indexPatterns
+    );
+
+    return {
+      indexPatternId: meta.id,
+      timeRange: this.input.timeRange,
+      filters: newFilters,
+      query: newQuery,
+      columns: meta.columns,
+    };
   }
 
   async initializeOutput() {

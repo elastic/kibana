@@ -61,7 +61,7 @@ export class EditorFrameService {
   private readonly datasources: Array<Datasource | (() => Promise<Datasource>)> = [];
   private readonly visualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
 
-  private loadDatasources = () => collectAsyncDefinitions(this.datasources);
+  public loadDatasources = () => collectAsyncDefinitions(this.datasources);
   public loadVisualizations = () => collectAsyncDefinitions(this.visualizations);
 
   /**
