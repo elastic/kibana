@@ -51,7 +51,7 @@ import {
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -84,13 +84,13 @@ describe.skip('Detection rules, EQL', () => {
     });
   });
 
-  it('Creates and activates a new EQL rule', function () {
+  it('Creates and enables a new EQL rule', function () {
     loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -176,13 +176,13 @@ describe.skip('Detection rules, sequence EQL', () => {
     });
   });
 
-  it('Creates and activates a new EQL rule with a sequence', function () {
+  it('Creates and enables a new EQL rule with a sequence', function () {
     loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

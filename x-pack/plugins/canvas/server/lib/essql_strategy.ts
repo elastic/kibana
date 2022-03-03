@@ -32,11 +32,11 @@ export const essqlSearchStrategyProvider = (): ISearchStrategy<
               format: 'json',
               body: {
                 query,
-                // @ts-expect-error `params` missing from `QuerySqlRequest` type
                 params,
                 field_multi_value_leniency: true,
                 time_zone: timezone,
                 fetch_size: count,
+                // @ts-expect-error `client_id` missing from `QuerySqlRequest` type
                 client_id: 'canvas',
                 filter: {
                   bool: {

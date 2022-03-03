@@ -4,7 +4,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-securitysolution-es-utils"
 PKG_REQUIRE_NAME = "@kbn/securitysolution-es-utils"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__securitysolution-es-utils"
 
 SOURCE_FILES = glob(
   [
@@ -65,11 +64,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 
@@ -100,7 +97,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )
