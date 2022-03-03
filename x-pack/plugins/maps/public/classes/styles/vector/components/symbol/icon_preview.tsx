@@ -17,6 +17,7 @@ export interface Props {
   svg?: string;
   cutoff?: number;
   radius?: number;
+  isSvgInvalid?: boolean;
 }
 
 interface State {
@@ -68,9 +69,13 @@ export class IconPreview extends Component<Props, State> {
   };
 
   async _syncImageToMap() {
-    if (this._isMounted && this.state.map && this.props.svg) {
+    if (this._isMounted && this.state.map) {
       const map = this.state.map;
-      const { svg, cutoff, radius } = this.props;
+      const { svg, cutoff, radius, isSvgInvalid } = this.props;
+      if (!svg || isSvgInvalid) {
+        map.setLayoutProperty('icon-layer', 'visibility', 'none');
+        return;
+      }
       const imageData = await createSdfIcon({ svg, cutoff, radius });
       if (map.hasImage(IconPreview.iconId)) {
         // @ts-expect-error
@@ -80,6 +85,7 @@ export class IconPreview extends Component<Props, State> {
       }
       map.setLayoutProperty('icon-layer', 'icon-image', IconPreview.iconId);
       map.setLayoutProperty('icon-layer', 'icon-size', 6);
+      map.setLayoutProperty('icon-layer', 'visibility', 'visible');
       this._syncPaintPropertiesToMap();
     }
   }

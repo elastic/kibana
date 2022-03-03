@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
-import { get } from 'lodash';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiButton,
@@ -93,6 +92,10 @@ const strings = {
     i18n.translate('xpack.maps.customIconModal.imageInputLabel', {
       defaultMessage: 'SVG icon',
     }),
+  getInvalidFileLabel: () =>
+    i18n.translate('xpack.maps.customIconModal.invalidFileError', {
+      defaultMessage: 'Icon must be in SVG format. Other image types are not supported.',
+    }),
   getNameInputLabel: () =>
     i18n.translate('xpack.maps.customIconModal.nameInputLabel', {
       defaultMessage: 'Name',
@@ -172,9 +175,10 @@ interface State {
 
   cutoff?: number;
   radius?: number;
+  isFileInvalid?: boolean;
 }
 
-export class CustomIconModal extends PureComponent<Props, State> {
+export class CustomIconModal extends Component<Props, State> {
   public static propTypes = {
     symbolId: PropTypes.string,
     name: PropTypes.string,
@@ -193,9 +197,10 @@ export class CustomIconModal extends PureComponent<Props, State> {
     svg: this.props.svg || '',
     cutoff: this.props.cutoff,
     radius: this.props.radius,
+    isFileInvalid: this.props.svg ? false : true,
   };
 
-  private _handleChange = (type: 'name' | 'id' | 'svg' | 'cutoff' | 'radius', value: string) => {
+  private _handleChange = (type: 'name' | 'svg', value: string) => {
     this.setState({ [type]: value });
   };
 
@@ -208,18 +213,25 @@ export class CustomIconModal extends PureComponent<Props, State> {
   };
 
   private _handleUpload = (files: FileList | null) => {
-    if (files == null) return;
-    const file = files[0];
-    const [type, subtype] = get(file, 'type', '').split('/');
-    if (type === 'image') {
-      file.text().then((img: string) => this._handleChange('svg', img));
+    if (!files || !files.length) {
+      this._handleChange('svg', '');
+      return;
     }
+    const file = files[0];
+    const { type } = file;
+    if (type === 'image/svg+xml') {
+      this.setState({ isFileInvalid: false });
+    } else {
+      this.setState({ isFileInvalid: true });
+    }
+    file.text().then((img: string) => this._handleChange('svg', img));
   };
 
   public render() {
     const { onSave, onCancel, onDelete, title, ...rest } = this.props;
-    const { symbolId, name, svg, cutoff, radius } = this.state;
-
+    const { symbolId, name, svg, cutoff, radius, isFileInvalid } = this.state;
+    const isComplete = name.length !== 0 && svg.length !== 0 && !isFileInvalid;
+    const fileError = svg && isFileInvalid ? strings.getInvalidFileLabel() : '';
     return (
       <EuiModal
         {...rest}
@@ -245,7 +257,6 @@ export class CustomIconModal extends PureComponent<Props, State> {
                   value={name}
                   className="mapsCustomIconForm__name"
                   onChange={(e) =>
-                    e.target.value.length <= MAX_NAME_LENGTH &&
                     this._handleChange('name', e.target.value)
                   }
                   required
@@ -256,12 +267,16 @@ export class CustomIconModal extends PureComponent<Props, State> {
                 className="mapsCustomIconForm__thumbnail"
                 label={strings.getImageInputLabel()}
                 display="rowCompressed"
+                isInvalid={!!fileError}
+                error={fileError}
               >
                 <EuiFilePicker
                   initialPromptText={strings.getImageFilePickerPlaceholder()}
                   onChange={this._handleUpload}
                   className="mapsImageUpload"
                   accept=".svg"
+                  isInvalid={!!fileError}
+                  required
                 />
               </EuiFormRow>
               <EuiText className="mapsCustomIconForm__thumbnailHelp" size="xs">
@@ -308,7 +323,7 @@ export class CustomIconModal extends PureComponent<Props, State> {
                 <h4>{strings.getIconPreviewTitle()}</h4>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <IconPreview svg={svg} cutoff={cutoff} radius={radius} />
+              <IconPreview svg={svg} isSvgInvalid={isFileInvalid} cutoff={cutoff} radius={radius} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalBody>
@@ -324,6 +339,7 @@ export class CustomIconModal extends PureComponent<Props, State> {
                   onSave({ symbolId, name, svg, cutoff, radius });
                 }}
                 data-test-subj="mapsCustomIconForm-submit"
+                isDisabled={!isComplete}
               >
                 {strings.getSaveButtonLabel()}
               </EuiButton>

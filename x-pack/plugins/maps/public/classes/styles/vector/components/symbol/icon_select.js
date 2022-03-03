@@ -220,7 +220,7 @@ export class IconSelect extends Component {
         </EuiPopover>
         {this.state.isModalVisible ? (
           <CustomIconModal
-            title="Custom Icon"
+            title="Add custom Icon"
             cutoff={DEFAULT_CUSTOM_ICON_CUTOFF}
             radius={DEFAULT_CUSTOM_ICON_RADIUS}
             onSave={this._handleSave}
