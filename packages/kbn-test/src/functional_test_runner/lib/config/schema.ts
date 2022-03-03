@@ -199,7 +199,9 @@ export const schema = Joi.object()
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
         ccs: Joi.object().keys({
-          remoteClusterPort: Joi.number(),
+          remoteClusterUrl: Joi.string().uri({
+            scheme: /https?/,
+          }),
         }),
       })
       .default(),

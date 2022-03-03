@@ -20,7 +20,7 @@ interface RunElasticsearchOptions {
 }
 
 interface CcsConfig {
-  remoteClusterPort: number;
+  remoteClusterUrl: string;
 }
 
 type EsConfig = ReturnType<typeof getEsConfig>;
@@ -74,7 +74,7 @@ export async function runElasticsearch(
   const remotePort = await getPort();
   const remoteNode = await startEsNode(log, 'ftr-remote', {
     ...config,
-    port: config.ccsConfig.remoteClusterPort,
+    port: parseInt(new URL(config.ccsConfig.remoteClusterUrl).port, 10),
     transportPort: remotePort,
   });
 

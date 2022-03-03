@@ -36,13 +36,8 @@ export function createRemoteEsClientForFtrConfig(
     throw new Error('FTR config is missing esTestCluster.ccs');
   }
 
-  const esUrl = Url.format({
-    ...config.get('servers.elasticsearch'),
-    port: ccsConfig.remoteClusterPort,
-  });
-
   return createEsClientForTesting({
-    esUrl,
+    esUrl: ccsConfig.remoteClusterUrl,
     requestTimeout: config.get('timeouts.esRequestTimeout'),
     ...overrides,
   });
