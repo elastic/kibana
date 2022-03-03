@@ -10,9 +10,9 @@ import type { ElasticsearchClient, IRouter, Logger } from 'kibana/server';
 import seedrandom from 'seedrandom';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRemoteRoutePaths } from '../../common';
-import { FlameGraph } from './flamegraph';
+import { FlameGraph } from '../../common/flamegraph';
+import { Executable, FileID, StackFrame, StackFrameID, StackTrace, StackTraceID } from '../../common/profiling';
 import { newProjectTimeQuery, ProjectTimeQuery } from './mappings';
-import { Executable, FileID, StackFrame, StackFrameID, StackTrace, StackTraceID } from './types';
 
 export interface DownsampledEventsIndex {
   name: string;
