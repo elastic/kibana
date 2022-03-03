@@ -21,6 +21,7 @@ import { CasesUiConfigType } from '../common/ui/types';
 import { getCasesContextLazy } from './methods/get_cases_context';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { getRuleIdFromEvent } from './methods/get_rule_id_from_event';
 
 /**
  * @public
@@ -51,6 +52,9 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
       hooks: {
         getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
         getUseCasesAddToExistingCaseModal: useCasesAddToExistingCaseModal,
+      },
+      helpers: {
+        getRuleIdFromEvent,
       },
     };
   }
