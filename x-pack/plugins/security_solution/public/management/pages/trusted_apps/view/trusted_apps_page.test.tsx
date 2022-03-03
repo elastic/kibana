@@ -11,11 +11,8 @@ import { TrustedAppsPage } from './trusted_apps_page';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { fireEvent } from '@testing-library/dom';
 import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
-import {
-  ConditionEntryField,
-  OperatingSystem,
-  TrustedApp,
-} from '../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { TrustedApp } from '../../../../../common/endpoint/types';
 import { HttpFetchOptions, HttpFetchOptionsWithPath } from 'kibana/public';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from '../../../components/effected_policy_select/test_utils';
