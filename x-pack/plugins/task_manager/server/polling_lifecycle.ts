@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject, Observable, Subscription, from } from 'rxjs';
+import { Subject, Observable, Subscription } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
