@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export interface BaseMeta {
-  dataViewId?: string;
-  indexPatternString?: string;
-}
+export { FieldSelect } from './field_select';
