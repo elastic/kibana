@@ -22,4 +22,5 @@ export const LazyNoDataViewsComponent = React.lazy(() =>
  * A `NoDataViews` component and its props.  This component is a pure UI
  * component, and has no reference to services.
  */
-export { NoDataViewsComponent, NoDataViewsComponentProps } from './empty_state';
+export { NoDataViewsComponent } from './empty_state';
+export type { NoDataViewsComponentProps } from './empty_state';

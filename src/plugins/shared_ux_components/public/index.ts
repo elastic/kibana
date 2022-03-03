@@ -17,4 +17,4 @@ export function plugin() {
 
 export type { SharedUXComponentsPluginSetup, SharedUXComponentsPluginStart } from './types';
 export { NoDataViewsComponent, LazyNoDataViewsComponent } from './components';
-export { NoDataViewsComponentProps } from './components';
+export type { NoDataViewsComponentProps } from './components';
