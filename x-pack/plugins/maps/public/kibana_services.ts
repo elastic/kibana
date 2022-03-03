@@ -33,6 +33,7 @@ export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
 export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;
 export const getHttp = () => coreStart.http;
+export const getExecutionContext = () => coreStart.executionContext;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;
 export const getToasts = () => coreStart.notifications.toasts;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;

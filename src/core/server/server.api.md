@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import { AddConfigDeprecation } from '@kbn/config';
+import apm from 'elastic-apm-node';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
@@ -1001,6 +1002,8 @@ export class EventLoopDelaysMonitor {
 
 // @public (undocumented)
 export interface ExecutionContextSetup {
+    // (undocumented)
+    getAsLabels(): apm.Labels;
     withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
 }
 
@@ -1326,9 +1329,10 @@ export interface IUiSettingsClient {
 
 // @public
 export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
+    readonly type?: string;
+    readonly name?: string;
+    readonly page?: string;
+    readonly id?: string;
     readonly description?: string;
     readonly url?: string;
     child?: KibanaExecutionContext;
