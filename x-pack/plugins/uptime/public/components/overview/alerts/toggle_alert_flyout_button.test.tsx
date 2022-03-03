@@ -7,6 +7,8 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import {
   render,
   forNearestButton,
@@ -14,6 +16,18 @@ import {
 } from '../../../lib/helper/rtl_helpers';
 import { ToggleAlertFlyoutButtonComponent } from './toggle_alert_flyout_button';
 import { ToggleFlyoutTranslations } from './translations';
+
+const mockStartServices = mockCoreMock.createStart();
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({
+    services: {
+      ...mockStartServices,
+      observability: {
+        useRulesLink: jest.fn().mockImplementation(() => ({ href: 'newRuleLink' })),
+      },
+    },
+  }),
+}));
 
 describe('ToggleAlertFlyoutButtonComponent', () => {
   describe('when users have write access to uptime', () => {
