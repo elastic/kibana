@@ -602,6 +602,27 @@ export default async function ({ readConfigFile }) {
             cluster: ['manage'],
           },
         },
+
+        global_alerts_logs_all_else_read: {
+          kibana: [
+            {
+              feature: {
+                apm: ['read'],
+                logs: ['all'],
+                infrastructure: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
       },
       defaultRoles: ['superuser'],
     },
