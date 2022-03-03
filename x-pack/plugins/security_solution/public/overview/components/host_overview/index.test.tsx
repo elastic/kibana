@@ -14,9 +14,9 @@ import { TestProviders } from '../../../common/mock';
 import { HostOverview } from './index';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { useHostRiskScore } from '../../../risk_score/containers';
+import { useHostRiskScore } from '../../../risk_score/containers/all';
 
-jest.mock('../../../risk_score/containers', () => ({
+jest.mock('../../../risk_score/containers/all', () => ({
   useHostRiskScore: jest.fn().mockReturnValue([
     true,
     {

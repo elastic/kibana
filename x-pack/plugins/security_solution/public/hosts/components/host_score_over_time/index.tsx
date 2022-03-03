@@ -29,7 +29,7 @@ import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
-import { buildHostNamesFilter } from '../../../../common/search_strategy';
+import { buildHostNamesFilter } from '../../../../common/search_strategy/security_solution/risk_score';
 import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
 
 export interface HostRiskScoreOverTimeProps
