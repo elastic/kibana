@@ -15,24 +15,27 @@ import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import { ArtifactFormComponentProps } from './types';
 import { HttpFetchError } from 'kibana/public';
+import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 
 describe('When using the ArtifactListPage component', () => {
-  let render: () => ReturnType<AppContextTestRender['render']>;
+  let render: (
+    props?: Partial<ArtifactListPageProps>
+  ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   let FormComponentMock: jest.Mock<React.FunctionComponent<ArtifactFormComponentProps>>;
 
-  interface FutureInterface<T = void> {
+  interface DeferredInterface<T = void> {
     promise: Promise<T>;
     resolve: (data: T) => void;
     reject: (e: Error) => void;
   }
 
-  const getFuture = function <T = void>(): FutureInterface<T> {
-    let resolve: FutureInterface<T>['resolve'];
-    let reject: FutureInterface<T>['reject'];
+  const getDeferred = function <T = void>(): DeferredInterface<T> {
+    let resolve: DeferredInterface<T>['resolve'];
+    let reject: DeferredInterface<T>['reject'];
 
     const promise = new Promise<T>((_resolve, _reject) => {
       resolve = _resolve;
@@ -91,7 +94,7 @@ describe('When using the ArtifactListPage component', () => {
 
   it('should display a loader while determining which view to show', async () => {
     // Mock a delay into the list results http call
-    const deferrable = getFuture();
+    const deferrable = getDeferred();
     mockedApi.responseProvider.trustedAppsList.mockDelay.mockReturnValue(deferrable.promise);
 
     const { getByTestId } = render();
@@ -142,22 +145,35 @@ describe('When using the ArtifactListPage component', () => {
   });
 
   describe('and the flyout is opened', () => {
+    let renderAndWaitForFlyout: (
+      props?: Partial<ArtifactListPageProps>
+    ) => Promise<ReturnType<typeof render>>;
+
     beforeEach(async () => {
       history.push('somepage?show=create');
-      render();
 
-      await waitFor(async () => {
-        expect(renderResult.getByTestId('testPage-flyout'));
-      });
+      renderAndWaitForFlyout = async (...props) => {
+        render(...props);
+
+        await waitFor(async () => {
+          expect(renderResult.getByTestId('testPage-flyout'));
+        });
+
+        return renderResult;
+      };
     });
 
-    it('should display `Cancel` button enabled', () => {
+    it('should display `Cancel` button enabled', async () => {
+      await renderAndWaitForFlyout();
+
       expect(
         (renderResult.getByTestId('testPage-flyout-cancelButton') as HTMLButtonElement).disabled
       ).toBe(false);
     });
 
-    it('should display `Submit` button as disabled', () => {
+    it('should display `Submit` button as disabled', async () => {
+      await renderAndWaitForFlyout();
+
       expect(
         (renderResult.getByTestId('testPage-flyout-submitButton') as HTMLButtonElement).disabled
       ).toBe(true);
@@ -167,6 +183,8 @@ describe('When using the ArtifactListPage component', () => {
       ['Cancel', 'testPage-flyout-cancelButton'],
       ['Close', 'euiFlyoutCloseButton'],
     ])('should close flyout when `%s` button is clicked', async (_, testId) => {
+      await renderAndWaitForFlyout();
+
       act(() => {
         userEvent.click(renderResult.getByTestId(testId));
       });
@@ -175,7 +193,9 @@ describe('When using the ArtifactListPage component', () => {
       expect(history.location.search).toEqual('');
     });
 
-    it('should pass to the Form component the expected props', () => {
+    it('should pass to the Form component the expected props', async () => {
+      await renderAndWaitForFlyout();
+
       expect(FormComponentMock).toHaveBeenLastCalledWith(
         {
           disabled: false,
@@ -201,14 +221,24 @@ describe('When using the ArtifactListPage component', () => {
     });
 
     describe('and form data is valid', () => {
-      beforeEach(() => {
-        act(() => {
-          const lastProps = getLastFormComponentProps();
-          lastProps.onChange({ item: { ...lastProps.item, name: 'some name' }, isValid: true });
-        });
+      beforeEach(async () => {
+        const _renderAndWaitForFlyout = renderAndWaitForFlyout;
+
+        renderAndWaitForFlyout = async (...props) => {
+          await _renderAndWaitForFlyout(...props);
+
+          act(() => {
+            const lastProps = getLastFormComponentProps();
+            lastProps.onChange({ item: { ...lastProps.item, name: 'some name' }, isValid: true });
+          });
+
+          return renderResult;
+        };
       });
 
-      it('should enable the `Submit` button', () => {
+      it('should enable the `Submit` button', async () => {
+        await renderAndWaitForFlyout();
+
         expect(
           (renderResult.getByTestId('testPage-flyout-submitButton') as HTMLButtonElement).disabled
         ).toBe(false);
@@ -218,11 +248,13 @@ describe('When using the ArtifactListPage component', () => {
         let releaseApiUpdateResponse: () => void;
         let getByTestId: typeof renderResult['getByTestId'];
 
-        beforeEach(() => {
+        beforeEach(async () => {
+          await renderAndWaitForFlyout();
+
           getByTestId = renderResult.getByTestId;
 
           // Mock a delay into the create api http call
-          const deferrable = getFuture();
+          const deferrable = getDeferred();
           mockedApi.responseProvider.trustedAppCreate.mockDelay.mockReturnValue(deferrable.promise);
           releaseApiUpdateResponse = deferrable.resolve;
 
@@ -259,6 +291,8 @@ describe('When using the ArtifactListPage component', () => {
 
       describe('and submit is successful', () => {
         beforeEach(async () => {
+          await renderAndWaitForFlyout();
+
           act(() => {
             userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
           });
@@ -284,6 +318,8 @@ describe('When using the ArtifactListPage component', () => {
       // FIXME:PT revisit these tests. having hard time making them work
       describe.skip('and submit fails', () => {
         beforeEach(async () => {
+          await renderAndWaitForFlyout();
+
           mockedApi.responseProvider.trustedAppCreate.mockImplementation(() => {
             // eslint-disable-next-line no-throw-literal
             throw new Error('oh oh. no good!') as HttpFetchError;
@@ -325,9 +361,70 @@ describe('When using the ArtifactListPage component', () => {
       });
 
       describe('and a custom Submit handler is used', () => {
-        it.todo('should use custom submit handler when submit button is used'); // loading and button disabled checks
+        let handleSubmitCallback: jest.Mock;
+        let releaseSuccessSubmit: () => void;
+        let releaseFailureSubmit: () => void;
 
-        it.todo('should catch and show error if one is encountered');
+        beforeEach(async () => {
+          const deferred = getDeferred();
+          releaseSuccessSubmit = () => act(() => deferred.resolve());
+          releaseFailureSubmit = () => act(() => deferred.reject(new Error('oh oh. No good')));
+
+          handleSubmitCallback = jest.fn(async (item) => {
+            await deferred.promise;
+
+            return new ExceptionsListItemGenerator().generateTrustedApp(item);
+          });
+
+          await renderAndWaitForFlyout({ onFormSubmit: handleSubmitCallback });
+
+          act(() => {
+            userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+          });
+        });
+
+        afterEach(() => {
+          if (releaseSuccessSubmit) {
+            releaseSuccessSubmit();
+          }
+        });
+
+        it('should use custom submit handler when submit button is used', async () => {
+          expect(handleSubmitCallback).toHaveBeenCalled();
+
+          expect(
+            (renderResult.getByTestId('testPage-flyout-cancelButton') as HTMLButtonElement).disabled
+          ).toBe(true);
+
+          expect(
+            (renderResult.getByTestId('testPage-flyout-submitButton') as HTMLButtonElement).disabled
+          ).toBe(true);
+        });
+
+        it('should catch and show error if one is encountered', async () => {
+          releaseFailureSubmit();
+          await waitFor(() => {
+            expect(renderResult.getByTestId('formError')).toBeTruthy();
+          });
+        });
+
+        it('should show a success toast', async () => {
+          releaseSuccessSubmit();
+
+          await waitFor(() => {
+            expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalled();
+          });
+
+          expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+            '"some name" has been added.'
+          );
+        });
+
+        it('should clear the URL params', () => {
+          releaseSuccessSubmit();
+
+          expect(location.search).toBe('');
+        });
       });
     });
 

@@ -62,7 +62,7 @@ export interface ArtifactListPageProps {
    * @param item
    * @param mode
    */
-  onFormSubmit?: ArtifactFlyoutProps['submitHandler'];
+  onFormSubmit?: Required<ArtifactFlyoutProps>['submitHandler'];
   /** A list of fields that will be used by the search functionality when a user enters a value in the searchbar */
   searchableFields?: MaybeImmutable<string[]>;
   flyoutSize?: EuiFlyoutSize;

@@ -193,6 +193,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         ..._labels,
       };
     }, [_labels]);
+    // TODO:PT Refactor internal/external state into the `useEithArtifactSucmitData()` hook
     const [externalIsSubmittingData, setExternalIsSubmittingData] = useState<boolean>(false);
     const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
       HttpFetchError | undefined
