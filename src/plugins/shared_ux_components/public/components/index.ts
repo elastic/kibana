@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { withSuspense } from './utility';
 
 /**
  * The lazily-loaded `NoDataViews` component that is wrapped by the `withSuspense` HOC. Consumers should use `React.Suspense` or the
