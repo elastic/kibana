@@ -43,12 +43,12 @@ function options(y: Argv) {
     .option('username', {
       describe: 'Basic authentication username',
       string: true,
-      demandOption: true,
+      default: "elastic",
     })
     .option('password', {
       describe: 'Basic authentication password',
       string: true,
-      demandOption: true,
+      default: "changeme",
     })
     .option('from', {
       description: 'The start of the time window',
@@ -113,8 +113,8 @@ function options(y: Argv) {
       describe: 'Log level',
       default: 'info',
     })
-    .option('forceDataStreams', {
-      describe: 'Force writing to datastreams, default if --cloudId is specified',
+    .option('forceLegacyIndices', {
+      describe: 'Force writing to legacy indices',
       boolean: true,
     })
     .option('writeTarget', {
@@ -141,7 +141,7 @@ export type RunCliFlags = ReturnType<typeof options>['argv'];
 yargs(process.argv.slice(2))
   .command('*', 'Generate data and index into Elasticsearch', options, async (argv: RunCliFlags) => {
     if (argv.local) {
-      argv.target = "http://localhost:9200"
+      argv.target = "http://localhost:9200";
     }
 
     const runOptions = parseRunCliFlags(argv);

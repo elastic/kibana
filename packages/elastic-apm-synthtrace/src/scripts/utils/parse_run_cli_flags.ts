@@ -62,7 +62,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'writeTarget',
       'numShards',
       'scenarioOpts',
-      'forceDataStreams',
+      'forceLegacyIndices',
       'dryRun'
     ),
     intervalInMs,

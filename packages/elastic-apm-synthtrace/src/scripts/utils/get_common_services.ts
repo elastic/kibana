@@ -16,13 +16,12 @@ export function getLogger({ logLevel }: RunOptions) {
 }
 
 export function getCommonServices(
-  { target, cloudId, username, password, logLevel, forceDataStreams }: RunOptions,
+  { target, cloudId, username, password, logLevel, forceLegacyIndices }: RunOptions,
   logger?: Logger
 ) {
   if (!target && !cloudId) {
     throw Error('target or cloudId needs to be specified');
   }
-  const useDataStreams =  forceDataStreams ?? !!cloudId;
   const options: ClientOptions = !!target ? { node: target } : { cloud: { id: cloudId! } };
   options.auth = {
     username,
@@ -41,7 +40,7 @@ export function getCommonServices(
 
   logger = logger ?? createLogger(logLevel);
 
-  const apmEsClient = new ApmSynthtraceEsClient(client, logger, useDataStreams);
+  const apmEsClient = new ApmSynthtraceEsClient(client, logger, forceLegacyIndices ?? false);
 
   return {
     logger,

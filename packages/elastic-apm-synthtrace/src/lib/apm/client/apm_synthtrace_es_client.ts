@@ -31,11 +31,11 @@ export class ApmSynthtraceEsClient {
   constructor(
     private readonly client: Client,
     private readonly logger: Logger,
-    private readonly forceDataStreams: boolean
+    private readonly forceLegacyIndices: boolean
   ) {}
 
   private getWriteTargets() {
-    return getApmWriteTargets({ client: this.client, forceDataStreams: this.forceDataStreams });
+    return getApmWriteTargets({ client: this.client, forceLegacyIndices: this.forceLegacyIndices });
   }
 
   async runningVersion() {
@@ -49,22 +49,21 @@ export class ApmSynthtraceEsClient {
     return this.getWriteTargets().then(async (writeTargets) => {
       const indices = Object.values(writeTargets);
       this.logger.info(`Attempting to clean: ${indices}`);
-      if (this.forceDataStreams) {
-        for (const name of indices) {
-          const dataStream = await this.client.indices.getDataStream({ name }, { ignore: [404] });
-          if (dataStream.data_streams && dataStream.data_streams.length > 0) {
-            this.logger.debug(`Deleting datastream: ${name}`);
-            await this.client.indices.deleteDataStream({ name });
-          }
-        }
-        return;
+      if (this.forceLegacyIndices) {
+        return cleanWriteTargets({
+          client: this.client,
+          targets: indices,
+          logger: this.logger,
+        });
       }
-
-      return cleanWriteTargets({
-        client: this.client,
-        targets: indices,
-        logger: this.logger,
-      });
+      for (const name of indices) {
+        const dataStream = await this.client.indices.getDataStream({ name }, { ignore: [404] });
+        if (dataStream.data_streams && dataStream.data_streams.length > 0) {
+          this.logger.debug(`Deleting datastream: ${name}`);
+          await this.client.indices.deleteDataStream({ name });
+        }
+      }
+      return;
     });
   }
 
@@ -162,7 +161,7 @@ export class ApmSynthtraceEsClient {
         }
         const index = options?.mapToIndex
           ? options?.mapToIndex(item)
-          : this.forceDataStreams
+          : !this.forceLegacyIndices
           ? StreamProcessor.getDataStreamForEvent(item, writeTargets)
           : StreamProcessor.getIndexForEvent(item, writeTargets);
         return { create: { _index: index } };
