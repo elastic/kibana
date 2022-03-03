@@ -19,12 +19,17 @@ import { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
 import { CommentRequestAlertType } from '../../../../common/api';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
+import { CaseAttachments } from '../../../types';
 export interface AllCasesSelectorModalProps {
+  /**
+   * @deprecated Use the attachments prop instead
+   */
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   hiddenStatuses?: CaseStatusWithAllStatus[];
-  onRowClick: (theCase?: Case) => void;
+  onRowClick?: (theCase?: Case) => void;
   updateCase?: (newCase: Case) => void;
   onClose?: () => void;
+  attachments?: CaseAttachments;
 }
 
 const Modal = styled(EuiModal)`
@@ -35,7 +40,7 @@ const Modal = styled(EuiModal)`
 `;
 
 export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
-  ({ alertData, hiddenStatuses, onRowClick, updateCase, onClose }) => {
+  ({ alertData, attachments, hiddenStatuses, onRowClick, updateCase, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
     const closeModal = useCallback(() => {
       if (onClose) {
@@ -47,7 +52,9 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
     const onClick = useCallback(
       (theCase?: Case) => {
         closeModal();
-        onRowClick(theCase);
+        if (onRowClick) {
+          onRowClick(theCase);
+        }
       },
       [closeModal, onRowClick]
     );
@@ -60,6 +67,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
         <EuiModalBody>
           <AllCasesList
             alertData={alertData}
+            attachments={attachments}
             hiddenStatuses={hiddenStatuses}
             isSelectorView={true}
             onRowClick={onClick}

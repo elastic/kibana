@@ -16,11 +16,18 @@ module.exports = {
   ),
   setupFilesAfterEnv: [
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.eui.js',
   ],
   reporters: [
     'default',
-    ['@kbn/test/target_node/jest/junit_reporter', { reportName: 'Jest Integration Tests' }],
+    [
+      '@kbn/test/target_node/jest/junit_reporter',
+      {
+        rootDirectory: '.',
+        reportName: 'Jest Integration Tests',
+      },
+    ],
     [
       '@kbn/test/target_node/jest/ci_stats_jest_reporter',
       {

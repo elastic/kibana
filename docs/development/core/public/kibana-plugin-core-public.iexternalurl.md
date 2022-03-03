@@ -16,5 +16,6 @@ export interface IExternalUrl
 
 |  Method | Description |
 |  --- | --- |
+|  [isInternalUrl(relativeOrAbsoluteUrl)](./kibana-plugin-core-public.iexternalurl.isinternalurl.md) | Determines if the provided URL is an internal url. |
 |  [validateUrl(relativeOrAbsoluteUrl)](./kibana-plugin-core-public.iexternalurl.validateurl.md) | Determines if the provided URL is a valid location to send users. Validation is based on the configured allow list in kibana.yml.<!-- -->If the URL is valid, then a URL will be returned. Otherwise, this will return null. |
 

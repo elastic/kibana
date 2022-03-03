@@ -29,9 +29,7 @@ describe('When using the Fleet Artifacts Client', () => {
     }
 
     // @ts-expect-error not full interface
-    esClientMock.get.mockImplementation(() => {
-      return elasticsearchServiceMock.createSuccessTransportRequestPromise(singleHit);
-    });
+    esClientMock.get.mockResponse(singleHit);
   };
 
   beforeEach(() => {
@@ -105,11 +103,7 @@ describe('When using the Fleet Artifacts Client', () => {
 
   describe('and calling `listArtifacts()`', () => {
     beforeEach(() => {
-      esClientMock.search.mockImplementation(() => {
-        return elasticsearchServiceMock.createSuccessTransportRequestPromise(
-          generateArtifactEsSearchResultHitsMock()
-        );
-      });
+      esClientMock.search.mockResponse(generateArtifactEsSearchResultHitsMock());
     });
 
     it('should retrieve list bound to packageName', async () => {

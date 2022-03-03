@@ -9,8 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Immutable, OperatingSystem } from '../../../../../../../common/endpoint/types';
-import { BehaviorProtectionOSes, OS } from '../../../types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { Immutable, PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
+import { BehaviorProtectionOSes } from '../../../types';
 import { ConfigForm } from '../../components/config_form';
 import { RadioButtons } from '../components/radio_buttons';
 import { UserNotification } from '../components/user_notification';
@@ -23,7 +24,11 @@ import { SecurityPageName } from '../../../../../../app/types';
  *  which will configure for all relevant OSes.
  */
 export const BehaviorProtection = React.memo(() => {
-  const OSes: Immutable<BehaviorProtectionOSes[]> = [OS.windows, OS.mac, OS.linux];
+  const OSes: Immutable<BehaviorProtectionOSes[]> = [
+    PolicyOperatingSystem.windows,
+    PolicyOperatingSystem.mac,
+    PolicyOperatingSystem.linux,
+  ];
   const protection = 'behavior_protection';
   const protectionLabel = i18n.translate(
     'xpack.securitySolution.endpoint.policy.protections.behavior',

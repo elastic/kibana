@@ -36,6 +36,12 @@ export const mockAlertDetailsData = [
   },
   { category: 'agent', field: 'agent.version', values: ['7.10.0'], originalValue: '7.10.0' },
   {
+    category: 'agent',
+    field: 'agent.status',
+    values: ['inactive'],
+    originalValue: ['inactive'],
+  },
+  {
     category: 'winlog',
     field: 'winlog.computer_name',
     values: ['windows-native'],

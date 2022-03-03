@@ -13,6 +13,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import type { SavedObjectAttributes, KibanaExecutionContext } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
@@ -38,10 +39,9 @@ import {
   ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
 import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getTheme, getUiActions } from '../services';
+import { getExecutionContext, getExpressions, getTheme, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { SavedObjectAttributes } from '../../../../core/types';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
@@ -398,13 +398,17 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
-    const context = {
+    const parentContext = this.parent?.getInput().executionContext || getExecutionContext().get();
+    const child: KibanaExecutionContext = {
       type: 'visualization',
-      name: this.vis.type.title,
-      id: this.vis.id ?? 'an_unsaved_vis',
+      name: this.vis.type.name,
+      id: this.vis.id ?? 'new',
       description: this.vis.title || this.input.title || this.vis.type.name,
       url: this.output.editUrl,
-      parent: this.parent?.getInput().executionContext,
+    };
+    const context = {
+      ...parentContext,
+      child,
     };
 
     const expressionParams: IExpressionLoaderParams = {

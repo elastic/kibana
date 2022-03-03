@@ -11,6 +11,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_NAME,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import type { TopAlert } from '../';
 import { experimentalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
@@ -38,7 +39,7 @@ export const parseAlert =
     const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
-      reason: parsedFields[ALERT_RULE_NAME] ?? '',
+      reason: parsedFields[ALERT_REASON] ?? parsedFields[ALERT_RULE_NAME] ?? '',
       ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
     };
 

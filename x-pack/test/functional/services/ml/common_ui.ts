@@ -7,9 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
@@ -333,6 +331,14 @@ export function MachineLearningCommonUIProvider({
       await PageObjects.spaceSelector.openSpacesNav();
       await PageObjects.spaceSelector.goToSpecificSpace(spaceId);
       await PageObjects.spaceSelector.expectHomePage(spaceId);
+    },
+
+    async waitForDatePickerIndicatorLoaded() {
+      await testSubjects.waitForEnabled('superDatePickerApplyTimeButton');
+    },
+
+    async waitForRefreshButtonEnabled() {
+      await testSubjects.waitForEnabled('~mlRefreshPageButton');
     },
   };
 }

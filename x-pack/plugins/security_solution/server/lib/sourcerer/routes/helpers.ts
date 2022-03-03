@@ -20,7 +20,7 @@ export const findExistingIndices = async (
           ignore_unavailable: true,
           allow_no_indices: false,
         });
-        return searchResponse.body.indices.length > 0;
+        return searchResponse.indices.length > 0;
       })
       .map((p) => p.catch((e) => false))
   );

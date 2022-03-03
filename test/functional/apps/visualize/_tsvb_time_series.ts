@@ -468,12 +468,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.setAnnotationFilter('geo.dest : "AW" or geo.src : "AM"');
             await visualBuilder.setAnnotationFields('extension.raw');
             await visualBuilder.setAnnotationRowTemplate('extension: {{extension.raw}}');
-
             const annotationsData = await visualBuilder.getAnnotationsData();
-
             expect(annotationsData).to.eql(expectedAnnotationsData);
           });
-
           it('should display correct annotations data for machine.os.raw and memory fields', async () => {
             const expectedAnnotationsData = [
               {
@@ -512,12 +509,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.setAnnotationRowTemplate(
               'OS: {{machine.os.raw}}, memory: {{memory}}'
             );
-
             const annotationsData = await visualBuilder.getAnnotationsData();
-
             expect(annotationsData).to.eql(expectedAnnotationsData);
           });
-
           it('should display correct annotations data when using runtime field', async () => {
             const expectedAnnotationsData = [
               {

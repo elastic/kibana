@@ -46,7 +46,7 @@ async function getSpacesUsage(
   }
 
   const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
-  const { body: resp } = (await esClient.search({
+  const resp = (await esClient.search({
     index: kibanaIndex,
     body: {
       track_total_hits: true,
@@ -68,7 +68,7 @@ async function getSpacesUsage(
       },
       size: 0,
     },
-  })) as { body: SpacesAggregationResponse };
+  })) as SpacesAggregationResponse;
 
   const { hits, aggregations } = resp;
 

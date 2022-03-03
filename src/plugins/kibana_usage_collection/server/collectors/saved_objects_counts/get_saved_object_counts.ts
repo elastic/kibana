@@ -25,7 +25,7 @@ export async function getSavedObjectsCounts(
       aggs: { types: { terms: { field: 'type' } } },
     },
   };
-  const { body } = await esClient.search(savedObjectCountSearchParams);
+  const body = await esClient.search(savedObjectCountSearchParams);
   // @ts-expect-error declare type for aggregations explicitly
   return body.aggregations?.types?.buckets || [];
 }

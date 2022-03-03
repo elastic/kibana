@@ -19,7 +19,7 @@ export const getIndexExists = async (
   index: string
 ): Promise<boolean> => {
   try {
-    const { body: response } = await esClient.search({
+    const response = await esClient.search({
       allow_no_indices: true,
       body: {
         terminate_after: 1,

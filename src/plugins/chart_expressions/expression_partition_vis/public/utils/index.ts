@@ -18,3 +18,4 @@ export { getColumnByAccessor } from './accessor';
 export { isLegendFlat, shouldShowLegend } from './legend';
 export { generateFormatters, getAvailableFormatter, getFormatter } from './formatters';
 export { getPartitionType } from './get_partition_type';
+export { getIcon } from './get_icon';

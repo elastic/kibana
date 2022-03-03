@@ -180,7 +180,11 @@ const TopHitAggUi = (props) => {
             restrict={aggWithOptionsRestrictFields}
             indexPattern={indexPattern}
             value={model.field}
-            onChange={handleSelectChange('field')}
+            onChange={(value) =>
+              handleChange({
+                field: value?.[0],
+              })
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -242,7 +246,11 @@ const TopHitAggUi = (props) => {
             }
             restrict={ORDER_DATE_RESTRICT_FIELDS}
             value={model.order_by}
-            onChange={handleSelectChange('order_by')}
+            onChange={(value) =>
+              handleChange({
+                order_by: value?.[0],
+              })
+            }
             indexPattern={indexPattern}
             fields={fields}
             data-test-subj="topHitOrderByFieldSelect"

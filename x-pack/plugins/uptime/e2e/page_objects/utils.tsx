@@ -38,6 +38,10 @@ export function utilsPageProvider({ page }: { page: Page }) {
       await page.selectOption(`[data-test-subj=${dataTestSubj}]`, value);
     },
 
+    async checkByTestSubj(dataTestSubj: string, value: string) {
+      await page.check(`[data-test-subj=${dataTestSubj}]`);
+    },
+
     async clickByTestSubj(dataTestSubj: string) {
       await page.click(`[data-test-subj=${dataTestSubj}]`);
     },

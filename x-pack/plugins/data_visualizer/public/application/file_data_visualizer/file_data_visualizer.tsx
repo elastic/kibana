@@ -23,11 +23,13 @@ interface Props {
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, share, security, fileUpload, cloud } = getPluginsStart();
+  const { data, maps, embeddable, discover, share, security, fileUpload, cloud } =
+    getPluginsStart();
   const services = {
     data,
     maps,
     embeddable,
+    discover,
     share,
     security,
     fileUpload,

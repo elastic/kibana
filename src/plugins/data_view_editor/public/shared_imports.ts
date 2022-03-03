@@ -28,6 +28,7 @@ export type {
   ValidationFunc,
   FieldConfig,
   ValidationConfig,
+  ValidationFuncArg,
 } from '../../es_ui_shared/static/forms/hook_form_lib';
 export {
   useForm,

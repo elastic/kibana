@@ -191,14 +191,27 @@ describe('transformActionVariables', () => {
     ]);
   });
 
-  test('should return only the required action variables when omitOptionalMessageVariables is provided', () => {
+  test(`should return only the required action variables when omitMessageVariables is "all"`, () => {
     const alertType = getAlertType({
       context: mockContextVariables(),
       state: mockStateVariables(),
       params: mockParamsVariables(),
     });
-    expect(transformActionVariables(alertType.actionVariables, true)).toEqual([
+    expect(transformActionVariables(alertType.actionVariables, 'all')).toEqual([
       ...expectedTransformResult,
+      ...expectedParamsTransformResult(),
+    ]);
+  });
+
+  test(`should return required and context action variables when omitMessageVariables is "keepContext"`, () => {
+    const alertType = getAlertType({
+      context: mockContextVariables(),
+      state: mockStateVariables(),
+      params: mockParamsVariables(),
+    });
+    expect(transformActionVariables(alertType.actionVariables, 'keepContext')).toEqual([
+      ...expectedTransformResult,
+      ...expectedContextTransformResult(),
       ...expectedParamsTransformResult(),
     ]);
   });

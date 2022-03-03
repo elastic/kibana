@@ -65,6 +65,7 @@ import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
 import type { ThemeServiceSetup, ThemeServiceStart } from './theme';
+import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
 
 export type {
   PackageInfo,
@@ -194,7 +195,11 @@ export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './type
 
 export { URL_MAX_LENGTH } from './core_app';
 
-export type { KibanaExecutionContext } from './execution_context';
+export type {
+  KibanaExecutionContext,
+  ExecutionContextSetup,
+  ExecutionContextStart,
+} from './execution_context';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -221,6 +226,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   notifications: NotificationsSetup;
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
+  /** {@link ExecutionContextSetup} */
+  executionContext: ExecutionContextSetup;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -264,6 +271,8 @@ export interface CoreStart {
   chrome: ChromeStart;
   /** {@link DocLinksStart} */
   docLinks: DocLinksStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
   /** {@link HttpStart} */
   http: HttpStart;
   /** {@link SavedObjectsStart} */

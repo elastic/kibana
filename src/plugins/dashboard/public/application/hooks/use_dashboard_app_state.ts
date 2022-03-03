@@ -185,7 +185,7 @@ export const useDashboardAppState = ({
       // Backwards compatible way of detecting that we are taking a screenshot
       const legacyPrintLayoutDetected =
         screenshotModeService?.isScreenshotMode() &&
-        screenshotModeService.getScreenshotLayout() === 'print';
+        screenshotModeService.getScreenshotContext('layout') === 'print';
 
       const initialDashboardState = {
         ...savedDashboardState,
@@ -220,11 +220,7 @@ export const useDashboardAppState = ({
         savedDashboard,
         data,
         executionContext: {
-          type: 'application',
-          name: 'dashboard',
-          id: savedDashboard.id ?? 'unsaved_dashboard',
           description: savedDashboard.title,
-          url: history.location.pathname,
         },
       });
       if (canceled || !dashboardContainer) {
