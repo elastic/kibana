@@ -17,25 +17,25 @@ import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_reac
 import { FlashMessages } from '../flash_messages';
 import { Loading } from '../loading';
 
-import { EnterpriseSearchPageTemplate } from './page_template';
+import { EnterpriseSearchPageTemplateWrapper } from './page_template';
 
-describe('EnterpriseSearchPageTemplate', () => {
+describe('EnterpriseSearchPageTemplateWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({ readOnlyMode: false });
   });
 
   it('renders', () => {
-    const wrapper = shallow(<EnterpriseSearchPageTemplate />);
+    const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper />);
 
     expect(wrapper.type()).toEqual(KibanaPageTemplate);
   });
 
   it('renders children', () => {
     const wrapper = shallow(
-      <EnterpriseSearchPageTemplate>
+      <EnterpriseSearchPageTemplateWrapper>
         <div className="hello">world</div>
-      </EnterpriseSearchPageTemplate>
+      </EnterpriseSearchPageTemplateWrapper>
     );
 
     expect(wrapper.find('.hello').text()).toEqual('world');
@@ -44,9 +44,9 @@ describe('EnterpriseSearchPageTemplate', () => {
   describe('loading state', () => {
     it('renders a loading icon in place of children', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplate isLoading>
+        <EnterpriseSearchPageTemplateWrapper isLoading>
           <div className="test" />
-        </EnterpriseSearchPageTemplate>
+        </EnterpriseSearchPageTemplateWrapper>
       );
 
       expect(wrapper.find(Loading).exists()).toBe(true);
@@ -55,9 +55,9 @@ describe('EnterpriseSearchPageTemplate', () => {
 
     it('renders children & does not render a loading icon when the page is done loading', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplate isLoading={false}>
+        <EnterpriseSearchPageTemplateWrapper isLoading={false}>
           <div className="test" />
-        </EnterpriseSearchPageTemplate>
+        </EnterpriseSearchPageTemplateWrapper>
       );
 
       expect(wrapper.find(Loading).exists()).toBe(false);
@@ -68,12 +68,12 @@ describe('EnterpriseSearchPageTemplate', () => {
   describe('empty state', () => {
     it('renders a custom empty state in place of children', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplate
+        <EnterpriseSearchPageTemplateWrapper
           isEmptyState
           emptyState={<div className="emptyState">Nothing here yet!</div>}
         >
           <div className="test" />
-        </EnterpriseSearchPageTemplate>
+        </EnterpriseSearchPageTemplateWrapper>
       );
 
       expect(wrapper.find('.emptyState').exists()).toBe(true);
@@ -85,12 +85,12 @@ describe('EnterpriseSearchPageTemplate', () => {
 
     it('does not render the custom empty state if the page is not empty', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplate
+        <EnterpriseSearchPageTemplateWrapper
           isEmptyState={false}
           emptyState={<div className="emptyState">Nothing here yet!</div>}
         >
           <div className="test" />
-        </EnterpriseSearchPageTemplate>
+        </EnterpriseSearchPageTemplateWrapper>
       );
 
       expect(wrapper.find('.emptyState').exists()).toBe(false);
@@ -99,7 +99,7 @@ describe('EnterpriseSearchPageTemplate', () => {
 
     it('does not render an empty state if the page is still loading', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplate
+        <EnterpriseSearchPageTemplateWrapper
           isLoading
           isEmptyState
           emptyState={<div className="emptyState" />}
@@ -114,14 +114,14 @@ describe('EnterpriseSearchPageTemplate', () => {
   describe('read-only mode', () => {
     it('renders a callout if in read-only mode', () => {
       setMockValues({ readOnlyMode: true });
-      const wrapper = shallow(<EnterpriseSearchPageTemplate />);
+      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper />);
 
       expect(wrapper.find(EuiCallOut).exists()).toBe(true);
     });
 
     it('does not render a callout if not in read-only mode', () => {
       setMockValues({ readOnlyMode: false });
-      const wrapper = shallow(<EnterpriseSearchPageTemplate />);
+      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper />);
 
       expect(wrapper.find(EuiCallOut).exists()).toBe(false);
     });
@@ -129,7 +129,7 @@ describe('EnterpriseSearchPageTemplate', () => {
 
   describe('flash messages', () => {
     it('renders FlashMessages by default', () => {
-      const wrapper = shallow(<EnterpriseSearchPageTemplate />);
+      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper />);
 
       expect(wrapper.find(FlashMessages).exists()).toBe(true);
     });
@@ -137,7 +137,7 @@ describe('EnterpriseSearchPageTemplate', () => {
     it('does not render FlashMessages if hidden', () => {
       // Example use case: manually showing flash messages in an open flyout or modal
       // and not wanting to duplicate flash messages on the overlayed page
-      const wrapper = shallow(<EnterpriseSearchPageTemplate hideFlashMessages />);
+      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper hideFlashMessages />);
 
       expect(wrapper.find(FlashMessages).exists()).toBe(false);
     });
@@ -147,14 +147,16 @@ describe('EnterpriseSearchPageTemplate', () => {
     const SetPageChrome = () => <div />;
 
     it('renders a product-specific <SetPageChrome />', () => {
-      const wrapper = shallow(<EnterpriseSearchPageTemplate setPageChrome={<SetPageChrome />} />);
+      const wrapper = shallow(
+        <EnterpriseSearchPageTemplateWrapper setPageChrome={<SetPageChrome />} />
+      );
 
       expect(wrapper.find(SetPageChrome).exists()).toBe(true);
     });
 
     it('invokes page chrome immediately (without waiting for isLoading to be finished)', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplate setPageChrome={<SetPageChrome />} isLoading />
+        <EnterpriseSearchPageTemplateWrapper setPageChrome={<SetPageChrome />} isLoading />
       );
 
       expect(wrapper.find(SetPageChrome).exists()).toBe(true);
@@ -166,14 +168,14 @@ describe('EnterpriseSearchPageTemplate', () => {
 
   describe('EuiPageTemplate props', () => {
     it('overrides the restrictWidth prop', () => {
-      const wrapper = shallow(<EnterpriseSearchPageTemplate restrictWidth />);
+      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper restrictWidth />);
 
       expect(wrapper.find(KibanaPageTemplate).prop('restrictWidth')).toEqual(true);
     });
 
     it('passes down any ...pageTemplateProps that EuiPageTemplate accepts', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplate
+        <EnterpriseSearchPageTemplateWrapper
           template="empty"
           paddingSize="s"
           pageHeader={{ pageTitle: 'hello world' }}
@@ -187,7 +189,10 @@ describe('EnterpriseSearchPageTemplate', () => {
 
     it('sets enterpriseSearchPageTemplate classNames while still accepting custom classNames', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplate className="hello" pageContentProps={{ className: 'world' }} />
+        <EnterpriseSearchPageTemplateWrapper
+          className="hello"
+          pageContentProps={{ className: 'world' }}
+        />
       );
 
       expect(wrapper.find(KibanaPageTemplate).prop('className')).toEqual(
@@ -200,7 +205,9 @@ describe('EnterpriseSearchPageTemplate', () => {
 
     it('automatically sets the Enterprise Search logo onto passed solution navs', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplate solutionNav={{ name: 'Enterprise Search', items: [] }} />
+        <EnterpriseSearchPageTemplateWrapper
+          solutionNav={{ name: 'Enterprise Search', items: [] }}
+        />
       );
 
       expect(wrapper.find(KibanaPageTemplate).prop('solutionNav')).toEqual({
