@@ -359,6 +359,7 @@ export function FilterItem(props: FilterItemProps) {
     iconOnClick: () => props.onRemove(),
     onClick: handleBadgeClick,
     ['data-test-subj']: getDataTestSubj(valueLabelConfig),
+    readonly: props.readonly,
   };
 
   const popoverProps: CommonProps & HTMLAttributes<HTMLDivElement> & EuiPopoverProps = {
@@ -380,7 +381,7 @@ export function FilterItem(props: FilterItemProps) {
         anchorPosition="upCenter"
         {...popoverProps}
       >
-        <FilterView readonly={props.readonly} {...filterViewProps} />
+        <FilterView {...filterViewProps} hideAlias />
       </EuiPopover>
     );
   }

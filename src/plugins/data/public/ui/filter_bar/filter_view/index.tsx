@@ -19,6 +19,7 @@ interface Props {
   filterLabelStatus: FilterLabelStatus;
   errorMessage?: string;
   readonly?: boolean;
+  hideAlias?: boolean;
   [propName: string]: any;
 }
 
@@ -30,6 +31,7 @@ export const FilterView: FC<Props> = ({
   errorMessage,
   filterLabelStatus,
   readonly,
+  hideAlias,
   ...rest
 }: Props) => {
   const [ref, innerText] = useInnerText();
@@ -90,7 +92,7 @@ export const FilterView: FC<Props> = ({
           filter={filter}
           valueLabel={valueLabel}
           filterLabelStatus={filterLabelStatus}
-          hideAlias={readonly}
+          hideAlias={hideAlias}
         />
       </span>
     </EuiBadge>
