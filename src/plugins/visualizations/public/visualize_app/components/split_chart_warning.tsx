@@ -38,13 +38,13 @@ export const SplitChartWarning: FC<Props> = ({ chartType, chartConfigToken }) =>
               <>
                 {canEditAdvancedSettings && (
                   <FormattedMessage
-                    id="visualizations.newHeatmapChart.conditionalMessage.newLibrary"
+                    id="visualizations.newChart.conditionalMessage.newLibrary"
                     defaultMessage="Switch to the old library in {link}"
                     values={{
                       link: (
                         <EuiLink href={advancedSettingsLink}>
                           <FormattedMessage
-                            id="visualizations.newHeatmapChart.conditionalMessage.advancedSettingsLink"
+                            id="visualizations.newChart.conditionalMessage.advancedSettingsLink"
                             defaultMessage="Advanced Settings."
                           />
                         </EuiLink>
