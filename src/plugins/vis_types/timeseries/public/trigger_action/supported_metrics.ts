@@ -80,8 +80,16 @@ export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
     name: 'filter_ratio',
     isFullReference: false,
   },
+  top_hit: {
+    name: 'last_value',
+    isFullReference: false,
+  },
   math: {
     name: 'formula',
+    isFullReference: true,
+  },
+  positive_only: {
+    name: 'clamp',
     isFullReference: true,
   },
 };

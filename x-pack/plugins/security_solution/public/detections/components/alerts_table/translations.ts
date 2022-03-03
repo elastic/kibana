@@ -136,13 +136,6 @@ export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
   }
 );
 
-export const ALERTS_HEADERS_TARGET_IMPORT_HASH = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overviewTable.targetImportHash',
-  {
-    defaultMessage: 'Import Hash',
-  }
-);
-
 export const ACTION_OPEN_ALERT = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.openAlertTitle',
   {
@@ -290,5 +283,19 @@ export const TRIGGERED = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle',
   {
     defaultMessage: 'Triggered',
+  }
+);
+
+export const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
+  {
+    defaultMessage: 'Add to existing case',
+  }
+);
+
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
   }
 );

@@ -84,7 +84,9 @@ describe('fetchLicenses', () => {
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
       filter_path: [
         'hits.hits._source.license.*',
+        'hits.hits._source.elasticsearch.cluster.stats.license.*',
         'hits.hits._source.cluster_uuid',
+        'hits.hits._source.elasticsearch.cluster.id',
         'hits.hits._index',
       ],
       body: {
@@ -98,6 +100,7 @@ describe('fetchLicenses', () => {
                 bool: {
                   should: [
                     { term: { type: 'cluster_stats' } },
+                    { term: { 'metricset.name': 'cluster_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
                   ],
                   minimum_should_match: 1,

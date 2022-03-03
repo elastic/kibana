@@ -26,7 +26,6 @@ import {
 } from '../../../visualizations/public';
 import { getDataStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
-import { triggerTSVBtoLensConfiguration } from './trigger_action';
 import type { IndexPatternValue, Panel } from '../common/types';
 import { RequestAdapter } from '../../../inspector/public';
 
@@ -169,6 +168,8 @@ export const metricsVisDefinition: VisTypeDefinition<
     return [];
   },
   navigateToLens: async (params?: VisParams) => {
+    const { triggerTSVBtoLensConfiguration } = await import('./trigger_action');
+
     const triggerConfiguration = params
       ? await triggerTSVBtoLensConfiguration(params as Panel)
       : null;

@@ -4,7 +4,7 @@
   ],
   "description": "Detects when a EFS File System or Mount is deleted. An adversary could break any file system using the mount target that is being deleted, which might disrupt instances or applications using those mounts. The mount must be deleted prior to deleting the File System, or the adversary will be unable to delete the File System.",
   "false_positives": [
-    "File System or Mount being deleted may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. File System Mount deleted from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "File System or Mount being deleted may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. File System Mount deletion by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -51,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

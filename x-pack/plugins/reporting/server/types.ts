@@ -32,26 +32,28 @@ import type { ReportingCore } from './core';
 import type { LevelLogger } from './lib';
 import type { ReportTaskParams } from './lib/tasks';
 
-/*
- * Plugin Contract
+/**
+ * Plugin Setup Contract
  */
-
 export interface ReportingSetup {
+  /**
+   * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
+   */
   usesUiCapabilities: () => boolean;
 }
 
-export type ReportingStart = ReportingSetup;
-
-/*
- * Internal Types
+/**
+ * Plugin Start Contract
  */
-
+export type ReportingStart = ReportingSetup;
 export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export type { BaseParams, BasePayload };
+/**
+ * Internal Types
+ */
 
 // default fn type for CreateJobFnFactory
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
@@ -91,9 +93,6 @@ export interface ExportTypeDefinition<
   validLicenses: string[];
 }
 
-/*
- * @internal
- */
 export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
@@ -103,9 +102,6 @@ export interface ReportingSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
-/*
- * @internal
- */
 export interface ReportingStartDeps {
   data: DataPluginStart;
   fieldFormats: FieldFormatsStart;
@@ -115,22 +111,15 @@ export interface ReportingStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
-/**
- * @internal
- */
 export interface ReportingRequestHandlerContext {
   reporting: ReportingStart | null;
   core: RequestHandlerContext['core'];
 }
 
-/**
- * @internal
- */
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
 
-/**
- * @internal
- */
 export interface ScreenshotOptions extends Omit<BaseScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
+
+export type { BaseParams, BasePayload };

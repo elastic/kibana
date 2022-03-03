@@ -24,7 +24,7 @@ import classNames from 'classnames';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import { esFilters } from '../../../../../../data/public';
+import { generateFilters } from '../../../../../../data/public';
 import { DataViewField } from '../../../../../../data/common';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
@@ -172,7 +172,7 @@ export function DiscoverLayout({
     (field: DataViewField | string, values: string, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
-      const newFilters = esFilters.generateFilters(
+      const newFilters = generateFilters(
         filterManager,
         field,
         values,
@@ -318,7 +318,7 @@ export function DiscoverLayout({
                       savedSearchDataChart$={charts$}
                       savedSearchDataTotalHits$={totalHits$}
                       stateContainer={stateContainer}
-                      isTimeBased={isTimeBased}
+                      indexPattern={indexPattern}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
                       hideChart={state.hideChart}
