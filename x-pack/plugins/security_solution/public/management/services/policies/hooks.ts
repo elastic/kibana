@@ -53,16 +53,21 @@ export function useGetAgentCountForPolicy({
   onError?: (error: ServerApiError) => void;
   policyIds: string[];
 }): QueryObserverResult<GetAgentPoliciesResponse> {
+  // is there a more elegant way to do this? w/o the conditional, the call is a bad request when the policyId is empty
   const http = useHttp();
   return useQuery<GetAgentPoliciesResponse, ServerApiError>(
-    // is this too generic for a key?
-    ['endpointCountForPolicy'],
+    ['endpointCountForPolicy', policyIds],
     () => {
-      return sendGetAgentPolicyList(http, {
-        query: {
-          kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIds.join(' or ')})`,
-        },
-      });
+      if (policyIds.length > 0) {
+        return sendGetAgentPolicyList(http, {
+          query: {
+            kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIds.join(
+              ' or '
+            )})`,
+          },
+        });
+      }
+      return sendGetAgentPolicyList(http, { query: {} });
     },
     {
       refetchIntervalInBackground: false,

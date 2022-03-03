@@ -28,6 +28,7 @@ import {
   useGetAgentCountForPolicy,
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
+import { PackagePolicy } from '../../../../../../fleet/common';
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -39,9 +40,18 @@ export const PolicyList = memo(() => {
   });
 
   // endpoint count per policy
-  /* const { data: endpointCount  } = useGetAgentCountForPolicy({
-data.items[].policy_id
-});*/
+  const policyIds = data?.items.map((policies) => policies.id) ?? [];
+  const { data: endpointCount = { items: [] } } = useGetAgentCountForPolicy({
+    policyIds,
+  });
+
+  const policyIdToEndpointCount = useMemo(() => {
+    const map = new Map<string | PackagePolicy, number>();
+    for (const policy of endpointCount?.items) {
+      map.set(policy.package_policies[0], policy.agents ?? 0);
+    }
+    return map;
+  }, [endpointCount]);
 
   const totalItemCount = data?.total ?? 0;
 
@@ -140,10 +150,17 @@ data.items[].policy_id
         },
       },
       {
-        field: '-',
+        field: '',
         name: i18n.translate('xpack.securitySolution.policy.list.endpoints', {
           defaultMessage: 'Endpoints',
         }),
+        render: (policy: PolicyData) => {
+          return (
+            <EuiLink className="eui-textTruncate" data-test-subj="policyEndpointCountLink">
+              {policyIdToEndpointCount.get(policy.id)}
+            </EuiLink>
+          );
+        },
       },
       {
         field: '-',
@@ -152,7 +169,7 @@ data.items[].policy_id
         }),
       },
     ];
-  }, []);
+  }, [policyIdToEndpointCount]);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {
