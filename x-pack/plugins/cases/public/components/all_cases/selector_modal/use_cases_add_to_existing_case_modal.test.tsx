@@ -12,6 +12,7 @@ import React from 'react';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
+jest.mock('../../../common/use_cases_toast');
 
 describe('use cases add to existing case modal hook', () => {
   const dispatch = jest.fn();
@@ -65,7 +66,7 @@ describe('use cases add to existing case modal hook', () => {
     );
   });
 
-  it('should dispatch the close action when invoked', () => {
+  it('should dispatch the close action for modal and flyout when invoked', () => {
     const { result } = renderHook(
       () => {
         return useCasesAddToExistingCaseModal(defaultParams());
@@ -76,6 +77,11 @@ describe('use cases add to existing case modal hook', () => {
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL,
+      })
+    );
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
       })
     );
   });
