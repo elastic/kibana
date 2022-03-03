@@ -11,7 +11,7 @@ import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { ENTERPRISE_SEARCH_OVERVIEW_PLUGIN } from '../../../../../common/constants';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -20,7 +20,7 @@ import GettingStarted from './assets/getting_started.png';
 
 export const SetupGuide: React.FC = () => (
   <SetupGuideLayout
-    productName={ENTERPRISE_SEARCH_PLUGIN.NAME}
+    productName={ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME}
     productEuiIcon="logoEnterpriseSearch"
   >
     <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />

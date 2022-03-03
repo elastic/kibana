@@ -6,7 +6,6 @@
  */
 
 import { getExistingEnvironmentsForService } from './get_environments/get_existing_environments_for_service';
-import { getServiceNames } from './get_service_names';
 import { listConfigurations } from './list_configurations';
 import { searchConfigurations } from './search_configurations';
 import {
@@ -44,20 +43,6 @@ describe('agent configuration queries', () => {
         getExistingEnvironmentsForService({
           serviceName: 'foo',
           setup,
-          size: 50,
-        })
-      );
-
-      expect(mock.params).toMatchSnapshot();
-    });
-  });
-
-  describe('getServiceNames', () => {
-    it('fetches service names', async () => {
-      mock = await inspectSearchParams((setup) =>
-        getServiceNames({
-          setup,
-          searchAggregatedTransactions: false,
           size: 50,
         })
       );
