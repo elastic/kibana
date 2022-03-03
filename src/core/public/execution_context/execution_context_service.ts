@@ -72,9 +72,7 @@ export class ExecutionContextService
     this.contract = {
       context$: this.context$.asObservable(),
       clear: () => {
-        this.context$.next({
-          ...this.getDefaultContext(),
-        });
+        this.context$.next(this.getDefaultContext());
       },
       set: (c: KibanaExecutionContext) => {
         const newVal = this.mergeContext(c);
