@@ -134,7 +134,7 @@ function getDropPropsForField({
   const isTheSameIndexPattern = state.layers[layerId].indexPatternId === dragging.indexPatternId;
   const newOperation = getNewOperation(dragging.field, filterOperations, targetColumn);
 
-  if (!!(isTheSameIndexPattern && newOperation)) {
+  if (isTheSameIndexPattern && newOperation) {
     const nextLabel = operationLabels[newOperation].displayName;
 
     if (!targetColumn) {

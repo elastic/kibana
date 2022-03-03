@@ -236,7 +236,7 @@ export function getFieldsByValidationState(
   validFields: string[];
   invalidFields: string[];
 } {
-  const newFieldNames = [];
+  const newFieldNames: string[] = [];
   if (column && 'sourceField' in column) {
     if (column.sourceField) {
       newFieldNames.push(column.sourceField);
@@ -246,12 +246,14 @@ export function getFieldsByValidationState(
     }
   }
   if (field) {
-    newFieldNames.push(typeof field === 'string' ? field : field.displayName);
+    newFieldNames.push(typeof field === 'string' ? field : field.name || field.displayName);
   }
   const newFields = newFieldNames.map((fieldName) => newIndexPattern.getFieldByName(fieldName));
   // lodash groupby does not provide the index arg, so had to write it manually :(
   const validFields: string[] = [];
   const invalidFields: string[] = [];
+  // mind to check whether a column was passed, in such case single term with scripted field is ok
+  const canAcceptScripted = Boolean(column && newFields.length === 1);
   newFieldNames.forEach((fieldName, i) => {
     const newField = newFields[i];
     const isValid =
@@ -259,8 +261,8 @@ export function getFieldsByValidationState(
       supportedTypes.has(newField.type) &&
       newField.aggregatable &&
       (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms) &&
-      // scripted fields are supported only for single term
-      (newFields.length === 1 || !isScriptedField(newField));
+      (canAcceptScripted || !isScriptedField(newField));
+
     const arrayToPush = isValid ? validFields : invalidFields;
     arrayToPush.push(fieldName);
   });
