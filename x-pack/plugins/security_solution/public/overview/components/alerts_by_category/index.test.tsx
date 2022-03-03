@@ -17,7 +17,12 @@ import { mockIndexPattern, TestProviders } from '../../../common/mock';
 import { AlertsByCategory } from '.';
 
 jest.mock('../../../common/components/link_to');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => (
+    <div data-test-subj="mock-viz-actions">{'mockVizAction'}</div>
+  )),
+}));
+
 jest.mock('../../../common/containers/matrix_histogram', () => ({
   useMatrixHistogramCombined: jest.fn(),
 }));
@@ -137,6 +142,13 @@ describe('Alerts by category', () => {
     test('it renders the bar chart when data is available', async () => {
       await waitFor(() => {
         expect(wrapper.find(`.echChart`).exists()).toBe(true);
+      });
+    });
+
+    test('it shows visualization actions', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).not.toBe(true);
+        expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
       });
     });
   });
