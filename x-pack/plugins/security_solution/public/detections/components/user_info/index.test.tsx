@@ -55,7 +55,6 @@ describe('useUserInfo', () => {
         loading: true,
         signalIndexName: null,
         signalIndexMappingOutdated: null,
-        isKibanaReadOnly: null,
       });
       expect(result.error).toBeUndefined();
     });

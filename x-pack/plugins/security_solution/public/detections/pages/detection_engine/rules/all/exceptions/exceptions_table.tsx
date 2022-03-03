@@ -60,7 +60,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 
 export const ExceptionListsTable = React.memo(() => {
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const [{ loading: userInfoLoading, canUserCRUD, isKibanaReadOnly }] = useUserData();
+  const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
   const hasPermissions = userHasPermissions(canUserCRUD);
 
   const { loading: listsConfigLoading } = useListsConfig();
@@ -193,6 +193,7 @@ export const ExceptionListsTable = React.memo(() => {
   );
 
   const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
+    const isKibanaReadOnly = canUserREAD && !canUserCRUD;
     return getAllExceptionListsColumns(
       handleExport,
       handleDelete,
@@ -200,7 +201,7 @@ export const ExceptionListsTable = React.memo(() => {
       navigateToUrl,
       isKibanaReadOnly
     );
-  }, [handleExport, handleDelete, formatUrl, navigateToUrl, isKibanaReadOnly]);
+  }, [handleExport, handleDelete, formatUrl, navigateToUrl, canUserREAD, canUserCRUD]);
 
   const handleRefresh = useCallback((): void => {
     if (refreshExceptions != null) {
