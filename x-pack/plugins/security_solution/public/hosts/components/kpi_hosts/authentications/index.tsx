@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiUserAuthenticationsMetricSuccess } from '../../../configs/kpi_user_authentications-metric_success';
+import { kpiUserAuthenticationsMetricSuccess } from '../../../configs/kpi_user_authentications_metric_success';
 import { kpiUserAuthenticationsArea } from '../../../configs/kpi_user_authentications_area';
 import { kpiUserAuthenticationsBar } from '../../../configs/kpi_user_authentications_bar';
 import { kpiUserAuthenticationsMetricFailure } from '../../../configs/kpi_user_authentication_metric_failure';

@@ -126,6 +126,7 @@ describe('Inputs', () => {
         loading: false,
         refetch,
         selectedInspectIndex: 0,
+        vizType: null,
       });
     });
 
@@ -152,6 +153,7 @@ describe('Inputs', () => {
         loading: true,
         refetch,
         selectedInspectIndex: 0,
+        vizType: null,
       });
     });
   });
@@ -187,6 +189,7 @@ describe('Inputs', () => {
         loading: false,
         refetch,
         selectedInspectIndex: 0,
+        vizType: null,
       });
     });
 
@@ -207,6 +210,7 @@ describe('Inputs', () => {
         loading: false,
         refetch,
         selectedInspectIndex: 0,
+        vizType: null,
       });
     });
   });
@@ -272,6 +276,7 @@ describe('Inputs', () => {
               loading: false,
               refetch,
               selectedInspectIndex: 0,
+              vizType: null,
             },
           ],
           timerange: {

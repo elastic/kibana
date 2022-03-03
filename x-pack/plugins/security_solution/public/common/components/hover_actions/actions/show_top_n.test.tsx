@@ -10,6 +10,12 @@ import React from 'react';
 import { TestProviders } from '../../../mock';
 import { ShowTopNButton } from './show_top_n';
 
+jest.mock('../../visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => (
+    <div data-test-subj="mock-viz-actions">{'mockVizAction'}</div>
+  )),
+}));
+
 describe('show topN button', () => {
   const defaultProps = {
     field: 'signal.rule.name',
