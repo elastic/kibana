@@ -20,6 +20,7 @@ export interface CoreStart
 |  [chrome](./kibana-plugin-core-public.corestart.chrome.md) | ChromeStart | [ChromeStart](./kibana-plugin-core-public.chromestart.md) |
 |  [deprecations](./kibana-plugin-core-public.corestart.deprecations.md) | DeprecationsServiceStart | [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md) |
 |  [docLinks](./kibana-plugin-core-public.corestart.doclinks.md) | DocLinksStart | [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |
+|  [executionContext](./kibana-plugin-core-public.corestart.executioncontext.md) | ExecutionContextStart | [ExecutionContextStart](./kibana-plugin-core-public.executioncontextstart.md) |
 |  [fatalErrors](./kibana-plugin-core-public.corestart.fatalerrors.md) | FatalErrorsStart | [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) |
 |  [http](./kibana-plugin-core-public.corestart.http.md) | HttpStart | [HttpStart](./kibana-plugin-core-public.httpstart.md) |
 |  [i18n](./kibana-plugin-core-public.corestart.i18n.md) | I18nStart | [I18nStart](./kibana-plugin-core-public.i18nstart.md) |

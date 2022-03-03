@@ -21,7 +21,8 @@ import { SecurityPageName } from '../../../app/types';
 export const type = usersModel.UsersType.details;
 
 const TabNameMappedToI18nKey: Record<UsersTableType, string> = {
-  [UsersTableType.allUsers]: i18n.ALL_USERS_TITLE,
+  [UsersTableType.allUsers]: i18n.NAVIGATION_ALL_USERS_TITLE,
+  [UsersTableType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
 };
 
 export const getBreadcrumbs = (
