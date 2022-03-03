@@ -35,6 +35,10 @@ jest.mock('../../lib/rule_api', () => ({
   })),
 }));
 
+jest.mock('../../../common/lib/config_api', () => ({
+  triggersActionsUiConfig: jest.fn().mockResolvedValue({ minimumScheduleInterval: '1m' }),
+}));
+
 jest.mock('./rule_errors', () => ({
   getRuleActionErrors: jest.fn().mockImplementation(() => {
     return [];
@@ -44,7 +48,7 @@ jest.mock('./rule_errors', () => ({
     ruleBaseErrors: {},
     ruleErrors: {
       name: new Array<string>(),
-      interval: new Array<string>(),
+      'schedule.interval': new Array<string>(),
       ruleTypeId: new Array<string>(),
       actionConnectors: new Array<string>(),
     },
@@ -220,11 +224,11 @@ describe('rule_edit', () => {
     );
   });
 
-  it('should pass in the server rule type into `getRuleErrors`', async () => {
+  it('should pass in the config into `getRuleErrors`', async () => {
     const { getRuleErrors } = jest.requireMock('./rule_errors');
     await setup();
     const lastCall = getRuleErrors.mock.calls[getRuleErrors.mock.calls.length - 1];
     expect(lastCall[2]).toBeDefined();
-    expect(lastCall[2].id).toBe('my-rule-type');
+    expect(lastCall[2]).toEqual({ minimumScheduleInterval: '1m' });
   });
 });

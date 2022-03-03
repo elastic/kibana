@@ -15,6 +15,7 @@ import { first } from 'rxjs/operators';
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
 import { HttpResponse, HttpFetchOptionsWithPath } from './types';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 
 function delay<T>(duration: number) {
   return new Promise<T>((r) => setTimeout(r, duration));
@@ -23,9 +24,11 @@ function delay<T>(duration: number) {
 const BASE_PATH = 'http://localhost/myBase';
 
 describe('Fetch', () => {
+  const executionContextMock = executionContextServiceMock.createSetupContract();
   const fetchInstance = new Fetch({
     basePath: new BasePath(BASE_PATH),
     kibanaVersion: 'VERSION',
+    executionContext: executionContextMock,
   });
   afterEach(() => {
     fetchMock.restore();
@@ -230,18 +233,43 @@ describe('Fetch', () => {
     it('should inject context headers if provided', async () => {
       fetchMock.get('*', {});
 
+      const context = {
+        type: 'test-type',
+        name: 'test-name',
+        description: 'test-description',
+        id: '42',
+      };
+      executionContextMock.withGlobalContext.mockReturnValue(context);
       await fetchInstance.fetch('/my/path', {
-        context: {
-          type: 'test-type',
-          name: 'test-name',
-          description: 'test-description',
-          id: '42',
-        },
+        context,
       });
 
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'x-kbn-context':
           '%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22description%22%3A%22test-description%22%2C%22id%22%3A%2242%22%7D',
+      });
+    });
+
+    it('should include top level context context headers if provided', async () => {
+      fetchMock.get('*', {});
+
+      const context = {
+        type: 'test-type',
+        name: 'test-name',
+        description: 'test-description',
+        id: '42',
+      };
+      executionContextMock.withGlobalContext.mockReturnValue({
+        ...context,
+        name: 'banana',
+      });
+      await fetchInstance.fetch('/my/path', {
+        context,
+      });
+
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        'x-kbn-context':
+          '%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22banana%22%2C%22description%22%3A%22test-description%22%2C%22id%22%3A%2242%22%7D',
       });
     });
 
