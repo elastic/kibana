@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import { ShallowWrapper } from 'enzyme';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButton } from '@elastic/eui';
@@ -18,24 +18,23 @@ import { NoDataViews } from './no_data_views';
 
 describe('<NoDataViewsPageTest />', () => {
   let services: SharedUXServices;
-  let mount: (element: JSX.Element) => ReactWrapper;
 
   beforeEach(() => {
     services = servicesFactory();
-    mount = (element: JSX.Element) =>
-      mountWithIntl(<ServicesProvider {...services}>{element}</ServicesProvider>);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  test('on dataView created', () => {
-    const component = mount(
-      <NoDataViews
-        onDataViewCreated={jest.fn()}
-        dataViewsDocLink={services.docLinks.dataViewsDocsLink}
-      />
+  test('on dataView created', async () => {
+    const component = mountWithIntl(
+      <ServicesProvider {...services}>
+        <NoDataViews
+          onDataViewCreated={jest.fn()}
+          dataViewsDocLink={services.docLinks.dataViewsDocsLink}
+        />
+      </ServicesProvider>
     );
 
     expect(services.editors.openDataViewEditor).not.toHaveBeenCalled();

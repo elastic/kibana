@@ -20,9 +20,7 @@ export const LazyNoDataViewsComponent = React.lazy(() =>
 );
 
 /**
- * A `NoDataViews` component that is wrapped by the `withSuspense` HOC.  This component is a pure UI
+ * A `NoDataViews` component and its props.  This component is a pure UI
  * component, and has no reference to services.
  */
-export const NoDataViewsComponent = withSuspense(LazyNoDataViewsComponent);
-
-export { NoDataViewsComponentProps } from './empty_state';
+export { NoDataViewsComponent, NoDataViewsComponentProps } from './empty_state';
