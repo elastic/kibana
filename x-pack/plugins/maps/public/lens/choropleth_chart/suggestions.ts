@@ -26,6 +26,8 @@ export function getSuggestions(
 
   const [buckets, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
+  // TODO return empty array if more then one bucket or more then one metric
+
   const suggestions: Array<VisualizationSuggestion<ChoroplethChartState>> = [];
   buckets
     .filter((col) => {

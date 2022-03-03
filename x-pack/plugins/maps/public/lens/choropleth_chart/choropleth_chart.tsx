@@ -65,11 +65,11 @@ export function ChoroplethChart({
 
   const choroplethLayer = {
     id: args.layerId,
-    label: emsLayerLabel 
+    label: emsLayerLabel
       ? i18n.translate('xpack.maps.lens.choroplethChart.choroplethLayerLabel', {
           defaultMessage: '{emsLayerLabel} by {accessorLabel}',
           values: {
-            emsLayerLabel: emsLayerLabel,
+            emsLayerLabel,
             accessorLabel: getAccessorLabel(table, args.valueAccessor),
           },
         })

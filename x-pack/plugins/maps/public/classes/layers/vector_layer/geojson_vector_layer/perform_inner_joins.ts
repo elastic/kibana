@@ -103,7 +103,10 @@ export async function performInnerJoins(
 
     const joinStatus = joinStatusesWithoutAnyMatches[0];
     const leftFieldName = await joinStatus.joinState.join.getLeftField().getLabel();
-    const rightFieldName= await joinStatus.joinState.join.getRightJoinSource().getTermField().getLabel();
+    const rightFieldName = await joinStatus.joinState.join
+      .getRightJoinSource()
+      .getTermField()
+      .getLabel();
     const reason =
       joinStatus.keys.length === 0
         ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {

@@ -31,7 +31,7 @@ export class JoinTooltipProperty implements ITooltipProperty {
   getPropertyName(): ReactNode {
     return (
       <JoinKeyLabel
-        leftFieldName={this._tooltipProperty.getPropertyName()}
+        leftFieldName={this._tooltipProperty.getPropertyName() as string}
         innerJoins={this._innerJoins}
       />
     );

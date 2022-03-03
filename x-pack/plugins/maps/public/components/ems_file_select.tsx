@@ -78,7 +78,7 @@ export class EMSFileSelect extends Component<Props, State> {
     return (
       <EuiComboBox
         placeholder={i18n.translate('xpack.maps.emsFileSelect.selectPlaceholder', {
-          defaultMessage: 'Select EMS layer',
+          defaultMessage: 'Select EMS boundaries',
         })}
         options={this.state.emsFileOptions}
         selectedOptions={selectedOption ? [selectedOption!] : []}
@@ -95,7 +95,7 @@ export class EMSFileSelect extends Component<Props, State> {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.emsFileSelect.selectLabel', {
-          defaultMessage: 'Layer',
+          defaultMessage: 'EMS Boundaries',
         })}
         helpText={this.state.emsFileOptions.length === 0 ? getEmsUnavailableMessage() : null}
       >

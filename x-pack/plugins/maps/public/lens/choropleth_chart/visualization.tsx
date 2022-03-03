@@ -18,6 +18,7 @@ import { layerTypes } from '../../../../lens/public';
 import type { OperationMetadata, SuggestionRequest, Visualization } from '../../../../lens/public';
 import type { ChoroplethChartState } from './types';
 import { Icon } from './icon';
+import { RegionKeyEditor } from './region_key_editor';
 
 const REGION_KEY_GROUP_ID = 'region_key';
 const METRIC_GROUP_ID = 'metric';
@@ -172,8 +173,7 @@ export const getVisualization = ({
     };
   },
 
-  setDimension({ columnId, groupId, prevState, ...rest }) {
-    console.log('rest', rest);
+  setDimension({ columnId, groupId, prevState }) {
     const update: Partial<ChoroplethChartState> = {};
     if (groupId === REGION_KEY_GROUP_ID) {
       update.regionAccessor = columnId;
@@ -201,15 +201,20 @@ export const getVisualization = ({
   },
 
   renderDimensionEditor(domElement, props) {
-    console.log(props);
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <div>dimension editor</div>
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+    if (props.groupId === REGION_KEY_GROUP_ID) {
+      render(
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <I18nProvider>
+            <RegionKeyEditor
+              emsFileLayers={emsFileLayers}
+              state={props.state}
+              setState={props.setState}
+            />
+          </I18nProvider>
+        </KibanaThemeProvider>,
+        domElement
+      );
+    }
   },
 
   getErrorMessages(state) {
