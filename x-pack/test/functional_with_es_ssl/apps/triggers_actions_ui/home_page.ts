@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Home page', function () {
     describe('Loads the app with limited privileges', () => {
       before(async () => {
-        await security.testUser.setRoles(['alerts_and_actions_role'], true);
+        await security.testUser.setRoles(['alerts_and_actions_role']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

@@ -40,18 +40,10 @@ export class LicenseService {
   }
 
   public isGoldPlus() {
-    return (
-      this.licenseInformation?.isAvailable &&
-      this.licenseInformation?.isActive &&
-      this.licenseInformation?.hasAtLeast('gold')
-    );
+    return this.hasAtLeast('gold');
   }
   public isEnterprise() {
-    return (
-      this.licenseInformation?.isAvailable &&
-      this.licenseInformation?.isActive &&
-      this.licenseInformation?.hasAtLeast('enterprise')
-    );
+    return this.hasAtLeast('enterprise');
   }
   public hasAtLeast(licenseType: LicenseType) {
     return (
