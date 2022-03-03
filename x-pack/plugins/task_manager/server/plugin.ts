@@ -118,7 +118,7 @@ export class TaskManagerPlugin
 
     router.post({ path: '/api/task_manager/_stop', validate: false }, async (context, req, res) => {
       this.taskPollingLifecycle!.stop();
-      return res.ok({ body: `Ack` });
+      return res.ok({ body: `Aye, aye, captain` });
     });
 
     core.status.derivedStatus$.subscribe((status) =>
