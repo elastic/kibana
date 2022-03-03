@@ -25,6 +25,7 @@ import {
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -32,7 +33,7 @@ import { MultiRowInput } from '../multi_row_input';
 import type { Output } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { LogstashInstructions } from '../logstash_instructions';
-import { useBreadcrumbs } from '../../../../hooks';
+import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 
 import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
 import { useOutputForm } from './use_output_form';
@@ -54,6 +55,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   useBreadcrumbs('settings');
   const form = useOutputForm(onClose, output);
   const inputs = form.inputs;
+  const { docLinks } = useStartServices();
 
   const isLogstashOutput = inputs.typeInput.value === 'logstash';
   const isESOutput = inputs.typeInput.value === 'elasticsearch';
@@ -165,17 +167,25 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           {isLogstashOutput && (
             <MultiRowInput
               placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder',
+                'xpack.fleet.settings.editOutputFlyout.logstashHostsInputPlaceholder',
                 {
                   defaultMessage: 'Specify host',
                 }
               )}
+              sortable={false}
               helpText={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.logstashHostsInputDescription"
-                  defaultMessage="Specify the URLs that your agents will use to connect to a Logstash. For more information, see the Fleet User Guide."
+                  defaultMessage="Specify the URLs that your agents will use to connect to a Logstash. For more information, see the {guideLink}."
                   values={{
-                    fleetUserGuideLink: <>TODO</>,
+                    guideLink: (
+                      <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
+                        <FormattedMessage
+                          id="xpack.fleet.settings.fleetUserGuideLink"
+                          defaultMessage="Fleet User Guide"
+                        />
+                      </EuiLink>
+                    ),
                   }}
                 />
               }
@@ -216,7 +226,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               placeholder={i18n.translate(
                 'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
                 {
-                  defaultMessage: 'Specify host',
+                  defaultMessage: 'Specify certificate authority',
                 }
               )}
               label={i18n.translate(

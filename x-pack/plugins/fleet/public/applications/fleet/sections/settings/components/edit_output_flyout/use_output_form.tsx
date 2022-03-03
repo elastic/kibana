@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   sendPostOutput,
@@ -20,78 +19,16 @@ import {
 } from '../../../../hooks';
 import type { Output, PostOutputRequest } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
-import { getAgentAndPolicyCountForOutput } from '../../services/agent_and_policies_count';
 
 import {
   validateName,
   validateHosts,
   validateYamlConfig,
   validateCATrustedFingerPrint,
+  validateSSLCertificate,
+  validateSSLKey,
 } from './output_form_validators';
-
-const ConfirmTitle = () => (
-  <FormattedMessage
-    id="xpack.fleet.settings.updateOutput.confirmModalTitle"
-    defaultMessage="Save and deploy changes?"
-  />
-);
-
-interface ConfirmDescriptionProps {
-  output: Output;
-  agentCount: number;
-  agentPolicyCount: number;
-}
-
-const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
-  output,
-  agentCount,
-  agentPolicyCount,
-}) => (
-  <FormattedMessage
-    id="xpack.fleet.settings.updateOutput.confirmModalText"
-    defaultMessage="This action will update {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
-    values={{
-      outputName: <strong>{output.name}</strong>,
-      agents: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.updateOutput.agentsCount"
-            defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-            values={{
-              agentCount,
-            }}
-          />
-        </strong>
-      ),
-      policies: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.updateOutput.agentPolicyCount"
-            defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
-            values={{
-              agentPolicyCount,
-            }}
-          />
-        </strong>
-      ),
-    }}
-  />
-);
-
-async function confirmUpdate(
-  output: Output,
-  confirm: ReturnType<typeof useConfirmModal>['confirm']
-) {
-  const { agentCount, agentPolicyCount } = await getAgentAndPolicyCountForOutput(output);
-  return confirm(
-    <ConfirmTitle />,
-    <ConfirmDescription
-      agentCount={agentCount}
-      agentPolicyCount={agentPolicyCount}
-      output={output}
-    />
-  );
-}
+import { confirmUpdate } from './confirm_update';
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
   const [isLoading, setIsloading] = useState(false);
@@ -132,7 +69,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     validateHosts,
     isPreconfigured
   );
-  // Logstash input
+  // Logstash inputs
   const logstashHostsInput = useComboInput(
     'logstashHostsComboxBox',
     output?.hosts ?? [],
@@ -147,15 +84,11 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
   const sslCertificateInput = useInput(
     output?.ssl?.certificate ?? '',
-    undefined, // TODO validate certificate
+    validateSSLCertificate,
     isPreconfigured
   );
 
-  const sslKeyInput = useInput(
-    output?.ssl?.key ?? '',
-    undefined, // TODO validate certificate
-    isPreconfigured
-  );
+  const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isPreconfigured);
 
   const isLogstash = typeInput.value === 'logstash';
 
@@ -181,10 +114,18 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
+    const sslCertificateValid = sslCertificateInput.validate();
+    const sslKeyValid = sslKeyInput.validate();
 
     if (isLogstash) {
       // validate logstash
-      return !logstashHostsValid || !additionalYamlConfigValid || !nameInputValid;
+      return (
+        !logstashHostsValid ||
+        !additionalYamlConfigValid ||
+        !nameInputValid ||
+        !sslCertificateValid ||
+        !sslKeyValid
+      );
     } else {
       // validate ES
       return (
@@ -197,6 +138,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   }, [
     isLogstash,
     nameInput,
+    sslCertificateInput,
+    sslKeyInput,
     elasticsearchUrlInput,
     logstashHostsInput,
     additionalYamlConfigInput,

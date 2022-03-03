@@ -81,3 +81,23 @@ export function validateCATrustedFingerPrint(value: string) {
     ];
   }
 }
+
+export function validateSSLCertificate(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.sslCertificateRequiredErrorMessage', {
+        defaultMessage: 'SSL certificate is required',
+      }),
+    ];
+  }
+}
+
+export function validateSSLKey(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.sslCertificateRequiredErrorMessage', {
+        defaultMessage: 'SSL key is required',
+      }),
+    ];
+  }
+}

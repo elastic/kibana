@@ -6,7 +6,7 @@
  */
 
 export const LOGSTASH_CONFIG_PIPELINES = `- pipeline.id: elastic-agent-pipeline
-path.config: "/etc/path/to/elastic-agent-pipeline.config"
+  path.config: "/etc/path/to/elastic-agent-pipeline.config"
 `;
 
 export function getLogstashPipeline(apiKey?: string) {
@@ -23,7 +23,7 @@ export function getLogstashPipeline(apiKey?: string) {
 
 output {
   elasticsearch {
-    hosts => "<es_hosts>"
+    hosts => "<es_host>"
     api_key => "<api_key>"
     data_stream => true
     # ca_cert: <path-to-cert-or-pem>
