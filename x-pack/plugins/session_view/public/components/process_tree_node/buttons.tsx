@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
-import { useButtonStyles } from './useButtonStyles';
+import { useButtonStyles } from './use_button_styles';
 
 export const ChildrenProcessesButton = ({
   onToggle,

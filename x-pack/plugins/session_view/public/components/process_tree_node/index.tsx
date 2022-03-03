@@ -25,7 +25,7 @@ import { Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
 import { SessionLeaderButton, AlertButton, ChildrenProcessesButton } from './buttons';
-import { useButtonStyles } from './useButtonStyles';
+import { useButtonStyles } from './use_button_styles';
 interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
