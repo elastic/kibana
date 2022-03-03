@@ -17,6 +17,8 @@ import { LegacyRequest } from '../../types';
  *
  * @param req {Object} the server route handler request object
  */
+
+// TODO: replace LegacyRequest with current request object + plugin retrieval
 export async function verifyMonitoringAuth(req: LegacyRequest) {
   const xpackInfo = get(req.server.plugins.monitoring, 'info');
 
@@ -38,6 +40,8 @@ export async function verifyMonitoringAuth(req: LegacyRequest) {
  * @param req {Object} the server route handler request object
  * @return {Promise} That either resolves with no response (void) or an exception.
  */
+
+// TODO: replace LegacyRequest with current request object + plugin retrieval
 async function verifyHasPrivileges(req: LegacyRequest) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
