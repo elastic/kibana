@@ -9,7 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '../../../../expressions/public';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/utils';
+import {
+  prepareLogTable,
+  Dimension,
+  validateAccessor,
+} from '../../../../visualizations/common/utils';
 import { HeatmapExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_HEATMAP_NAME,
@@ -150,6 +154,12 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     },
   },
   fn(data, args, handlers) {
+    validateAccessor(args.xAccessor, data.columns);
+    validateAccessor(args.yAccessor, data.columns);
+    validateAccessor(args.valueAccessor, data.columns);
+    validateAccessor(args.splitRowAccessor, data.columns);
+    validateAccessor(args.splitColumnAccessor, data.columns);
+
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [];
       if (args.valueAccessor) {

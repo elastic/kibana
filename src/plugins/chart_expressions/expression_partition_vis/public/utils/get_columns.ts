@@ -7,12 +7,12 @@
  */
 
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { getColumnByAccessor } from '../../../../visualizations/common/utils';
 import { DatatableColumn, Datatable } from '../../../../expressions/public';
 import { BucketColumns, PartitionVisParams } from '../../common/types';
-import { getColumnByAccessor } from './accessor';
 
 const getMetricColumn = (
-  metricAccessor: ExpressionValueVisDimension['accessor'],
+  metricAccessor: ExpressionValueVisDimension | string,
   visData: Datatable
 ) => {
   return getColumnByAccessor(metricAccessor, visData.columns);
@@ -27,20 +27,29 @@ export const getColumns = (
 } => {
   const { metric, buckets } = visParams.dimensions;
   if (buckets && buckets.length > 0) {
-    const bucketColumns: Array<Partial<BucketColumns>> = buckets.map(({ accessor, format }) => ({
-      ...getColumnByAccessor(accessor, visData.columns),
-      format,
-    }));
+    const bucketColumns: Array<Partial<BucketColumns>> = buckets.map((bucket) => {
+      const column = getColumnByAccessor(bucket, visData.columns);
+      return {
+        ...column,
+        format: typeof bucket === 'string' ? column?.meta.params : bucket.format,
+      };
+    });
 
     const lastBucketId = bucketColumns[bucketColumns.length - 1].id;
     const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
 
     return {
       bucketColumns,
-      metricColumn: getMetricColumn(metric?.accessor ?? matchingIndex + 1, visData),
+      metricColumn: getMetricColumn(
+        metric ?? ({ accessor: matchingIndex + 1 } as ExpressionValueVisDimension),
+        visData
+      )!,
     };
   }
-  const metricColumn = getMetricColumn(metric?.accessor ?? 0, visData);
+  const metricColumn = getMetricColumn(
+    metric ?? ({ accessor: 0 } as ExpressionValueVisDimension),
+    visData
+  )!;
   return {
     metricColumn,
     bucketColumns: [{ name: metricColumn.name }],

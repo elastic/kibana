@@ -25,8 +25,8 @@ export interface MetricArguments {
   font: Style;
   labelFont: Style;
   labelPosition: LabelPositionType;
-  metric: ExpressionValueVisDimension[];
-  bucket?: ExpressionValueVisDimension;
+  metric: Array<ExpressionValueVisDimension | string>;
+  bucket?: ExpressionValueVisDimension | string;
   colorFullBackground: boolean;
   autoScale?: boolean;
 }
