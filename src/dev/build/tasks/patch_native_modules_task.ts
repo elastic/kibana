@@ -41,7 +41,7 @@ interface Package {
 const packages: Package[] = [
   {
     name: 're2',
-    version: '1.16.0',
+    version: '1.17.4',
     destinationPath: 'node_modules/re2/build/Release/re2.node',
     extractMethod: 'gunzip',
     archives: {
