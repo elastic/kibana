@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export function monitoringBulk(Client, _config, components) {
+// TODO: Track down where this function is called by the elasticsearch client setup so we can properly type these
+
+export function monitoringBulk(Client: any, _config: any, components: any) {
   const ca = components.clientAction.factory;
   Client.prototype.monitoring = components.clientAction.namespaceFactory();
   const monitoring = Client.prototype.monitoring.prototype;
