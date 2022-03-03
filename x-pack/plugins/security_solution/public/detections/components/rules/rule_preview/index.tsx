@@ -92,6 +92,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     previewId,
     logs,
     hasNoiseWarning,
+    isAborted,
   } = usePreviewRoute({
     index,
     isDisabled,
@@ -159,7 +160,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           index={index}
         />
       )}
-      <PreviewLogsComponent logs={logs} hasNoiseWarning={hasNoiseWarning} />
+      <PreviewLogsComponent logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
     </>
   );
 };

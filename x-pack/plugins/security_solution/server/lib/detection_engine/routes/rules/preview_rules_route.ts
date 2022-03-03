@@ -47,6 +47,7 @@ import {
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
+import { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 
@@ -108,9 +109,11 @@ export const previewRulesRoute = async (
         const spaceId = siemClient.getSpaceId();
         const previewId = uuid.v4();
         const username = security?.authc.getCurrentUser(request)?.username;
-        const previewRuleExecutionLogger = createPreviewRuleExecutionLogger();
+        const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
+        const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
+        let isAborted = false;
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
@@ -153,8 +156,8 @@ export const previewRulesRoute = async (
           }
         ) => {
           let statePreview = runState as TState;
+
           const abortController = new AbortController();
-          let isAborted = false;
           setTimeout(() => {
             abortController.abort();
             isAborted = true;
@@ -177,7 +180,11 @@ export const previewRulesRoute = async (
             updatedBy: username ?? 'preview-updated-by',
           };
 
+          let invocationStartTime;
+
           while (invocationCount > 0 && !isAborted) {
+            invocationStartTime = moment();
+
             statePreview = (await executor({
               alertId: previewId,
               createdBy: rule.createdBy,
@@ -190,7 +197,6 @@ export const previewRulesRoute = async (
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
                 alertFactory,
-                // Just use es client always for preview
                 search: createAbortableEsClientFactory({
                   scopedClusterClient: context.core.elasticsearch.client,
                   abortController,
@@ -205,12 +211,11 @@ export const previewRulesRoute = async (
               updatedBy: rule.updatedBy,
             })) as TState;
 
-            // Save and reset error and warning logs
-            const errors = previewRuleExecutionLogger.logged.statusChanges
+            const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)
               .map((item) => item.message ?? 'Unkown Error');
 
-            const warnings = previewRuleExecutionLogger.logged.statusChanges
+            const warnings = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
               .map((item) => item.message ?? 'Unknown Warning');
 
@@ -218,21 +223,18 @@ export const previewRulesRoute = async (
               errors,
               warnings,
               startedAt: startedAt.toDate().toISOString(),
+              duration: moment().diff(invocationStartTime, 'milliseconds'),
             });
 
-            previewRuleExecutionLogger.clearLogs();
+            loggedStatusChanges.length = 0;
+
+            if (errors.length) {
+              break;
+            }
 
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
             invocationCount--;
-          }
-
-          if (isAborted) {
-            logs.push({
-              warnings: [`Preview timed out after ${PREVIEW_TIMEOUT_SECONDS} seconds`],
-              errors: [],
-              startedAt: moment().toDate().toISOString(),
-            });
           }
         };
 
@@ -310,6 +312,7 @@ export const previewRulesRoute = async (
           body: {
             previewId,
             logs,
+            isAborted,
           },
         });
       } catch (err) {

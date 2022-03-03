@@ -45,10 +45,12 @@ export const usePreviewRoute = ({
 
   const { isLoading, response, rule, setRule } = usePreviewRule(timeFrame);
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
+  const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);
   const [hasNoiseWarning, setHasNoiseWarning] = useState<boolean>(false);
 
   useEffect(() => {
     setLogs(response.logs ?? []);
+    setIsAborted(!!response.isAborted);
   }, [response]);
 
   const addNoiseWarning = useCallback(() => {
@@ -58,6 +60,7 @@ export const usePreviewRoute = ({
   const clearPreview = useCallback(() => {
     setRule(null);
     setLogs([]);
+    setIsAborted(false);
     setIsRequestTriggered(false);
     setHasNoiseWarning(false);
   }, [setRule]);
@@ -120,5 +123,6 @@ export const usePreviewRoute = ({
     isPreviewRequestInProgress: isLoading,
     previewId: response.previewId ?? '',
     logs,
+    isAborted,
   };
 };
