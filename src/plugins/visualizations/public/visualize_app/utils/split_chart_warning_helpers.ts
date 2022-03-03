@@ -22,19 +22,6 @@ export const CHARTS_CONFIG_TOKENS = {
   [CHARTS_WITHOUT_SMALL_MULTIPLES.gauge]: NEW_GAUGE_CHARTS_LIBRARY,
 } as const;
 
-export const warningStrings = {
-  [CHARTS_WITHOUT_SMALL_MULTIPLES.heatmap]: {
-    id: 'visualizations.newHeatmapChart.notificationMessage',
-    defaultMessage:
-      'The new heatmap charts library does not yet support split chart aggregation. {conditionalMessage}',
-  },
-  [CHARTS_WITHOUT_SMALL_MULTIPLES.gauge]: {
-    id: 'visualizations.newGaugeChart.notificationMessage',
-    defaultMessage:
-      'The new gauge charts library does not yet support split chart aggregation. {conditionalMessage}',
-  },
-};
-
 export const isSplitChart = (chartType: string | undefined, aggs?: AggConfigs) => {
   const defaultIsSplitChart = () => aggs?.aggs.some((agg) => agg.schema === 'split');
 
