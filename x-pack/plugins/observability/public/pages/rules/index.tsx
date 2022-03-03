@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiButton,
   EuiText,
   EuiBadge,
   EuiPopover,
