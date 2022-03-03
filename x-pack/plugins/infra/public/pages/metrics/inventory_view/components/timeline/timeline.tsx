@@ -214,7 +214,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
       data-test-subj={isVisible ? 'timelineContainerOpen' : 'timelineContainerClosed'}
     >
       <TimelineHeader>
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={false} style={{ marginRight: 20 }}>
           <EuiText>
             <strong>
               <FormattedMessage
@@ -225,7 +225,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             </strong>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EuiFlexGroup alignItems={'center'} responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
