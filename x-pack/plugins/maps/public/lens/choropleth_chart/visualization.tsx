@@ -44,7 +44,8 @@ export const getVisualization = ({
       groupLabel: i18n.translate('xpack.maps.lens.groupLabel', {
         defaultMessage: 'Map',
       }),
-      sortPriority: 3,
+      sortPriority: 1,
+      showExperimentalBadge: true,
     },
   ],
 

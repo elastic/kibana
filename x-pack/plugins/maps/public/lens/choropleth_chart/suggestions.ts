@@ -26,7 +26,11 @@ export function getSuggestions(
 
   const [buckets, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
-  // TODO return empty array if more then one bucket or more then one metric
+  // Do not return suggestions for tables with multiple buckets.
+  // This will avoid providing multiple suggestions for table with "time" and "top value" buckets
+  if (buckets.length > 1) {
+    return [];
+  }
 
   const suggestions: Array<VisualizationSuggestion<ChoroplethChartState>> = [];
   buckets
