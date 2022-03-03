@@ -36,9 +36,8 @@ describe('ConnectInstance', () => {
   const getSourceConnectData = jest.fn((_, redirectOauth) => {
     redirectOauth();
   });
-  const createContentSource = jest.fn((_, redirectFormCreated, handleFormSubmitError) => {
+  const createContentSource = jest.fn((_, redirectFormCreated) => {
     redirectFormCreated();
-    handleFormSubmitError();
   });
 
   const credentialsSourceData = staticSourceData[13];
