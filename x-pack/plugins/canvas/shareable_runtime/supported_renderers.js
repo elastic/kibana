@@ -44,4 +44,9 @@ export const renderFunctions = [
   text,
 ];
 
-export const renderFunctionNames = renderFunctions.map((fn) => fn.name);
+export const renderFunctionNames = renderFunctions.map((fn) => {
+  if (typeof fn === 'function') {
+    return fn().name;
+  }
+  return fn.name;
+});
