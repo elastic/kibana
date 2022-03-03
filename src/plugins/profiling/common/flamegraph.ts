@@ -6,7 +6,26 @@
  * Side Public License, v 1.
  */
 import { Logger } from 'kibana/server';
-import { StackTraceID, StackFrameID, FileID, StackTrace, StackFrame, Executable } from './profiling';
+import {
+  buildCallerCalleeIntermediateRoot,
+  CallerCalleeNode,
+  fromCallerCalleeIntermediateNode,
+} from './callercallee';
+import {
+  StackTraceID,
+  StackFrameID,
+  FileID,
+  StackTrace,
+  StackFrame,
+  Executable,
+  buildStackFrameMetadata,
+  StackFrameMetadata,
+} from './profiling';
+
+interface PixiFlameGraph extends CallerCalleeNode {
+  TotalTraces: number;
+  TotalSeconds: number;
+}
 
 function checkIfStringHasParentheses(s: string) {
   return /\(|\)/.test(s);
@@ -137,7 +156,14 @@ export class FlameGraph {
     return { leaves };
   }
 
-  toPixi() {
-    return {};
+  toPixi(): PixiFlameGraph {
+    let rootFrame = buildStackFrameMetadata();
+    let metadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
+    let diagram = buildCallerCalleeIntermediateRoot(rootFrame, this.events, metadataForTraces);
+    return {
+      ...fromCallerCalleeIntermediateNode(diagram),
+      TotalTraces: this.totalCount,
+      TotalSeconds: 0,
+    } as PixiFlameGraph;
   }
 }
