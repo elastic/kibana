@@ -31,7 +31,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       }),
       value: 'MMM D, YYYY @ HH:mm:ss.SSS',
       description: i18n.translate('core.ui_settings.params.dateFormatText', {
-        defaultMessage: 'The {formatLink} for pretty formatted dates',
+        defaultMessage: 'The {formatLink} for pretty formatted dates.',
         description:
           'Part of composite text: core.ui_settings.params.dateFormatText + ' +
           'core.ui_settings.params.dateFormat.optionsLinkText',
@@ -52,7 +52,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       }),
       value: 'Browser',
       description: i18n.translate('core.ui_settings.params.dateFormat.timezoneText', {
-        defaultMessage: 'The default time zone',
+        defaultMessage: 'The default time zone.',
       }),
       type: 'select',
       options: timezones,
@@ -111,7 +111,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       }),
       value: defaultWeekday,
       description: i18n.translate('core.ui_settings.params.dateFormat.dayOfWeekText', {
-        defaultMessage: 'The day that starts the week',
+        defaultMessage: 'The day that starts the week.',
       }),
       type: 'select',
       options: weekdays,
@@ -137,7 +137,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       }),
       value: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
       description: i18n.translate('core.ui_settings.params.dateNanosFormatText', {
-        defaultMessage: 'The format for {dateNanosLink} data',
+        defaultMessage: 'The format for {dateNanosLink} data.',
         values: {
           dateNanosLink:
             '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/date_nanos.html" target="_blank" rel="noopener noreferrer">' +
