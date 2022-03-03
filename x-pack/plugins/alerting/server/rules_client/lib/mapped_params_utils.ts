@@ -112,6 +112,26 @@ export const getModifiedValue = (key: string, value: string) => {
   return value;
 };
 
+export const getModifiedSearch = (searchFields: string | string[] | undefined, value: string) => {
+  if (!searchFields) {
+    return value;
+  }
+
+  const fieldNames = Array.isArray(searchFields) ? searchFields : [searchFields];
+
+  const modifiedSearchValues = fieldNames.map((fieldName) => {
+    const firstAttribute = getFieldNameAttribute(fieldName, [
+      'alert',
+      'attributes',
+      'params',
+      'mapped_params',
+    ]);
+    return getModifiedValue(firstAttribute, value);
+  });
+
+  return modifiedSearchValues.find((search) => search !== value) || value;
+};
+
 export const modifyFilterKueryNode = ({
   astFilter,
   hasNestedKey = false,

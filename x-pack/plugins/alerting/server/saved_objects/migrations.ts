@@ -148,7 +148,7 @@ export function getMigrations(
 
   const migrationRules820 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSiemSignalsRuleType(doc),
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
     pipeMigrations(addMappedParams)
   );
 
@@ -844,7 +844,7 @@ function addMappedParams(
       ...doc,
       attributes: {
         ...doc.attributes,
-        ...(mappedParams && { mapped_params: mappedParams }),
+        mapped_params: mappedParams,
       },
     };
   }

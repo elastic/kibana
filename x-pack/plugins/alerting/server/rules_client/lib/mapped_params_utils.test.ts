@@ -11,6 +11,7 @@ import {
   getModifiedFilter,
   getModifiedField,
   getModifiedSearchFields,
+  getModifiedSearch,
   getModifiedValue,
   modifyFilterKueryNode,
 } from './mapped_params_utils';
@@ -77,14 +78,25 @@ describe('getModifiedSearchFields', () => {
       'invalid',
     ]);
   });
+});
 
-  describe('getModifiedValue', () => {
-    it('converts severity strings to sortable strings', () => {
-      expect(getModifiedValue('severity', 'low')).toEqual('20-low');
-      expect(getModifiedValue('severity', 'medium')).toEqual('40-medium');
-      expect(getModifiedValue('severity', 'high')).toEqual('60-high');
-      expect(getModifiedValue('severity', 'critical')).toEqual('80-critical');
-    });
+describe('getModifiedSearch', () => {
+  it('converts the search value depending on the search field', () => {
+    const searchFields = ['params.severity', 'another'];
+
+    expect(getModifiedSearch(searchFields, 'medium')).toEqual('40-medium');
+    expect(getModifiedSearch(searchFields, 'something else')).toEqual('something else');
+    expect(getModifiedSearch('params.risk_score', 'something else')).toEqual('something else');
+    expect(getModifiedSearch('mapped_params.severity', 'medium')).toEqual('40-medium');
+  });
+});
+
+describe('getModifiedValue', () => {
+  it('converts severity strings to sortable strings', () => {
+    expect(getModifiedValue('severity', 'low')).toEqual('20-low');
+    expect(getModifiedValue('severity', 'medium')).toEqual('40-medium');
+    expect(getModifiedValue('severity', 'high')).toEqual('60-high');
+    expect(getModifiedValue('severity', 'critical')).toEqual('80-critical');
   });
 });
 

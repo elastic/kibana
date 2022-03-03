@@ -82,6 +82,7 @@ import {
   getMappedParams,
   getModifiedField,
   getModifiedSearchFields,
+  getModifiedSearch,
   modifyFilterKueryNode,
 } from './lib/mapped_params_utils';
 
@@ -665,10 +666,18 @@ export class RulesClient {
 
     sortField = mapSortField(getModifiedField(options.sortField));
 
-    if (options.searchFields) {
-      options.searchFields = getModifiedSearchFields(options.searchFields);
-    }
+    // Generate new modified search and search fields, translating certain params properties
+    // to mapped_params. Thus, allowing for sort/search/filtering on params.
+    // We do the modifcation after the validate check to make sure the public API does not
+    // use the mapped_params in their queries.
+    options = {
+      ...options,
+      ...(options.searchFields && { searchFields: getModifiedSearchFields(options.searchFields) }),
+      ...(options.search && { search: getModifiedSearch(options.searchFields, options.search) }),
+    };
 
+    // Modifies kuery node AST to translate params filter and the filter value to mapped_params.
+    // This translation is done in place, and therefore is not a pure function.
     if (filterKueryNode) {
       modifyFilterKueryNode({ astFilter: filterKueryNode });
     }

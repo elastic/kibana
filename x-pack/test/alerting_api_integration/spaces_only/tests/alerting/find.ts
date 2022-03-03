@@ -205,7 +205,7 @@ const findTestUtils = (
         const response = await supertest.get(
           `${getUrlPrefix(Spaces.space1.id)}/${
             describeType === 'public' ? 'api' : 'internal'
-          }/alerting/rules/_find?search_fields=params.severity&search=40-medium`
+          }/alerting/rules/_find?search_fields=params.severity&search=medium`
         );
 
         expect(response.status).to.eql(200);

@@ -284,7 +284,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      await supertest
+      const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
@@ -312,6 +312,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       );
 
       expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
       expect(response.body.total).to.equal(1);
       expect(response.body.data[0].mapped_params).to.eql({
         risk_score: 40,
