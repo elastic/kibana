@@ -47,10 +47,13 @@ export interface EventFiltersFlyoutProps {
   id?: string;
   data?: Ecs;
   onCancel(): void;
+  maskProps?: {
+    style?: string;
+  };
 }
 
 export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
-  ({ onCancel, id, type = 'create', data }) => {
+  ({ onCancel, id, type = 'create', data, ...flyoutProps }) => {
     useEventFiltersNotification();
     const [enrichedData, setEnrichedData] = useState<Ecs | null>();
     const toasts = useToasts();
@@ -214,7 +217,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         size="l"
         onClose={handleOnCancel}
         data-test-subj="eventFiltersCreateEditFlyout"
-        maskProps={{ style: 'z-index: 5000' }}
+        {...flyoutProps}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">

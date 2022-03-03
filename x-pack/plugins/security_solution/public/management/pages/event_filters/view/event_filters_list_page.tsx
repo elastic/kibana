@@ -18,7 +18,6 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { AppAction } from '../../../../common/store/actions';
 import { getEventFiltersListPath } from '../../../common/routing';
 import { AdministrationListPage as _AdministrationListPage } from '../../../components/administration_list_page';
-import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 
 import { EventFiltersListEmptyState } from './components/empty';
 import { useEventFiltersNavigateCallback, useEventFiltersSelector } from './hooks';
@@ -252,90 +251,88 @@ export const EventFiltersListPage = memo(() => {
   }
 
   return (
-    <SecuritySolutionPageWrapper>
-      <AdministrationListPage
-        headerBackComponent={backButtonHeaderComponent}
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.eventFilters.list.pageTitle"
-            defaultMessage="Event filters"
+    <AdministrationListPage
+      headerBackComponent={backButtonHeaderComponent}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.eventFilters.list.pageTitle"
+          defaultMessage="Event filters"
+        />
+      }
+      subtitle={ABOUT_EVENT_FILTERS}
+      actions={
+        doesDataExist && (
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            isDisabled={showFlyout}
+            onClick={handleAddButtonClick}
+            data-test-subj="eventFiltersPageAddButton"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.list.pageAddButton"
+              defaultMessage="Add event filter"
+            />
+          </EuiButton>
+        )
+      }
+      hideHeader={!doesDataExist}
+    >
+      {showFlyout && (
+        <EventFiltersFlyout
+          onCancel={handleCancelButtonClick}
+          id={location.id}
+          type={location.show}
+        />
+      )}
+
+      {showDelete && <EventFilterDeleteModal />}
+
+      {doesDataExist && (
+        <>
+          <SearchExceptions
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
+              defaultMessage: 'Search on the fields below: name, description, comments, value',
+            })}
+            hasPolicyFilter
+            policyList={policiesRequest.data?.items}
+            defaultIncludedPolicies={location.included_policies}
           />
-        }
-        subtitle={ABOUT_EVENT_FILTERS}
-        actions={
-          doesDataExist && (
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              isDisabled={showFlyout}
-              onClick={handleAddButtonClick}
-              data-test-subj="eventFiltersPageAddButton"
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.list.pageAddButton"
-                defaultMessage="Add event filter"
-              />
-            </EuiButton>
+          <EuiSpacer size="m" />
+          <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.list.totalCount"
+              defaultMessage="Showing {total, plural, one {# event filter} other {# event filters}}"
+              values={{ total: totalCountListItems }}
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
+        items={listItems}
+        ItemComponent={ArtifactEntryCard}
+        itemComponentProps={handleArtifactCardProps}
+        onChange={handlePaginatedContentChange}
+        error={fetchError?.message}
+        loading={isLoading}
+        pagination={pagination}
+        contentClassName="event-filter-container"
+        data-test-subj="eventFiltersContent"
+        noItemsMessage={
+          !doesDataExist && (
+            <EventFiltersListEmptyState
+              onAdd={handleAddButtonClick}
+              isAddDisabled={showFlyout}
+              backComponent={backButtonEmptyComponent}
+            />
           )
         }
-        hideHeader={!doesDataExist}
-      >
-        {showFlyout && (
-          <EventFiltersFlyout
-            onCancel={handleCancelButtonClick}
-            id={location.id}
-            type={location.show}
-          />
-        )}
-
-        {showDelete && <EventFilterDeleteModal />}
-
-        {doesDataExist && (
-          <>
-            <SearchExceptions
-              defaultValue={location.filter}
-              onSearch={handleOnSearch}
-              placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
-                defaultMessage: 'Search on the fields below: name, description, comments, value',
-              })}
-              hasPolicyFilter
-              policyList={policiesRequest.data?.items}
-              defaultIncludedPolicies={location.included_policies}
-            />
-            <EuiSpacer size="m" />
-            <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.list.totalCount"
-                defaultMessage="Showing {total, plural, one {# event filter} other {# event filters}}"
-                values={{ total: totalCountListItems }}
-              />
-            </EuiText>
-            <EuiSpacer size="s" />
-          </>
-        )}
-
-        <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
-          items={listItems}
-          ItemComponent={ArtifactEntryCard}
-          itemComponentProps={handleArtifactCardProps}
-          onChange={handlePaginatedContentChange}
-          error={fetchError?.message}
-          loading={isLoading}
-          pagination={pagination}
-          contentClassName="event-filter-container"
-          data-test-subj="eventFiltersContent"
-          noItemsMessage={
-            !doesDataExist && (
-              <EventFiltersListEmptyState
-                onAdd={handleAddButtonClick}
-                isAddDisabled={showFlyout}
-                backComponent={backButtonEmptyComponent}
-              />
-            )
-          }
-        />
-      </AdministrationListPage>
-    </SecuritySolutionPageWrapper>
+      />
+    </AdministrationListPage>
   );
 });
 

@@ -145,7 +145,11 @@ export const EventDetailsFooterComponent = React.memo(
             />
           )}
         {isAddEventFilterModalOpen && detailsEcsData != null && (
-          <EventFiltersFlyout data={detailsEcsData} onCancel={closeAddEventFilterModal} />
+          <EventFiltersFlyout
+            data={detailsEcsData}
+            onCancel={closeAddEventFilterModal}
+            maskProps={{ style: 'z-index: 5000' }}
+          />
         )}
       </>
     );
