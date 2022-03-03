@@ -95,7 +95,7 @@ export function validateSSLCertificate(value: string) {
 export function validateSSLKey(value: string) {
   if (!value || value === '') {
     return [
-      i18n.translate('xpack.fleet.settings.outputForm.sslCertificateRequiredErrorMessage', {
+      i18n.translate('xpack.fleet.settings.outputForm.sslKeyRequiredErrorMessage', {
         defaultMessage: 'SSL key is required',
       }),
     ];
