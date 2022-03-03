@@ -1017,7 +1017,7 @@ describe('terms', () => {
       ).toBeTruthy();
     });
 
-    it('should show an error message when field is invalid', () => {
+    it('should show an error message when first field is invalid', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
@@ -1050,7 +1050,7 @@ describe('terms', () => {
       ).toBe('Invalid field. Check your data view or pick another field.');
     });
 
-    it('should show an error message when field is not supported', () => {
+    it('should show an error message when first field is not supported', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
@@ -1082,6 +1082,74 @@ describe('terms', () => {
       expect(
         instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
       ).toBe('This field does not work with the selected function.');
+    });
+
+    it('should show an error message when any field but the first is invalid', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      layer.columns.col1 = {
+        label: 'Top value of geo.src + 1 other',
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+          secondaryFields: ['unsupported'],
+        },
+        sourceField: 'geo.src',
+      } as TermsIndexPatternColumn;
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      expect(
+        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+      ).toBe('Invalid field: "unsupported". Check your data view or pick another field.');
+    });
+
+    it('should show an error message when any field but the first is not supported', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      layer.columns.col1 = {
+        label: 'Top value of geo.src + 1 other',
+        dataType: 'date',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+          secondaryFields: ['timestamp'],
+        },
+        sourceField: 'geo.src',
+      } as TermsIndexPatternColumn;
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      expect(
+        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+      ).toBe('Invalid field: "timestamp". Check your data view or pick another field.');
     });
 
     it('should render the an add button for single layer, but no other hints', () => {
@@ -2296,6 +2364,49 @@ describe('terms', () => {
         secondaryFields: expect.arrayContaining(['dest']),
         parentFormat: { id: 'multi_terms' },
       });
+    });
+  });
+
+  describe('getNonTransferableFields', () => {
+    it('should return empty array if all fields are transferable', () => {
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn(['source']),
+          defaultProps.indexPattern
+        )
+      ).toEqual([]);
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn(['source', 'bytes']),
+          defaultProps.indexPattern
+        )
+      ).toEqual([]);
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn([]),
+          defaultProps.indexPattern
+        )
+      ).toEqual([]);
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn(['source', 'geo.src']),
+          defaultProps.indexPattern
+        )
+      ).toEqual([]);
+    });
+    it('should return only non transferable fields (invalid or not existence)', () => {
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn(['source', 'timestamp']),
+          defaultProps.indexPattern
+        )
+      ).toEqual(['timestamp']);
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn(['source', 'unsupported']),
+          defaultProps.indexPattern
+        )
+      ).toEqual(['unsupported']);
     });
   });
 });

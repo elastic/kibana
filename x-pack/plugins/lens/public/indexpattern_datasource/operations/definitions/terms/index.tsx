@@ -26,18 +26,18 @@ import type { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
-import { getInvalidFieldMessage, isColumnOfType } from '../helpers';
+import { getInvalidFieldMessage } from '../helpers';
 import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
 import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
 import type { TermsIndexPatternColumn } from './types';
-import type { IndexPattern, IndexPatternField } from '../../../types';
+import type { IndexPatternField } from '../../../types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
-  getNonTransferableFields,
+  getFieldsByValidationState,
   isSortableByColumn,
 } from './helpers';
 import {
@@ -86,16 +86,6 @@ function ofName(name?: string, count: number = 0, rare: boolean = false) {
   });
 }
 
-function isScriptedField(field: IndexPatternField): boolean;
-function isScriptedField(fieldName: string, indexPattern: IndexPattern): boolean;
-function isScriptedField(fieldName: string | IndexPatternField, indexPattern?: IndexPattern) {
-  if (typeof fieldName === 'string') {
-    const field = indexPattern?.getFieldByName(fieldName);
-    return field && field.scripted;
-  }
-  return fieldName.scripted;
-}
-
 // It is not always possible to know if there's a numeric field, so just ignore it for now
 function getParentFormatter(params: Partial<TermsIndexPatternColumn['params']>) {
   return { id: params.secondaryFields?.length ? 'multi_terms' : 'terms' };
@@ -114,30 +104,18 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     return [targetColumn.sourceField, ...(targetColumn?.params?.secondaryFields ?? [])];
   },
   getParamsForMultipleFields: ({ targetColumn, sourceColumn, field, indexPattern }) => {
-    const secondaryFields = new Set<string>();
-    if (targetColumn.params?.secondaryFields?.length) {
-      targetColumn.params.secondaryFields.forEach((fieldName) => {
-        if (!isScriptedField(fieldName, indexPattern)) {
-          secondaryFields.add(fieldName);
-        }
-      });
-    }
-    if (sourceColumn && 'sourceField' in sourceColumn && sourceColumn?.sourceField) {
-      if (!isScriptedField(sourceColumn.sourceField, indexPattern)) {
-        secondaryFields.add(sourceColumn.sourceField);
-      }
-    }
-    if (sourceColumn && isColumnOfType<TermsIndexPatternColumn>('terms', sourceColumn)) {
-      if (sourceColumn?.params?.secondaryFields?.length) {
-        sourceColumn.params.secondaryFields.forEach((fieldName) => {
-          if (!isScriptedField(fieldName, indexPattern)) {
-            secondaryFields.add(fieldName);
-          }
-        });
-      }
-    }
-    if (field && !isScriptedField(field)) {
-      secondaryFields.add(field.name);
+    const secondaryFields = new Set<string>(
+      getFieldsByValidationState(indexPattern, targetColumn).validFields
+    );
+
+    const validFieldsToAdd = getFieldsByValidationState(
+      indexPattern,
+      sourceColumn,
+      field
+    ).validFields;
+
+    for (const validField of validFieldsToAdd) {
+      secondaryFields.add(validField);
     }
     // remove the sourceField
     secondaryFields.delete(targetColumn.sourceField);
@@ -157,27 +135,12 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       return false;
     }
     // collect the fields from the targetColumn
-    const originalTerms = new Set([
-      targetColumn.sourceField,
-      ...(targetColumn.params?.secondaryFields ?? []),
-    ]);
+    const originalTerms = new Set(
+      getFieldsByValidationState(indexPattern, targetColumn).validFields
+    );
     // now check how many fields can be added
-    let counter = field && !isScriptedField(field) && !originalTerms.has(field.name) ? 1 : 0;
-    if (sourceColumn) {
-      if ('sourceField' in sourceColumn) {
-        counter +=
-          !isScriptedField(sourceColumn.sourceField, indexPattern) &&
-          !originalTerms.has(sourceColumn.sourceField)
-            ? 1
-            : 0;
-        if (isColumnOfType<TermsIndexPatternColumn>('terms', sourceColumn)) {
-          counter +=
-            sourceColumn.params.secondaryFields?.filter((f) => {
-              return !isScriptedField(f, indexPattern) && !originalTerms.has(f);
-            }).length ?? 0;
-        }
-      }
-    }
+    const { validFields } = getFieldsByValidationState(indexPattern, sourceColumn, field);
+    const counter = validFields.filter((fieldName) => !originalTerms.has(fieldName)).length;
     // reject when there are no new fields to add
     if (!counter) {
       return false;
@@ -212,10 +175,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     return messages.length ? messages : undefined;
   },
   getNonTransferableFields: (column, newIndexPattern) => {
-    return getNonTransferableFields(column, newIndexPattern).invalidFields;
+    return getFieldsByValidationState(newIndexPattern, column).invalidFields;
   },
   isTransferable: (column, newIndexPattern) => {
-    const { allFields, invalidFields } = getNonTransferableFields(column, newIndexPattern);
+    const { allFields, invalidFields } = getFieldsByValidationState(newIndexPattern, column);
 
     return Boolean(
       allFields.length &&
@@ -445,7 +408,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     const showScriptedFieldError = Boolean(
       getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern)
     );
-    const { invalidFields } = getNonTransferableFields(selectedColumn, indexPattern);
+    const { invalidFields } = getFieldsByValidationState(indexPattern, selectedColumn);
 
     return (
       <EuiFormRow
