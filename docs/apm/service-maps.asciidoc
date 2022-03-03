@@ -84,7 +84,7 @@ image:apm/images/red-service.png[APM red service]:: Max anomaly score **≥75**.
 [role="screenshot"]
 image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on service maps in the APM app]
 
-If an anomaly has been detected, click *view anomalies* to view the anomaly detection metric viewier in the Machine learning app.
+If an anomaly has been detected, click *view anomalies* to view the anomaly detection metric viewer in the Machine learning app.
 This time series analysis will display additional details on the severity and time of the detected anomalies.
 
 To learn how to create a machine learning job, see <<machine-learning-integration,machine learning integration>>.
