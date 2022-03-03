@@ -1,12 +1,84 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { isPathValid, hasSimpleExecutableName } from './validations';
-import { OperatingSystem, ConditionEntryField } from '../../types';
+import {
+  isPathValid,
+  hasSimpleExecutableName,
+  OperatingSystem,
+  ConditionEntryField,
+  validateFilePathInput,
+  FILENAME_WILDCARD_WARNING,
+  FILEPATH_WARNING,
+} from '.';
+
+describe('validateFilePathInput', () => {
+  describe('windows', () => {
+    const os = OperatingSystem.WINDOWS;
+
+    it('warns on wildcard in file name at the end of the path', () => {
+      expect(validateFilePathInput({ os, value: 'c:\\path*.exe' })).toEqual(
+        FILENAME_WILDCARD_WARNING
+      );
+    });
+
+    it('warns on unix paths or non-windows paths', () => {
+      expect(validateFilePathInput({ os, value: '/opt/bin' })).toEqual(FILEPATH_WARNING);
+    });
+
+    it('warns on malformed paths', () => {
+      expect(validateFilePathInput({ os, value: 'c:\\path/opt' })).toEqual(FILEPATH_WARNING);
+      expect(validateFilePathInput({ os, value: '1242' })).toEqual(FILEPATH_WARNING);
+      expect(validateFilePathInput({ os, value: 'w12efdfa' })).toEqual(FILEPATH_WARNING);
+    });
+  });
+  describe('unix paths', () => {
+    const os =
+      parseInt((Math.random() * 2).toString(), 10) === 1
+        ? OperatingSystem.MAC
+        : OperatingSystem.LINUX;
+
+    it('warns on wildcard in file name at the end of the path', () => {
+      expect(validateFilePathInput({ os, value: '/opt/bin*' })).toEqual(FILENAME_WILDCARD_WARNING);
+    });
+
+    it('warns on windows paths', () => {
+      expect(validateFilePathInput({ os, value: 'd:\\path\\file.exe' })).toEqual(FILEPATH_WARNING);
+    });
+
+    it('warns on malformed paths', () => {
+      expect(validateFilePathInput({ os, value: 'opt/bin\\file.exe' })).toEqual(FILEPATH_WARNING);
+      expect(validateFilePathInput({ os, value: '1242' })).toEqual(FILEPATH_WARNING);
+      expect(validateFilePathInput({ os, value: 'w12efdfa' })).toEqual(FILEPATH_WARNING);
+    });
+  });
+});
+
+describe('No Warnings', () => {
+  it('should not show warnings on non path entries ', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.HASH,
+        type: 'match',
+        value: '5d5b09f6dcb2d53a5fffc60c4ac0d55fabdf556069d6631545f42aa6e3500f2e',
+      })
+    ).toEqual(true);
+
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.SIGNER,
+        type: 'match',
+        value: '',
+      })
+    ).toEqual(true);
+  });
+});
 
 describe('Unacceptable Windows wildcard paths', () => {
   it('should not accept paths that do not have a folder name with a wildcard ', () => {

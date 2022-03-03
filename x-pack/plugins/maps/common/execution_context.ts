@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { isUndefined, omitBy } from 'lodash';
 import { APP_ID } from './constants';
 
-export function makeExecutionContext(id: string, url: string, description?: string) {
-  return {
-    name: APP_ID,
-    type: 'application',
-    id,
-    description: description || '',
-    url,
-  };
+export function makeExecutionContext(context: { id?: string; url?: string; description?: string }) {
+  return omitBy(
+    {
+      name: APP_ID,
+      type: 'application',
+      ...context,
+    },
+    isUndefined
+  );
 }
