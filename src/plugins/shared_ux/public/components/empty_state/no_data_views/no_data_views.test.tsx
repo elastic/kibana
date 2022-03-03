@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { ShallowWrapper } from 'enzyme';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButton } from '@elastic/eui';
