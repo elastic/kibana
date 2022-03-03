@@ -9,11 +9,8 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { fireEvent, getByTestId } from '@testing-library/dom';
 
-import {
-  ConditionEntryField,
-  NewTrustedApp,
-  OperatingSystem,
-} from '../../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { NewTrustedApp } from '../../../../../../common/endpoint/types';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
