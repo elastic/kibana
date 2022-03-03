@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
 import { DataPublicPluginStart } from '../../../../data/public';
+import { Datatable } from '../../../../expressions/public';
+import { getColumnByAccessor } from '../../../../visualizations/common/utils';
 import { PartitionVisParams } from '../../common/types';
 import { FieldFormatsStart } from '../../../../field_formats/public';
 import { FilterEvent } from '../types';
@@ -24,6 +26,7 @@ export const getLegendActions = (
   getFilterEventData: (series: SeriesIdentifier) => FilterEvent | null,
   onFilter: (data: FilterEvent, negate?: any) => void,
   visParams: PartitionVisParams,
+  visData: Datatable,
   actions: DataPublicPluginStart['actions'],
   formatter: FieldFormatsStart
 ): LegendAction => {
@@ -44,9 +47,17 @@ export const getLegendActions = (
     let formattedTitle = '';
     if (visParams.dimensions.buckets) {
       const column = visParams.dimensions.buckets.find(
-        (bucket) => bucket.accessor === filterData.data.data[0].column
+        (bucket) =>
+          (typeof bucket === 'string' ? bucket : bucket.accessor) === filterData.data.data[0].column
       );
-      formattedTitle = formatter.deserialize(column?.format).convert(pieSeries.key) ?? '';
+      formattedTitle =
+        formatter
+          .deserialize(
+            typeof column === 'string'
+              ? getColumnByAccessor(column, visData.columns)!.meta.params
+              : column?.format
+          )
+          .convert(pieSeries.key) ?? '';
     }
 
     const title = formattedTitle || pieSeries.key;

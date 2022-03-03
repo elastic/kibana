@@ -406,6 +406,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   getLegendActionEventData(visData),
                   handleLegendAction,
                   visParams,
+                  visData,
                   services.data.actions,
                   services.fieldFormats
                 )}
