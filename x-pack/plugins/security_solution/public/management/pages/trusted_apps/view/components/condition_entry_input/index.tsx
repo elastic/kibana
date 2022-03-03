@@ -16,13 +16,8 @@ import {
   EuiSuperSelectOption,
   EuiText,
 } from '@elastic/eui';
-
-import {
-  ConditionEntry,
-  ConditionEntryField,
-  OperatorFieldIds,
-  OperatingSystem,
-} from '../../../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { ConditionEntry, OperatorFieldIds } from '../../../../../../../common/endpoint/types';
 
 import {
   CONDITION_FIELD_DESCRIPTION,
