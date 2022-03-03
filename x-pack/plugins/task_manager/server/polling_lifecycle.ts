@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject, Observable, Subscription } from 'rxjs';
+import { Subject, Observable, Subscription, from } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
@@ -91,8 +91,6 @@ export class TaskPollingLifecycle {
   private middleware: Middleware;
 
   private usageCounter?: UsageCounter;
-
-  #stopped: boolean = false;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -208,23 +206,18 @@ export class TaskPollingLifecycle {
       );
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
-      if (this.#stopped) {
-        return;
-      }
-
       if (areESAndSOAvailable && !this.isStarted) {
         // start polling for work
         this.pollingSubscription = this.subscribeToPoller(poller$);
       } else if (!areESAndSOAvailable && this.isStarted) {
-        this.stop();
+        this.pollingSubscription.unsubscribe();
+        this.pool.cancelRunningTasks();
       }
     });
   }
 
   public stop() {
-    this.#stopped = true;
-    this.pollingSubscription.unsubscribe();
-    this.pool.cancelRunningTasks();
+    this.taskClaiming.excludedTaskTypes = ['*'];
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
