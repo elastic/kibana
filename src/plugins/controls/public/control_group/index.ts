@@ -11,3 +11,4 @@ export type { ControlGroupInput, ControlGroupOutput } from './types';
 
 export { CONTROL_GROUP_TYPE } from './types';
 export { ControlGroupContainerFactory } from './embeddable/control_group_container_factory';
+export { ControlsCallout } from './component/controls_callout';

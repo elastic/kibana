@@ -28,6 +28,7 @@ export { OPTIONS_LIST_CONTROL, CONTROL_GROUP_TYPE } from '../common';
 
 export {
   ControlGroupContainer,
+  ControlsCallout,
   ControlGroupContainerFactory,
   type ControlGroupInput,
   type ControlGroupOutput,

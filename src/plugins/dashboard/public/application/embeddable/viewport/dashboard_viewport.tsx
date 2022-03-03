@@ -13,7 +13,7 @@ import { DashboardContainer, DashboardReactContextValue } from '../dashboard_con
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { ControlGroupContainer } from '../../../../../controls/public';
+import { ControlGroupContainer, ControlsCallout } from '../../../../../controls/public';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
@@ -101,7 +101,13 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     return (
       <>
         {controlsEnabled ? (
-          <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
+          <div className="dshDashboardViewport-controls">
+            <ControlsCallout
+              controlEmbeddable={this.props.controlGroup}
+              dashboardPanelCount={panelCount}
+            />
+            <div ref={this.controlsRoot} />
+          </div>
         ) : null}
         <div
           data-shared-items-count={panelCount}

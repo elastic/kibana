@@ -68,9 +68,9 @@ export class ControlGroupContainer extends Container<
     return Promise.resolve();
   };
 
-  private getCreateControlButtons = (
+  public getCreateControlButton = (
     buttonType: CreateControlButtonTypes,
-    closePopover: () => void
+    closePopover?: () => void
   ) => {
     return (
       <CreateControlButton
@@ -115,7 +115,7 @@ export class ControlGroupContainer extends Container<
         {({ closePopover }: { closePopover: () => void }) => (
           <EuiContextMenuPanel
             items={[
-              this.getCreateControlButtons('toolbar', closePopover),
+              this.getCreateControlButton('toolbar', closePopover),
               <EuiHorizontalRule margin="none" />,
               this.getEditControlGroupButton(closePopover),
             ]}
@@ -161,6 +161,10 @@ export class ControlGroupContainer extends Container<
       );
     });
   }
+
+  public getPanelCount = () => {
+    return Object.keys(this.getInput().panels).length;
+  };
 
   private recalculateOutput = () => {
     const allFilters: Filter[] = [];

@@ -8,8 +8,8 @@
 
 import '../control_group.scss';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiButtonEmpty } from '@elastic/eui';
-import React, { useMemo, useState, useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
   arrayMove,
@@ -28,26 +28,13 @@ import {
   useSensors,
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { ControlGroupInput } from '../types';
 import { ViewMode } from '../../../../embeddable/public';
-import { ControlGroupStrings } from '../control_group_strings';
-import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useReduxContainerContext } from '../../../../presentation_util/public';
-import { ControlsIllustration } from './controls_illustration';
-
-const CONTROLS_CALLOUT_STATE_KEY = 'dashboard:controlsCalloutDismissed';
 
 export const ControlGroup = () => {
-  const [controlsDismissed, setControlsDismissed] = useLocalStorage(
-    CONTROLS_CALLOUT_STATE_KEY,
-    false
-  );
-  const dismissControls = useCallback(() => {
-    setControlsDismissed(true);
-  }, [setControlsDismissed]);
   // Redux embeddable container Context
   const reduxContainerContext = useReduxContainerContext<
     ControlGroupInput,
@@ -56,15 +43,12 @@ export const ControlGroup = () => {
   const {
     useEmbeddableSelector,
     useEmbeddableDispatch,
-    actions: { setControlOrders, setDefaultControlWidth },
-    containerActions: { addNewEmbeddable },
+    actions: { setControlOrders },
   } = reduxContainerContext;
   const dispatch = useEmbeddableDispatch();
 
   // current state
-  const { panels, viewMode, controlStyle, defaultControlWidth } = useEmbeddableSelector(
-    (state) => state
-  );
+  const { panels, viewMode, controlStyle } = useEmbeddableSelector((state) => state);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -111,22 +95,9 @@ export const ControlGroup = () => {
   if (emptyState) panelBg = 'plain';
   if (draggingId) panelBg = 'success';
 
-  const getCreateControlButton = (buttonType: CreateControlButtonTypes) => {
-    return (
-      <CreateControlButton
-        buttonType={buttonType}
-        defaultControlWidth={defaultControlWidth}
-        updateDefaultWidth={(newDefaultControlWidth) =>
-          dispatch(setDefaultControlWidth(newDefaultControlWidth))
-        }
-        addNewEmbeddable={(type, input) => addNewEmbeddable(type, input)}
-      />
-    );
-  };
-
   return (
     <>
-      {idsInOrder.length > 0 || !controlsDismissed ? (
+      {idsInOrder.length > 0 ? (
         <EuiPanel
           borderRadius="m"
           color={panelBg}
@@ -136,78 +107,54 @@ export const ControlGroup = () => {
             'controlsWrapper--twoLine': controlStyle === 'twoLine',
           })}
         >
-          {idsInOrder.length > 0 ? (
-            <EuiFlexGroup
-              wrap={false}
-              gutterSize="m"
-              direction="row"
-              responsive={false}
-              alignItems="center"
-              data-test-subj="controls-group"
-              data-shared-items-count={idsInOrder.length}
-            >
-              <EuiFlexItem>
-                <DndContext
-                  onDragStart={({ active }) => setDraggingId(active.id)}
-                  onDragEnd={onDragEnd}
-                  onDragCancel={() => setDraggingId(null)}
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  layoutMeasuring={{
-                    strategy: LayoutMeasuringStrategy.Always,
-                  }}
-                >
-                  <SortableContext items={idsInOrder} strategy={rectSortingStrategy}>
-                    <EuiFlexGroup
-                      className={classNames('controlGroup', {
-                        'controlGroup-isDragging': draggingId,
-                      })}
-                      alignItems="center"
-                      gutterSize="s"
-                      wrap={true}
-                    >
-                      {idsInOrder.map(
-                        (controlId, index) =>
-                          panels[controlId] && (
-                            <SortableControl
-                              isEditable={isEditable}
-                              dragInfo={{ index, draggingIndex }}
-                              embeddableId={controlId}
-                              key={controlId}
-                            />
-                          )
-                      )}
-                    </EuiFlexGroup>
-                  </SortableContext>
-                  <DragOverlay>
-                    {draggingId ? <ControlClone draggingId={draggingId} /> : null}
-                  </DragOverlay>
-                </DndContext>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
-            <EuiFlexGroup alignItems="center" gutterSize="xs" data-test-subj="controls-empty">
-              <EuiFlexItem grow={1} className="controlsIllustration__container">
-                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <ControlsIllustration />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    {' '}
-                    <EuiText className="emptyStateText" size="s">
-                      <p>{ControlGroupStrings.emptyState.getCallToAction()}</p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{getCreateControlButton('callout')}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty size="s" onClick={dismissControls}>
-                  {ControlGroupStrings.emptyState.getDismissButton()}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+          <EuiFlexGroup
+            wrap={false}
+            gutterSize="m"
+            direction="row"
+            responsive={false}
+            alignItems="center"
+            data-test-subj="controls-group"
+            data-shared-items-count={idsInOrder.length}
+          >
+            <EuiFlexItem>
+              <DndContext
+                onDragStart={({ active }) => setDraggingId(active.id)}
+                onDragEnd={onDragEnd}
+                onDragCancel={() => setDraggingId(null)}
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                layoutMeasuring={{
+                  strategy: LayoutMeasuringStrategy.Always,
+                }}
+              >
+                <SortableContext items={idsInOrder} strategy={rectSortingStrategy}>
+                  <EuiFlexGroup
+                    className={classNames('controlGroup', {
+                      'controlGroup-isDragging': draggingId,
+                    })}
+                    alignItems="center"
+                    gutterSize="s"
+                    wrap={true}
+                  >
+                    {idsInOrder.map(
+                      (controlId, index) =>
+                        panels[controlId] && (
+                          <SortableControl
+                            isEditable={isEditable}
+                            dragInfo={{ index, draggingIndex }}
+                            embeddableId={controlId}
+                            key={controlId}
+                          />
+                        )
+                    )}
+                  </EuiFlexGroup>
+                </SortableContext>
+                <DragOverlay>
+                  {draggingId ? <ControlClone draggingId={draggingId} /> : null}
+                </DragOverlay>
+              </DndContext>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
       ) : (
         <></>
