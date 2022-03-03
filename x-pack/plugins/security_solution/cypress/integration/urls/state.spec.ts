@@ -210,7 +210,7 @@ describe('url state', () => {
       openAddSavedQueryForm();
       fillAddSavedQueryForm();
       cy.wait('@savedQuery').then(({ response }) => {
-        cy.url().should('include', `savedQuery=${response?.body.id}`);
+        cy.url().should('include', `${response?.body.id}`);
         cy.clearLocalStorage();
         cy.visit('/app/home');
         cy.visit(`/app/security/alerts?savedQuery=${response?.body.id}`);
