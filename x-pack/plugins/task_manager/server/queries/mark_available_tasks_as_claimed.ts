@@ -131,18 +131,18 @@ export const updateFieldsAndMarkAsFailed = ({
   const markAsClaimingScript = `ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
     .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
     .join(' ')}`;
+  const setScheduledAtAndMarkAsClaimed = `${setScheduledAtScript}
+    ${markAsClaimingScript}`;
   return {
     source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
       if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-        ${setScheduledAtScript}
-        ${markAsClaimingScript}
+        ${setScheduledAtAndMarkAsClaimed}
       } else {
         ctx._source.task.status = "failed";
       }
     } else if (params.skippedTaskTypes.contains(ctx._source.task.taskType) && params.claimTasksById.contains(ctx._id)) {
-      ${setScheduledAtScript}
-      ${markAsClaimingScript}
+      ${setScheduledAtAndMarkAsClaimed}
     } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
     } else {

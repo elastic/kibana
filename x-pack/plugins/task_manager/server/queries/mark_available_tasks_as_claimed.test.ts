@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import sinon from 'sinon';
 import { shouldBeOneOf, mustBeAllOf } from './query_clauses';
 
 import {
@@ -18,7 +19,17 @@ import {
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 
+let clock: sinon.SinonFakeTimers;
+
 describe('mark_available_tasks_as_claimed', () => {
+  beforeEach(() => {
+    clock = sinon.useFakeTimers();
+  });
+
+  afterEach(() => {
+    clock.restore();
+  });
+
   test('generates query matching tasks to be claimed when polling for tasks', () => {
     const definitions = new TaskTypeDictionary(mockLogger());
     definitions.registerTaskDefinitions({
@@ -117,16 +128,26 @@ if (doc['task.runAt'].size()!=0) {
         source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
       if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-        ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-          .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-          .join(' ')}
+        if(ctx._source.task.retryAt != null && ZonedDateTime.parse(ctx._source.task.retryAt).toInstant().toEpochMilli() < params.now) {
+    ctx._source.task.scheduledAt=ctx._source.task.retryAt;
+  } else {
+    ctx._source.task.scheduledAt=ctx._source.task.runAt;
+  }
+    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+      .join(' ')}
       } else {
         ctx._source.task.status = "failed";
       }
     } else if (params.skippedTaskTypes.contains(ctx._source.task.taskType) && params.claimTasksById.contains(ctx._id)) {
-      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-        .join(' ')}
+      if(ctx._source.task.retryAt != null && ZonedDateTime.parse(ctx._source.task.retryAt).toInstant().toEpochMilli() < params.now) {
+    ctx._source.task.scheduledAt=ctx._source.task.retryAt;
+  } else {
+    ctx._source.task.scheduledAt=ctx._source.task.runAt;
+  }
+    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+      .join(' ')}
     } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
     } else {
@@ -134,6 +155,7 @@ if (doc['task.runAt'].size()!=0) {
     }`,
         lang: 'painless',
         params: {
+          now: 0,
           fieldUpdates: {
             ownerId: taskManagerId,
             retryAt: claimOwnershipUntil,
@@ -181,16 +203,26 @@ if (doc['task.runAt'].size()!=0) {
         source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
       if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-        ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-          .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-          .join(' ')}
+        if(ctx._source.task.retryAt != null && ZonedDateTime.parse(ctx._source.task.retryAt).toInstant().toEpochMilli() < params.now) {
+    ctx._source.task.scheduledAt=ctx._source.task.retryAt;
+  } else {
+    ctx._source.task.scheduledAt=ctx._source.task.runAt;
+  }
+    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+      .join(' ')}
       } else {
         ctx._source.task.status = "failed";
       }
     } else if (params.skippedTaskTypes.contains(ctx._source.task.taskType) && params.claimTasksById.contains(ctx._id)) {
-      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-        .join(' ')}
+      if(ctx._source.task.retryAt != null && ZonedDateTime.parse(ctx._source.task.retryAt).toInstant().toEpochMilli() < params.now) {
+    ctx._source.task.scheduledAt=ctx._source.task.retryAt;
+  } else {
+    ctx._source.task.scheduledAt=ctx._source.task.runAt;
+  }
+    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+      .join(' ')}
     } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
     } else {
@@ -198,6 +230,7 @@ if (doc['task.runAt'].size()!=0) {
     }`,
         lang: 'painless',
         params: {
+          now: 0,
           fieldUpdates,
           claimTasksById: [
             '33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
