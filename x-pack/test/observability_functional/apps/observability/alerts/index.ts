@@ -238,7 +238,7 @@ export default ({ getService }: FtrProviderContext) => {
        */
       describe.skip('Bulk Actions', () => {
         before(async () => {
-          await security.testUser.setRoles(['global_alerts_logs_all_else_read'], true);
+          await security.testUser.setRoles(['global_alerts_logs_all_else_read']);
           await observability.alerts.common.submitQuery('kibana.alert.status: "active"');
         });
         after(async () => {
