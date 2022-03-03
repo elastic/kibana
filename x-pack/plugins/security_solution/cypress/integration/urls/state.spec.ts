@@ -201,15 +201,20 @@ describe('url state', () => {
   });
 
   describe('savedQuery parameter', () => {
-    it('should update the url with the saved query', () => {
+    const queryInputToTest = 'host.ip: "1.1.1.1"';
+    it('should write and read url state for the saved query', () => {
       loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
       cy.url().should('not.include', `savedQuery=`);
       cy.intercept('POST', '/api/saved_query/_create').as('savedQuery');
-      kqlSearch('host.ip: "1.1.1.1"');
+      kqlSearch(queryInputToTest);
       openAddSavedQueryForm();
       fillAddSavedQueryForm();
       cy.wait('@savedQuery').then(({ response }) => {
         cy.url().should('include', `savedQuery=${response?.body.id}`);
+        cy.clearLocalStorage();
+        cy.visit('/app/home');
+        cy.visit(`/app/security/alerts?savedQuery=${response?.body.id}`);
+        cy.get(KQL_INPUT).should('have.text', queryInputToTest);
       });
     });
   });
