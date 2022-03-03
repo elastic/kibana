@@ -5,26 +5,38 @@
  * 2.0.
  */
 
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { KueryNode } from '@kbn/es-query';
+import { SavedObjectsFindResponse } from 'kibana/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter } from '../../client/utils';
-import { CasesTelemetry, CollectTelemetryDataParams } from '../types';
-import { getConnectorsCardinalityAggregationQuery } from './utils';
+import { CasesTelemetry, CollectTelemetryDataParams, MaxBucketOnCaseAggregation } from '../types';
+import {
+  getConnectorsCardinalityAggregationQuery,
+  getMaxBucketOnCaseAggregationQuery,
+} from './utils';
+
+interface UniqueConnectorsAggregation {
+  references: { connectors: { uniqueConnectors: { value: number } } };
+}
 
 export const getConnectorsTelemetryData = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['connectors']> => {
-  const getData = async (filter?: KueryNode) => {
-    const res = await savedObjectsClient.find<
-      unknown,
-      { references: { connectors: { uniqueConnectors: { value: number } } } }
-    >({
+  const getData = async <A>({
+    filter,
+    aggs,
+  }: {
+    filter?: KueryNode;
+    aggs?: Record<string, AggregationsAggregationContainer>;
+  } = {}) => {
+    const res = await savedObjectsClient.find<unknown, A>({
       page: 0,
       perPage: 0,
       filter,
       type: CASE_USER_ACTION_SAVED_OBJECT,
       aggs: {
-        ...getConnectorsCardinalityAggregationQuery(),
+        ...aggs,
       },
     });
 
@@ -39,7 +51,10 @@ export const getConnectorsTelemetryData = async ({
       type: CASE_USER_ACTION_SAVED_OBJECT,
     });
 
-    const res = await getData(connectorFilter);
+    const res = await getData<UniqueConnectorsAggregation>({
+      filter: connectorFilter,
+      aggs: getConnectorsCardinalityAggregationQuery(),
+    });
 
     return res;
   };
@@ -52,12 +67,26 @@ export const getConnectorsTelemetryData = async ({
     '.swimlane',
   ] as const;
 
+  const onlyConnectorsFilter = buildFilter({
+    filters: ['connector'],
+    field: 'type',
+    operator: 'or',
+    type: CASE_USER_ACTION_SAVED_OBJECT,
+  });
+
   const all = await Promise.all([
-    getData(),
+    getData<UniqueConnectorsAggregation>({ aggs: getConnectorsCardinalityAggregationQuery() }),
+    getData<MaxBucketOnCaseAggregation>({
+      filter: onlyConnectorsFilter,
+      aggs: getMaxBucketOnCaseAggregationQuery(CASE_USER_ACTION_SAVED_OBJECT),
+    }),
     ...connectorTypes.map((connectorType) => getConnectorData(connectorType)),
   ]);
 
-  const connectorData = all.slice(1);
+  const connectorData = all.slice(2) as Array<
+    SavedObjectsFindResponse<unknown, UniqueConnectorsAggregation>
+  >;
+
   const data = connectorData.reduce(
     (acc, res, currentIndex) => ({
       ...acc,
@@ -68,6 +97,7 @@ export const getConnectorsTelemetryData = async ({
   );
 
   const allAttached = all[0].aggregations?.references?.connectors?.uniqueConnectors?.value ?? 0;
+  const maxAttachedToACase = all[1].aggregations?.references?.cases?.max?.value ?? 0;
 
   return {
     all: {
@@ -77,7 +107,17 @@ export const getConnectorsTelemetryData = async ({
       jira: { totalAttached: data['.jira'] },
       resilient: { totalAttached: data['.resilient'] },
       swimlane: { totalAttached: data['.swimlane'] },
-      maxAttachedToACase: 0,
+      /**
+       * This metric is not 100% accurate. To get this metric we
+       * we do a term aggregation based on the the case reference id.
+       * Each bucket corresponds to a case and contains the total user actions
+       * of type connector. Then from all buckets we take the maximum bucket.
+       * A user actions of type connectors will be created if the connector is attached
+       * to a case or the user updates the fields of the connector. This metric
+       * contains also the updates on the fields of the connector. Ideally we would
+       * like to filter for unique connector ids on each bucket.
+       */
+      maxAttachedToACase,
     },
   };
 };

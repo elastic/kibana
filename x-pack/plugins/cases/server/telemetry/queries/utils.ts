@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { ISavedObjectsRepository } from 'kibana/server';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
-import { Buckets } from '../types';
+import { Buckets, MaxBucketOnCaseAggregation } from '../types';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
@@ -95,7 +95,7 @@ export const getCountsAndMaxData = async ({
 }) => {
   const res = await savedObjectsClient.find<
     unknown,
-    { counts: Buckets; references: { cases: { max: { value: number } } } }
+    { counts: Buckets; references: MaxBucketOnCaseAggregation['references'] }
   >({
     page: 0,
     perPage: 0,

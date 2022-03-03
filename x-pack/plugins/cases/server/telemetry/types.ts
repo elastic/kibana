@@ -15,6 +15,9 @@ export interface Buckets {
   }>;
 }
 
+export interface MaxBucketOnCaseAggregation {
+  references: { cases: { max: { value: number } } };
+}
 export interface CollectTelemetryDataParams {
   savedObjectsClient: ISavedObjectsRepository;
 }
