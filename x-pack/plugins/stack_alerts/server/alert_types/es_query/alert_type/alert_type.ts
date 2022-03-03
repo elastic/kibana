@@ -15,10 +15,9 @@ import {
   EsQueryAlertState,
 } from '../alert_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
-import { ExecutorOptions, OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from '../types';
+import { ExecutorOptions } from '../types';
 import { ActionGroupId, ES_QUERY_ID } from '../constants';
-import { esQueryExecutor } from './es_query_executor';
-import { searchSourceExecutor } from './search_source_executor';
+import { executor } from './executor';
 
 export function getAlertType(
   logger: Logger,
@@ -135,7 +134,7 @@ export function getAlertType(
   const actionVariableContextLinkLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextLinkLabel',
     {
-      defaultMessage: `A link to the records that triggered this alert, if it was created from Discover. 
+      defaultMessage: `A link to the records that triggered this alert, if it was created from Discover.
         For Elastic query alerts, this link navigates to Stack Management.`,
     }
   );
@@ -170,27 +169,9 @@ export function getAlertType(
     },
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor,
+    executor: async (options: ExecutorOptions<EsQueryAlertParams>) => {
+      return await executor(logger, core, options);
+    },
     producer: STACK_ALERTS_FEATURE_ID,
   };
-
-  async function executor(options: ExecutorOptions<EsQueryAlertParams>) {
-    if (isEsQueryAlert(options)) {
-      return await esQueryExecutor(
-        logger,
-        core,
-        options as ExecutorOptions<OnlyEsQueryAlertParams>
-      );
-    } else {
-      return await searchSourceExecutor(
-        logger,
-        core,
-        options as ExecutorOptions<OnlySearchSourceAlertParams>
-      );
-    }
-  }
-}
-
-function isEsQueryAlert(options: ExecutorOptions<EsQueryAlertParams>) {
-  return options.params.searchType !== 'searchSource';
 }

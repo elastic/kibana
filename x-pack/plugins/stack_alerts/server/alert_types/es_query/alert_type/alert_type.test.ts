@@ -66,7 +66,7 @@ describe('alertType', () => {
             "name": "conditions",
           },
           Object {
-            "description": "A link to the records that triggered this alert, if it was created from Discover. 
+            "description": "A link to the records that triggered this alert, if it was created from Discover.
               For Elastic query alerts, this link navigates to Stack Management.",
             "name": "link",
           },
@@ -516,9 +516,7 @@ describe('alertType', () => {
     });
 
     it('validator succeeds with valid search source params', async () => {
-      const params = defaultParams;
-
-      expect(alertType.validate?.params?.validate(params)).toBeTruthy();
+      expect(alertType.validate?.params?.validate(defaultParams)).toBeTruthy();
     });
 
     it('validator fails with invalid search source params - esQuery provided', async () => {
@@ -573,11 +571,6 @@ describe('alertType', () => {
     it('alert executor schedule actions when condition met', async () => {
       const params = { ...defaultParams, thresholdComparator: '>=', threshold: [3] };
       const alertServices: AlertServicesMock = alertsMock.createAlertServices();
-
-      const scheduleActionsMock = jest.fn();
-      alertServices.alertFactory.create.mockImplementationOnce(() => ({
-        scheduleActions: scheduleActionsMock,
-      }));
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
