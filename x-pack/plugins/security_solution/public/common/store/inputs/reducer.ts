@@ -220,8 +220,8 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
   .case(toggleTimelineLinkTo, (state, { linkToId }) => toggleLockTimeline(linkToId, state))
   .case(
     setInspectionParameter,
-    (state, { id, inputId, isInspected, selectedInspectIndex, vizType }) =>
-      setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state, vizType })
+    (state, { id, inputId, isInspected, selectedInspectIndex, inspectedVizType }) =>
+      setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state, inspectedVizType })
   )
   .case(removeGlobalLinkTo, (state) => removeGlobalLink(state))
   .case(addGlobalLinkTo, (state, { linkToId }) => addGlobalLink(linkToId, state))

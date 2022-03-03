@@ -37,15 +37,10 @@ export const useInspect = ({
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const {
-    loading,
-    inspect,
-    selectedInspectIndex,
-    isInspected,
-    vizType: activeVizType,
-  } = useDeepEqualSelector((state) =>
-    inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId)
-  );
+  const { loading, inspect, selectedInspectIndex, isInspected, inspectedVizType } =
+    useDeepEqualSelector((state) =>
+      inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId)
+    );
 
   const handleClick = useCallback(() => {
     if (onClick) {
@@ -57,7 +52,7 @@ export const useInspect = ({
         inputId,
         isInspected: true,
         selectedInspectIndex: inspectIndex,
-        vizType,
+        inspectedVizType: vizType,
       })
     );
   }, [onClick, dispatch, queryId, inputId, inspectIndex, vizType]);
@@ -72,7 +67,7 @@ export const useInspect = ({
         inputId,
         isInspected: false,
         selectedInspectIndex: inspectIndex,
-        vizType: null,
+        inspectedVizType: null,
       })
     );
   }, [onCloseInspect, dispatch, queryId, inputId, inspectIndex]);
@@ -99,8 +94,11 @@ export const useInspect = ({
 
   const isShowingModal = useMemo(
     () =>
-      !loading && selectedInspectIndex === inspectIndex && isInspected && activeVizType === vizType,
-    [activeVizType, vizType, inspectIndex, isInspected, loading, selectedInspectIndex]
+      !loading &&
+      selectedInspectIndex === inspectIndex &&
+      isInspected &&
+      inspectedVizType === vizType,
+    [inspectedVizType, vizType, inspectIndex, isInspected, loading, selectedInspectIndex]
   );
 
   const isButtonDisabled = useMemo(

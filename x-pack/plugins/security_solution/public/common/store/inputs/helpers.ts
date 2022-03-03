@@ -103,7 +103,7 @@ export const upsertQuery = ({
                 isInspected: state[inputId].queries[queryIndex].isInspected,
                 loading,
                 refetch,
-                vizType: null,
+                inspectedVizType: null,
                 selectedInspectIndex: state[inputId].queries[queryIndex].selectedInspectIndex,
               },
               ...state[inputId].queries.slice(queryIndex + 1),
@@ -117,7 +117,7 @@ export const upsertQuery = ({
                 loading,
                 refetch,
                 selectedInspectIndex: 0,
-                vizType: null,
+                inspectedVizType: null,
               },
             ],
     },
@@ -130,7 +130,7 @@ export interface SetIsInspectedParams {
   isInspected: boolean;
   selectedInspectIndex: number;
   state: InputsModel;
-  vizType?: string | null;
+  inspectedVizType?: string | null;
 }
 
 export const setIsInspected = ({
@@ -139,7 +139,7 @@ export const setIsInspected = ({
   isInspected,
   selectedInspectIndex,
   state,
-  vizType = null,
+  inspectedVizType = null,
 }: SetIsInspectedParams): InputsModel => {
   const myQueryIndex = state[inputId].queries.findIndex((q) => q.id === id);
   const myQuery = myQueryIndex > -1 ? state[inputId].queries[myQueryIndex] : null;
@@ -152,7 +152,7 @@ export const setIsInspected = ({
         myQueryIndex > -1
           ? [
               ...state[inputId].queries.slice(0, myQueryIndex),
-              { ...myQuery, isInspected, selectedInspectIndex, vizType },
+              { ...myQuery, isInspected, selectedInspectIndex, inspectedVizType },
               ...state[inputId].queries.slice(myQueryIndex + 1),
             ]
           : [...state[inputId].queries],

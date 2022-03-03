@@ -65,7 +65,7 @@ export const setInspectionParameter = actionCreator<{
   inputId: InputsModelId;
   isInspected: boolean;
   selectedInspectIndex: number;
-  vizType: string | null;
+  inspectedVizType: string | null;
 }>('SET_INSPECTION_PARAMETER');
 
 export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_QUERY');
