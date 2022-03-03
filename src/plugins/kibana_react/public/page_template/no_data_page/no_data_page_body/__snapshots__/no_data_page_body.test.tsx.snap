@@ -10,6 +10,9 @@ exports[`NoDataPageBody render 1`] = `
       name="Elastic"
       size="xxl"
     />
+    <EuiSpacer
+      size="l"
+    />
     <h1 />
     <EuiTextColor
       color="subdued"
@@ -38,9 +41,6 @@ exports[`NoDataPageBody render 1`] = `
   </EuiText>
   <EuiSpacer
     size="xxl"
-  />
-  <EuiSpacer
-    size="l"
   />
   <ActionCards
     actionCards={

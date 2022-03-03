@@ -29,6 +29,7 @@ export const NoDataPageBody = (props: NoDataPageBodyProps) => {
           iconType={logo || `logo${solution}`}
           size="xxl"
         />
+        <EuiSpacer size="l" />
         <h1>{pageTitle}</h1>
         <EuiTextColor color="subdued">
           <p>
@@ -51,7 +52,6 @@ export const NoDataPageBody = (props: NoDataPageBodyProps) => {
         </EuiTextColor>
       </EuiText>
       <EuiSpacer size="xxl" />
-      <EuiSpacer size="l" />
       <ActionCards actionCards={actionCards} />
     </>
   );

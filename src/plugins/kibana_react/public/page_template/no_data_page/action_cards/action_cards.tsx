@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import './action_cards.scss';
+
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import React, { ReactElement } from 'react';
 import { ElasticAgentCard, NoDataCard } from '../no_data_card';

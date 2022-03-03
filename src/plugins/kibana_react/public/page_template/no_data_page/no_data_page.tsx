@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './no_data_page.scss';
-
 import React, { ReactNode, useMemo, FunctionComponent, MouseEventHandler } from 'react';
 import { EuiCardProps, EuiSpacer, EuiText, EuiLink, CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
