@@ -494,6 +494,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async closeDimensionEditor() {
       await retry.try(async () => {
         await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+        if (await testSubjects.exists('lns-indexPattern-dimensionContainerBack')) {
+          // add another option to close: formula tooltips can cover the previous button sometimes
+          await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        }
         await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
       });
     },

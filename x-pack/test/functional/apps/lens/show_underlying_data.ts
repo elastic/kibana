@@ -119,6 +119,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const input = await find.activeElement();
       await input.type(`bytes > 6000`);
 
+      await PageObjects.lens.closeDimensionEditor();
+
       await PageObjects.lens.waitForVisualization();
       // expect the button is shown and enabled
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
