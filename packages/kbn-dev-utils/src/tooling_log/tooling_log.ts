@@ -62,7 +62,10 @@ export class ToolingLog {
    * @param delta the number of spaces to increase/decrease the indentation
    * @param block a function to run and reset any indentation changes after
    */
-  public indent<T>(delta = 0, block?: () => Promise<T>) {
+  public indent(delta: number): undefined;
+  public indent<T>(delta: number, block: () => Promise<T>): Promise<T>;
+  public indent<T>(delta: number, block: () => T): T;
+  public indent<T>(delta = 0, block?: () => T | Promise<T>) {
     const originalWidth = this.indentWidth$.getValue();
     this.indentWidth$.next(Math.max(originalWidth + delta, 0));
     if (!block) {

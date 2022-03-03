@@ -11,7 +11,7 @@ import { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
-  ENVIRONMENT_ALL,
+  ENVIRONMENT_ALL_SELECT_OPTION,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
 import { fromQuery, toQuery } from '../links/url_helpers';
@@ -51,7 +51,7 @@ function getOptions(environments: string[]) {
     }));
 
   return [
-    ENVIRONMENT_ALL,
+    ENVIRONMENT_ALL_SELECT_OPTION,
     ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value)
       ? [ENVIRONMENT_NOT_DEFINED]
       : []),

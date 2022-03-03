@@ -10,6 +10,6 @@ import { UsersTableType } from '../store/model';
 
 export const usersDetailsPagePath = `${USERS_PATH}/:detailName`;
 
-export const usersTabPath = `${USERS_PATH}/:tabName(${UsersTableType.allUsers})`;
+export const usersTabPath = `${USERS_PATH}/:tabName(${UsersTableType.allUsers}|${UsersTableType.anomalies})`;
 
 export const usersDetailsTabPath = `${usersDetailsPagePath}/:tabName(${UsersTableType.allUsers})`;
