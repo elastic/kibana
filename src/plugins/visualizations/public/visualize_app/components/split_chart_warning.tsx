@@ -6,28 +6,33 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useKibana } from '../../../../kibana_react/public';
 import { VisualizeServices } from '../types';
+import { warningStrings } from '../utils/split_chart_warning_helpers';
+import type { CHARTS_WITHOUT_SMALL_MULTIPLES } from '../utils/split_chart_warning_helpers';
 
-export const NEW_HEATMAP_CHARTS_LIBRARY = 'visualization:visualize:legacyHeatmapChartsLibrary';
+interface Props {
+  chartType: CHARTS_WITHOUT_SMALL_MULTIPLES;
+  chartConfigToken: string;
+}
 
-export const SplitChartWarning = () => {
+export const SplitChartWarning: FC<Props> = ({ chartType, chartConfigToken }) => {
   const { services } = useKibana<VisualizeServices>();
   const canEditAdvancedSettings = services.application.capabilities.advancedSettings.save;
   const advancedSettingsLink = services.application.getUrlForApp('management', {
-    path: `/kibana/settings?query=${NEW_HEATMAP_CHARTS_LIBRARY}`,
+    path: `/kibana/settings?query=${chartConfigToken}`,
   });
+  const message = warningStrings[chartType];
 
   return (
     <EuiCallOut
       data-test-subj="vizSplitChartWarning"
       title={
         <FormattedMessage
-          id="visualizations.newHeatmapChart.notificationMessage"
-          defaultMessage="The new heatmap charts library does not yet support split chart aggregation. {conditionalMessage}"
+          {...message}
           values={{
             conditionalMessage: (
               <>
