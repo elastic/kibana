@@ -82,6 +82,8 @@ export const getCasesTelemetryData = async ({
         inProgress: findValueInBuckets(aggregationsBuckets.status, 'in-progress'),
         closed: findValueInBuckets(aggregationsBuckets.status, 'closed'),
       },
+      syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
+      syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
     },
     sec: {
       total: findValueInBuckets(aggregationsBuckets.totalsByOwner, 'securitySolution'),
@@ -92,7 +94,5 @@ export const getCasesTelemetryData = async ({
       ...getCountsFromBuckets(aggregationsBuckets['observability.counts']),
     },
     main: { total: 0, daily: 0, weekly: 0, monthly: 0 },
-    syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
-    syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
   };
 };

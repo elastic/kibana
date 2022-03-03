@@ -38,12 +38,10 @@ export interface Status {
 
 export interface CasesTelemetry {
   cases: {
-    all: Count & { status: Status };
+    all: Count & { status: Status; syncAlertsOn: number; syncAlertsOff: number };
     sec: Count;
     obs: Count;
     main: Count;
-    syncAlertsOn: number;
-    syncAlertsOff: number;
   };
   userActions: { all: Count; maxOnACase: number };
   comments: { all: Count; maxOnACase: number };

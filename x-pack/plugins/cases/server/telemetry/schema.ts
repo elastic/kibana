@@ -24,12 +24,10 @@ const statusSchema: StatusSchema = {
 
 export const casesSchema: CasesTelemetrySchema = {
   cases: {
-    all: { ...countSchema, status: statusSchema },
+    all: { ...countSchema, status: statusSchema, syncAlertsOn: long, syncAlertsOff: long },
     sec: countSchema,
     obs: countSchema,
     main: countSchema,
-    syncAlertsOn: long,
-    syncAlertsOff: long,
   },
   userActions: { all: countSchema, maxOnACase: long },
   comments: { all: countSchema, maxOnACase: long },
