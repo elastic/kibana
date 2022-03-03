@@ -278,14 +278,12 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
               systemImpact,
               threads,
             },
-            endpoint_metadata: {
+            endpoint_meta: {
+              os: endpoint.endpoint_metrics.host.os,
               capabilities:
                 endpointMetadataById !== null && endpointMetadataById !== undefined
                   ? endpointMetadataById._source.Endpoint.capabilities
                   : [],
-            },
-            endpoint_meta: {
-              os: endpoint.endpoint_metrics.host.os,
             },
             policy_config: endpointPolicyDetail !== null ? endpointPolicyDetail : {},
             policy_response:
