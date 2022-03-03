@@ -30,7 +30,6 @@ import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_f
 import { createLegend } from '../lib/create_legend';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
-import { Legend } from './waffle/legend';
 import { LegendControls } from './waffle/legend_controls';
 
 interface Props {
@@ -193,14 +192,6 @@ export const Layout = React.memo(
                               bottomMargin={height}
                               topMargin={topActionHeight}
                             />
-                            {view === 'map' && (
-                              <Legend
-                                formatter={formatter}
-                                bounds={bounds}
-                                dataBounds={dataBounds}
-                                legend={options.legend}
-                              />
-                            )}
                             {view === 'map' && (
                               <BottomDrawer
                                 measureRef={measureRef}

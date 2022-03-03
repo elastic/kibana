@@ -58,9 +58,6 @@ const TickLabel = ({ value, bounds, formatter }: TickProps) => {
 
 const LegendContainer = euiStyled.div`
   position: relative;
-  top: 25%;
-  right: -16px;
-  bottom: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
