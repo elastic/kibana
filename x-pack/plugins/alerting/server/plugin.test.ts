@@ -15,7 +15,7 @@ import { eventLogServiceMock } from '../../event_log/server/event_log_service.mo
 import { KibanaRequest } from 'kibana/server';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { KibanaFeature } from '../../features/server';
-import { AlertsConfig } from './config';
+import { AlertingConfig } from './config';
 import { RuleType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
@@ -30,7 +30,7 @@ describe('Alerting Plugin', () => {
     beforeEach(() => jest.clearAllMocks());
 
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
         healthCheck: {
           interval: '5m',
         },
@@ -41,6 +41,7 @@ describe('Alerting Plugin', () => {
         maxEphemeralActionsPerAlert: 10,
         defaultRuleTaskTimeout: '5m',
         cancelAlertsOnRuleTimeout: true,
+        minimumScheduleInterval: '1m',
       });
       plugin = new AlertingPlugin(context);
 
@@ -65,7 +66,7 @@ describe('Alerting Plugin', () => {
     });
 
     it('should create usage counter if usageCollection plugin is defined', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
         healthCheck: {
           interval: '5m',
         },
@@ -76,6 +77,7 @@ describe('Alerting Plugin', () => {
         maxEphemeralActionsPerAlert: 10,
         defaultRuleTaskTimeout: '5m',
         cancelAlertsOnRuleTimeout: true,
+        minimumScheduleInterval: '1m',
       });
       plugin = new AlertingPlugin(context);
 
@@ -96,6 +98,35 @@ describe('Alerting Plugin', () => {
 
       expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
       expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
+    });
+
+    it(`exposes configured minimumScheduleInterval()`, async () => {
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
+        minimumScheduleInterval: '1m',
+      });
+      plugin = new AlertingPlugin(context);
+
+      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+      const setupContract = plugin.setup(coreMock.createSetup(), {
+        licensing: licensingMock.createSetup(),
+        encryptedSavedObjects: encryptedSavedObjectsSetup,
+        taskManager: taskManagerMock.createSetup(),
+        eventLog: eventLogServiceMock.create(),
+        actions: actionsMock.createSetup(),
+        statusService: statusServiceMock.createSetupContract(),
+      });
+
+      expect(setupContract.getConfig()).toEqual({ minimumScheduleInterval: '1m' });
     });
 
     describe('registerType()', () => {
@@ -191,7 +222,7 @@ describe('Alerting Plugin', () => {
   describe('start()', () => {
     describe('getRulesClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
-        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        const context = coreMock.createPluginInitializerContext<AlertingConfig>({
           healthCheck: {
             interval: '5m',
           },
@@ -202,6 +233,7 @@ describe('Alerting Plugin', () => {
           maxEphemeralActionsPerAlert: 10,
           defaultRuleTaskTimeout: '5m',
           cancelAlertsOnRuleTimeout: true,
+          minimumScheduleInterval: '1m',
         });
         const plugin = new AlertingPlugin(context);
 
@@ -234,7 +266,7 @@ describe('Alerting Plugin', () => {
       });
 
       it(`doesn't throw error when encryptedSavedObjects plugin has encryption key`, async () => {
-        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        const context = coreMock.createPluginInitializerContext<AlertingConfig>({
           healthCheck: {
             interval: '5m',
           },
@@ -245,6 +277,7 @@ describe('Alerting Plugin', () => {
           maxEphemeralActionsPerAlert: 10,
           defaultRuleTaskTimeout: '5m',
           cancelAlertsOnRuleTimeout: true,
+          minimumScheduleInterval: '1m',
         });
         const plugin = new AlertingPlugin(context);
 
@@ -291,7 +324,7 @@ describe('Alerting Plugin', () => {
     });
 
     test(`exposes getAlertingAuthorizationWithRequest()`, async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
         healthCheck: {
           interval: '5m',
         },
@@ -302,6 +335,7 @@ describe('Alerting Plugin', () => {
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '5m',
         cancelAlertsOnRuleTimeout: true,
+        minimumScheduleInterval: '1m',
       });
       const plugin = new AlertingPlugin(context);
 

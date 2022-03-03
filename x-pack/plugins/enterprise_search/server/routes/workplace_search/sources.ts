@@ -38,6 +38,14 @@ const oauthConfigSchema = schema.object({
   consumer_key: schema.maybe(schema.string()),
 });
 
+const externalConnectorSchema = schema.object({
+  url: schema.string(),
+  api_key: schema.string(),
+  service_type: schema.string(),
+});
+
+const postConnectorSchema = schema.oneOf([externalConnectorSchema, oauthConfigSchema]);
+
 const displayFieldSchema = schema.object({
   fieldName: schema.string(),
   label: schema.string(),
@@ -872,7 +880,7 @@ export function registerOrgSourceOauthConfigurationsRoute({
     {
       path: '/internal/workplace_search/org/settings/connectors',
       validate: {
-        body: oauthConfigSchema,
+        body: postConnectorSchema,
       },
     },
     enterpriseSearchRequestHandler.createRequest({

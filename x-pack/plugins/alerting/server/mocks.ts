@@ -12,6 +12,7 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   httpServerMock,
+  uiSettingsServiceMock,
 } from '../../../../src/core/server/mocks';
 import { dataPluginMock } from '../../../../src/plugins/data/server/mocks';
 import { AlertInstanceContext, AlertInstanceState } from './types';
@@ -22,6 +23,7 @@ const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
     getSecurityHealth: jest.fn(),
+    getConfig: jest.fn(),
   };
   return mock;
 };
@@ -106,6 +108,7 @@ const createAlertServicesMock = <
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     savedObjectsClient: savedObjectsClientMock.create(),
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
