@@ -18,15 +18,15 @@ import { ErrorConnecting } from './components/error_connecting';
 import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';
 
-import { EnterpriseSearch } from './';
+import { EnterpriseSearchOverview } from './';
 
-describe('EnterpriseSearch', () => {
+describe('EnterpriseSearchOverview', () => {
   it('renders the Setup Guide and Product Selector', () => {
     setMockValues({
       errorConnectingMessage: '',
       config: { host: 'localhost' },
     });
-    const wrapper = shallow(<EnterpriseSearch />);
+    const wrapper = shallow(<EnterpriseSearchOverview />);
 
     expect(wrapper.find(SetupGuide)).toHaveLength(1);
     expect(wrapper.find(ProductSelector)).toHaveLength(1);
@@ -37,7 +37,7 @@ describe('EnterpriseSearch', () => {
       errorConnectingMessage: '502 Bad Gateway',
       config: { host: 'localhost' },
     });
-    const wrapper = shallow(<EnterpriseSearch />);
+    const wrapper = shallow(<EnterpriseSearchOverview />);
 
     expect(wrapper.find(VersionMismatchPage)).toHaveLength(0);
     const errorConnecting = wrapper.find(ErrorConnecting);
@@ -61,7 +61,7 @@ describe('EnterpriseSearch', () => {
       config: { host: 'localhost' },
     });
     const wrapper = shallow(
-      <EnterpriseSearch enterpriseSearchVersion="7.15.0" kibanaVersion="7.16.0" />
+      <EnterpriseSearchOverview enterpriseSearchVersion="7.15.0" kibanaVersion="7.16.0" />
     );
 
     expect(wrapper.find(VersionMismatchPage)).toHaveLength(1);
