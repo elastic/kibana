@@ -6863,7 +6863,6 @@
     "xpack.apm.alertAnnotationTooltipExperimentalText": "技术预览",
     "xpack.apm.alertAnnotationTooltipMoreDetailsText": "单击以查看更多详情。",
     "xpack.apm.alertAnnotationWarningTitle": "警告告警",
-    "xpack.apm.alerting.fields.allOption": "全部",
     "xpack.apm.alerting.fields.environment": "环境",
     "xpack.apm.alerting.fields.service": "服务",
     "xpack.apm.alerting.fields.type": "类型",
