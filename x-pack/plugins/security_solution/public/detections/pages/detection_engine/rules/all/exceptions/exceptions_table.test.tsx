@@ -84,7 +84,7 @@ describe('ExceptionListsTable', () => {
       {
         loading: false,
         canUserCRUD: false,
-        isKibanaReadOnly: false,
+        canUserREAD: false,
       },
     ]);
   });
@@ -113,7 +113,7 @@ describe('ExceptionListsTable', () => {
       {
         loading: false,
         canUserCRUD: false,
-        isKibanaReadOnly: true,
+        canUserREAD: true,
       },
     ]);
 
