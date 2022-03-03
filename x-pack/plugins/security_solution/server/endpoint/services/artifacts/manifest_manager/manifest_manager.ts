@@ -10,6 +10,12 @@ import semver from 'semver';
 import LRU from 'lru-cache';
 import { isEqual, isEmpty } from 'lodash';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import {
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_BLOCKLISTS_LIST_ID,
+  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { ListResult } from '../../../../../../fleet/common';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
@@ -23,11 +29,7 @@ import {
   ArtifactConstants,
   buildArtifact,
   getArtifactId,
-  getEndpointEventFiltersList,
   getEndpointExceptionList,
-  getEndpointTrustedAppsList,
-  getHostIsolationExceptionsList,
-  getEndpointBlocklistsList,
   Manifest,
 } from '../../../lib/artifacts';
 import {
@@ -134,7 +136,11 @@ export class ManifestManager {
    */
   protected async buildExceptionListArtifact(os: string): Promise<InternalArtifactCompleteSchema> {
     return buildArtifact(
-      await getEndpointExceptionList(this.exceptionListClient, this.schemaVersion, os),
+      await getEndpointExceptionList({
+        elClient: this.exceptionListClient,
+        schemaVersion: this.schemaVersion,
+        os,
+      }),
       this.schemaVersion,
       os,
       ArtifactConstants.GLOBAL_ALLOWLIST_NAME
@@ -172,7 +178,13 @@ export class ManifestManager {
    */
   protected async buildTrustedAppsArtifact(os: string, policyId?: string) {
     return buildArtifact(
-      await getEndpointTrustedAppsList(this.exceptionListClient, this.schemaVersion, os, policyId),
+      await getEndpointExceptionList({
+        elClient: this.exceptionListClient,
+        schemaVersion: this.schemaVersion,
+        os,
+        policyId,
+        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      }),
       this.schemaVersion,
       os,
       ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME
@@ -232,7 +244,13 @@ export class ManifestManager {
 
   protected async buildEventFiltersForOs(os: string, policyId?: string) {
     return buildArtifact(
-      await getEndpointEventFiltersList(this.exceptionListClient, this.schemaVersion, os, policyId),
+      await getEndpointExceptionList({
+        elClient: this.exceptionListClient,
+        schemaVersion: this.schemaVersion,
+        os,
+        policyId,
+        listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+      }),
       this.schemaVersion,
       os,
       ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME
@@ -267,7 +285,13 @@ export class ManifestManager {
 
   protected async buildBlocklistForOs(os: string, policyId?: string) {
     return buildArtifact(
-      await getEndpointBlocklistsList(this.exceptionListClient, this.schemaVersion, os, policyId),
+      await getEndpointExceptionList({
+        elClient: this.exceptionListClient,
+        schemaVersion: this.schemaVersion,
+        os,
+        policyId,
+        listId: ENDPOINT_BLOCKLISTS_LIST_ID,
+      }),
       this.schemaVersion,
       os,
       ArtifactConstants.GLOBAL_BLOCKLISTS_NAME
@@ -308,12 +332,13 @@ export class ManifestManager {
     policyId?: string
   ): Promise<InternalArtifactCompleteSchema> {
     return buildArtifact(
-      await getHostIsolationExceptionsList(
-        this.exceptionListClient,
-        this.schemaVersion,
+      await getEndpointExceptionList({
+        elClient: this.exceptionListClient,
+        schemaVersion: this.schemaVersion,
         os,
-        policyId
-      ),
+        policyId,
+        listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      }),
       this.schemaVersion,
       os,
       ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME
