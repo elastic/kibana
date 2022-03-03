@@ -429,7 +429,38 @@ describe('When using the ArtifactListPage component', () => {
     });
 
     describe('and in Edit mode', () => {
-      it.todo('should show loader while initializing in edit mode');
+      beforeEach(async () => {
+        history.push('somepage?show=edit&itemId=123');
+      });
+
+      it('should show loader while initializing in edit mode', async () => {
+        const deferred = getDeferred();
+        mockedApi.responseProvider.trustedApp.mockDelay.mockReturnValue(deferred.promise);
+
+        const { getByTestId } = await renderAndWaitForFlyout();
+
+        // The loader should be shown and the flyout footer should not be shown
+        expect(getByTestId('testPage-flyout-loader')).toBeTruthy();
+        expect(() => getByTestId('testPage-flyout-cancelButton')).toThrow();
+        expect(() => getByTestId('testPage-flyout-submitButton')).toThrow();
+
+        // The Form should not yet have been rendered
+        expect(FormComponentMock).not.toHaveBeenCalled();
+
+        act(() => deferred.resolve());
+
+        // we should call the GET API with the id provided
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedApp).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              path: expect.any(String),
+              query: expect.objectContaining({
+                item_id: '123',
+              }),
+            })
+          );
+        });
+      });
 
       it.todo(
         'should show expired license warning when unsupported features are being used (downgrade scenario)'

@@ -355,7 +355,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         )}
 
         <EuiFlyoutBody>
-          {isInitializing && <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />}
+          {isInitializing && <ManagementPageLoader data-test-subj={getTestId('loader')} />}
 
           {!isInitializing && (
             <FormComponent
