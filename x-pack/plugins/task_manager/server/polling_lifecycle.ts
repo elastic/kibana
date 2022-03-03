@@ -92,6 +92,8 @@ export class TaskPollingLifecycle {
 
   private usageCounter?: UsageCounter;
 
+  #stopped: boolean = false;
+
   /**
    * Initializes the task manager, preventing any further addition of middleware,
    * enabling the task manipulation methods, and beginning the background polling
@@ -206,14 +208,23 @@ export class TaskPollingLifecycle {
       );
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
+      if (this.#stopped) {
+        return;
+      }
+
       if (areESAndSOAvailable && !this.isStarted) {
         // start polling for work
         this.pollingSubscription = this.subscribeToPoller(poller$);
       } else if (!areESAndSOAvailable && this.isStarted) {
-        this.pollingSubscription.unsubscribe();
-        this.pool.cancelRunningTasks();
+        this.stop();
       }
     });
+  }
+
+  public stop() {
+    this.#stopped = true;
+    this.pollingSubscription.unsubscribe();
+    this.pool.cancelRunningTasks();
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
