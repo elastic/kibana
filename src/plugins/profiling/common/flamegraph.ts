@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { Logger } from 'kibana/server';
-import { StackTraceID, StackFrameID, FileID, StackTrace, StackFrame, Executable } from './types';
+import { StackTraceID, StackFrameID, FileID, StackTrace, StackFrame, Executable } from './profiling';
 
 function checkIfStringHasParentheses(s: string) {
   return /\(|\)/.test(s);
