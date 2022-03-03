@@ -36,6 +36,7 @@ import {
   setDocLinks,
   setSpaces,
   setTheme,
+  setExecutionContext,
 } from './services';
 import {
   createVisEmbeddableFromObject,
@@ -361,6 +362,7 @@ export class VisualizationsPlugin
     setTimeFilter(data.query.timefilter.timefilter);
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
+    setExecutionContext(core.executionContext);
     setChrome(core.chrome);
 
     if (spaces) {

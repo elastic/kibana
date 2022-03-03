@@ -220,11 +220,7 @@ export const useDashboardAppState = ({
         savedDashboard,
         data,
         executionContext: {
-          type: 'application',
-          name: 'dashboard',
-          id: savedDashboard.id ?? 'unsaved_dashboard',
           description: savedDashboard.title,
-          url: history.location.pathname,
         },
       });
       if (canceled || !dashboardContainer) {
