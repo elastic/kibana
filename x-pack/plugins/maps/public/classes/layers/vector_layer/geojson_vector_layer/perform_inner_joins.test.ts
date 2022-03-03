@@ -53,17 +53,20 @@ const featureCollection = {
 const joinDescriptor = {
   leftField: LEFT_FIELD,
   right: {
-    applyGlobalQuery: true,
-    applyGlobalTime: true,
     id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
-    indexPatternId: 'myIndexPattern',
-    metrics: [
+    __rows: [],
+    __columns: [
       {
-        type: AGG_TYPE.COUNT,
+        name: 'rightKey',
+        type: 'string',
+      },
+      {
+        name: COUNT_PROPERTY_NAME,
+        type: 'number',
       },
     ],
     term: 'rightKey',
-    type: SOURCE_TYPES.ES_TERM_SOURCE,
+    type: SOURCE_TYPES.TABLE_SOURCE,
   } as ESTermSourceDescriptor,
 };
 const mockVectorSource = {
@@ -75,6 +78,9 @@ const mockVectorSource = {
       getName: () => {
         return LEFT_FIELD;
       },
+      getLabel: () => {
+        return LEFT_FIELD;
+      }
     } as IField;
   },
 } as unknown as IVectorSource;
