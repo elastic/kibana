@@ -32,6 +32,11 @@ export const LazySolutionToolbarButton = React.lazy(() =>
  */
 export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
 
+/**
+ * A `SolutionToolbarButton` component that is wrapped by the `withSuspense` HOC.  This component can
+ * be used directly by consumers and will load the `LazySolutionToolbarButton` component lazily with
+ * a predefined fallback and error boundary.
+ */
 export const SolutionToolbarButton = withSuspense(LazySolutionToolbarButton);
 
 /**

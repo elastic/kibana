@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Story } from '@storybook/react';
 import React from 'react';
 import { SolutionToolbarButton } from './primary';
 import mdx from './primary.mdx';
@@ -18,8 +19,23 @@ export default {
       page: mdx,
     },
   },
+  argTypes: {
+    iconType: {
+      control: {
+        type: 'radio',
+        expanded: true,
+        options: ['apps', 'logoGithub', 'folderCheck', 'documents'],
+      },
+    },
+  },
 };
 
-export const Component = () => {
-  return <SolutionToolbarButton label={'Primary Action'} iconType="apps" />;
+export const Component: Story<{
+  iconType: any;
+}> = ({ iconType }) => {
+  return <SolutionToolbarButton label={'Primary Action'} iconType={iconType} />;
+};
+
+Component.args = {
+  iconType: 'apps',
 };
