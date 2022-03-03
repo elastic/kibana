@@ -19,6 +19,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = '2021-01-01T12:00:00.000Z';
   const end = '2021-08-01T12:00:00.000Z';
 
+  // the terms enum API will return names for deleted services,
+  // so we add a prefix to make sure we don't get data from other
+  // tests
+  const SERVICE_NAME_PREFIX = 'sorted_and_filtered_';
+
   async function getSortedAndFilteredServices({
     environment = 'ENVIRONMENT_ALL',
     kuery = '',
@@ -35,7 +40,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       },
     });
 
-    return response.body.services;
+    return response.body.services
+      .filter((service) => service.serviceName.startsWith(SERVICE_NAME_PREFIX))
+      .map((service) => ({
+        ...service,
+        serviceName: service.serviceName.replace(SERVICE_NAME_PREFIX, ''),
+      }));
   }
 
   type ServiceListItem = ValuesType<Awaited<ReturnType<typeof getSortedAndFilteredServices>>>;
@@ -45,11 +55,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       before(async () => {
-        const serviceA = apm.service('a', 'production', 'java').instance('a');
+        const serviceA = apm.service(SERVICE_NAME_PREFIX + 'a', 'production', 'java').instance('a');
 
-        const serviceB = apm.service('b', 'development', 'go').instance('b');
+        const serviceB = apm.service(SERVICE_NAME_PREFIX + 'b', 'development', 'go').instance('b');
 
-        const serviceC = apm.service('c', 'development', 'go').instance('c');
+        const serviceC = apm.service(SERVICE_NAME_PREFIX + 'c', 'development', 'go').instance('c');
 
         const spikeStart = new Date('2021-01-07T12:00:00.000Z').getTime();
         const spikeEnd = new Date('2021-01-07T14:00:00.000Z').getTime();

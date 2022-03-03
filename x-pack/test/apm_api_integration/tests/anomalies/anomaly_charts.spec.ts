@@ -233,7 +233,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(omitTimeseriesData(latencySeries)).to.eql({
               type: ApmMlDetectorType.txLatency,
-              jobId: 'apm-tx-metrics-prod',
+              jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',
               transactionType: 'request',
@@ -242,7 +242,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(omitTimeseriesData(throughputSeries)).to.eql({
               type: ApmMlDetectorType.txThroughput,
-              jobId: 'apm-tx-metrics-prod',
+              jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',
               transactionType: 'request',
@@ -251,7 +251,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(omitTimeseriesData(failureRateSeries)).to.eql({
               type: ApmMlDetectorType.txFailureRate,
-              jobId: 'apm-tx-metrics-prod',
+              jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',
               transactionType: 'request',
