@@ -11,9 +11,9 @@ const long: Long = { type: 'long' };
 
 const countSchema: CountSchema = {
   total: long,
-  '1m': long,
-  '1w': long,
-  '1d': long,
+  monthly: long,
+  weekly: long,
+  daily: long,
 };
 
 const statusSchema: StatusSchema = {

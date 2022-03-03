@@ -25,9 +25,9 @@ export interface Long {
 
 export interface Count {
   total: number;
-  '1m': number;
-  '1w': number;
-  '1d': number;
+  monthly: number;
+  weekly: number;
+  daily: number;
 }
 
 export interface Status {

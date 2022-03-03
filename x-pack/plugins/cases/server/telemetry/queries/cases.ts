@@ -59,9 +59,9 @@ export const getCasesTelemetryData = async ({
   return {
     all: {
       total: res.total,
-      '1d': 0,
-      '1w': 0,
-      '1m': 0,
+      daily: 0,
+      weekly: 0,
+      monthly: 0,
       status: {
         open: statusBuckets.find(({ key }) => key === 'open')?.doc_count ?? 0,
         inProgress: statusBuckets.find(({ key }) => key === 'in-progress')?.doc_count ?? 0,
@@ -76,7 +76,7 @@ export const getCasesTelemetryData = async ({
       total: 0,
       ...getCountsFromBuckets(obsCountsBuckets),
     },
-    main: { total: 0, '1d': 0, '1w': 0, '1m': 0 },
+    main: { total: 0, daily: 0, weekly: 0, monthly: 0 },
     syncAlertsOn: syncAlertsBuckets.find(({ key }) => key === 1)?.doc_count ?? 0,
     syncAlertsOff: syncAlertsBuckets.find(({ key }) => key === 0)?.doc_count ?? 0,
   };

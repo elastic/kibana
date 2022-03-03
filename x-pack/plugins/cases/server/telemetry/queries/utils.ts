@@ -78,9 +78,9 @@ export const getConnectorsCardinalityAggregationQuery = () => ({
 });
 
 export const getCountsFromBuckets = (buckets: Buckets['buckets']) => ({
-  '1d': buckets?.[2]?.doc_count ?? 0,
-  '1w': buckets?.[1]?.doc_count ?? 0,
-  '1m': buckets?.[0]?.doc_count ?? 0,
+  daily: buckets?.[2]?.doc_count ?? 0,
+  weekly: buckets?.[1]?.doc_count ?? 0,
+  monthly: buckets?.[0]?.doc_count ?? 0,
 });
 
 export const getCountsAndMaxData = async ({
