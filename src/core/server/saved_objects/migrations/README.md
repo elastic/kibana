@@ -133,6 +133,14 @@ is left out of the description for brevity.
 
 ## INIT
 ### Next action
+`initAction`
+
+Check that replica allocation is enabled from cluster settings (`cluster.routing.allocation.enabled`). Migrations will fail when replica allocation is disabled during the bulk index operation that waits for all active shards. Migrations wait for all active shards to ensure that saved objects are replicated to protect against data loss.
+
+The Elasticsearch documentation mentions switching off replica allocation when restoring a cluster and this is a setting that might be overlooked when a restore is done. Migrations will always fail when replica allocation is disabled and migrations fail early to avoid adding a write block to the old index before running into a failure later.
+
+If replica allocation is enabled, the migration continues to fetch the saved object indices.
+
 `fetchIndices`
 
 Fetch the saved object indices, mappings and aliases to find the source index
