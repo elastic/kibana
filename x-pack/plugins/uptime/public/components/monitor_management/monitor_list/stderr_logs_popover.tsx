@@ -44,8 +44,8 @@ const Container = styled.div`
 `;
 
 export const getInlineErrorLabel = (message?: string) => {
-  return i18n.translate('xpack.uptime.monitorList.statusColumn.error.message', {
-    defaultMessage: '{message}, Click for more details.',
+  return i18n.translate('xpack.uptime.monitorList.statusColumn.error.messageLabel', {
+    defaultMessage: '{message}. Click for more details.',
     values: { message },
   });
 };
