@@ -58,6 +58,7 @@ export function getColorAssignments(
       }
       const splitAccessor = layer.splitAccessor;
       const column = data.tables[layer.layerId]?.columns.find(({ id }) => id === splitAccessor);
+      const columnFormatter = column && formatFactory(column.meta.params);
       const splits =
         !column || !data.tables[layer.layerId]
           ? []
@@ -65,7 +66,7 @@ export function getColorAssignments(
               data.tables[layer.layerId].rows.map((row) => {
                 let value = row[splitAccessor];
                 if (value && !isPrimitive(value)) {
-                  value = formatFactory(column.meta.params).convert(value);
+                  value = columnFormatter?.convert(value) ?? value;
                 } else {
                   value = String(value);
                 }
