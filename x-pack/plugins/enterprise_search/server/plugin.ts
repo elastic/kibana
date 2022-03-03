@@ -23,7 +23,7 @@ import { SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginStart } from '../../spaces/server';
 
 import {
-  ENTERPRISE_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   LOGS_SOURCE_ID,
@@ -101,17 +101,21 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register space/feature control
      */
     features.registerKibanaFeature({
-      id: ENTERPRISE_SEARCH_PLUGIN.ID,
-      name: ENTERPRISE_SEARCH_PLUGIN.NAME,
+      id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+      name: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       app: [
         'kibana',
-        ENTERPRISE_SEARCH_PLUGIN.ID,
+        ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
         APP_SEARCH_PLUGIN.ID,
         WORKPLACE_SEARCH_PLUGIN.ID,
       ],
-      catalogue: [ENTERPRISE_SEARCH_PLUGIN.ID, APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
+      catalogue: [
+        ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+        APP_SEARCH_PLUGIN.ID,
+        WORKPLACE_SEARCH_PLUGIN.ID,
+      ],
       privileges: null,
     });
 
