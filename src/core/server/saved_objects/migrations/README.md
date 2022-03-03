@@ -139,7 +139,7 @@ Check that replica allocation is enabled from cluster settings (`cluster.routing
 
 The Elasticsearch documentation mentions switching off replica allocation when restoring a cluster and this is a setting that might be overlooked when a restore is done. Migrations will always fail when replica allocation is disabled and migrations fail early to avoid adding a write block to the old index before running into a failure later.
 
-If replica allocation is enabled, the migration continues to fetch the saved object indices.
+If replica allocation is enabled, the migration continues to fetch the saved object indices:
 
 `fetchIndices`
 
@@ -154,7 +154,7 @@ the same version could have plugins enabled at any time that would introduce
 new transforms or mappings.
   →  `OUTDATED_DOCUMENTS_SEARCH`
 
-2. If `.kibana` is pointing to an index that belongs to a later version of
+2. If replica allocation is disabled or if `.kibana` is pointing to an index that belongs to a later version of
 Kibana .e.g. a 7.11.0 instance found the `.kibana` alias pointing to
 `.kibana_7.12.0_001` fail the migration
   → `FATAL`
