@@ -37,11 +37,8 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   /** Access the fields on the form. */
   getFields: () => FieldsMap;
   /** Access the defaultValue for a specific field */
-  getFieldDefaultValue: (path: string) => unknown;
-  /**
-   * Return the form data. It accepts an optional options object with an `unflatten` parameter (defaults to `true`).
-   * If you are only interested in the raw form data, pass `unflatten: false` to the handler
-   */
+  getFieldDefaultValue: <FieldType = unknown>(path: string) => FieldType | undefined;
+  /** Return the form data. */
   getFormData: () => T;
   /* Returns an array with of all errors in the form. */
   getErrors: () => string[];
@@ -61,8 +58,14 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __removeField: (fieldNames: string | string[]) => void;
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
-  __readFieldConfigFromSchema: (field: string) => FieldConfig;
-  __getFormDefaultValue: () => FormData;
+  __readFieldConfigFromSchema: <
+    FieldType = unknown,
+    FormType = FormData,
+    InternalFieldType = FieldType
+  >(
+    field: string
+  ) => FieldConfig<FieldType, FormType, InternalFieldType> | undefined;
+  __getFormDefaultValue: () => I | undefined;
   __getFieldsRemoved: () => FieldsMap;
 }
 
@@ -165,6 +168,11 @@ export interface FieldConfig<T = unknown, FormType extends FormData = FormData, 
   readonly serializer?: SerializerFunc<T, I>;
   readonly fieldsToValidateOnChange?: string[];
   readonly valueChangeDebounceTime?: number;
+}
+
+export interface FieldValidationData {
+  validationData?: unknown;
+  validationDataProvider?: () => Promise<unknown>;
 }
 
 export interface FieldsMap {

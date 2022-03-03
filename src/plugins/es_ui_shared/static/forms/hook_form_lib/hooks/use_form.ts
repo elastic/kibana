@@ -10,7 +10,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 
-import { FormHook, FieldHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
+import { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
 import { mapFormFields, unflattenObject, Subject, Subscription } from '../lib';
 
 const DEFAULT_OPTIONS = {
@@ -35,22 +35,23 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     defaultValue,
   } = formConfig ?? {};
 
+  // Strip out any "undefined" value and run the deserializer
   const initDefaultValue = useCallback(
-    (_defaultValue?: Partial<T>): { [key: string]: any } => {
+    (_defaultValue?: Partial<T>): I | undefined => {
       if (_defaultValue === undefined || Object.keys(_defaultValue).length === 0) {
-        return {};
+        return undefined;
       }
 
       const filtered = Object.entries(_defaultValue as object)
         .filter(({ 1: value }) => value !== undefined)
         .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as T);
 
-      return deserializer ? deserializer(filtered) : filtered;
+      return deserializer ? deserializer(filtered) : (filtered as unknown as I);
     },
     [deserializer]
   );
 
-  const defaultValueMemoized = useMemo<{ [key: string]: any }>(() => {
+  const defaultValueMemoized = useMemo<I | undefined>(() => {
     return initDefaultValue(defaultValue);
   }, [defaultValue, initDefaultValue]);
 
@@ -175,7 +176,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   const updateDefaultValueAt: FormHook<T, I>['__updateDefaultValueAt'] = useCallback(
     (path, value) => {
-      set(defaultValueDeserialized.current, path, value);
+      if (defaultValueDeserialized.current === undefined) {
+        defaultValueDeserialized.current = {} as I;
+      }
+      set(defaultValueDeserialized.current!, path, value);
     },
     []
   );
@@ -261,20 +265,20 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   // ----------------------------------
   const addField: FormHook<T, I>['__addField'] = useCallback(
     (field) => {
-      const fieldExists = fieldsRefs.current[field.path] !== undefined;
+      const fieldPreviouslyAdded = fieldsRefs.current[field.path] !== undefined;
       fieldsRefs.current[field.path] = field;
       delete fieldsRemovedRefs.current[field.path];
 
       updateFormDataAt(field.path, field.value);
       updateFieldErrorMessage(field.path, field.getErrorsMessages());
 
-      if (!fieldExists && !field.isValidated) {
+      if (!fieldPreviouslyAdded && !field.isValidated) {
         setIsValid(undefined);
 
-        // When we submit the form (and set "isSubmitted" to "true"), we validate **all fields**.
-        // If a field is added and it is not validated it means that we have swapped fields and added new ones:
-        // --> we have basically have a new form in front of us.
-        // For that reason we make sure that the "isSubmitted" state is false.
+        // When we submit() the form we set the "isSubmitted" state to "true" and all fields are marked as "isValidated: true".
+        // If a **new** field is added and and its "isValidated" is "false" it means that we have swapped fields and added new ones:
+        // --> we have a new form in front of us with different set of fields. We need to reset the "isSubmitted" state.
+        // (e.g. This happnes when changing a field "type" in the mappings editor which brings a whole new set of settings to configure)
         setIsSubmitted(false);
       }
     },
@@ -320,7 +324,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   const readFieldConfigFromSchema: FormHook<T, I>['__readFieldConfigFromSchema'] = useCallback(
     (fieldName) => {
-      const config = (get(schema ?? {}, fieldName) as FieldConfig) || {};
+      const config = get(schema ?? {}, fieldName);
 
       return config;
     },
@@ -394,7 +398,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const getFields: FormHook<T, I>['getFields'] = useCallback(() => fieldsRefs.current, []);
 
   const getFieldDefaultValue: FormHook<T, I>['getFieldDefaultValue'] = useCallback(
-    (fieldName) => get(defaultValueDeserialized.current, fieldName),
+    (fieldName) => get(defaultValueDeserialized.current ?? {}, fieldName),
     []
   );
 

@@ -16,32 +16,27 @@ import {
   ValidationError,
   FormData,
   ValidationConfig,
+  FieldValidationData,
 } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
 export interface InternalFieldConfig<T> {
-  initialValue?: T;
+  initialValue: T;
   isIncludedInOutput?: boolean;
 }
 
 export const useField = <T, FormType = FormData, I = T>(
   form: FormHook<FormType>,
   path: string,
-  config: FieldConfig<T, FormType, I> & InternalFieldConfig<T> = {},
+  config: FieldConfig<T, FormType, I> & InternalFieldConfig<T>,
   valueChangeListener?: (value: I) => void,
   errorChangeListener?: (errors: string[] | null) => void,
-  {
-    customValidationData = null,
-    customValidationDataProvider,
-  }: {
-    customValidationData?: unknown;
-    customValidationDataProvider?: () => Promise<unknown>;
-  } = {}
+  { validationData = null, validationDataProvider }: FieldValidationData = {}
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
-    defaultValue = '', // The value to use a fallback mecanism when no initial value is passed
-    initialValue = config.defaultValue ?? ('' as unknown as I), // The value explicitly passed
+    defaultValue = '' as unknown as T, // The default value instead of "undefined" (when resetting the form this will be the field value)
+    initialValue, // The initial value of the field when rendering the form
     isIncludedInOutput = true,
     label = '',
     labelAppend = '',
@@ -57,24 +52,28 @@ export const useField = <T, FormType = FormData, I = T>(
   const {
     getFormData,
     getFields,
+    validateFields,
     __addField,
     __removeField,
     __updateFormDataAt,
-    validateFields,
     __getFormData$,
   } = form;
 
   const deserializeValue = useCallback(
-    (rawValue = initialValue) => {
+    (rawValue: T): I => {
       if (typeof rawValue === 'function') {
         return deserializer ? deserializer(rawValue()) : rawValue();
       }
-      return deserializer ? deserializer(rawValue) : rawValue;
+      return deserializer ? deserializer(rawValue) : (rawValue as unknown as I);
     },
-    [initialValue, deserializer]
+    [deserializer]
   );
 
-  const [value, setStateValue] = useState<I>(deserializeValue);
+  const initialValueDeserialized = useMemo(() => {
+    return deserializeValue(initialValue);
+  }, [deserializeValue, initialValue]);
+
+  const [value, setStateValue] = useState<I>(initialValueDeserialized);
   const [errors, setStateErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isModified, setIsModified] = useState(false);
@@ -89,7 +88,7 @@ export const useField = <T, FormType = FormData, I = T>(
   const inflightValidation = useRef<(Promise<any> & { cancel?(): void }) | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   // Keep a ref of the last state (value and errors) notified to the consumer so he does
-  // not get tons of updates whenever he does not wrap the "onChange()" and "onError()" handlers with a useCallback
+  // not get loads of updates whenever he does not wrap the "onChange()" and "onError()" handlers with a useCallback
   const lastNotifiedState = useRef<{ value?: I; errors: string[] | null }>({
     value: undefined,
     errors: null,
@@ -245,7 +244,7 @@ export const useField = <T, FormType = FormData, I = T>(
       };
 
       const dataProvider: () => Promise<any> =
-        customValidationDataProvider ?? (() => Promise.resolve(undefined));
+        validationDataProvider ?? (() => Promise.resolve(undefined));
 
       const runAsync = async () => {
         const validationErrors: ValidationError[] = [];
@@ -267,7 +266,7 @@ export const useField = <T, FormType = FormData, I = T>(
             form: { getFormData, getFields },
             formData,
             path,
-            customData: { provider: dataProvider, value: customValidationData },
+            customData: { provider: dataProvider, value: validationData },
           }) as Promise<ValidationError>;
 
           const validationResult = await inflightValidation.current;
@@ -313,7 +312,7 @@ export const useField = <T, FormType = FormData, I = T>(
             form: { getFormData, getFields },
             formData,
             path,
-            customData: { provider: dataProvider, value: customValidationData },
+            customData: { provider: dataProvider, value: validationData },
           });
 
           if (!validationResult) {
@@ -362,8 +361,8 @@ export const useField = <T, FormType = FormData, I = T>(
       getFormData,
       getFields,
       path,
-      customValidationData,
-      customValidationDataProvider,
+      validationData,
+      validationDataProvider,
     ]
   );
 
@@ -388,13 +387,13 @@ export const useField = <T, FormType = FormData, I = T>(
   );
 
   const validate: FieldHook<T, I>['validate'] = useCallback(
-    (validationData = {}) => {
+    (validationConfig = {}) => {
       const {
         formData = __getFormData$().value,
         value: valueToValidate = value,
         validationType = VALIDATION_TYPES.FIELD,
         onlyBlocking = false,
-      } = validationData;
+      } = validationConfig;
 
       setValidating(true);
 
@@ -589,11 +588,14 @@ export const useField = <T, FormType = FormData, I = T>(
   // -- EFFECTS
   // ----------------------------------
   useEffect(() => {
+    // Add the fieldHook object to the form "fieldsRefs" map
     __addField(field as FieldHook<any>);
   }, [field, __addField]);
 
   useEffect(() => {
     return () => {
+      // We only remove the field from the "fieldsRefs" object when its path
+      // changes (which in practice never occurs) or whenever the <UseField /> unmounts
       __removeField(path);
     };
   }, [path, __removeField]);
@@ -612,8 +614,8 @@ export const useField = <T, FormType = FormData, I = T>(
 
   useEffect(() => {
     // If the field value has been reset, we don't want to call the "onValueChange()"
-    // as it will set the "isPristine" state to true or validate the field, which we don't want
-    // to occur right after resetting the field state.
+    // as it will set the "isPristine" state to true and validate the field (which we don't want
+    // to occur right after resetting the field).
     if (hasBeenReset.current) {
       hasBeenReset.current = false;
       return;
@@ -636,11 +638,11 @@ export const useField = <T, FormType = FormData, I = T>(
   useEffect(() => {
     setIsModified(() => {
       if (typeof value === 'object') {
-        return JSON.stringify(value) !== JSON.stringify(initialValue);
+        return JSON.stringify(value) !== JSON.stringify(initialValueDeserialized);
       }
-      return value !== initialValue;
+      return value !== initialValueDeserialized;
     });
-  }, [value, initialValue]);
+  }, [value, initialValueDeserialized]);
 
   useEffect(() => {
     if (!isMounted.current) {
