@@ -17,6 +17,11 @@ export class TablesAdapter extends EventEmitter {
     this.emit('change', this.tables);
   }
 
+  public reset() {
+    this._tables = {};
+    this.emit('change', this.tables);
+  }
+
   public get tables() {
     return this._tables;
   }
