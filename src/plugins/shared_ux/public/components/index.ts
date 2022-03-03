@@ -42,3 +42,18 @@ export const LazyNoDataViewsPage = React.lazy(() =>
  * a predefined fallback and error boundary.
  */
 export const NoDataViewsPage = withSuspense(LazyNoDataViewsPage);
+
+/**
+ * The Lazily-loaded `QuickButtonGroup` component.  Consumers should use `React.Suspennse` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const LazyQuickButtonGroup = React.lazy(() =>
+  import('./toolbar/solution_toolbar/quick_group_buttons').then(({ QuickButtonGroup }) => ({
+    default: QuickButtonGroup,
+  }))
+);
+
+/**
+ * The QuickButtonGroup component that is wrapped by the `withSuspence` HOC.
+ */
+export const QuickButtonGroup = withSuspense(LazyQuickButtonGroup);
