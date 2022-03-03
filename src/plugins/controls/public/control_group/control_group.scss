@@ -82,9 +82,25 @@ $controlMinWidth: $euiSize * 14;
   }
 }
 
+.controlFrame__labelToolTip {
+  max-width: 50%;
+}
+
 .controlFrameWrapper {
   flex-basis: auto;
   position: relative;
+
+  &.controlFrameWrapper-isEditable {
+    .controlFrame__formControlLayoutLabel {
+      padding-left: 0;
+    }
+  }
+
+  &:not(.controlFrameWrapper-isEditable) {
+    .controlFrameFormControlLayout--twoLine .euiFormControlLayout__childrenWrapper {
+      border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
+    }
+  }
 
   .controlFrame__formControlLayout {
     width: 100%;
@@ -93,7 +109,6 @@ $controlMinWidth: $euiSize * 14;
 
     &Label {
       @include euiTextTruncate;
-      max-width: 50%;
       border-radius: $euiBorderRadius;
     }
 

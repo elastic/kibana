@@ -8,21 +8,27 @@
 import React from 'react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 export enum CREATE_STATUS {
   INITIAL = 'initial',
   CREATED = 'created',
   FAILED = 'failed',
 }
 
-interface Props {
-  createStatus: CREATE_STATUS;
+export interface AgentPolicyCreateState {
+  status: CREATE_STATUS;
+  errorMessage?: JSX.Element;
 }
 
-export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ createStatus }) => {
+interface Props {
+  createState: AgentPolicyCreateState;
+}
+
+export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ createState }) => {
   return (
     <>
       <EuiSpacer size="m" />
-      {createStatus === CREATE_STATUS.CREATED ? (
+      {createState.status === CREATE_STATUS.CREATED ? (
         <EuiCallOut
           data-test-subj="agentPolicyCreateStatusCallOut"
           title={
@@ -45,7 +51,9 @@ export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ crea
           }
           color="danger"
           iconType="cross"
-        />
+        >
+          {createState.errorMessage ?? null}
+        </EuiCallOut>
       )}
     </>
   );

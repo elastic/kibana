@@ -43,7 +43,7 @@ describe('ConnectInstance', () => {
 
   const credentialsSourceData = staticSourceData[13];
   const oauthSourceData = staticSourceData[0];
-  const subdomainSourceData = staticSourceData[16];
+  const subdomainSourceData = staticSourceData[18];
 
   const props = {
     ...credentialsSourceData,

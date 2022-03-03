@@ -7,7 +7,7 @@
  */
 
 import { schema, Type } from '@kbn/config-schema';
-import { RUNTIME_FIELD_TYPES, RuntimeType } from '../../../common';
+import { /* RUNTIME_FIELD_TYPES,*/ RuntimeType } from '../../../common';
 
 export const serializedFieldFormatSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -60,17 +60,63 @@ export const fieldSpecSchema = schema.object(fieldSpecSchemaFields, {
   unknowns: 'ignore',
 });
 
-export const runtimeFieldSpecTypeSchema = schema.oneOf(
-  RUNTIME_FIELD_TYPES.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
+export const RUNTIME_FIELD_TYPES2 = [
+  'keyword',
+  'long',
+  'double',
+  'date',
+  'ip',
+  'boolean',
+  'geo_point',
+] as const;
+
+export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
+  RUNTIME_FIELD_TYPES2.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
     Type<RuntimeType>
   ]
 );
-export const runtimeFieldSpec = {
-  type: runtimeFieldSpecTypeSchema,
+
+export const primitiveRuntimeFieldSchema = schema.object({
+  type: runtimeFieldNonCompositeFieldsSpecTypeSchema,
   script: schema.maybe(
     schema.object({
       source: schema.string(),
     })
   ),
-};
-export const runtimeFieldSpecSchema = schema.object(runtimeFieldSpec);
+  format: schema.maybe(serializedFieldFormatSchema),
+  customLabel: schema.maybe(schema.string()),
+  popularity: schema.maybe(
+    schema.number({
+      min: 0,
+    })
+  ),
+});
+
+export const compositeRuntimeFieldSchema = schema.object({
+  type: schema.literal('composite') as Type<RuntimeType>,
+  script: schema.maybe(
+    schema.object({
+      source: schema.string(),
+    })
+  ),
+  fields: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        type: runtimeFieldNonCompositeFieldsSpecTypeSchema,
+        format: schema.maybe(serializedFieldFormatSchema),
+        customLabel: schema.maybe(schema.string()),
+        popularity: schema.maybe(
+          schema.number({
+            min: 0,
+          })
+        ),
+      })
+    )
+  ),
+});
+
+export const runtimeFieldSchema = schema.oneOf([
+  primitiveRuntimeFieldSchema,
+  compositeRuntimeFieldSchema,
+]);

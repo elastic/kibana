@@ -171,14 +171,14 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={services.documentation.getPutPipelineApiUrl()}
+            href={services.documentation.getCreatePipelineCSVUrl()}
             target="_blank"
             iconType="help"
             data-test-subj="documentationLink"
           >
             <FormattedMessage
-              id="xpack.ingestPipelines.create.docsButtonLabel"
-              defaultMessage="Create pipeline docs"
+              id="xpack.ingestPipelines.createFromCSV.docsButtonLabel"
+              defaultMessage="CSV to pipeline docs"
             />
           </EuiButtonEmpty>,
         ]}
