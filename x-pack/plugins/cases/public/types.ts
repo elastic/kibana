@@ -33,6 +33,7 @@ import type {
   GetRecentCasesProps,
 } from './methods';
 import { GetCasesContextProps } from './methods/get_cases_context';
+import { getRuleIdFromEvent } from './methods/get_rule_id_from_event';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -117,6 +118,9 @@ export interface CasesUiStart {
   hooks: {
     getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     getUseCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
+  };
+  helpers: {
+    getRuleIdFromEvent: typeof getRuleIdFromEvent;
   };
 }
 

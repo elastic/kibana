@@ -26,6 +26,7 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { getCasesContextLazy } from './methods/get_cases_context';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import { getRuleIdFromEvent } from './methods/get_rule_id_from_event';
 
 /**
  * @public
@@ -101,6 +102,9 @@ export class CasesUiPlugin
       hooks: {
         getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
         getUseCasesAddToExistingCaseModal: useCasesAddToExistingCaseModal,
+      },
+      helpers: {
+        getRuleIdFromEvent,
       },
     };
   }
