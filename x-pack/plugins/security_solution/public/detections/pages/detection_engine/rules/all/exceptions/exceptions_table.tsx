@@ -193,7 +193,8 @@ export const ExceptionListsTable = React.memo(() => {
   );
 
   const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
-    const isKibanaReadOnly = canUserREAD && !canUserCRUD;
+    // Defaulting to true to default to the lower privilege first
+    const isKibanaReadOnly = (canUserREAD && !canUserCRUD) ?? true;
     return getAllExceptionListsColumns(
       handleExport,
       handleDelete,
