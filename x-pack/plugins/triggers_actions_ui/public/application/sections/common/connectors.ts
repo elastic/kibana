@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ActionConnector, ActionTypeIndex, AlertAction } from '../../../types';
+import { ActionConnector, ActionTypeIndex, RuleAction } from '../../../types';
 
 export const getValidConnectors = (
   connectors: ActionConnector[],
-  actionItem: AlertAction,
+  actionItem: RuleAction,
   actionTypesIndex: ActionTypeIndex
 ): ActionConnector[] => {
   const actionType = actionTypesIndex[actionItem.actionTypeId];

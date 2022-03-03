@@ -53,6 +53,7 @@ import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { SecurityPluginStart } from '../../security/public';
+import { SpacesPluginStart } from '../../spaces/public';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -82,6 +83,7 @@ export interface ApmPluginStartDeps {
   observability: ObservabilityPublicStart;
   fleet?: FleetStart;
   security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {

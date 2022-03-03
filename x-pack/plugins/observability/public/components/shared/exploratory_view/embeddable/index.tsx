@@ -33,7 +33,7 @@ export function getExploratoryViewEmbeddable(
     const [indexPatterns, setIndexPatterns] = useState<IndexPatternState>({} as IndexPatternState);
     const [loading, setLoading] = useState(false);
 
-    const series = props.attributes[0];
+    const series = props.attributes && props.attributes[0];
 
     const isDarkMode = core.uiSettings.get('theme:darkMode');
 
@@ -59,8 +59,10 @@ export function getExploratoryViewEmbeddable(
     );
 
     useEffect(() => {
-      loadIndexPattern({ dataType: series.dataType });
-    }, [series.dataType, loadIndexPattern]);
+      if (series?.dataType) {
+        loadIndexPattern({ dataType: series.dataType });
+      }
+    }, [series?.dataType, loadIndexPattern]);
 
     if (Object.keys(indexPatterns).length === 0 || loading) {
       return <EuiLoadingSpinner />;

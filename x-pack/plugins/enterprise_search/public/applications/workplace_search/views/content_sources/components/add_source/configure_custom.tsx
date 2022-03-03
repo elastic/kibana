@@ -24,51 +24,64 @@ import { docLinks } from '../../../../../shared/doc_links';
 
 import { SOURCE_NAME_LABEL } from '../../constants';
 
-import { AddSourceLogic } from './add_source_logic';
+import { AddCustomSourceLogic } from './add_custom_source_logic';
+import { AddSourceHeader } from './add_source_header';
 import { CONFIG_CUSTOM_BUTTON, CONFIG_CUSTOM_LINK_TEXT } from './constants';
 
-interface ConfigureCustomProps {
-  header: React.ReactNode;
-  helpText: string;
-  advanceStep(): void;
-}
-
-export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
-  helpText,
-  advanceStep,
-  header,
-}) => {
-  const { setCustomSourceNameValue } = useActions(AddSourceLogic);
-  const { customSourceNameValue, buttonLoading } = useValues(AddSourceLogic);
+export const ConfigureCustom: React.FC = () => {
+  const { setCustomSourceNameValue, createContentSource } = useActions(AddCustomSourceLogic);
+  const { customSourceNameValue, buttonLoading, sourceData } = useValues(AddCustomSourceLogic);
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
-    advanceStep();
+    createContentSource();
   };
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) =>
     setCustomSourceNameValue(e.target.value);
 
+  const {
+    serviceType,
+    configuration: { documentationUrl, helpText },
+    name,
+    categories = [],
+  } = sourceData;
+
   return (
     <>
-      {header}
+      <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
       <EuiSpacer />
       <form onSubmit={handleFormSubmit}>
         <EuiForm>
           <EuiText grow={false}>
             <p>{helpText}</p>
             <p>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.docs.link.description"
-                defaultMessage="{link} to learn more about Custom API Sources."
-                values={{
-                  link: (
-                    <EuiLink href={docLinks.workplaceSearchCustomSources} target="_blank">
-                      {CONFIG_CUSTOM_LINK_TEXT}
-                    </EuiLink>
-                  ),
-                }}
-              />
+              {serviceType === 'custom' ? (
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.docs.link.description"
+                  defaultMessage="{link} to learn more about Custom API Sources."
+                  values={{
+                    link: (
+                      <EuiLink href={docLinks.workplaceSearchCustomSources} target="_blank">
+                        {CONFIG_CUSTOM_LINK_TEXT}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentDocs.link.description"
+                  defaultMessage="{link} to learn more about deploying a {name} source."
+                  values={{
+                    link: (
+                      <EuiLink target="_blank" href={documentationUrl}>
+                        {CONFIG_CUSTOM_LINK_TEXT}
+                      </EuiLink>
+                    ),
+                    name,
+                  }}
+                />
+              )}
             </p>
           </EuiText>
           <EuiSpacer size="xxl" />
@@ -90,7 +103,17 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
               isLoading={buttonLoading}
               data-test-subj="CreateCustomButton"
             >
-              {CONFIG_CUSTOM_BUTTON}
+              {serviceType === 'custom' ? (
+                CONFIG_CUSTOM_BUTTON
+              ) : (
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.createNamedSourceButtonLabel"
+                  defaultMessage="Create {name} source"
+                  values={{
+                    name,
+                  }}
+                />
+              )}
             </EuiButton>
           </EuiFormRow>
         </EuiForm>

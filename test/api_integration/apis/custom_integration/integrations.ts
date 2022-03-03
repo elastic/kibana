@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(resp.body).to.be.an('array');
-
+        
         expect(resp.body.length).to.be(37);
 
         // Test for sample data card

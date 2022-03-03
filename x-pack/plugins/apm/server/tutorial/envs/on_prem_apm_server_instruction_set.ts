@@ -124,10 +124,7 @@ export function getOnPremApmServerInstructionSet({
         index: apmConfig.indices.onboarding,
         query: {
           bool: {
-            filter: [
-              { term: { 'processor.event': 'onboarding' } },
-              { range: { 'observer.version_major': { gte: 7 } } },
-            ],
+            filter: [{ term: { 'processor.event': 'onboarding' } }],
           },
         },
       },

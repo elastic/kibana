@@ -25,7 +25,7 @@ export const BulkOperationPopover: React.FunctionComponent = ({ children }) => {
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         >
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.buttonTitle"
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.buttonTitle"
             defaultMessage="Manage rules"
           />
         </EuiButton>

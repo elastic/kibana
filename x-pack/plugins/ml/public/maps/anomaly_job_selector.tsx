@@ -11,10 +11,13 @@ import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { MlApiServices } from '../application/services/ml_api_service';
+import { AnomalyJobSelectorEmptyState } from './anomaly_job_selector_empty_state';
 
 interface Props {
   onJobChange: (jobId: string) => void;
   mlJobsService: MlApiServices['jobs'];
+  jobsManagementPath?: string;
+  canCreateJobs: boolean;
 }
 
 interface State {
@@ -61,11 +64,8 @@ export class AnomalyJobSelector extends Component<Props, State> {
   };
 
   render() {
-    if (!this.state.jobIdList) {
-      return null;
-    }
-
-    return (
+    const supportedJobsExist = this.state.jobIdList?.length && this.state.jobIdList?.length > 0;
+    return supportedJobsExist || !this.props.jobsManagementPath ? (
       <EuiFormRow
         label={i18n.translate('xpack.ml.maps.jobIdLabel', {
           defaultMessage: 'Job ID',
@@ -81,6 +81,11 @@ export class AnomalyJobSelector extends Component<Props, State> {
           }
         />
       </EuiFormRow>
+    ) : (
+      <AnomalyJobSelectorEmptyState
+        jobsManagementPath={this.props.jobsManagementPath}
+        canCreateJobs={this.props.canCreateJobs}
+      />
     );
   }
 }

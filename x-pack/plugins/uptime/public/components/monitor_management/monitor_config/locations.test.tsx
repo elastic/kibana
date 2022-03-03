@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ServiceLocations } from './locations';
 
-describe('<ActionBar />', () => {
+describe('<ServiceLocations />', () => {
   const setLocations = jest.fn();
   const location = {
     label: 'US Central',
@@ -21,6 +21,7 @@ describe('<ActionBar />', () => {
     },
     url: 'url',
   };
+  const locationTestSubId = `syntheticsServiceLocation--${location.id}`;
   const state = {
     monitorManagementList: {
       locations: [location],
@@ -61,5 +62,36 @@ describe('<ActionBar />', () => {
     );
 
     expect(screen.getByText('At least one service location must be specified')).toBeInTheDocument();
+  });
+
+  it('checks unchecks location', () => {
+    const { getByTestId } = render(
+      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={true} />,
+      { state }
+    );
+
+    const checkbox = getByTestId(locationTestSubId) as HTMLInputElement;
+    expect(checkbox.checked).toEqual(false);
+    fireEvent.click(checkbox);
+
+    expect(setLocations).toHaveBeenCalled();
+  });
+
+  it('calls onBlur', () => {
+    const onBlur = jest.fn();
+    const { getByTestId } = render(
+      <ServiceLocations
+        selectedLocations={[]}
+        setLocations={setLocations}
+        isInvalid={true}
+        onBlur={onBlur}
+      />,
+      { state }
+    );
+
+    const checkbox = getByTestId(locationTestSubId) as HTMLInputElement;
+    fireEvent.click(checkbox);
+    fireEvent.blur(checkbox);
+    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });

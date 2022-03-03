@@ -7,25 +7,26 @@
 
 import { CoreStart } from 'kibana/public';
 import { ReactElement, ReactNode } from 'react';
-
-import type { LensPublicStart } from '../../lens/public';
-import type { SecurityPluginSetup } from '../../security/public';
-import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '../../triggers_actions_ui/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { SpacesPluginStart } from '../../spaces/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
-
-import type {
-  GetCasesProps,
-  GetAllCasesSelectorModalProps,
-  GetCreateCaseFlyoutProps,
-  GetRecentCasesProps,
-  CasesOwners,
-} from './methods';
-import { GetCasesContextProps } from './methods/get_cases_context';
+import type { LensPublicStart } from '../../lens/public';
+import type { SecurityPluginSetup } from '../../security/public';
+import type { SpacesPluginStart } from '../../spaces/public';
+import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '../../triggers_actions_ui/public';
+import { CommentRequestAlertType, CommentRequestUserType } from '../common/api';
+import { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { CreateCaseFlyoutProps } from './components/create/flyout';
 import { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import type {
+  CasesOwners,
+  GetAllCasesSelectorModalProps,
+  GetCasesProps,
+  GetCreateCaseFlyoutProps,
+  GetRecentCasesProps,
+} from './methods';
+import { GetCasesContextProps } from './methods/get_cases_context';
+import { getRuleIdFromEvent } from './methods/get_rule_id_from_event';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -78,6 +79,9 @@ export interface CasesUiStart {
   getAllCasesSelectorModal: (
     props: GetAllCasesSelectorModalProps
   ) => ReactElement<GetAllCasesSelectorModalProps>;
+  getAllCasesSelectorModalNoProvider: (
+    props: GetAllCasesSelectorModalProps
+  ) => ReactElement<GetAllCasesSelectorModalProps>;
   /**
    * Flyout with the form to create a case for the owner
    * @param props GetCreateCaseFlyoutProps
@@ -95,5 +99,12 @@ export interface CasesUiStart {
   getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
   hooks: {
     getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
+    getUseCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
+  };
+  helpers: {
+    getRuleIdFromEvent: typeof getRuleIdFromEvent;
   };
 }
+
+export type SupportedCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
+export type CaseAttachments = SupportedCaseAttachment[];
