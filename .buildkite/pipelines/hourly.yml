@@ -61,8 +61,18 @@ steps:
     timeout_in_minutes: 120
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '1'
           limit: 1
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '130'
+          limit: 3
+        - exit_status: '137'
+          limit: 3
+        - exit_status: '143'
+          limit: 3
+        - exit_status: '255'
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/xpack_accessibility.sh
     label: 'Default Accessibility Tests'
@@ -72,8 +82,18 @@ steps:
     timeout_in_minutes: 120
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '1'
           limit: 1
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '130'
+          limit: 3
+        - exit_status: '137'
+          limit: 3
+        - exit_status: '143'
+          limit: 3
+        - exit_status: '255'
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/oss_firefox.sh
     label: 'OSS Firefox Tests'
@@ -94,8 +114,18 @@ steps:
     timeout_in_minutes: 120
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '1'
           limit: 1
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '130'
+          limit: 3
+        - exit_status: '137'
+          limit: 3
+        - exit_status: '143'
+          limit: 3
+        - exit_status: '255'
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/oss_misc.sh
     label: 'OSS Misc Functional Tests'
@@ -116,8 +146,18 @@ steps:
     timeout_in_minutes: 120
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '1'
           limit: 1
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '130'
+          limit: 3
+        - exit_status: '137'
+          limit: 3
+        - exit_status: '143'
+          limit: 3
+        - exit_status: '255'
+          limit: 3
 
   - command: .buildkite/scripts/steps/test/jest.sh
     label: 'Jest Tests'
@@ -141,6 +181,20 @@ steps:
       queue: n2-4-spot
     timeout_in_minutes: 120
     key: api-integration
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 1
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '130'
+          limit: 3
+        - exit_status: '137'
+          limit: 3
+        - exit_status: '143'
+          limit: 3
+        - exit_status: '255'
+          limit: 3
 
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
