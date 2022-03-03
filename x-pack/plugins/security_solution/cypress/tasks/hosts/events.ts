@@ -19,15 +19,21 @@ import { DATAGRID_HEADERS } from '../../screens/timeline';
 import { REFRESH_BUTTON } from '../../screens/security_header';
 
 export const addsHostGeoCityNameToHeader = () => {
+  cy.clock();
   cy.get(HOST_GEO_CITY_NAME_CHECKBOX).check({
     force: true,
   });
+  cy.wait(0);
+  cy.tick(1000);
 };
 
 export const addsHostGeoCountryNameToHeader = () => {
+  cy.clock();
   cy.get(HOST_GEO_COUNTRY_NAME_CHECKBOX).check({
     force: true,
   });
+  cy.wait(0);
+  cy.tick(1000);
 };
 
 export const openEventsViewerFieldsBrowser = () => {
