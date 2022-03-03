@@ -46,7 +46,6 @@ import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { getScheduleDelay } from '../lib/get_schedule_delay';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
   AlertTypeParams,
@@ -669,6 +668,7 @@ export class TaskRunner<
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
+    const scheduleDelay = runDate.getTime() - this.taskInstance.scheduledAt.getTime();
 
     const event = createAlertEventLogRecordObject({
       ruleId,
@@ -676,7 +676,10 @@ export class TaskRunner<
       action: EVENT_LOG_ACTIONS.execute,
       namespace,
       executionId: this.executionId,
-      task: getScheduleDelay(runDate, this.taskInstance),
+      task: {
+        scheduled: this.taskInstance.scheduledAt.toISOString(),
+        scheduleDelay: Millis2Nanos * scheduleDelay,
+      },
       savedObjects: [
         {
           id: ruleId,

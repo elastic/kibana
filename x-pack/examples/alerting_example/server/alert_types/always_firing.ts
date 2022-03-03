@@ -55,6 +55,7 @@ export const alertType: RuleType<
   defaultActionGroupId: DEFAULT_ACTION_GROUP,
   minimumLicenseRequired: 'basic',
   isExportable: true,
+  ruleTaskTimeout: '1m',
   async executor({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
@@ -62,6 +63,25 @@ export const alertType: RuleType<
   }) {
     const count = (state.count ?? 0) + 1;
 
+    await services.scopedClusterClient.asCurrentUser.search({
+      index: '.kibana-event-log*',
+      body: {
+        query: {
+          bool: {
+            filter: {
+              match_all: {},
+            },
+          },
+        },
+        aggs: {
+          delay: {
+            shard_delay: {
+              value: '75s',
+            },
+          },
+        },
+      },
+    });
     range(instances)
       .map(() => uuid.v4())
       .forEach((id: string) => {
