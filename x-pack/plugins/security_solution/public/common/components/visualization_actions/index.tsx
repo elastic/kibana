@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import {
@@ -23,6 +22,13 @@ import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { useAddToNewCase } from './use_add_to_new_case';
 import { VisualizationActionsProps } from './types';
+import {
+  ADD_TO_EXISTING_CASE,
+  ADD_TO_NEW_CASE,
+  INSPECT,
+  OPEN_IN_LENS,
+  SAVE_VISUALIZATION,
+} from './translations';
 
 const Wrapper = styled.div`
   &.viz-actions {
@@ -183,10 +189,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         disabled={disaledOpenInLens}
         onClick={onOpenInLens}
       >
-        <FormattedMessage
-          id="xpack.securitySolution.visualizationActions.openInLens"
-          defaultMessage="Open in Lens"
-        />
+        {OPEN_IN_LENS}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         icon="save"
@@ -195,10 +198,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         disabled={!userCanCrud}
         onClick={onSaveVisualization}
       >
-        <FormattedMessage
-          id="xpack.securitySolution.visualizationActions.saveVisualization"
-          defaultMessage="Save Visualization"
-        />
+        {SAVE_VISUALIZATION}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         icon="search"
@@ -207,10 +207,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         disabled={disableInspectButton}
         data-test-subj="viz-actions-inspect"
       >
-        <FormattedMessage
-          id="xpack.securitySolution.visualizationActions.inspect"
-          defaultMessage="Inspect"
-        />
+        {INSPECT}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         disabled={isAddToNewCaseDisabled}
@@ -219,10 +216,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         onClick={onAddToNewCaseClicked}
         data-test-subj="viz-actions-add-to-new-case"
       >
-        <FormattedMessage
-          id="xpack.securitySolution.visualizationActions.addToNewCase"
-          defaultMessage="Add to new Case"
-        />
+        {ADD_TO_NEW_CASE}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         disabled={isAddToExistingCaseDisabled}
@@ -231,10 +225,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         key="visualizationActionsAddToExistingCase"
         onClick={onAddToExistingCaseClicked}
       >
-        <FormattedMessage
-          id="xpack.securitySolution.visualizationActions.addToExistingCase"
-          defaultMessage="Add to Existing Case"
-        />
+        {ADD_TO_EXISTING_CASE}
       </EuiContextMenuItem>,
     ],
     [

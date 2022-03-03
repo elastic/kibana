@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const ADD_TO_CASE_SUCCESS = (caseTitle: string) =>
   i18n.translate(
-    'xpack.securitySolution.components.histogramActopms.addToCase.notificationSuccess',
+    'xpack.securitySolution.components.visualizationActions.addToCase.notificationSuccess',
     {
       defaultMessage: 'Successfully added visualization to the case: {caseTitle}',
       values: { caseTitle },
@@ -17,15 +17,47 @@ export const ADD_TO_CASE_SUCCESS = (caseTitle: string) =>
   );
 
 export const ADD_TO_CASE_FAILURE = i18n.translate(
-  'xpack.securitySolution.components.histogramActopms.addToCase.notificationFailure',
+  'xpack.securitySolution.components.visualizationActions.addToCase.notificationFailure',
   {
     defaultMessage: 'Failed to add visualization to the selected case.',
   }
 );
 
 export const VIEW_CASE = i18n.translate(
-  'xpack.securitySolution.components.histogramActopms.addToCase.notification.viewCase',
+  'xpack.securitySolution.components.visualizationActions.addToCase.notification.viewCase',
   {
     defaultMessage: 'View case',
+  }
+);
+
+export const INSPECT = i18n.translate('xpack.securitySolution.visualizationActions.inspect', {
+  defaultMessage: 'Inspect',
+});
+
+export const SAVE_VISUALIZATION = i18n.translate(
+  'xpack.securitySolution.visualizationActions.saveVisualization',
+  {
+    defaultMessage: 'Save Visualization',
+  }
+);
+
+export const OPEN_IN_LENS = i18n.translate(
+  'xpack.securitySolution.visualizationActions.openInLens',
+  {
+    defaultMessage: 'Open in Lens',
+  }
+);
+
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.visualizationActions.addToNewCase',
+  {
+    defaultMessage: 'Add to new Case',
+  }
+);
+
+export const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.visualizationActions.addToExistingCase',
+  {
+    defaultMessage: 'Add to Existing Case',
   }
 );
