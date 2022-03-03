@@ -17,19 +17,19 @@ import { useUserInfo } from './detections/components/user_info';
  * privileges
  */
 export function useReadonlyHeader(tooltip: string) {
-  const { isKibanaReadOnly } = useUserInfo();
+  const { canUserREAD, canUserCRUD } = useUserInfo();
   const chrome = useKibana().services.chrome;
 
   // if the user is read only then display the glasses badge in the global navigation header
   const setBadge = useCallback(() => {
-    if (isKibanaReadOnly) {
+    if (canUserREAD && !canUserCRUD) {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
         tooltip,
         iconType: 'glasses',
       });
     }
-  }, [chrome, isKibanaReadOnly, tooltip]);
+  }, [chrome, canUserREAD, canUserCRUD, tooltip]);
 
   useEffect(() => {
     setBadge();

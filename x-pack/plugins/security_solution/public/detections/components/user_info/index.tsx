@@ -26,7 +26,6 @@ export interface State {
   loading: boolean;
   signalIndexName: string | null;
   signalIndexMappingOutdated: boolean | null;
-  isKibanaReadOnly: boolean | null;
 }
 
 export const initialState: State = {
@@ -43,7 +42,6 @@ export const initialState: State = {
   loading: true,
   signalIndexName: null,
   signalIndexMappingOutdated: null,
-  isKibanaReadOnly: null,
 };
 
 export type Action =
@@ -378,6 +376,5 @@ export const useUserInfo = (): State => {
     hasIndexUpdateDelete,
     signalIndexName,
     signalIndexMappingOutdated,
-    isKibanaReadOnly: (hasKibanaREAD && !canUserCRUD) || null,
   };
 };
