@@ -9,7 +9,7 @@
 import { ENTRY_VALUE, FIELD, OPERATOR, WILDCARD } from '../../../constants/index.mock';
 import { EndpointEntryMatchWildcard } from './index';
 
-export const getEndpointEntryMatchWildcard = (): EndpointEntryMatchWildcard => ({
+export const getEndpointEntryMatchWildcardMock = (): EndpointEntryMatchWildcard => ({
   field: FIELD,
   operator: OPERATOR,
   type: WILDCARD,
