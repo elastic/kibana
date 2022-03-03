@@ -11,12 +11,35 @@ import { ExecutionContextService, ExecutionContextSetup } from './execution_cont
 describe('ExecutionContextService', () => {
   let execContext: ExecutionContextSetup;
   let curApp$: BehaviorSubject<string>;
+  let execService: ExecutionContextService;
+
   beforeEach(() => {
-    const service = new ExecutionContextService();
-    execContext = service.setup();
+    execService = new ExecutionContextService();
+    execContext = execService.setup();
     curApp$ = new BehaviorSubject('app1');
-    execContext = service.start({
+    execContext = execService.start({
       curApp$,
+    });
+  });
+
+  it('app name updates automatically and clears everything else', () => {
+    execContext.set({
+      type: 'ghf',
+      description: 'first set',
+    });
+
+    expect(execContext.get()).toStrictEqual({
+      name: 'app1',
+      description: 'first set',
+      type: 'ghf',
+      url: '/',
+    });
+
+    curApp$.next('app2');
+
+    expect(execContext.get()).toStrictEqual({
+      name: 'app2',
+      url: '/',
     });
   });
 
@@ -170,5 +193,16 @@ describe('ExecutionContextService', () => {
       name: 'app1',
       page: 'mypage',
     });
+  });
+
+  it('stop clears subscriptions', () => {
+    const sub = jest.fn();
+    execContext.context$.subscribe(sub);
+    sub.mockReset();
+
+    execService.stop();
+    curApp$.next('abc');
+
+    expect(sub).not.toHaveBeenCalled();
   });
 });
