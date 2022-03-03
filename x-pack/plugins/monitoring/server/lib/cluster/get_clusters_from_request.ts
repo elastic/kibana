@@ -50,7 +50,7 @@ export async function getClustersFromRequest(
     start,
     end,
     codePaths,
-  }: { clusterUuid: string; start: number; end: number; codePaths: string[] }
+  }: { clusterUuid?: string; start?: number; end?: number; codePaths: string[] }
 ) {
   const { filebeatIndexPattern } = indexPatterns;
 
@@ -96,13 +96,14 @@ export async function getClustersFromRequest(
       cluster.ml = { jobs: mlJobs };
     }
 
-    cluster.logs = isInCodePath(codePaths, [CODE_PATH_LOGS])
-      ? await getLogTypes(req, filebeatIndexPattern, {
-          clusterUuid: get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid),
-          start,
-          end,
-        })
-      : [];
+    cluster.logs =
+      start && end && isInCodePath(codePaths, [CODE_PATH_LOGS])
+        ? await getLogTypes(req, filebeatIndexPattern, {
+            clusterUuid: get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid),
+            start,
+            end,
+          })
+        : [];
   } else if (!isStandaloneCluster) {
     // get all clusters
     if (!clusters || clusters.length === 0) {
