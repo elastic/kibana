@@ -234,7 +234,6 @@ export interface RuleType<
     | 'defaultActionGroupId'
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
-    | 'minimumScheduleInterval'
     | 'doesSetRecoveryContext'
   > {
   actionVariables: ActionVariables;
@@ -346,4 +345,8 @@ export enum Percentiles {
   P50 = 'P50',
   P95 = 'P95',
   P99 = 'P99',
+}
+
+export interface TriggersActionsUiConfig {
+  minimumScheduleInterval?: string;
 }

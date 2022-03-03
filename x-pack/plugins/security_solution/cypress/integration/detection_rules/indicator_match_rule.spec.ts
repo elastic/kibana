@@ -75,7 +75,7 @@ import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, reload } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineIndicatorMatchRuleAndContinue,
   fillIndexAndIndicatorIndexPattern,
@@ -408,7 +408,7 @@ describe.skip('indicator match', () => {
         loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
-      it('Creates and activates a new Indicator Match rule', () => {
+      it('Creates and enables a new Indicator Match rule', () => {
         goToManageAlertsDetectionRules();
         waitForRulesTableToBeLoaded();
         goToCreateNewRule();
@@ -416,7 +416,7 @@ describe.skip('indicator match', () => {
         fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
         fillAboutRuleAndContinue(getNewThreatIndicatorRule());
         fillScheduleRuleAndContinue(getNewThreatIndicatorRule());
-        createAndActivateRule();
+        createAndEnableRule();
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
