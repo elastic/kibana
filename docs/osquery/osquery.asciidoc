@@ -282,7 +282,7 @@ integration collect logs from self-managed Osquery deployments.
 The *Osquery Manager* integration manages Osquery deployments
 and supports running and scheduling queries from {kib}.
 
-* Osquery Manager cannot be integrated with an Elastic Agent in Standalone mode.
+* *Osquery Manager* cannot be integrated with an Elastic Agent in standalone mode.
 =========================
 
 [float]
