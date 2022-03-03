@@ -50,7 +50,7 @@ import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const STANDALONE_ID = 'standalone-t-grid';
+export const STANDALONE_ID = 'standalone-t-grid';
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
 
 const TitleText = styled.span`

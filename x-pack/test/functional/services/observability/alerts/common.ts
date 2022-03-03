@@ -53,6 +53,14 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.findAll('dataGridRowCell');
   };
 
+  const getAllDisabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:disabled');
+  };
+
+  const getAllEnabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:enabled');
+  };
+
   const getTableCellsInRows = async () => {
     const columnHeaders = await getTableColumnHeaders();
     if (columnHeaders.length <= 0) {
@@ -195,6 +203,8 @@ export function ObservabilityAlertsCommonProvider({
     getAlertsFlyoutTitle,
     getAlertsFlyoutViewInAppButtonOrFail,
     getCopyToClipboardButton,
+    getAllDisabledCheckBoxInTable,
+    getAllEnabledCheckBoxInTable,
     getFilterForValueButton,
     copyToClipboardButtonExists,
     getNoDataPageOrFail,
