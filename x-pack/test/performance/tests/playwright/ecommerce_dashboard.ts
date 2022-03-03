@@ -8,12 +8,12 @@ import Url from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ecommerceDashboard({ getService }: FtrProviderContext) {
-  describe('Ecommerce Dashboard', () => {
+  describe('ecommerce_dashboard', () => {
     const config = getService('config');
     const playwright = getService('playwright');
     const logger = getService('log');
 
-    const { step } = playwright.makePage({ autoLogin: true, journeyName: 'ecommerce_dashboard' });
+    const { step } = playwright.makePage('ecommerce_dashboard', { autoLogin: true });
 
     step('Go to Sample Data Page', async ({ page }) => {
       const kibanaUrl = Url.format({

@@ -6,12 +6,13 @@
  */
 import Url from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { PROFILES } from '../user_action_profiles';
 
 export default function login({ getService }: FtrProviderContext) {
-  describe('Login Page', () => {
+  describe('login', () => {
     const config = getService('config');
     const playwright = getService('playwright');
-    const { step } = playwright.makePage({ autoLogin: false, journeyName: 'login' });
+    const { step } = playwright.makePage('login', { autoLogin: false });
 
     step('Go to Kibana login page', async ({ page }) => {
       const kibanaUrl = Url.format({
@@ -30,9 +31,15 @@ export default function login({ getService }: FtrProviderContext) {
 
       const noDelayOnUserActions = process.env.TEST_DONT_DELAY_USER_ACTIONS === 'true';
 
-      await usernameLocator?.type('elastic', { delay: noDelayOnUserActions ? 0 : 500 });
-      await passwordLocator?.type('changeme', { delay: noDelayOnUserActions ? 0 : 500 });
-      await submitButtonLocator?.click({ delay: noDelayOnUserActions ? 0 : 1000 });
+      await usernameLocator?.type('elastic', {
+        delay: noDelayOnUserActions ? 0 : PROFILES.DEFAULT.INPUT_DELAYS.TYPING,
+      });
+      await passwordLocator?.type('changeme', {
+        delay: noDelayOnUserActions ? 0 : PROFILES.DEFAULT.INPUT_DELAYS.TYPING,
+      });
+      await submitButtonLocator?.click({
+        delay: noDelayOnUserActions ? 0 : PROFILES.DEFAULT.INPUT_DELAYS.MOUSE_CLICK,
+      });
       await page.waitForSelector('#headerUserMenu');
     });
   });

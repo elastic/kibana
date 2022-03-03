@@ -6,12 +6,12 @@
  */
 
 import { services as functionalServices } from '../../functional/services';
-import { PlaywrightService } from './playwright';
+import { PerformanceTestingService } from './performance';
 
 export const services = {
   es: functionalServices.es,
   kibanaServer: functionalServices.kibanaServer,
   esArchiver: functionalServices.esArchiver,
   retry: functionalServices.retry,
-  playwright: PlaywrightService,
+  playwright: PerformanceTestingService,
 };

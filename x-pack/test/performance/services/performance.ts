@@ -27,7 +27,7 @@ interface StepCtx {
 type StepFn = (ctx: StepCtx) => Promise<void>;
 type Steps = Array<{ name: string; fn: StepFn }>;
 
-export class PlaywrightService extends FtrService {
+export class PerformanceTestingService extends FtrService {
   private readonly config = this.ctx.getService('config');
   // private readonly es = this.ctx.getService('es');
   private readonly lifecycle = this.ctx.getService('lifecycle');
@@ -52,15 +52,6 @@ export class PlaywrightService extends FtrService {
     });
   }
 
-  private startTransaction(name: string) {
-    if (this.currentTransaction !== undefined) {
-      throw new Error(
-        `Transaction already started, make sure you end transaction ${this.currentTransaction?.name}`
-      );
-    }
-    this.currentTransaction = apm.startTransaction(name, 'performance');
-  }
-
   private endTransaction(result: string) {
     if (this.currentTransaction === undefined) {
       throw new Error(`No transaction started`);
@@ -71,7 +62,12 @@ export class PlaywrightService extends FtrService {
 
   private async withTransaction<T>(name: string, block: () => Promise<T>) {
     try {
-      this.startTransaction(name);
+      if (this.currentTransaction !== undefined) {
+        throw new Error(
+          `Transaction already started, make sure you end transaction ${this.currentTransaction?.name}`
+        );
+      }
+      this.currentTransaction = apm.startTransaction(name, 'performance');
       const result = await block();
       this.endTransaction('success');
       return result;
@@ -187,7 +183,7 @@ export class PlaywrightService extends FtrService {
     });
   }
 
-  public makePage({ journeyName, autoLogin }: { journeyName: string; autoLogin?: boolean }) {
+  public makePage(journeyName: string, { autoLogin }: { autoLogin?: boolean }) {
     const steps: Steps = [];
 
     it(journeyName, async () => {

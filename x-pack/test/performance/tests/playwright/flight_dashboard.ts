@@ -8,11 +8,11 @@ import Url from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function flightDashboard({ getService }: FtrProviderContext) {
-  describe('Flights Dashboard', () => {
+  describe('flights_dashboard', () => {
     const config = getService('config');
     const playwright = getService('playwright');
     const logger = getService('log');
-    const { step } = playwright.makePage({ autoLogin: true, journeyName: 'flights_dashboard' });
+    const { step } = playwright.makePage('flights_dashboard', { autoLogin: true });
 
     step('Go to Sample Data Page', async ({ page }) => {
       const kibanaUrl = Url.format({

@@ -8,14 +8,13 @@ import Url from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function promotionTrackingDashboard({ getService }: FtrProviderContext) {
-  describe('Promotion Tracking Dashboard', () => {
+  describe('promotion_tracking_dashboard', () => {
     const config = getService('config');
     const playwright = getService('playwright');
     const esArchiver = getService('esArchiver');
     const kibanaServer = getService('kibanaServer');
-    const { step } = playwright.makePage({
+    const { step } = playwright.makePage('promotion_tracking_dashboard', {
       autoLogin: true,
-      journeyName: 'promotion_tracking_dashboard',
     });
 
     before(async () => {
