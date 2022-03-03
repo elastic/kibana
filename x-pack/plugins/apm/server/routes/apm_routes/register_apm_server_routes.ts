@@ -54,13 +54,13 @@ export function registerRoutes({
   core: APMRouteHandlerResources['core'];
   plugins: APMRouteHandlerResources['plugins'];
   logger: APMRouteHandlerResources['logger'];
-  repository: ServerRouteRepository<APMRouteHandlerResources>;
+  repository: ServerRouteRepository;
   config: APMRouteHandlerResources['config'];
   ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
   telemetryUsageCounter?: TelemetryUsageCounter;
   kibanaVersion: string;
 }) {
-  const routes = repository.getRoutes();
+  const routes = Object.values(repository);
 
   const router = core.setup.http.createRouter();
 
@@ -117,10 +117,10 @@ export function registerRoutes({
               ),
               ruleDataClient,
               kibanaVersion,
-            }).then((value) => {
+            }).then((value: Record<string, any> | undefined | null) => {
               return {
                 aborted: false,
-                data: value as Record<string, any> | undefined | null,
+                data: value,
               };
             }),
             request.events.aborted$.toPromise().then(() => {

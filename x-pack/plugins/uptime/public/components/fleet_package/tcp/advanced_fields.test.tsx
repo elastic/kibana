@@ -23,12 +23,16 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 describe('<TCPAdvancedFields />', () => {
   const WrappedComponent = ({
     defaultValues = defaultConfig,
+    children,
+    onFieldBlur,
   }: {
     defaultValues?: TCPAdvancedFieldsType;
+    children?: React.ReactNode;
+    onFieldBlur?: (field: ConfigKey) => void;
   }) => {
     return (
       <TCPAdvancedFieldsContextProvider defaultValues={defaultValues}>
-        <TCPAdvancedFields />
+        <TCPAdvancedFields onFieldBlur={onFieldBlur}>{children}</TCPAdvancedFields>
       </TCPAdvancedFieldsContextProvider>
     );
   };
@@ -57,6 +61,17 @@ describe('<TCPAdvancedFields />', () => {
     expect(requestPayload.value).toEqual('success');
   });
 
+  it('calls onBlur on fields', () => {
+    const onFieldBlur = jest.fn();
+    const { getByLabelText } = render(<WrappedComponent onFieldBlur={onFieldBlur} />);
+
+    const requestPayload = getByLabelText('Request payload') as HTMLInputElement;
+
+    fireEvent.change(requestPayload, { target: { value: 'success' } });
+    fireEvent.blur(requestPayload);
+    expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.REQUEST_SEND_CHECK);
+  });
+
   it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {
     const { getByLabelText, queryByLabelText } = render(<WrappedComponent />);
 
@@ -67,5 +82,13 @@ describe('<TCPAdvancedFields />', () => {
     fireEvent.change(proxyUrl, { target: { value: 'sampleProxyUrl' } });
 
     expect(getByLabelText('Resolve hostnames locally')).toBeInTheDocument();
+  });
+
+  it('renders upstream fields', () => {
+    const upstreamFieldsText = 'Monitor Advanced field section';
+    const { getByText } = render(<WrappedComponent>{upstreamFieldsText}</WrappedComponent>);
+
+    const upstream = getByText(upstreamFieldsText) as HTMLInputElement;
+    expect(upstream).toBeInTheDocument();
   });
 });

@@ -18,7 +18,7 @@ interface SessionPersistedTermsBucket {
 export function fetchProvider(kibanaIndex: string, logger: Logger) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
     try {
-      const { body: esResponse } = await esClient.search<unknown>({
+      const esResponse = await esClient.search<unknown>({
         index: kibanaIndex,
         body: {
           size: 0,

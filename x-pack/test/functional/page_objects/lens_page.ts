@@ -204,7 +204,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector('lnsWorkspace')
       );
       await this.waitForLensDragDropToFinish();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForVisualization();
     },
 
     /**
@@ -574,11 +574,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const lastIndex = (
         await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
       ).length;
-      await testSubjects.click('indexPattern-terms-add-field');
-      // count the number of defined terms
-      const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
-      await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, field);
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-terms-add-field');
+        // count the number of defined terms
+        const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`, 1000);
+        await comboBox.openOptionsList(target);
+        await comboBox.setElement(target, field);
+      });
     },
 
     async checkTermsAreNotAvailableToAgg(fields: string[]) {
@@ -932,7 +934,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${colIndex}"]`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-row-index="${rowIndex}"]`
       );
     },
 

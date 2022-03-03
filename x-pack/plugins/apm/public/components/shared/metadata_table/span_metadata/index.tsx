@@ -19,15 +19,17 @@ interface Props {
 export function SpanMetadata({ span }: Props) {
   const { data: spanEvent, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi({
-        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
-        params: {
-          path: {
-            processorEvent: ProcessorEvent.span,
-            id: span.span.id,
+      return callApmApi(
+        'GET /internal/apm/event_metadata/{processorEvent}/{id}',
+        {
+          params: {
+            path: {
+              processorEvent: ProcessorEvent.span,
+              id: span.span.id,
+            },
           },
-        },
-      });
+        }
+      );
     },
     [span.span.id]
   );

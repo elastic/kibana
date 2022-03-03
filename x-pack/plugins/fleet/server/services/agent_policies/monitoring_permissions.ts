@@ -30,6 +30,14 @@ function buildDefault(enabled: { logs: boolean; metrics: boolean }, namespace: s
     );
   }
 
+  if (names.length === 0) {
+    return {
+      _elastic_agent_monitoring: {
+        indices: [],
+      },
+    };
+  }
+
   return {
     _elastic_agent_monitoring: {
       indices: [

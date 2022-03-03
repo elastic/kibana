@@ -7,7 +7,7 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { delay } from '../utils/testHelpers';
+import { delay } from '../utils/test_helpers';
 import { useFetcher } from './use_fetcher';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 

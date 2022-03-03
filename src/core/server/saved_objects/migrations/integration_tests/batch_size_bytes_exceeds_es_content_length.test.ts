@@ -104,6 +104,7 @@ function createRoot(options: { maxBatchSizeBytes?: number }) {
         loggers: [
           {
             name: 'root',
+            level: 'info',
             appenders: ['file'],
           },
         ],

@@ -115,11 +115,13 @@ export const thresholdExecutor = async ({
       index: ruleParams.index,
     });
 
+    // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
       signalHistory,
       timestampOverride: ruleParams.timestampOverride,
     });
 
+    // Combine dupe filter with other filters
     const esFilter = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters ? ruleParams.filters.concat(bucketFilters) : bucketFilters,
@@ -131,6 +133,7 @@ export const thresholdExecutor = async ({
       lists: exceptionItems,
     });
 
+    // Look for new events over threshold
     const {
       searchResult: thresholdResults,
       searchErrors,
@@ -147,6 +150,7 @@ export const thresholdExecutor = async ({
       buildRuleMessage,
     });
 
+    // Build and index new alerts
     const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
       await bulkCreateThresholdSignals({
         someResult: thresholdResults,

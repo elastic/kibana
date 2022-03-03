@@ -11,6 +11,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { DataViewField, DataView, DataViewType } from 'src/plugins/data_views/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { getFieldInfo } from '../../utils';
+import { RuntimeField } from 'src/plugins/data_views/common';
 
 jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',
@@ -67,11 +68,12 @@ const rollupIndexPattern = {
 } as unknown as DataView;
 
 const mockFieldToIndexPatternField = (
-  spec: Record<string, string | string[] | boolean | undefined>
+  spec: Record<string, string | string[] | boolean | undefined | RuntimeField>
 ) => {
   return new DataViewField(spec as unknown as DataViewField['spec']);
 };
 
+const runtimeField: RuntimeField = { type: 'long', script: { source: "emit('Hello');" } };
 const fields = [
   {
     name: 'Elastic',
@@ -88,7 +90,20 @@ const fields = [
     isUserEditable: true,
   },
   { name: 'amount', displayName: 'amount', esTypes: ['long'], isUserEditable: true },
+  {
+    name: 'runtime',
+    displayName: 'runtime',
+    runtimeField,
+    esTypes: ['long'],
+    type: 'number',
+  },
 ].map(mockFieldToIndexPatternField);
+
+const mockedServices = {
+  userEditPermission: false,
+  openModal: () => ({ onClose: new Promise<void>(() => {}), close: async () => {} }),
+  theme: {} as any,
+};
 
 describe('IndexedFieldsTable', () => {
   test('should render normally', async () => {
@@ -100,10 +115,12 @@ describe('IndexedFieldsTable', () => {
         fieldWildcardMatcher={() => {
           return () => false;
         }}
-        indexedFieldTypeFilter=""
+        indexedFieldTypeFilter={[]}
+        schemaFieldTypeFilter={[]}
         fieldFilter=""
+        {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
@@ -120,10 +137,12 @@ describe('IndexedFieldsTable', () => {
         fieldWildcardMatcher={() => {
           return () => false;
         }}
-        indexedFieldTypeFilter=""
+        indexedFieldTypeFilter={[]}
+        schemaFieldTypeFilter={[]}
         fieldFilter=""
+        {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ fieldFilter: 'Elast' });
@@ -141,13 +160,38 @@ describe('IndexedFieldsTable', () => {
         fieldWildcardMatcher={() => {
           return () => false;
         }}
-        indexedFieldTypeFilter=""
+        indexedFieldTypeFilter={[]}
+        schemaFieldTypeFilter={[]}
         fieldFilter=""
+        {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
-    component.setProps({ indexedFieldTypeFilter: 'date' });
+    component.setProps({ indexedFieldTypeFilter: ['date'] });
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should filter based on the schema filter', async () => {
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
+      <IndexedFieldsTable
+        fields={fields}
+        indexPattern={indexPattern}
+        helpers={helpers}
+        fieldWildcardMatcher={() => {
+          return () => false;
+        }}
+        indexedFieldTypeFilter={[]}
+        schemaFieldTypeFilter={[]}
+        fieldFilter=""
+        {...mockedServices}
+      />
+    );
+
+    await new Promise((resolve) => process.nextTick(resolve));
+    component.setProps({ schemaFieldTypeFilter: ['runtime'] });
     component.update();
 
     expect(component).toMatchSnapshot();
@@ -163,10 +207,12 @@ describe('IndexedFieldsTable', () => {
           fieldWildcardMatcher={() => {
             return () => false;
           }}
-          indexedFieldTypeFilter=""
+          indexedFieldTypeFilter={[]}
+          schemaFieldTypeFilter={[]}
           fieldFilter=""
+          {...mockedServices}
         />
-      ).dive();
+      );
 
       await new Promise((resolve) => process.nextTick(resolve));
       component.update();

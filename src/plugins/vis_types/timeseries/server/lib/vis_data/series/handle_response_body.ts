@@ -59,7 +59,8 @@ export function handleResponseBody(
       meta,
       extractFields,
       fieldFormatService,
-      services.cachedIndexPatternFetcher
+      services.cachedIndexPatternFetcher,
+      req.body.timerange.timezone
     );
 
     return await processor([]);

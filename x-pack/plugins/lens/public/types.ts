@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference } from 'kibana/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { TopNavMenuData } from 'src/plugins/navigation/public';
 import type { MutableRefObject } from 'react';
 import { Filter } from '@kbn/es-query';
 import type {
@@ -16,8 +17,9 @@ import type {
   IInterpreterRenderHandlers,
   Datatable,
 } from '../../../../src/plugins/expressions/public';
+import type { VisualizeEditorLayersContext } from '../../../../src/plugins/visualizations/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import type { DateRange, LayerType } from '../common';
+import type { DateRange, LayerType, SortingHint } from '../common';
 import type { Query } from '../../../../src/plugins/data/public';
 import type {
   RangeSelectContext,
@@ -164,6 +166,33 @@ export interface InitializationOptions {
   isFullEditor?: boolean;
 }
 
+interface AxisExtents {
+  mode: string;
+  lowerBound?: number;
+  upperBound?: number;
+}
+
+export interface VisualizeEditorContext {
+  layers: VisualizeEditorLayersContext[];
+  configuration: ChartSettings;
+  savedObjectId?: string;
+  embeddableId?: string;
+  vizEditorOriginatingAppUrl?: string;
+  originatingApp?: string;
+  isVisualizeAction: boolean;
+  type: string;
+}
+
+interface ChartSettings {
+  fill?: string;
+  legend?: Record<string, boolean | string>;
+  gridLinesVisibility?: Record<string, boolean>;
+  extents?: {
+    yLeftExtent: AxisExtents;
+    yRightExtent: AxisExtents;
+  };
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -176,7 +205,7 @@ export interface Datasource<T = unknown, P = unknown> {
   initialize: (
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext,
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext,
     options?: InitializationOptions
   ) => Promise<T>;
 
@@ -245,6 +274,10 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T,
     field: unknown,
     filterFn: (layerId: string) => boolean
+  ) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForVisualizeCharts: (
+    state: T,
+    context: VisualizeEditorLayersContext[]
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
     state: T,
@@ -435,6 +468,7 @@ export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataT
 export interface Operation extends OperationMetadata {
   // User-facing label for the operation
   label: string;
+  sortingHint?: SortingHint;
 }
 
 export interface OperationMetadata {
@@ -526,6 +560,31 @@ interface VisualizationDimensionChangeProps<T> {
   columnId: string;
   prevState: T;
   frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+}
+export interface Suggestion {
+  visualizationId: string;
+  datasourceState?: unknown;
+  datasourceId?: string;
+  columns: number;
+  score: number;
+  title: string;
+  visualizationState: unknown;
+  previewExpression?: Ast | string;
+  previewIcon: IconType;
+  hide?: boolean;
+  changeType: TableChangeType;
+  keptLayerIds: string[];
+}
+
+interface VisualizationConfigurationFromContextChangeProps<T> {
+  layerId: string;
+  prevState: T;
+  context: VisualizeEditorLayersContext;
+}
+
+interface VisualizationStateFromContextChangeProps {
+  suggestions: Suggestion[];
+  context: VisualizeEditorContext;
 }
 
 /**
@@ -655,6 +714,10 @@ export interface Visualization<T = unknown> {
   getMainPalette?: (state: T) => undefined | PaletteOutput;
 
   /**
+   * Supported triggers of this visualization type when embedded somewhere
+   */
+  triggers?: string[];
+  /**
    * Visualizations must provide at least one type for the chart switcher,
    * but can register multiple subtypes
    */
@@ -689,7 +752,7 @@ export interface Visualization<T = unknown> {
     label: string;
     icon?: IconType;
     disabled?: boolean;
-    tooltipContent?: string;
+    toolTipContent?: string;
     initialDimensions?: Array<{
       groupId: string;
       columnId: string;
@@ -739,6 +802,19 @@ export interface Visualization<T = unknown> {
    */
   removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
 
+  /**
+   * Update the configuration for the visualization. This is used to update the state
+   */
+  updateLayersConfigurationFromContext?: (
+    props: VisualizationConfigurationFromContextChangeProps<T>
+  ) => T;
+
+  /**
+   * Update the visualization state from the context.
+   */
+  getVisualizationSuggestionFromContext?: (
+    props: VisualizationStateFromContextChangeProps
+  ) => Suggestion;
   /**
    * Additional editor that gets rendered inside the dimension popover.
    * This can be used to configure dimension-specific options
@@ -873,3 +949,18 @@ export interface SharingSavedObjectProps {
   aliasTargetId?: string;
   sourceId?: string;
 }
+
+/**
+ * Configuration of a top nav entry which can be shown for specific scenarios given a certain combination of active datasource and visualization id.
+ * This function gets passed the currently active visualization id and state as well as the current datasource states.
+ *
+ * If it returns a top nav menu entry, it is rendered along with the native Lens menu entries
+ */
+export type LensTopNavMenuEntryGenerator = (props: {
+  visualizationId: string;
+  datasourceStates: Record<string, { state: unknown }>;
+  visualizationState: unknown;
+  query: Query;
+  filters: Filter[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+}) => undefined | TopNavMenuData;

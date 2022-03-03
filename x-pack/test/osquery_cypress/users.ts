@@ -5,7 +5,7 @@
  * 2.0.
  */
 import axios from 'axios';
-import { ElasticsearchConfig } from './fleet_server';
+import { AgentManagerParams } from './agent';
 
 interface Roles {
   [roleName: string]: {
@@ -83,7 +83,7 @@ export const USERS: Users = {
   },
 };
 
-export const setupUsers = async (config: ElasticsearchConfig) => {
+export const setupUsers = async (config: AgentManagerParams) => {
   const { esHost, user: username, password } = config;
   const params = {
     auth: { username, password },

@@ -14,7 +14,7 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { ServiceProfilingFlamegraph } from './service_profiling_flamegraph';
 import { ServiceProfilingTimeline } from './service_profiling_timeline';
 
@@ -37,18 +37,20 @@ export function ServiceProfiling() {
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /internal/apm/services/{serviceName}/profiling/timeline',
-        params: {
-          path: { serviceName },
-          query: {
-            kuery,
-            start,
-            end,
-            environment,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/profiling/timeline',
+        {
+          params: {
+            path: { serviceName },
+            query: {
+              kuery,
+              start,
+              end,
+              environment,
+            },
           },
-        },
-      });
+        }
+      );
     },
     [kuery, start, end, serviceName, environment]
   );

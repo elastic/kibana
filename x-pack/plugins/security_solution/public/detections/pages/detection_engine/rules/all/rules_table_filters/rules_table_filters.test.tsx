@@ -31,6 +31,9 @@ describe('RulesTableFilters', () => {
           rulesCustomInstalled={null}
           rulesInstalled={null}
           currentFilterTags={[]}
+          tags={[]}
+          isLoadingTags={false}
+          reFetchTags={() => ({})}
         />
       );
 
@@ -51,6 +54,9 @@ describe('RulesTableFilters', () => {
           rulesCustomInstalled={10}
           rulesInstalled={9}
           currentFilterTags={[]}
+          tags={[]}
+          isLoadingTags={false}
+          reFetchTags={() => ({})}
         />
       );
 

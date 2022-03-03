@@ -12,6 +12,7 @@ import { setState, LensDispatch, LensStoreDeps, navigateAway } from '..';
 import { LensAppState } from '../types';
 import { getResolvedDateRange, containsDynamicMath } from '../../utils';
 import { subscribeToExternalContext } from './subscribe_to_external_context';
+import { onActiveDataChange } from '../lens_slice';
 
 export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
   const unsubscribeFromExternalContext = subscribeToExternalContext(
@@ -20,7 +21,7 @@ export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: Middlewar
     store.dispatch
   );
   return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
-    if (!action.payload?.searchSessionId) {
+    if (!action.payload?.searchSessionId && !onActiveDataChange.match(action)) {
       updateTimeRange(storeDeps.lensServices.data, store.dispatch);
     }
     if (navigateAway.match(action)) {

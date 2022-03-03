@@ -396,6 +396,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           },
           "delete": [MockFunction],
           "externalUrl": Object {
+            "isInternalUrl": [MockFunction],
             "validateUrl": [MockFunction],
           },
           "fetch": [MockFunction],
@@ -464,6 +465,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
             },
             "delete": [MockFunction],
             "externalUrl": Object {
+              "isInternalUrl": [MockFunction],
               "validateUrl": [MockFunction],
             },
             "fetch": [MockFunction],
@@ -533,6 +535,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           },
           "delete": [MockFunction],
           "externalUrl": Object {
+            "isInternalUrl": [MockFunction],
             "validateUrl": [MockFunction],
           },
           "fetch": [MockFunction],

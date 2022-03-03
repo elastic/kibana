@@ -5,35 +5,44 @@
  * 2.0.
  */
 
+import { IconColor } from '@elastic/eui';
 import { capitalize } from 'lodash';
+import { assertUnreachable } from '../../../../../common/utility_types';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
-export const normalizeRuleExecutionStatus = (
-  value: RuleExecutionStatus | null | undefined
-): RuleExecutionStatus | null =>
-  value === RuleExecutionStatus['partial failure']
-    ? RuleExecutionStatus.warning
-    : value != null
-    ? value
-    : null;
+export const getStatusText = (value: RuleExecutionStatus | null | undefined): string | null => {
+  if (value == null) {
+    return null;
+  }
+  if (value === RuleExecutionStatus['partial failure']) {
+    return 'warning';
+  }
+  return value;
+};
 
-export const getCapitalizedRuleStatusText = (
+export const getCapitalizedStatusText = (
   value: RuleExecutionStatus | null | undefined
 ): string | null => {
-  const status = normalizeRuleExecutionStatus(value);
+  const status = getStatusText(value);
   return status != null ? capitalize(status) : null;
 };
 
-export const getStatusColor = (status: RuleExecutionStatus | string | null) =>
-  status == null
-    ? 'subdued'
-    : status === 'succeeded'
-    ? 'success'
-    : status === 'failed'
-    ? 'danger'
-    : status === 'executing' ||
-      status === 'going to run' ||
-      status === 'partial failure' ||
-      status === 'warning'
-    ? 'warning'
-    : 'subdued';
+export const getStatusColor = (status: RuleExecutionStatus | null | undefined): IconColor => {
+  if (status == null) {
+    return 'subdued';
+  }
+  if (status === RuleExecutionStatus.succeeded) {
+    return 'success';
+  }
+  if (status === RuleExecutionStatus.failed) {
+    return 'danger';
+  }
+  if (
+    status === RuleExecutionStatus.running ||
+    status === RuleExecutionStatus['partial failure'] ||
+    status === RuleExecutionStatus['going to run']
+  ) {
+    return 'warning';
+  }
+  return assertUnreachable(status, 'Unknown rule execution status');
+};

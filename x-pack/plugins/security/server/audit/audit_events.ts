@@ -97,12 +97,14 @@ export interface UserLoginParams {
   authenticationResult: AuthenticationResult;
   authenticationProvider?: string;
   authenticationType?: string;
+  sessionId?: string;
 }
 
 export function userLoginEvent({
   authenticationResult,
   authenticationProvider,
   authenticationType,
+  sessionId,
 }: UserLoginParams): AuditEvent {
   return {
     message: authenticationResult.user
@@ -119,6 +121,7 @@ export function userLoginEvent({
     },
     kibana: {
       space_id: undefined, // Ensure this does not get populated by audit service
+      session_id: sessionId,
       authentication_provider: authenticationProvider,
       authentication_type: authenticationType,
       authentication_realm: authenticationResult.user?.authentication_realm.name,
@@ -218,8 +221,6 @@ export enum SavedObjectAction {
   UPDATE = 'saved_object_update',
   DELETE = 'saved_object_delete',
   FIND = 'saved_object_find',
-  ADD_TO_SPACES = 'saved_object_add_to_spaces',
-  DELETE_FROM_SPACES = 'saved_object_delete_from_spaces',
   REMOVE_REFERENCES = 'saved_object_remove_references',
   OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
   CLOSE_POINT_IN_TIME = 'saved_object_close_point_in_time',
@@ -236,8 +237,6 @@ const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
   saved_object_update: ['update', 'updating', 'updated'],
   saved_object_delete: ['delete', 'deleting', 'deleted'],
   saved_object_find: ['access', 'accessing', 'accessed'],
-  saved_object_add_to_spaces: ['update', 'updating', 'updated'],
-  saved_object_delete_from_spaces: ['update', 'updating', 'updated'],
   saved_object_open_point_in_time: [
     'open point-in-time',
     'opening point-in-time',
@@ -272,8 +271,6 @@ const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
   saved_object_update: 'change',
   saved_object_delete: 'deletion',
   saved_object_find: 'access',
-  saved_object_add_to_spaces: 'change',
-  saved_object_delete_from_spaces: 'change',
   saved_object_open_point_in_time: 'creation',
   saved_object_close_point_in_time: 'deletion',
   saved_object_remove_references: 'change',

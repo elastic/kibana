@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { MultiValueRow } from './multi_value_row';
 import { ColorPicker } from '../../color_picker';
 

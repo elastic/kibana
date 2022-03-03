@@ -18,11 +18,11 @@ interface UserActionCopyLinkProps {
 
 const UserActionCopyLinkComponent = ({ id: commentId }: UserActionCopyLinkProps) => {
   const { getCaseViewUrl } = useCaseViewNavigation();
-  const { detailName, subCaseId } = useCaseViewParams();
+  const { detailName } = useCaseViewParams();
 
   const handleAnchorLink = useCallback(() => {
-    copy(getCaseViewUrl({ detailName, subCaseId, commentId }, true));
-  }, [detailName, subCaseId, commentId, getCaseViewUrl]);
+    copy(getCaseViewUrl({ detailName, commentId }, true));
+  }, [detailName, commentId, getCaseViewUrl]);
 
   return (
     <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>

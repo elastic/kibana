@@ -22,6 +22,7 @@ import { DEFAULT_HEADERS } from '../default_headers';
 export type ElasticsearchClientConfig = Pick<
   ElasticsearchConfig,
   | 'customHeaders'
+  | 'compression'
   | 'sniffOnStart'
   | 'sniffOnConnectionFault'
   | 'requestHeadersWhitelist'
@@ -63,6 +64,7 @@ export function parseClientOptions(
       maxSockets: Infinity,
       keepAlive: config.keepAlive ?? true,
     },
+    compression: config.compression,
   };
 
   if (config.pingTimeout != null) {

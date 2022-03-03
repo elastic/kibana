@@ -46,7 +46,7 @@ export const esSearchStrategyProvider = (
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
           ...requestParams,
         };
-        const { body } = await esClient.asCurrentUser.search(params, {
+        const body = await esClient.asCurrentUser.search(params, {
           signal: abortSignal,
         });
         const response = shimHitsTotal(body, options);

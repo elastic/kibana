@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Subscription } from 'rxjs';
+import { fromEvent, interval, merge } from 'rxjs';
+import { exhaustMap } from 'rxjs/operators';
 import { LOCALSTORAGE_KEY, PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
 import { Storage } from '../../../kibana_utils/public';
@@ -16,7 +19,7 @@ export class TelemetrySender {
   private readonly telemetryService: TelemetryService;
   private lastReported?: number;
   private readonly storage: Storage;
-  private intervalId: number = 0; // setInterval returns a positive integer, 0 means no interval is set
+  private sendIfDue$?: Subscription;
   private retryCount: number = 0;
 
   static getRetryDelay(retryCount: number) {
@@ -62,11 +65,21 @@ export class TelemetrySender {
   };
 
   /**
-   * Using configuration and the lastReported dates, it decides whether a new telemetry report should be sent.
+   * Returns `true` when the page is visible and active in the browser.
+   */
+  private isActiveWindow = () => {
+    // Using `document.hasFocus()` instead of `document.visibilityState` because the latter may return "visible"
+    // if 2 windows are open side-by-side because they are "technically" visible.
+    return document.hasFocus();
+  };
+
+  /**
+   * Using configuration, page visibility state and the lastReported dates,
+   * it decides whether a new telemetry report should be sent.
    * @returns `true` if a new report should be sent. `false` otherwise.
    */
   private shouldSendReport = async (): Promise<boolean> => {
-    if (this.telemetryService.canSendTelemetry()) {
+    if (this.isActiveWindow() && this.telemetryService.canSendTelemetry()) {
       return await this.isReportDue();
     }
 
@@ -122,8 +135,20 @@ export class TelemetrySender {
   };
 
   public startChecking = () => {
-    if (this.intervalId === 0) {
-      this.intervalId = window.setInterval(this.sendIfDue, 60000);
+    if (!this.sendIfDue$) {
+      // Trigger sendIfDue...
+      this.sendIfDue$ = merge(
+        // ... periodically
+        interval(60000),
+        // ... when it regains `focus`
+        fromEvent(window, 'focus') // Using `window` instead of `document` because Chrome only emits on the first one.
+      )
+        .pipe(exhaustMap(this.sendIfDue))
+        .subscribe();
     }
+  };
+
+  public stop = () => {
+    this.sendIfDue$?.unsubscribe();
   };
 }

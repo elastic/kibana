@@ -118,7 +118,7 @@ export class SampleDataInstaller {
     try {
       // if the sample data was reindexed using UA, the index name is actually an alias pointing to the reindexed
       // index. In that case, we need to get rid of the alias and to delete the underlying index
-      const { body: response } = await this.esClient.asCurrentUser.indices.getAlias({
+      const response = await this.esClient.asCurrentUser.indices.getAlias({
         name: index,
       });
       const aliasName = index;

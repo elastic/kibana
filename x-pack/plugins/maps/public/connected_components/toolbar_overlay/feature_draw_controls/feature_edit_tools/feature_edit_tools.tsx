@@ -19,7 +19,7 @@ export interface ReduxStateProps {
 }
 
 export interface ReduxDispatchProps {
-  setDrawShape: (shapeToDraw: DRAW_SHAPE) => void;
+  setDrawShape: (shapeToDraw: DRAW_SHAPE | null) => void;
 }
 
 export interface OwnProps {
@@ -36,6 +36,14 @@ export function FeatureEditTools(props: Props) {
   const drawPointSelected = props.drawShape === DRAW_SHAPE.POINT;
   const deleteSelected = props.drawShape === DRAW_SHAPE.DELETE;
 
+  function toggleDrawShape(mode: DRAW_SHAPE) {
+    if (mode && props.drawShape === mode) {
+      props.setDrawShape(null);
+    } else {
+      props.setDrawShape(mode);
+    }
+  }
+
   return (
     <TrackApplicationView viewId="featureEditTools">
       <EuiPanel
@@ -47,7 +55,7 @@ export function FeatureEditTools(props: Props) {
             <EuiButtonIcon
               key="line"
               size="s"
-              onClick={() => props.setDrawShape(DRAW_SHAPE.LINE)}
+              onClick={() => toggleDrawShape(DRAW_SHAPE.LINE)}
               iconType={VectorLineIcon}
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineLabel', {
                 defaultMessage: 'Draw line',
@@ -63,7 +71,7 @@ export function FeatureEditTools(props: Props) {
             <EuiButtonIcon
               key="polygon"
               size="s"
-              onClick={() => props.setDrawShape(DRAW_SHAPE.POLYGON)}
+              onClick={() => toggleDrawShape(DRAW_SHAPE.POLYGON)}
               iconType="node"
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPolygonLabel', {
                 defaultMessage: 'Draw polygon',
@@ -78,7 +86,7 @@ export function FeatureEditTools(props: Props) {
             <EuiButtonIcon
               key="circle"
               size="s"
-              onClick={() => props.setDrawShape(DRAW_SHAPE.DISTANCE)}
+              onClick={() => toggleDrawShape(DRAW_SHAPE.DISTANCE)}
               iconType={VectorCircleIcon}
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawCircleLabel', {
                 defaultMessage: 'Draw circle',
@@ -93,7 +101,7 @@ export function FeatureEditTools(props: Props) {
             <EuiButtonIcon
               key="boundingBox"
               size="s"
-              onClick={() => props.setDrawShape(DRAW_SHAPE.BOUNDS)}
+              onClick={() => toggleDrawShape(DRAW_SHAPE.BOUNDS)}
               iconType={VectorSquareIcon}
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawBBoxLabel', {
                 defaultMessage: 'Draw bounding box',
@@ -110,7 +118,7 @@ export function FeatureEditTools(props: Props) {
         <EuiButtonIcon
           key="point"
           size="s"
-          onClick={() => props.setDrawShape(DRAW_SHAPE.POINT)}
+          onClick={() => toggleDrawShape(DRAW_SHAPE.POINT)}
           iconType="dot"
           aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointLabel', {
             defaultMessage: 'Draw point',
@@ -125,7 +133,7 @@ export function FeatureEditTools(props: Props) {
         <EuiButtonIcon
           key="delete"
           size="s"
-          onClick={() => props.setDrawShape(DRAW_SHAPE.DELETE)}
+          onClick={() => toggleDrawShape(DRAW_SHAPE.DELETE)}
           iconType="trash"
           aria-label={i18n.translate(
             'xpack.maps.toolbarOverlay.featureDraw.deletePointOrShapeLabel',

@@ -57,7 +57,7 @@ export const findExistingIndices = async (
             index,
             body: { query: { match_all: {} }, size: 0 },
           });
-          return get(searchResponse, 'body.hits.total.value', 0) > 0;
+          return get(searchResponse, 'hits.total.value', 0) > 0;
         }
         const searchResponse = await esClient.fieldCaps({
           index,
@@ -65,7 +65,7 @@ export const findExistingIndices = async (
           ignore_unavailable: true,
           allow_no_indices: false,
         });
-        return searchResponse.body.indices.length > 0;
+        return searchResponse.indices.length > 0;
       })
       .map((p) => p.catch((e) => false))
   );

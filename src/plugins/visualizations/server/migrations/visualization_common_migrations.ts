@@ -199,3 +199,19 @@ export const commonRemoveMarkdownLessFromTSVB = (visState: any) => {
 
   return visState;
 };
+
+export const commonUpdatePieVisApi = (visState: any) => {
+  if (visState && visState.type === 'pie') {
+    const { addLegend, ...restParams } = visState.params;
+
+    return {
+      ...visState,
+      params: {
+        ...restParams,
+        legendDisplay: addLegend ? 'show' : 'hide',
+      },
+    };
+  }
+
+  return visState;
+};

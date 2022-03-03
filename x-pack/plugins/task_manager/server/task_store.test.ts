@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
 import { first } from 'rxjs/operators';
@@ -37,6 +38,7 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
   constructor() {
     return mockedDate;
   }
+
   static now() {
     return mockedDate.getTime();
   }
@@ -209,7 +211,9 @@ describe('TaskStore', () => {
     });
 
     async function testFetch(opts?: SearchOpts, hits: Array<estypes.SearchHit<unknown>> = []) {
-      esClient.search.mockResolvedValue(asApiResponse({ hits: { hits, total: hits.length } }));
+      esClient.search.mockResponse({
+        hits: { hits, total: hits.length },
+      } as estypes.SearchResponse);
 
       const result = await store.fetch(opts);
 
@@ -570,18 +574,5 @@ describe('TaskStore', () => {
     });
   });
 });
-
-const asApiResponse = (body: Pick<estypes.SearchResponse, 'hits'>) =>
-  elasticsearchServiceMock.createSuccessTransportRequestPromise({
-    hits: body.hits,
-    took: 0,
-    timed_out: false,
-    _shards: {
-      failed: 0,
-      successful: body.hits.hits.length,
-      total: 0,
-      skipped: 0,
-    },
-  });
 
 const randomId = () => `id-${_.random(1, 20)}`;

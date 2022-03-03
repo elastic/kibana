@@ -10,9 +10,12 @@ import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
-import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
-import { MonitorFields, ServiceLocations } from '../../../common/runtime_types';
+import {
+  MonitorFields,
+  ServiceLocations,
+  ServiceLocationErrors,
+} from '../../../common/runtime_types';
 import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 import { ServiceConfig } from '../../../common/config';
 
@@ -31,15 +34,17 @@ export class ServiceAPIClient {
   private readonly username?: string;
   private readonly devUrl?: string;
   private readonly authorization: string;
-  private locations: ServiceLocations;
+  public locations: ServiceLocations;
   private logger: Logger;
   private readonly config: ServiceConfig;
+  private readonly kibanaVersion: string;
 
-  constructor(logger: Logger, config: ServiceConfig) {
+  constructor(logger: Logger, config: ServiceConfig, kibanaVersion: string) {
     this.config = config;
-    const { username, password, manifestUrl, devUrl } = config;
+    const { username, password, devUrl } = config;
     this.username = username;
     this.devUrl = devUrl;
+    this.kibanaVersion = kibanaVersion;
 
     if (username && password) {
       this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
@@ -49,10 +54,6 @@ export class ServiceAPIClient {
 
     this.logger = logger;
     this.locations = [];
-
-    getServiceLocations({ manifestUrl }).then((result) => {
-      this.locations = result.locations;
-    });
   }
 
   getHttpsAgent() {
@@ -102,7 +103,7 @@ export class ServiceAPIClient {
       return axios({
         method,
         url: (this.devUrl ?? url) + (runOnce ? '/run' : '/monitors'),
-        data: { monitors: monitorsStreams, output },
+        data: { monitors: monitorsStreams, output, stack_version: this.kibanaVersion },
         headers: this.authorization
           ? {
               Authorization: this.authorization,
@@ -112,7 +113,7 @@ export class ServiceAPIClient {
       });
     };
 
-    const pushErrors: Array<{ locationId: string; error: Error }> = [];
+    const pushErrors: ServiceLocationErrors = [];
 
     const promises: Array<Observable<unknown>> = [];
 
@@ -131,7 +132,7 @@ export class ServiceAPIClient {
               );
             }),
             catchError((err) => {
-              pushErrors.push({ locationId: id, error: err });
+              pushErrors.push({ locationId: id, error: err.response?.data });
               this.logger.error(err);
               // we don't want to throw an unhandled exception here
               return of(true);

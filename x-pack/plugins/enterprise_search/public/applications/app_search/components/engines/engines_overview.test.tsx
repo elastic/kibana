@@ -119,6 +119,18 @@ describe('EnginesOverview', () => {
       expect(actions.loadMetaEngines).toHaveBeenCalled();
     });
 
+    it('renders meta engines even if there is no indexed engine', () => {
+      setMockValues({
+        ...valuesWithEngines,
+        hasPlatinumLicense: true,
+        engines: [],
+      });
+      const wrapper = shallow(<EnginesOverview />);
+
+      expect(wrapper.find(MetaEnginesTable)).toHaveLength(1);
+      expect(actions.loadMetaEngines).toHaveBeenCalled();
+    });
+
     describe('meta engine creation', () => {
       it('renders a create meta engine action when the user can create meta engines', () => {
         setMockValues({

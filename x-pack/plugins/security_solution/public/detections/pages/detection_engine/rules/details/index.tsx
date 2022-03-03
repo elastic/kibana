@@ -38,7 +38,6 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
@@ -55,7 +54,6 @@ import { Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
-import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
@@ -81,11 +79,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import {
-  APP_UI_ID,
-  DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
-} from '../../../../../../common/constants';
+import { APP_UI_ID, DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 
@@ -126,6 +120,7 @@ import {
   FILTER_OPEN,
 } from '../../../../components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
+import { HeaderPage } from '../../../../../common/components/header_page';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -227,8 +222,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
-  // This is used to re-trigger api rule status when user de/activate rule
-  const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
   const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
@@ -246,9 +239,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-
-  // TODO: Steph/ueba remove when past experimental
-  const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -284,7 +274,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         spacesApi.ui.redirectLegacyUrl(
           path,
           i18nTranslate.translate(
-            'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+            'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
             {
               defaultMessage: 'rule',
             }
@@ -305,7 +295,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <EuiSpacer />
           {spacesApi.ui.components.getLegacyUrlConflict({
             objectNoun: i18nTranslate.translate(
-              'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+              'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
               {
                 defaultMessage: 'rule',
               }
@@ -450,53 +440,38 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     ),
     [ruleDetailTab, setRuleDetailTab, pageTabs]
   );
-  const ruleIndices = useMemo(
-    () =>
-      rule?.index ??
-      (uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN),
-    [rule?.index, uebaEnabled]
-  );
+  const ruleIndices = useMemo(() => rule?.index ?? DEFAULT_INDEX_PATTERN, [rule?.index]);
 
   const lastExecution = rule?.execution_summary?.last_execution;
   const lastExecutionStatus = lastExecution?.status;
   const lastExecutionDate = lastExecution?.date ?? '';
   const lastExecutionMessage = lastExecution?.message ?? '';
 
-  // TODO: https://github.com/elastic/kibana/pull/121644 clean up
   const ruleStatusInfo = useMemo(() => {
     return ruleLoading ? (
       <EuiFlexItem>
         <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
       </EuiFlexItem>
     ) : (
-      <>
-        <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-          <EuiButtonIcon
-            data-test-subj="refreshButton"
-            color="primary"
-            onClick={refreshRule}
-            iconType="refresh"
-            aria-label={ruleI18n.REFRESH}
-            isDisabled={!isExistingRule}
-          />
-        </RuleStatus>
-      </>
+      <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
+        <EuiButtonIcon
+          data-test-subj="refreshButton"
+          color="primary"
+          onClick={refreshRule}
+          iconType="refresh"
+          aria-label={ruleI18n.REFRESH}
+          isDisabled={!isExistingRule}
+        />
+      </RuleStatus>
     );
   }, [lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
 
-  // TODO: https://github.com/elastic/kibana/pull/121644 clean up
   const ruleError = useMemo(() => {
-    if (ruleLoading) {
-      return (
-        <EuiFlexItem>
-          <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
-        </EuiFlexItem>
-      );
-    }
-
-    return (
+    return ruleLoading ? (
+      <EuiFlexItem>
+        <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+      </EuiFlexItem>
+    ) : (
       <RuleStatusFailedCallOut
         status={lastExecutionStatus}
         date={lastExecutionDate}
@@ -522,14 +497,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [dispatch]
   );
 
-  const handleOnChangeEnabledRule = useCallback(
-    (enabled: boolean) => {
-      if (ruleEnabled == null || enabled !== ruleEnabled) {
-        setRuleEnabled(enabled);
-      }
-    },
-    [ruleEnabled, setRuleEnabled]
-  );
+  const handleOnChangeEnabledRule = useCallback((enabled: boolean) => {
+    setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
+  }, []);
 
   const goToEditRule = useCallback(
     (ev) => {
@@ -666,7 +636,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
         <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
           <Display show={!globalFullScreen}>
-            <DetectionEngineHeaderPage
+            <HeaderPage
               backOptions={{
                 path: getRulesUrl(),
                 text: i18n.BACK_TO_RULES,
@@ -707,7 +677,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         enabled={isExistingRule && (rule?.enabled ?? false)}
                         onChange={handleOnChangeEnabledRule}
                       />
-                      <EuiFlexItem>{i18n.ACTIVATE_RULE}</EuiFlexItem>
+                      <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -728,7 +698,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </DetectionEngineHeaderPage>
+            </HeaderPage>
             {ruleError}
             {getLegacyUrlConflictCallout}
             <EuiSpacer />

@@ -13,7 +13,7 @@ import uuid from 'uuid';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -112,21 +112,22 @@ export function TransactionsTable({
       if (!start || !end || !latencyAggregationType || !transactionType) {
         return;
       }
-      return callApmApi({
-        endpoint:
-          'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
-        params: {
-          path: { serviceName },
-          query: {
-            environment,
-            kuery,
-            start,
-            end,
-            transactionType,
-            latencyAggregationType,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
+        {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              transactionType,
+              latencyAggregationType,
+            },
           },
-        },
-      }).then((response) => {
+        }
+      ).then((response) => {
         const currentPageTransactionGroups = orderBy(
           response.transactionGroups,
           field,
@@ -185,27 +186,28 @@ export function TransactionsTable({
         transactionType &&
         latencyAggregationType
       ) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              numBuckets: 20,
-              transactionType,
-              latencyAggregationType,
-              transactionNames: JSON.stringify(
-                transactionGroups.map(({ name }) => name).sort()
-              ),
-              comparisonStart,
-              comparisonEnd,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                numBuckets: 20,
+                transactionType,
+                latencyAggregationType,
+                transactionNames: JSON.stringify(
+                  transactionGroups.map(({ name }) => name).sort()
+                ),
+                comparisonStart,
+                comparisonEnd,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call
@@ -227,7 +229,11 @@ export function TransactionsTable({
   const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="transactionsGroupTable"
+    >
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>

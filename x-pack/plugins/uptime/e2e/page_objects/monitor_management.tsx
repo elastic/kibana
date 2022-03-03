@@ -6,6 +6,8 @@
  */
 
 import { Page } from '@elastic/synthetics';
+import { DataStream } from '../../common/runtime_types/monitor_management';
+import { getQuerystring } from '../journeys/utils';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
 
@@ -16,11 +18,21 @@ export function monitorManagementPageProvider({
   page: Page;
   kibanaUrl: string;
 }) {
-  const monitorManagement = `${kibanaUrl}/app/uptime/manage-monitors`;
-  const addMonitor = `${kibanaUrl}/app/uptime/add-monitor`;
-
+  const remoteKibanaUrl = process.env.SYNTHETICS_REMOTE_KIBANA_URL;
+  const remoteUsername = process.env.SYNTHETICS_REMOTE_KIBANA_USERNAME;
+  const remotePassword = process.env.SYNTHETICS_REMOTE_KIBANA_PASSWORD;
+  const isRemote = Boolean(process.env.SYNTHETICS_REMOTE_ENABLED);
+  const basePath = isRemote ? remoteKibanaUrl : kibanaUrl;
+  const monitorManagement = `${basePath}/app/uptime/manage-monitors`;
+  const addMonitor = `${basePath}/app/uptime/add-monitor`;
+  const overview = `${basePath}/app/uptime`;
   return {
-    ...loginPageProvider({ page, kibanaUrl }),
+    ...loginPageProvider({
+      page,
+      isRemote,
+      username: isRemote ? remoteUsername : 'elastic',
+      password: isRemote ? remotePassword : 'changeme',
+    }),
     ...utilsPageProvider({ page }),
 
     async navigateToMonitorManagement() {
@@ -35,17 +47,24 @@ export function monitorManagementPageProvider({
       });
     },
 
+    async navigateToOverviewPage(options?: object) {
+      await page.goto(`${overview}${options ? `?${getQuerystring(options)}` : ''}`, {
+        waitUntil: 'networkidle',
+      });
+    },
+
     async clickAddMonitor() {
       await page.click('text=Add monitor');
     },
 
     async deleteMonitor() {
       await this.clickByTestSubj('monitorManagementDeleteMonitor');
+      await this.clickByTestSubj('confirmModalConfirmButton');
       return await this.findByTestSubj('uptimeDeleteMonitorSuccess');
     },
 
     async editMonitor() {
-      await this.clickByTestSubj('monitorManagementEditMonitor');
+      await page.click(this.byTestId('monitorManagementEditMonitor'), { delay: 800 });
     },
 
     async findMonitorConfiguration(monitorConfig: Record<string, string>) {
@@ -71,7 +90,7 @@ export function monitorManagementPageProvider({
       } else {
         await page.click('text=Save monitor');
       }
-      return await this.findByTestSubj('uptimeAddMonitorSuccess');
+      return await this.findByText('Monitor added successfully.');
     },
 
     async fillCodeEditor(value: string) {
@@ -79,9 +98,8 @@ export function monitorManagementPageProvider({
     },
 
     async selectLocations({ locations }: { locations: string[] }) {
-      await this.clickByTestSubj('syntheticsServiceLocationsComboBox');
       for (let i = 0; i < locations.length; i++) {
-        await page.click(`text=${locations[i]}`);
+        await page.check(`text=${locations[i]}`);
       }
     },
 
@@ -182,6 +200,35 @@ export function monitorManagementPageProvider({
       await this.fillByTestSubj('syntheticsBrowserZipUrlUsername', username || '');
       await this.fillByTestSubj('syntheticsBrowserZipUrlPassword', password || '');
       await this.fillCodeEditor(params || '');
+    },
+
+    async createMonitor({
+      monitorConfig,
+      monitorType,
+    }: {
+      monitorConfig: Record<string, string | string[]>;
+      monitorType: DataStream;
+    }) {
+      switch (monitorType) {
+        case DataStream.HTTP:
+          // @ts-ignore
+          await this.createBasicHTTPMonitorDetails(monitorConfig);
+          break;
+        case DataStream.TCP:
+          // @ts-ignore
+          await this.createBasicTCPMonitorDetails(monitorConfig);
+          break;
+        case DataStream.ICMP:
+          // @ts-ignore
+          await this.createBasicICMPMonitorDetails(monitorConfig);
+          break;
+        case DataStream.BROWSER:
+          // @ts-ignore
+          await this.createBasicBrowserMonitorDetails(monitorConfig, true);
+          break;
+        default:
+          break;
+      }
     },
   };
 }

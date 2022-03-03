@@ -13,10 +13,11 @@ import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../co
 import { JobId, JobSummary, JobSummarySet } from '../../common/types';
 import {
   getFailureToast,
-  getGeneralErrorToast,
+  getWarningToast,
   getSuccessToast,
-  getWarningFormulasToast,
+  getGeneralErrorToast,
   getWarningMaxSizeToast,
+  getWarningFormulasToast,
 } from '../notifier';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
@@ -30,7 +31,7 @@ function getReportStatus(src: Job): JobSummary {
     id: src.id,
     status: src.status,
     title: src.title,
-    jobtype: src.jobtype,
+    jobtype: src.prettyJobTypeName ?? src.jobtype,
     maxSizeReached: src.max_size_reached,
     csvContainsFormulas: src.csv_contains_formulas,
   };
@@ -65,6 +66,15 @@ export class ReportingNotifierStreamHandler {
         } else if (job.maxSizeReached) {
           this.notifications.toasts.addWarning(
             getWarningMaxSizeToast(
+              job,
+              this.apiClient.getManagementLink,
+              this.apiClient.getDownloadLink,
+              this.theme
+            )
+          );
+        } else if (job.status === JOB_STATUSES.WARNINGS) {
+          this.notifications.toasts.addWarning(
+            getWarningToast(
               job,
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink,

@@ -12,7 +12,7 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { mockEngineActions } from '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SchemaType, Schema } from '../../../shared/schema/types';
 

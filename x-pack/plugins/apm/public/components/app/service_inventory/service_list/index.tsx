@@ -32,7 +32,7 @@ import {
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
@@ -41,7 +41,11 @@ import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { HealthBadge } from './HealthBadge';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
+import { HealthBadge } from './health_badge';
 
 type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
@@ -77,6 +81,7 @@ export function getServiceColumns({
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
+
   return [
     ...(showHealthStatusColumn
       ? [
@@ -155,17 +160,23 @@ export function getServiceColumns({
       }),
       sortable: true,
       dataType: 'number',
-      render: (_, { serviceName, latency }) => (
-        <ListMetric
-          series={comparisonData?.currentPeriod[serviceName]?.latency}
-          comparisonSeries={
-            comparisonData?.previousPeriod[serviceName]?.latency
-          }
-          hideSeries={!showWhenSmallOrGreaterThanLarge}
-          color="euiColorVis1"
-          valueLabel={asMillisecondDuration(latency || 0)}
-        />
-      ),
+      render: (_, { serviceName, latency }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.LATENCY_AVG
+        );
+        return (
+          <ListMetric
+            series={comparisonData?.currentPeriod[serviceName]?.latency}
+            comparisonSeries={
+              comparisonData?.previousPeriod[serviceName]?.latency
+            }
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
+            color={currentPeriodColor}
+            valueLabel={asMillisecondDuration(latency || 0)}
+            comparisonSeriesColor={previousPeriodColor}
+          />
+        );
+      },
       align: RIGHT_ALIGNMENT,
     },
     {
@@ -175,17 +186,24 @@ export function getServiceColumns({
       }),
       sortable: true,
       dataType: 'number',
-      render: (_, { serviceName, throughput }) => (
-        <ListMetric
-          series={comparisonData?.currentPeriod[serviceName]?.throughput}
-          comparisonSeries={
-            comparisonData?.previousPeriod[serviceName]?.throughput
-          }
-          hideSeries={!showWhenSmallOrGreaterThanLarge}
-          color="euiColorVis0"
-          valueLabel={asTransactionRate(throughput)}
-        />
-      ),
+      render: (_, { serviceName, throughput }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.THROUGHPUT
+        );
+
+        return (
+          <ListMetric
+            series={comparisonData?.currentPeriod[serviceName]?.throughput}
+            comparisonSeries={
+              comparisonData?.previousPeriod[serviceName]?.throughput
+            }
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
+            color={currentPeriodColor}
+            valueLabel={asTransactionRate(throughput)}
+            comparisonSeriesColor={previousPeriodColor}
+          />
+        );
+      },
       align: RIGHT_ALIGNMENT,
     },
     {
@@ -197,6 +215,9 @@ export function getServiceColumns({
       dataType: 'number',
       render: (_, { serviceName, transactionErrorRate }) => {
         const valueLabel = asPercent(transactionErrorRate, 1);
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
         return (
           <ListMetric
             series={
@@ -206,8 +227,9 @@ export function getServiceColumns({
               comparisonData?.previousPeriod[serviceName]?.transactionErrorRate
             }
             hideSeries={!showWhenSmallOrGreaterThanLarge}
-            color="euiColorVis7"
+            color={currentPeriodColor}
             valueLabel={valueLabel}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },

@@ -34,7 +34,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       const store = await reporting.getStore();
 
       try {
-        const { body } = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
+        const body = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
           body: {
             index: [
               {
@@ -126,8 +126,10 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         await client.indices.putSettings({
           index: indexPattern,
           body: {
-            'index.lifecycle': {
-              name: ILM_POLICY_NAME,
+            index: {
+              lifecycle: {
+                name: ILM_POLICY_NAME,
+              },
             },
           },
         });

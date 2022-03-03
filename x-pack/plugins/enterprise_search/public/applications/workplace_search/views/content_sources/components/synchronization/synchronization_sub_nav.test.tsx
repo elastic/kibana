@@ -24,9 +24,9 @@ describe('useSynchronizationSubNav', () => {
         href: '/sources/1/synchronization/frequency',
       },
       {
-        id: 'sourceSynchronizationObjectsAndAssets',
-        name: 'Objects and assets',
-        href: '/sources/1/synchronization/objects_and_assets',
+        id: 'sourceSynchronizationAssetsAndObjects',
+        name: 'Assets and objects',
+        href: '/sources/1/synchronization/assets_and_objects',
       },
     ]);
   });

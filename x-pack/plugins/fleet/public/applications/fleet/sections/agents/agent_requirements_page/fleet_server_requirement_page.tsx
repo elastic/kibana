@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useStartServices } from '../../../hooks';
+import { useStartServices, sendGetPermissionsCheck } from '../../../hooks';
+
+import { FleetServerMissingPrivileges } from '../../agents/components/fleet_server_callouts';
+
+import { Loading } from '../../../components';
 
 import { CloudInstructions, OnPremInstructions } from './components';
 
@@ -27,6 +31,29 @@ export const FleetServerRequirementPage = () => {
   const startService = useStartServices();
   const deploymentUrl = startService.cloud?.deploymentUrl;
 
+  const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
+  const [permissionsError, setPermissionsError] = useState<string>();
+
+  useEffect(() => {
+    async function checkPermissions() {
+      setIsPermissionsLoading(false);
+      setPermissionsError(undefined);
+
+      try {
+        setIsPermissionsLoading(true);
+        const permissionsResponse = await sendGetPermissionsCheck(true);
+
+        setIsPermissionsLoading(false);
+        if (!permissionsResponse.data?.success) {
+          setPermissionsError(permissionsResponse.data?.error || 'REQUEST_ERROR');
+        }
+      } catch (err) {
+        setPermissionsError('REQUEST_ERROR');
+      }
+    }
+    checkPermissions();
+  }, []);
+
   return (
     <>
       <ContentWrapper
@@ -38,6 +65,10 @@ export const FleetServerRequirementPage = () => {
         <FlexItemWithMinWidth grow={false}>
           {deploymentUrl ? (
             <CloudInstructions deploymentUrl={deploymentUrl} />
+          ) : isPermissionsLoading ? (
+            <Loading />
+          ) : permissionsError ? (
+            <FleetServerMissingPrivileges />
           ) : (
             <OnPremInstructions />
           )}

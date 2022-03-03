@@ -5,28 +5,33 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo, useRef, useCallback } from 'react';
+import { observabilityFeatureId } from '../../../common';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../..';
 import { EmptySections } from '../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
 import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
-import { AlertsSection } from '../../components/app/section/alerts';
 import { DatePicker } from '../../components/shared/date_picker';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useAlertIndexNames } from '../../hooks/use_alert_index_names';
 import { RouteParams } from '../../routes';
 import { getNewsFeed } from '../../services/get_news_feed';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { DataSections } from './data_sections';
 import { LoadingObservability } from './loading_observability';
-
+import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
+import { SectionContainer } from '../../components/app/section';
+import { ObservabilityAppServices } from '../../application/types';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -48,6 +53,8 @@ export function OverviewPage({ routeParams }: Props) {
     },
   ]);
 
+  const indexNames = useAlertIndexNames();
+
   const { core, ObservabilityPageTemplate } = usePluginContext();
 
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
@@ -57,7 +64,34 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
-  const { hasDataMap, hasAnyData, isAllRequestsComplete } = useHasData();
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
+  const refetch = useRef<() => void>();
+
+  const bucketSize = calculateBucketSize({
+    start: absoluteTime.start,
+    end: absoluteTime.end,
+  });
+
+  const bucketSizeValue = useMemo(() => {
+    if (bucketSize?.bucketSize) {
+      return {
+        bucketSize: bucketSize.bucketSize,
+        intervalString: bucketSize.intervalString,
+      };
+    }
+  }, [bucketSize?.bucketSize, bucketSize?.intervalString]);
+
+  const setRefetch = useCallback((ref) => {
+    refetch.current = ref;
+  }, []);
+
+  const onTimeRangeRefresh = useCallback(() => {
+    return refetch.current && refetch.current();
+  }, []);
+
+  const kibana = useKibana<ObservabilityAppServices>();
+  const CasesContext = kibana.services.cases.getCasesContext();
+  const userPermissions = useGetUserCasesPermissions();
 
   if (hasAnyData === undefined) {
     return <LoadingObservability />;
@@ -73,11 +107,6 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
-  const bucketSize = calculateBucketSize({
-    start: absoluteTime.start,
-    end: absoluteTime.end,
-  });
-
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
@@ -91,6 +120,7 @@ export function OverviewPage({ routeParams }: Props) {
                   rangeTo={relativeTime.end}
                   refreshInterval={refreshInterval}
                   refreshPaused={refreshPaused}
+                  onTimeRangeRefresh={onTimeRangeRefresh}
                 />,
               ],
             }
@@ -100,28 +130,46 @@ export function OverviewPage({ routeParams }: Props) {
       {hasData && (
         <>
           <ObservabilityHeaderMenu />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={6}>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <SectionContainer
+                title={i18n.translate('xpack.observability.overview.alerts.title', {
+                  defaultMessage: 'Alerts',
+                })}
+                hasError={false}
+              >
+                <CasesContext
+                  owner={[observabilityFeatureId]}
+                  userCanCrud={userPermissions?.crud ?? false}
+                  features={{ alerts: { sync: false } }}
+                >
+                  <AlertsTableTGrid
+                    setRefetch={setRefetch}
+                    rangeFrom={relativeTime.start}
+                    rangeTo={relativeTime.end}
+                    indexNames={indexNames}
+                  />
+                </CasesContext>
+              </SectionContainer>
+            </EuiFlexItem>
+            <EuiFlexItem>
               {/* Data sections */}
-              {hasAnyData && <DataSections bucketSize={bucketSize} />}
+              {hasAnyData && <DataSections bucketSize={bucketSizeValue} />}
               <EmptySections />
-              <EuiSpacer size="l" />
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  {/* Resources / What's New sections */}
-                  <EuiPanel hasBorder={true}>
-                    <Resources />
-                    <EuiSpacer size="l" />
-                    {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 5)} />}
-                  </EuiPanel>
+            </EuiFlexItem>
+            <EuiSpacer size="s" />
+          </EuiFlexGroup>
+          <EuiHorizontalRule />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              {/* Resources / What's New sections */}
+              <EuiFlexGroup direction="row">
+                <EuiFlexItem grow={4}>
+                  {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
                 </EuiFlexItem>
-                {hasDataMap?.alert?.hasData && (
-                  <EuiFlexItem>
-                    <EuiPanel hasBorder={true}>
-                      <AlertsSection />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                )}
+                <EuiFlexItem grow={2}>
+                  <Resources />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

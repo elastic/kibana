@@ -9,13 +9,14 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-type TransformRowActionName = 'Clone' | 'Delete' | 'Edit' | 'Start' | 'Stop' | 'Discover';
+type TransformRowActionName = 'Clone' | 'Delete' | 'Discover' | 'Edit' | 'Reset' | 'Start' | 'Stop';
 
 export function TransformTableProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const ml = getService('ml');
 
   return new (class TransformTable {
     public async parseTransformTable() {
@@ -60,50 +61,6 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       }
 
       return rows;
-    }
-
-    async parseEuiDataGrid(tableSubj: string) {
-      const table = await testSubjects.find(`~${tableSubj}`);
-      const $ = await table.parseDomContent();
-      const rows = [];
-
-      // For each row, get the content of each cell and
-      // add its values as an array to each row.
-      for (const tr of $.findTestSubjects(`~dataGridRow`).toArray()) {
-        rows.push(
-          $(tr)
-            .find('.euiDataGridRowCell__truncate')
-            .toArray()
-            .map((cell) => $(cell).text().trim())
-        );
-      }
-
-      return rows;
-    }
-
-    async assertEuiDataGridColumnValues(
-      tableSubj: string,
-      column: number,
-      expectedColumnValues: string[]
-    ) {
-      await retry.tryForTime(2000, async () => {
-        // get a 2D array of rows and cell values
-        const rows = await this.parseEuiDataGrid(tableSubj);
-
-        // reduce the rows data to an array of unique values in the specified column
-        const uniqueColumnValues = rows
-          .map((row) => row[column])
-          .flat()
-          .filter((v, i, a) => a.indexOf(v) === i);
-
-        uniqueColumnValues.sort();
-
-        // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues).to.eql(
-          expectedColumnValues,
-          `Expected '${tableSubj}' column values to be '${expectedColumnValues}' (got '${uniqueColumnValues}')`
-        );
-      });
     }
 
     public async waitForRefreshButtonLoaded() {
@@ -234,6 +191,34 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await this.switchToExpandedRowTab('transformPreviewTab', '~transformPivotPreview');
     }
 
+    public async assertTransformExpandedRowJson(expectedText: string, expectedToContain = true) {
+      await this.ensureDetailsOpen();
+
+      // The expanded row should show the details tab content by default
+      await testSubjects.existOrFail('transformDetailsTab');
+      await testSubjects.existOrFail('~transformDetailsTabContent');
+
+      // Click on the JSON tab and assert the messages
+      await this.switchToExpandedRowTab('transformJsonTab', '~transformJsonTabContent');
+      await retry.tryForTime(30 * 1000, async () => {
+        const actualText = await testSubjects.getVisibleText('~transformJsonTabContent');
+        if (expectedToContain) {
+          expect(actualText.toLowerCase()).to.contain(
+            expectedText.toLowerCase(),
+            `Expected transform messages text to include '${expectedText}'`
+          );
+        } else {
+          expect(actualText.toLowerCase()).to.not.contain(
+            expectedText.toLowerCase(),
+            `Expected transform messages text to not include '${expectedText}'`
+          );
+        }
+      });
+
+      // Switch back to details tab
+      await this.switchToExpandedRowTab('transformDetailsTab', '~transformDetailsTabContent');
+    }
+
     public async assertTransformExpandedRowMessages(expectedText: string) {
       await this.ensureDetailsOpen();
 
@@ -250,6 +235,9 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
           `Expected transform messages text to include '${expectedText}'`
         );
       });
+
+      // Switch back to details tab
+      await this.switchToExpandedRowTab('transformDetailsTab', '~transformDetailsTabContent');
     }
 
     public rowSelector(transformId: string, subSelector?: string) {
@@ -303,6 +291,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('transformActionDelete');
       await testSubjects.existOrFail('transformActionDiscover');
       await testSubjects.existOrFail('transformActionEdit');
+      await testSubjects.existOrFail('transformActionReset');
 
       if (isTransformRunning) {
         await testSubjects.missingOrFail('transformActionStart');
@@ -352,7 +341,11 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
     public async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
       await this.waitForTransformsExpandedRowPreviewTabToLoad();
-      await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
+      await ml.commonDataGrid.assertEuiDataGridColumnValues(
+        'transformPivotPreview',
+        column,
+        values
+      );
     }
 
     public async assertTransformDeleteModalExists() {
@@ -361,6 +354,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
     public async assertTransformDeleteModalNotExists() {
       await testSubjects.missingOrFail('transformDeleteModal', { timeout: 60 * 1000 });
+    }
+
+    public async assertTransformResetModalExists() {
+      await testSubjects.existOrFail('transformResetModal', { timeout: 60 * 1000 });
+    }
+
+    public async assertTransformResetModalNotExists() {
+      await testSubjects.missingOrFail('transformResetModal', { timeout: 60 * 1000 });
     }
 
     public async assertTransformStartModalExists() {
@@ -376,6 +377,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
         await this.assertTransformDeleteModalExists();
         await testSubjects.click('transformDeleteModal > confirmModalConfirmButton');
         await this.assertTransformDeleteModalNotExists();
+      });
+    }
+
+    public async confirmResetTransform() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertTransformResetModalExists();
+        await testSubjects.click('transformResetModal > confirmModalConfirmButton');
+        await this.assertTransformResetModalNotExists();
       });
     }
 

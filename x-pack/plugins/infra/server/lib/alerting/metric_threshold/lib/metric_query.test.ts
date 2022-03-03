@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MetricExpressionParams } from '../types';
-import { getElasticsearchMetricQuery } from './metric_query';
 import moment from 'moment';
+import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   const expressionParams = {

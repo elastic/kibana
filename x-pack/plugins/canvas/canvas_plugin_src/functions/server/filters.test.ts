@@ -14,7 +14,8 @@ describe('filters migrations', () => {
   const expression = 'filters group="1" group="3" ungrouped=true';
   const ast = fromExpression(expression);
   it('8.1.0. Should migrate `filters` expression to `kibana | selectFilter`', () => {
-    const migratedAst = migrations?.['8.1.0'](ast.chain[0]);
+    const migrationObj = typeof migrations === 'function' ? migrations() : migrations || {};
+    const migratedAst = migrationObj['8.1.0'](ast.chain[0]);
     expect(migratedAst !== null && typeof migratedAst === 'object').toBeTruthy();
     expect(migratedAst.type).toBe('expression');
     expect(Array.isArray(migratedAst.chain)).toBeTruthy();

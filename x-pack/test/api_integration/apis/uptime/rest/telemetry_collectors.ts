@@ -14,8 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/111240
-  describe.skip('telemetry collectors heartbeat', () => {
+  describe('telemetry collectors heartbeat', () => {
     before('generating data', async () => {
       await getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank');
 
@@ -69,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         'downMonitorId',
         1,
         1,
-        1,
+        10 * 1000,
         {
           observer,
           monitor: {
@@ -79,7 +78,15 @@ export default function ({ getService }: FtrProviderContext) {
         'down'
       );
 
-      await makeChecksWithStatus(es, 'mixMonitorId', 1, 1, 1, { observer: observer2 }, 'down');
+      await makeChecksWithStatus(
+        es,
+        'mixMonitorId',
+        1,
+        1,
+        30 * 1000,
+        { observer: observer2 },
+        'down'
+      );
       await es.indices.refresh();
     });
 
@@ -103,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
           dateEnd: 'now/d',
           autoRefreshEnabled: true,
           refreshTelemetryHistory: true,
+          refreshEsData: true,
         })
         .expect(200);
 
@@ -111,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitor_page: 1,
         no_of_unique_monitors: 4,
         settings_page: 0,
-        monitor_frequency: [120, 0.001, 60, 60],
+        monitor_frequency: [10, 30, 60, 60],
         monitor_name_stats: { min_length: 7, max_length: 22, avg_length: 12 },
         no_of_unique_observer_locations: 3,
         observer_location_name_stats: { min_length: 2, max_length: 7, avg_length: 4.8 },

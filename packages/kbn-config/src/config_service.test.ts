@@ -13,7 +13,7 @@ import { mockApplyDeprecations, mockedChangedPaths } from './config_service.test
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
-import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 
 import type { ConfigDeprecationContext } from './deprecation';
 import { ConfigService, Env, RawPackageInfo } from '.';
@@ -434,11 +434,13 @@ test('logs deprecation warning during validation', async () => {
     const addDeprecation = createAddDeprecation!('');
     addDeprecation({
       configPath: 'test1',
+      level: 'warning',
       message: 'some deprecation message',
       correctiveActions: { manualSteps: ['do X'] },
     });
     addDeprecation({
       configPath: 'test2',
+      level: 'warning',
       message: 'another deprecation message',
       correctiveActions: { manualSteps: ['do Y'] },
     });
@@ -505,12 +507,14 @@ test('does not log warnings for silent deprecations during validation', async ()
       const addDeprecation = createAddDeprecation!('');
       addDeprecation({
         configPath: 'test1',
+        level: 'warning',
         message: 'some deprecation message',
         correctiveActions: { manualSteps: ['do X'] },
         silent: true,
       });
       addDeprecation({
         configPath: 'test2',
+        level: 'warning',
         message: 'another deprecation message',
         correctiveActions: { manualSteps: ['do Y'] },
       });
@@ -520,6 +524,7 @@ test('does not log warnings for silent deprecations during validation', async ()
       const addDeprecation = createAddDeprecation!('');
       addDeprecation({
         configPath: 'silent',
+        level: 'warning',
         message: 'I am silent',
         silent: true,
         correctiveActions: { manualSteps: ['do Z'] },
@@ -597,13 +602,16 @@ describe('getHandledDeprecatedConfigs', () => {
     const rawConfig = getRawConfigProvider({ base: { unused: 'unusedConfig' } });
     const configService = new ConfigService(rawConfig, defaultEnv, logger);
 
-    configService.addDeprecationProvider('base', ({ unused }) => [unused('unused')]);
+    configService.addDeprecationProvider('base', ({ unused }) => [
+      unused('unused', { level: 'warning' }),
+    ]);
 
     mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
       deprecations.forEach((deprecation) => {
         const addDeprecation = createAddDeprecation!(deprecation.path);
         addDeprecation({
           configPath: 'test1',
+          level: 'warning',
           message: `some deprecation message`,
           documentationUrl: 'some-url',
           correctiveActions: { manualSteps: ['do X'] },
@@ -627,6 +635,7 @@ describe('getHandledDeprecatedConfigs', () => {
                 ],
               },
               "documentationUrl": "some-url",
+              "level": "warning",
               "message": "some deprecation message",
             },
           ],

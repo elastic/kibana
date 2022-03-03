@@ -51,35 +51,38 @@ export const createCommonUpdateUserActionBuilder = ({
   label,
   icon,
   handleOutlineComment,
-}: BuilderArgs): ReturnType<UserActionBuilder> => ({
-  build: () => [
-    {
-      username: (
-        <UserActionUsernameWithAvatar
-          username={userAction.createdBy.username}
-          fullName={userAction.createdBy.fullName}
-        />
-      ),
-      type: 'update' as const,
-      event: label,
-      'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
-      timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-      timelineIcon: icon,
-      actions: (
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false}>
-            <UserActionCopyLink id={userAction.actionId} />
-          </EuiFlexItem>
-          {showMoveToReference(userAction.action, userAction.commentId) && (
+}: BuilderArgs): ReturnType<UserActionBuilder> => {
+  return {
+    // eslint-disable-next-line react/display-name
+    build: () => [
+      {
+        username: (
+          <UserActionUsernameWithAvatar
+            username={userAction.createdBy.username}
+            fullName={userAction.createdBy.fullName}
+          />
+        ),
+        type: 'update' as const,
+        event: label,
+        'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+        timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
+        timelineIcon: icon,
+        actions: (
+          <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
-              <UserActionMoveToReference
-                id={userAction.commentId}
-                outlineComment={handleOutlineComment}
-              />
+              <UserActionCopyLink id={userAction.actionId} />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
-    },
-  ],
-});
+            {showMoveToReference(userAction.action, userAction.commentId) && (
+              <EuiFlexItem grow={false}>
+                <UserActionMoveToReference
+                  id={userAction.commentId}
+                  outlineComment={handleOutlineComment}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ),
+      },
+    ],
+  };
+};

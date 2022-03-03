@@ -7,15 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import {
   InventoryMetricConditions,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../server/lib/alerting/inventory_metric_threshold/types';
-
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-
-import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
+} from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
 import { formatReason } from './rule_data_formatters';
 

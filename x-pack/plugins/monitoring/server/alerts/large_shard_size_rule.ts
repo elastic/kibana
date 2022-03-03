@@ -21,7 +21,7 @@ import {
   CommonAlertFilter,
   IndexShardSizeStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
+import { Alert } from '../../../alerting/server';
 import { RULE_LARGE_SHARD_SIZE, RULE_DETAILS } from '../../common/constants';
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
@@ -149,7 +149,7 @@ export class LargeShardSizeRule extends BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

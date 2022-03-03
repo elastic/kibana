@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
@@ -31,7 +31,9 @@ const requestPreferenceOptionLabels = {
   }),
 };
 
-export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
+export function getUiSettings(
+  docLinks: DocLinksServiceSetup
+): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.META_FIELDS]: {
       name: i18n.translate('data.advancedSettings.metaFieldsTitle', {
@@ -71,7 +73,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.query.queryStringOptionsText',
         values: {
           optionsLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener">' +
+            `<a href=${docLinks.links.query.luceneQuery} target="_blank" rel="noopener">` +
             i18n.translate('data.advancedSettings.query.queryStringOptions.optionsLinkText', {
               defaultMessage: 'Options',
             }) +
@@ -150,7 +152,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.sortOptionsText',
         values: {
           optionsLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener">' +
+            `<a href=${docLinks?.links.elasticsearch.sortSearch} target="_blank" rel="noopener">` +
             i18n.translate('data.advancedSettings.sortOptions.optionsLinkText', {
               defaultMessage: 'Options',
             }) +
@@ -232,7 +234,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           setRequestReferenceSetting: `<strong>${UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE}</strong>`,
           customSettingValue: '"custom"',
           requestPreferenceLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener">' +
+            `<a href=${docLinks.links.apis.searchPreference} target="_blank" rel="noopener">` +
             i18n.translate(
               'data.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText',
               {
@@ -256,7 +258,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'Controls the {maxRequestsLink} setting used for _msearch requests sent by Kibana. ' +
           'Set to 0 to disable this config and use the Elasticsearch default.',
         values: {
-          maxRequestsLink: `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
+          maxRequestsLink: `<a href=${docLinks.links.apis.multiSearch}
             target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`,
         },
       }),
@@ -265,7 +267,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
     },
     [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: {
       name: 'Search in frozen indices',
-      description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
+      description: `Will include <a href=${docLinks.links.elasticsearch.frozenIndices}
         target="_blank" rel="noopener">frozen indices</a> in results if enabled. Searching through frozen indices
         might increase the search time.`,
       value: false,
@@ -444,7 +446,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText',
         values: {
           acceptedFormatsLink:
-            `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
+            `<a href=${docLinks.links.date.dateMath}
             target="_blank" rel="noopener">` +
             i18n.translate('data.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText', {
               defaultMessage: 'accepted formats',
@@ -495,7 +497,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'Elasticsearch terms aggregation. {learnMoreLink}',
         values: {
           learnMoreLink:
-            '<a href="https://www.elastic.co/guide/en/kibana/current/kibana-concepts-analysts.html#autocomplete-suggestions" target="_blank" rel="noopener">' +
+            `<a href=${docLinks.links.kibana.autocompleteSuggestions} target="_blank" rel="noopener">` +
             i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodLink', {
               defaultMessage: 'Learn more.',
             }) +
@@ -517,7 +519,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. {learnMoreLink}',
         values: {
           learnMoreLink:
-            '<a href="https://www.elastic.co/guide/en/kibana/current/kibana-concepts-analysts.html#autocomplete-suggestions" target="_blank" rel="noopener">' +
+            `<a href=${docLinks.links.kibana.autocompleteSuggestions} target="_blank" rel="noopener">` +
             i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodLearnMoreLink', {
               defaultMessage: 'Learn more.',
             }) +

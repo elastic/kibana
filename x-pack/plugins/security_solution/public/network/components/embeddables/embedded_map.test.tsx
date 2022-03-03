@@ -25,9 +25,13 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('./embedded_map_helpers', () => ({
   createEmbeddable: jest.fn(),
 }));
+
+const mockGetStorage = jest.fn();
+const mockSetStorage = jest.fn();
+
 jest.mock('../../../common/lib/kibana', () => {
   return {
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: () => ({
       services: {
         embeddable: {
           EmbeddablePanel: jest.fn(() => <div data-test-subj="EmbeddablePanel" />),
@@ -37,6 +41,10 @@ jest.mock('../../../common/lib/kibana', () => {
           links: {
             siem: { networkMap: '' },
           },
+        },
+        storage: {
+          get: mockGetStorage,
+          set: mockSetStorage,
         },
       },
     }),
@@ -101,6 +109,11 @@ describe('EmbeddedMapComponent', () => {
 
   beforeEach(() => {
     setQuery.mockClear();
+    mockGetStorage.mockReturnValue(false);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   test('renders correctly against snapshot', () => {
@@ -173,6 +186,40 @@ describe('EmbeddedMapComponent', () => {
       expect(wrapper.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
       expect(wrapper.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(false);
       expect(wrapper.find('[data-test-subj="loading-panel"]').exists()).toEqual(true);
+    });
+  });
+
+  test('map hidden on close', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+
+    const container = wrapper.find('[data-test-subj="false-toggle-network-map"]').at(0);
+    container.simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', true);
+    });
+  });
+
+  test('map visible on open', async () => {
+    mockGetStorage.mockReturnValue(true);
+
+    const wrapper = mount(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+
+    const container = wrapper.find('[data-test-subj="true-toggle-network-map"]').at(0);
+    container.simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', false);
     });
   });
 });

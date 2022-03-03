@@ -6,12 +6,16 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type {
   Logger,
   KibanaRequest,
   ISavedObjectsRepository,
   IBasePath,
   ExecutionContextStart,
+  SavedObjectsServiceStart,
+  ElasticsearchServiceStart,
+  UiSettingsServiceStart,
 } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
@@ -19,7 +23,6 @@ import { PluginStartContract as ActionsPluginStartContract } from '../../../acti
 import {
   AlertTypeParams,
   RuleTypeRegistry,
-  GetServicesFunction,
   SpaceIdToNamespaceFunction,
   AlertTypeState,
   AlertInstanceState,
@@ -32,7 +35,9 @@ import { NormalizedRuleType } from '../rule_type_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;
-  getServices: GetServicesFunction;
+  savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
   getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
@@ -46,6 +51,7 @@ export interface TaskRunnerContext {
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
   cancelAlertsOnRuleTimeout: boolean;
+  usageCounter?: UsageCounter;
 }
 
 export class TaskRunnerFactory {

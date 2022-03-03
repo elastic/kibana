@@ -10,6 +10,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from 'kibana/server';
+import { RuleExecutionMetrics } from '.';
 import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 export type AlertTypeState = Record<string, unknown>;
@@ -36,6 +37,8 @@ export enum AlertExecutionStatusErrorReasons {
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
+  numberOfTriggeredActions?: number;
+  metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {
@@ -137,13 +140,19 @@ export interface ActionVariable {
   useWithTripleBracesInTemplates?: boolean;
 }
 
+export interface RuleMonitoringHistory extends SavedObjectAttributes {
+  success: boolean;
+  timestamp: number;
+  duration?: number;
+}
+
 export interface RuleMonitoring extends SavedObjectAttributes {
   execution: {
-    history: Array<{
-      success: boolean;
-      timestamp: number;
-    }>;
+    history: RuleMonitoringHistory[];
     calculated_metrics: {
+      p50?: number;
+      p95?: number;
+      p99?: number;
       success_ratio: number;
     };
   };

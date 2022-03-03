@@ -37,8 +37,7 @@ export const useTransactionDistributionChartData = () => {
         params.start &&
         params.end
       ) {
-        return callApmApi({
-          endpoint: 'POST /internal/apm/latency/overall_distribution',
+        return callApmApi('POST /internal/apm/latency/overall_distribution', {
           params: {
             body: {
               ...params,
@@ -84,8 +83,7 @@ export const useTransactionDistributionChartData = () => {
           params.start &&
           params.end
         ) {
-          return callApmApi({
-            endpoint: 'POST /internal/apm/latency/overall_distribution',
+          return callApmApi('POST /internal/apm/latency/overall_distribution', {
             params: {
               body: {
                 ...params,

@@ -473,7 +473,14 @@ export class AggConfigs {
   getResponseAggById(id: string): AggConfig | undefined {
     id = String(id);
     const reqAgg = _.find(this.getRequestAggs(), function (agg: AggConfig) {
-      return id.substr(0, String(agg.id).length) === agg.id;
+      const aggId = String(agg.id);
+      // only multi-value aggs like percentiles are allowed to contain dots and [
+      const isMultiValueId = id.includes('[') || id.includes('.');
+      if (!isMultiValueId) {
+        return id === aggId;
+      }
+      const baseId = id.substring(0, id.indexOf('[') !== -1 ? id.indexOf('[') : id.indexOf('.'));
+      return baseId === aggId;
     });
     if (!reqAgg) return;
     return _.find(reqAgg.getResponseAggs(), { id });

@@ -67,12 +67,11 @@ PUT _snapshot/my_src_only_repository
 
 ### Plugin-based repositories:
 
-There are four official repository plugins available: S3, GCS, HDFS, Azure. Available plugin repository settings can be found in the docs: https://www.elastic.co/guide/en/elasticsearch/plugins/master/repository.html.
+There is one official repository plugin available: HDFS. You can find the repository settings in the docs: https://www.elastic.co/guide/en/elasticsearch/plugins/master/repository-hdfs-config.html.
 
 To run ES with plugins:
 
 1. Run `yarn es snapshot` from the Kibana directory like normal, then exit out of process.
 2. `cd .es/8.0.0`
-3. `bin/elasticsearch-plugin install https://snapshots.elastic.co/downloads/elasticsearch-plugins/repository-s3/repository-s3-8.0.0-SNAPSHOT.zip`
-4. Repeat step 3 for additional plugins, replacing occurrences of `repository-s3` with the plugin you want to install.
-5. Run `bin/elasticsearch` from the `.es/8.0.0` directory. Otherwise, starting ES with `yarn es snapshot` would overwrite the plugins you just installed.
+3. `bin/elasticsearch-plugin install https://snapshots.elastic.co/downloads/elasticsearch-plugins/repository-hdfs/repository-hdfs-8.0.0-SNAPSHOT.zip`
+4. Run `bin/elasticsearch` from the `.es/8.0.0` directory. Otherwise, starting ES with `yarn es snapshot` would overwrite the plugins you just installed.

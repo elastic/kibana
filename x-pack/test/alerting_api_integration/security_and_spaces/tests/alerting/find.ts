@@ -6,20 +6,20 @@
  */
 
 import expect from '@kbn/expect';
+import { SuperTest, Test } from 'supertest';
 import { chunk, omit } from 'lodash';
 import uuid from 'uuid';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function createFindTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-
-  describe('find', () => {
-    const objectRemover = new ObjectRemover(supertest);
-
+const findTestUtils = (
+  describeType: 'internal' | 'public',
+  objectRemover: ObjectRemover,
+  supertest: SuperTest<Test>,
+  supertestWithoutAuth: any
+) => {
+  describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -35,9 +35,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(
-                space.id
-              )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+              `${getUrlPrefix(space.id)}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 
@@ -82,7 +82,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: match.execution_status,
-                monitoring: match.monitoring,
+                ...(describeType === 'internal' ? { monitoring: match.monitoring } : {}),
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -132,9 +132,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(
-                space.id
-              )}/api/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt`
+              `${getUrlPrefix(space.id)}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -181,9 +181,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
                 const secondResponse = await supertestWithoutAuth
                   .get(
-                    `${getUrlPrefix(
-                      space.id
-                    )}/api/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
+                    `${getUrlPrefix(space.id)}/${
+                      describeType === 'public' ? 'api' : 'internal'
+                    }/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
                   )
                   .auth(user.username, user.password);
 
@@ -228,9 +228,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(
-                space.id
-              )}/api/alerting/rules/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
+              `${getUrlPrefix(space.id)}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rules/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
             )
             .auth(user.username, user.password);
 
@@ -281,7 +281,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 created_at: match.created_at,
                 updated_at: match.updated_at,
                 execution_status: match.execution_status,
-                monitoring: match.monitoring,
+                ...(describeType === 'internal' ? { monitoring: match.monitoring } : {}),
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -323,9 +323,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(
-                space.id
-              )}/api/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]&sort_field=createdAt`
+              `${getUrlPrefix(space.id)}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -400,9 +400,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(
-                space.id
-              )}/api/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
+              `${getUrlPrefix(space.id)}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -457,9 +457,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(
-                'other'
-              )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+              `${getUrlPrefix('other')}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 
@@ -492,5 +492,20 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         });
       });
     }
+  });
+};
+
+// eslint-disable-next-line import/no-default-export
+export default function createFindTests({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+  describe('find', () => {
+    const objectRemover = new ObjectRemover(supertest);
+
+    afterEach(() => objectRemover.removeAll());
+
+    findTestUtils('public', objectRemover, supertest, supertestWithoutAuth);
+    findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
   });
 }

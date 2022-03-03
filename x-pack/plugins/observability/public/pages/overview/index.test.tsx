@@ -13,7 +13,7 @@ import { OverviewPage as OldOverviewPage } from './old_overview_page';
 import { OverviewPage as NewOverviewPage } from './overview_page';
 
 describe('Overview page', () => {
-  it('should render the old overview page when feature flag is disabled', () => {
+  it('should render the old overview page when feature flag is disabled and queryParams are empty', () => {
     const pluginContext = {
       config: {
         unsafe: {
@@ -31,7 +31,7 @@ describe('Overview page', () => {
     expect(component.find(NewOverviewPage)).toHaveLength(0);
   });
 
-  it('should render the new overview page when feature flag is enabled', () => {
+  it('should render the new overview page when feature flag is enabled and queryParams are empty', () => {
     const pluginContext = {
       config: {
         unsafe: {
@@ -45,6 +45,42 @@ describe('Overview page', () => {
       .mockReturnValue(pluginContext as PluginContextValue);
 
     const component = shallow(<OverviewPage routeParams={{ query: {} }} />);
+    expect(component.find(OldOverviewPage)).toHaveLength(0);
+    expect(component.find(NewOverviewPage)).toHaveLength(1);
+  });
+
+  it('should render the new overview page when feature flag is enabled and alpha param is in the url', () => {
+    const pluginContext = {
+      config: {
+        unsafe: {
+          overviewNext: { enabled: true },
+        },
+      },
+    };
+
+    jest
+      .spyOn(PluginContext, 'usePluginContext')
+      .mockReturnValue(pluginContext as PluginContextValue);
+
+    const component = shallow(<OverviewPage routeParams={{ query: { alpha: true } }} />);
+    expect(component.find(OldOverviewPage)).toHaveLength(0);
+    expect(component.find(NewOverviewPage)).toHaveLength(1);
+  });
+
+  it('should render the new overview page when feature flag is disabled and alpha param is in the url', () => {
+    const pluginContext = {
+      config: {
+        unsafe: {
+          overviewNext: { enabled: false },
+        },
+      },
+    };
+
+    jest
+      .spyOn(PluginContext, 'usePluginContext')
+      .mockReturnValue(pluginContext as PluginContextValue);
+
+    const component = shallow(<OverviewPage routeParams={{ query: { alpha: true } }} />);
     expect(component.find(OldOverviewPage)).toHaveLength(0);
     expect(component.find(NewOverviewPage)).toHaveLength(1);
   });

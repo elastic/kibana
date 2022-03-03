@@ -97,7 +97,7 @@ export function registerListRoute({
             },
           });
         const body: ListNodesRouteResponse = convertSettingsIntoLists(
-          settingsResponse.body as Settings,
+          settingsResponse as Settings,
           disallowedNodeAttributes
         );
         return response.ok({ body });

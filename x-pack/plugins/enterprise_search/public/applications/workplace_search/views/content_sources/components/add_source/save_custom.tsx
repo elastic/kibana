@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiLink,
   EuiPanel,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../../shared/doc_links';
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { AppLogic } from '../../../../app_logic';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
 import {
   SOURCES_PATH,
@@ -34,11 +36,12 @@ import {
   getContentSourcePath,
   getSourcesPath,
 } from '../../../../routes';
-import { CustomSource } from '../../../../types';
 import { LEARN_CUSTOM_FEATURES_BUTTON } from '../../constants';
 
 import { SourceIdentifier } from '../source_identifier';
 
+import { AddCustomSourceLogic } from './add_custom_source_logic';
+import { AddSourceHeader } from './add_source_header';
 import {
   SAVE_CUSTOM_BODY1,
   SAVE_CUSTOM_BODY2,
@@ -51,23 +54,20 @@ import {
   SAVE_CUSTOM_DOC_PERMISSIONS_LINK,
 } from './constants';
 
-interface SaveCustomProps {
-  documentationUrl: string;
-  newCustomSource: CustomSource;
-  isOrganization: boolean;
-  header: React.ReactNode;
-}
-
-export const SaveCustom: React.FC<SaveCustomProps> = ({
-  documentationUrl,
-  newCustomSource: { id, name },
-  isOrganization,
-  header,
-}) => {
+export const SaveCustom: React.FC = () => {
+  const { newCustomSource, sourceData } = useValues(AddCustomSourceLogic);
+  const { isOrganization } = useValues(AppLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const {
+    serviceType,
+    configuration: { githubRepository, documentationUrl },
+    name,
+    categories = [],
+  } = sourceData;
+
   return (
     <>
-      {header}
+      <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
       <EuiSpacer />
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={2}>
@@ -84,7 +84,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                         'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.heading',
                         {
                           defaultMessage: '{name} Created',
-                          values: { name },
+                          values: { name: newCustomSource.name },
                         }
                       )}
                     </h1>
@@ -93,7 +93,22 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <EuiText grow={false}>
                   <EuiTextAlign textAlign="center">
                     {SAVE_CUSTOM_BODY1}
-                    <br />
+                    <EuiSpacer size="s" />
+                    {serviceType !== 'custom' && githubRepository && (
+                      <>
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.repositoryInstructions"
+                          defaultMessage="First you'll need to clone and deploy this repository"
+                        />
+                        <br />
+                        <EuiCode>
+                          <EuiLinkTo to={`https://github.com/${githubRepository}`}>
+                            {githubRepository}
+                          </EuiLinkTo>
+                        </EuiCode>
+                        <EuiSpacer size="s" />
+                      </>
+                    )}
                     {SAVE_CUSTOM_BODY2}
                     <br />
                     <EuiLinkTo to={getSourcesPath(SOURCES_PATH, isOrganization)}>
@@ -105,7 +120,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
             </EuiFlexGroup>
             <EuiHorizontalRule />
             <EuiSpacer size="s" />
-            <SourceIdentifier id={id} />
+            <SourceIdentifier id={newCustomSource.id} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
@@ -119,17 +134,32 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <EuiSpacer size="xs" />
                 <EuiText color="subdued" size="s">
                   <p>
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentation.text"
-                      defaultMessage="{link} to learn more about Custom API Sources."
-                      values={{
-                        link: (
-                          <EuiLink target="_blank" href={documentationUrl}>
-                            {SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK}
-                          </EuiLink>
-                        ),
-                      }}
-                    />
+                    {serviceType === 'custom' ? (
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentation.text"
+                        defaultMessage="{link} to learn more about Custom API Sources."
+                        values={{
+                          link: (
+                            <EuiLink target="_blank" href={documentationUrl}>
+                              {SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.namedSourceDocumentation.text"
+                        defaultMessage="{link} to learn more about deploying a {name} source."
+                        values={{
+                          link: (
+                            <EuiLink target="_blank" href={documentationUrl}>
+                              {SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK}
+                            </EuiLink>
+                          ),
+                          name,
+                        }}
+                      />
+                    )}
                   </p>
                 </EuiText>
               </div>
@@ -149,7 +179,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                           <EuiLinkTo
                             to={getContentSourcePath(
                               SOURCE_DISPLAY_SETTINGS_PATH,
-                              id,
+                              newCustomSource.id,
                               isOrganization
                             )}
                           >
@@ -174,7 +204,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                   <p>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.permissions.text"
-                      defaultMessage="{link} manage content access content on individual or group attributes. Allow or deny access to specific documents."
+                      defaultMessage="{link} manage content access on individual or group attributes. Allow or deny access to specific documents."
                       values={{
                         link: (
                           <EuiLink

@@ -16,7 +16,7 @@ import { itShowsServerErrorAsFlashMessage } from '../../../../../../../test_help
 
 // I don't know why eslint is saying this line is out of order
 // eslint-disable-next-line import/order
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { IgnoredQueriesLogic } from './ignored_queries_logic';
 

@@ -33,6 +33,7 @@ import { PolicyEventFiltersDeleteModal } from '../delete_modal';
 import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
 import { getEventFiltersListPath } from '../../../../../common/routing';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { useGetLinkTo } from '../empty/use_policy_event_filters_empty_hooks';
 
 interface PolicyEventFiltersListProps {
   policy: ImmutableObject<PolicyData>;
@@ -40,13 +41,14 @@ interface PolicyEventFiltersListProps {
 export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({ policy }) => {
   const { getAppUrl } = useAppUrl();
   const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
-  const policiesRequest = useGetEndpointSpecificPolicies();
+  const policiesRequest = useGetEndpointSpecificPolicies({ perPage: 1000 });
   const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
   const [exceptionItemToDelete, setExceptionItemToDelete] = useState<
     ExceptionListItemSchema | undefined
   >();
+  const { state } = useGetLinkTo(policy.id, policy.name);
 
   const {
     data: eventFilters,
@@ -96,7 +98,8 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
     return i18n.translate(
       'xpack.securitySolution.endpoint.policy.eventFilters.list.totalItemCount',
       {
-        defaultMessage: 'Showing {totalItemsCount, plural, one {# exception} other {# exceptions}}',
+        defaultMessage:
+          'Showing {totalItemsCount, plural, one {# event filter} other {# event filters}}',
         values: { totalItemsCount: eventFilters?.data.length || 0 },
       }
     );
@@ -115,7 +118,7 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
       ),
       href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
       navigateAppId: APP_UI_ID,
-      navigateOptions: { path: viewUrlPath },
+      navigateOptions: { path: viewUrlPath, state },
       'data-test-subj': 'view-full-details-action',
     };
     const item = artifact as ExceptionListItemSchema;
@@ -158,6 +161,7 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
       {exceptionItemToDelete && (
         <PolicyEventFiltersDeleteModal
           policyId={policy.id}
+          policyName={policy.name}
           exception={exceptionItemToDelete}
           onCancel={handleDeleteModalClose}
         />
@@ -166,7 +170,7 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
         placeholder={i18n.translate(
           'xpack.securitySolution.endpoint.policy.eventFilters.list.search.placeholder',
           {
-            defaultMessage: 'Search on the fields below: name, comments, value',
+            defaultMessage: 'Search on the fields below: name, description, comments, value',
           }
         )}
         defaultValue={urlParams.filter}

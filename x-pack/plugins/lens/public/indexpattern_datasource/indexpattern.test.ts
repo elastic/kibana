@@ -224,7 +224,7 @@ describe('IndexPattern Data Source', () => {
         isBucketed: false,
         label: 'Foo',
         operationType: 'count',
-        sourceField: 'Records',
+        sourceField: '___records___',
       };
       const map = indexPatternDatasource.uniqueLabels({
         layers: {
@@ -353,7 +353,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
               col2: {
@@ -479,7 +479,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"col-0-0\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-1\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
+                  "{\\"col-0-0\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-1\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
                 ],
               },
               "function": "lens_rename_columns",
@@ -491,19 +491,19 @@ describe('IndexPattern Data Source', () => {
       `);
     });
 
-    it('should put all time fields used in date_histograms to the esaggs timeFields parameter', async () => {
+    it('should put all time fields used in date_histograms to the esaggs timeFields parameter if not ignoring global time range', async () => {
       const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
             indexPatternId: '1',
-            columnOrder: ['col1', 'col2', 'col3'],
+            columnOrder: ['col1', 'col2', 'col3', 'col4'],
             columns: {
               col1: {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
               col2: {
@@ -524,6 +524,17 @@ describe('IndexPattern Data Source', () => {
                 sourceField: 'another_datefield',
                 params: {
                   interval: 'auto',
+                },
+              } as DateHistogramIndexPatternColumn,
+              col4: {
+                label: 'Date 3',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'yet_another_datefield',
+                params: {
+                  interval: '2d',
+                  ignoreTimeRange: true,
                 },
               } as DateHistogramIndexPatternColumn,
             },
@@ -549,7 +560,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
                 timeShift: '1d',
               },
@@ -586,7 +597,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
                 timeScale: 'h',
                 filter: {
@@ -716,7 +727,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
                 timeScale: 'h',
               },
@@ -809,7 +820,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
                 timeScale: 'h',
               },
@@ -848,7 +859,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
               bucket1: {
@@ -1025,7 +1036,7 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'count',
                   isBucketed: false,
                   scale: 'ratio',
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   customLabel: true,
                 },
                 date: {
@@ -1057,7 +1068,7 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'count',
                   isBucketed: false,
                   scale: 'ratio',
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   customLabel: true,
                 },
                 math: {
@@ -1589,7 +1600,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records2',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
             },
@@ -1602,7 +1613,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
               bucket1: {
@@ -1633,6 +1644,63 @@ describe('IndexPattern Data Source', () => {
       });
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
+    it('should return false if date histogram exists but is detached from global time range in every layer', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records2',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+            },
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: ['bucket1', 'bucket2', 'metric2'],
+            columns: {
+              metric2: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+              bucket1: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: '1d',
+                  ignoreTimeRange: true,
+                },
+              } as DateHistogramIndexPatternColumn,
+              bucket2: {
+                label: 'Terms',
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'terms',
+                sourceField: 'geo.src',
+                params: {
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  size: 10,
+                },
+              } as TermsIndexPatternColumn,
+            },
+          },
+        },
+      });
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+    });
     it('should return false if date histogram does not exist in any layer', () => {
       const state = enrichBaseState({
         currentIndexPatternId: '1',
@@ -1645,7 +1713,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
             },
@@ -1669,7 +1737,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
             },
@@ -1698,7 +1766,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
             },
@@ -1753,7 +1821,7 @@ describe('IndexPattern Data Source', () => {
               operationType: 'count',
               isBucketed: false,
               scale: 'ratio',
-              sourceField: 'Records',
+              sourceField: '___records___',
             },
           },
           columnOrder: ['fa649155-d7f5-49d9-af26-508287431244'],

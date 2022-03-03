@@ -25,8 +25,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlRoles();
 
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote_small');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization_small');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/event_rate_nanos');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/bm_classification');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');

@@ -19,8 +19,11 @@ import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
 import type { MetricConfig, MetricState } from '../../common/expressions';
 import { layerTypes } from '../../common';
-import { CUSTOM_PALETTE, getStopsForFixedMode, shiftPalette } from '../shared_components';
+import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
+import { MetricToolbar } from './metric_config_panel';
+
+export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
 const toExpression = (
   paletteService: PaletteRegistry,
@@ -37,6 +40,8 @@ const toExpression = (
 
   const stops = state.palette?.params?.stops || [];
   const isCustomPalette = state.palette?.params?.name === CUSTOM_PALETTE;
+
+  const canColor = operation?.dataType === 'number';
 
   const paletteParams = {
     ...state.palette?.params,
@@ -59,11 +64,14 @@ const toExpression = (
         function: 'lens_metric_chart',
         arguments: {
           title: [attributes?.title || ''],
+          size: [state?.size || 'xl'],
+          titlePosition: [state?.titlePosition || 'bottom'],
+          textAlign: [state?.textAlign || 'center'],
           description: [attributes?.description || ''],
           metricTitle: [operation?.label || ''],
           accessor: [state.accessor],
           mode: [attributes?.mode || 'full'],
-          colorMode: [state?.colorMode || ColorMode.None],
+          colorMode: !canColor ? [ColorMode.None] : [state?.colorMode || ColorMode.None],
           palette:
             state?.colorMode && state?.colorMode !== ColorMode.None
               ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
@@ -146,16 +154,13 @@ export const getMetricVisualization = ({
                 {
                   columnId: props.state.accessor,
                   triggerIcon: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring
-                    ? props.state.palette?.params?.name === CUSTOM_PALETTE
-                      ? getStopsForFixedMode(stops, props.state.palette?.params.colorStops)
-                      : stops.map(({ color }) => color)
-                    : undefined,
+                  palette: hasColoring ? stops.map(({ color }) => color) : undefined,
                 },
               ]
             : [],
           supportsMoreColumns: !props.state.accessor,
-          filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
+          filterOperations: (op: OperationMetadata) =>
+            !op.isBucketed && supportedTypes.has(op.dataType),
           enableDimensionEditor: true,
           required: true,
         },
@@ -168,7 +173,7 @@ export const getMetricVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.metric.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];
@@ -191,6 +196,17 @@ export const getMetricVisualization = ({
 
   removeDimension({ prevState }) {
     return { ...prevState, accessor: undefined, colorMode: ColorMode.None, palette: undefined };
+  },
+
+  renderToolbar(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <MetricToolbar state={props.state} setState={props.setState} frame={props.frame} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 
   renderDimensionEditor(domElement, props) {

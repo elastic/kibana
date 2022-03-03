@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { EsIndex } from '../types/es_index';
+import type { EsIngestPipeline } from '../types/es_ingest_pipeline';
 import { isPopulatedObject } from '../shared_imports';
 
 // To be able to use the type guards on the client side, we need to make sure we don't import
@@ -16,6 +17,7 @@ import { isPopulatedObject } from '../shared_imports';
 import type { FieldHistogramsResponseSchema } from './field_histograms';
 import type { GetTransformsAuditMessagesResponseSchema } from './audit_messages';
 import type { DeleteTransformsResponseSchema } from './delete_transforms';
+import type { ResetTransformsResponseSchema } from './reset_transforms';
 import type { StartTransformsResponseSchema } from './start_transforms';
 import type { StopTransformsResponseSchema } from './stop_transforms';
 import type {
@@ -56,8 +58,21 @@ export const isDeleteTransformsResponseSchema = (
   );
 };
 
+export const isResetTransformsResponseSchema = (
+  arg: unknown
+): arg is ResetTransformsResponseSchema => {
+  return (
+    isPopulatedObject(arg) &&
+    Object.values(arg).every((d) => isPopulatedObject(d, ['transformReset']))
+  );
+};
+
 export const isEsIndices = (arg: unknown): arg is EsIndex[] => {
   return Array.isArray(arg);
+};
+
+export const isEsIngestPipelines = (arg: unknown): arg is EsIngestPipeline[] => {
+  return Array.isArray(arg) && arg.every((d) => isPopulatedObject(d, ['name']));
 };
 
 export const isEsSearchResponse = (arg: unknown): arg is estypes.SearchResponse => {

@@ -60,12 +60,16 @@ export const useEditorUpdates = (
             timeRange: timefilter.getTime(),
             filters: filterManager.getFilters(),
             query: queryString.getQuery(),
+            searchSessionId: services.data.search.session.getSessionId(),
           });
         }
       };
 
       const subscriptions = state$.subscribe({
-        next: reloadVisualization,
+        next: () => {
+          services.data.search.session.start();
+          reloadVisualization();
+        },
         error: services.fatalErrors.add,
       });
 
@@ -96,6 +100,16 @@ export const useEditorUpdates = (
       };
 
       vis.uiState.on('change', updateOnChange);
+
+      const sessionSubscription = services.data.search.session
+        .getSession$()
+        .subscribe((sessionId) => {
+          if (embeddableHandler.getInput().searchSessionId !== sessionId) {
+            embeddableHandler.updateInput({
+              searchSessionId: sessionId,
+            });
+          }
+        });
 
       const unsubscribeStateUpdates = appState.subscribe((state) => {
         setCurrentAppState(state);
@@ -152,6 +166,7 @@ export const useEditorUpdates = (
         subscriptions.unsubscribe();
         vis.uiState.off('change', updateOnChange);
         unsubscribeStateUpdates();
+        sessionSubscription.unsubscribe();
       };
     }
   }, [appState, eventEmitter, visInstance, services, setHasUnsavedChanges, visEditorController]);

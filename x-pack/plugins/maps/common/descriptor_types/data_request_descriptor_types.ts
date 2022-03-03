@@ -8,8 +8,9 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { Query } from 'src/plugins/data/common';
+import type { Filter } from '@kbn/es-query';
 import { MapExtent } from './map_descriptor';
-import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
+import { TimeRange } from '../../../../../src/plugins/data/common';
 
 export type Timeslice = {
   from: number;

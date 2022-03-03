@@ -45,7 +45,7 @@ import {
   BulkRuleResponse,
   PatchRuleProps,
   BulkActionProps,
-  BulkActionResponse,
+  BulkActionResponseMap,
   PreviewRulesProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -127,16 +127,17 @@ export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
-    sortField: 'enabled',
-    sortOrder: 'desc',
     showCustomRules: false,
     showElasticRules: false,
     tags: [],
   },
+  sortingOptions = {
+    field: 'enabled',
+    order: 'desc',
+  },
   pagination = {
     page: 1,
     perPage: 20,
-    total: 0,
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
@@ -150,8 +151,8 @@ export const fetchRules = async ({
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: getFieldNameForSortField(filterOptions.sortField),
-    sort_order: filterOptions.sortOrder,
+    sort_field: getFieldNameForSortField(sortingOptions.field),
+    sort_order: sortingOptions.order,
     ...(filterString !== '' ? { filter: filterString } : {}),
   };
 
@@ -254,6 +255,8 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
  * Perform bulk action with rules selected by a filter query
  *
  * @param query filter query to select rules to perform bulk action with
+ * @param ids string[] rule ids to select rules to perform bulk action with
+ * @param edit BulkEditActionPayload edit action payload
  * @param action bulk action to perform
  *
  * @throws An error if response is not OK
@@ -261,11 +264,21 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
 export const performBulkAction = async <Action extends BulkAction>({
   action,
   query,
-}: BulkActionProps<Action>): Promise<BulkActionResponse<Action>> =>
-  KibanaServices.get().http.fetch<BulkActionResponse<Action>>(DETECTION_ENGINE_RULES_BULK_ACTION, {
-    method: 'POST',
-    body: JSON.stringify({ action, query }),
-  });
+  edit,
+  ids,
+}: BulkActionProps<Action>): Promise<BulkActionResponseMap<Action>> =>
+  KibanaServices.get().http.fetch<BulkActionResponseMap<Action>>(
+    DETECTION_ENGINE_RULES_BULK_ACTION,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        action,
+        ...(edit ? { edit } : {}),
+        ...(ids ? { ids } : {}),
+        ...(query !== undefined ? { query } : {}),
+      }),
+    }
+  );
 
 /**
  * Create Prepackaged Rules

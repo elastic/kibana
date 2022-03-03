@@ -22,7 +22,7 @@ import {
   APMPluginStartDependencies,
 } from '../types';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
-import { UxUIFilters } from '../../typings/ui_filters';
+import { UxUIFilters } from '../../common/ux_ui_filter';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;

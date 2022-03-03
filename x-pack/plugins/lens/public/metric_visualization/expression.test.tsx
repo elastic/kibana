@@ -100,16 +100,16 @@ describe('metric_expression', () => {
             key="3"
           >
             <div
-              className="lnsMetricExpression__value"
-              data-test-subj="lns_metric_value"
-            >
-              3
-            </div>
-            <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
             >
               My fanci metric chart
+            </div>
+            <div
+              className="lnsMetricExpression__value"
+              data-test-subj="lns_metric_value"
+            >
+              3
             </div>
           </AutoScale>
         </VisualizationContainer>
@@ -138,16 +138,16 @@ describe('metric_expression', () => {
             key="last"
           >
             <div
-              className="lnsMetricExpression__value"
-              data-test-subj="lns_metric_value"
-            >
-              last
-            </div>
-            <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
             >
               My fanci metric chart
+            </div>
+            <div
+              className="lnsMetricExpression__value"
+              data-test-subj="lns_metric_value"
+            >
+              last
             </div>
           </AutoScale>
         </VisualizationContainer>
@@ -175,16 +175,16 @@ describe('metric_expression', () => {
             key="3"
           >
             <div
-              className="lnsMetricExpression__value"
-              data-test-subj="lns_metric_value"
-            >
-              3
-            </div>
-            <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
             >
               My fanci metric chart
+            </div>
+            <div
+              className="lnsMetricExpression__value"
+              data-test-subj="lns_metric_value"
+            >
+              3
             </div>
           </AutoScale>
         </VisualizationContainer>
@@ -210,6 +210,7 @@ describe('metric_expression', () => {
         >
           <AutoScale
             key="3"
+            minScale={0.05}
           >
             <div
               className="lnsMetricExpression__value"
@@ -293,16 +294,16 @@ describe('metric_expression', () => {
             key="0"
           >
             <div
-              className="lnsMetricExpression__value"
-              data-test-subj="lns_metric_value"
-            >
-              0
-            </div>
-            <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
             >
               My fanci metric chart
+            </div>
+            <div
+              className="lnsMetricExpression__value"
+              data-test-subj="lns_metric_value"
+            >
+              0
             </div>
           </AutoScale>
         </VisualizationContainer>
@@ -420,7 +421,7 @@ describe('metric_expression', () => {
       );
     });
 
-    test('it renders no color styling for numeric value if value is higher than rangeMax and continuity is "none"', () => {
+    test('it renders no color styling for numeric value if value is higher than rangeMax', () => {
       const { data, args } = sampleArgs();
 
       data.tables.l1.rows[0].c = 500;
@@ -432,7 +433,6 @@ describe('metric_expression', () => {
         gradient: false,
         range: 'number',
         colors: ['red', 'yellow', 'green'],
-        continuity: 'none',
       };
 
       const instance = mount(
@@ -453,7 +453,7 @@ describe('metric_expression', () => {
       );
     });
 
-    test('it renders no color styling for numeric value if value is lower than rangeMin and continuity is "none"', () => {
+    test('it renders no color styling for numeric value if value is lower than rangeMin', () => {
       const { data, args } = sampleArgs();
 
       data.tables.l1.rows[0].c = -1;
@@ -465,7 +465,6 @@ describe('metric_expression', () => {
         gradient: false,
         range: 'number',
         colors: ['red', 'yellow', 'green'],
-        continuity: 'none',
       };
 
       const instance = mount(
@@ -486,19 +485,18 @@ describe('metric_expression', () => {
       );
     });
 
-    test('it renders the color styling for numeric value if value is higher than rangeMax and continuity is "all"', () => {
+    test('it renders the correct color styling for numeric value if user select auto detect max value', () => {
       const { data, args } = sampleArgs();
 
       data.tables.l1.rows[0].c = 500;
       args.colorMode = ColorMode.Labels;
       args.palette.params = {
-        rangeMin: 0,
-        rangeMax: 400,
+        rangeMin: 20,
+        rangeMax: Infinity,
         stops: [100, 200, 400],
         gradient: false,
         range: 'number',
         colors: ['red', 'yellow', 'green'],
-        continuity: 'all',
       };
 
       const instance = mount(
@@ -519,19 +517,18 @@ describe('metric_expression', () => {
       );
     });
 
-    test('it renders the color styling for numeric value if value is lower than rangeMin and continuity is "all"', () => {
+    test('it renders the correct color styling for numeric value if user select auto detect min value', () => {
       const { data, args } = sampleArgs();
 
       data.tables.l1.rows[0].c = -1;
       args.colorMode = ColorMode.Labels;
       args.palette.params = {
-        rangeMin: 0,
+        rangeMin: -Infinity,
         rangeMax: 400,
-        stops: [100, 200, 400],
+        stops: [-Infinity, 200, 400],
         gradient: false,
         range: 'number',
         colors: ['red', 'yellow', 'green'],
-        continuity: 'all',
       };
 
       const instance = mount(

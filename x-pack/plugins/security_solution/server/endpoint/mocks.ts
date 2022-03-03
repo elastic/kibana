@@ -46,6 +46,7 @@ import { createEndpointMetadataServiceTestContextMock } from './services/metadat
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
+import { createFeatureUsageServiceMock } from './services/feature_usage';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -100,6 +101,7 @@ export const createMockEndpointAppContextServiceStartContract =
     const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
     const casesClientMock = createCasesClientMock();
     const savedObjectsStart = savedObjectsServiceMock.createStartContract();
+    const security = securityMock.createStart();
     const agentService = createMockAgentService();
     const agentPolicyService = createMockAgentPolicyService();
     const packagePolicyService = createPackagePolicyServiceMock();
@@ -129,6 +131,11 @@ export const createMockEndpointAppContextServiceStartContract =
       };
     });
 
+    // Make current user have `superuser` role by default
+    security.authc.getCurrentUser.mockReturnValue(
+      securityMock.createMockAuthenticatedUser({ roles: ['superuser'] })
+    );
+
     return {
       agentService,
       agentPolicyService,
@@ -139,7 +146,7 @@ export const createMockEndpointAppContextServiceStartContract =
       packageService,
       fleetAuthzService: createFleetAuthzServiceMock(),
       manifestManager: getManifestManagerMock(),
-      security: securityMock.createStart(),
+      security,
       alerting: alertsMock.createStart(),
       config,
       licenseService: createLicenseServiceMock(),
@@ -151,6 +158,7 @@ export const createMockEndpointAppContextServiceStartContract =
       cases: {
         getCasesClientWithRequest: jest.fn(async () => casesClientMock),
       },
+      featureUsageService: createFeatureUsageServiceMock(),
     };
   };
 

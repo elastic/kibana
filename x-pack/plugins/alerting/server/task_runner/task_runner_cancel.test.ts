@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import {
   AlertExecutorOptions,
   AlertTypeParams,
@@ -22,6 +23,9 @@ import {
   savedObjectsRepositoryMock,
   httpServiceMock,
   executionContextServiceMock,
+  savedObjectsServiceMock,
+  elasticsearchServiceMock,
+  uiSettingsServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
@@ -34,6 +38,9 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+}));
+jest.mock('../lib/wrap_scoped_cluster_client', () => ({
+  createWrappedScopedClusterClientFactory: jest.fn(),
 }));
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
@@ -51,6 +58,9 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 let fakeTimer: sinon.SinonFakeTimers;
+
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 describe('Task Runner Cancel', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -83,6 +93,9 @@ describe('Task Runner Cancel', () => {
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
+  const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+  const elasticsearchService = elasticsearchServiceMock.createInternalStart();
+  const uiSettingsService = uiSettingsServiceMock.createStartContract();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -91,7 +104,9 @@ describe('Task Runner Cancel', () => {
   };
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
-    getServices: jest.fn().mockReturnValue(services),
+    savedObjects: savedObjectsService,
+    uiSettings: uiSettingsService,
+    elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
@@ -106,6 +121,7 @@ describe('Task Runner Cancel', () => {
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
+    usageCounter: mockUsageCounter,
   };
 
   const mockDate = new Date('2019-02-12T21:01:22.479Z');
@@ -157,7 +173,18 @@ describe('Task Runner Cancel', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    taskRunnerFactoryInitializerParams.getServices.mockReturnValue(services);
+    jest
+      .requireMock('../lib/wrap_scoped_cluster_client')
+      .createWrappedScopedClusterClientFactory.mockReturnValue({
+        client: () => services.scopedClusterClient,
+        getMetrics: () => ({
+          numSearches: 3,
+          esSearchDurationMs: 33,
+          totalSearchDurationMs: 23423,
+        }),
+      });
+    savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
+    elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
@@ -282,6 +309,12 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
+              metrics: {
+                number_of_searches: 3,
+                number_of_triggered_actions: 0,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
@@ -333,6 +366,11 @@ describe('Task Runner Cancel', () => {
       },
       { refresh: false, namespace: undefined }
     );
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: 'alertsSkippedDueToRuleExecutionTimeout_test',
+      incrementBy: 1,
+    });
   });
 
   test('actionsPlugin.execute is called if rule execution is cancelled but cancelAlertsOnRuleTimeout from config is false', async () => {
@@ -346,7 +384,7 @@ describe('Task Runner Cancel', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
@@ -361,6 +399,8 @@ describe('Task Runner Cancel', () => {
     await promise;
 
     testActionsExecute();
+
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('actionsPlugin.execute is called if rule execution is cancelled but cancelAlertsOnRuleTimeout for ruleType is false', async () => {
@@ -378,7 +418,7 @@ describe('Task Runner Cancel', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     // setting cancelAlertsOnRuleTimeout for ruleType to false here
@@ -397,6 +437,8 @@ describe('Task Runner Cancel', () => {
     await promise;
 
     testActionsExecute();
+
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('actionsPlugin.execute is skipped if rule execution is cancelled and cancelAlertsOnRuleTimeout for both config and ruleType are true', async () => {
@@ -410,7 +452,7 @@ describe('Task Runner Cancel', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -449,7 +491,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       7,
-      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -533,6 +575,12 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
+              metrics: {
+                number_of_searches: 3,
+                number_of_triggered_actions: 0,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
@@ -563,6 +611,12 @@ describe('Task Runner Cancel', () => {
         ruleset: 'alerts',
       },
     });
+
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: 'alertsSkippedDueToRuleExecutionTimeout_test',
+      incrementBy: 1,
+    });
   });
 
   function testActionsExecute() {
@@ -587,7 +641,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -781,6 +835,12 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
+              metrics: {
+                number_of_searches: 3,
+                number_of_triggered_actions: 1,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },

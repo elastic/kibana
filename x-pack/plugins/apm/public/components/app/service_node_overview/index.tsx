@@ -46,20 +46,22 @@ function ServiceNodeOverview() {
       if (!start || !end) {
         return undefined;
       }
-      return callApmApi({
-        endpoint: 'GET /internal/apm/services/{serviceName}/serviceNodes',
-        params: {
-          path: {
-            serviceName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/serviceNodes',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              kuery,
+              environment,
+              start,
+              end,
+            },
           },
-          query: {
-            kuery,
-            environment,
-            start,
-            end,
-          },
-        },
-      });
+        }
+      );
     },
     [kuery, environment, serviceName, start, end]
   );
