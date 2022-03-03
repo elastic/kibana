@@ -57,6 +57,7 @@ import {
   VisualizationMap,
   Visualization,
   DatasourceMap,
+  Datasource,
 } from '../types';
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
@@ -148,6 +149,52 @@ const getExpressionFromDocument = async (
   };
 };
 
+async function getViewUnderlyingDataArgs({
+  activeDatasource,
+  activeDatasourceState,
+  activeData,
+  indexPatterns,
+  capabilities,
+  query,
+  filters,
+  timeRange,
+}: {
+  activeDatasource: Datasource;
+  activeDatasourceState: unknown;
+  activeData: TableInspectorAdapter | undefined;
+  indexPatterns: IndexPattern[];
+  capabilities: LensEmbeddableDeps['capabilities'];
+  query: Query;
+  filters: Filter[];
+  timeRange: TimeRange;
+}) {
+  const { error, meta } = getLayerMetaInfo(
+    activeDatasource,
+    activeDatasourceState,
+    activeData,
+    capabilities
+  );
+
+  if (error || !meta) {
+    return;
+  }
+
+  const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+    query,
+    filters,
+    meta,
+    indexPatterns
+  );
+
+  return {
+    indexPatternId: meta.id,
+    timeRange,
+    filters: newFilters,
+    query: newQuery,
+    columns: meta.columns,
+  };
+}
+
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>
@@ -183,6 +230,14 @@ export class Embeddable
     searchSessionId?: string;
   } = {};
 
+  private activeDataInfo: {
+    activeData?: TableInspectorAdapter;
+    activeDatasource?: Datasource;
+    activeDatasourceState?: unknown;
+  } = {};
+
+  private indexPatterns: IndexPattern[] = [];
+
   constructor(
     private deps: LensEmbeddableDeps,
     initialInput: LensEmbeddableInput,
@@ -197,7 +252,12 @@ export class Embeddable
     );
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
-    this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
+    this.initializeSavedVis(initialInput)
+      .then(() => this.initializeOutput())
+      .then(() => {
+        this.isInitialized = true;
+        this.onContainerStateChanged(initialInput);
+      });
     this.subscription = this.getUpdated$().subscribe(() =>
       this.onContainerStateChanged(this.input)
     );
@@ -364,9 +424,6 @@ export class Embeddable
     );
     this.expression = expression;
     this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
-
-    await this.initializeOutput();
-    this.isInitialized = true;
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
@@ -392,15 +449,15 @@ export class Embeddable
         searchSessionId: containerState.searchSessionId,
       };
       this.embeddableTitle = this.getTitle();
+      this.updateViewUnderlyingDataArgs();
       isDirty = true;
     }
     return isDirty;
   }
 
-  private updateActiveData: ExpressionWrapperProps['onData$'] = (data) => {
-    this.getViewUnderlyingDataArgs(data?.value?.data?.tables as TableInspectorAdapter).then(
-      console.log
-    );
+  private updateActiveData: ExpressionWrapperProps['onData$'] = (_, adapters) => {
+    this.activeDataInfo.activeData = adapters?.tables?.tables;
+    this.updateViewUnderlyingDataArgs();
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
@@ -610,65 +667,51 @@ export class Embeddable
     }
   }
 
-  async getViewUnderlyingDataArgs(activeData: TableInspectorAdapter) {
+  private async updateViewUnderlyingDataArgs() {
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+    if (activeDatasourceId) {
+      this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
+      const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
 
-    if (!activeDatasourceId) {
-      return;
+      this.activeDataInfo.activeDatasourceState =
+        await this.activeDataInfo.activeDatasource.initialize(
+          docDatasourceState,
+          this.savedVis?.references
+        );
     }
 
-    const { error, meta } = getLayerMetaInfo(
-      this.deps.datasourceMap[activeDatasourceId],
-      (this.savedVis?.state.datasourceStates[activeDatasourceId] as { state: unknown }).state,
-      activeData,
-      this.deps.capabilities
-    );
+    const viewUnderlyingDataArgs = await getViewUnderlyingDataArgs({
+      activeDatasource: this.activeDataInfo.activeDatasource!,
+      activeDatasourceState: this.activeDataInfo.activeDatasourceState,
+      activeData: this.activeDataInfo.activeData,
+      indexPatterns: this.indexPatterns!,
+      capabilities: this.deps.capabilities,
+      query: this.externalSearchContext.query!,
+      filters: this.externalSearchContext.filters!,
+      timeRange: this.externalSearchContext.timeRange!,
+    });
 
-    if (error || !meta) {
-      return;
-    }
-
-    const { indexPatterns } = await getIndexPatternsObjects([], this.deps.indexPatternService);
-
-    const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
-      this.input.query,
-      this.input.filters || [],
-      meta,
-      indexPatterns
-    );
-
-    return {
-      indexPatternId: meta.id,
-      timeRange: this.input.timeRange,
-      filters: newFilters,
-      query: newQuery,
-      columns: meta.columns,
-    };
+    console.log(viewUnderlyingDataArgs);
   }
 
   async initializeOutput() {
     if (!this.savedVis) {
       return;
     }
-    const responses = await Promise.allSettled(
-      uniqBy(
-        this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
-        'id'
-      ).map(({ id }) => this.deps.indexPatternService.get(id))
+
+    const { indexPatterns } = await getIndexPatternsObjects(
+      this.savedVis?.references.map(({ id }) => id) || [],
+      this.deps.indexPatternService
     );
-    const indexPatterns = responses
-      .filter(
-        (response): response is PromiseFulfilledResult<IndexPattern> =>
-          response.status === 'fulfilled'
-      )
-      .map(({ value }) => value);
+
+    this.indexPatterns = indexPatterns;
 
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
     // config dropdown correctly.
     const input = this.getInput();
 
-    this.errors = this.maybeAddTimeRangeError(this.errors, input, indexPatterns);
+    this.errors = this.maybeAddTimeRangeError(this.errors, input, this.indexPatterns);
 
     if (this.errors) {
       this.logError('validation');
@@ -683,7 +726,7 @@ export class Embeddable
       title,
       editPath: getEditPath(savedObjectId),
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
-      indexPatterns,
+      indexPatterns: this.indexPatterns,
     });
 
     // deferred loading of this embeddable is complete
