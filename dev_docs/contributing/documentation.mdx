@@ -11,7 +11,7 @@ Docs should be written during development and accompany PRs when relevant. There
 
 ## End-user documentation
 
-Documentation about user facing features should be written in [asciidoc](http://asciidoc.org/) at [https://github.com/elastic/kibana/tree/main/docs](https://github.com/elastic/kibana//tree/master/docs)
+Documentation about user facing features should be written in [asciidoc](http://asciidoc.org/) at [https://github.com/elastic/kibana/tree/main/docs](https://github.com/elastic/kibana/tree/main/docs)
 
 To build the docs, you must clone the [elastic/docs](https://github.com/elastic/docs) repo as a sibling of your Kibana repo. Follow the instructions in that project’s [README](https://github.com/elastic/docs#readme) for getting the docs tooling set up.
 
@@ -22,10 +22,10 @@ node scripts/docs.js --open
 ```
 
 ## REST APIs
-REST APIs should be documented using the following recommended formats:
+REST APIs should be documented using the following formats:
 
-- [API doc template](https://raw.githubusercontent.com/elastic/docs/master/shared/api-ref-ex.asciidoc)
-- [API object definition template](https://raw.githubusercontent.com/elastic/docs/master/shared/api-definitions-ex.asciidoc)
+- [API doc template](https://raw.githubusercontent.com/elastic/docs/main/shared/api-ref-ex.asciidoc)
+- [API object definition template](https://raw.githubusercontent.com/elastic/docs/main/shared/api-definitions-ex.asciidoc)
 
 ## Developer documentation
 
@@ -171,7 +171,7 @@ There are three great ways to debug issues with the API infrastructure.
 
 1. Write a test
 
-[api_doc_suite.test.ts](https://github.com/elastic/kibana/blob/master/packages/kbn-docs-utils/src/api_docs/tests/api_doc_suite.test.ts) is a pretty comprehensive test suite that builds the test docs inside the [**fixtures** folder](https://github.com/elastic/kibana/tree/master/packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src).
+[api_doc_suite.test.ts](https://github.com/elastic/kibana/blob/main/packages/kbn-docs-utils/src/api_docs/tests/api_doc_suite.test.ts) is a pretty comprehensive test suite that builds the test docs inside the [**fixtures** folder](https://github.com/elastic/kibana/tree/main/packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src).
 
 Edit the code inside `__fixtures__` to replicate the bug, write a test to track what should happen, then run `yarn jest api_doc_suite`.
 
@@ -183,7 +183,7 @@ This nifty website will let you add some types and see how the system parses it.
 
 3. Play around with `ts-morph` in a Code Sandbox.
 
-You can fork [this Code Sandbox example](https://codesandbox.io/s/typescript-compiler-issue-0lkwx?file=/src/use_ts_compiler.ts) that was used to explore how various ways to create the node signature returns different results (e.g. `node.getType.getText()` shows different results than `node.getType.getText(node)`).  Here is [another messy example](https://codesandbox.io/s/admiring-field-5btxs).
+You can fork [this Code Sandbox example](https://codesandbox.io/s/typescript-compiler-issue-0lkwx?file=/src/use_ts_compiler.ts) that was used to explore how to generate the node signature in different ways (e.g. `node.getType.getText()` shows different results than `node.getType.getText(node)`).  Here is [another messy example](https://codesandbox.io/s/admiring-field-5btxs).
 
 The code sandbox approach can be a lot faster to iterate compared to running it in Kibana.
 
