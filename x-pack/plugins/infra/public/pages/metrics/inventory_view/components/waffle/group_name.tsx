@@ -72,7 +72,6 @@ interface InnerProps {
 }
 
 const Inner = euiStyled.div<InnerProps>`
-  margin-top: -20px;
   border: 1px solid ${(props) => props.theme.eui.euiBorderColor};
   background-color: ${(props) =>
     props.isChild ? props.theme.eui.euiColorLightestShade : props.theme.eui.euiColorEmptyShade};
