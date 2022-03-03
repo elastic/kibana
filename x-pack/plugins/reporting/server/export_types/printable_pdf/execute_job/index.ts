@@ -21,7 +21,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
     const encryptionKey = config.get('encryptionKey');
 
     return async function runTask(jobId, job, cancellationToken, stream) {
-      const jobLogger = parentLogger.clone([PDF_JOB_TYPE, 'execute-job', jobId]);
+      const jobLogger = parentLogger.get(PDF_JOB_TYPE).get(`execute-job:${jobId}`);
       const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
       const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePdf: { end: () => void } | null | undefined;

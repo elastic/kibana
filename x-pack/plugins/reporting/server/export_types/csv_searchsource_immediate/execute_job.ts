@@ -32,7 +32,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   parentLogger
 ) {
   const config = reporting.getConfig();
-  const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE, 'execute-job']);
+  const logger = parentLogger.get(CSV_SEARCHSOURCE_IMMEDIATE_TYPE).get('execute-job');
 
   return async function runTask(_jobId, immediateJobParams, context, stream, req) {
     const job = {
@@ -82,7 +82,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     const { warnings } = result;
     if (warnings) {
       warnings.forEach((warning) => {
-        logger.warning(warning);
+        logger.warn(warning);
       });
     }
 
