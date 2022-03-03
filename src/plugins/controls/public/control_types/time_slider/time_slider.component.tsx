@@ -16,10 +16,12 @@ import {
   EuiFilterGroup,
   EuiButton,
   EuiPopover,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import moment from 'moment-timezone';
 import { TimeRange, calcAutoIntervalNear } from '../../../../data/common';
+import { ValidatedDualRange } from '../../../../kibana_react/public';
 
 function getTimezone() {
   const detectedTimezone = moment.tz.guess();
@@ -111,7 +113,8 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
       isSelected={true}
     >
       <EuiText>
-        {epochToKbnDateFormat(lowerValue)} → {epochToKbnDateFormat(upperValue)}
+        {epochToKbnDateFormat(lowerValue < lowerBound ? lowerBound : lowerValue)} →{' '}
+        {epochToKbnDateFormat(upperValue > upperBound ? upperBound : upperValue)}
       </EuiText>
     </EuiFilterButton>
   );
@@ -124,7 +127,7 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
         className="optionsList__popoverOverride"
         anchorClassName="optionsList__anchorOverride"
         closePopover={() => setIsPopoverOpen(false)}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         anchorPosition="downCenter"
         ownFocus
         repositionOnScroll
@@ -143,12 +146,45 @@ export interface TimeSliderProps {
 
 export const TimeSliderComponent: FC<TimeSliderProps> = ({ range, value, onChange }) => {
   const [lowerBound, upperBound] = range;
-  const [lowerValue, upperValue] = value;
+  let [lowerValue, upperValue] = value;
+
+  if (lowerValue < lowerBound) {
+    lowerValue = lowerBound;
+  }
+
+  if (upperValue > upperBound) {
+    upperValue = upperBound;
+  }
 
   const ticks = useMemo(() => {
     const interval = getInterval(lowerBound, upperBound);
     return getTicks(lowerBound, upperBound, interval);
   }, [lowerBound, upperBound]);
+
+  return (
+    <>
+      <EuiPopoverTitle paddingSize="s">
+        {epochToKbnDateFormat(lowerValue)} - {epochToKbnDateFormat(upperValue)}
+      </EuiPopoverTitle>
+      <div className="rangeSlider__actions">
+        <ValidatedDualRange
+          id={'my-id'}
+          max={upperBound}
+          min={lowerBound}
+          onChange={onChange}
+          step={undefined}
+          value={[lowerValue, upperValue]}
+          fullWidth
+          ticks={ticks}
+          // levels={levels}
+          showTicks
+          disabled={false}
+          errorMessage={''}
+          allowEmptyRange
+        />
+      </div>
+    </>
+  );
 
   // We want to have some sort of delay in actually pushing up a change so we don't continually push changes
   // But for now we'll just report everything up.  Maybe a layer up is where that should be happening anyways

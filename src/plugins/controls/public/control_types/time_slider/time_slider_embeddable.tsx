@@ -10,6 +10,7 @@ import {
   Filter,
   buildEsQuery,
   compareFilters,
+  buildRangeFilter,
   buildPhraseFilter,
   buildPhrasesFilter,
 } from '@kbn/es-query';
@@ -37,6 +38,7 @@ import { pluginServices } from '../../services';
 //import { TimeSlider } from './time_slider.component';
 import { TimeSlider as TimeSliderComponent, TimeSliderSubjectState } from './time_slider';
 import { TimeRange } from 'src/plugins/data/public';
+import { timeSliderReducers } from './time_slider_reducers';
 
 //interface TimesliderControlEmbeddableInput extends EmbeddableInput {
 //  timerange: TimeRange;//
@@ -115,7 +117,53 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     );
 
     this.subscriptions.add(dataFetchPipe.subscribe(this.fetchAvailableTimerange));
+
+    // build filters when value change
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(
+          debounceTime(400),
+          distinctUntilChanged((a, b) => isEqual(a.value, b.value)),
+          skip(1) // skip the first input update because initial filters will be built by initialize.
+        )
+        .subscribe(() => this.buildFilter())
+    );
   }
+
+  private buildFilter = async () => {
+    console.log('building filter');
+    const {
+      fieldName,
+      value: [min, max],
+    } = this.getInput();
+    // TODO: double check that this is correct
+    if (
+      [min, max, this.componentState.min, this.componentState.max].some(
+        (value) => value === undefined
+      )
+    ) {
+      this.updateOutput({ filters: [] });
+      return;
+    }
+    const dataView = await this.getCurrentDataView();
+    const field = dataView.getFieldByName(this.getInput().fieldName);
+
+    //if (!field) throw fieldMissingError(fieldName);
+
+    const rangeFilter = buildRangeFilter(
+      field!,
+      {
+        gte: Math.max(Number(min), this.componentState.min!),
+        lte: Math.min(Number(max), this.componentState.max!),
+      },
+      dataView
+    );
+
+    rangeFilter.meta.key = field?.name;
+
+    console.log(rangeFilter);
+    this.updateOutput({ filters: [rangeFilter] });
+  };
 
   private updateComponentState(changes: Partial<TimeSliderSubjectState>) {
     this.componentState = {
@@ -197,8 +245,6 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const min = get(resp, 'rawResponse.aggregations.minAgg.value', undefined);
     const max = get(resp, 'rawResponse.aggregations.maxAgg.value', undefined);
 
-    console.log(min, max);
-
     this.updateComponentState({
       min: min === null ? undefined : min,
       max: max === null ? undefined : max,
@@ -228,7 +274,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.node = node;
 
     ReactDOM.render(
-      <TimeSliderControlReduxWrapper embeddable={this} reducers={{}}>
+      <TimeSliderControlReduxWrapper embeddable={this} reducers={timeSliderReducers}>
         <TimeSliderComponent componentStateSubject={this.componentStateSubject$} />
       </TimeSliderControlReduxWrapper>,
       node
