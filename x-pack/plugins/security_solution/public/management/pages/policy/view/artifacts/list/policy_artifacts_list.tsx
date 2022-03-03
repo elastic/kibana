@@ -12,6 +12,7 @@ import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { useUrlParams } from '../../../../../components/hooks/use_url_params';
 import {
   MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
@@ -21,11 +22,7 @@ import {
   ArtifactCardGrid,
   ArtifactCardGridProps,
 } from '../../../../../components/artifact_card_grid';
-import {
-  usePolicyDetailsArtifactsNavigateCallback,
-  usePolicyDetailsSelector,
-} from '../../policy_hooks';
-import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
+import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
@@ -58,7 +55,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const policiesRequest = useGetEndpointSpecificPolicies({ perPage: 1000 });
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(apiClient.listId);
-    const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+    const { urlParams } = useUrlParams();
     const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
 
     const { state } = useGetLinkTo(policy.id, policy.name, apiClient.listId);
@@ -68,15 +65,15 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       isLoading: isLoadingArtifacts,
       isRefetching: isRefetchingArtifacts,
     } = useListArtifact(apiClient, searcheableFields, {
-      page: urlParams.page_index + 1 || undefined,
-      perPage: urlParams.page_size || undefined,
-      filter: urlParams.filter,
+      page: Number(urlParams.page_index) + 1 || undefined,
+      perPage: Number(urlParams.page_size) || undefined,
+      filter: urlParams.filter as string,
       policies: [policy.id, 'global'],
     });
 
     const pagination: Pagination = {
-      pageSize: urlParams.page_size || MANAGEMENT_DEFAULT_PAGE_SIZE,
-      pageIndex: urlParams.page_index || 0,
+      pageSize: Number(urlParams.page_size) || MANAGEMENT_DEFAULT_PAGE_SIZE,
+      pageIndex: Number(urlParams.page_index) || 0,
       pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
       totalItemCount: artifacts?.total || 0,
     };
@@ -153,7 +150,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       <>
         <SearchExceptions
           placeholder={labels.listSearchPlaceholderMessage}
-          defaultValue={urlParams.filter}
+          defaultValue={urlParams.filter as string}
           hideRefreshButton
           onSearch={handleOnSearch}
         />

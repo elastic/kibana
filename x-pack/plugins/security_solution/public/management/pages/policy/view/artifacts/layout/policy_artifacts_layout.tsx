@@ -25,17 +25,14 @@ import { useAppUrl, useHttp } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { ManagementPageLoader } from '../../../../../components/management_page_loader';
+import { useUrlParams } from '../../../../../components/hooks/use_url_params';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import {
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
   getTrustedAppsListPath,
 } from '../../../../../common/routing';
-import {
-  usePolicyDetailsSelector,
-  usePolicyDetailsArtifactsNavigateCallback,
-} from '../../policy_hooks';
-import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
+import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
@@ -63,7 +60,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     const { getAppUrl } = useAppUrl();
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(listId);
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
-    const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+    const { urlParams } = useUrlParams();
     const [exceptionItemToDelete, setExceptionItemToDelete] = useState<
       ExceptionListItemSchema | undefined
     >();
