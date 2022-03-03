@@ -169,7 +169,7 @@ export class VectorStyleEditor extends Component<Props, State> {
 
   _onCustomIconsChange = (icons: CustomIcon[]) => {
     this.props.onCustomIconsChange(icons);
-  }
+  };
 
   _hasMarkerOrIcon() {
     const iconSize = this.props.styleProperties[VECTOR_STYLES.ICON_SIZE];

@@ -10,7 +10,12 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { OrdinalLegend } from '../components/legend/ordinal_legend';
 import { makeMbClampedNumberExpression } from '../style_util';
-import { FieldFormatter, HALF_MAKI_ICON_SIZE, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../../common/constants';
+import {
+  FieldFormatter,
+  HALF_MAKI_ICON_SIZE,
+  MB_LOOKUP_FUNCTION,
+  VECTOR_STYLES,
+} from '../../../../../common/constants';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer';

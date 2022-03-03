@@ -155,28 +155,26 @@ export class IconSelect extends Component {
       }),
     ];
 
-    let customOptions = [];
+    const customOptions = [];
 
     if (this.props.customIcons) {
-      this.props.customIcons.forEach(
-        ({ symbolId, svg, name, cutoff, radius }) => {
-          customOptions.push({
-            key: symbolId,
-            label: name,
-            svg,
-            cutoff,
-            radius,
-            prepend: (
-              <SymbolIcon
-                key={symbolId}
-                symbolId={symbolId}
-                svg={svg}
-                fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-              />
-            ),
-          });
-        }
-      );
+      this.props.customIcons.forEach(({ symbolId, svg, name, cutoff, radius }) => {
+        customOptions.push({
+          key: symbolId,
+          label: name,
+          svg,
+          cutoff,
+          radius,
+          prepend: (
+            <SymbolIcon
+              key={symbolId}
+              symbolId={symbolId}
+              svg={svg}
+              fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            />
+          ),
+        });
+      });
     }
 
     if (customOptions.length)

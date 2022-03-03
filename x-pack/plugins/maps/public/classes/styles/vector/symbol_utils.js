@@ -8,8 +8,8 @@
 import React from 'react';
 import xml2js from 'xml2js';
 import uuid from 'uuid/v4';
-import Canvg from 'canvg';
-import calcSDF  from 'bitmap-sdf';
+import { Canvg } from 'canvg';
+import calcSDF from 'bitmap-sdf';
 import { CUSTOM_ICON_SIZE, MAKI_ICON_SIZE } from '../../../../common/constants';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
@@ -17,7 +17,9 @@ import { getIsDarkMode } from '../../../kibana_services';
 import { MAKI_ICONS } from './maki_icons';
 
 export const CUSTOM_ICON_PREFIX_SDF = '__kbn__custom_icon_sdf__';
-export const CUSTOM_ICON_PIXEL_RATIO = Math.floor((window.devicePixelRatio) * (CUSTOM_ICON_SIZE / MAKI_ICON_SIZE) * 0.75);
+export const CUSTOM_ICON_PIXEL_RATIO = Math.floor(
+  window.devicePixelRatio * (CUSTOM_ICON_SIZE / MAKI_ICON_SIZE) * 0.75
+);
 
 export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
   return {
@@ -25,7 +27,6 @@ export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
     label: symbolId,
   };
 });
-
 
 /**
  * Converts a SVG icon to a PNG image using a signed distance function (SDF).
@@ -36,7 +37,7 @@ export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
  * @param {number} [radius=0.25] - size of SDF around the cutoff as percent of output icon size
  * @return {ImageData} image that can be added to a MapLibre map with option `{ sdf: true }`
  */
-export async function createSdfIcon({ svg, renderSize=64, cutoff = 0.25, radius = 0.25 }) {
+export async function createSdfIcon({ svg, renderSize = 64, cutoff = 0.25, radius = 0.25 }) {
   const buffer = 3;
   const size = renderSize + buffer * 4;
   const svgCanvas = document.createElement('canvas');

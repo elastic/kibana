@@ -68,7 +68,7 @@ export class BreakedLegend extends Component<Props, State> {
     }
 
     const categories = this.props.breaks.map(({ symbolId, svg, label, color }, index) => {
-      let icon = undefined;
+      let icon;
       if (symbolId !== undefined) {
         icon = { value: symbolId, svg };
       }

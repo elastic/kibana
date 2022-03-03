@@ -256,9 +256,7 @@ export class CustomIconModal extends Component<Props, State> {
                 <EuiFieldText
                   value={name}
                   className="mapsCustomIconForm__name"
-                  onChange={(e) =>
-                    this._handleChange('name', e.target.value)
-                  }
+                  onChange={(e) => this._handleChange('name', e.target.value)}
                   required
                   data-test-subj="mapsCustomIconForm-name"
                 />

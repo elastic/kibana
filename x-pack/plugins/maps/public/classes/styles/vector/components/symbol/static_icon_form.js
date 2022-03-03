@@ -9,9 +9,21 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IconSelect } from './icon_select';
 
-export function StaticIconForm({ onStaticStyleChange, onCustomIconsChange, customIcons, staticDynamicSelect, styleProperty }) {
+export function StaticIconForm({
+  onStaticStyleChange,
+  onCustomIconsChange,
+  customIcons,
+  staticDynamicSelect,
+  styleProperty,
+}) {
   const onChange = ({ selectedIconId, svg, label, cutoff, radius }) => {
-    onStaticStyleChange(styleProperty.getStyleName(), { value: selectedIconId, svg, label, cutoff, radius });
+    onStaticStyleChange(styleProperty.getStyleName(), {
+      value: selectedIconId,
+      svg,
+      label,
+      cutoff,
+      radius,
+    });
   };
 
   return (
@@ -20,7 +32,12 @@ export function StaticIconForm({ onStaticStyleChange, onCustomIconsChange, custo
         {staticDynamicSelect}
       </EuiFlexItem>
       <EuiFlexItem>
-        <IconSelect customIcons={customIcons} onChange={onChange} onCustomIconsChange={onCustomIconsChange} icon={styleProperty.getOptions()} />
+        <IconSelect
+          customIcons={customIcons}
+          onChange={onChange}
+          onCustomIconsChange={onCustomIconsChange}
+          icon={styleProperty.getOptions()}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

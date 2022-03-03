@@ -170,7 +170,7 @@ export class VectorStyle implements IVectorStyle {
 
   static createDescriptor(
     properties: Partial<VectorStylePropertiesDescriptor> = {},
-    isTimeAware = true,
+    isTimeAware = true
   ) {
     return {
       type: LAYER_STYLE_TYPE.VECTOR,
@@ -462,7 +462,7 @@ export class VectorStyle implements IVectorStyle {
   renderEditor(
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
     onCustomIconsChange: (customIcons: CustomIcon[]) => void,
-    customIcons: CustomIcon[],
+    customIcons: CustomIcon[]
   ) {
     const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName: VECTOR_STYLES, stylePropertyDescriptor: any) => {

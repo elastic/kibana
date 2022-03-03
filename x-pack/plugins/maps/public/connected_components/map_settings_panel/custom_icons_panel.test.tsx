@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 jest.mock('../../kibana_services', () => {
   return {
     getIsDarkMode() {

@@ -188,7 +188,7 @@ export type SizeStylePropertyDescriptor =
 
 export type CustomIcon = {
   symbolId: string;
-  svg: string; //svg string
+  svg: string; // svg string
   name: string; // user given name
   cutoff: number;
   radius: number;

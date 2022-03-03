@@ -76,7 +76,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     });
 
     if (fallbackSymbol && 'icon' in fallbackSymbol) {
-      mbStops.push(fallbackSymbol.icon);// last item is fallback style for anything that does not match provided stops
+      mbStops.push(fallbackSymbol.icon); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }

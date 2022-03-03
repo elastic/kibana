@@ -7,11 +7,14 @@
 
 import React, { Component } from 'react';
 import { EuiColorPicker, EuiFlexItem, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { ResizeChecker } from '.././../../../../../../../../src/plugins/kibana_utils/public';
 import { mapboxgl, Map as MapboxMap } from '@kbn/mapbox-gl';
-// @ts-expect-error
-import { CUSTOM_ICON_PREFIX_SDF, CUSTOM_ICON_PIXEL_RATIO, createSdfIcon, getCustomIconId } from '../../symbol_utils';
-
+import { ResizeChecker } from '.././../../../../../../../../src/plugins/kibana_utils/public';
+import {
+  CUSTOM_ICON_PREFIX_SDF,
+  CUSTOM_ICON_PIXEL_RATIO,
+  createSdfIcon,
+  // @ts-expect-error
+} from '../../symbol_utils';
 
 export interface Props {
   svg?: string;
@@ -42,7 +45,11 @@ export class IconPreview extends Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.svg !== prevProps.svg || this.props.cutoff !== prevProps.cutoff || this.props.radius !== prevProps.radius) {
+    if (
+      this.props.svg !== prevProps.svg ||
+      this.props.cutoff !== prevProps.cutoff ||
+      this.props.radius !== prevProps.radius
+    ) {
       this._syncImageToMap();
     }
   }
@@ -62,7 +69,7 @@ export class IconPreview extends Component<Props, State> {
     this.setState({ iconColor }, () => {
       this._syncPaintPropertiesToMap();
     });
-  }
+  };
 
   _setContainerRef = (element: HTMLDivElement) => {
     this._containerRef = element;
@@ -81,7 +88,10 @@ export class IconPreview extends Component<Props, State> {
         // @ts-expect-error
         map.updateImage(IconPreview.iconId, imageData);
       } else {
-        map.addImage(IconPreview.iconId, imageData, { sdf: true, pixelRatio: CUSTOM_ICON_PIXEL_RATIO });
+        map.addImage(IconPreview.iconId, imageData, {
+          sdf: true,
+          pixelRatio: CUSTOM_ICON_PIXEL_RATIO,
+        });
       }
       map.setLayoutProperty('icon-layer', 'icon-image', IconPreview.iconId);
       map.setLayoutProperty('icon-layer', 'icon-size', 6);
@@ -150,7 +160,7 @@ export class IconPreview extends Component<Props, State> {
       });
 
       resolve(map);
-    })
+    });
   }
 
   async _initializeMap() {
@@ -159,7 +169,6 @@ export class IconPreview extends Component<Props, State> {
     const map: MapboxMap = await this._createMapInstance();
 
     if (!this._isMounted) return;
-
 
     this.setState({ map }, () => {
       this._initResizerChecker();

@@ -14,8 +14,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { DEFAULT_CUSTOM_ICON_CUTOFF, DEFAULT_CUSTOM_ICON_RADIUS } from '../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DEFAULT_CUSTOM_ICON_CUTOFF, DEFAULT_CUSTOM_ICON_RADIUS } from '../../../common/constants';
 import { getIsDarkMode } from '../../kibana_services';
 import { MapSettings } from '../../reducers/map';
 // @ts-expect-error
@@ -91,8 +91,8 @@ export class CustomIconsPanel extends Component<Props, State> {
     const { symbolId, name, svg, cutoff, radius } = icon;
 
     const icons = [
-      ...this.props.settings.customIcons.filter((icon) => {
-        return icon.symbolId !== symbolId;
+      ...this.props.settings.customIcons.filter((i) => {
+        return i.symbolId !== symbolId;
       }),
       {
         symbolId: symbolId || getCustomIconId(),
@@ -109,8 +109,8 @@ export class CustomIconsPanel extends Component<Props, State> {
   private _handleDelete = (icon: CustomIcon) => {
     const { symbolId } = icon;
     const icons = [
-      ...this.props.settings.customIcons.filter((icon) => {
-        return icon.symbolId !== symbolId;
+      ...this.props.settings.customIcons.filter((i) => {
+        return i.symbolId !== symbolId;
       }),
     ];
     this.props.updateMapSetting('customIcons', icons);
@@ -132,7 +132,11 @@ export class CustomIconsPanel extends Component<Props, State> {
     );
     if (!this.props.settings.customIcons.length) {
       return (
-        <EuiEmptyPrompt title={<h2>This map does not have any custom icons yet</h2>} titleSize={"xs"} actions={[addIconButton]} />
+        <EuiEmptyPrompt
+          title={<h2>This map does not have any custom icons yet</h2>}
+          titleSize={'xs'}
+          actions={[addIconButton]}
+        />
       );
     }
 
@@ -152,7 +156,7 @@ export class CustomIconsPanel extends Component<Props, State> {
           iconType: 'gear',
           alwaysShow: true,
           onClick: () => {
-            this._handleIconEdit(icon)
+            this._handleIconEdit(icon);
           },
         },
       };

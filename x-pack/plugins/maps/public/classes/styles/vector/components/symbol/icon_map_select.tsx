@@ -13,7 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { IconStops } from './icon_stops';
 // @ts-expect-error
 import { getIconPaletteOptions, PREFERRED_ICONS } from '../../symbol_utils';
-import { CustomIcon, IconDynamicOptions, IconStop } from '../../../../../../common/descriptor_types';
+import {
+  CustomIcon,
+  IconDynamicOptions,
+  IconStop,
+} from '../../../../../../common/descriptor_types';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const CUSTOM_MAP_ID = 'CUSTOM_MAP_ID';
