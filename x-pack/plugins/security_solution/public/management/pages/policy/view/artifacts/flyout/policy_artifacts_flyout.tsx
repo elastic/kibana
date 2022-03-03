@@ -79,9 +79,6 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       searcheableFields,
       {
         excludedPolicies: [policyItem.id, 'global'],
-      },
-      {
-        enabled: currentFilter !== '' && artifacts?.total === 0,
       }
     );
 
@@ -131,13 +128,23 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       [labels.flyoutWarningCalloutTitle, labels.flyoutWarningCalloutMessage]
     );
 
+    const assignableArtifacts = useMemo(
+      () => allNotAssigned?.total !== 0 && (artifacts?.total !== 0 || currentFilter !== ''),
+      [allNotAssigned?.total, artifacts?.total, currentFilter]
+    );
+
+    const isGlobalLoading = useMemo(
+      () => isLoadingArtifacts || isRefetchingArtifacts || isLoadingAllNotAssigned,
+      [isLoadingAllNotAssigned, isLoadingArtifacts, isRefetchingArtifacts]
+    );
+
     const noItemsMessage = useMemo(() => {
-      if (isLoadingArtifacts || isRefetchingArtifacts || isLoadingAllNotAssigned) {
+      if (isGlobalLoading) {
         return null;
       }
 
       // there are no artifacts assignable to this policy
-      if (allNotAssigned?.total === 0 || (artifacts?.total === 0 && currentFilter === '')) {
+      if (!assignableArtifacts) {
         return (
           <EuiEmptyPrompt
             data-test-subj="artifacts-no-assignable-items"
@@ -156,12 +163,9 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
         );
       }
     }, [
-      isLoadingArtifacts,
-      isRefetchingArtifacts,
-      isLoadingAllNotAssigned,
-      allNotAssigned?.total,
+      isGlobalLoading,
+      assignableArtifacts,
       artifacts?.total,
-      currentFilter,
       labels.flyoutNoArtifactsToBeAssignedMessage,
       labels.flyoutNoSearchResultsMessage,
     ]);
@@ -177,11 +181,13 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {(artifacts?.total || 0) > MAX_ALLOWED_RESULTS ? searchWarningMessage : null}
-          <SearchExceptions
-            onSearch={handleOnSearch}
-            placeholder={labels.flyoutSearchPlaceholder}
-            hideRefreshButton
-          />
+          {!isLoadingAllNotAssigned && assignableArtifacts && (
+            <SearchExceptions
+              onSearch={handleOnSearch}
+              placeholder={labels.flyoutSearchPlaceholder}
+              hideRefreshButton
+            />
+          )}
           <EuiSpacer size="m" />
 
           <PolicyArtifactsAssignableList

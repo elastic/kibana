@@ -52,6 +52,7 @@ interface PolicyArtifactsLayoutProps {
   listId: string;
   /** A list of labels for the given policy artifact page. Not all have to be defined, only those that should override the defaults */
   labels: PolicyArtifactsPageLabels;
+  /** A boolean to check extra privileges for restricted actions, true when it's allowed, false when not */
   externalPrivileges?: boolean;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
