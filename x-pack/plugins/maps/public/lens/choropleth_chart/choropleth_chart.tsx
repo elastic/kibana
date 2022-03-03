@@ -138,15 +138,15 @@ export function ChoroplethChart({
 }
 
 function getAccessorLabel(table: Datatable, accessor: string) {
-  const column = table.columns.find((column) => {
-    return column.id === accessor;
+  const column = table.columns.find((col) => {
+    return col.id === accessor;
   });
   return column ? column.name : accessor;
 }
 
 function getEmsLayerLabel(emsLayerId: string, emsFileLayers: FileLayer[]): string | null {
-  const fileLayer = emsFileLayers.find((fileLayer) => {
-    return fileLayer.getId() === emsLayerId;
+  const fileLayer = emsFileLayers.find((file) => {
+    return file.getId() === emsLayerId;
   });
   return fileLayer ? fileLayer.getDisplayName() : null;
 }

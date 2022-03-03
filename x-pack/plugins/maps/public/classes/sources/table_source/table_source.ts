@@ -216,9 +216,11 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const tooltipProperties: ITooltipProperty[] = [];
     for (const key in properties) {
-      const field = this.getFieldByName(key);
-      if (field) {
-        tooltipProperties.push(new TooltipProperty(key, await field.getLabel(), properties[key]));
+      if (properties.hasOwnProperty(key)) {
+        const field = this.getFieldByName(key);
+        if (field) {
+          tooltipProperties.push(new TooltipProperty(key, await field.getLabel(), properties[key]));
+        }
       }
     }
     return tooltipProperties;

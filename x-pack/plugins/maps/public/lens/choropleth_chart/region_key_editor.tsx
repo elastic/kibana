@@ -7,11 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import type { FileLayer } from '@elastic/ems-client';
 import { ChoroplethChartState } from './types';
 import { EMSFileSelect } from '../../components/ems_file_select';
@@ -48,11 +44,9 @@ export function RegionKeyEditor(props: Props) {
   if (emsFields.length) {
     let selectedOption;
     if (props.state.emsField) {
-      selectedOption = emsFields.find(
-        (option: EuiComboBoxOptionOption<string>) => {
-          return props.state.emsField === option.value;
-        }
-      );
+      selectedOption = emsFields.find((option: EuiComboBoxOptionOption<string>) => {
+        return props.state.emsField === option.value;
+      });
     }
     emsFieldSelect = (
       <EuiFormRow

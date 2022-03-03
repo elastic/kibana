@@ -74,7 +74,7 @@ export const getVisualization = ({
   },
 
   getSuggestions(suggestionRequest: SuggestionRequest<ChoroplethChartState>) {
-    return getSuggestions(suggestionRequest, emsFileLayers);
+    return getSuggestions(suggestionRequest.table, suggestionRequest.activeData, emsFileLayers);
   },
 
   initialize(addNewLayer, state) {

@@ -148,7 +148,7 @@ export function getSuggestions({
             currentVisualizationState,
             subVisualizationId,
             palette,
-            activeData,
+            activeData
           );
         });
     })
@@ -206,7 +206,7 @@ function getVisualizationSuggestions(
   currentVisualizationState: unknown,
   subVisualizationId?: string,
   mainPalette?: PaletteOutput,
-  activeData?: Record<string, Datatable>,
+  activeData?: Record<string, Datatable>
 ) {
   return visualization
     .getSuggestions({
