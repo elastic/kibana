@@ -252,9 +252,6 @@ export const useGetCaseUserActions = (
         const response = await getCaseUserActions(thisCaseId, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
-          // Attention Future developer
-          // We are removing the first item because it will always be the creation of the case
-          // and we do not want it to simplify our life
           const participants = !isEmpty(response)
             ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
             : [];

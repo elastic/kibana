@@ -15,6 +15,10 @@ export interface Buckets {
   }>;
 }
 
+export interface Cardinality {
+  value: number;
+}
+
 export interface MaxBucketOnCaseAggregation {
   references: { cases: { max: { value: number } } };
 }
@@ -41,7 +45,14 @@ export interface Status {
 
 export interface CasesTelemetry {
   cases: {
-    all: Count & { status: Status; syncAlertsOn: number; syncAlertsOff: number };
+    all: Count & {
+      status: Status;
+      syncAlertsOn: number;
+      syncAlertsOff: number;
+      totalUsers: number;
+      totalParticipants: number;
+      totalTags: number;
+    };
     sec: Count;
     obs: Count;
     main: Count;

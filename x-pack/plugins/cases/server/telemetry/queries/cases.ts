@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { CollectTelemetryDataParams, Buckets, CasesTelemetry } from '../types';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CollectTelemetryDataParams, Buckets, CasesTelemetry, Cardinality } from '../types';
 import {
   findValueInBuckets,
   getAggregationsBuckets,
@@ -33,12 +33,14 @@ export const getCasesTelemetryData = async ({
     {}
   );
 
-  const res = await savedObjectsClient.find<
+  const casesRes = await savedObjectsClient.find<
     unknown,
     Record<typeof owners[number], { counts: Buckets }> & {
       counts: Buckets;
       syncAlerts: Buckets;
       status: Buckets;
+      users: Cardinality;
+      tags: Cardinality;
     }
   >({
     page: 0,
@@ -58,11 +60,39 @@ export const getCasesTelemetryData = async ({
           field: `${CASE_SAVED_OBJECT}.attributes.status`,
         },
       },
+      users: {
+        cardinality: {
+          field: `${CASE_SAVED_OBJECT}.attributes.created_by.username`,
+        },
+      },
+      tags: {
+        cardinality: {
+          field: `${CASE_SAVED_OBJECT}.attributes.tags`,
+        },
+      },
+    },
+  });
+
+  const commentsRes = await savedObjectsClient.find<
+    unknown,
+    Record<typeof owners[number], { counts: Buckets }> & {
+      participants: Cardinality;
+    }
+  >({
+    page: 0,
+    perPage: 0,
+    type: CASE_COMMENT_SAVED_OBJECT,
+    aggs: {
+      participants: {
+        cardinality: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_by.username`,
+        },
+      },
     },
   });
 
   const aggregationsBuckets = getAggregationsBuckets({
-    aggs: res.aggregations,
+    aggs: casesRes.aggregations,
     keys: [
       'counts',
       'observability.counts',
@@ -70,12 +100,13 @@ export const getCasesTelemetryData = async ({
       'syncAlerts',
       'status',
       'totalsByOwner',
+      'users',
     ],
   });
 
   return {
     all: {
-      total: res.total,
+      total: casesRes.total,
       ...getCountsFromBuckets(aggregationsBuckets.counts),
       status: {
         open: findValueInBuckets(aggregationsBuckets.status, 'open'),
@@ -84,6 +115,9 @@ export const getCasesTelemetryData = async ({
       },
       syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
       syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
+      totalUsers: casesRes.aggregations?.users?.value ?? 0,
+      totalParticipants: commentsRes.aggregations?.participants?.value ?? 0,
+      totalTags: casesRes.aggregations?.tags?.value ?? 0,
     },
     sec: {
       total: findValueInBuckets(aggregationsBuckets.totalsByOwner, 'securitySolution'),

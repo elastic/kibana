@@ -24,7 +24,15 @@ const statusSchema: StatusSchema = {
 
 export const casesSchema: CasesTelemetrySchema = {
   cases: {
-    all: { ...countSchema, status: statusSchema, syncAlertsOn: long, syncAlertsOff: long },
+    all: {
+      ...countSchema,
+      status: statusSchema,
+      syncAlertsOn: long,
+      syncAlertsOff: long,
+      totalUsers: long,
+      totalParticipants: long,
+      totalTags: long,
+    },
     sec: countSchema,
     obs: countSchema,
     main: countSchema,
