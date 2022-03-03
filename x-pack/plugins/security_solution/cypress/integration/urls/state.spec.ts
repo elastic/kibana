@@ -65,8 +65,6 @@ describe('url state', () => {
     cleanKibana();
   });
 
-  // sourcerer=(default:(id:security-solution-default,selectedPatterns:!(%27auditbeat-*%27,%27filebeat-*%27,%27logs-*%27,%27winlogbeat-*%27)))
-
   describe('timerange parameter', () => {
     describe('global', () => {
       it('sets the global start and end dates from the url', () => {
@@ -154,33 +152,33 @@ describe('url state', () => {
           ABSOLUTE_DATE.endTimeTimelineFormatted
         );
       });
-    });
 
-    it('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
-      loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlUnlinked);
-      openTimelineUsingToggle();
-      setTimelineStartDate(ABSOLUTE_DATE.newStartTimeTyped);
-      updateTimelineDates();
-      setTimelineEndDate(ABSOLUTE_DATE.newEndTimeTyped);
-      updateTimelineDates();
+      it('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
+        loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlUnlinked);
+        openTimelineUsingToggle();
+        setTimelineStartDate(ABSOLUTE_DATE.newStartTimeTyped);
+        updateTimelineDates();
+        setTimelineEndDate(ABSOLUTE_DATE.newEndTimeTyped);
+        updateTimelineDates();
 
-      let startDate: string;
-      let endDate: string;
+        let startDate: string;
+        let endDate: string;
 
-      if (Cypress.browser.name === 'firefox') {
-        startDate = new Date(ABSOLUTE_DATE.firefoxStartTimeTyped)
-          .toISOString()
-          .replace('000', '186');
-        endDate = new Date(ABSOLUTE_DATE.firefoxEndTimeTyped).toISOString().replace('000', '186');
-      } else {
-        startDate = new Date(ABSOLUTE_DATE.newStartTimeTyped).toISOString();
-        endDate = new Date(ABSOLUTE_DATE.newEndTimeTyped).toISOString();
-      }
+        if (Cypress.browser.name === 'firefox') {
+          startDate = new Date(ABSOLUTE_DATE.firefoxStartTimeTyped)
+            .toISOString()
+            .replace('000', '186');
+          endDate = new Date(ABSOLUTE_DATE.firefoxEndTimeTyped).toISOString().replace('000', '186');
+        } else {
+          startDate = new Date(ABSOLUTE_DATE.newStartTimeTyped).toISOString();
+          endDate = new Date(ABSOLUTE_DATE.newEndTimeTyped).toISOString();
+        }
 
-      cy.url().should(
-        'include',
-        `timeline:(linkTo:!(),timerange:(from:%27${startDate}%27,kind:absolute,to:%27${endDate}%27))`
-      );
+        cy.url().should(
+          'include',
+          `timeline:(linkTo:!(),timerange:(from:%27${startDate}%27,kind:absolute,to:%27${endDate}%27))`
+        );
+      });
     });
   });
 
@@ -205,9 +203,12 @@ describe('url state', () => {
   describe('savedQuery parameter', () => {
     it('should update the url with the saved query', () => {
       loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
+      cy.url().should('not.include', `savedQuery=`);
       kqlSearch('host.ip: "1.1.1.1"');
       openAddSavedQueryForm();
       fillAddSavedQueryForm();
+      // We can't provide the value as a savedObjectId is created that we are unable to track
+      // For now we'll check that the param for the savedQuery was added
       cy.url().should('include', `savedQuery=`);
     });
   });
@@ -294,7 +295,6 @@ describe('url state', () => {
     });
   });
 
-  // timeline=(activeTab:query,graphEventId:%27%27,id:c56a0dd0-944c-11ec-a854-fb74530743ac,isOpen:!f)
   describe('timeline', () => {
     it('sets and reads the url state for timeline by id', () => {
       loginAndWaitForPage(HOSTS_URL);
@@ -303,6 +303,7 @@ describe('url state', () => {
 
       cy.intercept('PATCH', '/api/timeline').as('timeline');
     });
+
     it('sets and reads the url state for timeline by id', () => {
       loginAndWaitForPage(HOSTS_URL);
       openTimelineUsingToggle();
