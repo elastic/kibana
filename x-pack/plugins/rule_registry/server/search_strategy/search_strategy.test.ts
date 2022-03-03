@@ -68,6 +68,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   });
 
   let getAuthzFilterSpy: jest.SpyInstance;
+  const search = jest.fn().mockImplementation(() => of(response));
 
   beforeEach(() => {
     ruleDataService.findIndicesByFeature.mockImplementation(() => {
@@ -80,7 +81,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     data.search.getSearchStrategy.mockImplementation(() => {
       return {
-        search: () => of(response),
+        search,
       };
     });
 
@@ -95,6 +96,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     ruleDataService.findIndicesByFeature.mockClear();
     data.search.getSearchStrategy.mockClear();
     getAuthzFilterSpy.mockClear();
+    search.mockClear();
   });
 
   it('should handle a basic search request', async () => {
@@ -198,5 +200,66 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
     expect(result).toBe(EMPTY_RESPONSE);
+  });
+
+  it('should support pagination', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+      pagination: {
+        pageSize: 10,
+        pageIndex: 1,
+      },
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(search.mock.calls.length).toBe(1);
+    expect(search.mock.calls[0][0].params.body.size).toBe(10);
+    expect(search.mock.calls[0][0].params.body.from).toBe(10);
+  });
+
+  it('should support sorting', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+      sort: [
+        {
+          field: 'test',
+          direction: 'desc',
+        },
+      ],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(search.mock.calls.length).toBe(1);
+    expect(search.mock.calls[0][0].params.body.sort).toStrictEqual([{ test: { order: 'desc' } }]);
   });
 });

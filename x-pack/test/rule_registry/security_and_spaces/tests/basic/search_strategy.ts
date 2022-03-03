@@ -35,9 +35,11 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       });
+
       afterEach(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       });
+
       it('should return alerts from log rules', async () => {
         const result = await bsearch.send<RuleRegistrySearchResponse>({
           supertest,
@@ -51,6 +53,31 @@ export default ({ getService }: FtrProviderContext) => {
           return hit.fields?.['kibana.alert.rule.consumer'];
         });
         expect(consumers.every((consumer) => consumer === AlertConsumers.LOGS));
+      });
+
+      it('should support pagination and sorting', async () => {
+        const result = await bsearch.send<RuleRegistrySearchResponse>({
+          supertest,
+          options: {
+            featureIds: [AlertConsumers.LOGS],
+            pagination: {
+              pageSize: 2,
+              pageIndex: 1,
+            },
+            sort: [
+              {
+                field: 'kibana.alert.evaluation.value',
+                direction: 'desc',
+              },
+            ],
+          },
+          strategy: 'ruleRegistryAlertsSearchStrategy',
+        });
+        expect(result.rawResponse.hits.total).to.eql(5);
+        expect(result.rawResponse.hits.hits.length).to.eql(2);
+        const first = result.rawResponse.hits.hits[0].fields?.['kibana.alert.evaluation.value'];
+        const second = result.rawResponse.hits.hits[1].fields?.['kibana.alert.evaluation.value'];
+        expect(first > second).to.be(true);
       });
     });
 
