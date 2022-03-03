@@ -78,12 +78,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `Cluster routing allocation is not enabled. To proceed, please enable routing.`,
+          reason: `The elasticsearch cluster has cluster routing allocation disabled. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}`,
           logs: [
             ...stateP.logs,
             {
               level: 'error',
-              message: `'cluster.routing.allocation.enable' is set to 'none'. You should enable routing.`,
+              message: `The elasticsearch cluster has cluster routing allocation disabled. Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'.`,
             },
           ],
         };

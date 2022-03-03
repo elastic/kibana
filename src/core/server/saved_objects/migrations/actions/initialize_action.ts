@@ -40,18 +40,17 @@ export const checkClusterRoutingAllocationEnabledTask =
   () => {
     return client.cluster
       .getSettings({
-        include_defaults: true,
         flat_settings: true,
       })
       .then((settings) => {
         const clusterRoutingAllocations: string[] =
           settings?.transient?.[routingAllocationEnable] ??
           settings?.persistent?.[routingAllocationEnable] ??
-          settings?.defaults?.[routingAllocationEnable] ??
           [];
 
         const clusterRoutingAllocationEnabled =
-          clusterRoutingAllocations.length === 0 || !clusterRoutingAllocations.includes('none');
+          [...clusterRoutingAllocations].length === 0 ||
+          [...clusterRoutingAllocations].every((s: string) => s === 'all'); // if set, only allow 'all'
 
         if (!clusterRoutingAllocationEnabled) {
           return Either.left({ type: 'cluster_routing_allocation_disabled' as const });

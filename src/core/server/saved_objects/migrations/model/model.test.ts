@@ -299,7 +299,7 @@ describe('migrations v2 model', () => {
 
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"Cluster routing allocation is not enabled. To proceed, please enable routing."`
+          `"The elasticsearch cluster has cluster routing allocation disabled. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}"`
         );
       });
       test("INIT -> FATAL when .kibana points to newer version's index", () => {
