@@ -199,4 +199,28 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       .toPromise();
     expect(result).toBe(EMPTY_RESPONSE);
   });
+
+  it('should not apply rbac filters for siem', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(getAuthzFilterSpy).not.toHaveBeenCalled();
+  });
 });

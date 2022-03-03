@@ -20,12 +20,15 @@ import {
 } from '../../../../detection_engine_api_integration/utils';
 import { ID } from '../../../../detection_engine_api_integration/security_and_spaces/tests/generating_signals';
 import { QueryCreateSchema } from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { obsOnlySpacesAllEsRead } from '../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const bsearch = getService('bsearch');
+  const secureBsearch = getService('secureBsearch');
   const log = getService('log');
 
   const SPACE1 = 'space1';
@@ -81,8 +84,12 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, log, createdId);
         await waitForSignalsToBePresent(supertest, log, 1, [createdId]);
 
-        const result = await bsearch.send<RuleRegistrySearchResponse>({
-          supertest,
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAllEsRead.username,
+            password: obsOnlySpacesAllEsRead.password,
+          },
           options: {
             featureIds: [AlertConsumers.SIEM],
           },
@@ -129,7 +136,6 @@ export default ({ getService }: FtrProviderContext) => {
             featureIds: [],
           },
           strategy: 'ruleRegistryAlertsSearchStrategy',
-          space: SPACE1,
         });
         expect(result.rawResponse).to.eql({});
       });

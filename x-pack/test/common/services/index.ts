@@ -9,10 +9,12 @@ import { services as kibanaCommonServices } from '../../../../test/common/servic
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
 
 import { SpacesServiceProvider } from './spaces';
+import { BSecureSearchProvider } from './bsearch_secure';
 
 export const services = {
   ...kibanaCommonServices,
   supertest: kibanaApiIntegrationServices.supertest,
 
   spaces: SpacesServiceProvider,
+  secureBsearch: BSecureSearchProvider,
 };

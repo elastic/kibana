@@ -8,7 +8,7 @@ import { map, mergeMap, catchError } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'src/core/server';
 import { from, of } from 'rxjs';
-import { isValidFeatureId } from '@kbn/rule-data-utils';
+import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import { ISearchStrategy, PluginStart } from '../../../../../src/plugins/data/server';
 import {
@@ -27,6 +27,8 @@ import { getSpacesFilter, getAuthzFilter } from '../lib';
 export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
 };
+
+export const FEATURES_TO_SKIP_RBAC: AlertConsumers[] = [AlertConsumers.SIEM];
 
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
@@ -47,10 +49,13 @@ export const ruleRegistrySearchStrategyProvider = (
           getActiveSpace(),
           alerting.getAlertingAuthorizationWithRequest(deps.request),
         ]);
-        const authzFilter = (await getAuthzFilter(
-          authorization,
-          ReadOperations.Find
-        )) as estypes.QueryDslQueryContainer;
+        let authzFilter;
+        if (!request.featureIds.some((featureId) => FEATURES_TO_SKIP_RBAC.includes(featureId))) {
+          authzFilter = (await getAuthzFilter(
+            authorization,
+            ReadOperations.Find
+          )) as estypes.QueryDslQueryContainer;
+        }
         return { space, authzFilter };
       };
       return from(getAsync()).pipe(
