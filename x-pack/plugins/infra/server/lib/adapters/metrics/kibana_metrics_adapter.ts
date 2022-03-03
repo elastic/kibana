@@ -83,7 +83,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
               series: panel.series.map((series) => {
                 return {
                   id: series.id,
-                  label: series.label,
+                  // In case of grouping by multiple fields, "series.label" is array.
+                  // If infra will perform this type of grouping, the following code needs to be updated
+                  label: [series.label].flat()[0],
                   data: series.data.map((point) => ({
                     timestamp: point[0] as number,
                     value: point[1] as number | null,
