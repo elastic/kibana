@@ -8,7 +8,11 @@
 import { mockEnsureAuthorized } from './secure_spaces_client_wrapper.test.mocks';
 
 import { deepFreeze } from '@kbn/std';
-import type { EcsEventOutcome, SavedObjectsClientContract } from 'src/core/server';
+import type {
+  EcsEventOutcome,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from 'src/core/server';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
@@ -16,7 +20,7 @@ import type { GetAllSpacesPurpose, LegacyUrlAliasTarget, Space } from '../../../
 import { spacesClientMock } from '../../../spaces/server/mocks';
 import type { AuditEvent, AuditLogger } from '../audit';
 import { SavedObjectAction, SpaceAuditAction } from '../audit';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditLoggerMock } from '../audit/mocks';
 import type {
   AuthorizationServiceSetup,
   AuthorizationServiceSetupInternal,
@@ -63,13 +67,38 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
     return space;
   });
 
+  baseClient.createSavedObjectFinder.mockImplementation(() => ({
+    async *find() {
+      yield {
+        saved_objects: [
+          {
+            namespaces: ['*'],
+            type: 'dashboard',
+            id: '1',
+          },
+          {
+            namespaces: ['existing_space'],
+            type: 'dashboard',
+            id: '2',
+          },
+          {
+            namespaces: ['default', 'existing_space'],
+            type: 'dashboard',
+            id: '3',
+          },
+        ],
+      } as SavedObjectsFindResponse<unknown, unknown>;
+    },
+    async close() {},
+  }));
+
   const authorization = authorizationMock.create({
     version: 'unit-test',
     applicationName: 'kibana',
   });
   authorization.mode.useRbacForRequest.mockReturnValue(securityEnabled);
 
-  const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+  const auditLogger = auditLoggerMock.create();
 
   const request = httpServerMock.createKibanaRequest();
 
@@ -602,7 +631,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
     });
 
-    test(`throws a forbidden error when unauthorized`, async () => {
+    it(`throws a forbidden error when unauthorized`, async () => {
       const username = 'some_user';
 
       const { wrapper, baseClient, authorization, auditLogger, request } = setup({
@@ -637,7 +666,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
     });
 
-    it('deletes the space when authorized', async () => {
+    it('deletes the space with all saved objects when authorized', async () => {
       const username = 'some_user';
 
       const { wrapper, baseClient, authorization, auditLogger, request } = setup({
@@ -668,6 +697,14 @@ describe('SecureSpacesClientWrapper', () => {
       expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, 'unknown', {
         type: 'space',
         id: space.id,
+      });
+      expectAuditEvent(auditLogger, SavedObjectAction.DELETE, 'unknown', {
+        type: 'dashboard',
+        id: '2',
+      });
+      expectAuditEvent(auditLogger, SavedObjectAction.UPDATE_OBJECTS_SPACES, 'unknown', {
+        type: 'dashboard',
+        id: '3',
       });
     });
   });

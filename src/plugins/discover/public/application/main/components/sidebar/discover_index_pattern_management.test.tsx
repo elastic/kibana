@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
+import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { EuiContextMenuPanel, EuiPopover, EuiContextMenuItem } from '@elastic/eui';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
@@ -54,6 +54,7 @@ describe('Discover DataView Management', () => {
   const indexPattern = stubLogstashIndexPattern;
 
   const editField = jest.fn();
+  const createNewDataView = jest.fn();
 
   const mountComponent = () => {
     return mountWithIntl(
@@ -62,6 +63,7 @@ describe('Discover DataView Management', () => {
           editField={editField}
           selectedIndexPattern={indexPattern}
           useNewFieldsApi={true}
+          createNewDataView={createNewDataView}
         />
       </KibanaContextProvider>
     );
@@ -81,7 +83,7 @@ describe('Discover DataView Management', () => {
     button.simulate('click');
 
     expect(component.find(EuiContextMenuPanel).length).toBe(1);
-    expect(component.find(EuiContextMenuItem).length).toBe(2);
+    expect(component.find(EuiContextMenuItem).length).toBe(3);
   });
 
   test('click on an add button executes editField callback', () => {
@@ -102,5 +104,15 @@ describe('Discover DataView Management', () => {
     const manageButton = findTestSubject(component, 'indexPattern-manage-field');
     manageButton.simulate('click');
     expect(mockServices.core.application.navigateToApp).toHaveBeenCalled();
+  });
+
+  test('click on add dataView button executes createNewDataView callback', () => {
+    const component = mountComponent();
+    const button = findTestSubject(component, 'discoverIndexPatternActions');
+    button.simulate('click');
+
+    const manageButton = findTestSubject(component, 'dataview-create-new');
+    manageButton.simulate('click');
+    expect(createNewDataView).toHaveBeenCalled();
   });
 });

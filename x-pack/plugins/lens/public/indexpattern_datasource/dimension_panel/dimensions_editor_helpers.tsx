@@ -15,9 +15,8 @@
 import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldText, EuiTabs, EuiTab, EuiCallOut } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiCallOut } from '@elastic/eui';
 import { operationDefinitionMap } from '../operations';
-import { useDebouncedValue } from '../../shared_components';
 
 export const formulaOperationName = 'formula';
 export const staticValueOperationName = 'static_value';
@@ -29,37 +28,6 @@ export type TemporaryState = typeof quickFunctionsName | typeof staticValueOpera
 export function isQuickFunction(operationType: string) {
   return !nonQuickFunctions.has(operationType);
 }
-
-export const LabelInput = ({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) => {
-  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({ onChange, value });
-
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.lens.indexPattern.columnLabel', {
-        defaultMessage: 'Display name',
-        description: 'Display name of a column of data',
-      })}
-      display="columnCompressed"
-      fullWidth
-    >
-      <EuiFieldText
-        compressed
-        data-test-subj="indexPattern-label-edit"
-        value={inputValue}
-        onChange={(e) => {
-          handleInputChange(e.target.value);
-        }}
-        placeholder={initialValue}
-      />
-    </EuiFormRow>
-  );
-};
 
 export function getParamEditor(
   temporaryStaticValue: boolean,

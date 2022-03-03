@@ -7,13 +7,14 @@
 
 import { set } from 'lodash';
 import { ElasticsearchClient } from 'src/core/server';
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { statuses } from '../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 
 import { jobsQueryFactory } from './jobs_query';
 
 describe('jobsQuery', () => {
-  let client: jest.Mocked<ElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let jobsQuery: ReturnType<typeof jobsQueryFactory>;
 
   beforeEach(async () => {
@@ -26,8 +27,8 @@ describe('jobsQuery', () => {
 
   describe('list', () => {
     beforeEach(() => {
-      client.search.mockResolvedValue(
-        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
+      client.search.mockResponse(
+        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'hits.hits', [
           { _source: { _id: 'id1', jobtype: 'pdf', payload: {} } },
           { _source: { _id: 'id2', jobtype: 'csv', payload: {} } },
         ])
@@ -82,9 +83,7 @@ describe('jobsQuery', () => {
     });
 
     it('should return an empty array when there are no hits', async () => {
-      client.search.mockResolvedValue({ body: {} } as Awaited<
-        ReturnType<ElasticsearchClient['search']>
-      >);
+      client.search.mockResponse({} as Awaited<ReturnType<ElasticsearchClient['search']>>);
 
       await expect(
         jobsQuery.list(['pdf'], { username: 'somebody' }, 0, 10, [])
@@ -92,8 +91,8 @@ describe('jobsQuery', () => {
     });
 
     it('should reject if the report source is missing', async () => {
-      client.search.mockResolvedValue(
-        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [{}])
+      client.search.mockResponse(
+        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'hits.hits', [{}])
       );
 
       await expect(
@@ -104,9 +103,7 @@ describe('jobsQuery', () => {
 
   describe('count', () => {
     beforeEach(() => {
-      client.count.mockResolvedValue({ body: { count: 10 } } as Awaited<
-        ReturnType<ElasticsearchClient['count']>
-      >);
+      client.count.mockResponse({ count: 10 } as Awaited<ReturnType<ElasticsearchClient['count']>>);
     });
 
     it('should pass parameters in the request body', async () => {
@@ -135,8 +132,8 @@ describe('jobsQuery', () => {
 
   describe('get', () => {
     beforeEach(() => {
-      client.search.mockResolvedValue(
-        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
+      client.search.mockResponse(
+        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'hits.hits', [
           { _source: { _id: 'id1', jobtype: 'pdf', payload: {} } },
         ])
       );
@@ -168,9 +165,7 @@ describe('jobsQuery', () => {
     });
 
     it('should return undefined when there is no report', async () => {
-      client.search.mockResolvedValue({ body: {} } as Awaited<
-        ReturnType<ElasticsearchClient['search']>
-      >);
+      client.search.mockResponse({} as Awaited<ReturnType<ElasticsearchClient['search']>>);
 
       await expect(jobsQuery.get({ username: 'somebody' }, 'id1')).resolves.toBeUndefined();
     });
@@ -183,8 +178,8 @@ describe('jobsQuery', () => {
 
   describe('getError', () => {
     beforeEach(() => {
-      client.search.mockResolvedValue(
-        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
+      client.search.mockResponse(
+        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'hits.hits', [
           {
             _source: {
               _id: 'id1',
@@ -218,8 +213,8 @@ describe('jobsQuery', () => {
     });
 
     it('should reject when the job is not failed', async () => {
-      client.search.mockResolvedValue(
-        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
+      client.search.mockResponse(
+        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'hits.hits', [
           {
             _source: {
               _id: 'id1',
@@ -236,9 +231,7 @@ describe('jobsQuery', () => {
 
   describe('delete', () => {
     beforeEach(() => {
-      client.delete.mockResolvedValue({ body: {} } as Awaited<
-        ReturnType<ElasticsearchClient['delete']>
-      >);
+      client.delete.mockResponse({} as Awaited<ReturnType<ElasticsearchClient['delete']>>);
     });
 
     it('should pass parameters in the request body', async () => {
@@ -248,7 +241,8 @@ describe('jobsQuery', () => {
         expect.objectContaining({
           id: 'id1',
           index: '.reporting-12345',
-        })
+        }),
+        { meta: true }
       );
     });
   });

@@ -15,7 +15,7 @@ import {
   VectorSourceRequestMeta,
 } from '../../../maps/common';
 import { AbstractSourceDescriptor, MapExtent } from '../../../maps/common/descriptor_types';
-import { ITooltipProperty } from '../../../maps/public';
+import { ITooltipProperty, GEOJSON_FEATURE_ID_PROPERTY_NAME } from '../../../maps/public';
 import {
   AnomalySourceField,
   AnomalySourceTooltipProperty,
@@ -247,6 +247,9 @@ export class AnomalySource implements IVectorSource {
   async getTooltipProperties(properties: { [p: string]: any } | null): Promise<ITooltipProperty[]> {
     const tooltipProperties: ITooltipProperty[] = [];
     for (const key in properties) {
+      if (key === GEOJSON_FEATURE_ID_PROPERTY_NAME) {
+        continue;
+      }
       if (properties.hasOwnProperty(key)) {
         const label = ANOMALY_SOURCE_FIELDS[key]?.label;
         if (label) {

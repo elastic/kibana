@@ -7,12 +7,13 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import { Operation } from '../types';
-import type { State } from './types';
+import { Operation, VisualizeEditorContext, Suggestion } from '../types';
+import type { State, XYSuggestion } from './types';
 import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
+import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { Datatable } from 'src/plugins/expressions';
@@ -352,6 +353,243 @@ describe('xy_visualization', () => {
             forAccessor: 'newCol',
           },
         ],
+      });
+    });
+  });
+
+  describe('#updateLayersConfigurationFromContext', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+    let context: VisualizeEditorLayersContext;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'd' },
+        { columnId: 'a' },
+        { columnId: 'b' },
+        { columnId: 'c' },
+      ]);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          rows: [],
+          columns: [],
+        },
+      };
+
+      context = {
+        chartType: 'area',
+        axisPosition: 'right',
+        palette: {
+          name: 'temperature',
+          type: 'palette',
+        },
+        metrics: [
+          {
+            agg: 'count',
+            isFullReference: false,
+            fieldName: 'document',
+            params: {},
+            color: '#68BC00',
+          },
+        ],
+        timeInterval: 'auto',
+        format: 'bytes',
+      } as VisualizeEditorLayersContext;
+    });
+
+    it('sets the context configuration correctly', () => {
+      const state = xyVisualization?.updateLayersConfigurationFromContext?.({
+        prevState: {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'line',
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+          ],
+        },
+        layerId: 'first',
+        context,
+      });
+      expect(state?.layers[0]).toHaveProperty('seriesType', 'area');
+      expect(state?.layers[0].yConfig).toStrictEqual([
+        {
+          axisMode: 'right',
+          color: '#68BC00',
+          forAccessor: 'a',
+        },
+      ]);
+
+      expect(state?.layers[0].palette).toStrictEqual({
+        name: 'temperature',
+        type: 'palette',
+      });
+    });
+  });
+
+  describe('#getVisualizationSuggestionFromContext', () => {
+    let context: VisualizeEditorContext;
+    let suggestions: Suggestion[];
+
+    beforeEach(() => {
+      suggestions = [
+        {
+          title: 'Average of AvgTicketPrice over timestamp',
+          score: 0.3333333333333333,
+          hide: true,
+          visualizationId: 'lnsXY',
+          visualizationState: {
+            legend: {
+              isVisible: true,
+              position: 'right',
+            },
+            valueLabels: 'hide',
+            fittingFunction: 'None',
+            axisTitlesVisibilitySettings: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            tickLabelsVisibilitySettings: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            labelsOrientation: {
+              x: 0,
+              yLeft: 0,
+              yRight: 0,
+            },
+            gridlinesVisibilitySettings: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            preferredSeriesType: 'bar_stacked',
+            layers: [
+              {
+                layerId: 'e71c3459-ddcf-4a13-94a1-bf91f7b40175',
+                seriesType: 'bar_stacked',
+                xAccessor: '911abe51-36ca-42ba-ae4e-bcf3f941f3c1',
+                accessors: ['0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b'],
+                layerType: 'data',
+              },
+            ],
+          },
+          keptLayerIds: [],
+          datasourceState: {
+            layers: {
+              'e71c3459-ddcf-4a13-94a1-bf91f7b40175': {
+                indexPatternId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+                columns: {
+                  '911abe51-36ca-42ba-ae4e-bcf3f941f3c1': {
+                    label: 'timestamp',
+                    dataType: 'date',
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                    isBucketed: true,
+                    scale: 'interval',
+                    params: {
+                      interval: 'auto',
+                    },
+                  },
+                  '0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b': {
+                    label: 'Average of AvgTicketPrice',
+                    dataType: 'number',
+                    operationType: 'average',
+                    sourceField: 'AvgTicketPrice',
+                    isBucketed: false,
+                    scale: 'ratio',
+                  },
+                },
+                columnOrder: [
+                  '911abe51-36ca-42ba-ae4e-bcf3f941f3c1',
+                  '0ffeb3fb-86fd-42d1-ab62-5a00b7000a7b',
+                ],
+                incompleteColumns: {},
+              },
+            },
+          },
+          datasourceId: 'indexpattern',
+          columns: 2,
+          changeType: 'initial',
+        },
+      ] as unknown as Suggestion[];
+
+      context = {
+        layers: [
+          {
+            indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+            timeFieldName: 'order_date',
+            chartType: 'area',
+            axisPosition: 'left',
+            palette: {
+              type: 'palette',
+              name: 'default',
+            },
+            metrics: [
+              {
+                agg: 'count',
+                isFullReference: false,
+                fieldName: 'document',
+                params: {},
+                color: '#68BC00',
+              },
+            ],
+            timeInterval: 'auto',
+          },
+        ],
+        type: 'lnsXY',
+        configuration: {
+          fill: '0.5',
+          legend: {
+            isVisible: true,
+            position: 'right',
+            shouldTruncate: true,
+            maxLines: true,
+          },
+          gridLinesVisibility: {
+            x: true,
+            yLeft: true,
+            yRight: true,
+          },
+          extents: {
+            yLeftExtent: {
+              mode: 'full',
+            },
+            yRightExtent: {
+              mode: 'full',
+            },
+          },
+        },
+        isVisualizeAction: true,
+      } as VisualizeEditorContext;
+    });
+
+    it('updates the visualization state correctly based on the context', () => {
+      const suggestion = xyVisualization?.getVisualizationSuggestionFromContext?.({
+        suggestions,
+        context,
+      }) as XYSuggestion;
+      expect(suggestion?.visualizationState?.fillOpacity).toEqual(0.5);
+      expect(suggestion?.visualizationState?.yRightExtent).toEqual({ mode: 'full' });
+      expect(suggestion?.visualizationState?.legend).toEqual({
+        isVisible: true,
+        maxLines: true,
+        position: 'right',
+        shouldTruncate: true,
       });
     });
   });

@@ -33,6 +33,10 @@ import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
 
+/**
+ * Properties for displaying a share menu with Reporting features, including
+ * internally-derived fields.
+ */
 export interface ReportingPanelProps {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
@@ -42,7 +46,9 @@ export interface ReportingPanelProps {
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
   layoutId?: string;
   objectId?: string;
+
   getJobParams: (forShareUrl?: boolean) => Omit<BaseParams, 'browserTimezone' | 'version'>;
+
   options?: ReactElement | null;
   isDirty?: boolean;
   onClose?: () => void;

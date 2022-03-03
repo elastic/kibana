@@ -9,7 +9,6 @@ import { elasticsearchServiceMock, httpServerMock, loggingSystemMock } from 'src
 
 import type { SecurityLicense } from '../../../common/licensing';
 import { licenseMock } from '../../../common/licensing/index.mock';
-import { securityMock } from '../../mocks';
 import { APIKeys } from './api_keys';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
@@ -63,16 +62,12 @@ describe('API Keys', () => {
 
     it('returns true when the operation completes without error', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockClusterClient.asInternalUser.security.invalidateApiKey.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            invalidated_api_keys: [],
-            previously_invalidated_api_keys: [],
-            error_count: 0,
-            error_details: [],
-          },
-        })
-      );
+      mockClusterClient.asInternalUser.security.invalidateApiKey.mockResponse({
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+        error_details: [],
+      });
       const result = await apiKeys.areAPIKeysEnabled();
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledTimes(1);
       expect(result).toEqual(true);
@@ -111,16 +106,12 @@ describe('API Keys', () => {
 
     it('calls `invalidateApiKey` with proper parameters', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockClusterClient.asInternalUser.security.invalidateApiKey.mockResolvedValueOnce(
-        securityMock.createApiResponse({
-          body: {
-            invalidated_api_keys: [],
-            previously_invalidated_api_keys: [],
-            error_count: 0,
-            error_details: [],
-          },
-        })
-      );
+      mockClusterClient.asInternalUser.security.invalidateApiKey.mockResponseOnce({
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+        error_details: [],
+      });
 
       const result = await apiKeys.areAPIKeysEnabled();
       expect(result).toEqual(true);
@@ -146,17 +137,13 @@ describe('API Keys', () => {
     it('calls `createApiKey` with proper parameters', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
-      mockScopedClusterClient.asCurrentUser.security.createApiKey.mockResolvedValueOnce(
+      mockScopedClusterClient.asCurrentUser.security.createApiKey.mockResponseOnce({
+        id: '123',
+        name: 'key-name',
         // @ts-expect-error @elastic/elsticsearch CreateApiKeyResponse.expiration: number
-        securityMock.createApiResponse({
-          body: {
-            id: '123',
-            name: 'key-name',
-            expiration: '1d',
-            api_key: 'abc123',
-          },
-        })
-      );
+        expiration: '1d',
+        api_key: 'abc123',
+      });
       const result = await apiKeys.create(httpServerMock.createKibanaRequest(), {
         name: 'key-name',
         role_descriptors: { foo: true },
@@ -192,16 +179,13 @@ describe('API Keys', () => {
 
     it('calls `grantApiKey` with proper parameters for the Basic scheme', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockClusterClient.asInternalUser.security.grantApiKey.mockResolvedValueOnce(
-        securityMock.createApiResponse({
-          body: {
-            id: '123',
-            name: 'key-name',
-            api_key: 'abc123',
-            expires: '1d',
-          },
-        })
-      );
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+        // @ts-expect-error invalid definition
+        expires: '1d',
+      });
       const result = await apiKeys.grantAsInternalUser(
         httpServerMock.createKibanaRequest({
           headers: {
@@ -236,15 +220,11 @@ describe('API Keys', () => {
 
     it('calls `grantApiKey` with proper parameters for the Bearer scheme', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockClusterClient.asInternalUser.security.grantApiKey.mockResolvedValueOnce(
-        securityMock.createApiResponse({
-          body: {
-            id: '123',
-            name: 'key-name',
-            api_key: 'abc123',
-          },
-        })
-      );
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+      });
       const result = await apiKeys.grantAsInternalUser(
         httpServerMock.createKibanaRequest({
           headers: {
@@ -311,16 +291,12 @@ describe('API Keys', () => {
 
     it('calls callCluster with proper parameters', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockScopedClusterClient.asCurrentUser.security.invalidateApiKey.mockResolvedValueOnce(
-        securityMock.createApiResponse({
-          body: {
-            invalidated_api_keys: ['api-key-id-1'],
-            previously_invalidated_api_keys: [],
-            error_count: 0,
-            error_details: [],
-          },
-        })
-      );
+      mockScopedClusterClient.asCurrentUser.security.invalidateApiKey.mockResponseOnce({
+        invalidated_api_keys: ['api-key-id-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+        error_details: [],
+      });
       const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {
         ids: ['123'],
       });
@@ -339,16 +315,12 @@ describe('API Keys', () => {
 
     it(`Only passes ids as a parameter`, async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockScopedClusterClient.asCurrentUser.security.invalidateApiKey.mockResolvedValueOnce(
-        securityMock.createApiResponse({
-          body: {
-            invalidated_api_keys: ['api-key-id-1'],
-            previously_invalidated_api_keys: [],
-            error_count: 0,
-            error_details: [],
-          },
-        })
-      );
+      mockScopedClusterClient.asCurrentUser.security.invalidateApiKey.mockResponseOnce({
+        invalidated_api_keys: ['api-key-id-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+        error_details: [],
+      });
       const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {
         ids: ['123'],
         name: 'abc',
@@ -377,16 +349,12 @@ describe('API Keys', () => {
 
     it('calls callCluster with proper parameters', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockClusterClient.asInternalUser.security.invalidateApiKey.mockResolvedValueOnce(
-        securityMock.createApiResponse({
-          body: {
-            invalidated_api_keys: ['api-key-id-1'],
-            previously_invalidated_api_keys: [],
-            error_count: 0,
-            error_details: [],
-          },
-        })
-      );
+      mockClusterClient.asInternalUser.security.invalidateApiKey.mockResponseOnce({
+        invalidated_api_keys: ['api-key-id-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+        error_details: [],
+      });
       const result = await apiKeys.invalidateAsInternalUser({ ids: ['123'] });
       expect(result).toEqual({
         invalidated_api_keys: ['api-key-id-1'],
@@ -403,16 +371,12 @@ describe('API Keys', () => {
 
     it('Only passes ids as a parameter', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockClusterClient.asInternalUser.security.invalidateApiKey.mockResolvedValueOnce(
-        securityMock.createApiResponse({
-          body: {
-            invalidated_api_keys: ['api-key-id-1'],
-            previously_invalidated_api_keys: [],
-            error_count: 0,
-            error_details: [],
-          },
-        })
-      );
+      mockClusterClient.asInternalUser.security.invalidateApiKey.mockResponseOnce({
+        invalidated_api_keys: ['api-key-id-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+        error_details: [],
+      });
       const result = await apiKeys.invalidateAsInternalUser({
         ids: ['123'],
         name: 'abc',

@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
 import {
   EuiDataGridSorting,
-  EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGrid,
   EuiScreenReaderOnly,
@@ -35,7 +34,7 @@ import {
 } from './discover_grid_columns';
 import {
   defaultPageSize,
-  gridStyle,
+  GRID_STYLE,
   pageSizeArr,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from './constants';
@@ -49,6 +48,7 @@ import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_docume
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
+import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 
 interface SortObj {
@@ -154,6 +154,14 @@ export interface DiscoverGridProps {
    * List of used control columns (available: 'openDetails', 'select')
    */
   controlColumnIds?: string[];
+  /**
+   * Row height from state
+   */
+  rowHeightState?: number;
+  /**
+   * Update row height state
+   */
+  onUpdateRowHeight?: (rowHeight: number) => void;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -187,6 +195,8 @@ export const DiscoverGrid = ({
   isPaginationEnabled = true,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   className,
+  rowHeightState,
+  onUpdateRowHeight,
 }: DiscoverGridProps) => {
   const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -349,6 +359,17 @@ export const DiscoverGrid = ({
     [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
+  const showDisplaySelector = useMemo(
+    () =>
+      !!onUpdateRowHeight
+        ? {
+            allowDensity: false,
+            allowRowHeight: true,
+          }
+        : undefined,
+    [onUpdateRowHeight]
+  );
+
   const toolbarVisibility = useMemo(
     () =>
       defaultColumns
@@ -357,14 +378,21 @@ export const DiscoverGrid = ({
             showColumnSelector: false,
             showSortSelector: isSortEnabled,
             additionalControls,
+            showDisplaySelector,
           }
         : {
             ...toolbarVisibilityDefaults,
             showSortSelector: isSortEnabled,
             additionalControls,
+            showDisplaySelector,
           },
-    [defaultColumns, additionalControls, isSortEnabled]
+    [showDisplaySelector, defaultColumns, additionalControls, isSortEnabled]
   );
+
+  const rowHeightsOptions = useRowHeightsOptions({
+    rowHeightState,
+    onUpdateRowHeight,
+  });
 
   if (!rowCount && isLoading) {
     return (
@@ -380,7 +408,14 @@ export const DiscoverGrid = ({
 
   if (!rowCount) {
     return (
-      <div className="euiDataGrid__noResults">
+      <div
+        className="euiDataGrid__noResults"
+        data-render-complete={!isLoading}
+        data-shared-item=""
+        data-title={searchTitle}
+        data-description={searchDescription}
+        data-document-number={0}
+      >
         <EuiText size="xs" color="subdued">
           <EuiIcon type="discoverApp" size="m" color="subdued" />
           <EuiSpacer size="s" />
@@ -423,7 +458,6 @@ export const DiscoverGrid = ({
           columns={euiGridColumns}
           columnVisibility={columnsVisibility}
           data-test-subj="docTable"
-          gridStyle={gridStyle as EuiDataGridStyle}
           leadingControlColumns={lead}
           onColumnResize={onResize}
           pagination={paginationObj}
@@ -432,6 +466,8 @@ export const DiscoverGrid = ({
           schemaDetectors={schemaDetectors}
           sorting={sorting as EuiDataGridSorting}
           toolbarVisibility={toolbarVisibility}
+          rowHeightsOptions={rowHeightsOptions}
+          gridStyle={GRID_STYLE}
         />
 
         {showDisclaimer && (

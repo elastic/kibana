@@ -62,7 +62,7 @@ export function getMlSystemProvider(
           return await getGuards(request, savedObjectsClient)
             .isMinimumLicense()
             .ok(async ({ mlClient }) => {
-              const { body: info } = await mlClient.info<MlInfoResponse>();
+              const info = await mlClient.info();
               const cloudId = cloud && cloud.cloudId;
               return {
                 ...info,
@@ -78,8 +78,7 @@ export function getMlSystemProvider(
             .isFullLicense()
             .hasMlCapabilities(['canAccessML'])
             .ok(async ({ mlClient }) => {
-              const { body } = await mlClient.anomalySearch<T>(searchParams, jobIds);
-              return body;
+              return await mlClient.anomalySearch<T>(searchParams, jobIds);
             });
         },
       };

@@ -25,6 +25,7 @@ beforeEach(() => {
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
+    minimumScheduleInterval: '1m',
   };
 });
 
@@ -165,7 +166,7 @@ describe('register()', () => {
     );
   });
 
-  test('throws if minimumScheduleInterval isnt valid', () => {
+  test('throws if defaultScheduleInterval is less than configured minimumScheduleInterval', () => {
     const ruleType: RuleType<never, never, never, never, never, 'default'> = {
       id: '123',
       name: 'Test',
@@ -175,19 +176,18 @@ describe('register()', () => {
           name: 'Default',
         },
       ],
+
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
-      minimumScheduleInterval: 'foobar',
+      defaultScheduleInterval: '10s',
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
     expect(() => registry.register(ruleType)).toThrowError(
-      new Error(
-        `Rule type \"123\" has invalid minimum interval: string is not a valid duration: foobar.`
-      )
+      new Error(`Rule type \"123\" cannot specify a default interval less than 1m.`)
     );
   });
 
@@ -493,6 +493,7 @@ describe('list()', () => {
         },
       ],
       defaultActionGroupId: 'testActionGroup',
+      doesSetRecoveryContext: false,
       isExportable: true,
       ruleTaskTimeout: '20m',
       minimumLicenseRequired: 'basic',
@@ -520,11 +521,11 @@ describe('list()', () => {
           },
           "defaultActionGroupId": "testActionGroup",
           "defaultScheduleInterval": undefined,
+          "doesSetRecoveryContext": false,
           "enabledInLicense": false,
           "id": "test",
           "isExportable": true,
           "minimumLicenseRequired": "basic",
-          "minimumScheduleInterval": undefined,
           "name": "Test",
           "producer": "alerts",
           "recoveryActionGroup": Object {

@@ -42,21 +42,32 @@ import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
+  getDatasourceSuggestionsForVisualizeCharts,
 } from './indexpattern_suggestions';
 
 import { getVisualDefaultsForLayer, isColumnInvalid } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
-import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
-import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
+import {
+  DateHistogramIndexPatternColumn,
+  GenericIndexPatternColumn,
+  getErrorMessages,
+  insertNewColumn,
+} from './operations';
+import {
+  IndexPatternField,
+  IndexPatternPrivateState,
+  IndexPatternPersistedState,
+  IndexPattern,
+} from './types';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
 } from '../../../../../src/plugins/kibana_react/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { DataPublicPluginStart, ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { mergeLayer } from './state_helpers';
-import { Datasource, StateSetter } from '../types';
+import { Datasource, StateSetter, VisualizeEditorContext } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
@@ -64,20 +75,28 @@ import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/wor
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
+import { isColumnOfType } from './operations/definitions/helpers';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
 export function columnToOperation(
   column: GenericIndexPatternColumn,
-  uniqueLabel?: string
+  uniqueLabel?: string,
+  dataView?: IndexPattern
 ): Operation {
   const { dataType, label, isBucketed, scale, operationType } = column;
+  const fieldTypes =
+    'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
+    sortingHint:
+      column.dataType === 'string' && fieldTypes?.includes(ES_FIELD_TYPES.VERSION)
+        ? 'version'
+        : undefined,
   };
 }
 
@@ -138,7 +157,7 @@ export function getIndexPatternDatasource({
     async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
-      initialContext?: VisualizeFieldContext,
+      initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       options?: InitializationOptions
     ) {
       return loadInitialState({
@@ -446,7 +465,11 @@ export function getIndexPatternDatasource({
 
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {
-              return columnToOperation(layer.columns[columnId], columnLabelMap[columnId]);
+              return columnToOperation(
+                layer.columns[columnId],
+                columnLabelMap[columnId],
+                state.indexPatterns[layer.indexPatternId]
+              );
             }
           }
           return null;
@@ -469,6 +492,7 @@ export function getIndexPatternDatasource({
     },
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
+    getDatasourceSuggestionsForVisualizeCharts,
 
     getErrorMessages(state) {
       if (!state) {
@@ -543,7 +567,13 @@ export function getIndexPatternDatasource({
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
           const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
-          return buckets.some((colId) => layer.columns[colId].operationType === 'date_histogram');
+          return buckets.some((colId) => {
+            const column = layer.columns[colId];
+            return (
+              isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+              !column.params.ignoreTimeRange
+            );
+          });
         })
       );
     },

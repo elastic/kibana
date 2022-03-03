@@ -26,9 +26,7 @@ const indexLifecycleDataEnricher = async (
     return [];
   }
 
-  const {
-    body: { indices: ilmIndicesData },
-  } = await client.asCurrentUser.ilm.explainLifecycle({
+  const { indices: ilmIndicesData } = await client.asCurrentUser.ilm.explainLifecycle({
     index: '*',
   });
   // @ts-expect-error IndexLifecyclePolicy is not compatible with IlmExplainLifecycleResponse
@@ -100,5 +98,6 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
   }
 
   start() {}
+
   stop() {}
 }

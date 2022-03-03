@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test-jest-helpers';
 import { docLinksServiceMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';

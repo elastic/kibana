@@ -10,7 +10,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "New or Modified Federation Domain",
-  "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:(\"Set-AcceptedDomain\" or \n\"Set-MsolDomainFederationSettings\" or \"Add-FederatedDomain\" or \"New-AcceptedDomain\" or \"Remove-AcceptedDomain\" or \"Remove-FederatedDomain\") and \nevent.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/module/exchange/remove-accepteddomain?view=exchange-ps",
@@ -57,5 +57,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

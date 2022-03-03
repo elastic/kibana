@@ -6,8 +6,29 @@
  * Side Public License, v 1.
  */
 
+import { ControlEmbeddable, ControlFactory, ControlInput, ControlOutput } from '../..';
+import { EmbeddableFactory } from '../../../../embeddable/public';
 import { PluginServiceFactory } from '../../../../presentation_util/public';
-import { getCommonControlsService, ControlsService } from '../controls';
+import { ControlsService, ControlTypeRegistry } from '../controls';
 
 export type ControlsServiceFactory = PluginServiceFactory<ControlsService>;
-export const controlsServiceFactory = () => getCommonControlsService();
+export const controlsServiceFactory = () => controlsService;
+
+const controlsFactoriesMap: ControlTypeRegistry = {};
+
+// export controls service directly for use in plugin setup lifecycle
+export const controlsService: ControlsService = {
+  registerControlType: (factory: ControlFactory) => {
+    controlsFactoriesMap[factory.type] = factory;
+  },
+  getControlFactory: <
+    I extends ControlInput = ControlInput,
+    O extends ControlOutput = ControlOutput,
+    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>
+  >(
+    type: string
+  ) => {
+    return controlsFactoriesMap[type] as EmbeddableFactory<I, O, E>;
+  },
+  getControlTypes: () => Object.keys(controlsFactoriesMap),
+};

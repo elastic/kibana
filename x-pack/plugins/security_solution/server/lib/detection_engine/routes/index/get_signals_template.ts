@@ -47,7 +47,7 @@ export const SIGNALS_TEMPLATE_VERSION = 67;
   UI will call create_index_route and and go through the index update process. Increment this number if
   making changes to the field aliases we use to make signals forwards-compatible.
 */
-export const SIGNALS_FIELD_ALIASES_VERSION = 2;
+export const SIGNALS_FIELD_ALIASES_VERSION = 3;
 
 /**
   @constant
@@ -154,7 +154,6 @@ export const backwardsCompatibilityMappings = [
           },
         },
       },
-      properties,
     },
   },
 ];
@@ -171,7 +170,7 @@ export const createBackwardsCompatibilityMapping = (version: number) => {
     },
   };
 
-  return merge({}, ...mappings, meta);
+  return merge({ properties }, ...mappings, meta);
 };
 
 export const getRbacRequiredFields = (spaceId: string) => {

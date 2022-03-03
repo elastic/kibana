@@ -9,10 +9,8 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiSwitch,
   EuiSpacer,
-  EuiFieldText,
   IconType,
   EuiFormRow,
   EuiButtonGroup,
@@ -21,7 +19,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from '../../../common/expressions';
-import { ToolbarPopover, useDebouncedValue, TooltipWrapper } from '../../shared_components';
+import {
+  ToolbarPopover,
+  useDebouncedValue,
+  TooltipWrapper,
+  AxisTitleSettings,
+} from '../../shared_components';
 import { isHorizontalChart } from '../state_helpers';
 import { EuiIconAxisBottom } from '../../assets/axis_bottom';
 import { EuiIconAxisLeft } from '../../assets/axis_left';
@@ -251,10 +254,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
     setExtent,
   ]);
 
-  const { inputValue: title, handleInputChange: onTitleChange } = useDebouncedValue<string>({
-    value: axisTitle || '',
-    onChange: updateTitleState,
-  });
   return (
     <ToolbarPopover
       title={config.popoverTitle}
@@ -263,43 +262,13 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       isDisabled={isDisabled}
       buttonDataTestSubj={config.buttonDataTestSubj}
     >
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <h4>
-              {i18n.translate('xpack.lens.xyChart.axisNameLabel', {
-                defaultMessage: 'Axis name',
-              })}
-            </h4>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            compressed
-            data-test-subj={`lnsShowAxisTitleSwitch__${axis}`}
-            label={i18n.translate('xpack.lens.xyChart.ShowAxisTitleLabel', {
-              defaultMessage: 'Show',
-            })}
-            onChange={({ target }) => toggleAxisTitleVisibility(axis, target.checked)}
-            checked={isAxisTitleVisible}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <EuiFieldText
-        data-test-subj={`lns${axis}AxisTitle`}
-        compressed
-        placeholder={i18n.translate('xpack.lens.xyChart.overwriteAxisTitle', {
-          defaultMessage: 'Overwrite axis title',
-        })}
-        value={title || ''}
-        disabled={!isAxisTitleVisible || false}
-        onChange={({ target }) => onTitleChange(target.value)}
-        aria-label={i18n.translate('xpack.lens.xyChart.overwriteAxisTitle', {
-          defaultMessage: 'Overwrite axis title',
-        })}
+      <AxisTitleSettings
+        axis={axis}
+        axisTitle={axisTitle}
+        updateTitleState={updateTitleState}
+        isAxisTitleVisible={isAxisTitleVisible}
+        toggleAxisTitleVisibility={toggleAxisTitleVisibility}
       />
-      <EuiSpacer size="m" />
       <EuiSwitch
         compressed
         data-test-subj={`lnsshow${axis}AxisGridlines`}
@@ -490,6 +459,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                           });
                         }
                       }}
+                      step="any"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -535,6 +505,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                           });
                         }
                       }}
+                      step="any"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>

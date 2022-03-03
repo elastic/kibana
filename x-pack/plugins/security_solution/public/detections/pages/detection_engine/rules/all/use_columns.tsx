@@ -33,7 +33,7 @@ import { canEditRuleWithActions, getToolTipContent } from '../../../../../common
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
 import { Rule } from '../../../../containers/detection_engine/rules';
-import { useRulesTableContext } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
 import { PopoverTooltip } from './popover_tooltip';
 import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
@@ -91,36 +91,40 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
   );
 };
 
-const useRuleNameColumn = (): TableColumn => {
+export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { navigateToApp } = useKibana().services.application;
 
+  return (
+    <EuiToolTip content={name} anchorClassName="eui-textTruncate">
+      <LinkAnchor
+        data-test-subj="ruleName"
+        onClick={(ev: { preventDefault: () => void }) => {
+          ev.preventDefault();
+          navigateToApp(APP_UI_ID, {
+            deepLinkId: SecurityPageName.rules,
+            path: getRuleDetailsUrl(id),
+          });
+        }}
+        href={formatUrl(getRuleDetailsUrl(id))}
+      >
+        {name}
+      </LinkAnchor>
+    </EuiToolTip>
+  );
+};
+
+const useRuleNameColumn = (): TableColumn => {
   return useMemo(
     () => ({
       field: 'name',
       name: i18n.COLUMN_RULE,
-      render: (value: Rule['name'], item: Rule) => (
-        <EuiToolTip content={value} anchorClassName="eui-textTruncate">
-          <LinkAnchor
-            data-test-subj="ruleName"
-            onClick={(ev: { preventDefault: () => void }) => {
-              ev.preventDefault();
-              navigateToApp(APP_UI_ID, {
-                deepLinkId: SecurityPageName.rules,
-                path: getRuleDetailsUrl(item.id),
-              });
-            }}
-            href={formatUrl(getRuleDetailsUrl(item.id))}
-          >
-            {value}
-          </LinkAnchor>
-        </EuiToolTip>
-      ),
+      render: (value: Rule['name'], item: Rule) => <RuleLink id={item.id} name={value} />,
       sortable: true,
       truncateText: true,
       width: '38%',
     }),
-    [formatUrl, navigateToApp]
+    []
   );
 };
 

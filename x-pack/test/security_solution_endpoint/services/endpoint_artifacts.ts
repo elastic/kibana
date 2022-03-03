@@ -16,7 +16,9 @@ import { FtrService } from '../../functional/ftr_provider_context';
 import { ExceptionsListItemGenerator } from '../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/trusted_apps/constants';
 import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
-import { EVENT_FILTER_LIST } from '../../../plugins/security_solution/public/management/pages/event_filters/constants';
+import { EVENT_FILTER_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/event_filters/constants';
+import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/host_isolation_exceptions/constants';
+import { BLOCKLISTS_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/blocklist/constants';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;
@@ -59,9 +61,9 @@ export class EndpointArtifactsTestResources extends FtrService {
       .then(this.getHttpResponseFailureHandler())
       .then((response) => response.body as ExceptionListItemSchema);
 
-    const { item_id: itemId, namespace_type: namespaceType } = artifact;
+    const { item_id: itemId, namespace_type: namespaceType, list_id: listId } = artifact;
 
-    this.log.info(`Created exception list item: ${itemId}`);
+    this.log.info(`Created exception list item [${listId}]: ${itemId}`);
 
     const cleanup = async () => {
       const deleteResponse = await this.supertest
@@ -70,7 +72,9 @@ export class EndpointArtifactsTestResources extends FtrService {
         .send()
         .then(this.getHttpResponseFailureHandler([404]));
 
-      this.log.info(`Deleted exception list item: ${itemId} (${deleteResponse.status})`);
+      this.log.info(
+        `Deleted exception list item [${listId}]: ${itemId} (${deleteResponse.status})`
+      );
     };
 
     return {
@@ -91,9 +95,27 @@ export class EndpointArtifactsTestResources extends FtrService {
   async createEventFilter(
     overrides: Partial<CreateExceptionListItemSchema> = {}
   ): Promise<ArtifactTestData> {
-    await this.ensureListExists(EVENT_FILTER_LIST);
+    await this.ensureListExists(EVENT_FILTER_LIST_DEFINITION);
     const eventFilter = this.exceptionsGenerator.generateEventFilterForCreate(overrides);
 
     return this.createExceptionItem(eventFilter);
+  }
+
+  async createHostIsolationException(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): Promise<ArtifactTestData> {
+    await this.ensureListExists(HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION);
+    const artifact = this.exceptionsGenerator.generateHostIsolationExceptionForCreate(overrides);
+
+    return this.createExceptionItem(artifact);
+  }
+
+  async createBlocklist(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): Promise<ArtifactTestData> {
+    await this.ensureListExists(BLOCKLISTS_LIST_DEFINITION);
+    const blocklist = this.exceptionsGenerator.generateBlocklistForCreate(overrides);
+
+    return this.createExceptionItem(blocklist);
   }
 }

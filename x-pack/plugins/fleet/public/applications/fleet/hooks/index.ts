@@ -7,4 +7,4 @@
 
 export * from '../../../hooks';
 
-export { useBreadcrumbs } from './use_breadcrumbs';
+export * from './use_breadcrumbs';

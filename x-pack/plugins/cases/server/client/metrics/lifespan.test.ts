@@ -193,7 +193,6 @@ function createStatusChangeSavedObject(
       action_id: '',
       case_id: '',
       comment_id: null,
-      sub_case_id: '',
     },
   };
 }

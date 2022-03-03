@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
 import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 

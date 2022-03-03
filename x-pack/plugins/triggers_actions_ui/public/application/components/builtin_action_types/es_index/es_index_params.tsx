@@ -108,7 +108,7 @@ export const IndexParamsFields = ({
         >
           <EuiIcon type="refresh" />
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.resetDefaultIndexLabel"
+            id="xpack.triggersActionsUI.sections.rulesList.resetDefaultIndexLabel"
             defaultMessage="Reset default index"
           />
         </EuiLink>

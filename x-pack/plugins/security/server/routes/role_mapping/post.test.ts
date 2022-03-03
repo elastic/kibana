@@ -18,8 +18,8 @@ describe('POST role mappings', () => {
       core: coreMock.createRequestHandlerContext(),
       licensing: { license: { check: jest.fn().mockReturnValue({ state: 'valid' }) } } as any,
     };
-    mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping.mockResolvedValue({
-      body: { created: true },
+    mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping.mockResponse({
+      created: true,
     } as any);
 
     defineRoleMappingPostRoutes(mockRouteDefinitionParams);

@@ -85,7 +85,7 @@ export function ServiceContents({
 
   const detailsUrl = apmRouter.link('/services/{serviceName}', {
     path: { serviceName },
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: { rangeFrom, rangeTo, environment, kuery, comparisonEnabled },
   });
 
   const focusUrl = apmRouter.link('/services/{serviceName}/service-map', {

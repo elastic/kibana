@@ -31,7 +31,7 @@ export const registerDocumentsRoute = ({
       const { index, id } = req.params;
 
       try {
-        const { body: document } = await clusterClient.asCurrentUser.get({ index, id });
+        const document = await clusterClient.asCurrentUser.get({ index, id });
 
         const { _id, _index, _source } = document;
 

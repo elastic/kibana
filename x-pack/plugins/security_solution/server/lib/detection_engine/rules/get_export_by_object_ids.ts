@@ -16,13 +16,13 @@ import { RulesClient, AlertServices } from '../../../../../alerting/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
 import { isAlertType } from '../rules/types';
-import { transformAlertToRule } from '../routes/rules/utils';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../rule_actions/legacy_get_bulk_rule_actions_saved_object';
+import { internalRuleToAPIResponse } from '../schemas/rule_converters';
 
 interface ExportSuccessRule {
   statusCode: 200;
@@ -127,7 +127,7 @@ export const getRulesFromObjects = async (
     ) {
       return {
         statusCode: 200,
-        rule: transformAlertToRule(matchingRule, null, legacyActions[matchingRule.id]),
+        rule: internalRuleToAPIResponse(matchingRule, null, legacyActions[matchingRule.id]),
       };
     } else {
       return {

@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes, CaseType, CaseConnector } from '../../../common/api';
+import { CaseStatuses, CaseAttributes, CaseConnector } from '../../../common/api';
 import { Case, UpdateKey, UpdateByKey } from '../../../common/ui';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
@@ -38,19 +38,13 @@ import { useCasesFeatures } from '../cases_context/use_cases_features';
 const useOnUpdateField = ({
   caseData,
   caseId,
-  subCaseId,
   handleUpdateField,
 }: {
   caseData: Case;
   caseId: string;
-  subCaseId?: string;
   handleUpdateField: (newCase: Case, updateKey: UpdateKey) => void;
 }) => {
-  const {
-    isLoading,
-    updateKey: loadingKey,
-    updateCaseProperty,
-  } = useUpdateCase({ caseId, subCaseId });
+  const { isLoading, updateKey: loadingKey, updateCaseProperty } = useUpdateCase({ caseId });
 
   const onUpdateField = useCallback(
     ({ key, value, onSuccess, onError }: OnUpdateFields) => {
@@ -117,7 +111,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
-    subCaseId,
     updateCase,
     useFetchAlertData,
     refreshRef,
@@ -138,11 +131,11 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       hasDataToPush,
       isLoading: isLoadingUserActions,
       participants,
-    } = useGetCaseUserActions(caseId, caseData.connector.id, subCaseId);
+    } = useGetCaseUserActions(caseId, caseData.connector.id);
 
     const refetchCaseUserActions = useCallback(() => {
-      fetchCaseUserActions(caseId, caseData.connector.id, subCaseId);
-    }, [caseId, fetchCaseUserActions, subCaseId, caseData]);
+      fetchCaseUserActions(caseId, caseData.connector.id);
+    }, [caseId, fetchCaseUserActions, caseData]);
 
     const {
       metrics,
@@ -159,24 +152,23 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const handleUpdateCase = useCallback(
       (newCase: Case) => {
         updateCase(newCase);
-        fetchCaseUserActions(caseId, newCase.connector.id, subCaseId);
+        fetchCaseUserActions(caseId, newCase.connector.id);
         fetchCaseMetrics();
       },
-      [updateCase, fetchCaseUserActions, caseId, subCaseId, fetchCaseMetrics]
+      [updateCase, fetchCaseUserActions, caseId, fetchCaseMetrics]
     );
 
     const handleUpdateField = useCallback(
       (newCase: Case, updateKey: UpdateKey) => {
         updateCase({ ...newCase, comments: caseData.comments });
-        fetchCaseUserActions(caseId, newCase.connector.id, subCaseId);
+        fetchCaseUserActions(caseId, newCase.connector.id);
         fetchCaseMetrics();
       },
-      [updateCase, caseData, fetchCaseUserActions, caseId, subCaseId, fetchCaseMetrics]
+      [updateCase, caseData, fetchCaseUserActions, caseId, fetchCaseMetrics]
     );
 
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
       caseId,
-      subCaseId,
       caseData,
       handleUpdateField,
     });
@@ -274,9 +266,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
-        body: i18n.EMAIL_BODY(getCaseViewUrl({ detailName: caseId, subCaseId })),
+        body: i18n.EMAIL_BODY(getCaseViewUrl({ detailName: caseId })),
       }),
-      [caseData.title, getCaseViewUrl, caseId, subCaseId]
+      [caseData.title, getCaseViewUrl, caseId]
     );
 
     useEffect(() => {
@@ -364,11 +356,8 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                         isLoadingUserActions={isLoadingUserActions}
                         onShowAlertDetails={onShowAlertDetails}
                         onUpdateField={onUpdateField}
-                        renderInvestigateInTimelineActionComponent={
-                          timelineUi?.renderInvestigateInTimelineActionComponent
-                        }
                         statusActionButton={
-                          caseData.type !== CaseType.collection && userCanCrud ? (
+                          userCanCrud ? (
                             <StatusActionButton
                               status={caseData.status}
                               onStatusChanged={changeStatus}
@@ -411,9 +400,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                   connectorName={connectorName}
                   connectors={connectors}
                   hasDataToPush={hasDataToPush && userCanCrud}
-                  hideConnectorServiceNowSir={
-                    subCaseId != null || caseData.type === CaseType.collection
-                  }
                   isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
                   isValidConnector={isLoadingConnectors ? true : isValidConnector}
                   onSubmit={onSubmitConnector}

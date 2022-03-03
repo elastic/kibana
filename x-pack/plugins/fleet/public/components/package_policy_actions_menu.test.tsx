@@ -48,7 +48,6 @@ function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
     monitoring_enabled: [],
     name: 'Test Policy',
     description: '',
-    is_default: false,
     is_preconfigured: false,
     status: 'active',
     is_managed: false,

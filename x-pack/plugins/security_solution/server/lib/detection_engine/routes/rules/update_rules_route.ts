@@ -12,7 +12,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildSiemResponse } from '../utils';
 
 import { getIdError } from './utils';
@@ -54,7 +54,7 @@ export const updateRulesRoute = (
           request,
           savedObjectsClient,
         });
-        throwHttpError(await mlAuthz.validateRuleType(request.body.type));
+        throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
 
         const existingRule = await readRules({
           isRuleRegistryEnabled,
@@ -76,8 +76,8 @@ export const updateRulesRoute = (
         });
 
         if (rule != null) {
-          const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
-          const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(rule.id);
+          const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
           const [validated, errors] = transformValidate(
             rule,
             ruleExecutionSummary,

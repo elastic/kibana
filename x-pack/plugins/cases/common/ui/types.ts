@@ -6,12 +6,10 @@
  */
 
 import {
-  AssociationType,
   CaseAttributes,
   CaseConnector,
   CasePatchRequest,
   CaseStatuses,
-  CaseType,
   User,
   ActionConnector,
   CaseExternalServiceBasic,
@@ -27,15 +25,6 @@ export interface CasesContextFeatures {
 }
 
 export type CasesFeatures = Partial<CasesContextFeatures>;
-
-export interface CasesContextValue {
-  owner: string[];
-  appId: string;
-  appTitle: string;
-  userCanCrud: boolean;
-  basePath: string;
-  features: CasesContextFeatures;
-}
 
 export interface CasesUiConfigType {
   markdownPlugins: {
@@ -83,20 +72,12 @@ interface BasicCase {
   version: string;
 }
 
-export interface SubCase extends BasicCase {
-  associationType: AssociationType;
-  caseParentId: string;
-}
-
 export interface Case extends BasicCase {
   connector: CaseConnector;
   description: string;
   externalService: CaseExternalService | null;
-  subCases?: SubCase[] | null;
-  subCaseIds: string[];
   settings: CaseAttributes['settings'];
   tags: string[];
-  type: CaseType;
 }
 
 export interface ResolvedCase {
@@ -118,7 +99,6 @@ export interface FilterOptions {
   tags: string[];
   reporters: User[];
   owner: string[];
-  onlyCollectionType?: boolean;
 }
 
 export interface CasesStatus {
@@ -178,7 +158,6 @@ export interface ActionLicense {
 
 export interface DeleteCase {
   id: string;
-  type: CaseType | null;
   title: string;
 }
 
@@ -195,7 +174,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
+  fetchCaseUserActions?: (caseId: string, caseConnectorId: string) => void;
   updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;
@@ -206,7 +185,7 @@ export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
   name?: string[];
-  false_positives: string[];
+  false_positives?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];
@@ -265,3 +244,5 @@ export interface Ecs {
 }
 
 export type CaseActionConnector = ActionConnector;
+
+export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];

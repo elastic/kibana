@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
 import { esHits } from '../../__mocks__/es_hits';
 import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';

@@ -100,6 +100,11 @@ export function useDiscoverState({
   });
 
   /**
+   * Reset to display loading spinner when savedSearch is changing
+   */
+  useEffect(() => reset(), [savedSearch.id, reset]);
+
+  /**
    * Sync URL state with local app state on saved search load
    * or dataView / savedSearch switch
    */

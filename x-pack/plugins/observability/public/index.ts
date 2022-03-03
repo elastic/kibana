@@ -27,6 +27,7 @@ export {
   enableInspectEsQueries,
   enableComparisonByDefault,
   enableInfrastructureView,
+  defaultApmServiceEnvironment,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 
@@ -57,6 +58,7 @@ export {
   FilterValueLabel,
   SelectableUrlList,
   ExploratoryView,
+  DatePicker,
 } from './components/shared/';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
@@ -80,11 +82,16 @@ export * from './typings';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
+export { useRulesLink } from './hooks/use_rules_link';
+export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
+export type { LinkDescriptor } from './hooks/use_link_props';
+
+export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warning_prompt';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
 export { ALL_VALUES_SELECTED } from './components/shared/field_value_suggestions/field_value_combobox';
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
-export type { SeriesUrl } from './components/shared/exploratory_view/types';
+export type { SeriesUrl, ReportViewType } from './components/shared/exploratory_view/types';
 
 export type {
   ObservabilityRuleTypeFormatter,
@@ -93,6 +100,7 @@ export type {
 } from './rules/create_observability_rule_type_registry';
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
 export type { ExploratoryEmbeddableProps } from './components/shared/exploratory_view/embeddable/embeddable';
+export type { ActionTypes } from './components/shared/exploratory_view/embeddable/use_actions';
 
 export type { AddInspectorRequest } from './context/inspector/inspector_context';
 export { InspectorContextProvider } from './context/inspector/inspector_context';
@@ -102,5 +110,8 @@ export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_
 export {
   ReportTypes,
   REPORT_METRIC_FIELD,
+  RECORDS_PERCENTAGE_FIELD,
+  RECORDS_FIELD,
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
+export { fromQuery, toQuery } from './utils/url';

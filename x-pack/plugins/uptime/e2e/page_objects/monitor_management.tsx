@@ -7,6 +7,7 @@
 
 import { Page } from '@elastic/synthetics';
 import { DataStream } from '../../common/runtime_types/monitor_management';
+import { getQuerystring } from '../journeys/utils';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
 
@@ -46,8 +47,8 @@ export function monitorManagementPageProvider({
       });
     },
 
-    async navigateToOverviewPage() {
-      await page.goto(overview, {
+    async navigateToOverviewPage(options?: object) {
+      await page.goto(`${overview}${options ? `?${getQuerystring(options)}` : ''}`, {
         waitUntil: 'networkidle',
       });
     },
@@ -58,11 +59,12 @@ export function monitorManagementPageProvider({
 
     async deleteMonitor() {
       await this.clickByTestSubj('monitorManagementDeleteMonitor');
+      await this.clickByTestSubj('confirmModalConfirmButton');
       return await this.findByTestSubj('uptimeDeleteMonitorSuccess');
     },
 
     async editMonitor() {
-      await this.clickByTestSubj('monitorManagementEditMonitor');
+      await page.click(this.byTestId('monitorManagementEditMonitor'), { delay: 800 });
     },
 
     async findMonitorConfiguration(monitorConfig: Record<string, string>) {
@@ -88,7 +90,7 @@ export function monitorManagementPageProvider({
       } else {
         await page.click('text=Save monitor');
       }
-      return await this.findByTestSubj('uptimeAddMonitorSuccess');
+      return await this.findByText('Monitor added successfully.');
     },
 
     async fillCodeEditor(value: string) {
@@ -96,9 +98,8 @@ export function monitorManagementPageProvider({
     },
 
     async selectLocations({ locations }: { locations: string[] }) {
-      await this.clickByTestSubj('syntheticsServiceLocationsComboBox');
       for (let i = 0; i < locations.length; i++) {
-        await page.click(`text=${locations[i]}`);
+        await page.check(`text=${locations[i]}`);
       }
     },
 

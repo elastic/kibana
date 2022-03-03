@@ -19,7 +19,7 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { Source } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
-import { Prompt } from '../../../utils/navigation_warning_prompt';
+import { Prompt } from '../../../../../observability/public';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { MLConfigurationPanel } from './ml_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';

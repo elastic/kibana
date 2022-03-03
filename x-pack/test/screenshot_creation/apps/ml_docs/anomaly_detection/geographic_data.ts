@@ -229,7 +229,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(ecommerceGeoJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(ecommerceGeoJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
@@ -260,7 +259,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(weblogGeoJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(weblogGeoJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
@@ -268,7 +266,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('select swim lane tile');
       const cells = await ml.swimLane.getCells(overallSwimLaneTestSubj);
       const sampleCell1 = cells[11];
-      const sampleCell2 = cells[12];
+      const sampleCell2 = cells[cells.length - 1];
       await ml.swimLane.selectCells(overallSwimLaneTestSubj, {
         x1: sampleCell1.x + cellSize,
         y1: sampleCell1.y + cellSize,
@@ -283,6 +281,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // clickFitToData only works with displayed legend
       await maps.openLegend();
       await maps.clickFitToData();
+      await ml.anomalyExplorer.scrollChartsContainerIntoView();
       await maps.closeLegend();
 
       await mlScreenshots.takeScreenshot(

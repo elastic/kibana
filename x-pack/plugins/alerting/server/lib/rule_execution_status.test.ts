@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { AlertExecutionStatusErrorReasons } from '../types';
+import { AlertAction, AlertExecutionStatusErrorReasons, RuleExecutionState } from '../types';
 import {
   executionStatusFromState,
   executionStatusFromError,
@@ -16,6 +16,7 @@ import {
 import { ErrorWithReason } from './error_with_reason';
 
 const MockLogger = loggingSystemMock.create().get();
+const metrics = { numSearches: 1, esSearchDurationMs: 10, totalSearchDurationMs: 20 };
 
 describe('RuleExecutionStatus', () => {
   beforeEach(() => {
@@ -24,24 +25,50 @@ describe('RuleExecutionStatus', () => {
 
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
-      const status = executionStatusFromState({});
+      const status = executionStatusFromState({} as RuleExecutionState);
       checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
     });
 
     test('task state with no instances', () => {
-      const status = executionStatusFromState({ alertInstances: {} });
+      const status = executionStatusFromState({
+        alertInstances: {},
+        triggeredActions: [],
+        metrics,
+      });
       checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
+      expect(status.metrics).toBe(metrics);
     });
 
     test('task state with one instance', () => {
-      const status = executionStatusFromState({ alertInstances: { a: {} } });
+      const status = executionStatusFromState({
+        alertInstances: { a: {} },
+        triggeredActions: [],
+        metrics,
+      });
       checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
+      expect(status.metrics).toBe(metrics);
+    });
+
+    test('task state with numberOfTriggeredActions', () => {
+      const status = executionStatusFromState({
+        triggeredActions: [{ group: '1' } as AlertAction],
+        alertInstances: { a: {} },
+        metrics,
+      });
+      checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.numberOfTriggeredActions).toBe(1);
+      expect(status.status).toBe('active');
+      expect(status.error).toBe(undefined);
+      expect(status.metrics).toBe(metrics);
     });
   });
 
@@ -109,6 +136,19 @@ describe('RuleExecutionStatus', () => {
       Object {
         "error": null,
         "lastDuration": 1234,
+        "lastExecutionDate": "2020-09-03T16:26:58.000Z",
+        "status": "ok",
+      }
+    `);
+    });
+
+    test('status with a numberOfTriggeredActions', () => {
+      expect(
+        ruleExecutionStatusToRaw({ lastExecutionDate: date, status, numberOfTriggeredActions: 5 })
+      ).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "lastDuration": 0,
         "lastExecutionDate": "2020-09-03T16:26:58.000Z",
         "status": "ok",
       }
@@ -222,6 +262,28 @@ describe('RuleExecutionStatus', () => {
           },
           "lastDuration": 1234,
           "lastExecutionDate": 2020-09-03T16:26:58.000Z,
+          "status": "active",
+        }
+      `);
+    });
+
+    test('valid status, date, error, duration and triggeredActions', () => {
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
+        status,
+        lastExecutionDate: date,
+        numberOfTriggeredActions: 5,
+        error,
+        lastDuration: 1234,
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "error": Object {
+            "message": "wops",
+            "reason": "execute",
+          },
+          "lastDuration": 1234,
+          "lastExecutionDate": 2020-09-03T16:26:58.000Z,
+          "numberOfTriggeredActions": 5,
           "status": "active",
         }
       `);
