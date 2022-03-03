@@ -51,10 +51,10 @@ type Props = {
 );
 
 const resolveAgentId = (
-  agentPolicies?: AgentPolicy[],
+  agentPolicies: AgentPolicy[],
   selectedAgentPolicyId?: string
 ): undefined | string => {
-  if (agentPolicies && agentPolicies.length && !selectedAgentPolicyId) {
+  if (agentPolicies.length && !selectedAgentPolicyId) {
     if (agentPolicies.length === 1) {
       return agentPolicies[0].id;
     }

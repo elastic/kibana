@@ -698,7 +698,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             'replace_duplicate_incompatible',
             'swap_incompatible',
           ],
-          nextLabel: 'Unique count',
+          nextLabel: 'Minimum',
         });
       });
 
@@ -736,7 +736,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           })
         ).toEqual({
           dropTypes: ['replace_incompatible', 'replace_duplicate_incompatible'],
-          nextLabel: 'Unique count',
+          nextLabel: 'Minimum',
         });
       });
 

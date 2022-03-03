@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 import uuid from 'uuid';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { useUpgradeAssistantHref } from '../../shared/links/kibana';
 import { SearchBar } from '../../shared/search_bar';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ServiceList } from './service_list';
@@ -37,8 +29,6 @@ const initialData = {
   },
 };
 
-let hasDisplayedToast = false;
-
 function useServicesFetcher() {
   const {
     urlParams: { comparisonEnabled, comparisonType },
@@ -49,9 +39,6 @@ function useServicesFetcher() {
   } = useAnyOfApmParams('/services/{serviceName}', '/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { core } = useApmPluginContext();
-  const upgradeAssistantHref = useUpgradeAssistantHref();
 
   const { offset } = getTimeRangeComparison({
     start,
@@ -112,40 +99,6 @@ function useServicesFetcher() {
     [requestId, offset],
     { preservePreviousData: false }
   );
-
-  useEffect(() => {
-    if (mainStatisticsData.hasLegacyData && !hasDisplayedToast) {
-      hasDisplayedToast = true;
-
-      core.notifications.toasts.addWarning({
-        title: i18n.translate('xpack.apm.serviceInventory.toastTitle', {
-          defaultMessage:
-            'Legacy data was detected within the selected time range',
-        }),
-        text: toMountPoint(
-          <p>
-            {i18n.translate('xpack.apm.serviceInventory.toastText', {
-              defaultMessage:
-                "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in ",
-            })}
-
-            <EuiLink href={upgradeAssistantHref}>
-              {i18n.translate(
-                'xpack.apm.serviceInventory.upgradeAssistantLinkText',
-                {
-                  defaultMessage: 'the upgrade assistant',
-                }
-              )}
-            </EuiLink>
-          </p>
-        ),
-      });
-    }
-  }, [
-    mainStatisticsData.hasLegacyData,
-    upgradeAssistantHref,
-    core.notifications.toasts,
-  ]);
 
   return {
     mainStatisticsData,

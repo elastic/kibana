@@ -99,7 +99,7 @@ export const createGridColumns = (
                     data-test-subj="lensDatatableFilterFor"
                     onClick={() => {
                       handleFilterClick(field, rowValue, colIndex, rowIndex);
-                      closePopover();
+                      closePopover?.();
                     }}
                     iconType="plusInCircle"
                   >
@@ -137,7 +137,7 @@ export const createGridColumns = (
                     aria-label={filterOutAriaLabel}
                     onClick={() => {
                       handleFilterClick(field, rowValue, colIndex, rowIndex, true);
-                      closePopover();
+                      closePopover?.();
                     }}
                     iconType="minusInCircle"
                   >

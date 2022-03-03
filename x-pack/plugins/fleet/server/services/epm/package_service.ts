@@ -19,13 +19,13 @@ import type {
   InstallablePackage,
   Installation,
   RegistryPackage,
-  RegistrySearchResult,
+  BundledPackage,
 } from '../../types';
 import { checkSuperuser } from '../../routes/security';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { installTransform, isTransform } from './elasticsearch/transform/install';
-import { fetchFindLatestPackage, getRegistryPackage } from './registry';
+import { fetchFindLatestPackageOrThrow, getRegistryPackage } from './registry';
 import { ensureInstalledPackage, getInstallation } from './packages';
 
 export type InstalledAssetType = EsAssetReference;
@@ -44,7 +44,7 @@ export interface PackageClient {
     spaceId?: string;
   }): Promise<Installation | undefined>;
 
-  fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult>;
+  fetchFindLatestPackage(packageName: string): Promise<RegistryPackage | BundledPackage>;
 
   getRegistryPackage(
     packageName: string,
@@ -117,7 +117,7 @@ class PackageClientImpl implements PackageClient {
 
   public async fetchFindLatestPackage(packageName: string) {
     await this.#runPreflight();
-    return fetchFindLatestPackage(packageName);
+    return fetchFindLatestPackageOrThrow(packageName);
   }
 
   public async getRegistryPackage(packageName: string, packageVersion: string) {

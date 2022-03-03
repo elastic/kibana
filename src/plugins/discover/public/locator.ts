@@ -7,9 +7,9 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
+import type { Filter } from '@kbn/es-query';
+import type { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
-import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import type { VIEW_MODE } from './components/view_mode_toggle';
 
@@ -127,10 +127,10 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       hideAggregatedPreview?: boolean;
     } = {};
     const queryState: QueryState = {};
+    const { isFilterPinned } = await import('@kbn/es-query');
 
     if (query) appState.query = query;
-    if (filters && filters.length)
-      appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
+    if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
     if (indexPatternId) appState.index = indexPatternId;
     if (columns) appState.columns = columns;
     if (savedQuery) appState.savedQuery = savedQuery;
@@ -138,8 +138,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (interval) appState.interval = interval;
 
     if (timeRange) queryState.time = timeRange;
-    if (filters && filters.length)
-      queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+    if (filters && filters.length) queryState.filters = filters?.filter((f) => isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
     if (viewMode) appState.viewMode = viewMode;
     if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;

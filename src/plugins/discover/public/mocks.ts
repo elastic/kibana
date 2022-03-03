@@ -24,9 +24,6 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    urlGenerator: {
-      createUrl: jest.fn(),
-    } as unknown as DiscoverStart['urlGenerator'],
     locator: sharePluginMock.createLocator(),
   };
   return startContract;

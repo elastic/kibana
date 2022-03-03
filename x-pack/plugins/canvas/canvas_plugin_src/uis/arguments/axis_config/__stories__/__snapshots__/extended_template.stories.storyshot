@@ -20,6 +20,7 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
       <label
         className="euiFormLabel euiFormRow__label"
         htmlFor="generated-id"
+        id="generated-id-label"
       >
         Position
       </label>
@@ -97,6 +98,7 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
       <label
         className="euiFormLabel euiFormRow__label"
         htmlFor="generated-id"
+        id="generated-id-label"
       >
         Position
       </label>

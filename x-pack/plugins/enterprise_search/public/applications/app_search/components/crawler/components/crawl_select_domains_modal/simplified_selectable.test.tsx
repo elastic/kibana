@@ -27,6 +27,7 @@ describe('SimplifiedSelectable', () => {
         options={['cat', 'dog', 'fish']}
         selectedOptions={['cat', 'fish']}
         onChange={MOCK_ON_CHANGE}
+        emptyMessage={'empty message'}
       />
     );
   });
@@ -45,6 +46,10 @@ describe('SimplifiedSelectable', () => {
         checked: 'on',
       },
     ]);
+  });
+
+  it('passes on an empty message', () => {
+    expect(wrapper.find(EuiSelectable).prop('emptyMessage')).toEqual('empty message');
   });
 
   it('passes newly selected options to the callback', () => {

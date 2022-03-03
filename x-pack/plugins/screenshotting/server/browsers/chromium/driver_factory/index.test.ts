@@ -61,7 +61,7 @@ describe('HeadlessChromiumDriverFactory', () => {
 
     (puppeteer as jest.Mocked<typeof puppeteer>).launch.mockResolvedValue(mockBrowser);
 
-    factory = new HeadlessChromiumDriverFactory(screenshotMode, config, logger, path);
+    factory = new HeadlessChromiumDriverFactory(screenshotMode, config, logger, path, '');
     jest.spyOn(factory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
     jest.spyOn(factory, 'getProcessLogger').mockReturnValue(Rx.EMPTY);
     jest.spyOn(factory, 'getPageExit').mockReturnValue(Rx.EMPTY);

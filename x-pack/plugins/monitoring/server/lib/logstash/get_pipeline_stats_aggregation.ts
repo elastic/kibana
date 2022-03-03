@@ -15,7 +15,7 @@ function scalarCounterAggregation(
   field: string,
   fieldPath: string,
   ephemeralIdField: string,
-  maxBucketSize: string
+  maxBucketSize: number
 ) {
   const fullPath = `${fieldPath}.${field}`;
 
@@ -54,7 +54,7 @@ function scalarCounterAggregation(
   return aggs;
 }
 
-function nestedVertices(statsPath: string, maxBucketSize: string) {
+function nestedVertices(statsPath: string, maxBucketSize: number) {
   const fieldPath = `${statsPath}.pipelines.vertices`;
   const ephemeralIdField = `${statsPath}.pipelines.vertices.pipeline_ephemeral_id`;
 
@@ -81,7 +81,7 @@ function nestedVertices(statsPath: string, maxBucketSize: string) {
   };
 }
 
-function createScopedAgg(pipelineId: string, pipelineHash: string, maxBucketSize: string) {
+function createScopedAgg(pipelineId: string, pipelineHash: string, maxBucketSize: number) {
   return (statsPath: string) => {
     const verticesAgg = {
       vertices: nestedVertices(statsPath, maxBucketSize),
@@ -115,7 +115,7 @@ function fetchPipelineLatestStats(
   query: object,
   pipelineId: string,
   version: PipelineVersion,
-  maxBucketSize: string,
+  maxBucketSize: number,
   callWithRequest: any,
   req: LegacyRequest
 ) {
@@ -219,15 +219,13 @@ export function getPipelineStatsAggregation({
     filters,
   });
 
-  const config = req.server.config();
+  const config = req.server.config;
 
   return fetchPipelineLatestStats(
     query,
     pipelineId,
     version,
-    // @ts-ignore not undefined, need to get correct config
-    // https://github.com/elastic/kibana/issues/112146
-    config.get('monitoring.ui.max_bucket_size'),
+    config.ui.max_bucket_size,
     callWithRequest,
     req
   );

@@ -65,7 +65,6 @@ export function getAgentAuthorizationSettings({
     {
       type: 'text',
       key: 'secret_token',
-      readOnly: isCloudPolicy,
       labelAppend: OPTIONAL_LABEL,
       label: i18n.translate(
         'xpack.apm.fleet_integration.settings.agentAuthorization.secretTokenLabel',

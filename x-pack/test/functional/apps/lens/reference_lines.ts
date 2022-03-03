@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should carry the style when moving a reference line to another group', async () => {
       // style it enabling the fill
       await testSubjects.click('lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger');
-      await testSubjects.click('lnsXY_referenceLine_fill_below');
+      await testSubjects.click('lnsXY_fill_below');
       await PageObjects.lens.closeDimensionEditor();
 
       // drag and drop it to the left axis
@@ -93,9 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('lnsXY_yReferenceLineRightPanel > lns-dimensionTrigger');
       expect(
-        await find.existsByCssSelector(
-          '[data-test-subj="lnsXY_referenceLine_fill_below"][class$="isSelected"]'
-        )
+        await find.existsByCssSelector('[data-test-subj="lnsXY_fill_below"][class$="isSelected"]')
       ).to.be(true);
       await PageObjects.lens.closeDimensionEditor();
     });
@@ -113,9 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         )
       ).click();
       expect(
-        await find.existsByCssSelector(
-          '[data-test-subj="lnsXY_referenceLine_fill_below"][class$="isSelected"]'
-        )
+        await find.existsByCssSelector('[data-test-subj="lnsXY_fill_below"][class$="isSelected"]')
       ).to.be(true);
       await PageObjects.lens.closeDimensionEditor();
     });

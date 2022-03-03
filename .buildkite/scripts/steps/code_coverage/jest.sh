@@ -10,7 +10,7 @@ is_test_execution_step
 
 echo '--- Jest code coverage'
 
-.buildkite/scripts/steps/code_coverage/jest_parallel.sh
+.buildkite/scripts/steps/code_coverage/jest_parallel.sh jest.config.js
 
 tar -czf kibana-jest-thread-coverage.tar.gz target/kibana-coverage/jest
 

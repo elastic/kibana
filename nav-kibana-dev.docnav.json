@@ -6,7 +6,7 @@
   "description": "Developer documentation for building custom Kibana plugins and extending Kibana functionality.",
   "items": [
     {
-      "category": "Getting started",
+      "label": "Getting started",
       "items": [
         { "id": "kibDevDocsWelcome" },
         { "id": "kibDevTutorialSetupDevEnv" },
@@ -16,7 +16,7 @@
       ]
     },
     {
-      "category": "Key concepts",
+      "label": "Key concepts",
       "items": [
         { "id": "kibPlatformIntro" },
         { "id": "kibDevAnatomyOfAPlugin" },
@@ -32,7 +32,7 @@
       ]
     },
     {
-      "category": "Tutorials",
+      "label": "Tutorials",
       "items": [
         { "id": "kibDevTutorialTestingPlugins" },
         { "id": "kibDevTutorialSavedObject" },
@@ -46,11 +46,14 @@
           "id": "kibDevTutorialBuildingDistributable",
           "label": "Building a Kibana distributable"
         },
-        { "id": "kibDevTutorialServerEndpoint" }
+        { "id": "kibDevTutorialCI" },
+        { "id": "kibDevTutorialServerEndpoint" },
+        { "id": "kibDevTutorialAdvancedSettings"},
+        { "id": "kibDevSharePluginReadme"}
       ]
     },
     {
-      "category": "Contributing",
+      "label": "Contributing",
       "items": [
         { "id": "kibRepoStructure" },
         { "id": "kibDevPrinciples" },
@@ -62,8 +65,9 @@
       ]
     },
     {
-      "category": "Contributors Newsletters",
+      "label": "Contributors Newsletters",
       "items": [
+        { "id": "kibFebruary2022ContributorNewsletter" },
         { "id": "kibJanuary2022ContributorNewsletter" },
         { "id": "kibDecember2021ContributorNewsletter" },
         { "id": "kibNovember2021ContributorNewsletter" },
@@ -78,7 +82,7 @@
       ]
     },
     {
-      "category": "API documentation",
+      "label": "API documentation",
       "items": [
         { "id": "kibDevDocsApiWelcome" },
         { "id": "kibDevDocsPluginDirectory" },
