@@ -181,10 +181,16 @@ function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
 ): IndexPatternLayer | undefined {
   const { timeFieldName, splitMode, splitFilters, metrics, timeInterval } = layer;
   const dateField = indexPattern.getFieldByName(timeFieldName!);
-  const splitField = layer.splitField ? indexPattern.getFieldByName(layer.splitField) : null;
+
+  const splitFields = layer.splitFields
+    ? (layer.splitFields
+        .map((item) => indexPattern.getFieldByName(item))
+        .filter(Boolean) as IndexPatternField[])
+    : null;
+
   // generate the layer for split by terms
-  if (splitMode === 'terms' && splitField) {
-    return getSplitByTermsLayer(indexPattern, splitField, dateField, layer);
+  if (splitMode === 'terms' && splitFields?.length) {
+    return getSplitByTermsLayer(indexPattern, splitFields, dateField, layer);
     // generate the layer for split by filters
   } else if (splitMode?.includes('filter') && splitFilters && splitFilters.length) {
     return getSplitByFiltersLayer(indexPattern, dateField, layer);
