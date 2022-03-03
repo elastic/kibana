@@ -13,6 +13,8 @@ import {
 } from '../../../embeddable/common/types';
 import { ControlGroupInput, ControlPanelState } from './types';
 import { SavedObjectReference } from '../../../../core/types';
+import { MigrateFunctionsObject } from '../../../kibana_utils/common';
+import { makeControlOrdersZeroBased } from './control_group_migrations';
 
 type ControlGroupInputWithType = Partial<ControlGroupInput> & { type: string };
 
@@ -82,4 +84,12 @@ export const createControlGroupExtract = (
     }
     return { state: workingState as EmbeddableStateWithType, references };
   };
+};
+
+export const migrations: MigrateFunctionsObject = {
+  '8.2.0': (state) => {
+    const controlInput = state as unknown as ControlGroupInput;
+    // for hierarchical chaining it is required that all control orders start at 0.
+    return makeControlOrdersZeroBased(controlInput);
+  },
 };

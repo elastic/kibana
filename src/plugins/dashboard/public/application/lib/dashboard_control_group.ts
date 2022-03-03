@@ -13,9 +13,13 @@ import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
 import { DashboardContainer } from '..';
 import { DashboardState } from '../../types';
-import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
 import { DashboardContainerInput, DashboardSavedObject } from '../..';
 import { ControlGroupContainer, ControlGroupInput } from '../../../../controls/public';
+import {
+  controlGroupInputToRawAttributes,
+  getDefaultDashboardControlGroupInput,
+  rawAttributesToControlGroupInput,
+} from '../../../common';
 
 // only part of the control group input should be stored in dashboard state. The rest is passed down from the dashboard.
 export interface DashboardControlGroupInput {
@@ -176,10 +180,9 @@ export const serializeControlGroupToDashboardSavedObject = (
     return;
   }
   if (dashboardState.controlGroupInput) {
-    dashboardSavedObject.controlGroupInput = {
-      controlStyle: dashboardState.controlGroupInput.controlStyle,
-      panelsJSON: JSON.stringify(dashboardState.controlGroupInput.panels),
-    };
+    dashboardSavedObject.controlGroupInput = controlGroupInputToRawAttributes(
+      dashboardState.controlGroupInput
+    );
   }
 };
 
@@ -187,15 +190,7 @@ export const deserializeControlGroupFromDashboardSavedObject = (
   dashboardSavedObject: DashboardSavedObject
 ): Omit<ControlGroupInput, 'id'> | undefined => {
   if (!dashboardSavedObject.controlGroupInput) return;
-
-  const defaultControlGroupInput = getDefaultDashboardControlGroupInput();
-  return {
-    controlStyle:
-      dashboardSavedObject.controlGroupInput?.controlStyle ?? defaultControlGroupInput.controlStyle,
-    panels: dashboardSavedObject.controlGroupInput?.panelsJSON
-      ? JSON.parse(dashboardSavedObject.controlGroupInput?.panelsJSON)
-      : {},
-  };
+  return rawAttributesToControlGroupInput(dashboardSavedObject.controlGroupInput);
 };
 
 export const combineDashboardFiltersWithControlGroupFilters = (
