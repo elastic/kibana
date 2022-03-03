@@ -242,19 +242,19 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             timerange={timerange}
             getLensAttributes={getLensAttributes}
           >
-            {stackByOptions.length > 1 && (
-              <EuiFlexGroup alignItems="center" gutterSize="none">
-                <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                {stackByOptions.length > 1 && (
                   <EuiSelect
                     onChange={setSelectedChartOptionCallback}
                     options={stackByOptions}
                     prepend={i18n.STACK_BY}
                     value={selectedStackByOption?.value}
                   />
-                </EuiFlexItem>
-                <HeaderChildrenFlexItem grow={false}>{headerChildren}</HeaderChildrenFlexItem>
-              </EuiFlexGroup>
-            )}
+                )}
+              </EuiFlexItem>
+              <HeaderChildrenFlexItem grow={false}>{headerChildren}</HeaderChildrenFlexItem>
+            </EuiFlexGroup>
           </HeaderSection>
 
           {isInitialLoading ? (
