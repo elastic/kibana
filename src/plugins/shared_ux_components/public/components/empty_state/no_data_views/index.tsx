@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 export { NoDataViews as NoDataViewsComponent } from './no_data_views.component';
-export { Props as NoDataViewsComponentProps } from './no_data_views.component';
+export type { Props as NoDataViewsComponentProps } from './no_data_views.component';
