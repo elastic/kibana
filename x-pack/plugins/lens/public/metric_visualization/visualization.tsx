@@ -89,14 +89,14 @@ const toExpression = (
 
   const labelFont = fontSizes[state?.size || 'xl'];
   const labelToMetricFontSizeMap: Record<string, number> = {
-    xs: fontSizes.s.size,
-    s: fontSizes.m.size,
-    m: fontSizes.l.size,
-    l: fontSizes.xl.size,
-    xl: fontSizes.xxl.size,
-    xxl: fontSizes.xxl.size * 1.2,
+    xs: fontSizes.xs.size * 2,
+    s: fontSizes.m.size * 2.5,
+    m: fontSizes.l.size * 2.5,
+    l: fontSizes.xl.size * 2.5,
+    xl: fontSizes.xxl.size * 2.5,
+    xxl: fontSizes.xxl.size * 3,
   };
-  const metricFontSize = labelToMetricFontSizeMap[state?.size || 'xl'] * 2.5;
+  const metricFontSize = labelToMetricFontSizeMap[state?.size || 'xl'];
 
   return {
     type: 'expression',
