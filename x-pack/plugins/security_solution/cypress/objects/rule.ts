@@ -59,6 +59,7 @@ export interface CustomRule {
   timeline: CompleteTimeline;
   maxSignals: number;
   buildingBlockType?: string;
+  exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
 }
 
 export interface ThresholdRule extends CustomRule {
