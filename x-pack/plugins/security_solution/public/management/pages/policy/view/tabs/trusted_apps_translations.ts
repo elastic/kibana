@@ -129,7 +129,7 @@ export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS = Object.freeze({
   listSearchPlaceholderMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.trustedApps.list.search.placeholder',
     {
-      defaultMessage: `Search on the fields below: name, description, comments, value`,
+      defaultMessage: `Search on the fields below: name, description, value`,
     }
   ),
   layoutTitle: i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.layout.title', {
@@ -150,7 +150,7 @@ export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS = Object.freeze({
   layoutAboutMessage: (count: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.layout.about', {
       defaultMessage:
-        'There {count, plural, one {is} other {are}} {count} event {count, plural, =1 {filter} other {filters}} associated with this policy. Click here to',
+        'There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {app} other {apps}} associated with this policy. Click here to',
       values: {
         count,
       },

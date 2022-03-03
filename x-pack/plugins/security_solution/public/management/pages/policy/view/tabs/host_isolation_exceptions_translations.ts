@@ -140,7 +140,7 @@ export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS = Object.freeze({
   listSearchPlaceholderMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.hostIsolationException.list.search.placeholder',
     {
-      defaultMessage: `Search on the fields below: name, description, comments, value`,
+      defaultMessage: `Search on the fields below: name, description, IP`,
     }
   ),
   layoutTitle: i18n.translate(
@@ -164,7 +164,7 @@ export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS = Object.freeze({
   layoutAboutMessage: (count: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.hostIsolationException.layout.about', {
       defaultMessage:
-        'There {count, plural, one {is} other {are}} {count} event {count, plural, =1 {filter} other {filters}} associated with this policy. Click here to',
+        'There {count, plural, one {is} other {are}} {count} host isolation {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to',
       values: {
         count,
       },

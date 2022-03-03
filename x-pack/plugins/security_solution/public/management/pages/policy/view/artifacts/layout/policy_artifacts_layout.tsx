@@ -55,9 +55,10 @@ interface PolicyArtifactsLayoutProps {
   listId: string;
   /** A list of labels for the given policy artifact page. Not all have to be defined, only those that should override the defaults */
   labels: PolicyArtifactsPageLabels;
+  externalPrivileges?: boolean;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
-  ({ policyItem, listId, labels: _labels = {} }) => {
+  ({ policyItem, listId, labels: _labels = {}, externalPrivileges = true }) => {
     const http = useHttp();
     const { getAppUrl } = useAppUrl();
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(listId);
@@ -217,10 +218,10 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             </EuiText>
           </EuiPageHeaderSection>
           <EuiPageHeaderSection>
-            {canCreateArtifactsByPolicy && assignToPolicyButton}
+            {canCreateArtifactsByPolicy && externalPrivileges && assignToPolicyButton}
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        {canCreateArtifactsByPolicy && urlParams.show === 'list' && (
+        {canCreateArtifactsByPolicy && externalPrivileges && urlParams.show === 'list' && (
           <PolicyArtifactsFlyout
             policyItem={policyItem}
             apiClient={exceptionsListApiClient}
@@ -254,6 +255,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             artifactPathFn={getArtifactPath}
             labels={labels}
             onDeleteActionCallback={handleOnDeleteActionCallback}
+            externalPrivileges={externalPrivileges}
           />
         </EuiPageContent>
       </div>

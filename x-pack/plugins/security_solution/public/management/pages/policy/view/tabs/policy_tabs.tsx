@@ -143,13 +143,14 @@ export const PolicyTabs = React.memo(() => {
                   policyItem={policyItem}
                   listId={ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID}
                   labels={POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS}
+                  externalPrivileges={privileges.canIsolateHost}
                 />
               </>
             ),
           }
         : undefined,
     };
-  }, [canSeeHostIsolationExceptions, policyItem]);
+  }, [canSeeHostIsolationExceptions, policyItem, privileges.canIsolateHost]);
 
   // convert tabs object into an array EuiTabbedContent can understand
   const tabsList: PolicyTab[] = useMemo(

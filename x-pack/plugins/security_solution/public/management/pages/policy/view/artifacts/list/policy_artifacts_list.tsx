@@ -41,10 +41,19 @@ interface PolicyArtifactsListProps {
   artifactPathFn: (location: object) => string;
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
+  externalPrivileges?: boolean;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
-  ({ policy, apiClient, searcheableFields, artifactPathFn, labels, onDeleteActionCallback }) => {
+  ({
+    policy,
+    apiClient,
+    searcheableFields,
+    artifactPathFn,
+    labels,
+    onDeleteActionCallback,
+    externalPrivileges = true,
+  }) => {
     const { getAppUrl } = useAppUrl();
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const policiesRequest = useGetEndpointSpecificPolicies({ perPage: 1000 });
@@ -132,9 +141,10 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       };
       return {
         expanded: expandedItemsMap.get(item.id) || false,
-        actions: canCreateArtifactsByPolicy
-          ? [fullDetailsAction, deleteAction]
-          : [fullDetailsAction],
+        actions:
+          canCreateArtifactsByPolicy && externalPrivileges
+            ? [fullDetailsAction, deleteAction]
+            : [fullDetailsAction],
         policies: artifactCardPolicies,
       };
     };
