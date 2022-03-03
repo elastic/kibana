@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig } from '../../features/common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
-import { APP_ID } from '../common/constants';
+import { APP_ID, FEATURE_ID } from '../common/constants';
 
 /**
  * The order of appearance in the feature privilege page
@@ -21,7 +21,7 @@ import { APP_ID } from '../common/constants';
 const FEATURE_ORDER = 3100;
 
 export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
-  id: APP_ID,
+  id: FEATURE_ID,
   name: i18n.translate('xpack.cases.features.casesFeatureName', {
     defaultMessage: 'Cases',
   }),

@@ -15,7 +15,8 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
  */
 
 export const APP_ID = 'cases' as const;
-export const APP_OWNER = 'cases' as const;
+export const FEATURE_ID = 'generalCases' as const;
+export const APP_OWNER = FEATURE_ID;
 export const APP_PATH = '/app/management/insightsAndAlerting/cases' as const;
 /**
  * The main Cases application is in the stack management under the
