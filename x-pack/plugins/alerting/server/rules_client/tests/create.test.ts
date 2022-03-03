@@ -1937,7 +1937,7 @@ describe('create()', () => {
         alertTypeId: '123',
         consumer: 'bar',
         schedule: {
-          interval: '10s',
+          interval: '1m',
         },
         throttle: null,
         notifyWhen: 'onActiveAlert',
