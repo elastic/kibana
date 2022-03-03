@@ -12,6 +12,7 @@ import { securityMock } from '../../security/public/mocks';
 import { fullStoryApiMock, initializeFullStoryMock } from './plugin.test.mocks';
 import { CloudPlugin, CloudConfigType, loadFullStoryUserId } from './plugin';
 import { Observable, Subject } from 'rxjs';
+import { KibanaExecutionContext } from 'kibana/public';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -24,12 +25,12 @@ describe('Cloud Plugin', () => {
         config = {},
         securityEnabled = true,
         currentUserProps = {},
-        currentAppId$ = undefined,
+        currentContext$ = undefined,
       }: {
         config?: Partial<CloudConfigType>;
         securityEnabled?: boolean;
         currentUserProps?: Record<string, any>;
-        currentAppId$?: Observable<string | undefined>;
+        currentContext$?: Observable<KibanaExecutionContext>;
       }) => {
         const initContext = coreMock.createPluginInitializerContext({
           id: 'cloudId',
@@ -51,8 +52,8 @@ describe('Cloud Plugin', () => {
         const coreSetup = coreMock.createSetup();
         const coreStart = coreMock.createStart();
 
-        if (currentAppId$) {
-          coreStart.application.currentAppId$ = currentAppId$;
+        if (currentContext$) {
+          coreStart.executionContext.context$ = currentContext$;
         }
 
         coreSetup.getStartServices.mockResolvedValue([coreStart, {}, undefined]);
@@ -104,34 +105,65 @@ describe('Cloud Plugin', () => {
         );
       });
 
-      it('calls FS.setUserVars everytime an app changes', async () => {
-        const currentAppId$ = new Subject<string | undefined>();
+      it('calls FS.setVars everytime an app changes', async () => {
+        const currentContext$ = new Subject<KibanaExecutionContext>();
         const { plugin } = await setupPlugin({
           config: { full_story: { enabled: true, org_id: 'foo' } },
           currentUserProps: {
             username: '1234',
           },
-          currentAppId$,
+          currentContext$,
         });
 
-        expect(fullStoryApiMock.setUserVars).not.toHaveBeenCalled();
-        currentAppId$.next('App1');
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        // takes the app name
+        expect(fullStoryApiMock.setVars).not.toHaveBeenCalled();
+        currentContext$.next({
+          name: 'App1',
+          description: '123',
+        });
+
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          pageName: 'App1',
           app_id_str: 'App1',
         });
-        currentAppId$.next();
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
-          app_id_str: 'unknown',
+
+        // context clear
+        currentContext$.next({});
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          pageName: 'App1',
+          app_id_str: 'App1',
         });
 
-        currentAppId$.next('App2');
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        // different app
+        currentContext$.next({
+          name: 'App2',
+          page: 'page2',
+          id: '123',
+        });
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          pageName: 'App2:page2',
           app_id_str: 'App2',
+          page_str: 'page2',
+          ent_id_str: '123',
         });
 
-        expect(currentAppId$.observers.length).toBe(1);
+        // Back to first app
+        currentContext$.next({
+          name: 'App1',
+          page: 'page3',
+          id: '123',
+        });
+
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          pageName: 'App1:page3',
+          app_id_str: 'App1',
+          page_str: 'page3',
+          ent_id_str: '123',
+        });
+
+        expect(currentContext$.observers.length).toBe(1);
         plugin.stop();
-        expect(currentAppId$.observers.length).toBe(0);
+        expect(currentContext$.observers.length).toBe(0);
       });
 
       it('does not call FS.identify when security is not available', async () => {
