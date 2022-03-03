@@ -252,9 +252,7 @@ export function RulesPage() {
             }}
             selection={{
               selectable: () => true,
-              onSelectionChange: (selectedItems) => {
-                console.log(selectedItems, '!!selectd');
-              },
+              onSelectionChange: (selectedItems) => {},
             }}
           />
         </EuiFlexItem>
