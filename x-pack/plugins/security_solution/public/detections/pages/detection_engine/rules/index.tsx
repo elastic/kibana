@@ -195,7 +195,7 @@ const RulesPageComponent: React.FC = () => {
                     <EuiButton
                       data-test-subj="open-value-lists-modal-button"
                       iconType="importAction"
-                      isDisabled={!canWriteListsIndex || loading}
+                      isDisabled={!canWriteListsIndex || !canUserCRUD || loading}
                       onClick={showValueListModal}
                     >
                       {i18n.UPLOAD_VALUE_LISTS}
