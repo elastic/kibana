@@ -199,3 +199,17 @@ In addition to the above methods, broadly used the next approaches and common is
 include::troubleshooting/alerting-common-issues.asciidoc[]
 include::troubleshooting/event-log-index.asciidoc[]
 include::troubleshooting/testing-connectors.asciidoc[]
+
+[discrete]
+[[alerting-kibana-disable]]
+==== Temporarily disable
+
+Cluster performance may become degraded from excessive or expensive {kib} rules. If 
+{kib} is sluggish or unresponsive, you may wish to temporarily reduce load to the
+Task Manager by updating <<task-manager-settings-kb.html|settings>>:
+
+[source, txt]
+--------------------------------------------------
+xpack.task_manager.max_workers: 1
+xpack.task_manager.poll_interval: 1m
+--------------------------------------------------
