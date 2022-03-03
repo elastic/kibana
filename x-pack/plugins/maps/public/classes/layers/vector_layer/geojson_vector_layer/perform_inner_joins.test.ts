@@ -82,11 +82,11 @@ const innerJoin = new InnerJoin(joinDescriptor, mockVectorSource);
 const propertiesMap = new Map<string, Record<string | number, unknown>>();
 propertiesMap.set('alpha', { [COUNT_PROPERTY_NAME]: 1 });
 
-test('should skip join when no state has changed', () => {
+test('should skip join when no state has changed', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: false,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
@@ -105,11 +105,11 @@ test('should skip join when no state has changed', () => {
   expect(onJoinError.notCalled);
 });
 
-test('should perform join when features change', () => {
+test('should perform join when features change', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: true,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
@@ -128,11 +128,11 @@ test('should perform join when features change', () => {
   expect(onJoinError.notCalled);
 });
 
-test('should perform join when join state changes', () => {
+test('should perform join when join state changes', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: false,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
@@ -151,11 +151,11 @@ test('should perform join when join state changes', () => {
   expect(onJoinError.notCalled);
 });
 
-test('should call updateSourceData with feature collection with updated feature visibility and join properties', () => {
+test('should call updateSourceData with feature collection with updated feature visibility and join properties', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: true,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
@@ -204,11 +204,11 @@ test('should call updateSourceData with feature collection with updated feature 
   expect(onJoinError.notCalled);
 });
 
-test('should call updateSourceData when no results returned from terms aggregation', () => {
+test('should call updateSourceData when no results returned from terms aggregation', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: false,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
@@ -256,7 +256,7 @@ test('should call updateSourceData when no results returned from terms aggregati
   expect(onJoinError.notCalled);
 });
 
-test('should call onJoinError when there are no matching features', () => {
+test('should call onJoinError when there are no matching features', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
@@ -264,7 +264,7 @@ test('should call onJoinError when there are no matching features', () => {
   const propertiesMapFromMismatchedKey = new Map<string, Record<string | number, unknown>>();
   propertiesMapFromMismatchedKey.set('1', { [COUNT_PROPERTY_NAME]: 1 });
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: false,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,

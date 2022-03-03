@@ -247,7 +247,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       }
 
       const joinStates = await this._syncJoins(syncContext, style);
-      performInnerJoins(
+      await performInnerJoins(
         sourceResult,
         joinStates,
         syncContext.updateSourceData,

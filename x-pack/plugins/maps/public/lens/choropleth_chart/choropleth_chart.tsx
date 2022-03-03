@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
 import { IUiSettingsClient } from 'kibana/public';
 import type { EmbeddableFactory } from 'src/plugins/embeddable/public';
@@ -60,9 +61,19 @@ export function ChoroplethChart({
     }
   }
 
+  const emsLayerLabel = getEmsLayerLabel(emsLayerId, emsFileLayers);
+
   const choroplethLayer = {
     id: args.layerId,
-    label: args.title,
+    label: emsLayerLabel 
+      ? i18n.translate('xpack.maps.lens.choroplethChart.choroplethLayerLabel', {
+          defaultMessage: '{emsLayerLabel} by {accessorLabel}',
+          values: {
+            emsLayerLabel: emsLayerLabel,
+            accessorLabel: getAccessorLabel(table, args.valueAccessor),
+          },
+        })
+      : '',
     joins: [
       {
         leftField: emsField,
@@ -131,4 +142,11 @@ function getAccessorLabel(table: Datatable, accessor: string) {
     return column.id === accessor;
   });
   return column ? column.name : accessor;
+}
+
+function getEmsLayerLabel(emsLayerId: string, emsFileLayers: FileLayer[]): string | null {
+  const fileLayer = emsFileLayers.find((fileLayer) => {
+    return fileLayer.getId() === emsLayerId;
+  });
+  return fileLayer ? fileLayer.getDisplayName() : null;
 }

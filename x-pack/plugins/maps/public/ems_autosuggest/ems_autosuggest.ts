@@ -148,13 +148,12 @@ function suggestByIdValues(
       if (!emsField.values || !emsField.values.length) {
         return;
       }
-      const emsConfig = {
-        layerId: fileLayer.getId(),
-        field: emsField.id,
-        displayName: fileLayer.getDisplayName(),
-      };
       if (allSamplesMatch(sampleValues, emsField.values)) {
-        matches.push(emsConfig);
+        matches.push({
+          layerId: fileLayer.getId(),
+          field: emsField.id,
+          displayName: fileLayer.getDisplayName(),
+        });
       }
     });
   });
