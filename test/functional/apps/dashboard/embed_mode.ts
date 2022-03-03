@@ -27,9 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ];
 
     before(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
@@ -85,9 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Then get rid of the timestamp so the rest of the tests work with state and app switching.
       useTimeStamp = false;
       await browser.get(newUrl.toString(), useTimeStamp);
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
   });
 }

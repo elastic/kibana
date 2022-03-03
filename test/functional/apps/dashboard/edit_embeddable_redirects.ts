@@ -18,9 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('edit embeddable redirects', () => {
     before(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
@@ -34,9 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('redirects via save and return button after edit', async () => {

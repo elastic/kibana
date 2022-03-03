@@ -26,9 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY https://github.com/elastic/kibana/issues/112812
   describe.skip('dashboard unsaved state', () => {
     before(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
@@ -44,9 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('view mode state', () => {

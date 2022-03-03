@@ -20,9 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('empty dashboard', () => {
     before(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
@@ -37,9 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should display empty widget', async () => {

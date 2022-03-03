@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.clean({ types: ['canvas-workpad'] });
+      await kibanaServer.savedObjects.cleanStandardList();
       await soInfo.logSoTypes(log);
     });
 

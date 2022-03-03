@@ -88,9 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard', 'tag', 'map'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('adding a map by value', () => {

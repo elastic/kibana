@@ -24,6 +24,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
   describe('lens in canvas', function () {
     before(async () => {
       await esArchiver.load(archives.es);
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(archives.kbn);
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-lens' });
       // open canvas home
@@ -36,7 +37,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
     after(async () => {
       await esArchiver.unload(archives.es);
-      await kibanaServer.importExport.unload(archives.kbn);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('by-reference', () => {

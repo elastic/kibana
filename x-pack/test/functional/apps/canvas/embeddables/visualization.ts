@@ -18,9 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('visualization in canvas', function () {
     before(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
@@ -39,9 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('by-reference', () => {

@@ -43,9 +43,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('edit visualizations from dashboard', () => {
     before(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
@@ -56,9 +54,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('save button returns to dashboard after editing visualization with changes saved', async () => {

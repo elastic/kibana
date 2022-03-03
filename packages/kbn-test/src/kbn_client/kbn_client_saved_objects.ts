@@ -219,6 +219,25 @@ export class KbnClientSavedObjects {
     this.log.success('deleted', deleted, 'objects');
   }
 
+  public async cleanStandardList(space: string = '') {
+    // add types here
+    const types = [
+      'search',
+      'index-pattern',
+      'visualization',
+      'dashboard',
+      'lens',
+      'map',
+      'graph-workspace',
+      'query',
+      'tag',
+      'url',
+      'canvas-workpad',
+    ];
+    const options = { types, space };
+    await this.clean(options);
+  }
+
   public async bulkDelete(options: DeleteObjectsOptions) {
     let deleted = 0;
     let missing = 0;

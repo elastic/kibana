@@ -17,20 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('maps in canvas', function () {
     before(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: [
-          'search',
-          'index-pattern',
-          'visualization',
-          'dashboard',
-          'lens',
-          'map',
-          'graph-workspace',
-          'query',
-          'tag',
-          'url',
-        ],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // create new workpad

@@ -102,20 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
-      await kibanaServer.savedObjects.clean({
-        types: [
-          'search',
-          'index-pattern',
-          'visualization',
-          'dashboard',
-          'lens',
-          'map',
-          'graph-workspace',
-          'query',
-          'tag',
-          'url',
-        ],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
@@ -137,20 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newUrl = currentUrl.replace(/\?.*$/, '');
       await browser.get(newUrl, false);
       await security.testUser.restoreDefaults();
-      await kibanaServer.savedObjects.clean({
-        types: [
-          'search',
-          'index-pattern',
-          'visualization',
-          'dashboard',
-          'lens',
-          'map',
-          'graph-workspace',
-          'query',
-          'tag',
-          'url',
-        ],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('adding visualizations', async () => {

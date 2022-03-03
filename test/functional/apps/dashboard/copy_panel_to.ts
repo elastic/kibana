@@ -39,9 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard panel copy to', function viewEditModeTests() {
     before(async function () {
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
@@ -65,9 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await kibanaServer.savedObjects.clean({
-        types: ['search', 'index-pattern', 'visualization', 'dashboard'],
-      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('does not show the new dashboard option when on a new dashboard', async () => {
