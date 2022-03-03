@@ -136,6 +136,7 @@ export const CreateControlButton = ({
           }
           createNewControl(type);
         }}
+        toolTipContent={factory.getDescription()}
       >
         {factory.getDisplayName()}
       </EuiContextMenuItem>
