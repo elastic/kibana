@@ -7,7 +7,12 @@
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { CollectTelemetryDataParams, Buckets, CasesTelemetry } from '../types';
-import { getCountsAggregationQuery, getCountsFromBuckets } from './utils';
+import {
+  findValueInBuckets,
+  getAggregationsBuckets,
+  getCountsAggregationQuery,
+  getCountsFromBuckets,
+} from './utils';
 
 export const getCasesTelemetryData = async ({
   savedObjectsClient,
@@ -31,6 +36,7 @@ export const getCasesTelemetryData = async ({
   const res = await savedObjectsClient.find<
     unknown,
     Record<typeof owners[number], { counts: Buckets }> & {
+      counts: Buckets;
       syncAlerts: Buckets;
       status: Buckets;
     }
@@ -40,6 +46,10 @@ export const getCasesTelemetryData = async ({
     type: CASE_SAVED_OBJECT,
     aggs: {
       ...byOwnerAggregationQuery,
+      ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
+      totalsByOwner: {
+        terms: { field: `${CASE_SAVED_OBJECT}.attributes.owner` },
+      },
       syncAlerts: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.settings.syncAlerts` },
       },
@@ -51,33 +61,38 @@ export const getCasesTelemetryData = async ({
     },
   });
 
-  const obsCountsBuckets = res.aggregations?.observability?.counts?.buckets ?? [];
-  const secCountsBuckets = res.aggregations?.securitySolution?.counts?.buckets ?? [];
-  const syncAlertsBuckets = res.aggregations?.syncAlerts?.buckets ?? [];
-  const statusBuckets = res.aggregations?.status?.buckets ?? [];
+  const aggregationsBuckets = getAggregationsBuckets({
+    aggs: res.aggregations,
+    keys: [
+      'counts',
+      'observability.counts',
+      'securitySolution.counts',
+      'syncAlerts',
+      'status',
+      'totalsByOwner',
+    ],
+  });
 
   return {
     all: {
       total: res.total,
-      daily: 0,
-      weekly: 0,
-      monthly: 0,
+      ...getCountsFromBuckets(aggregationsBuckets.counts),
       status: {
-        open: statusBuckets.find(({ key }) => key === 'open')?.doc_count ?? 0,
-        inProgress: statusBuckets.find(({ key }) => key === 'in-progress')?.doc_count ?? 0,
-        closed: statusBuckets.find(({ key }) => key === 'closed')?.doc_count ?? 0,
+        open: findValueInBuckets(aggregationsBuckets.status, 'open'),
+        inProgress: findValueInBuckets(aggregationsBuckets.status, 'in-progress'),
+        closed: findValueInBuckets(aggregationsBuckets.status, 'closed'),
       },
     },
     sec: {
-      total: 0,
-      ...getCountsFromBuckets(secCountsBuckets),
+      total: findValueInBuckets(aggregationsBuckets.totalsByOwner, 'securitySolution'),
+      ...getCountsFromBuckets(aggregationsBuckets['securitySolution.counts']),
     },
     obs: {
-      total: 0,
-      ...getCountsFromBuckets(obsCountsBuckets),
+      total: findValueInBuckets(aggregationsBuckets.totalsByOwner, 'observability'),
+      ...getCountsFromBuckets(aggregationsBuckets['observability.counts']),
     },
     main: { total: 0, daily: 0, weekly: 0, monthly: 0 },
-    syncAlertsOn: syncAlertsBuckets.find(({ key }) => key === 1)?.doc_count ?? 0,
-    syncAlertsOff: syncAlertsBuckets.find(({ key }) => key === 0)?.doc_count ?? 0,
+    syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
+    syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
   };
 };

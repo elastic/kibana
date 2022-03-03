@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { ISavedObjectsRepository } from 'kibana/server';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
@@ -117,3 +118,29 @@ export const getCountsAndMaxData = async ({
     maxOnACase,
   };
 };
+
+export const getBucketFromAggregation = ({
+  aggs,
+  key,
+}: {
+  key: string;
+  aggs?: Record<string, unknown>;
+}): Buckets['buckets'] => (get(aggs, `${key}.buckets`) ?? []) as Buckets['buckets'];
+
+export const findValueInBuckets = (buckets: Buckets['buckets'], value: string | number): number =>
+  buckets.find(({ key }) => key === value)?.doc_count ?? 0;
+
+export const getAggregationsBuckets = ({
+  aggs,
+  keys,
+}: {
+  keys: string[];
+  aggs?: Record<string, unknown>;
+}): Record<string, Buckets['buckets']> =>
+  keys.reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]: getBucketFromAggregation({ aggs, key }),
+    }),
+    {}
+  );

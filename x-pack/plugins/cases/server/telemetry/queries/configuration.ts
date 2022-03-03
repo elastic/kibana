@@ -7,6 +7,7 @@
 
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import { Buckets, CasesTelemetry, CollectTelemetryDataParams } from '../types';
+import { findValueInBuckets } from './utils';
 
 export const getConfigurationTelemetryData = async ({
   savedObjectsClient,
@@ -31,8 +32,8 @@ export const getConfigurationTelemetryData = async ({
 
   return {
     closure: {
-      manually: closureBuckets.find(({ key }) => key === 'close-by-user')?.doc_count ?? 0,
-      automatic: closureBuckets.find(({ key }) => key === 'close-by-pushing')?.doc_count ?? 0,
+      manually: findValueInBuckets(closureBuckets, 'close-by-user'),
+      automatic: findValueInBuckets(closureBuckets, 'close-by-pushing'),
     },
   };
 };
