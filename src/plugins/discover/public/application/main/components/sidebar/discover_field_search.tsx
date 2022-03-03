@@ -28,7 +28,7 @@ import {
   EuiOutsideClickDetector,
   EuiFilterButton,
   EuiSpacer,
-  EuiButtonIcon,
+  EuiIcon,
   EuiToken,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -318,6 +318,17 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     </div>
   );
 
+  const helpButton = (
+    <EuiFilterButton
+      grow={false}
+      onClick={onHelpClick}
+      className="dscFieldTypesHelp__button"
+      aria-label="Filter type help"
+    >
+      <EuiIcon type="questionInCircle" title="Filter type help" />
+    </EuiFilterButton>
+  );
+
   return (
     <React.Fragment>
       <EuiFlexGroup responsive={false} gutterSize={'s'}>
@@ -333,42 +344,37 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-        <EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFilterGroup fullWidth>
           <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-            <EuiFilterGroup className="dscFieldSearch__filterWrapper">
-              <EuiPopover
-                id="dataPanelTypeFilter"
-                panelClassName="euiFilterGroup__popoverPanel"
-                panelPaddingSize="none"
-                anchorPosition="rightUp"
-                display="block"
-                isOpen={isPopoverOpen}
-                closePopover={() => {
-                  setPopoverOpen(false);
-                }}
-                button={buttonContent}
-              >
-                <EuiPopoverTitle paddingSize="s">
-                  {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
-                    defaultMessage: 'Filter by type',
-                  })}
-                </EuiPopoverTitle>
-                {selectionPanel}
-                {footer()}
-              </EuiPopover>
-            </EuiFilterGroup>
+            <EuiPopover
+              id="dataPanelTypeFilter"
+              panelClassName="euiFilterGroup__popoverPanel"
+              panelPaddingSize="none"
+              anchorPosition="rightUp"
+              display="block"
+              isOpen={isPopoverOpen}
+              closePopover={() => {
+                setPopoverOpen(false);
+              }}
+              button={buttonContent}
+            >
+              <EuiPopoverTitle paddingSize="s">
+                {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
+                  defaultMessage: 'Filter by type',
+                })}
+              </EuiPopoverTitle>
+              {selectionPanel}
+              {footer()}
+            </EuiPopover>
           </EuiOutsideClickDetector>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <EuiPopover
             anchorPosition="rightUp"
             display="block"
-            button={
-              <EuiButtonIcon onClick={onHelpClick} iconType="questionInCircle" aria-label="Help" />
-            }
+            button={helpButton}
             isOpen={isHelpOpen}
             panelPaddingSize="s"
+            className="dscFieldTypesHelp__popover"
             closePopover={closeHelp}
           >
             <EuiPopoverTitle paddingSize="s">Field types</EuiPopoverTitle>
@@ -381,8 +387,8 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
               columns={columnsSidebar}
             />
           </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiFilterGroup>
+      </EuiFlexItem>
     </React.Fragment>
   );
 }
