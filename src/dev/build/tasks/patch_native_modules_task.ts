@@ -46,12 +46,12 @@ const packages: Package[] = [
     extractMethod: 'gunzip',
     archives: {
       'darwin-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/darwin-x64-93.gz',
-        sha256: 'a267c6202d86d08170eb4a833acf81d83660ce33e8981fcd5b7f6e0310961d56',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/darwin-x64-93.gz',
+        sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
       },
       'linux-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/linux-x64-93.gz',
-        sha256: 'e0ca5d6527fe7ec0fe98b6960c47b66a5bb2823c3bebb3bf4ed4d58eed3d23c5',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/linux-x64-93.gz',
+        sha256: '4d06747b266c75b6f7ced93977692c0586ce6a52924cabb569bd966378941aa1',
       },
 
       // ARM build is currently done manually as Github Actions used in upstream project
@@ -65,16 +65,16 @@ const packages: Package[] = [
       // * gzip -c build/Release/re2.node > linux-arm64-83.gz
       // * upload to kibana-ci-proxy-cache bucket
       'linux-arm64': {
-        url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/linux-arm64-93.gz',
-        sha256: '7a786e0b75985e5aafdefa9af55cad8e85e69a3326f16d8c63d21d6b5b3bff1b',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/linux-arm64-93.gz',
+        sha256: '25409584f76f3d6ed85463d84adf094eb6e256ed1cb0b754b95bcbda6691fc26',
       },
       'darwin-arm64': {
-        url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/darwin-arm64-93.gz',
-        sha256: '28b540cdddf13578f1bd28a03e29ffdc26a7f00ec859c369987b8d51ec6357c8',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/darwin-arm64-93.gz',
+        sha256: 'd4b708749ddef1c87019f6b80e051ed0c29ccd1de34f233c47d8dcaddf803872',
       },
       'win32-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/win32-x64-93.gz',
-        sha256: '37245ceb59a086b5e7e9de8746a3cdf148c383be9ae2580f92baea90d0d39947',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/win-x64-93.gz',
+        sha256: '0320d0c0385432944c6fb3c8c8fcd78d440ce5626f7618f9ec71d88e44820674',
       },
     },
   },

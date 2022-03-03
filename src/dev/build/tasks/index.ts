@@ -25,6 +25,7 @@ export * from './nodejs';
 export * from './notice_file_task';
 export * from './os_packages';
 export * from './package_json';
+export * from './patch_native_modules_task';
 export * from './path_length_task';
 export * from './transpile_babel_task';
 export * from './uuid_verification_task';
