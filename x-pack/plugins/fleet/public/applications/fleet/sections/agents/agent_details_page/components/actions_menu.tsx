@@ -10,7 +10,7 @@ import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useKibanaVersion } from '../../../../hooks';
+import { useAuthz, useKibanaVersion, useStartServices } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
@@ -30,12 +30,16 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const hasFleetAllPrivileges = useAuthz().fleet.all;
   const kibanaVersion = useKibanaVersion();
   const refreshAgent = useAgentRefresh();
+  const { share, http, cloud } = useStartServices();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const isUnenrolling = agent.status === 'unenrolling';
 
   const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
+
+  const uptimeAddMonitorLocator = share.url.locators.get('uptime-add-monitor-locator');
+  const kibanaBaseUrl = http.basePath.publicBaseUrl;
 
   const onClose = useMemo(() => {
     if (onCancelReassign) {
@@ -90,38 +94,63 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           ),
         }}
         items={[
-          <EuiContextMenuItem
-            icon="pencil"
-            onClick={() => {
-              setIsReassignFlyoutOpen(true);
-            }}
-            disabled={!agent.active}
-            key="reassignPolicy"
-          >
-            <FormattedMessage
-              id="xpack.fleet.agentList.reassignActionText"
-              defaultMessage="Assign to new policy"
-            />
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            icon="cross"
-            disabled={!hasFleetAllPrivileges || !agent.active}
-            onClick={() => {
-              setIsUnenrollModalOpen(true);
-            }}
-          >
-            {isUnenrolling ? (
+          ...[
+            <EuiContextMenuItem
+              icon="pencil"
+              onClick={() => {
+                setIsReassignFlyoutOpen(true);
+              }}
+              disabled={!agent.active}
+              key="reassignPolicy"
+            >
               <FormattedMessage
-                id="xpack.fleet.agentList.forceUnenrollOneButton"
-                defaultMessage="Force unenroll"
+                id="xpack.fleet.agentList.reassignActionText"
+                defaultMessage="Assign to new policy"
               />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentList.unenrollOneButton"
-                defaultMessage="Unenroll agent"
-              />
-            )}
-          </EuiContextMenuItem>,
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              icon="cross"
+              disabled={!hasFleetAllPrivileges || !agent.active}
+              onClick={() => {
+                setIsUnenrollModalOpen(true);
+              }}
+            >
+              {isUnenrolling ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentList.forceUnenrollOneButton"
+                  defaultMessage="Force unenroll"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.agentList.unenrollOneButton"
+                  defaultMessage="Unenroll agent"
+                />
+              )}
+            </EuiContextMenuItem>,
+          ],
+          ...(!cloud?.isCloudEnabled
+            ? [
+                <EuiContextMenuItem
+                  icon="logoUptime"
+                  onClick={() => {
+                    if (uptimeAddMonitorLocator) {
+                      uptimeAddMonitorLocator.navigate({
+                        monitorType: 'http',
+                        url: `${kibanaBaseUrl}/api/fleet/agents/${agent.id}`,
+                        isElasticAgentMonitor: true,
+                      });
+                    }
+                  }}
+                  disabled={!agent.active}
+                  key="monitorWithUptime"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.monitorWithUptime"
+                    defaultMessage="Monitor with Uptime"
+                  />
+                </EuiContextMenuItem>,
+              ]
+            : []),
           <EuiContextMenuItem
             icon="refresh"
             disabled={!isAgentUpgradeable(agent, kibanaVersion)}

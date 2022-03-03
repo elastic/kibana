@@ -29,7 +29,7 @@ export {
   enableInfrastructureView,
   defaultApmServiceEnvironment,
 } from '../common/ui_settings_keys';
-export { uptimeOverviewLocatorID } from '../common';
+export { uptimeOverviewLocatorID, uptimeAddMonitorLocatorID } from '../common';
 
 export interface ConfigSchema {
   unsafe: {

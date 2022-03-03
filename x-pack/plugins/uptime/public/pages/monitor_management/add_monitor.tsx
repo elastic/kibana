@@ -8,16 +8,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '../../../../observability/public';
-import { ScheduleUnit } from '../../../common/runtime_types';
-import { SyntheticsProviders } from '../../components/fleet_package/contexts';
+import { ScheduleUnit, DataStream, ConfigKey } from '../../../common/runtime_types';
+import { SyntheticsProviders, defaultConfig } from '../../components/fleet_package/contexts';
 import { Loader } from '../../components/monitor_management/loader/loader';
 import { MonitorConfig } from '../../components/monitor_management/monitor_config/monitor_config';
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 
+import { useUrlParams } from '../../hooks/use_url_params';
+
 export const AddMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor' });
   useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
+
+  const [useGetUrlParams] = useUrlParams();
+  const { serviceName, monitorType, url, isElasticAgentMonitor } = useGetUrlParams();
 
   const { error, loading, locations } = useLocations();
 
@@ -35,6 +40,16 @@ export const AddMonitorPage: React.FC = () => {
         policyDefaultValues={{
           isZipUrlSourceEnabled: false,
           allowedScheduleUnits: [ScheduleUnit.MINUTES],
+          defaultMonitorType: monitorType as DataStream,
+        }}
+        browserDefaultValues={{
+          ...defaultConfig[DataStream.BROWSER],
+          [ConfigKey.APM_SERVICE_NAME]: serviceName || '',
+        }}
+        httpDefaultValues={{
+          ...defaultConfig[DataStream.HTTP],
+          [ConfigKey.URLS]: url || '',
+          [ConfigKey.IS_ELASTIC_AGENT_MONITOR]: isElasticAgentMonitor || false,
         }}
       >
         <MonitorConfig isEdit={false} />

@@ -16,6 +16,7 @@ import {
 } from '../../../../task_manager/server';
 import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
+import { addElasticAgentMonitors } from '../../rest_api/synthetics_service/add_elastic_agent_monitors';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
@@ -37,7 +38,7 @@ import { SyntheticsMonitorSavedObject } from '../../../common/types';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
-const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
+const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '1m';
 
 export class SyntheticsService {
   private logger: Logger;
@@ -207,6 +208,7 @@ export class SyntheticsService {
     >
   ) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    console.warn('monitors', JSON.stringify(monitors));
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
       return;
@@ -298,6 +300,13 @@ export class SyntheticsService {
       namespaces: ['*'],
       perPage: 10000,
     });
+
+    // try {
+    //   addElasticAgentMonitors(this.server, savedObjectsClient);
+    // } catch (e) {
+    //   console.warn('e', e);
+    //   this.logger.error(e);
+    // }
 
     if (this.indexTemplateExists) {
       // without mapping, querying won't make sense

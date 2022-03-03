@@ -15,6 +15,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.DOWNLOAD_SPEED,
   ConfigKey.LATENCY,
   ConfigKey.IS_THROTTLING_ENABLED,
+  ConfigKey.IS_ELASTIC_AGENT_MONITOR,
 ];
 
 const uiToHeartbeatKeyMap = {

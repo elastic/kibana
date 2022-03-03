@@ -18,6 +18,7 @@ import { UptimeConfig } from '../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
 import { syntheticsMonitor } from './synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';
+import { elasticAgentMonitoringApiKey } from './elastic_agent_monitoring_api_key';
 
 export const registerUptimeSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
@@ -29,6 +30,7 @@ export const registerUptimeSavedObjects = (
   if (isServiceEnabled) {
     savedObjectsService.registerType(syntheticsMonitor);
     savedObjectsService.registerType(syntheticsServiceApiKey);
+    savedObjectsService.registerType(elasticAgentMonitoringApiKey);
 
     encryptedSavedObjects.registerType({
       type: syntheticsServiceApiKey.name,

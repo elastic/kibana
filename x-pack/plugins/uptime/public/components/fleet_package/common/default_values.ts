@@ -22,4 +22,5 @@ export const defaultValues: CommonFields = {
   [ConfigKey.NAME]: '',
   [ConfigKey.LOCATIONS]: [],
   [ConfigKey.NAMESPACE]: DEFAULT_NAMESPACE_STRING,
+  [ConfigKey.IS_ELASTIC_AGENT_MONITOR]: false,
 };

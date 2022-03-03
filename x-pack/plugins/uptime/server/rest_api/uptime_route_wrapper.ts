@@ -13,6 +13,7 @@ import { createUptimeESClient, inspectableEsQueriesMap } from '../lib/lib';
 import { KibanaResponse } from '../../../../../src/core/server/http/router';
 import { enableInspectEsQueries } from '../../../observability/common';
 import { syntheticsServiceApiKey } from '../lib/saved_objects/service_api_key';
+import { elasticAgentMonitoringApiKey } from '../lib/saved_objects/elastic_agent_monitoring_api_key';
 import { API_URLS } from '../../common/constants';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
@@ -25,7 +26,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     let savedObjectsClient: SavedObjectsClientContract;
     if (server.config?.ui?.monitorManagement?.enabled) {
       savedObjectsClient = context.core.savedObjects.getClient({
-        includedHiddenTypes: [syntheticsServiceApiKey.name],
+        includedHiddenTypes: [syntheticsServiceApiKey.name, elasticAgentMonitoringApiKey.name],
       });
     } else {
       savedObjectsClient = context.core.savedObjects.client;

@@ -14,6 +14,7 @@ export enum ConfigKey {
   ENABLED = 'enabled',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
+  IS_ELASTIC_AGENT_MONITOR = 'is_elastic_agent_monitor',
   JOURNEY_FILTERS_MATCH = 'filter_journeys.match',
   JOURNEY_FILTERS_TAGS = 'filter_journeys.tags',
   MAX_REDIRECTS = 'max_redirects',

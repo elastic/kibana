@@ -53,6 +53,7 @@ export interface UptimeServerSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   syntheticsService: SyntheticsService;
   kibanaVersion: string;
+  kibanaBaseUrl: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;
   uptimeEsClient: UptimeESClient;

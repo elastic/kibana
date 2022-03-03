@@ -62,6 +62,7 @@ export const CommonFieldsCodec = t.intersection([
   t.partial({
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
+    [ConfigKey.IS_ELASTIC_AGENT_MONITOR]: t.boolean,
   }),
 ]);
 
@@ -212,6 +213,8 @@ export const SyntheticsMonitorCodec = t.union([
 ]);
 
 export type SyntheticsMonitor = t.TypeOf<typeof SyntheticsMonitorCodec>;
+
+export type HTTPMonitor = t.TypeOf<typeof HTTPFieldsCodec>;
 
 export const SyntheticsMonitorWithIdCodec = t.intersection([
   SyntheticsMonitorCodec,

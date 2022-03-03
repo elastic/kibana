@@ -6,7 +6,7 @@
  */
 
 // TODO: add a comment explaining the purpose of this function
-export const parseIsPaused = (value: string | undefined, defaultValue: boolean): boolean => {
+export const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
   if (value === 'true') {
     return true;
   }

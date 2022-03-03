@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseIsPaused } from './parse_is_paused';
+import { parseBoolean } from './parse_is_paused';
 import { parseUrlInt } from './parse_url_int';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { parseAbsoluteDate } from './parse_absolute_date';
@@ -24,6 +24,10 @@ export interface UptimeUrlParams {
   statusFilter: string;
   focusConnectorField?: boolean;
   query?: string;
+  serviceName?: string;
+  monitorType?: string;
+  url: string;
+  isElasticAgentMonitor: boolean;
 }
 
 const {
@@ -79,6 +83,10 @@ export const getSupportedUrlParams = (params: {
     pagination,
     focusConnectorField,
     query,
+    serviceName,
+    url,
+    monitorType,
+    isElasticAgentMonitor,
   } = filteredParams;
 
   return {
@@ -93,7 +101,7 @@ export const getSupportedUrlParams = (params: {
       { roundUp: true }
     ),
     autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
-    autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
+    autorefreshIsPaused: parseBoolean(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
     filters: filters || FILTERS,
@@ -102,5 +110,9 @@ export const getSupportedUrlParams = (params: {
     statusFilter: statusFilter || STATUS_FILTER,
     focusConnectorField: !!focusConnectorField,
     query: query || '',
+    serviceName: serviceName || '',
+    url: url || '',
+    monitorType,
+    isElasticAgentMonitor: parseBoolean(isElasticAgentMonitor, false),
   };
 };

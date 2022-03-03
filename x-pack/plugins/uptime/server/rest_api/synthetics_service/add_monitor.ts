@@ -6,12 +6,19 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObject } from 'kibana/server';
-import { MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  DataStream,
+  MonitorFields,
+  SyntheticsMonitor,
+  HTTPMonitor,
+} from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from './telemetry/monitor_upgrade_sender';
+import { getAPIKeyForElasticAgentMonitoring } from '../../lib/synthetics_service/get_api_key';
 
 export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
@@ -27,6 +34,19 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     if (!validationResult.valid) {
       const { reason: message, details, payload } = validationResult;
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
+    }
+
+    if (
+      monitor[ConfigKey.IS_ELASTIC_AGENT_MONITOR] === true &&
+      monitor[ConfigKey.MONITOR_TYPE] === DataStream.HTTP
+    ) {
+      const key = await getAPIKeyForElasticAgentMonitoring({ request, server });
+      monitor[ConfigKey.REQUEST_HEADERS_CHECK] = {
+        ...monitor[ConfigKey.REQUEST_HEADERS_CHECK],
+        Authorization: `ApiKey ${Buffer.from(`${key?.id}:${key?.apiKey}`, 'utf8').toString(
+          'base64'
+        )}`,
+      };
     }
 
     const newMonitor: SavedObject<SyntheticsMonitor> =

@@ -29,6 +29,8 @@ import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './lib/saved_objects/service_api_key';
+import { elasticAgentMonitoringApiKey } from './lib/saved_objects/elastic_agent_monitoring_api_key';
+import { SyntheticsServiceImpl } from './services/synthetics_service/synthetics_service';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -38,6 +40,7 @@ export class Plugin implements PluginType {
   private logger: Logger;
   private server?: UptimeServerSetup;
   private syntheticService?: SyntheticsService;
+  private externalSyntheticsService?: SyntheticsServiceImpl;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly isServiceEnabled?: boolean;
 
@@ -80,6 +83,7 @@ export class Plugin implements PluginType {
       kibanaVersion: this.initContext.env.packageInfo.version,
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
+      kibanaBaseUrl: core.http.basePath.publicBaseUrl,
     } as UptimeServerSetup;
 
     if (this.isServiceEnabled && this.server.config.service) {
@@ -114,7 +118,10 @@ export class Plugin implements PluginType {
   public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
     if (this.isServiceEnabled) {
       this.savedObjectsClient = new SavedObjectsClient(
-        coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
+        coreStart.savedObjects.createInternalRepository([
+          syntheticsServiceApiKey.name,
+          elasticAgentMonitoringApiKey.name,
+        ])
       );
     } else {
       this.savedObjectsClient = new SavedObjectsClient(
@@ -137,7 +144,22 @@ export class Plugin implements PluginType {
       }
       this.telemetryEventsSender.start(plugins.telemetry, coreStart);
     }
+
+    return {
+      syntheticsService: this.setupSyntheticsService(this.savedObjectsClient),
+    };
   }
 
   public stop() {}
+
+  private setupSyntheticsService(
+    internalSoClient: SavedObjectsClientContract
+  ): SyntheticsServiceImpl {
+    if (this.externalSyntheticsService) {
+      return this.externalSyntheticsService;
+    }
+
+    this.externalSyntheticsService = new SyntheticsServiceImpl(internalSoClient, this.server);
+    return this.externalSyntheticsService;
+  }
 }

@@ -12,6 +12,11 @@ import {
   setSyntheticsServiceApiKey,
   syntheticsServiceApiKey,
 } from '../saved_objects/service_api_key';
+import {
+  getElasticAgentMonitoringAPIKey,
+  setElasticAgentMonitoringAPIKey,
+  elasticAgentMonitoringApiKey,
+} from '../saved_objects/elastic_agent_monitoring_api_key';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
 import { UptimeServerSetup } from '../adapters';
 
@@ -44,6 +49,35 @@ export const getAPIKeyForSyntheticsService = async ({
   });
 };
 
+export const getAPIKeyForElasticAgentMonitoring = async ({
+  request,
+  server,
+}: {
+  server: UptimeServerSetup;
+  request?: KibanaRequest;
+}): Promise<SyntheticsServiceApiKey | undefined> => {
+  const { security, encryptedSavedObjects, authSavedObjectsClient } = server;
+
+  const encryptedClient = encryptedSavedObjects.getClient({
+    includedHiddenTypes: [elasticAgentMonitoringApiKey.name],
+  });
+
+  try {
+    const apiKey = await getElasticAgentMonitoringAPIKey(encryptedClient);
+    if (apiKey) {
+      return apiKey;
+    }
+  } catch (err) {
+    // TODO: figure out how to handle decryption errors
+  }
+
+  return await generateAndSaveAPIKeyForElasticAgentMonitoring({
+    request,
+    security,
+    authSavedObjectsClient,
+  });
+};
+
 export const generateAndSaveAPIKey = async ({
   security,
   request,
@@ -63,6 +97,18 @@ export const generateAndSaveAPIKey = async ({
   if (!request) {
     throw new Error('User authorization is needed for api key generation');
   }
+
+  // {
+  //   "fleet_reader": {
+  //           "cluster": ["monitor", "read_ilm", "read_pipeline"],
+  //           "index": [
+  //             {
+  //               "names": [".fleet-*"],
+  //               "privileges": ["read"]
+  //             }
+  //           ]
+  //         }
+  //   }
 
   const apiKeyResult = await security.authc.apiKeys?.create(request, {
     name: 'synthetics-api-key',
@@ -89,6 +135,47 @@ export const generateAndSaveAPIKey = async ({
     if (authSavedObjectsClient) {
       // discard decoded key and rest of the keys
       await setSyntheticsServiceApiKey(authSavedObjectsClient, apiKeyObject);
+    }
+    return apiKeyObject;
+  }
+};
+
+export const generateAndSaveAPIKeyForElasticAgentMonitoring = async ({
+  security,
+  request,
+  authSavedObjectsClient,
+}: {
+  request?: KibanaRequest;
+  security: SecurityPluginStart;
+  // authSavedObject is needed for write operations
+  authSavedObjectsClient?: SavedObjectsClientContract;
+}) => {
+  const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
+
+  if (!isApiKeysEnabled) {
+    throw new Error('Please enable API keys in kibana to use synthetics service.');
+  }
+
+  if (!request) {
+    throw new Error('User authorization is needed for api key generation');
+  }
+
+  const apiKeyResult = await security.authc.apiKeys?.create(request, {
+    name: 'synthetics-elastic-agent-monitoring-api-key',
+    metadata: {
+      description: 'Created for synthetics service to monitor Elastic Agent',
+    },
+    role_descriptors: {},
+  });
+
+  console.warn('apiKeyResult', apiKeyResult);
+
+  if (apiKeyResult) {
+    const { id, name, api_key: apiKey } = apiKeyResult;
+    const apiKeyObject = { id, name, apiKey };
+    if (authSavedObjectsClient) {
+      // discard decoded key and rest of the keys
+      await setElasticAgentMonitoringAPIKey(authSavedObjectsClient, apiKeyObject);
     }
     return apiKeyObject;
   }

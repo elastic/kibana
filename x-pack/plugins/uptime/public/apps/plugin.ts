@@ -50,6 +50,8 @@ import { Start as InspectorPluginStart } from '../../../../../src/plugins/inspec
 import { UptimeUiConfig } from '../../common/config';
 import { CasesUiStart } from '../../../cases/public';
 
+import { locators } from './locators';
+
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
@@ -215,6 +217,10 @@ export class UptimePlugin
         const { renderApp } = await import('./render_app');
         return renderApp(coreStart, plugins, corePlugins, params, config);
       },
+    });
+
+    locators.forEach((locator) => {
+      plugins.share.url.locators.create(locator);
     });
   }
 
