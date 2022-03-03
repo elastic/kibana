@@ -17,11 +17,7 @@ import {
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
 
-import {
-  closeFieldsBrowser,
-  filterFieldsBrowser,
-  clearFieldsBrowser,
-} from '../../tasks/fields_browser';
+import { closeFieldsBrowser, filterFieldsBrowser } from '../../tasks/fields_browser';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { openEvents } from '../../tasks/hosts/main';
 import {
@@ -90,8 +86,11 @@ describe('Events Viewer', () => {
   });
 
   context('Events viewer fields behaviour', () => {
-    beforeEach(() => {
+    before(() => {
       cleanKibana();
+    });
+
+    beforeEach(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
       openEventsViewerFieldsBrowser();
