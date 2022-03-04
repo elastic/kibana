@@ -19,9 +19,10 @@ import {
 } from '../../../../../../vis_default_editor/public';
 import { ColorSchemaParams, ColorSchemas, colorSchemas } from '../../../../../../charts/public';
 import { GaugeOptionsInternalProps } from '../gauge';
-import { Gauge } from '../../../gauge';
+import { Gauge } from '../../../types';
 
 function RangesPanel({
+  showElasticChartsOptions,
   setGaugeValue,
   setTouched,
   setValidity,
@@ -50,7 +51,7 @@ function RangesPanel({
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="visTypeVislib.controls.gaugeOptions.rangesTitle"
+            id="visTypeGauge.controls.gaugeOptions.rangesTitle"
             defaultMessage="Ranges"
           />
         </h3>
@@ -66,13 +67,20 @@ function RangesPanel({
       />
 
       <SwitchOption
-        disabled={stateParams.gauge.colorsRange.length < 2}
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.autoExtendRangeLabel', {
+        disabled={showElasticChartsOptions || stateParams.gauge.colorsRange.length < 2}
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.autoExtendRangeLabel', {
           defaultMessage: 'Auto extend range',
         })}
-        tooltip={i18n.translate('visTypeVislib.controls.gaugeOptions.extendRangeTooltip', {
-          defaultMessage: 'Extends range to the maximum value in your data.',
-        })}
+        tooltip={
+          showElasticChartsOptions
+            ? i18n.translate('visTypeGauge.controls.gaugeOptions.extendRangeTooltipNotAvailable', {
+                defaultMessage:
+                  'The new charts library supports only extended ranges. To disable it, please, enable the gauge legacy charts library advanced setting.',
+              })
+            : i18n.translate('visTypeGauge.controls.gaugeOptions.extendRangeTooltip', {
+                defaultMessage: 'Extends range to the maximum value in your data.',
+              })
+        }
         paramName="extendRange"
         value={stateParams.gauge.extendRange}
         setValue={setGaugeValue}
@@ -95,25 +103,46 @@ function RangesPanel({
       />
 
       <SwitchOption
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showOutline', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.showOutline', {
           defaultMessage: 'Show outline',
         })}
         paramName="outline"
         value={stateParams.gauge.outline}
         setValue={setGaugeValue}
+        disabled={showElasticChartsOptions}
+        {...(showElasticChartsOptions
+          ? {
+              tooltip: i18n.translate(
+                'visTypeGauge.controls.gaugeOptions.showOutlineNotAvailable',
+                {
+                  defaultMessage:
+                    'The outline is not supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
+                }
+              ),
+            }
+          : {})}
       />
 
       <SwitchOption
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showLegendLabel', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.showLegendLabel', {
           defaultMessage: 'Show legend',
         })}
         paramName="addLegend"
         value={stateParams.addLegend}
         setValue={setValue}
+        disabled={showElasticChartsOptions}
+        {...(showElasticChartsOptions
+          ? {
+              tooltip: i18n.translate('visTypeGauge.controls.gaugeOptions.showLegendNotAvailable', {
+                defaultMessage:
+                  'The legend is not supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
+              }),
+            }
+          : {})}
       />
 
       <SwitchOption
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showScaleLabel', {
+        label={i18n.translate('visTypeGauge.controls.gaugeOptions.showScaleLabel', {
           defaultMessage: 'Show scale',
         })}
         paramName="show"
