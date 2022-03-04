@@ -26,7 +26,7 @@ export const Page: FC = () => {
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   const mapJobId = globalState?.ml?.jobId;
   const mapModelId = globalState?.ml?.modelId;
-  const [analyticsId, setAnalyticsId] = useState();
+  const [analyticsId, setAnalyticsId] = useState<{ model_id?: string; job_id?: string }>();
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -51,7 +51,10 @@ export const Page: FC = () => {
       <UpgradeWarning />
 
       {mapJobId || mapModelId || analyticsId ? (
-        <JobMap analyticsId={mapJobId || analyticsId} modelId={mapModelId} />
+        <JobMap
+          analyticsId={mapJobId || analyticsId?.job_id}
+          modelId={mapModelId || analyticsId?.model_id}
+        />
       ) : (
         <>
           <AnalyticsIdSelector setAnalyticsId={setAnalyticsId} />
