@@ -63,6 +63,7 @@ import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
+import { validateOutputForPolicy } from './agent_policies';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -98,6 +99,8 @@ class AgentPolicyService {
         `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`
       );
     }
+
+    await validateOutputForPolicy(agentPolicy);
 
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
@@ -168,6 +171,8 @@ class AgentPolicyService {
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
     await this.requireUniqueName(soClient, agentPolicy);
+
+    await validateOutputForPolicy(agentPolicy);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,

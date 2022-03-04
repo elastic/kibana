@@ -24,7 +24,6 @@ const getColor = (
 ) => {
   const divider = Math.max(elementsCount - 1, 1);
   const value = invertColors ? 1 - index / divider : index / divider;
-
   return getHeatmapColors(value, colorSchema);
 };
 
