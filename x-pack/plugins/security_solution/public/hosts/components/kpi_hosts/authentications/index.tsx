@@ -8,10 +8,10 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiUserAuthenticationsMetricSuccess } from '../../../configs/kpi_user_authentications_metric_success';
-import { kpiUserAuthenticationsArea } from '../../../configs/kpi_user_authentications_area';
-import { kpiUserAuthenticationsBar } from '../../../configs/kpi_user_authentications_bar';
-import { kpiUserAuthenticationsMetricFailure } from '../../../configs/kpi_user_authentication_metric_failure';
+import { kpiUserAuthenticationsArea } from '../../../../common/components/visualization_actions/configs/hosts/kpi_user_authentications_area';
+import { kpiUserAuthenticationsBar } from '../../../../common/components/visualization_actions/configs/hosts/kpi_user_authentications_bar';
+import { kpiUserAuthenticationsMetricSuccess } from '../../../../common/components/visualization_actions/configs/hosts/kpi_user_authentications_metric_success';
+import { kpiUserAuthenticationsMetricFailure } from '../../../../common/components/visualization_actions/configs/hosts/kpi_user_authentication_metric_failure';
 import { useHostsKpiAuthentications } from '../../../containers/kpi_hosts/authentications';
 import { HostsKpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';

@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiDnsQueries } from '../../../configs/kpi_dns_queries';
+import { kpiDnsQueries } from '../../../../common/components/visualization_actions/configs/network/kpi_dns_queries';
 import { useNetworkKpiDns } from '../../../containers/kpi_network/dns';
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';

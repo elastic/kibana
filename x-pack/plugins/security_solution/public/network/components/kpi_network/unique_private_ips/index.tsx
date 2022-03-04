@@ -13,10 +13,10 @@ import { useNetworkKpiUniquePrivateIps } from '../../../containers/kpi_network/u
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
-import { kpiUniquePrivateIpsSourceMetric } from '../../../configs/kpi_unique_private_ips_source_metric';
-import { kpiUniquePrivateIpsDestinationMetric } from '../../../configs/kpi_unique_private_ips_destination_metric';
-import { kpiUniquePrivateIpsArea } from '../../../configs/kpi_unique_private_ips_area';
-import { kpiUniquePrivateIpsBar } from '../../../configs/kpi_unique_private_ips_bar';
+import { kpiUniquePrivateIpsSourceMetric } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_source_metric';
+import { kpiUniquePrivateIpsDestinationMetric } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_destination_metric';
+import { kpiUniquePrivateIpsArea } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_area';
+import { kpiUniquePrivateIpsBar } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_bar';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];

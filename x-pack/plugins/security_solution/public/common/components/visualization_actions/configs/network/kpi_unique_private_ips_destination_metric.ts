@@ -5,25 +5,31 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../common/components/visualization_actions/types';
+import { DESTINATION_CHART_LABEL } from '../../translations';
+import { LensAttributes } from '../../types';
 
-export const kpiHostMetric: LensAttributes = {
+export const kpiUniquePrivateIpsDestinationMetric: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
       indexpattern: {
         layers: {
-          '416b6fad-1923-4f6a-a2df-b223bb287e30': {
-            columnOrder: ['b00c65ea-32be-4163-bfc8-f795b1ef9d06'],
+          'cea37c70-8f91-43bf-b9fe-72d8c049f6a3': {
+            columnOrder: ['bd17c23e-4f83-4108-8005-2669170d064b'],
             columns: {
-              'b00c65ea-32be-4163-bfc8-f795b1ef9d06': {
+              'bd17c23e-4f83-4108-8005-2669170d064b': {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: ' ',
+                label: DESTINATION_CHART_LABEL,
                 operationType: 'unique_count',
                 scale: 'ratio',
-                sourceField: 'host.name',
+                sourceField: 'destination.ip',
+                filter: {
+                  language: 'kuery',
+                  query:
+                    '"destination.ip": "10.0.0.0/8" or "destination.ip": "192.168.0.0/16" or "destination.ip": "172.16.0.0/12" or "destination.ip": "fd00::/8"',
+                },
               },
             },
             incompleteColumns: {},
@@ -32,14 +38,17 @@ export const kpiHostMetric: LensAttributes = {
       },
     },
     filters: [],
-    query: { language: 'kuery', query: '' },
+    query: {
+      language: 'kuery',
+      query: '',
+    },
     visualization: {
-      accessor: 'b00c65ea-32be-4163-bfc8-f795b1ef9d06',
-      layerId: '416b6fad-1923-4f6a-a2df-b223bb287e30',
+      accessor: 'bd17c23e-4f83-4108-8005-2669170d064b',
+      layerId: 'cea37c70-8f91-43bf-b9fe-72d8c049f6a3',
       layerType: 'data',
     },
   },
-  title: '[Host] KPI Hosts - metric',
+  title: '[Network] KPI Unique private IPs - destination metric',
   visualizationType: 'lnsMetric',
   references: [
     {
@@ -49,13 +58,8 @@ export const kpiHostMetric: LensAttributes = {
     },
     {
       id: 'security-solution-default',
-      name: 'indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30',
+      name: 'indexpattern-datasource-layer-cea37c70-8f91-43bf-b9fe-72d8c049f6a3',
       type: 'index-pattern',
-    },
-    {
-      id: '880973d0-89cb-11ec-acbb-112a5cf3323a',
-      name: 'tag-ref-880973d0-89cb-11ec-acbb-112a5cf3323a',
-      type: 'tag',
     },
   ],
 } as LensAttributes;

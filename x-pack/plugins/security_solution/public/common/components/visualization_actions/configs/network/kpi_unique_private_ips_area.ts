@@ -4,15 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { LensAttributes } from '../../types';
 
-import {
-  SOURCE_CHART_LABEL,
-  DESTINATION_CHART_LABEL,
-} from '../components/kpi_network/unique_private_ips/translations';
-import { LensAttributes } from '../../common/components/visualization_actions/types';
-
-export const kpiUniquePrivateIpsBar = {
-  title: '[Network] KPI Unique private IPs - bar chart',
+export const kpiUniquePrivateIpsArea: LensAttributes = {
+  title: '[Network] KPI Unique private IPs - area chart',
   description: '',
   visualizationType: 'lnsXY',
   state: {
@@ -50,35 +45,33 @@ export const kpiUniquePrivateIpsBar = {
         yLeft: true,
         yRight: true,
       },
-      preferredSeriesType: 'bar_horizontal_stacked',
+      preferredSeriesType: 'area',
       layers: [
         {
-          layerId: 'e406bf4f-942b-41ac-b516-edb5cef06ec8',
-          accessors: ['5acd4c9d-dc3b-4b21-9632-e4407944c36d'],
-          position: 'top',
-          seriesType: 'bar_horizontal_stacked',
-          showGridlines: false,
+          layerId: '38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7',
+          seriesType: 'area',
+          accessors: ['5f317308-cfbb-4ee5-bfb9-07653184fabf'],
           layerType: 'data',
+          xAccessor: '662cd5e5-82bf-4325-a703-273f84b97e09',
           yConfig: [
             {
-              forAccessor: '5acd4c9d-dc3b-4b21-9632-e4407944c36d',
+              forAccessor: '5f317308-cfbb-4ee5-bfb9-07653184fabf',
               color: '#d36186',
             },
           ],
-          xAccessor: 'd9c438c5-f776-4436-9d20-d62dc8c03be8',
         },
         {
-          layerId: '38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7',
-          seriesType: 'bar_horizontal_stacked',
-          accessors: ['d27e0966-daf9-41f4-9033-230cf1e76dc9'],
+          layerId: '72dc4b99-b07d-4dc9-958b-081d259e11fa',
+          seriesType: 'area',
+          accessors: ['ac1eb80c-ddde-46c4-a90c-400261926762'],
           layerType: 'data',
+          xAccessor: '36444b8c-7e10-4069-8298-6c1b46912be2',
           yConfig: [
             {
-              forAccessor: 'd27e0966-daf9-41f4-9033-230cf1e76dc9',
+              forAccessor: 'ac1eb80c-ddde-46c4-a90c-400261926762',
               color: '#9170b8',
             },
           ],
-          xAccessor: '4607c585-3af3-43b9-804f-e49b27796d79',
         },
       ],
     },
@@ -90,10 +83,21 @@ export const kpiUniquePrivateIpsBar = {
     datasourceStates: {
       indexpattern: {
         layers: {
-          'e406bf4f-942b-41ac-b516-edb5cef06ec8': {
+          '38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7': {
             columns: {
-              '5acd4c9d-dc3b-4b21-9632-e4407944c36d': {
-                label: SOURCE_CHART_LABEL,
+              '662cd5e5-82bf-4325-a703-273f84b97e09': {
+                label: '@timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: '@timestamp',
+                isBucketed: true,
+                scale: 'interval',
+                params: {
+                  interval: 'auto',
+                },
+              },
+              '5f317308-cfbb-4ee5-bfb9-07653184fabf': {
+                label: 'Src.',
                 dataType: 'number',
                 operationType: 'unique_count',
                 scale: 'ratio',
@@ -106,69 +110,43 @@ export const kpiUniquePrivateIpsBar = {
                   language: 'kuery',
                 },
               },
-              'd9c438c5-f776-4436-9d20-d62dc8c03be8': {
-                label: 'Filters',
-                dataType: 'string',
-                operationType: 'filters',
-                scale: 'ordinal',
-                isBucketed: true,
-                params: {
-                  filters: [
-                    {
-                      input: {
-                        query: '',
-                        language: 'kuery',
-                      },
-                      label: SOURCE_CHART_LABEL,
-                    },
-                  ],
-                },
-              },
             },
             columnOrder: [
-              'd9c438c5-f776-4436-9d20-d62dc8c03be8',
-              '5acd4c9d-dc3b-4b21-9632-e4407944c36d',
+              '662cd5e5-82bf-4325-a703-273f84b97e09',
+              '5f317308-cfbb-4ee5-bfb9-07653184fabf',
             ],
             incompleteColumns: {},
           },
-          '38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7': {
+          '72dc4b99-b07d-4dc9-958b-081d259e11fa': {
             columns: {
-              'd27e0966-daf9-41f4-9033-230cf1e76dc9': {
-                label: DESTINATION_CHART_LABEL,
+              '36444b8c-7e10-4069-8298-6c1b46912be2': {
+                label: '@timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: '@timestamp',
+                isBucketed: true,
+                scale: 'interval',
+                params: {
+                  interval: 'auto',
+                },
+              },
+              'ac1eb80c-ddde-46c4-a90c-400261926762': {
+                label: 'Dest.',
                 dataType: 'number',
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'destination.ip',
                 isBucketed: false,
-                customLabel: true,
                 filter: {
                   query:
                     '"destination.ip": "10.0.0.0/8" or "destination.ip": "192.168.0.0/16" or "destination.ip": "172.16.0.0/12" or "destination.ip": "fd00::/8"',
                   language: 'kuery',
                 },
               },
-              '4607c585-3af3-43b9-804f-e49b27796d79': {
-                label: 'Filters',
-                dataType: 'string',
-                operationType: 'filters',
-                scale: 'ordinal',
-                isBucketed: true,
-                params: {
-                  filters: [
-                    {
-                      input: {
-                        query: '',
-                        language: 'kuery',
-                      },
-                      label: DESTINATION_CHART_LABEL,
-                    },
-                  ],
-                },
-              },
             },
             columnOrder: [
-              '4607c585-3af3-43b9-804f-e49b27796d79',
-              'd27e0966-daf9-41f4-9033-230cf1e76dc9',
+              '36444b8c-7e10-4069-8298-6c1b46912be2',
+              'ac1eb80c-ddde-46c4-a90c-400261926762',
             ],
             incompleteColumns: {},
           },
@@ -185,12 +163,12 @@ export const kpiUniquePrivateIpsBar = {
     {
       type: 'index-pattern',
       id: 'security-solution-default',
-      name: 'indexpattern-datasource-layer-e406bf4f-942b-41ac-b516-edb5cef06ec8',
+      name: 'indexpattern-datasource-layer-38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7',
     },
     {
       type: 'index-pattern',
       id: 'security-solution-default',
-      name: 'indexpattern-datasource-layer-38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7',
+      name: 'indexpattern-datasource-layer-72dc4b99-b07d-4dc9-958b-081d259e11fa',
     },
   ],
 } as LensAttributes;

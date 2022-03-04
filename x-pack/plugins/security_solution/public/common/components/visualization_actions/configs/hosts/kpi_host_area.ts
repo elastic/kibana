@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../common/components/visualization_actions/types';
+import { LensAttributes } from '../../types';
 
 export const kpiHostArea: LensAttributes = {
   description: '',

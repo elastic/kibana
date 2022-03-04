@@ -8,10 +8,10 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiUniqueIpsArea } from '../../../configs/kpi_unique_ips_area';
-import { kpiUniqueIpsBar } from '../../../configs/kpi_unique_ips_bar';
-import { kpiUniqueIpsDestinationMetric } from '../../../configs/kpi_unique_ips_destination_metric';
-import { kpiUniqueIpsSourceMetric } from '../../../configs/kpi_unique_ips_source_metric';
+import { kpiUniqueIpsArea } from '../../../../common/components/visualization_actions/configs/hosts/kpi_unique_ips_area';
+import { kpiUniqueIpsBar } from '../../../../common/components/visualization_actions/configs/hosts/kpi_unique_ips_bar';
+import { kpiUniqueIpsDestinationMetric } from '../../../../common/components/visualization_actions/configs/hosts/kpi_unique_ips_destination_metric';
+import { kpiUniqueIpsSourceMetric } from '../../../../common/components/visualization_actions/configs/hosts/kpi_unique_ips_source_metric';
 import { useHostsKpiUniqueIps } from '../../../containers/kpi_hosts/unique_ips';
 import { HostsKpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';

@@ -7,10 +7,10 @@
 
 import { NetworkKpiStrategyResponse } from '../../../../common/search_strategy';
 import { StatItems } from '../../../common/components/stat_items';
-import { kpiUniquePrivateIpsArea } from '../../configs/kpi_unique_private_ips_area';
-import { kpiUniquePrivateIpsBar } from '../../configs/kpi_unique_private_ips_bar';
-import { kpiUniquePrivateIpsDestinationMetric } from '../../configs/kpi_unique_private_ips_destination_metric';
-import { kpiUniquePrivateIpsSourceMetric } from '../../configs/kpi_unique_private_ips_source_metric';
+import { kpiUniquePrivateIpsArea } from '../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_area';
+import { kpiUniquePrivateIpsBar } from '../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_bar';
+import { kpiUniquePrivateIpsDestinationMetric } from '../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_destination_metric';
+import { kpiUniquePrivateIpsSourceMetric } from '../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_source_metric';
 
 export const mockNarrowDateRange = jest.fn();
 

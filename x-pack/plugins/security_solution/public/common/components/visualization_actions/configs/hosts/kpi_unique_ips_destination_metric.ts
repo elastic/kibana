@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../common/components/visualization_actions/types';
+import { LensAttributes } from '../../types';
 
-export const kpiUniqueIpsSourceMetric: LensAttributes = {
+export const kpiUniqueIpsDestinationMetric: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
@@ -23,7 +23,7 @@ export const kpiUniqueIpsSourceMetric: LensAttributes = {
                 label: ' ',
                 operationType: 'unique_count',
                 scale: 'ratio',
-                sourceField: 'source.ip',
+                sourceField: 'destination.ip',
               },
             },
             incompleteColumns: {},
@@ -39,7 +39,7 @@ export const kpiUniqueIpsSourceMetric: LensAttributes = {
       layerType: 'data',
     },
   },
-  title: '[Host]  KPI Unique IPs - source metric',
+  title: '[Host]  KPI Unique IPs - destination metric',
   visualizationType: 'lnsMetric',
   references: [
     {

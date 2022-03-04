@@ -23,7 +23,7 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { networkSelectors } from '../../store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { dnsTopDomainsAttrs } from '../../configs/dns_top_domains';
+import { dnsTopDomainsAttrs } from '../../../common/components/visualization_actions/configs/network/dns_top_domains';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 

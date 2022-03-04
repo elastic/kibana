@@ -8,7 +8,7 @@
 import * as i18n from './translations';
 import { MatrixHistogramOption, MatrixHistogramConfigs } from '../matrix_histogram/types';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution/matrix_histogram';
-import { getExternalAlertConfigs } from '../../../hosts/configs/external_alert';
+import { getExternalAlertConfigs } from '../visualization_actions/configs/common/external_alert';
 
 export const alertsStackByOptions: MatrixHistogramOption[] = [
   {

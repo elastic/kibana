@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiTlsHandshakes } from '../../../configs/kpi_tls_handshakes';
+import { kpiTlsHandshakes } from '../../../../common/components/visualization_actions/configs/network/kpi_tls_handshakes';
 import { useNetworkKpiTlsHandshakes } from '../../../containers/kpi_network/tls_handshakes';
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';

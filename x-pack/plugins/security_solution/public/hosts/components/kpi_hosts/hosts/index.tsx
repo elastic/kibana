@@ -8,8 +8,8 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiHostArea } from '../../../configs/kpi_host_area';
-import { kpiHostMetric } from '../../../configs/kpi_host_metric';
+import { kpiHostArea } from '../../../../common/components/visualization_actions/configs/hosts/kpi_host_area';
+import { kpiHostMetric } from '../../../../common/components/visualization_actions/configs/hosts/kpi_host_metric';
 import { useHostsKpiHosts } from '../../../containers/kpi_hosts/hosts';
 import { HostsKpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';

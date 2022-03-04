@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../common/components/visualization_actions/types';
+import { LensAttributes } from '../../types';
 
-export const kpiUniqueIpsDestinationMetric: LensAttributes = {
+export const kpiHostMetric: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
       indexpattern: {
         layers: {
-          '8be0156b-d423-4a39-adf1-f54d4c9f2e69': {
-            columnOrder: ['d9a6eb6b-8b78-439e-98e7-a718f8ffbebe'],
+          '416b6fad-1923-4f6a-a2df-b223bb287e30': {
+            columnOrder: ['b00c65ea-32be-4163-bfc8-f795b1ef9d06'],
             columns: {
-              'd9a6eb6b-8b78-439e-98e7-a718f8ffbebe': {
+              'b00c65ea-32be-4163-bfc8-f795b1ef9d06': {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: ' ',
                 operationType: 'unique_count',
                 scale: 'ratio',
-                sourceField: 'destination.ip',
+                sourceField: 'host.name',
               },
             },
             incompleteColumns: {},
@@ -34,12 +34,12 @@ export const kpiUniqueIpsDestinationMetric: LensAttributes = {
     filters: [],
     query: { language: 'kuery', query: '' },
     visualization: {
-      accessor: 'd9a6eb6b-8b78-439e-98e7-a718f8ffbebe',
-      layerId: '8be0156b-d423-4a39-adf1-f54d4c9f2e69',
+      accessor: 'b00c65ea-32be-4163-bfc8-f795b1ef9d06',
+      layerId: '416b6fad-1923-4f6a-a2df-b223bb287e30',
       layerType: 'data',
     },
   },
-  title: '[Host]  KPI Unique IPs - destination metric',
+  title: '[Host] KPI Hosts - metric',
   visualizationType: 'lnsMetric',
   references: [
     {
@@ -49,7 +49,7 @@ export const kpiUniqueIpsDestinationMetric: LensAttributes = {
     },
     {
       id: 'security-solution-default',
-      name: 'indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69',
+      name: 'indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30',
       type: 'index-pattern',
     },
     {

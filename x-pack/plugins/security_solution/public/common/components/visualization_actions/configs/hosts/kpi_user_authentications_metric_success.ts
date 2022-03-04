@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../common/components/visualization_actions/types';
+import { LensAttributes } from '../../types';
 
-export const kpiUserAuthenticationsMetricFailure: LensAttributes = {
-  title: '[Host] KPI User authentications - metric failure ',
+export const kpiUserAuthenticationsMetricSuccess: LensAttributes = {
+  title: '[Host] KPI User authentications - metric success ',
   description: '',
   visualizationType: 'lnsMetric',
   state: {
@@ -55,13 +55,14 @@ export const kpiUserAuthenticationsMetricFailure: LensAttributes = {
             columnOrder: ['0eb97c09-a351-4280-97da-944e4bd30dd7'],
             columns: {
               '0eb97c09-a351-4280-97da-944e4bd30dd7': {
+                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: 'event.outcome : "failure" ',
+                  query: 'event.outcome : "success" ',
                 },
                 isBucketed: false,
-                label: '',
+                label: ' ',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: '___records___',

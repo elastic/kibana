@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiUniqueFlowIds } from '../../../configs/kpi_unique_flow_ids';
+import { kpiUniqueFlowIds } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_flow_ids';
 import { useNetworkKpiUniqueFlows } from '../../../containers/kpi_network/unique_flows';
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';

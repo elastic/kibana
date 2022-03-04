@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../common/components/visualization_actions/types';
-import {
-  DESTINATION_CHART_LABEL,
-  SOURCE_CHART_LABEL,
-} from '../components/kpi_hosts/unique_ips/translations';
+import { DESTINATION_CHART_LABEL, SOURCE_CHART_LABEL } from '../../translations';
+import { LensAttributes } from '../../types';
 
 export const kpiUniqueIpsArea: LensAttributes = {
   description: '',

@@ -61,3 +61,45 @@ export const ADD_TO_EXISTING_CASE = i18n.translate(
     defaultMessage: 'Add to Existing Case',
   }
 );
+
+export const SOURCE_CHART_LABEL = i18n.translate(
+  'xpack.securitySolution.visualizationActions.uniqueIps.sourceChartLabel',
+  {
+    defaultMessage: 'Src.',
+  }
+);
+
+export const DESTINATION_CHART_LABEL = i18n.translate(
+  'xpack.securitySolution.visualizationActions.uniqueIps.destinationChartLabel',
+  {
+    defaultMessage: 'Dest.',
+  }
+);
+
+export const SUCCESS_CHART_LABEL = i18n.translate(
+  'xpack.securitySolution.visualizationActions.userAuthentications.successChartLabel',
+  {
+    defaultMessage: 'Succ.',
+  }
+);
+
+export const FAIL_CHART_LABEL = i18n.translate(
+  'xpack.securitySolution.visualizationActions.userAuthentications.failChartLabel',
+  {
+    defaultMessage: 'Fail',
+  }
+);
+
+export const SUCCESS_UNIT_LABEL = i18n.translate(
+  'xpack.securitySolution.visualizationActions.userAuthentications.successUnitLabel',
+  {
+    defaultMessage: 'success',
+  }
+);
+
+export const FAIL_UNIT_LABEL = i18n.translate(
+  'xpack.securitySolution.visualizationActions.userAuthentications.failUnitLabel',
+  {
+    defaultMessage: 'fail',
+  }
+);

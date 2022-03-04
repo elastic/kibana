@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import {
-  GetLensAttributes,
-  LensAttributes,
-} from '../../common/components/visualization_actions/types';
+import { GetLensAttributes, LensAttributes } from '../../types';
 
 export const getExternalAlertConfigs: GetLensAttributes = (stackByField = 'event.module') => {
   return {
-    title: 'external alerts',
+    title: 'External alerts',
     description: '',
     visualizationType: 'lnsXY',
     state: {

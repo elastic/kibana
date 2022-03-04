@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../common/components/visualization_actions/types';
+import { LensAttributes } from '../../types';
 
 export const kpiUniqueFlowIds: LensAttributes = {
   title: '[Network] KPI Unique flow IDs',
@@ -21,7 +21,40 @@ export const kpiUniqueFlowIds: LensAttributes = {
       query: 'source.ip: * or destination.ip: * ',
       language: 'kuery',
     },
-    filters: [],
+    filters: [
+      {
+        meta: {
+          index: 'c01edc8a-90ce-4d49-95f0-76954a034eb2',
+          type: 'custom',
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'query',
+          value:
+            '{"bool":{"should":[{"exists":{"field":"source.ip"}},{"exists":{"field":"destination.ip"}}],"minimum_should_match":1}}',
+        },
+        $state: {
+          store: 'appState',
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                exists: {
+                  field: 'source.ip',
+                },
+              },
+              {
+                exists: {
+                  field: 'destination.ip',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      },
+    ],
     datasourceStates: {
       indexpattern: {
         layers: {

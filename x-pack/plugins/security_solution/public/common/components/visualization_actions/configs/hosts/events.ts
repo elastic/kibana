@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  GetLensAttributes,
-  LensAttributes,
-} from '../../common/components/visualization_actions/types';
+import { GetLensAttributes, LensAttributes } from '../../types';
 
 export const getEventsHistogramCongifs: GetLensAttributes = (stackByField = 'event.action') =>
   ({

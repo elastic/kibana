@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../common/components/visualization_actions/types';
-import {
-  FAIL_CHART_LABEL,
-  SUCCESS_CHART_LABEL,
-} from '../components/kpi_hosts/authentications/translations';
+import { LensAttributes } from '../../types';
+import { FAIL_CHART_LABEL, SUCCESS_CHART_LABEL } from '../../translations';
 
 export const kpiUserAuthenticationsBar: LensAttributes = {
   title: '[Host] KPI User authentications - bar ',

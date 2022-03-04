@@ -28,7 +28,7 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
-import { getEventsHistogramCongifs } from '../../configs/events';
+import { getEventsHistogramCongifs } from '../../../common/components/visualization_actions/configs/hosts/events';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
