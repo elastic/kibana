@@ -16,8 +16,8 @@ import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_BLOCKLISTS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import { BaseDataGenerator } from './base_data_generator';
-import { ConditionEntryField } from '../types';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts/constants';
 
 /** Utility that removes null and undefined from a Type's property value */
@@ -256,7 +256,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     return this.generate({
       name: `Blocklist ${this.randomString(5)}`,
       list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
-      item_id: `generator_endpoint_blocklist_${this.randomUUID()}`,
+      item_id: `generator_endpoint_blocklist_${this.seededUUIDv4()}`,
       os_types: ['windows'],
       entries: [
         this.randomChoice([

@@ -19,7 +19,6 @@ import { withConfirmModalProvider } from './hooks/use_confirm_modal';
 import { FleetServerHostsFlyout } from './components/fleet_server_hosts_flyout';
 import { EditOutputFlyout } from './components/edit_output_flyout';
 import { useDeleteOutput } from './hooks/use_delete_output';
-import { FEATURE_ADD_OUTPUT_ENABLED } from './constants';
 
 export const SettingsApp = withConfirmModalProvider(() => {
   useBreadcrumbs('settings');
@@ -64,13 +63,11 @@ export const SettingsApp = withConfirmModalProvider(() => {
               />
             </EuiPortal>
           </Route>
-          {FEATURE_ADD_OUTPUT_ENABLED && (
-            <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
-              <EuiPortal>
-                <EditOutputFlyout onClose={onCloseCallback} />
-              </EuiPortal>
-            </Route>
-          )}
+          <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
+            <EuiPortal>
+              <EditOutputFlyout onClose={onCloseCallback} />
+            </EuiPortal>
+          </Route>
           <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
             {(route: { match: { params: { outputId: string } } }) => {
               const output = outputs.data?.items.find((o) => route.match.params.outputId === o.id);
