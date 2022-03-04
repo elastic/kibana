@@ -273,4 +273,48 @@ paths:
       'Error while compiling agent template: options.inverse is not a function'
     );
   });
+
+  it('should escape string values when necessary', () => {
+    const stringTemplate = `
+my-package:
+    asterisk: {{asterisk}}
+    leadingasterisk: {{leadingasterisk}}
+    middleasterisk: {{middleasterisk}}
+    trailingasterisk: {{trailingasterisk}}
+    ampersand: {{ampersand}}
+    leadingampersand: {{leadingampersand}}
+    middleampersand: {{middleampersand}}
+    trailingampersand: {{trailingampersand}}`;
+
+    // List of special chars that may lead to YAML parsing errors when not quoted.
+    // See YAML specification section 5.3 Indicator characters
+    // https://yaml.org/spec/1.2/spec.html#id2772075
+    // Currently only escaping leading * and &
+    const vars = {
+      asterisk: { value: '*', type: 'text' },
+      leadingasterisk: { value: '*blah', type: 'text' },
+      middleasterisk: { value: 'blah*blah', type: 'text' },
+      trailingasterisk: { value: 'blah*', type: 'text' },
+      ampersand: { value: '&', type: 'text' },
+      leadingampersand: { value: '&blah', type: 'text' },
+      middleampersand: { value: 'blah&blah', type: 'text' },
+      trailingampersand: { value: 'blah&', type: 'text' },
+    };
+
+    const targetOutput = {
+      'my-package': {
+        asterisk: '*',
+        leadingasterisk: '*blah',
+        middleasterisk: 'blah*blah',
+        trailingasterisk: 'blah*',
+        ampersand: '&',
+        leadingampersand: '&blah',
+        middleampersand: 'blah&blah',
+        trailingampersand: 'blah&',
+      },
+    };
+
+    const output = compileTemplate(vars, stringTemplate);
+    expect(output).toEqual(targetOutput);
+  });
 });

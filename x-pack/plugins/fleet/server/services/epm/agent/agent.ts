@@ -64,6 +64,14 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
+const maybeEscapeString = (value: string) => {
+  // Quote strings that start with special characters
+  if (/^[*&]/.test(value)) {
+    return `"${value}"`;
+  }
+  return value;
+};
+
 function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateStr: string) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
@@ -90,6 +98,12 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
+    } else if (recordEntry.type && recordEntry.type === 'text' && recordEntry.value?.length) {
+      if (Array.isArray(recordEntry.value)) {
+        varPart[lastKeyPart] = recordEntry.value.map((value: string) => maybeEscapeString(value));
+      } else {
+        varPart[lastKeyPart] = maybeEscapeString(recordEntry.value);
+      }
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }
