@@ -91,3 +91,5 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
 CasesRoutesComponent.displayName = 'CasesRoutes';
 
 export const CasesRoutes = React.memo(CasesRoutesComponent);
+// eslint-disable-next-line import/no-default-export
+export { CasesRoutes as default };
