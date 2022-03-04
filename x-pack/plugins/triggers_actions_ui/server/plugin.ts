@@ -11,6 +11,7 @@ import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/
 import { getService, register as registerDataService } from './data';
 import { createHealthRoute, createConfigRoute } from './routes';
 import { BASE_TRIGGERS_ACTIONS_UI_API_PATH } from '../common';
+import { createConfig, ConfigType } from './config';
 
 export interface PluginStartContract {
   data: ReturnType<typeof getService>;
@@ -24,13 +25,17 @@ interface PluginsSetup {
 export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {
   private readonly logger: Logger;
   private readonly data: PluginStartContract['data'];
+  private config: ConfigType;
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
     this.data = getService();
+    this.config = createConfig(ctx);
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): void {
+    const experimentalFeatures = this.config.experimentalFeatures;
+
     const router = core.http.createRouter();
     registerDataService({
       logger: this.logger,
