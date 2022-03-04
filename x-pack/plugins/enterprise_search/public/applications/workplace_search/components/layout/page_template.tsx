@@ -9,7 +9,7 @@ import React from 'react';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetWorkplaceSearchChrome } from '../../../shared/kibana_chrome';
-import { EnterpriseSearchPageTemplate, PageTemplateProps } from '../../../shared/layout';
+import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
 
 import { useWorkplaceSearchNav } from './nav';
@@ -21,7 +21,7 @@ export const WorkplaceSearchPageTemplate: React.FC<PageTemplateProps> = ({
   ...pageTemplateProps
 }) => {
   return (
-    <EnterpriseSearchPageTemplate
+    <EnterpriseSearchPageTemplateWrapper
       restrictWidth
       {...pageTemplateProps}
       solutionNav={{
@@ -34,6 +34,6 @@ export const WorkplaceSearchPageTemplate: React.FC<PageTemplateProps> = ({
         <SendWorkplaceSearchTelemetry action="viewed" metric={pageViewTelemetry} />
       )}
       {children}
-    </EnterpriseSearchPageTemplate>
+    </EnterpriseSearchPageTemplateWrapper>
   );
 };
