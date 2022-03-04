@@ -36,6 +36,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           error: 0,
           pending: 0,
           unknown: 0,
+          warning: 0,
         },
         rule_muted_status: {
           muted: 0,
