@@ -37,7 +37,9 @@ export const addsHostGeoContinentNameToTimeline = () => {
 };
 
 export const clearFieldsBrowser = () => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{selectall}{backspace}');
+  cy.get(FIELDS_BROWSER_FILTER_INPUT)
+    .type('{selectall}{backspace}')
+    .waitUntil((subject) => !subject.hasClass('euiFieldSearch-isLoading'));
 };
 
 export const closeFieldsBrowser = () => {
@@ -48,7 +50,7 @@ export const filterFieldsBrowser = (fieldName: string) => {
   cy.get(FIELDS_BROWSER_FILTER_INPUT)
     .clear()
     .type(fieldName)
-    .should('not.have.class', 'euiFieldSearch-isLoading');
+    .waitUntil((subject) => !subject.hasClass('euiFieldSearch-isLoading'));
 };
 
 export const toggleCategoryFilter = () => {

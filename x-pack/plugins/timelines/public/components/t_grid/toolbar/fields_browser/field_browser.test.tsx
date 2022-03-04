@@ -32,6 +32,7 @@ const testProps = {
   browserFields: mockBrowserFields,
   filteredBrowserFields: mockBrowserFields,
   searchInput: '',
+  appliedFilterInput: '',
   isSearching: false,
   setSelectedCategoryIds: jest.fn(),
   onHide,

@@ -51,6 +51,8 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width' | 
   isSearching: boolean;
   /** The text displayed in the search input */
   searchInput: string;
+  /** The text actually being applied to the result set, a debounced version of searchInput */
+  appliedFilterInput: string;
   /**
    * The category selected on the left-hand side of the field browser
    */
@@ -91,6 +93,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   options,
   restoreFocusTo,
   searchInput,
+  appliedFilterInput,
   selectedCategoryIds,
   timelineId,
   width = FIELD_BROWSER_WIDTH,
@@ -179,7 +182,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             timelineId={timelineId}
             columnHeaders={columnHeaders}
             filteredBrowserFields={filteredBrowserFields}
-            searchInput={searchInput}
+            searchInput={appliedFilterInput}
             selectedCategoryIds={selectedCategoryIds}
             getFieldTableColumns={getFieldTableColumns}
           />

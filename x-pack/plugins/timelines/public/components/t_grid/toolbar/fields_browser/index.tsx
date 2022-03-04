@@ -6,6 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -37,11 +38,10 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   width,
 }) => {
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
-  /** tracks the latest timeout id from `setTimeout`*/
-  const inputTimeoutId = useRef(0);
-
   /** all field names shown in the field browser must contain this string (when specified) */
   const [filterInput, setFilterInput] = useState('');
+  /** all field names shown in the field browser must contain this string (when specified) */
+  const [appliedFilterInput, setAppliedFilterInput] = useState('');
   /** all fields in this collection have field names that match the filterInput */
   const [filteredBrowserFields, setFilteredBrowserFields] = useState<BrowserFields | null>(null);
   /** when true, show a spinner in the input to indicate the field browser is searching for matching field names */
@@ -51,15 +51,25 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   /** show the field browser */
   const [show, setShow] = useState(false);
 
+  // debounced function to apply the input filter
+  // will delay the call to setAppliedFilterInput by INPUT_TIMEOUT ms
+  // the parameter used will be the last one passed
+  const debouncedApplyFilterInput = useMemo(
+    () =>
+      debounce((input: string) => {
+        setAppliedFilterInput(input);
+      }, INPUT_TIMEOUT),
+    []
+  );
+
   useEffect(() => {
-    return () => {
-      if (inputTimeoutId.current !== 0) {
-        // ⚠️ mutation: cancel any remaining timers and zero-out the timer id:
-        clearTimeout(inputTimeoutId.current);
-        inputTimeoutId.current = 0;
-      }
-    };
-  }, []);
+    const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
+      browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
+      substring: appliedFilterInput,
+    });
+    setFilteredBrowserFields(newFilteredBrowserFields);
+    setIsSearching(false);
+  }, [appliedFilterInput, browserFields]);
 
   /** Shows / hides the field browser */
   const onShow = useCallback(() => {
@@ -69,6 +79,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   /** Invoked when the field browser should be hidden */
   const onHide = useCallback(() => {
     setFilterInput('');
+    setAppliedFilterInput('');
     setFilteredBrowserFields(null);
     setIsSearching(false);
     setSelectedCategoryIds([]);
@@ -80,21 +91,12 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     (newFilterInput: string) => {
       setFilterInput(newFilterInput);
       setIsSearching(true);
-      if (inputTimeoutId.current !== 0) {
-        clearTimeout(inputTimeoutId.current); // ⚠️ mutation: cancel any previous timers
-      }
-      // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
-      inputTimeoutId.current = window.setTimeout(() => {
-        const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
-          browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
-          substring: newFilterInput,
-        });
-        setFilteredBrowserFields(newFilteredBrowserFields);
-        setIsSearching(false);
-      }, INPUT_TIMEOUT);
+      debouncedApplyFilterInput(newFilterInput);
+      return () => {
+        debouncedApplyFilterInput.cancel();
+      };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [browserFields, filterInput, inputTimeoutId.current]
+    [debouncedApplyFilterInput]
   );
 
   // only merge in the default category if the field browser is visible
@@ -133,6 +135,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           options={options}
           restoreFocusTo={customizeColumnsButtonRef}
           searchInput={filterInput}
+          appliedFilterInput={appliedFilterInput}
           selectedCategoryIds={selectedCategoryIds}
           timelineId={timelineId}
           width={width}

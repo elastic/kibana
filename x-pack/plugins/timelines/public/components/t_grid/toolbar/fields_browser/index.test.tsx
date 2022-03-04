@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 import { mockBrowserFields, TestProviders } from '../../../../mock';
 
@@ -80,8 +80,13 @@ describe('StatefulFieldsBrowser', () => {
         expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
       });
 
-      result.getByTestId('categories-filter-button').click();
-      result.getByTestId('categories-selector-option-base').click();
+      await act(async () => {
+        result.getByTestId('categories-filter-button').click();
+      });
+      await act(async () => {
+        result.getByTestId('categories-selector-option-base').click();
+      });
+
       expect(result.getByTestId('category-badge-base')).toBeInTheDocument();
     });
 
@@ -101,11 +106,17 @@ describe('StatefulFieldsBrowser', () => {
         expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
       });
 
-      result.getByTestId('categories-filter-button').click();
-      result.getByTestId('categories-selector-option-base').click();
+      await act(async () => {
+        result.getByTestId('categories-filter-button').click();
+      });
+      await act(async () => {
+        result.getByTestId('categories-selector-option-base').click();
+      });
       expect(result.getByTestId('category-badge-base')).toBeInTheDocument();
 
-      result.getByTestId('category-badge-unselect-base').click();
+      await act(async () => {
+        result.getByTestId('category-badge-unselect-base').click();
+      });
       expect(result.queryByTestId('category-badge-base')).toBeNull();
     });
 
