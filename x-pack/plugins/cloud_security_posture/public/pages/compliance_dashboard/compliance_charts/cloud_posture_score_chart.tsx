@@ -44,6 +44,7 @@ const ScoreChart = ({
   return (
     <Chart size={{ height: 90, width: 90 }}>
       <Settings
+        // TODO use the EUI charts theme
         theme={{
           partition: {
             linkLabel: { maximumSection: Infinity, maxCount: 0 },

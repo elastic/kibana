@@ -287,7 +287,12 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
                   height: chartHeight,
                 }}
               >
-                <Settings rotation={90} theme={theme} showLegend={showLegend} />
+                <Settings
+                  rotation={90}
+                  // TODO use the EUI charts theme
+                  theme={theme}
+                  showLegend={showLegend}
+                />
 
                 <Axis
                   id="x-axis"

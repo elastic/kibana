@@ -105,6 +105,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
           <>
             <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
               <Settings
+                // TODO use the EUI charts theme
                 theme={{
                   lineSeriesStyle: {
                     point: { visible: false },

@@ -415,6 +415,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   {showSwimlane && !isLoading && (
                     <Chart className={'mlSwimLaneContainer'}>
                       <Settings
+                        // TODO use the EUI charts theme
                         theme={themeOverrides}
                         onElementClick={onElementClick}
                         showLegend={showLegend}
