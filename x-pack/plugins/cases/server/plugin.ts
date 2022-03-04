@@ -28,18 +28,22 @@ import { CasesClient } from './client';
 import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import {
+  PluginStartContract as FeaturesPluginStart,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '../../features/server';
 import { LensServerPluginSetup } from '../../lens/server';
+import { getCasesKibanaFeature } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
-import { collectTelemetryData } from './telemetry/collect_telemetry_data';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
+  features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
@@ -88,6 +92,8 @@ export class CasePlugin {
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
+
+    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     core.savedObjects.registerType(
       createCaseCommentSavedObjectType({

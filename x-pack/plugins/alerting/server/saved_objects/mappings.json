@@ -155,6 +155,10 @@
             }
           }
         }
+      },
+      "snoozeEndTime": {
+        "type": "date",
+        "format": "strict_date_time"
       }
     }
   }
