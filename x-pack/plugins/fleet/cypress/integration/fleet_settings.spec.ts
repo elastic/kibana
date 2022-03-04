@@ -28,7 +28,7 @@ describe('Edit settings', () => {
     cy.getBySel('toastCloseButton').click();
   });
 
-  it('should update hosts', () => {
+  it('should update Fleet server hosts', () => {
     cy.getBySel('editHostsBtn').click();
     cy.get('[placeholder="Specify host URL"').type('http://localhost:8220');
 
@@ -50,6 +50,7 @@ describe('Edit settings', () => {
   it('should update outputs', () => {
     cy.getBySel('editOutputBtn').click();
     cy.get('[placeholder="Specify name"').clear().type('output-1');
+    cy.get('[placeholder="Specify host URL"').clear().type('http://elasticsearch:9200');
 
     cy.intercept('/api/fleet/outputs', {
       items: [
@@ -65,6 +66,7 @@ describe('Edit settings', () => {
     cy.intercept('PUT', '/api/fleet/outputs/fleet-default-output', {
       name: 'output-1',
       type: 'elasticsearch',
+      hosts: ['http://elasticsearch:9200'],
       is_default: true,
       is_default_monitoring: true,
     }).as('updateOutputs');
