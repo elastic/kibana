@@ -11,14 +11,67 @@ import fs from 'fs/promises';
 import JSON5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
+import { ElasticsearchClient } from '../../../elasticsearch';
+import { Env } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/utils';
+import { getEnvOptions } from '../../../config/mocks';
 import { LogRecord } from '@kbn/logging';
 import { retryAsync } from '../test_helpers/retry_async';
 
-const logFilePath = Path.join(__dirname, 'cluster_routing_allocation_disabled.log');
+const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+const targetIndex = `.kibana_${kibanaVersion}_001`;
+const logFilePath = Path.join(__dirname, 'batch_size_bytes.log');
 
-describe('cluster_routing_allocation_disabled', () => {
+async function removeLogFile() {
+  // ignore errors if it doesn't exist
+  await fs.unlink(logFilePath).catch(() => void 0);
+}
+function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
+  return a.type.localeCompare(b.type) || a.id.localeCompare(b.id);
+}
+
+async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
+  const body = await esClient.search<any>({
+    index,
+    body: {
+      query: {
+        match_all: {},
+      },
+      _source: ['type', 'id'],
+    },
+  });
+
+  return body.hits.hits
+    .map((h) => ({
+      ...h._source,
+      id: h._id,
+    }))
+    .sort(sortByTypeAndId);
+}
+
+const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
+
+describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
+  let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
+
+  beforeAll(async () => {
+    await removeLogFile();
+  });
+
+  beforeEach(() => {
+    ({ startES } = kbnTestServer.createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+      settings: {
+        es: {
+          license: 'basic',
+          dataArchive: Path.join(__dirname, 'archives', '7.14.0_xpack_sample_saved_objects.zip'),
+          esArgs: ['http.max_content_length=1715329b'],
+        },
+      },
+    }));
+  });
 
   afterEach(async () => {
     if (root) {
@@ -31,27 +84,41 @@ describe('cluster_routing_allocation_disabled', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  const startEsServer = async ({ esArgs = [] }: { esArgs?: string[] } = {}) => {
-    const { startES } = kbnTestServer.createTestServers({
-      adjustTimeout: jest.setTimeout,
-      settings: {
-        es: {
-          license: 'basic',
-          dataArchive: Path.join(__dirname, 'archives', '7.14.0_xpack_sample_saved_objects.zip'),
-          esArgs,
-        },
-      },
-    });
-    return startES();
-  };
+  it.only('completes the migration even when a full batch would exceed ES http.max_content_length', async () => {
+    root = createRoot({ maxBatchSizeBytes: 1715329 });
+    esServer = await startES();
+    await root.preboot();
+    await root.setup();
+    await expect(root.start()).resolves.toBeTruthy();
 
-  it('fails with a descriptive message when a routing allocation is disabled', async () => {
-    root = createRoot({});
-    esServer = await startEsServer({ esArgs: ['cluster.routing.allocation.enable=none'] });
+    // After plugins start, some saved objects are deleted/recreated, so we
+    // wait a bit for the count to settle.
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    const esClient: ElasticsearchClient = esServer.es.getClient();
+
+    // change cluster routing allocation enable
+
+    const changedSettings = await esClient.cluster.getSettings({
+      flat_settings: true,
+      filter_path: ['persistent'],
+      pretty: true,
+    });
+    expect(changedSettings).toBeTruthy();
+    expect(changedSettings).toMatchObject({ persistent: {} });
+    // assert that the docs from the original index have been migrated rather than comparing a doc count after startup
+    // const originalDocs = await fetchDocuments(esClient, '.kibana_7.14.0_001');
+    // const migratedDocs = await fetchDocuments(esClient, targetIndex);
+    // expect(assertMigratedDocuments(migratedDocs, originalDocs));
+  });
+
+  it('fails with a descriptive message when a single document exceeds maxBatchSizeBytes', async () => {
+    root = createRoot({ maxBatchSizeBytes: 1015275 });
+    esServer = await startES();
     await root.preboot();
     await root.setup();
     await expect(root.start()).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.kibana] index: Cluster routing allocation is not enabled. To proceed, please enable routing.]`
+      `[Error: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715329 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.]`
     );
 
     await retryAsync(
@@ -64,7 +131,7 @@ describe('cluster_routing_allocation_disabled', () => {
         expect(
           records.find((rec) =>
             rec.message.startsWith(
-              `Unable to complete saved object migrations for the [.kibana] index: Cluster routing allocation is not enabled. To proceed, please enable routing.`
+              `Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715329 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`
             )
           )
         ).toBeDefined();
@@ -88,15 +155,7 @@ function createRoot(options: { maxBatchSizeBytes?: number }) {
             type: 'file',
             fileName: logFilePath,
             layout: {
-              type: 'json',
-            },
-          },
-          console: {
-            type: 'console',
-            layout: {
               type: 'pattern',
-              highlight: true,
-              pattern: '[%date][%level][%logger]---%message',
             },
           },
         },
@@ -104,7 +163,12 @@ function createRoot(options: { maxBatchSizeBytes?: number }) {
           {
             name: 'root',
             level: 'info',
-            appenders: ['file', 'console'],
+            appenders: ['file'],
+          },
+          {
+            name: 'savedobjects-service',
+            appenders: ['file'],
+            level: 'info',
           },
         ],
       },
