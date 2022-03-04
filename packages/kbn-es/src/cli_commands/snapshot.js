@@ -34,7 +34,7 @@ exports.help = (defaults = {}) => {
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
       --plugins         Comma seperated list of Elasticsearch plugins to install
-      --secureFiles     Comma seperated list of secure_setting_name=/path pairs
+      --secure-files     Comma seperated list of secure_setting_name=/path pairs
 
     Example:
 
@@ -60,6 +60,7 @@ exports.run = async (defaults = {}) => {
       useCached: 'use-cached',
       skipReadyCheck: 'skip-ready-check',
       readyTimeout: 'ready-timeout',
+      secureFiles: 'secure-files',
     },
 
     string: ['version', 'ready-timeout'],
