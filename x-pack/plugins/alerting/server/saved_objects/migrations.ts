@@ -272,6 +272,7 @@ function initializeExecutionStatus(
         status: 'pending',
         lastExecutionDate: new Date().toISOString(),
         error: null,
+        warning: null,
       },
     },
   };

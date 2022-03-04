@@ -51,6 +51,9 @@ describe('has()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     });
     expect(registry.has('foo')).toEqual(true);
   });
@@ -72,6 +75,9 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -105,6 +111,9 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -129,6 +138,9 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -156,6 +168,9 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
       defaultScheduleInterval: 'foobar',
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -183,6 +198,9 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
       defaultScheduleInterval: '10s',
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -214,6 +232,9 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -243,6 +264,9 @@ describe('register()', () => {
       producer: 'alerts',
       minimumLicenseRequired: 'basic',
       isExportable: true,
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register(ruleType);
@@ -276,6 +300,9 @@ describe('register()', () => {
       producer: 'alerts',
       minimumLicenseRequired: 'basic',
       isExportable: true,
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register(ruleType);
@@ -313,6 +340,9 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -339,6 +369,9 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
       ruleTaskTimeout: '20m',
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register(ruleType);
@@ -371,6 +404,9 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register(ruleType);
@@ -394,6 +430,9 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     });
     expect(() =>
       registry.register({
@@ -410,6 +449,9 @@ describe('register()', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        config: {
+          maxExecutableActions: 1000,
+        },
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Rule type \\"test\\" is already registered."`);
   });
@@ -432,6 +474,9 @@ describe('get()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     });
     const ruleType = registry.get('test');
     expect(ruleType).toMatchInlineSnapshot(`
@@ -499,6 +544,9 @@ describe('list()', () => {
       minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
@@ -593,6 +641,9 @@ describe('ensureRuleTypeEnabled', () => {
       isExportable: true,
       minimumLicenseRequired: 'basic',
       recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+      config: {
+        maxExecutableActions: 1000,
+      },
     });
   });
 
@@ -625,6 +676,9 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alerts',
+    config: {
+      maxExecutableActions: 1000,
+    },
   };
 
   if (!context && !state) return baseAlert;

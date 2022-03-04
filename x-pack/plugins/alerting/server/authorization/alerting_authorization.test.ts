@@ -194,6 +194,9 @@ beforeEach(() => {
     recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'myApp',
+    config: {
+      maxExecutableActions: 1000,
+    },
   }));
   features.getKibanaFeatures.mockReturnValue([
     myAppFeature,

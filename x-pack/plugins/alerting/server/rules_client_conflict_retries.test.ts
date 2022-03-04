@@ -295,7 +295,7 @@ function setupRawAlertMocks(
 
   // splitting this out as it's easier to set a breakpoint :-)
   // eslint-disable-next-line prettier/prettier
-  unsecuredSavedObjectsClient.get.mockImplementation(async () => 
+  unsecuredSavedObjectsClient.get.mockImplementation(async () =>
     cloneDeep(rawAlert)
   );
 
@@ -356,6 +356,9 @@ beforeEach(() => {
     recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'alerts',
+    config: {
+      maxExecutableActions: 1000,
+    },
   }));
 
   ruleTypeRegistry.get.mockReturnValue({
@@ -368,6 +371,9 @@ beforeEach(() => {
     recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'alerts',
+    config: {
+      maxExecutableActions: 1000,
+    },
   });
 
   rulesClient = new RulesClient(rulesClientParams);
