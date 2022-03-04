@@ -13,10 +13,12 @@ import { withSolutionNav } from './with_solution_nav';
 import { KibanaPageTemplateProps } from './page_template';
 import { getClasses } from './util';
 
+type Props = KibanaPageTemplateProps;
+
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
-export const KibanaPageTemplateInner: FunctionComponent<KibanaPageTemplateProps> = ({
+export const KibanaPageTemplateInner: FunctionComponent<Props> = ({
   template,
   className,
   pageHeader,
