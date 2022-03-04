@@ -38,7 +38,7 @@ export async function generateData({
   const traceEvents = timerange(start, end)
     .interval('30s')
     .rate(rate)
-    .flatMap((timestamp) =>
+    .spans((timestamp) =>
       instance
         .transaction(transaction.name)
         .defaults({

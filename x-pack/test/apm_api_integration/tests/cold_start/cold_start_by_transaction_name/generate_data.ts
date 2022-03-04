@@ -29,12 +29,12 @@ export async function generateData({
   const { transactionName, duration, serviceName } = dataConfig;
   const instance = apm.service(serviceName, 'production', 'go').instance('instance-a');
 
-  const traceEvents = [
-    ...timerange(start, end)
+  const traceEvents =
+    timerange(start, end)
       .interval('1m')
       .rate(coldStartRate)
-      .flatMap((timestamp) => [
-        ...instance
+      .spans((timestamp) =>
+        instance
           .transaction(transactionName)
           .defaults({
             'faas.coldstart': true,
@@ -42,23 +42,24 @@ export async function generateData({
           .timestamp(timestamp)
           .duration(duration)
           .success()
-          .serialize(),
-      ]),
-    ...timerange(start, end)
-      .interval('1m')
-      .rate(warmStartRate)
-      .flatMap((timestamp) => [
-        ...instance
-          .transaction(transactionName)
-          .defaults({
-            'faas.coldstart': false,
-          })
-          .timestamp(timestamp)
-          .duration(duration)
-          .success()
-          .serialize(),
-      ]),
-  ];
+          .serialize()
+      )
+      .concat(
+      timerange(start, end)
+        .interval('1m')
+        .rate(warmStartRate)
+        .spans((timestamp) =>
+          instance
+            .transaction(transactionName)
+            .defaults({
+              'faas.coldstart': false,
+            })
+            .timestamp(timestamp)
+            .duration(duration)
+            .success()
+            .serialize()
+        )
+      );
 
   await synthtraceEsClient.index(traceEvents);
 }
