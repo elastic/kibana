@@ -60,27 +60,19 @@ export function OverviewPage({ routeParams }: Props) {
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, refreshInterval, refreshPaused } =
     useDatePickerContext();
 
-  const relativeTime = { start: relativeStart, end: relativeEnd };
-  const absoluteTime = { start: absoluteStart, end: absoluteEnd };
-
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
 
-  const bucketSize = calculateBucketSize({
-    start: absoluteTime.start,
-    end: absoluteTime.end,
-  });
-
-  const bucketSizeValue = useMemo(() => {
-    if (bucketSize?.bucketSize) {
-      return {
-        bucketSize: bucketSize.bucketSize,
-        intervalString: bucketSize.intervalString,
-      };
-    }
-  }, [bucketSize?.bucketSize, bucketSize?.intervalString]);
+  const bucketSize = useMemo(
+    () =>
+      calculateBucketSize({
+        start: absoluteStart,
+        end: absoluteEnd,
+      }),
+    [absoluteStart, absoluteEnd]
+  );
 
   const setRefetch = useCallback((ref) => {
     refetch.current = ref;
@@ -115,8 +107,8 @@ export function OverviewPage({ routeParams }: Props) {
               pageTitle: overviewPageTitle,
               rightSideItems: [
                 <DatePicker
-                  rangeFrom={relativeTime.start}
-                  rangeTo={relativeTime.end}
+                  rangeFrom={relativeStart}
+                  rangeTo={relativeEnd}
                   refreshInterval={refreshInterval}
                   refreshPaused={refreshPaused}
                   onTimeRangeRefresh={onTimeRangeRefresh}
@@ -144,8 +136,8 @@ export function OverviewPage({ routeParams }: Props) {
                 >
                   <AlertsTableTGrid
                     setRefetch={setRefetch}
-                    rangeFrom={relativeTime.start}
-                    rangeTo={relativeTime.end}
+                    rangeFrom={relativeStart}
+                    rangeTo={relativeEnd}
                     indexNames={indexNames}
                   />
                 </CasesContext>
@@ -153,7 +145,7 @@ export function OverviewPage({ routeParams }: Props) {
             </EuiFlexItem>
             <EuiFlexItem>
               {/* Data sections */}
-              {hasAnyData && <DataSections bucketSize={bucketSizeValue} />}
+              {hasAnyData && <DataSections bucketSize={bucketSize} />}
               <EmptySections />
             </EuiFlexItem>
             <EuiSpacer size="s" />
