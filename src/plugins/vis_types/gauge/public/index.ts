@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeDefinition } from 'src/plugins/visualizations/public';
-import { gaugeVisTypeDefinition } from './gauge';
-import { goalVisTypeDefinition } from './goal';
+import { VisTypeGaugePlugin } from './plugin';
 
-export { pieVisTypeDefinition } from './pie';
+export function plugin() {
+  return new VisTypeGaugePlugin();
+}
 
-export const visLibVisTypeDefinitions: Array<VisTypeDefinition<any>> = [
-  gaugeVisTypeDefinition,
-  goalVisTypeDefinition,
-];
+export type { VisTypeGaugePluginSetup, VisTypeGaugePluginStart } from './types';
+
+export { gaugeVisType, goalVisType } from './vis_type';
