@@ -13,4 +13,5 @@ export {
   getAccessorByDimension,
   validateAccessor,
   getColumnByAccessor,
+  isVisDimension,
 } from './accessors';
