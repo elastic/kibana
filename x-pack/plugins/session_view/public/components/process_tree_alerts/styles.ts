@@ -26,6 +26,14 @@ export const useStyles = () => {
       borderRadius: border.radius.medium,
       maxWidth: 800,
       backgroundColor: 'white',
+      '&>div': {
+        borderTop: border.thin,
+        marginTop: size.m,
+        paddingTop: size.m,
+        '&:first-child': {
+          borderTop: 'none',
+        },
+      },
     };
 
     return {

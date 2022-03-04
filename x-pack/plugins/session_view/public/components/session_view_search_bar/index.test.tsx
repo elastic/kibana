@@ -23,13 +23,13 @@ describe('SessionViewSearchBar component', () => {
 
   it('handles a typed search query', async () => {
     const mockSetSearchQuery = jest.fn((query) => query);
-    const mockSetSelectedProcess = jest.fn((process) => process);
+    const mockOnProcessSelected = jest.fn((process) => process);
 
     renderResult = mockedContext.render(
       <SessionViewSearchBar
         searchQuery="ls"
         searchResults={[]}
-        setSelectedProcess={mockSetSelectedProcess}
+        onProcessSelected={mockOnProcessSelected}
         setSearchQuery={mockSetSearchQuery}
       />
     );
@@ -53,13 +53,13 @@ describe('SessionViewSearchBar component', () => {
     const processMock3 = { ...processMock };
     const mockResults = [processMock, processMock2, processMock3];
     const mockSetSearchQuery = jest.fn((query) => query);
-    const mockSetSelectedProcess = jest.fn((process) => process);
+    const mockOnProcessSelected = jest.fn((process) => process);
 
     renderResult = mockedContext.render(
       <SessionViewSearchBar
         searchQuery="ls"
         searchResults={mockResults}
-        setSelectedProcess={mockSetSelectedProcess}
+        onProcessSelected={mockOnProcessSelected}
         setSearchQuery={mockSetSearchQuery}
       />
     );
@@ -87,9 +87,9 @@ describe('SessionViewSearchBar component', () => {
     // 1. searchResults is set so auto select first item
     // 2. next button hit, so call with 2nd item
     // 3. search changed, so call with first result.
-    expect(mockSetSelectedProcess.mock.calls.length).toBe(3);
-    expect(mockSetSelectedProcess.mock.results[0].value).toEqual(processMock);
-    expect(mockSetSelectedProcess.mock.results[1].value).toEqual(processMock2);
-    expect(mockSetSelectedProcess.mock.results[1].value).toEqual(processMock);
+    expect(mockOnProcessSelected.mock.calls.length).toBe(3);
+    expect(mockOnProcessSelected.mock.results[0].value).toEqual(processMock);
+    expect(mockOnProcessSelected.mock.results[1].value).toEqual(processMock2);
+    expect(mockOnProcessSelected.mock.results[1].value).toEqual(processMock);
   });
 });

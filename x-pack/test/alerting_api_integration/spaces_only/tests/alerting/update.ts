@@ -32,13 +32,15 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         tags: ['bar'],
         params: {
           foo: true,
+          risk_score: 40,
+          severity: 'medium',
         },
         schedule: { interval: '12s' },
         actions: [],
         throttle: '1m',
         notify_when: 'onThrottleInterval',
       };
-      const response = await supertest
+      let response = await supertest
         .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send(updatedData)
@@ -67,6 +69,17 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
         Date.parse(response.body.created_at)
       );
+
+      response = await supertest.get(
+        `${getUrlPrefix(
+          Spaces.space1.id
+        )}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
+      );
+
+      expect(response.body.data[0].mapped_params).to.eql({
+        risk_score: 40,
+        severity: '40-medium',
+      });
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -126,6 +139,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           throttle: '1m',
           notifyWhen: 'onThrottleInterval',
         };
+
         const response = await supertest
           .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
           .set('kbn-xsrf', 'foo')

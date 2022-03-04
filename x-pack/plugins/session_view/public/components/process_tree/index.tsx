@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ProcessTreeNode } from '../process_tree_node';
@@ -146,25 +146,17 @@ export const ProcessTree = ({
     }
   }, [sessionLeader, onProcessSelected, selectedProcess]);
 
-  function renderLoadMoreButton(text: JSX.Element, func: FetchFunction) {
-    return (
-      <EuiButton fullWidth onClick={func} isLoading={isFetching}>
-        {text}
-      </EuiButton>
-    );
-  }
-  console.log({sessionLeader});
   return (
     <div
       ref={scrollerRef}
       css={styles.scroller}
       data-test-subj="sessionView:sessionViewProcessTree"
     >
-      {hasPreviousPage &&
-        renderLoadMoreButton(
-          <FormattedMessage id="xpack.sessionView.loadPrevious" defaultMessage="Load previous" />,
-          fetchPreviousPage
-        )}
+      {hasPreviousPage && (
+        <EuiButton fullWidth onClick={fetchPreviousPage} isLoading={isFetching}>
+          <FormattedMessage id="xpack.sessionView.loadPrevious" defaultMessage="Load previous" />
+        </EuiButton>
+      )}
       {sessionLeader && (
         <ProcessTreeNode
           isSessionLeader
@@ -177,11 +169,11 @@ export const ProcessTree = ({
         ref={selectionAreaRef}
         css={styles.selectionArea}
       />
-      {hasNextPage &&
-        renderLoadMoreButton(
-          <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />,
-          fetchNextPage
-        )}
+      {hasNextPage && (
+        <EuiButton fullWidth onClick={fetchNextPage} isLoading={isFetching}>
+          <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />
+        </EuiButton>
+      )}
     </div>
   );
 };

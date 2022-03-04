@@ -12,21 +12,8 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 // Initializing react-query
 const queryClient = new QueryClient();
 
-const SessionViewTableProcessTreeLazy = lazy(
-  () => import('../components/session_view_table_process_tree')
-);
 const SessionViewLazy = lazy(() => import('../components/session_view'));
-export const getSessionViewTableProcessTreeLazy = ({
-  onOpenSessionView,
-}: {
-  onOpenSessionView: (eventId: string) => void;
-}) => {
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <SessionViewTableProcessTreeLazy onOpenSessionView={onOpenSessionView} />
-    </Suspense>
-  );
-};
+
 export const getSessionViewLazy = (sessionEntityId: string) => {
   return (
     <QueryClientProvider client={queryClient}>

@@ -46,7 +46,6 @@ export const buildProcessTree = (
   events.forEach((event) => {
     const process = processMap[event.process.entity_id];
     const parentProcess = processMap[event.process.parent?.entity_id];
-    console.log({process, parentProcess});
     // if session leader, or process already has a parent, return
     if (process.id === sessionEntityId || process.parent) {
       return;
@@ -74,8 +73,7 @@ export const buildProcessTree = (
 
   // with this new page of events processed, lets try re-parent any orphans
   orphans?.forEach((process) => {
-    const parentProcessId = process.getDetails()?.process.parent.entity_id;
-    const parentProcess = parentProcessId ? processMap[parentProcessId] : null;
+    const parentProcess = processMap[process.getDetails().process.parent.entity_id];
 
     if (parentProcess) {
       process.parent = parentProcess; // handy for recursive operations (like auto expand)
@@ -132,7 +130,7 @@ export const autoExpandProcessTree = (processMap: ProcessMap) => {
   for (const processId of Object.keys(processMap)) {
     const process = processMap[processId];
 
-    if (process.events.length > 0 && (process.searchMatched || process.isUserEntered())) {
+    if (process.searchMatched || process.isUserEntered()) {
       let { parent } = process;
       const parentIdSet = new Set<string>();
 
@@ -155,10 +153,10 @@ export const processNewEvents = (
   backwardDirection: boolean = false
 ): [ProcessMap, Process[]] => {
   if (!events || events.length === 0) {
-    return [eventsProcessMap, []];
+    return [eventsProcessMap, orphans];
   }
 
-  const updatedProcessMap = autoExpandProcessTree(updateProcessMap(eventsProcessMap, events));
+  const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
   const newOrphans = buildProcessTree(
     updatedProcessMap,
     events,
@@ -167,5 +165,5 @@ export const processNewEvents = (
     backwardDirection
   );
 
-  return [updatedProcessMap, newOrphans];
+  return [autoExpandProcessTree(updatedProcessMap), newOrphans];
 };

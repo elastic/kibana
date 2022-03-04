@@ -14,7 +14,7 @@ interface SessionViewSearchBarDeps {
   searchQuery: string;
   setSearchQuery(val: string): void;
   searchResults: Process[] | null;
-  setSelectedProcess(process: Process): void;
+  onProcessSelected(process: Process): void;
 }
 
 /**
@@ -23,7 +23,7 @@ interface SessionViewSearchBarDeps {
 export const SessionViewSearchBar = ({
   searchQuery,
   setSearchQuery,
-  setSelectedProcess,
+  onProcessSelected,
   searchResults,
 }: SessionViewSearchBarDeps) => {
   const styles = useStyles();
@@ -44,11 +44,13 @@ export const SessionViewSearchBar = ({
     if (searchResults) {
       const process = searchResults[selectedResult];
 
-      setSelectedProcess(process);
+      if (process) {
+        onProcessSelected(process);
+      }
     }
-  }, [searchResults, setSelectedProcess, selectedResult]);
+  }, [searchResults, onProcessSelected, selectedResult]);
 
-  const showPagination = searchResults?.length;
+  const showPagination = !!searchResults?.length;
 
   return (
     <div data-test-subj="sessionView:searchInput" css={{ position: 'relative' }}>

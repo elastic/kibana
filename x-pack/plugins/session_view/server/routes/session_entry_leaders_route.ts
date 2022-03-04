@@ -21,41 +21,17 @@ export const sessionEntryLeadersRoute = (router: IRouter) => {
     async (context, request, response) => {
       const client = context.core.elasticsearch.client.asCurrentUser;
       const { id } = request.query;
-      try {
-        const result = await client.search({
-          index: PROCESS_EVENTS_INDEX,
-          body: {
-            // only return 1 match at most
-            size: 1,
-            query: {
-              bool: {
-                filter: [
-                  {
-                    // only return documents with the matching _id
-                    ids: {
-                      values: id,
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
-        const docs = result.hits.hits;
-        if (docs.length > 0) {
-          return response.ok({
-            body: {
-              session_entry_leader: docs[0]._source,
-            },
-          });
-        } else {
-          return response.notFound();
-        }
-      } catch (error) {
-        console.log(error.toString());
-        debugger;
-        return response.customError({ statusCode: 501, body: { message: 'bullshit' } });
-      }
+
+      const result = await client.get({
+        index: PROCESS_EVENTS_INDEX,
+        id,
+      });
+
+      return response.ok({
+        body: {
+          session_entry_leader: result?._source,
+        },
+      });
     }
   );
 };

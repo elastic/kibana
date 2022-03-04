@@ -152,7 +152,7 @@ export interface Process {
   getAlerts(): ProcessEvent[];
   hasExec(): boolean;
   getOutput(): string;
-  getDetails(): ProcessEvent | null;
+  getDetails(): ProcessEvent;
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
   getChildren(verboseMode: boolean): Process[];
