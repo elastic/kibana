@@ -11,7 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { connect } from 'react-redux';
-import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
+import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
   GraphState,
@@ -19,6 +19,7 @@ import {
   requestDatasource,
   IndexpatternDatasource,
   submitSearch,
+  selectedFieldsSelector,
 } from '../state_management';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
@@ -28,6 +29,7 @@ import {
   IDataPluginServices,
   Query,
 } from '../../../../../src/plugins/data/public';
+import { TooltipWrapper } from './tooltip_wrapper';
 
 export interface SearchBarProps {
   isLoading: boolean;
@@ -44,6 +46,7 @@ export interface SearchBarProps {
 
 export interface SearchBarStateProps {
   currentDatasource?: IndexpatternDatasource;
+  selectedFields: WorkspaceField[];
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   submit: (searchTerm: string) => void;
 }
@@ -71,6 +74,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     currentIndexPattern,
     currentDatasource,
     indexPatternProvider,
+    selectedFields,
     submit,
     onIndexPatternSelected,
     confirmWipeWorkspace,
@@ -167,14 +171,27 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            type="submit"
-            disabled={isLoading || !currentIndexPattern}
-            data-test-subj="graph-explore-button"
+          <TooltipWrapper
+            condition={!currentIndexPattern || !selectedFields.length}
+            tooltipContent={
+              !currentIndexPattern
+                ? i18n.translate('xpack.graph.bar.exploreLabelNoIndexPattern', {
+                    defaultMessage: 'Select a data source',
+                  })
+                : i18n.translate('xpack.graph.bar.exploreLabelNoFields', {
+                    defaultMessage: 'Select at least one field',
+                  })
+            }
           >
-            {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Graph' })}
-          </EuiButton>
+            <EuiButton
+              fill
+              type="submit"
+              disabled={isLoading || !currentIndexPattern || !selectedFields.length}
+              data-test-subj="graph-explore-button"
+            >
+              {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Graph' })}
+            </EuiButton>
+          </TooltipWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     </form>
@@ -187,6 +204,7 @@ export const SearchBar = connect(
     return {
       currentDatasource:
         datasource.current.type === 'indexpattern' ? datasource.current : undefined,
+      selectedFields: selectedFieldsSelector(state),
     };
   },
   (dispatch) => ({

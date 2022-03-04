@@ -67,9 +67,10 @@ const mapEsQuerySortKey = (sort: readonly EsQuerySortValue[]): EsQuerySortValue[
   }, []);
 
 const showResponseErrorToast =
-  ({ toasts: { addDanger } }: CoreStart['notifications']) =>
+  ({ toasts }: CoreStart['notifications']) =>
   (error: unknown): void => {
-    addDanger(extractErrorMessage(error, TEXT.SEARCH_FAILED));
+    if (error instanceof Error) toasts.addError(error, { title: TEXT.SEARCH_FAILED });
+    else toasts.addDanger(extractErrorMessage(error, TEXT.SEARCH_FAILED));
   };
 
 const extractFindings = ({
