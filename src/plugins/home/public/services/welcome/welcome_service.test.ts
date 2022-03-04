@@ -27,6 +27,17 @@ describe('WelcomeService', () => {
 
     test('it should allow registering multiple onRendered listeners', () => {
       const onRendered = jest.fn();
+      const onRendered2 = jest.fn();
+      welcomeServiceSetup.registerOnRendered(onRendered);
+      welcomeServiceSetup.registerOnRendered(onRendered2);
+
+      welcomeService.onRendered();
+      expect(onRendered).toHaveBeenCalledTimes(1);
+      expect(onRendered2).toHaveBeenCalledTimes(1);
+    });
+
+    test('if the same handler is registered twice, it is called twice', () => {
+      const onRendered = jest.fn();
       welcomeServiceSetup.registerOnRendered(onRendered);
       welcomeServiceSetup.registerOnRendered(onRendered);
 
