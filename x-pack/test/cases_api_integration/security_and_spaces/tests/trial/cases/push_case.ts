@@ -33,6 +33,7 @@ import {
   getConnectorMappingsFromES,
   getCase,
   getServiceNowSimulationServer,
+  createConfiguration,
 } from '../../../../common/lib/utils';
 import { CaseConnector, CaseStatuses } from '../../../../../../plugins/cases/common/api';
 import {
@@ -299,7 +300,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should push a case that the user has permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
-          supertest,
+          supertest: supertestWithoutAuth,
           serviceNowSimulatorURL,
           actionsRemover,
           auth: superUserSpace1Auth,
@@ -315,7 +316,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should not push a case that the user does not have permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
-          supertest,
+          supertest: supertestWithoutAuth,
           serviceNowSimulatorURL,
           actionsRemover,
           auth: superUserSpace1Auth,
@@ -336,7 +337,7 @@ export default ({ getService }: FtrProviderContext): void => {
           user.username
         } with role(s) ${user.roles.join()} - should NOT push a case`, async () => {
           const { postedCase, connector } = await createCaseWithConnector({
-            supertest,
+            supertest: supertestWithoutAuth,
             serviceNowSimulatorURL,
             actionsRemover,
             auth: superUserSpace1Auth,
@@ -354,7 +355,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should not push a case in a space that the user does not have permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
-          supertest,
+          supertest: supertestWithoutAuth,
           serviceNowSimulatorURL,
           actionsRemover,
           auth: { user: superUser, space: 'space2' },
@@ -367,6 +368,59 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: secOnly, space: 'space2' },
           expectedHttpCode: 403,
         });
+      });
+
+      it('should respect closure options of the current owner when pushing', async () => {
+        await createConfiguration(
+          supertestWithoutAuth,
+          {
+            ...getConfigurationRequest(),
+            owner: 'securitySolutionFixture',
+            closure_type: 'close-by-user',
+          },
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
+
+        await createConfiguration(
+          supertestWithoutAuth,
+          {
+            ...getConfigurationRequest(),
+            owner: 'observabilityFixture',
+            closure_type: 'close-by-pushing',
+          },
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
+
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest: supertestWithoutAuth,
+          serviceNowSimulatorURL,
+          actionsRemover,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await pushCase({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        const theCase = await getCase({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          includeComments: false,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        expect(theCase.status).to.eql('open');
       });
     });
   });

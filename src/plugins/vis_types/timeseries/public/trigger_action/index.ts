@@ -16,6 +16,7 @@ import { getDataSourceInfo } from './get_datasource_info';
 import { getFieldType } from './get_field_type';
 import { getSeries } from './get_series';
 import { getYExtents } from './get_extents';
+import { getFieldsForTerms } from '../../common/fields_utils';
 
 const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];
 
@@ -99,13 +100,21 @@ export const triggerTSVBtoLensConfiguration = async (
     }
 
     const palette = layer.palette as PaletteOutput;
+    const splitFields = getFieldsForTerms(layer.terms_field);
 
     // in case of terms in a date field, we want to apply the date_histogram
     let splitWithDateHistogram = false;
-    if (layer.terms_field && layer.split_mode === 'terms') {
-      const fieldType = await getFieldType(indexPatternId, layer.terms_field);
-      if (fieldType === 'date') {
-        splitWithDateHistogram = true;
+    if (layer.terms_field && layer.split_mode === 'terms' && splitFields) {
+      for (const f of splitFields) {
+        const fieldType = await getFieldType(indexPatternId, f);
+
+        if (fieldType === 'date') {
+          if (splitFields.length === 1) {
+            splitWithDateHistogram = true;
+          } else {
+            return null;
+          }
+        }
       }
     }
 
@@ -114,7 +123,7 @@ export const triggerTSVBtoLensConfiguration = async (
       timeFieldName: timeField,
       chartType,
       axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
-      ...(layer.terms_field && { splitField: layer.terms_field }),
+      ...(layer.terms_field && { splitFields }),
       splitWithDateHistogram,
       ...(layer.split_mode !== 'everything' && { splitMode: layer.split_mode }),
       ...(splitFilters.length > 0 && { splitFilters }),

@@ -10,6 +10,7 @@ import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
 import { MessageChannel, MessagePort, Worker } from 'worker_threads';
 import type { Layout } from '../../../../../screenshotting/server';
+import { PdfWorkerOutOfMemoryError } from '../../../../common/errors';
 import {
   headingHeight,
   pageMarginBottom,
@@ -20,7 +21,6 @@ import {
 } from './constants';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
-import { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
 import type { GeneratePdfRequest, GeneratePdfResponse, WorkerData } from './worker';
 
 // Ensure that all dependencies are included in the release bundle.
