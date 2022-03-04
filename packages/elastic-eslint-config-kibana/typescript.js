@@ -230,6 +230,7 @@ module.exports = {
           'no-unused-expressions': 'off',
           '@typescript-eslint/no-unused-expressions': 'error',
           'no-unused-labels': 'error',
+          '@typescript-eslint/no-unused-vars':'error',
           'no-var': 'error',
           'object-shorthand': 'error',
           'one-var': [ 'error', 'never' ],
