@@ -39,7 +39,6 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackagePolicyPackage,
-  RegistryPackage,
 } from '../../common';
 import { packageToPackagePolicy } from '../../common';
 
@@ -50,9 +49,11 @@ import {
   updatePackageInputs,
   packagePolicyService,
   _applyIndexPrivileges,
+  _compilePackagePolicyInputs,
 } from './package_policy';
 import { appContextService } from './app_context';
-import { fetchInfo } from './epm/registry';
+
+import { getPackageInfo } from './epm/packages';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -113,10 +114,6 @@ async function mockedGetPackageInfo(params: any) {
   return Promise.resolve(pkg);
 }
 
-function mockedRegistryInfo(): RegistryPackage {
-  return {} as RegistryPackage;
-}
-
 jest.mock('./epm/packages/assets', () => {
   return {
     getAssetsData: mockedGetAssetsData,
@@ -125,7 +122,7 @@ jest.mock('./epm/packages/assets', () => {
 
 jest.mock('./epm/packages', () => {
   return {
-    getPackageInfo: mockedGetPackageInfo,
+    getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
     getInstallation: mockedGetInstallation,
   };
 });
@@ -170,18 +167,12 @@ jest.mock('./upgrade_sender', () => {
   };
 });
 
-const mockedFetchInfo = fetchInfo as jest.Mock<ReturnType<typeof fetchInfo>>;
-
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
 describe('Package policy service', () => {
-  beforeEach(() => {
-    mockedFetchInfo.mockResolvedValue({} as RegistryPackage);
-  });
   describe('_compilePackagePolicyInputs', () => {
     it('should work with config variables from the stream', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -244,8 +235,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with a two level dataset name', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -297,8 +287,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with config variables at the input level', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -361,8 +350,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with config variables at the package level', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -430,8 +418,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with an input with a template and no streams', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [],
           policy_templates: [
@@ -473,8 +460,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with an input with a template and streams', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           data_streams: [
             {
@@ -579,8 +565,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with a package without input', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           policy_templates: [
             {
@@ -596,8 +581,7 @@ describe('Package policy service', () => {
     });
 
     it('should work with a package with a empty inputs array', async () => {
-      const inputs = await packagePolicyService._compilePackagePolicyInputs(
-        mockedRegistryInfo(),
+      const inputs = await _compilePackagePolicyInputs(
         {
           policy_templates: [
             {
@@ -906,14 +890,16 @@ describe('Package policy service', () => {
         ...mockPackagePolicy,
         inputs: [],
       };
-
-      mockedFetchInfo.mockResolvedValue({
-        elasticsearch: {
-          privileges: {
-            cluster: ['monitor'],
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
           },
-        },
-      } as RegistryPackage);
+        } as PackageInfo);
+      });
 
       savedObjectsClient.get.mockResolvedValue({
         id: 'test',
@@ -1704,8 +1690,8 @@ describe('Package policy service', () => {
       });
     });
 
-    describe('when an input or stream is disabled on the original policy object', () => {
-      it('remains disabled on the resulting policy object', () => {
+    describe('when an input or stream is disabled by default in the package', () => {
+      it('allow preconfiguration to enable it', () => {
         const basePackagePolicy: NewPackagePolicy = {
           name: 'base-package-policy',
           description: 'Base Package Policy',
@@ -1914,13 +1900,13 @@ describe('Package policy service', () => {
         expect(template2Inputs).toHaveLength(1);
 
         const logsInput = template1Inputs?.find((input) => input.type === 'logs');
-        expect(logsInput?.enabled).toBe(false);
+        expect(logsInput?.enabled).toBe(true);
 
         const logfileStream = logsInput?.streams.find(
           (stream) => stream.data_stream.type === 'logfile'
         );
 
-        expect(logfileStream?.enabled).toBe(false);
+        expect(logfileStream?.enabled).toBe(true);
       });
     });
 

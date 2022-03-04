@@ -95,16 +95,16 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
         if (state.phase === 'issue') {
           log.error(`webpack compile errors`);
-          log.indent(4);
-          for (const b of state.compilerStates) {
-            if (b.type === 'compiler issue') {
-              log.error(`[${b.bundleId}] build`);
-              log.indent(4);
-              log.error(b.failure);
-              log.indent(-4);
+          log.indent(4, () => {
+            for (const b of state.compilerStates) {
+              if (b.type === 'compiler issue') {
+                log.error(`[${b.bundleId}] build`);
+                log.indent(4, () => {
+                  log.error(b.failure);
+                });
+              }
             }
-          }
-          log.indent(-4);
+          });
           return;
         }
 

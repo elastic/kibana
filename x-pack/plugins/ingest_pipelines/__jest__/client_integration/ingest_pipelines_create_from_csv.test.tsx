@@ -66,7 +66,7 @@ describe('<PipelinesCreateFromCsv />', () => {
       expect(find('pageTitle').text()).toEqual('Create pipeline from CSV');
 
       expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Create pipeline docs');
+      expect(find('documentationLink').text()).toBe('CSV to pipeline docs');
     });
 
     describe('form validation', () => {

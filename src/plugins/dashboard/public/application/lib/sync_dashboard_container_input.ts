@@ -20,6 +20,7 @@ import {
   setFullScreenMode,
   setPanels,
   setQuery,
+  setTimeRange,
 } from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
 import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
@@ -77,6 +78,11 @@ export const syncDashboardContainerInput = (
       )
       .subscribe(() => {
         applyStateChangesToContainer({ ...syncDashboardContainerProps, force: forceRefresh });
+
+        // If this dashboard has a control group, reload the control group when the refresh button is manually pressed.
+        if (forceRefresh && dashboardContainer.controlGroup) {
+          dashboardContainer.controlGroup.reload();
+        }
         forceRefresh = false;
       })
   );
@@ -109,6 +115,10 @@ export const applyContainerChangesToState = ({
 
   if (!_.isEqual(input.query, latestState.query)) {
     dispatchDashboardStateChange(setQuery(input.query));
+  }
+
+  if (input.timeRestore && !_.isEqual(input.timeRange, latestState.timeRange)) {
+    dispatchDashboardStateChange(setTimeRange(input.timeRange));
   }
 
   if (!_.isEqual(input.expandedPanelId, latestState.expandedPanelId)) {

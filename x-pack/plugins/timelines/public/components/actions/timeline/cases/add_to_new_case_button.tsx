@@ -42,6 +42,8 @@ const AddToNewCaseButtonComponent: React.FC<AddToNewCaseButtonProps> = ({
     onSuccess: onCaseSuccess,
   });
 
+  // TODO To be further refactored and moved to cases plugins
+  // https://github.com/elastic/kibana/issues/123183
   const handleClick = () => {
     // close the popover
     if (onClose) {

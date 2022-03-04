@@ -1,6 +1,13 @@
 name: Add QA labels to Fleet issues
 on:
-  pull_request:
+  # pull_request_target allows running actions on PRs from forks with a read/write GITHUB_TOKEN, but it will not allow
+  # running workflows defined in the PRs itself, only workflows already merged into the target branch. This avoids
+  # potential vulnerabilities that could allow someone to open a PR and retrieve secrets.
+  # It's important that this workflow never runs any checkout actions which could be used to circumvent this protection.
+  # See these links for more information:
+  # - https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/ 
+  # - https://nathandavison.com/blog/github-actions-and-the-threat-of-malicious-pull-requests
+  pull_request_target:
     types:
       - closed
 
@@ -12,7 +19,7 @@ jobs:
       github.event.pull_request.merged_at &&
       contains(github.event.pull_request.labels.*.name, 'Team:Fleet')
     outputs:
-      matrix: ${{ steps.issues_to_label.outputs.value }}
+      issue_ids: ${{ steps.issues_to_label.outputs.value }}
       label_ids: ${{ steps.label_ids.outputs.value }}
     steps:
       - uses: octokit/graphql-action@v2.x
@@ -38,7 +45,7 @@ jobs:
             }
           prnumber: ${{ github.event.number }}
         env:
-          GITHUB_TOKEN: ${{ secrets.FLEET_TECH_KIBANA_USER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: sergeysova/jq-action@v2
         id: issues_to_label
         with:
@@ -59,22 +66,28 @@ jobs:
   label_issues:
     needs: fetch_issues_to_label
     runs-on: ubuntu-latest
-    # For each issue closed by the PR run this job
+
+    # For each issue closed by the PR x each label to apply, run this job
+    if: |
+      fromJSON(needs.fetch_issues_to_label.outputs.issue_ids).length > 0 &&
+      fromJSON(needs.fetch_issues_to_label.outputs.label_ids).length > 0
     strategy:
       matrix:
-        issueNodeId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.matrix) }}
-    name: Label issue ${{ matrix.issueNodeId }}
+        issueId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.issue_ids) }}
+        labelId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.label_ids) }}
+
+    name: Label issue ${{ matrix.issueId }} with ${{ matrix.labelId }}
     steps:
       - uses: octokit/graphql-action@v2.x
         id: add_labels_to_closed_issue
         with:
           query: |
-            mutation add_label($issueid:String!, $labelids:[String!]!) {
-              addLabelsToLabelable(input: {labelableId: $issueid, labelIds: $labelids}) {
+            mutation add_label($issueid: ID!, $labelid:ID!) {
+              addLabelsToLabelable(input: {labelableId: $issueid, labelIds: [$labelid]}) {
                 clientMutationId
               }
             }
-          issueid: ${{ matrix.issueNodeId }}
-          labelids: ${{ needs.fetch_issues_to_label.outputs.label_ids }}
+          issueid: ${{ matrix.issueId }}
+          labelid: ${{ matrix.labelId }}
         env:
-          GITHUB_TOKEN: ${{ secrets.FLEET_TECH_KIBANA_USER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

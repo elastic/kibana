@@ -25,11 +25,21 @@ import { validateCiGroupTags } from './validate_ci_group_tags';
  *  @param  {EsVersion} esVersion
  *  @return {Promise<Mocha>}
  */
-export async function setupMocha(lifecycle, log, config, providers, esVersion) {
+export async function setupMocha(
+  lifecycle,
+  log,
+  config,
+  providers,
+  esVersion,
+  reporter,
+  reporterOptions
+) {
   // configure mocha
   const mocha = new Mocha({
     ...config.get('mochaOpts'),
-    reporter: await providers.loadExternalService('mocha reporter', MochaReporterProvider),
+    reporter:
+      reporter || (await providers.loadExternalService('mocha reporter', MochaReporterProvider)),
+    reporterOptions,
   });
 
   // global beforeEach hook in root suite triggers before all others
