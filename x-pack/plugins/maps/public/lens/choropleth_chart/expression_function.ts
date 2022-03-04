@@ -54,10 +54,6 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
       types: ['string'],
       help: 'Value accessor identifies the value column',
     },
-    isPreview: {
-      types: ['boolean'],
-      help: 'When true, display as lens preview',
-    },
   },
   inputTypes: ['lens_multitable'],
   fn(data, args) {

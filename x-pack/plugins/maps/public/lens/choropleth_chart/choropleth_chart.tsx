@@ -21,7 +21,6 @@ import {
   VECTOR_STYLES,
 } from '../../../common';
 import { ChoroplethChartProps } from './types';
-import { Icon } from './icon';
 import { getEmsSuggestion } from './get_ems_suggestion';
 import { PassiveMap } from '../passive_map';
 import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
@@ -41,10 +40,6 @@ export function ChoroplethChart({
   emsFileLayers,
   mapEmbeddableFactory,
 }: Props) {
-  if (args.isPreview) {
-    return <Icon />;
-  }
-
   if (!args.regionAccessor || !args.valueAccessor) {
     return null;
   }

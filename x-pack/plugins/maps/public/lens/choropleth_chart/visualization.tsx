@@ -151,7 +151,6 @@ export const getVisualization = ({
           function: 'lens_choropleth_chart',
           arguments: {
             title: [attributes?.title || ''],
-            isPreview: [false],
             layerId: [state.layerId],
             emsField: state.emsField ? [state.emsField] : [],
             emsLayerId: state.emsLayerId ? [state.emsLayerId] : [],
@@ -164,18 +163,7 @@ export const getVisualization = ({
   },
 
   toPreviewExpression: (state, datasourceLayers) => {
-    return {
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: 'lens_choropleth_chart',
-          arguments: {
-            isPreview: [true],
-          },
-        },
-      ],
-    };
+    return null;
   },
 
   setDimension({ columnId, groupId, prevState }) {

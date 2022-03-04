@@ -13,7 +13,6 @@ export interface ChoroplethChartState {
   emsField?: string;
   regionAccessor?: string;
   valueAccessor?: string;
-  isPreview?: boolean;
 }
 
 export interface ChoroplethChartConfig extends ChoroplethChartState {
