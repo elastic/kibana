@@ -13,6 +13,8 @@ import apm, { Outcome, Span, Transaction } from 'elastic-apm-node';
 import { setTimeout } from 'timers/promises';
 import playwright, { ChromiumBrowser, Page, BrowserContext } from 'playwright';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
+import { getUserActionProfile } from '../tests/user_action_profiles';
+
 type StorageState = Awaited<ReturnType<BrowserContext['storageState']>>;
 
 apm.start({
@@ -52,14 +54,6 @@ export class PerformanceTestingService extends FtrService {
     });
   }
 
-  private endTransaction(result: string) {
-    if (this.currentTransaction === undefined) {
-      throw new Error(`No transaction started`);
-    }
-    this.currentTransaction?.end(result);
-    this.currentTransaction = undefined;
-  }
-
   private async withTransaction<T>(name: string, block: () => Promise<T>) {
     try {
       if (this.currentTransaction !== undefined) {
@@ -69,35 +63,40 @@ export class PerformanceTestingService extends FtrService {
       }
       this.currentTransaction = apm.startTransaction(name, 'performance');
       const result = await block();
-      this.endTransaction('success');
+      if (this.currentTransaction === undefined) {
+        throw new Error(`No transaction started`);
+      }
+      this.currentTransaction?.end('success');
+      this.currentTransaction = undefined;
       return result;
     } catch (e) {
-      this.endTransaction('failure');
+      if (this.currentTransaction === undefined) {
+        throw new Error(`No transaction started`);
+      }
+      this.currentTransaction?.end('failure');
+      this.currentTransaction = undefined;
       throw e;
     }
   }
 
-  private startSpan(name: string, type?: string) {
-    this.currentSpanStack.unshift(apm.startSpan(name, type ?? null));
-  }
-
-  private endSpan(outcome: Outcome) {
-    if (this.currentSpanStack.length === 0) {
-      throw new Error(`No Span started`);
-    }
-    const span = this.currentSpanStack.shift();
-    span?.setOutcome(outcome);
-    span?.end();
-  }
-
   private async withSpan<T>(name: string, type: string | undefined, block: () => Promise<T>) {
     try {
-      this.startSpan(name, type);
+      this.currentSpanStack.unshift(apm.startSpan(name, type ?? null));
       const result = await block();
-      this.endSpan('success');
+      if (this.currentSpanStack.length === 0) {
+        throw new Error(`No Span started`);
+      }
+      const span = this.currentSpanStack.shift();
+      span?.setOutcome('success');
+      span?.end();
       return result;
     } catch (e) {
-      this.endSpan('failure');
+      if (this.currentSpanStack.length === 0) {
+        throw new Error(`No Span started`);
+      }
+      const span = this.currentSpanStack.shift();
+      span?.setOutcome('failure');
+      span?.end();
       throw e;
     }
   }
@@ -113,6 +112,8 @@ export class PerformanceTestingService extends FtrService {
     }
 
     await this.withSpan('initial login', undefined, async () => {
+      const { INPUT_DELAYS } = getUserActionProfile();
+
       const kibanaUrl = Url.format({
         protocol: this.config.get('servers.kibana.protocol'),
         hostname: this.config.get('servers.kibana.hostname'),
@@ -129,11 +130,9 @@ export class PerformanceTestingService extends FtrService {
       const passwordLocator = page.locator('[data-test-subj=loginPassword]');
       const submitButtonLocator = page.locator('[data-test-subj=loginSubmit]');
 
-      const noDelayOnUserActions = process.env.TEST_DONT_DELAY_USER_ACTIONS === 'true';
-
-      await usernameLocator?.type('elastic', { delay: noDelayOnUserActions ? 0 : 500 });
-      await passwordLocator?.type('changeme', { delay: noDelayOnUserActions ? 0 : 500 });
-      await submitButtonLocator?.click({ delay: noDelayOnUserActions ? 0 : 1000 });
+      await usernameLocator?.type('elastic', { delay: INPUT_DELAYS.TYPING });
+      await passwordLocator?.type('changeme', { delay: INPUT_DELAYS.TYPING });
+      await submitButtonLocator?.click({ delay: INPUT_DELAYS.MOUSE_CLICK });
 
       await page.waitForSelector('#headerUserMenu');
 
@@ -183,15 +182,15 @@ export class PerformanceTestingService extends FtrService {
     });
   }
 
-  public makePage(journeyName: string, { autoLogin }: { autoLogin?: boolean }) {
+  public makePage(journeyName: string) {
     const steps: Steps = [];
 
     it(journeyName, async () => {
       await this.withTransaction(`Journey ${journeyName}`, async () => {
         const browser = await this.getBrowserInstance();
         const context = await browser.newContext({
-          ...(autoLogin && { storageState: await this.getStorageState() }),
           viewport: { width: 1600, height: 1200 },
+          storageState: await this.getStorageState(),
         });
 
         const page = await context.newPage();

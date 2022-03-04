@@ -10,10 +10,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function promotionTrackingDashboard({ getService }: FtrProviderContext) {
   describe('promotion_tracking_dashboard', () => {
     const config = getService('config');
-    const playwright = getService('playwright');
+    const performance = getService('performance');
     const esArchiver = getService('esArchiver');
     const kibanaServer = getService('kibanaServer');
-    const { step } = playwright.makePage('promotion_tracking_dashboard', {
+    const { step } = performance.makePage('promotion_tracking_dashboard', {
       autoLogin: true,
     });
 

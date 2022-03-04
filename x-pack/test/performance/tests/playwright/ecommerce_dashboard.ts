@@ -10,10 +10,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ecommerceDashboard({ getService }: FtrProviderContext) {
   describe('ecommerce_dashboard', () => {
     const config = getService('config');
-    const playwright = getService('playwright');
+    const performance = getService('performance');
     const logger = getService('log');
 
-    const { step } = playwright.makePage('ecommerce_dashboard', { autoLogin: true });
+    const { step } = performance.makePage('ecommerce_dashboard', { autoLogin: true });
 
     step('Go to Sample Data Page', async ({ page }) => {
       const kibanaUrl = Url.format({
@@ -40,7 +40,7 @@ export default function ecommerceDashboard({ getService }: FtrProviderContext) {
     });
 
     step('Go to Ecommerce Dashboard', async ({ page }) => {
-      const viewdataBtn = page.locator('[aria-label="View Sample eCommerce orders"]');
+      const viewdataBtn = page.locator('[data-test-subj=launchSampleDataSetecommerce]>div>button');
       await viewdataBtn.click();
       const dashboardBtn = page.locator('text="Dashboard"');
       await dashboardBtn.click();

@@ -5,11 +5,22 @@
  * 2.0.
  */
 
-export const PROFILES = {
-  DEFAULT: {
+const PROFILES = {
+  CI: {
     INPUT_DELAYS: {
       TYPING: 500,
       MOUSE_CLICK: 1000,
     },
   },
+  DEVELOPMENT: {
+    INPUT_DELAYS: {
+      TYPING: 5,
+      MOUSE_CLICK: 5,
+    },
+  },
 };
+
+export function getUserActionProfile() {
+  const PROFILE = process.env.CI ? 'CI' : 'DEVELOPMENT';
+  return PROFILES[`${PROFILE}`];
+}

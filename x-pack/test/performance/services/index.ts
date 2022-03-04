@@ -13,5 +13,5 @@ export const services = {
   kibanaServer: functionalServices.kibanaServer,
   esArchiver: functionalServices.esArchiver,
   retry: functionalServices.retry,
-  playwright: PerformanceTestingService,
+  performance: PerformanceTestingService,
 };
