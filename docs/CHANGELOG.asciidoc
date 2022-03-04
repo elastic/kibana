@@ -140,6 +140,7 @@ Discover::
 * Improves the document explorer flyout {kibana-pull}120116[#120116]
 * Adds the ability to preserve *Discover* main route state in breadcrumb links {kibana-pull}119838[#119838]
 * Adds error state if chart loading fails {kibana-pull}119289[#119289]
+* Enable Field statistics table on by default {kibana-pull}124046[#124046]
 
 Elastic Security::
 For the Elastic Security 8.1.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -167,7 +168,6 @@ Lens & Visualizations::
 
 Machine Learning::
 * Adds missing document titles {kibana-pull}124125[#124125]
-* Enable Field statistics table on by default {kibana-pull}124046[#124046]
 * Synchronize Anomaly charts cursor position for X-axis with *Lens* visualizations in *Dashboard* {kibana-pull}123951[#123951]
 * Adds grouping to the side nav {kibana-pull}123805[#123805]
 * Adds empty states for the Jobs list pages {kibana-pull}123462[#123462]
