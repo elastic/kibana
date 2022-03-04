@@ -25,7 +25,6 @@ export const addsHostGeoCityNameToHeader = () => {
 };
 
 export const addsHostGeoCountryNameToHeader = () => {
-  cy.clock();
   cy.get(HOST_GEO_COUNTRY_NAME_CHECKBOX).check({
     force: true,
   });
@@ -45,7 +44,6 @@ export const opensInspectQueryModal = () => {
 };
 
 export const waitsForEventsToBeLoaded = () => {
-  cy.wait(0);
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
   cy.get(EVENTS_VIEWER_PAGINATION).should('exist');
