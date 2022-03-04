@@ -147,6 +147,4 @@ export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS = Object.freeze({
       defaultMessage: 'view all trusted apps',
     }
   ),
-  layoutAboutMessage:
-    'There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {app} other {apps}} associated with this policy. Click here to {link}',
 });

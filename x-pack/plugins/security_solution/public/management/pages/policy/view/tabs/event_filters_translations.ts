@@ -147,6 +147,4 @@ export const POLICY_ARTIFACT_EVENT_FILTERS_LABELS = Object.freeze({
       defaultMessage: 'view all event filters',
     }
   ),
-  layoutAboutMessage:
-    'There {count, plural, one {is} other {are}} {count} event {count, plural, =1 {filter} other {filters}} associated with this policy. Click here to {link}',
 });

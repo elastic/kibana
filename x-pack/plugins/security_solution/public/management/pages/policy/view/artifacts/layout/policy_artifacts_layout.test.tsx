@@ -26,6 +26,7 @@ import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/
 import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from '../../tabs/event_filters_translations';
 import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
 let mockedContext: AppContextTestRender;
@@ -35,6 +36,17 @@ const generator = new EndpointDocGenerator();
 let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
 let history: AppContextTestRender['history'];
 let getNewInstance: () => EventFiltersApiClient;
+
+const eventFiltersLabels = {
+  ...POLICY_ARTIFACT_EVENT_FILTERS_LABELS,
+  layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.policy.eventFilters.list.about"
+      defaultMessage="There {count, plural, one {is} other {are}} {count} event {count, plural, =1 {filter} other {filters}} associated with this policy. Click here to {link}"
+      values={{ count, link }}
+    />
+  ),
+};
 
 describe('Policy artifacts layout', () => {
   beforeEach(() => {
@@ -53,7 +65,7 @@ describe('Policy artifacts layout', () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsLayout
             policyItem={policyItem}
-            labels={POLICY_ARTIFACT_EVENT_FILTERS_LABELS}
+            labels={eventFiltersLabels}
             getExceptionsListApiClient={getNewInstance}
             searcheableFields={[...EVENT_FILTERS_SEARCHABLE_FIELDS]}
             getArtifactPath={getEventFiltersListPath}
@@ -72,7 +84,7 @@ describe('Policy artifacts layout', () => {
     const component = mockedContext.render(
       <PolicyArtifactsLayout
         policyItem={policyItem}
-        labels={POLICY_ARTIFACT_EVENT_FILTERS_LABELS}
+        labels={eventFiltersLabels}
         getExceptionsListApiClient={() =>
           EventFiltersApiClient.getInstance(mockedContext.coreStart.http)
         }

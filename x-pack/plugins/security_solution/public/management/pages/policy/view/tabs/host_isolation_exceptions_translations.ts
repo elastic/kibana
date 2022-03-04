@@ -161,6 +161,4 @@ export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS = Object.freeze({
       defaultMessage: 'view all host isolation exceptions',
     }
   ),
-  layoutAboutMessage:
-    'There {count, plural, one {is} other {are}} {count} host isolation {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}',
 });

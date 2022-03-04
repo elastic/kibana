@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 export const POLICY_ARTIFACT_LAYOUT_LABELS = Object.freeze({
@@ -23,6 +24,11 @@ export const POLICY_ARTIFACT_LAYOUT_LABELS = Object.freeze({
       defaultMessage: 'view all artifacts',
     }
   ),
-  layoutAboutMessage:
-    'There {count, plural, one {is} other {are}} {count} {count, plural, =1 {artifact} other {artifacts}} associated with this policy. Click here to {link}',
+  layoutAboutMessage: (count: number, _: React.ReactElement): React.ReactNode => {
+    return i18n.translate('xpack.securitySolution.endpoint.policy.artifacts.layout.about', {
+      defaultMessage:
+        'There {count, plural, one {is} other {are}} {count} {count, plural, =1 {artifact} other {artifacts}} associated with this policy. Click here to view all artifacts',
+      values: { count },
+    });
+  },
 });

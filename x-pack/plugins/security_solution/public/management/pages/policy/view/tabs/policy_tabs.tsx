@@ -7,6 +7,7 @@
 
 import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -89,6 +90,39 @@ export const PolicyTabs = React.memo(() => {
   }, [canSeeHostIsolationExceptions, history, isInHostIsolationExceptionsTab, policyId]);
 
   const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
+    const trustedAppsLabels = {
+      ...POLICY_ARTIFACT_TRUSTED_APPS_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.trustedApps.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {app} other {apps}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
+    const eventFiltersLabels = {
+      ...POLICY_ARTIFACT_EVENT_FILTERS_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.eventFilters.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} event {count, plural, =1 {filter} other {filters}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
+    const hostIsolationExceptionsLabels = {
+      ...POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} host isolation {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
     return {
       [PolicyTabKeys.SETTINGS]: {
         id: PolicyTabKeys.SETTINGS,
@@ -112,7 +146,7 @@ export const PolicyTabs = React.memo(() => {
             <EuiSpacer />
             <PolicyArtifactsLayout
               policyItem={policyItem}
-              labels={POLICY_ARTIFACT_TRUSTED_APPS_LABELS}
+              labels={trustedAppsLabels}
               getExceptionsListApiClient={() => TrustedAppsApiClient.getInstance(http)}
               searcheableFields={[...TRUSTED_APPS_SEARCHABLE_FIELDS]}
               getArtifactPath={getTrustedAppsListPath}
@@ -131,7 +165,7 @@ export const PolicyTabs = React.memo(() => {
             <EuiSpacer />
             <PolicyArtifactsLayout
               policyItem={policyItem}
-              labels={POLICY_ARTIFACT_EVENT_FILTERS_LABELS}
+              labels={eventFiltersLabels}
               getExceptionsListApiClient={() => EventFiltersApiClient.getInstance(http)}
               searcheableFields={[...EVENT_FILTERS_SEARCHABLE_FIELDS]}
               getArtifactPath={getEventFiltersListPath}
@@ -154,7 +188,7 @@ export const PolicyTabs = React.memo(() => {
                 <EuiSpacer />
                 <PolicyArtifactsLayout
                   policyItem={policyItem}
-                  labels={POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS}
+                  labels={hostIsolationExceptionsLabels}
                   getExceptionsListApiClient={() =>
                     HostIsolationExceptionsApiClient.getInstance(http)
                   }
