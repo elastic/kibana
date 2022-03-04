@@ -44,9 +44,9 @@ export const LegendDisplay = {
 } as const;
 
 export const layerTypes: Record<string, LayerType> = {
-  DATA: 'data',
-  REFERENCELINE: 'referenceLine',
-};
+  DATA: 'data' as const,
+  REFERENCELINE: 'referenceLine' as const,
+} as const;
 
 // might collide with user-supplied field names, try to make as unique as possible
 export const DOCUMENT_FIELD_NAME = '___records___';
