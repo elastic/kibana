@@ -297,7 +297,25 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
     });
 
     describe('startCustomCrawl', () => {
-      it('starts a custom crawl with the user set values', async () => {
+      it('can start a custom crawl for selected domains', async () => {
+        mount({
+          includeSitemapsInRobotsTxt: true,
+          maxCrawlDepth: 5,
+          selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
+        });
+        jest.spyOn(CrawlerLogic.actions, 'startCrawl');
+
+        CrawlCustomSettingsFlyoutLogic.actions.startCustomCrawl();
+        await nextTick();
+
+        expect(CrawlerLogic.actions.startCrawl).toHaveBeenCalledWith({
+          domain_allowlist: ['https://www.elastic.co', 'https://swiftype.com'],
+          max_crawl_depth: 5,
+          sitemap_discovery_disabled: false,
+        });
+      });
+
+      it('can start a custom crawl selected domains, sitemaps, and seed urls', async () => {
         mount({
           includeSitemapsInRobotsTxt: true,
           maxCrawlDepth: 5,
