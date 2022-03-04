@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from '@kbn/std';
 import yaml from 'js-yaml';
 import { pick, uniq } from 'lodash';
 
@@ -31,6 +32,42 @@ import { unpackBufferEntries } from './index';
 
 const MANIFESTS: Record<string, Buffer> = {};
 const MANIFEST_NAME = 'manifest.yml';
+
+const DEFAULT_RELEASE_VALUE = 'ga';
+
+const DEFAULT_INGEST_PIPELINE_VALUE = 'default';
+const DEFAULT_INGEST_PIPELINE_FILE_NAME_YML = 'default.yml';
+const DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON = 'default.json';
+
+// Borrowed from https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/utils/expand_dotted.ts
+// With some alterations around non-object values
+const expandDottedField = (dottedFieldName: string, val: unknown): object => {
+  const parts = dottedFieldName.split('.');
+
+  if (parts.length === 1) {
+    return { [parts[0]]: val };
+  } else {
+    return { [parts[0]]: expandDottedField(parts.slice(1).join('.'), val) };
+  }
+};
+
+export const expandDottedObject = (dottedObj: object) => {
+  if (typeof dottedObj !== 'object' || Array.isArray(dottedObj)) {
+    return dottedObj;
+  }
+  return Object.entries(dottedObj).reduce(
+    (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
+    {}
+  );
+};
+
+export const expandDottedEntries = (obj: object) => {
+  return Object.entries<any>(obj).reduce<any>((acc, [key, value]) => {
+    acc[key] = expandDottedObject(value);
+
+    return acc;
+  }, {} as Record<string, any>);
+};
 
 // not sure these are 100% correct but they do the job here
 // keeping them local until others need them
@@ -144,8 +181,13 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
     );
   }
 
-  parsed.data_streams = parseAndVerifyDataStreams(paths, parsed.name, parsed.version);
+  const parsedDataStreams = parseAndVerifyDataStreams(paths, parsed.name, parsed.version);
+  if (parsedDataStreams.length) {
+    parsed.data_streams = parsedDataStreams;
+  }
+
   parsed.policy_templates = parseAndVerifyPolicyTemplates(manifest);
+
   // add readme if exists
   const readme = parseAndVerifyReadme(paths, parsed.name, parsed.version);
   if (readme) {
@@ -202,11 +244,11 @@ export function parseAndVerifyDataStreams(
 
     const {
       title: dataStreamTitle,
-      release,
+      release = DEFAULT_RELEASE_VALUE,
       type,
       dataset,
-      ingest_pipeline: ingestPipeline,
       streams: manifestStreams,
+      elasticsearch,
       ...restOfProps
     } = manifest;
     if (!(dataStreamTitle && type)) {
@@ -214,28 +256,75 @@ export function parseAndVerifyDataStreams(
         `Invalid manifest for data stream '${dataStreamPath}': one or more fields missing of 'title', 'type'`
       );
     }
+
+    let ingestPipeline;
+    const ingestPipelinePaths = paths.filter((path) =>
+      path.startsWith(`${pkgKey}/data_stream/${dataStreamPath}/elasticsearch/ingest_pipeline`)
+    );
+
+    if (
+      ingestPipelinePaths.length &&
+      (ingestPipelinePaths.some((ingestPipelinePath) =>
+        ingestPipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_YML)
+      ) ||
+        ingestPipelinePaths.some((ingestPipelinePath) =>
+          ingestPipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON)
+        ))
+    ) {
+      ingestPipeline = DEFAULT_INGEST_PIPELINE_VALUE;
+    }
+
     const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
 
+    const parsedElasticsearchEntry: Record<string, any> = {};
+
+    if (ingestPipeline) {
+      parsedElasticsearchEntry['ingest_pipeline.name'] = DEFAULT_INGEST_PIPELINE_VALUE;
+    }
+
+    if (elasticsearch?.privileges) {
+      parsedElasticsearchEntry.privileges = elasticsearch.privileges;
+    }
+
+    if (elasticsearch?.index_template?.mappings) {
+      parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+        elasticsearch.index_template.mappings
+      );
+    }
+
+    if (elasticsearch?.index_template?.settings) {
+      parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+        elasticsearch.index_template.settings
+      );
+    }
+
+    // Build up the stream object here so we can conditionally insert nullable fields. The package registry omits undefined
+    // fields, so we're mimicking that behavior here.
+    const dataStreamObject: RegistryDataStream = {
+      title: dataStreamTitle,
+      release,
+      type,
+      package: pkgName,
+      dataset: dataset || `${pkgName}.${dataStreamPath}`,
+      path: dataStreamPath,
+      elasticsearch: parsedElasticsearchEntry,
+    };
+
+    if (ingestPipeline) {
+      dataStreamObject.ingest_pipeline = ingestPipeline;
+    }
+
+    if (streams.length) {
+      dataStreamObject.streams = streams;
+    }
+
     dataStreams.push(
-      Object.entries(restOfProps).reduce(
-        (validatedDataStream, [key, value]) => {
-          if (registryDataStreamProps.includes(key as RegistryDataStreamKeys)) {
-            // @ts-expect-error
-            validatedDataStream[key] = value;
-          }
-          return validatedDataStream;
-        },
-        {
-          title: dataStreamTitle,
-          release,
-          type,
-          package: pkgName,
-          dataset: dataset || `${pkgName}.${dataStreamPath}`,
-          ingest_pipeline: ingestPipeline,
-          path: dataStreamPath,
-          streams,
+      Object.entries(restOfProps).reduce((validatedDataStream, [key, value]) => {
+        if (registryDataStreamProps.includes(key as RegistryDataStreamKeys)) {
+          validatedDataStream[key] = value;
         }
-      )
+        return validatedDataStream;
+      }, dataStreamObject)
     );
   });
 
@@ -261,25 +350,28 @@ export function parseAndVerifyStreams(
           `Invalid manifest for data stream ${dataStreamPath}: stream is missing one or more fields of: input, title`
         );
       }
+
       const vars = parseAndVerifyVars(manifestVars, `data stream ${dataStreamPath}`);
+
+      const streamObject: RegistryStream = {
+        input,
+        title: streamTitle,
+        template_path: templatePath || 'stream.yml.hbs',
+      };
+
+      if (vars.length) {
+        streamObject.vars = vars;
+      }
 
       // default template path name see https://github.com/elastic/package-registry/blob/master/util/dataset.go#L143
       streams.push(
-        Object.entries(restOfProps).reduce(
-          (validatedStream, [key, value]) => {
-            if (registryStreamProps.includes(key as RegistryStreamKeys)) {
-              // @ts-expect-error
-              validatedStream[key] = value;
-            }
-            return validatedStream;
-          },
-          {
-            input,
-            title: streamTitle,
-            vars,
-            template_path: templatePath || 'stream.yml.hbs',
-          } as RegistryStream
-        )
+        Object.entries(restOfProps).reduce((validatedStream, [key, value]) => {
+          if (registryStreamProps.includes(key as RegistryStreamKeys)) {
+            // @ts-expect-error
+            validatedStream[key] = value;
+          }
+          return validatedStream;
+        }, streamObject)
       );
     });
   }

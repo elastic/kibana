@@ -69,7 +69,9 @@ describe('validate bundled packages', () => {
         'application/zip'
       );
 
-      expect(registryPackage.packageInfo).toEqual(archivePackageInfo.packageInfo);
+      expect(archivePackageInfo.packageInfo.data_streams).toEqual(
+        registryPackage.packageInfo.data_streams
+      );
     }
   });
 });

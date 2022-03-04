@@ -70,4 +70,5 @@ export interface PackageSpecScreenshot {
   title: string;
   size?: string;
   type?: string;
+  path?: string;
 }
