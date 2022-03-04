@@ -12,7 +12,7 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
     const config = getService('config');
     const performance = getService('performance');
     const logger = getService('log');
-    const { step } = performance.makePage('flights_dashboard', { autoLogin: true });
+    const { step } = performance.makePage('flights_dashboard');
 
     step('Go to Sample Data Page', async ({ page }) => {
       const kibanaUrl = Url.format({
@@ -40,7 +40,7 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
     });
 
     step('Go to Flights Dashboard', async ({ page }) => {
-      const viewdataBtn = page.locator('[aria-label="View Sample flight data"]');
+      const viewdataBtn = page.locator('[data-test-subj=launchSampleDataSetflights]>div>button');
       await viewdataBtn.click();
       const dashboardBtn = page.locator('text="Dashboard"');
       await dashboardBtn.click();

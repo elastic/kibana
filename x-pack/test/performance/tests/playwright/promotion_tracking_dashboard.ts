@@ -13,9 +13,7 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
     const performance = getService('performance');
     const esArchiver = getService('esArchiver');
     const kibanaServer = getService('kibanaServer');
-    const { step } = performance.makePage('promotion_tracking_dashboard', {
-      autoLogin: true,
-    });
+    const { step } = performance.makePage('promotion_tracking_dashboard');
 
     before(async () => {
       await kibanaServer.importExport.load(
@@ -43,7 +41,9 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
     });
 
     step('Go to Promotion Tracking Dashboard', async ({ page }) => {
-      const promotionDashboardButton = page.locator('text="Promotion Dashboard"');
+      const promotionDashboardButton = page.locator(
+        '[data-test-subj="dashboardListingTitleLink-Promotion-Dashboard"]'
+      );
       await promotionDashboardButton.click();
     });
 
@@ -53,7 +53,9 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
       );
       await beginningTimeRangeButton.click();
 
-      const lastYearButton = page.locator('text="Last 30 days"');
+      const lastYearButton = page.locator(
+        '[data-test-subj="superDatePickerCommonlyUsed_Last_30 days"]'
+      );
       await lastYearButton.click();
     });
 

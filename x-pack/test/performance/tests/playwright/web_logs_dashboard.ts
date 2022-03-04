@@ -12,7 +12,7 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
     const config = getService('config');
     const performance = getService('performance');
     const logger = getService('log');
-    const { step } = performance.makePage('weblogs_dashboard', { autoLogin: true });
+    const { step } = performance.makePage('weblogs_dashboard');
 
     step('Go to Sample Data Page', async ({ page }) => {
       const kibanaUrl = Url.format({
@@ -40,7 +40,7 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
     });
 
     step('Go to Web Logs Dashboard', async ({ page }) => {
-      const viewdataBtn = page.locator('[aria-label="View Sample web logs"]');
+      const viewdataBtn = page.locator('[data-test-subj=launchSampleDataSetlogs]>div>button');
       await viewdataBtn.click();
       const dashboardBtn = page.locator('text="Dashboard"');
       await dashboardBtn.click();

@@ -13,7 +13,7 @@ export default function ecommerceDashboard({ getService }: FtrProviderContext) {
     const performance = getService('performance');
     const logger = getService('log');
 
-    const { step } = performance.makePage('ecommerce_dashboard', { autoLogin: true });
+    const { step } = performance.makePage('ecommerce_dashboard');
 
     step('Go to Sample Data Page', async ({ page }) => {
       const kibanaUrl = Url.format({
