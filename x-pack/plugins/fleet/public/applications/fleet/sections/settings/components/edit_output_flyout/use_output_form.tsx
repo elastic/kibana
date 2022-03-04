@@ -120,19 +120,19 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     if (isLogstash) {
       // validate logstash
       return (
-        !logstashHostsValid ||
-        !additionalYamlConfigValid ||
-        !nameInputValid ||
-        !sslCertificateValid ||
-        !sslKeyValid
+        logstashHostsValid &&
+        additionalYamlConfigValid &&
+        nameInputValid &&
+        sslCertificateValid &&
+        sslKeyValid
       );
     } else {
       // validate ES
       return (
-        !elasticsearchUrlsValid ||
-        !additionalYamlConfigValid ||
-        !nameInputValid ||
-        !caTrustedFingerprintValid
+        elasticsearchUrlsValid &&
+        additionalYamlConfigValid &&
+        nameInputValid &&
+        caTrustedFingerprintValid
       );
     }
   }, [
