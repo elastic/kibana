@@ -164,5 +164,8 @@ export function registerJobsMonitoringRuleType({
         });
       }
     },
+    config: {
+      maxExecutableActions: 1000,
+    },
   });
 }

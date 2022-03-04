@@ -143,5 +143,8 @@ export function registerAnomalyDetectionAlertType({
         alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult);
       }
     },
+    config: {
+      maxExecutableActions: 1000,
+    },
   });
 }
