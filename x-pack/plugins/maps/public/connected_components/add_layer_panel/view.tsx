@@ -68,11 +68,11 @@ export class AddLayerPanel extends Component<Props, State> {
     }
   }
 
-  async _openWizard() {
-    const wizard = await getWizardById(this.props.layerWizardId);
+  _openWizard() {
+    const selectedWizard = getWizardById(this.props.layerWizardId);
 
-    if (wizard) {
-      this._onWizardSelect(wizard);
+    if (selectedWizard) {
+      this._onWizardSelect(selectedWizard);
       this.props.clearLayerWizard();
     }
   }

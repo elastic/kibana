@@ -21,8 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(resp.body).to.be.an('array');
-        
-        expect(resp.body.length).to.be(37);
+
+        expect(resp.body.length).to.be(38);
 
         // Test for sample data card
         expect(resp.body.findIndex((c: { id: string }) => c.id === 'sample_data_all')).to.be.above(

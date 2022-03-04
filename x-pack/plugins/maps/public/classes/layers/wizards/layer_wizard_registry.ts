@@ -92,7 +92,6 @@ export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
     });
 }
 
-export async function getWizardById(layerWizardId: string) {
-  await registry;
+export function getWizardById(layerWizardId: string) {
   return registry.find((wizard) => wizard.id === layerWizardId);
 }
