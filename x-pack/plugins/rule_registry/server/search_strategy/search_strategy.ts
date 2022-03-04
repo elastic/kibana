@@ -28,8 +28,6 @@ export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
 };
 
-export const FEATURES_TO_SKIP_RBAC: AlertConsumers[] = [AlertConsumers.SIEM];
-
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
   ruleDataService: IRuleDataService,
@@ -38,10 +36,20 @@ export const ruleRegistrySearchStrategyProvider = (
   security?: SecurityPluginSetup,
   spaces?: SpacesPluginStart
 ): ISearchStrategy<RuleRegistrySearchRequest, RuleRegistrySearchResponse> => {
-  const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
-
   return {
     search: (request, options, deps) => {
+      // SIEM uses RBAC fields in their alerts but also utilizes ES DLS which
+      // is different than every other solution so we need to special case
+      // those requests.
+      let siemRequest = false;
+      if (request.featureIds.length === 1 && request.featureIds[0] === AlertConsumers.SIEM) {
+        siemRequest = true;
+      } else if (request.featureIds.includes(AlertConsumers.SIEM)) {
+        throw new Error(
+          'The ruleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.'
+        );
+      }
+
       const securityAuditLogger = security?.audit.asScoped(deps.request);
       const getActiveSpace = async () => spaces?.spacesService.getActiveSpace(deps.request);
       const getAsync = async () => {
@@ -50,7 +58,8 @@ export const ruleRegistrySearchStrategyProvider = (
           alerting.getAlertingAuthorizationWithRequest(deps.request),
         ]);
         let authzFilter;
-        if (!request.featureIds.some((featureId) => FEATURES_TO_SKIP_RBAC.includes(featureId))) {
+
+        if (!siemRequest) {
           authzFilter = (await getAuthzFilter(
             authorization,
             ReadOperations.Find
@@ -111,6 +120,10 @@ export const ruleRegistrySearchStrategyProvider = (
               query,
             },
           };
+
+          const es = siemRequest
+            ? data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY)
+            : data.search.searchAsInternalUser;
           return es.search({ ...request, params }, options, deps);
         }),
         map((response) => {

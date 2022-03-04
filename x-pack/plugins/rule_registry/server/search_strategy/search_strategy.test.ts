@@ -84,6 +84,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       };
     });
 
+    data.search.searchAsInternalUser.search.mockImplementation(() => {
+      return of(response);
+    });
+
     getAuthzFilterSpy = jest
       .spyOn(getAuthzFilterImport, 'getAuthzFilter')
       .mockImplementation(async () => {
@@ -94,6 +98,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   afterEach(() => {
     ruleDataService.findIndicesByFeature.mockClear();
     data.search.getSearchStrategy.mockClear();
+    data.search.searchAsInternalUser.search.mockClear();
     getAuthzFilterSpy.mockClear();
   });
 
@@ -222,5 +227,84 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
     expect(getAuthzFilterSpy).not.toHaveBeenCalled();
+  });
+
+  it('should throw an error if requesting multiple featureIds and one is SIEM', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    let err;
+    try {
+      await strategy
+        .search(request, options, deps as unknown as SearchStrategyDependencies)
+        .toPromise();
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeDefined();
+  });
+
+  it('should use internal user when requesting o11y alerts as RBAC is applied', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(data.search.searchAsInternalUser.search).toHaveBeenCalled();
+    expect(data.search.getSearchStrategy).not.toHaveBeenCalled();
+  });
+
+  it('should use scoped user when requesting siem alerts as RBAC is not applied', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(data.search.searchAsInternalUser.search).not.toHaveBeenCalled();
+    expect(data.search.getSearchStrategy).toHaveBeenCalled();
   });
 });

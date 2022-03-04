@@ -44,12 +44,15 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
   }: SendOptions): Promise<T> => {
     const spaceUrl = getSpaceUrlPrefix(space);
     const { body } = await retry.try(async () => {
-      return await supertestWithoutAuth
+      const result = await supertestWithoutAuth
         .post(`${spaceUrl}/internal/search/${strategy}`)
         .auth(auth.username, auth.password)
         .set('kbn-xsrf', 'true')
-        .send(options)
-        .expect(200);
+        .send(options);
+      if (result.status === 500 || result.status === 200) {
+        return result;
+      }
+      throw new Error('try again');
     });
 
     if (body.isRunning) {

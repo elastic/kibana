@@ -15,6 +15,7 @@ import {
   securitySolutionOnlyAllSpacesAll,
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
+  logsOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
   // trial license roles
   observabilityMinReadAlertsAll,
@@ -162,6 +163,12 @@ export const obsOnlySpacesAll: User = {
   roles: [observabilityOnlyAllSpacesAll.name],
 };
 
+export const logsOnlySpacesAll: User = {
+  username: 'logs_only_all_spaces_all',
+  password: 'logs_only_all_spaces_all',
+  roles: [logsOnlyAllSpacesAll.name],
+};
+
 export const obsOnlySpacesAllEsRead: User = {
   username: 'obs_only_all_spaces_all_es_read',
   password: 'obs_only_all_spaces_all_es_read',
@@ -274,6 +281,7 @@ export const allUsers = [
   secOnlySpacesAll,
   secOnlyReadSpacesAll,
   obsOnlySpacesAll,
+  logsOnlySpacesAll,
   obsSecSpacesAll,
   obsSecReadSpacesAll,
   obsMinReadAlertsRead,

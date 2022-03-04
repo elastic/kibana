@@ -221,6 +221,30 @@ export const observabilityOnlyAllSpacesAll: Role = {
   },
 };
 
+export const logsOnlyAllSpacesAll: Role = {
+  name: 'logs_only_all_spaces_all',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          logs: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+/**
+ * This role exists to test that the alert search strategy allows
+ * users who do not have access to security solutions the ability
+ * to see security solutions alerts. This is because security solutions
+ * does not properly leverage RBAC and we filter out the RBAC when
+ * searching for security solution alerts in the alert search strategy.
+ */
 export const observabilityOnlyAllSpacesAllWithReadESIndices: Role = {
   name: 'obs_only_all_spaces_all_with_read_es_indices',
   privileges: {
@@ -439,6 +463,7 @@ export const allRoles = [
   securitySolutionOnlyAllSpacesAll,
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
+  logsOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAllWithReadESIndices,
   observabilityMinReadAlertsRead,
