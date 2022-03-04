@@ -6,9 +6,9 @@
  */
 
 export class ExtractError extends Error {
-  public readonly cause: string;
+  public readonly cause: Error;
 
-  constructor(cause: string, message = 'Failed to extract the browser archive') {
+  constructor(cause: Error, message = 'Failed to extract the browser archive') {
     super(message);
     this.message = message;
     this.name = this.constructor.name;

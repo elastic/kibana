@@ -31,6 +31,18 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-Cypress.Commands.add('getBySel', (selector, ...args) =>
-  cy.get(`[data-test-subj=${selector}]`, ...args)
+// force ESM in this module
+export {};
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Cypress {
+    interface Chainable {
+      getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+    }
+  }
+}
+
+Cypress.Commands.add('getBySel', (selector, options) =>
+  cy.get(`[data-test-subj="${selector}"]`, options)
 );

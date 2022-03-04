@@ -14,8 +14,15 @@ import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
+interface LoaderBatch {
+  bytesUsed?: number;
+  batchType?: string;
+  container?: Feature;
+  data?: Feature[];
+}
+
 export class GeoJsonImporter extends AbstractGeoFileImporter {
-  private _iterator?: Iterator<unknown>;
+  private _iterator?: AsyncIterator<LoaderBatch>;
   private _prevBatchLastFeature?: Feature;
 
   protected async _readNext(prevTotalFeaturesRead: number, prevTotalBytesRead: number) {
@@ -49,24 +56,28 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
       return results;
     }
 
-    if ('bytesUsed' in batch) {
+    if (batch.bytesUsed) {
       results.bytesRead = batch.bytesUsed - prevTotalBytesRead;
     }
 
-    const features: unknown[] = this._prevBatchLastFeature ? [this._prevBatchLastFeature] : [];
+    const features: Feature[] = this._prevBatchLastFeature ? [this._prevBatchLastFeature] : [];
     this._prevBatchLastFeature = undefined;
     const isLastBatch = batch.batchType === 'root-object-batch-complete';
     if (isLastBatch) {
       // Handle single feature geoJson
       if (featureIndex === 0) {
-        features.push(batch.container);
+        if (batch.container) {
+          features.push(batch.container);
+        }
       }
     } else {
-      features.push(...batch.data);
+      if (batch.data) {
+        features.push(...batch.data);
+      }
     }
 
     for (let i = 0; i < features.length; i++) {
-      const feature = features[i] as Feature;
+      const feature = features[i];
       if (!isLastBatch && i === features.length - 1) {
         // Do not process last feature until next batch is read, features on batch boundary may be incomplete.
         this._prevBatchLastFeature = feature;
