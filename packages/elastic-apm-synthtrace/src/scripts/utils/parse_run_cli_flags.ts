@@ -9,10 +9,9 @@
 import { pick } from 'lodash';
 import { LogLevel } from '../../lib/utils/create_logger';
 import { RunCliFlags } from '../run';
-import { intervalToMs } from './interval_to_ms';
 
 export function parseRunCliFlags(flags: RunCliFlags) {
-  const { file, _, logLevel, interval, bucketSize } = flags;
+  const { file, _, logLevel } = flags;
 
   const parsedFile = String(file || _[0]);
 
@@ -35,17 +34,6 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       break;
   }
 
-  const intervalInMs = intervalToMs(interval);
-  if (!intervalInMs) {
-    throw new Error('Invalid interval');
-  }
-
-  const bucketSizeInMs = intervalToMs(bucketSize);
-
-  if (!bucketSizeInMs) {
-    throw new Error('Invalid bucket size');
-  }
-
   return {
     ...pick(
       flags,
@@ -56,18 +44,14 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'username',
       'password',
       'workers',
-      'clientWorkers',
       'flushSizeBulk',
       'flushSize',
-      'writeTarget',
       'numShards',
       'scenarioOpts',
       'forceLegacyIndices',
       'dryRun',
       'gcpRepository'
     ),
-    intervalInMs,
-    bucketSizeInMs,
     logLevel: parsedLogLevel,
     file: parsedFile,
   };

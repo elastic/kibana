@@ -88,26 +88,9 @@ function options(y: Argv) {
       describe: 'Amount of Node.js worker threads',
       number: true,
     })
-    .option('bucketSize', {
-      describe: 'Size of bucket for which to generate data',
-      default: '15m',
-    })
-    .option('interval', {
-      describe: 'The interval at which to index data',
-      default: '10s',
-    })
     .option('clientWorkers', {
       describe: 'Number of concurrently connected ES clients',
       default: 5,
-    })
-    .option('flushSizeBulk', {
-      describe: 'Number of documents per bulk index request',
-      number: true,
-    })
-    .option('flushSize', {
-      describe: 'Max size for the StreamProcessor local buffer',
-      number: true,
-      default: 10000
     })
     .option('logLevel', {
       describe: 'Log level',
@@ -116,10 +99,6 @@ function options(y: Argv) {
     .option('forceLegacyIndices', {
       describe: 'Force writing to legacy indices',
       boolean: true,
-    })
-    .option('writeTarget', {
-      describe: 'Target to index',
-      string: true,
     })
     .option('scenarioOpts', {
       describe: 'Options specific to the scenario',
@@ -133,7 +112,6 @@ function options(y: Argv) {
     })
 
     .conflicts('to', 'live')
-    .conflicts('maxDocs', 'live')
     .conflicts('target', 'cloudId')
     .conflicts('kibana', 'cloudId')
     .conflicts('local', 'target')
@@ -215,10 +193,11 @@ yargs(process.argv.slice(2))
       )}`
     );
 
-    await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, version);
+    if (runOptions.maxDocs !== 0)
+      await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, version);
 
     if (live) {
-      await startLiveDataUpload(apmEsClient, logger, runOptions, to);
+      await startLiveDataUpload(apmEsClient, logger, runOptions, to, version);
     }
   })
   .parse();

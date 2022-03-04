@@ -49,11 +49,9 @@ async function setup() {
 
   events = logger.perf('generate_scenario', () => generate({ from: bucketFrom, to: bucketTo }));
   streamToBulkOptions = {
-    concurrency: runOptions.clientWorkers,
     maxDocs: runOptions.maxDocs,
     mapToIndex,
     dryRun: !!runOptions.dryRun,
-    flushInterval: runOptions.flushSizeBulk
   };
   streamToBulkOptions.itemStartStopCallback = (item, done) => {
     if (!item) return;
@@ -72,7 +70,6 @@ async function setup() {
       parentPort!.postMessage({ workerIndex, processedDocuments });
     },
     name: `Worker ${workerIndex}`,
-    maxBufferSize: runOptions.flushSize,
   });
 }
 

@@ -180,7 +180,7 @@ export class ApmSynthtraceEsClient {
       onDocument: (doc: unknown) => {
         item = doc as Record<string, any>;
         if (yielded === 0) {
-          options?.itemStartStopCallback!(item, false);
+          options?.itemStartStopCallback?.apply(this, [item, false]);
           yielded++;
         }
         const index = options?.mapToIndex

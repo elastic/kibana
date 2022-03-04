@@ -13,12 +13,14 @@ import { ApmFields } from '../../lib/apm/apm_fields';
 import { ApmSynthtraceEsClient } from '../../lib/apm';
 import { Logger } from '../../lib/utils/create_logger';
 import { EntityArrayIterable } from '../../lib/entity_iterable';
+import { StreamProcessor } from '../../lib/stream_processor';
 
 export async function startLiveDataUpload(
   esClient: ApmSynthtraceEsClient,
   logger: Logger,
   runOptions: RunOptions,
-  start: Date
+  start: Date,
+  version: string
 ) {
   const file = runOptions.file;
 
@@ -27,12 +29,13 @@ export async function startLiveDataUpload(
 
   let queuedEvents: ApmFields[] = [];
   let requestedUntil: Date = start;
+  const bucketSizeInMs = 1000 * 60;
 
   async function uploadNextBatch() {
     const end = new Date();
     if (end > requestedUntil) {
       const bucketFrom = requestedUntil;
-      const bucketTo = new Date(requestedUntil.getTime() + runOptions.bucketSizeInMs);
+      const bucketTo = new Date(requestedUntil.getTime() + bucketSizeInMs);
       // TODO this materializes into an array, assumption is that the live buffer will fit in memory
       const nextEvents = logger.perf('execute_scenario', () =>
         generate({ from: bucketFrom, to: bucketTo }).toArray()
@@ -55,20 +58,26 @@ export async function startLiveDataUpload(
     logger.info(`Uploading until ${new Date(end).toISOString()}, events: ${eventsToUpload.length}`);
 
     queuedEvents = eventsToRemainInQueue;
-
+    const streamProcessor = new StreamProcessor({
+      version: version,
+      logger: logger,
+      processors: StreamProcessor.apmProcessors,
+      maxSourceEvents: runOptions.maxDocs,
+      name: `Live index`,
+    });
     await logger.perf('index_live_scenario', () =>
       esClient.index(new EntityArrayIterable(eventsToUpload), {
-        concurrency: runOptions.clientWorkers,
+        concurrency: runOptions.workers,
         maxDocs: runOptions.maxDocs,
         mapToIndex,
         dryRun: false
-      })
+      }, streamProcessor)
     );
   }
 
   do {
     await uploadNextBatch();
-    await delay(runOptions.intervalInMs);
+    await delay(bucketSizeInMs);
   } while (true);
 }
 async function delay(ms: number) {
