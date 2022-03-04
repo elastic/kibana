@@ -33,7 +33,6 @@ import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { useKibana } from '../../../../common/lib/kibana';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
@@ -65,16 +64,15 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const [isPopoverOpen, setPopover] = useState(false);
   const [routeProps] = useRouteSpy();
 
-  const afterItemSelection = useCallback(() => {
+  const onMenuItemClick = useCallback(() => {
     setPopover(false);
   }, []);
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
-  const { timelines: timelinesUi } = useKibana().services;
 
-  const { addToCaseActionProps, addToCaseActionItems } = useAddToCaseActions({
+  const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,
-    afterCaseSelection: afterItemSelection,
+    onMenuItemClick,
     timelineId,
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
   });
@@ -186,7 +184,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 
   return (
     <>
-      {addToCaseActionProps && timelinesUi.getAddToCaseAction(addToCaseActionProps)}
       {items.length > 0 && (
         <div key="actions-context-menu">
           <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>

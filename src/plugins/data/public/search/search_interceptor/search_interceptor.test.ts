@@ -119,6 +119,7 @@ describe('SearchInterceptor', () => {
       }),
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
+      executionContext: mockCoreSetup.executionContext,
       session: sessionService,
       theme: themeServiceMock.createSetupContract(),
     });
@@ -543,7 +544,12 @@ describe('SearchInterceptor', () => {
           .catch(() => {});
         expect(fetchMock.mock.calls[0][0]).toEqual(
           expect.objectContaining({
-            options: { sessionId, isStored: true, isRestore: true, strategy: 'ese' },
+            options: {
+              sessionId,
+              isStored: true,
+              isRestore: true,
+              strategy: 'ese',
+            },
           })
         );
 
