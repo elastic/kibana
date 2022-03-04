@@ -61,6 +61,11 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       }, INPUT_TIMEOUT),
     []
   );
+  useEffect(() => {
+    return () => {
+      debouncedApplyFilterInput.cancel();
+    };
+  }, [debouncedApplyFilterInput]);
 
   useEffect(() => {
     const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
@@ -92,9 +97,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       setFilterInput(newFilterInput);
       setIsSearching(true);
       debouncedApplyFilterInput(newFilterInput);
-      return () => {
-        debouncedApplyFilterInput.cancel();
-      };
     },
     [debouncedApplyFilterInput]
   );

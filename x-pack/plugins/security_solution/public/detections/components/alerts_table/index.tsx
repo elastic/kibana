@@ -99,7 +99,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     browserFields,
     indexPattern: indexPatterns,
-    loading: indexPatternsLoading,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
