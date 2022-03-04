@@ -36,6 +36,23 @@ const nodeModulesButNotKbnPackages = (path: string) => {
   return !path.includes(`node_modules${Path.sep}@kbn${Path.sep}`);
 };
 
+const mediaAwareStyleLoaders = [
+  {
+    resourceQuery: /print/,
+    loader: 'style-loader',
+    options: {
+      attributes: { 'data-print-media-style': 'true' },
+    },
+  },
+  {
+    resourceQuery: undefined,
+    loader: 'style-loader',
+    options: {
+      attributes: { media: 'screen, projection' },
+    },
+  },
+];
+
 export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
@@ -132,10 +149,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.css$/,
           include: /node_modules/,
+          oneOf: mediaAwareStyleLoaders,
+        },
+        {
+          test: /\.css$/,
+          include: /node_modules/,
           use: [
-            {
-              loader: 'style-loader',
-            },
             {
               loader: 'css-loader',
               options: {
@@ -147,13 +166,15 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.scss$/,
           exclude: nodeModulesButNotKbnPackages,
+          oneOf: mediaAwareStyleLoaders,
+        },
+        {
+          test: /\.scss$/,
+          exclude: nodeModulesButNotKbnPackages,
           oneOf: [
             ...worker.themeTags.map((theme) => ({
               resourceQuery: `?${theme}`,
               use: [
-                {
-                  loader: 'style-loader',
-                },
                 {
                   loader: 'css-loader',
                   options: {

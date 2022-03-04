@@ -239,7 +239,11 @@ export class CoreSystem {
 
       // HACKS: scope all current styles to screen or projection media
       const setTargetMedia = (el: HTMLElement) => {
-        el.setAttribute('media', 'screen, projection');
+        if (el.getAttribute('data-print-media-style') === 'true') {
+          el.setAttribute('media', 'print');
+        } else {
+          el.setAttribute('media', 'screen, projection');
+        }
       };
       document.querySelectorAll('link').forEach(setTargetMedia);
       document.querySelectorAll('style').forEach(setTargetMedia);
