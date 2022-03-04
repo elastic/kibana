@@ -211,7 +211,6 @@ export class ExecuteReportTask implements ReportingTask {
     const doc: ReportFailedFields = {
       completed_at: completedTime,
       output: docOutput ?? null,
-      error_code: error?.code,
     };
 
     return await store.setReportFailed(report, doc);
@@ -228,11 +227,13 @@ export class ExecuteReportTask implements ReportingTask {
       docOutput.size = output.size;
       docOutput.warnings =
         output.warnings && output.warnings.length > 0 ? output.warnings : undefined;
+      docOutput.error_code = output.error_code;
     } else {
       const defaultOutput = null;
       docOutput.content = output.toString() || defaultOutput;
       docOutput.content_type = unknownMime;
       docOutput.warnings = [output.details ?? output.toString()];
+      docOutput.error_code = output.code;
     }
 
     return docOutput;
@@ -369,7 +370,7 @@ export class ExecuteReportTask implements ReportingTask {
             report._primary_term = stream.getPrimaryTerm()!;
 
             eventLog.logExecutionComplete({
-              ...(report.metrics ?? {}),
+              ...(output.metrics ?? {}),
               byteSize: stream.bytesWritten,
             });
 

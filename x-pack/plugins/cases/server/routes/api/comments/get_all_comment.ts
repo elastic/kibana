@@ -7,47 +7,36 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDeps } from '../types';
-import { wrapError, getWarningHeader, logDeprecatedEndpoint } from '../utils';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
 /**
  * @deprecated since version 8.1.0
  */
-export function initGetAllCommentsApi({ router, logger, kibanaVersion }: RouteDeps) {
-  router.get(
-    {
-      path: CASE_COMMENTS_URL,
-      validate: {
-        params: schema.object({
-          case_id: schema.string(),
+export const getAllCommentsRoute = createCasesRoute({
+  method: 'get',
+  path: CASE_COMMENTS_URL,
+  params: {
+    params: schema.object({
+      case_id: schema.string(),
+    }),
+  },
+  options: { deprecated: true },
+  handler: async ({ context, request, response, logger, kibanaVersion }) => {
+    try {
+      const client = await context.cases.getCasesClient();
+
+      return response.ok({
+        body: await client.attachments.getAll({
+          caseID: request.params.case_id,
         }),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        logDeprecatedEndpoint(
-          logger,
-          request.headers,
-          `The get all cases comments API '${CASE_COMMENTS_URL}' is deprecated.`
-        );
-
-        const client = await context.cases.getCasesClient();
-
-        return response.ok({
-          headers: {
-            ...getWarningHeader(kibanaVersion),
-          },
-          body: await client.attachments.getAll({
-            caseID: request.params.case_id,
-          }),
-        });
-      } catch (error) {
-        logger.error(
-          `Failed to get all comments in route case id: ${request.params.case_id}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to get all comments in route case id: ${request.params.case_id}: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});
