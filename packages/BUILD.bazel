@@ -61,6 +61,7 @@ filegroup(
       "//packages/kbn-test-subj-selector:build",
       "//packages/kbn-timelion-grammar:build",
       "//packages/kbn-tinymath:build",
+      "//packages/kbn-type-summarizer:build",
       "//packages/kbn-typed-react-router-config:build",
       "//packages/kbn-ui-framework:build",
       "//packages/kbn-ui-shared-deps-npm:build",
@@ -91,6 +92,7 @@ filegroup(
       "//packages/kbn-es-query:build_types",
       "//packages/kbn-i18n:build_types",
       "//packages/kbn-i18n-react:build_types",
+      "//packages/kbn-type-summarizer:build_types",
   ],
 )
 
