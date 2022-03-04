@@ -40,10 +40,8 @@ export default function ecommerceDashboard({ getService }: FtrProviderContext) {
     });
 
     step('Go to Ecommerce Dashboard', async ({ page }) => {
-      const viewdataBtn = page.locator('[data-test-subj=launchSampleDataSetecommerce]>div>button');
-      await viewdataBtn.click();
-      const dashboardBtn = page.locator('text="Dashboard"');
-      await dashboardBtn.click();
+      await page.click('[data-test-subj=launchSampleDataSetecommerce]');
+      await page.click('[data-test-subj=viewSampleDataSetecommerce-dashboard]');
 
       await page.waitForFunction(() => {
         const visualizations = Array.from(document.querySelectorAll('[data-rendering-count]'));

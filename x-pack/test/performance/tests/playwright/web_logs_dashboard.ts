@@ -40,10 +40,8 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
     });
 
     step('Go to Web Logs Dashboard', async ({ page }) => {
-      const viewdataBtn = page.locator('[data-test-subj=launchSampleDataSetlogs]>div>button');
-      await viewdataBtn.click();
-      const dashboardBtn = page.locator('text="Dashboard"');
-      await dashboardBtn.click();
+      await page.click('[data-test-subj=launchSampleDataSetlogs]');
+      await page.click('[data-test-subj=viewSampleDataSetlogs-dashboard]');
 
       await page.waitForFunction(() => {
         const visualizations = Array.from(document.querySelectorAll('[data-rendering-count]'));

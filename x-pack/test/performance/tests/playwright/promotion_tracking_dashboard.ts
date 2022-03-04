@@ -37,7 +37,7 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
       });
 
       await page.goto(`${kibanaUrl}/app/dashboards`);
-      await page.waitForSelector('text="Dashboards"');
+      await page.waitForSelector('#dashboardListingHeading');
     });
 
     step('Go to Promotion Tracking Dashboard', async ({ page }) => {

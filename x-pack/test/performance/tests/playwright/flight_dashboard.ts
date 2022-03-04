@@ -22,7 +22,7 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
       });
 
       await page.goto(`${kibanaUrl}/app/home#/tutorial_directory/sampleData`);
-      await page.waitForSelector('text="More ways to add data"');
+      await page.waitForSelector('[data-test-subj=sampleDataSetCardflights]');
     });
 
     step('Add Flights Sample Data', async ({ page }) => {
@@ -40,10 +40,8 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
     });
 
     step('Go to Flights Dashboard', async ({ page }) => {
-      const viewdataBtn = page.locator('[data-test-subj=launchSampleDataSetflights]>div>button');
-      await viewdataBtn.click();
-      const dashboardBtn = page.locator('text="Dashboard"');
-      await dashboardBtn.click();
+      await page.click('[data-test-subj=launchSampleDataSetflights]');
+      await page.click('[data-test-subj=viewSampleDataSetflights-dashboard]');
 
       await page.waitForFunction(() => {
         const visualizations = Array.from(document.querySelectorAll('[data-rendering-count]'));
@@ -54,18 +52,16 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
         return visualizationElementsLoaded && visualizationAnimationsFinished;
       });
     });
-
+    // embeddablePanelHeading-[Flights]AirportConnections(HoverOverAirport)
     step('Go to Airport Connections Visualizations Edit', async ({ page }) => {
-      const editButton = page.locator('[data-test-subj="dashboardEditMode"]');
-      await editButton.click();
+      await page.click('[data-test-subj="dashboardEditMode"]');
 
-      const flightAirportConnectionsOptionsButton = page.locator(
-        '[aria-label="Panel options for [Flights] Airport Connections (Hover Over Airport)"]'
-      );
-      await flightAirportConnectionsOptionsButton.click();
+      const flightsPanelHeadingSelector = `[data-test-subj="embeddablePanelHeading-[Flights]AirportConnections(HoverOverAirport)"]`;
+      const panelToggleMenuIconSelector = `[data-test-subj="embeddablePanelToggleMenuIcon"]`;
 
-      const editVisualization = page.locator('text="Edit Visualization"');
-      await editVisualization.click();
+      await page.click(`${flightsPanelHeadingSelector} ${panelToggleMenuIconSelector}`);
+
+      await page.click('[data-test-subj="embeddablePanelAction-editPanel"]');
 
       await page.waitForFunction(() => {
         const visualization = document.querySelector('[data-rendering-count]');
