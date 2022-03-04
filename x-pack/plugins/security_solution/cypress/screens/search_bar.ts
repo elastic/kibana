@@ -30,7 +30,7 @@ export const ADD_FILTER_FORM_SAVE_BUTTON = '[data-test-subj="saveFilter"]';
 export const GLOBAL_SEARCH_BAR_FILTER_ITEM = '#popoverFor_filter0';
 
 export const GLOBAL_SEARCH_BAR_SAVE_QUERY =
-  '[data-test-subj="saved-query-management-popover-button"]';
+  '[data-test-subj="saved-query-management-popover-button"] :not([data-test-subj="timeline"] [data-test-subj="saved-query-management-popover-button"])';
 
 export const GLOBAL_SEARCH_BAR_SAVE_BUTTON =
   '[data-test-subj="saved-query-management-save-button"]';

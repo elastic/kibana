@@ -32,10 +32,8 @@ export const ABSOLUTE_DATE_RANGE = {
 };
 
 export const openAddSavedQueryForm = () => {
-  cy.get(GLOBAL_SEARCH_BAR_SAVE_QUERY).should('exist');
   cy.get(GLOBAL_SEARCH_BAR_SAVE_QUERY).should('be.visible');
   cy.get(GLOBAL_SEARCH_BAR_SAVE_QUERY).first().click();
-  cy.get(GLOBAL_SEARCH_BAR_SAVE_BUTTON).should('exist');
   cy.get(GLOBAL_SEARCH_BAR_SAVE_BUTTON).should('be.visible');
   cy.get(GLOBAL_SEARCH_BAR_SAVE_BUTTON).first().click();
 };
