@@ -8,6 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useRef, useCallback } from 'react';
+import { observabilityFeatureId } from '../../../common';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../..';
 import { EmptySections } from '../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
@@ -28,6 +30,8 @@ import { DataSections } from './data_sections';
 import { LoadingObservability } from './loading_observability';
 import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
 import { SectionContainer } from '../../components/app/section';
+import { ObservabilityAppServices } from '../../application/types';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -85,6 +89,10 @@ export function OverviewPage({ routeParams }: Props) {
     return refetch.current && refetch.current();
   }, []);
 
+  const kibana = useKibana<ObservabilityAppServices>();
+  const CasesContext = kibana.services.cases.getCasesContext();
+  const userPermissions = useGetUserCasesPermissions();
+
   if (hasAnyData === undefined) {
     return <LoadingObservability />;
   }
@@ -130,12 +138,18 @@ export function OverviewPage({ routeParams }: Props) {
                 })}
                 hasError={false}
               >
-                <AlertsTableTGrid
-                  setRefetch={setRefetch}
-                  rangeFrom={relativeTime.start}
-                  rangeTo={relativeTime.end}
-                  indexNames={indexNames}
-                />
+                <CasesContext
+                  owner={[observabilityFeatureId]}
+                  userCanCrud={userPermissions?.crud ?? false}
+                  features={{ alerts: { sync: false } }}
+                >
+                  <AlertsTableTGrid
+                    setRefetch={setRefetch}
+                    rangeFrom={relativeTime.start}
+                    rangeTo={relativeTime.end}
+                    indexNames={indexNames}
+                  />
+                </CasesContext>
               </SectionContainer>
             </EuiFlexItem>
             <EuiFlexItem>
