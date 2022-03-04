@@ -12,113 +12,109 @@ import JSON5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import { ElasticsearchClient } from '../../../elasticsearch';
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/utils';
-import { getEnvOptions } from '../../../config/mocks';
 import { LogRecord } from '@kbn/logging';
 import { retryAsync } from '../test_helpers/retry_async';
 
-const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
-const targetIndex = `.kibana_${kibanaVersion}_001`;
-const logFilePath = Path.join(__dirname, 'batch_size_bytes.log');
+const logFilePath = Path.join(__dirname, 'unsupported_cluster_routing_allocation.log');
 
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await fs.unlink(logFilePath).catch(() => void 0);
 }
-function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
-  return a.type.localeCompare(b.type) || a.id.localeCompare(b.id);
-}
 
-async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
-  const body = await esClient.search<any>({
-    index,
-    body: {
-      query: {
-        match_all: {},
-      },
-      _source: ['type', 'id'],
+const { startES } = kbnTestServer.createTestServers({
+  adjustTimeout: (t: number) => jest.setTimeout(t),
+  settings: {
+    es: {
+      license: 'basic',
+      dataArchive: Path.join(__dirname, 'archives', '7.7.2_xpack_100k_obj.zip'),
     },
-  });
+  },
+});
 
-  return body.hits.hits
-    .map((h) => ({
-      ...h._source,
-      id: h._id,
-    }))
-    .sort(sortByTypeAndId);
+function createKbnRoot() {
+  return kbnTestServer.createRootWithCorePlugins(
+    {
+      migrations: {
+        skip: false,
+      },
+      logging: {
+        appenders: {
+          file: {
+            type: 'file',
+            fileName: logFilePath,
+            layout: {
+              type: 'json',
+            },
+          },
+        },
+        loggers: [
+          {
+            name: 'root',
+            level: 'info',
+            appenders: ['file'],
+          },
+        ],
+      },
+    },
+    {
+      oss: false,
+    }
+  );
+}
+const getClusterRoutingAllocations = (settings: Record<string, any>) => {
+  const routingAllocations =
+    settings?.transient?.['cluster.routing.allocation.enable'] ??
+    settings?.persistent?.['cluster.routing.allocation.enable'] ??
+    [];
+  return (
+    [...routingAllocations].length === 0 ||
+    [...routingAllocations].every((s: string) => s === 'all')
+  ); // if set, only allow 'all';
+};
+let esServer: kbnTestServer.TestElasticsearchUtils;
+
+async function updateRoutingAllocations(
+  esClient: ElasticsearchClient,
+  settingType: string = 'persistent',
+  value: string = 'none'
+) {
+  return await esClient.cluster.putSettings({
+    [settingType]: { cluster: { routing: { allocation: { enable: value } } } },
+  });
 }
 
-const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
-
-describe('migration v2', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+describe('unsupported_cluster_routing_allocation', () => {
+  let client: ElasticsearchClient;
   let root: Root;
-  let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
 
   beforeAll(async () => {
     await removeLogFile();
-  });
-
-  beforeEach(() => {
-    ({ startES } = kbnTestServer.createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-          dataArchive: Path.join(__dirname, 'archives', '7.14.0_xpack_sample_saved_objects.zip'),
-          esArgs: ['http.max_content_length=1715329b'],
-        },
-      },
-    }));
-  });
-
-  afterEach(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-  });
-
-  it.only('completes the migration even when a full batch would exceed ES http.max_content_length', async () => {
-    root = createRoot({ maxBatchSizeBytes: 1715329 });
     esServer = await startES();
+    client = esServer.es.getClient();
+  });
+  afterAll(async () => {
+    await esServer.stop();
+  });
+
+  it('fails with a descriptive message when persistent replica allocation is not enabled', async () => {
+    const initialSettings = await client.cluster.getSettings({ flat_settings: true });
+
+    expect(getClusterRoutingAllocations(initialSettings)).toBe(true);
+
+    await updateRoutingAllocations(client, 'persistent', 'none');
+
+    const updatedSettings = await client.cluster.getSettings({ flat_settings: true });
+
+    expect(getClusterRoutingAllocations(updatedSettings)).toBe(false);
+
+    // now try to start Kibana
+    root = createKbnRoot();
     await root.preboot();
     await root.setup();
-    await expect(root.start()).resolves.toBeTruthy();
 
-    // After plugins start, some saved objects are deleted/recreated, so we
-    // wait a bit for the count to settle.
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-
-    const esClient: ElasticsearchClient = esServer.es.getClient();
-
-    // change cluster routing allocation enable
-
-    const changedSettings = await esClient.cluster.getSettings({
-      flat_settings: true,
-      filter_path: ['persistent'],
-      pretty: true,
-    });
-    expect(changedSettings).toBeTruthy();
-    expect(changedSettings).toMatchObject({ persistent: {} });
-    // assert that the docs from the original index have been migrated rather than comparing a doc count after startup
-    // const originalDocs = await fetchDocuments(esClient, '.kibana_7.14.0_001');
-    // const migratedDocs = await fetchDocuments(esClient, targetIndex);
-    // expect(assertMigratedDocuments(migratedDocs, originalDocs));
-  });
-
-  it('fails with a descriptive message when a single document exceeds maxBatchSizeBytes', async () => {
-    root = createRoot({ maxBatchSizeBytes: 1015275 });
-    esServer = await startES();
-    await root.preboot();
-    await root.setup();
     await expect(root.start()).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715329 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.]`
+      `[Error: Unable to complete saved object migrations for the [.kibana] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}]`
     );
 
     await retryAsync(
@@ -131,7 +127,7 @@ describe('migration v2', () => {
         expect(
           records.find((rec) =>
             rec.message.startsWith(
-              `Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715329 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`
+              `Unable to complete saved object migrations for the [.kibana] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.`
             )
           )
         ).toBeDefined();
@@ -139,42 +135,21 @@ describe('migration v2', () => {
       { retryAttempts: 10, retryDelayMs: 200 }
     );
   });
-});
 
-function createRoot(options: { maxBatchSizeBytes?: number }) {
-  return kbnTestServer.createRootWithCorePlugins(
-    {
-      migrations: {
-        skip: false,
-        batchSize: 1000,
-        maxBatchSizeBytes: options.maxBatchSizeBytes,
-      },
-      logging: {
-        appenders: {
-          file: {
-            type: 'file',
-            fileName: logFilePath,
-            layout: {
-              type: 'pattern',
-            },
-          },
-        },
-        loggers: [
-          {
-            name: 'root',
-            level: 'info',
-            appenders: ['file'],
-          },
-          {
-            name: 'savedobjects-service',
-            appenders: ['file'],
-            level: 'info',
-          },
-        ],
-      },
-    },
-    {
-      oss: false,
-    }
-  );
-}
+  it('fails with a descriptive message when persistent replica allocation is set to "primaries"', async () => {
+    await updateRoutingAllocations(client, 'persistent', 'primaries');
+
+    const updatedSettings = await client.cluster.getSettings({ flat_settings: true });
+
+    expect(getClusterRoutingAllocations(updatedSettings)).toBe(false);
+
+    // now try to start Kibana
+    root = createKbnRoot();
+    await root.preboot();
+    await root.setup();
+
+    await expect(root.start()).rejects.toMatchInlineSnapshot(
+      `[Error: Unable to complete saved object migrations for the [.kibana] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}]`
+    );
+  });
+});

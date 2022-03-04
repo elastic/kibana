@@ -27,8 +27,8 @@ export interface InitActionParams {
   indices: string[];
 }
 
-export interface ClusterAllocationDisabledError {
-  type: 'cluster_routing_allocation_disabled';
+export interface UnsupportedClusterRoutingAllocation {
+  type: 'unsupported_cluster_routing_allocation';
 }
 
 export const checkClusterRoutingAllocationEnabledTask =
@@ -36,7 +36,7 @@ export const checkClusterRoutingAllocationEnabledTask =
     client,
   }: {
     client: ElasticsearchClient;
-  }): TaskEither.TaskEither<RetryableEsClientError | ClusterAllocationDisabledError, {}> =>
+  }): TaskEither.TaskEither<RetryableEsClientError | UnsupportedClusterRoutingAllocation, {}> =>
   () => {
     return client.cluster
       .getSettings({
@@ -53,7 +53,7 @@ export const checkClusterRoutingAllocationEnabledTask =
           [...clusterRoutingAllocations].every((s: string) => s === 'all'); // if set, only allow 'all'
 
         if (!clusterRoutingAllocationEnabled) {
-          return Either.left({ type: 'cluster_routing_allocation_disabled' as const });
+          return Either.left({ type: 'unsupported_cluster_routing_allocation' as const });
         } else {
           return Either.right({});
         }
@@ -65,7 +65,7 @@ export const initAction = ({
   client,
   indices,
 }: InitActionParams): TaskEither.TaskEither<
-  RetryableEsClientError | ClusterAllocationDisabledError,
+  RetryableEsClientError | UnsupportedClusterRoutingAllocation,
   FetchIndexResponse
 > => {
   return pipe(

@@ -74,16 +74,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isLeft(res)) {
       const left = res.left;
-      if (isLeftTypeof(left, 'cluster_routing_allocation_disabled')) {
+      if (isLeftTypeof(left, 'unsupported_cluster_routing_allocation')) {
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `The elasticsearch cluster has cluster routing allocation disabled. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}`,
+          reason: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}`,
           logs: [
             ...stateP.logs,
             {
               level: 'error',
-              message: `The elasticsearch cluster has cluster routing allocation disabled. Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'.`,
+              message: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'.`,
             },
           ],
         };
