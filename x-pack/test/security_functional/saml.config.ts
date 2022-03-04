@@ -45,7 +45,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       from: 'snapshot',
       serverArgs: [
         'xpack.security.authc.token.enabled=true',
-        'xpack.security.authc.realms.saml.saml1.order=0',
+        'xpack.security.authc.realms.native.native1.order=0',
+        'xpack.security.authc.realms.saml.saml1.order=1',
         `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
         'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
