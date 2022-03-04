@@ -360,7 +360,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const casesPermissions = useGetUserCasesPermissions();
   const CasesContext = kibana.services.cases.getCasesContext();
 
-  if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
+  if (loading || isEmpty(selectedPatterns)) {
     return null;
   }
 
