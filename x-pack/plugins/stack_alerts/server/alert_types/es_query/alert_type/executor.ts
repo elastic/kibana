@@ -36,7 +36,10 @@ export async function executor(
   let timestamp: string | undefined = tryToParseAsDate(previousTimestamp);
 
   const { numMatches, searchResult, dateStart, dateEnd } = esQueryAlert
-    ? await fetchEsQuery(alertId, params as OnlyEsQueryAlertParams, timestamp, { search, logger })
+    ? await fetchEsQuery(alertId, name, params as OnlyEsQueryAlertParams, timestamp, {
+        search,
+        logger,
+      })
     : await fetchSearchSourceQuery(alertId, params as OnlySearchSourceAlertParams, timestamp, {
         searchSourceClient,
         logger,

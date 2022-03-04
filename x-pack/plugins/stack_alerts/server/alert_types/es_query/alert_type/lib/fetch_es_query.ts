@@ -14,6 +14,7 @@ import { getSearchParams } from './get_search_params';
 
 export async function fetchEsQuery(
   alertId: string,
+  name: string,
   params: OnlyEsQueryAlertParams,
   timestamp: string | undefined,
   services: {
