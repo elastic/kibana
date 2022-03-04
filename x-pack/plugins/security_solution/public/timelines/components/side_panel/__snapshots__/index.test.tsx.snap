@@ -282,6 +282,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
           Object {
             "id": "",
             "inspect": null,
+            "inspectedVizType": null,
             "isInspected": false,
             "loading": false,
             "refetch": null,
