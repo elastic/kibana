@@ -58,9 +58,6 @@ function createRule(shouldWriteAlerts: boolean = true) {
     validate: {
       params: schema.object({}, { unknowns: 'allow' }),
     },
-    config: {
-      maxExecutableActions: 1000,
-    },
   });
 
   let state: Record<string, any> = {};

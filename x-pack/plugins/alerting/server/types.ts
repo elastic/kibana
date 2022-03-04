@@ -181,7 +181,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  config: RuleTypeConfig;
+  config?: RuleTypeConfig;
 }
 export type UntypedRuleType = RuleType<
   AlertTypeParams,
