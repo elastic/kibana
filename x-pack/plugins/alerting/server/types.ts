@@ -11,6 +11,7 @@ import type {
   RequestHandlerContext,
   SavedObjectReference,
   ElasticsearchClient,
+  IUiSettingsClient,
 } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
@@ -78,6 +79,7 @@ export interface AlertServices<
   ActionGroupIds extends string = never
 > {
   savedObjectsClient: SavedObjectsClientContract;
+  uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
   alertFactory: {
     create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
@@ -170,7 +172,6 @@ export interface RuleType<
   };
   isExportable: boolean;
   defaultScheduleInterval?: string;
-  minimumScheduleInterval?: string;
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
@@ -249,6 +250,7 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
+  snoozeEndTime?: string;
 }
 
 export type AlertInfoParams = Pick<
