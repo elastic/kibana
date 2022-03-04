@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './no_data_page';
-export * from './no_data_card';
-export * from './no_data_config_page';
+export { getClasses } from './presentation';
+export * from './constants';

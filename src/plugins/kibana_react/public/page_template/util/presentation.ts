@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './no_data_page';
-export * from './no_data_card';
-export * from './no_data_config_page';
+import classNames from 'classnames';
+
+export const getClasses = (template: string | undefined, className: string | undefined) => {
+  return classNames('kbnPageTemplate', { [`kbnPageTemplate--${template}`]: template }, className);
+};
