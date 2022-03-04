@@ -40,6 +40,7 @@ import {
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
+  MappedParams,
   AlertExecutionStatusWarningReasons,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
@@ -247,6 +248,7 @@ export interface RawRule extends SavedObjectAttributes {
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
+  mapped_params?: MappedParams;
   scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
