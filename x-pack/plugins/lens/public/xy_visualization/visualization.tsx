@@ -16,6 +16,7 @@ import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
+import { FillStyle } from '../../common/expressions/xy_chart';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
@@ -295,12 +296,14 @@ export const getXyVisualization = ({
     if (!foundLayer) {
       return prevState;
     }
+    const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
     const axisMode = axisPosition as YAxisMode;
     const yConfig = metrics.map((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],
         ...(axisMode && { axisMode }),
+        ...(isReferenceLine && { fill: 'below' as FillStyle }),
       };
     });
     const newLayer = {
@@ -308,6 +311,7 @@ export const getXyVisualization = ({
       ...(chartType && { seriesType: chartType as SeriesType }),
       ...(palette && { palette }),
       yConfig,
+      layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
     };
 
     const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));

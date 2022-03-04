@@ -92,4 +92,8 @@ export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
     name: 'clamp',
     isFullReference: true,
   },
+  static: {
+    name: 'static_value',
+    isFullReference: true,
+  },
 };

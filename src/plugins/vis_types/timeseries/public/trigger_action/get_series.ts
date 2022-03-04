@@ -184,6 +184,20 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       ];
       break;
     }
+    case 'static': {
+      const staticValue = metrics[metricIdx].value;
+      metricsArray = [
+        {
+          agg: aggregationMap.name,
+          isFullReference: aggregationMap.isFullReference,
+          fieldName: fieldName ?? 'document',
+          params: {
+            ...(staticValue && { value: staticValue }),
+          },
+        },
+      ];
+      break;
+    }
     default: {
       const timeScale = getTimeScale(metrics[metricIdx]);
       metricsArray = [
