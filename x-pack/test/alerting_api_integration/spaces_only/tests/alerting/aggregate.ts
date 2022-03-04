@@ -112,6 +112,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           error: NumErrorAlerts,
           pending: 0,
           unknown: 0,
+          warning: 0,
         },
         rule_muted_status: {
           muted: 0,
@@ -184,6 +185,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
             error: NumErrorAlerts,
             pending: 0,
             unknown: 0,
+            warning: 0,
           },
           ruleEnabledStatus: {
             disabled: 0,
