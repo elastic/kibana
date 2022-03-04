@@ -21,5 +21,5 @@ jobs:
             ]
         env:
           GRAPHQL_API_BASE: 'https://api.github.com'
-          PAT_TOKEN: ${{ secrets.APM_TECH_KIBANA_USER_TOKEN }}
+          PAT_TOKEN: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
