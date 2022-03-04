@@ -117,7 +117,6 @@ describe('KibanaMigrator', () => {
         {
           transient: {},
           persistent: {},
-          defaults: {},
         },
         { statusCode: 404 }
       );
@@ -208,7 +207,6 @@ const mockV2MigrationOptions = () => {
     {
       transient: {},
       persistent: {},
-      defaults: {},
     },
     { statusCode: 200 }
   );
