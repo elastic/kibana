@@ -127,6 +127,11 @@ function options(y: Argv) {
         return arg as Record<string, any> | undefined;
       },
     })
+    .option('gcpRepository', {
+      describe: 'Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format',
+      string: true,
+    })
+
     .conflicts('to', 'live')
     .conflicts('maxDocs', 'live')
     .conflicts('target', 'cloudId')
@@ -193,6 +198,9 @@ yargs(process.argv.slice(2))
 
     if (argv.clean) {
       await apmEsClient.clean();
+    }
+    if (runOptions.gcpRepository) {
+      await apmEsClient.registerGcpRepository(runOptions.gcpRepository);
     }
 
     logger.info(

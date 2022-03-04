@@ -63,7 +63,8 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'numShards',
       'scenarioOpts',
       'forceLegacyIndices',
-      'dryRun'
+      'dryRun',
+      'gcpRepository'
     ),
     intervalInMs,
     bucketSizeInMs,

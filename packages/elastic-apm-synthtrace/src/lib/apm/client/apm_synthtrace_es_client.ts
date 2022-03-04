@@ -88,6 +88,33 @@ export class ApmSynthtraceEsClient {
     }
   }
 
+  async registerGcpRepository(connectionString: string) {
+    // <client_name>:<bucket>[:base_path]
+    let [clientName, bucket, basePath] = connectionString.split(':');
+    if (!clientName) throw new Error(`client name is mandatory for gcp repostitory registration: ${connectionString}`)
+    if (!bucket) throw new Error(`bucket is mandatory for gcp repostitory registration: ${connectionString}`)
+
+    const name = `gcp-repository-${clientName}`;
+    this.logger.info(`Registering gcp repository ${name}`)
+    const putRepository = await this.client.snapshot.createRepository({
+      name: name,
+      type: 'gcs',
+      settings: {
+        // @ts-ignore
+        // missing from es types
+        'bucket': bucket,
+        client: clientName,
+        base_path: basePath
+      }
+    })
+    this.logger.info(putRepository);
+
+    this.logger.info(`Verifying gcp repository ${name}`)
+    const verifyRepository = await this.client.snapshot.verifyRepository({ name: name })
+    this.logger.info(verifyRepository);
+  }
+
+
   async refresh() {
 
     const writeTargets = await this.getWriteTargets();
