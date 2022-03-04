@@ -38,6 +38,8 @@ type SingleResponseProvider<F extends ResponseProviderCallback = ResponseProvide
      * Delay responding to the HTTP call until this promise is resolved. Use it to introduce
      * elongated delays in order to test intermediate UI states.
      *
+     * @param options
+     *
      * @example
      * apiMocks.responseProvider.someProvider.mockDelay
      *    // Delay this response by 1/2 second
@@ -45,7 +47,7 @@ type SingleResponseProvider<F extends ResponseProviderCallback = ResponseProvide
      *      () => new Promise(r => setTimeout(r, 500))
      *    )
      */
-    mockDelay: jest.MockedFunction<() => Promise<void>>;
+    mockDelay: jest.MockedFunction<(options: HttpFetchOptionsWithPath) => Promise<void>>;
   };
 
 /**
@@ -99,9 +101,9 @@ interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInte
   /**
    * A function that returns a promise. The API response will be delayed until this promise is
    * resolved. This can be helpful when wanting to test an intermediate UI state while the API
-   * call is inflight.
+   * call is inflight. The options provided to the `core.http.*` method will be provided on input
    */
-  delay?: () => Promise<void>;
+  delay?: (options: HttpFetchOptionsWithPath) => Promise<void>;
 }
 
 export type ApiHandlerMockFactoryProps<
@@ -134,12 +136,15 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
     let inflightApiCalls = 0;
     const { ignoreUnMockedApiRouteErrors = false } = options ?? {};
     const apiDoneListeners: Array<() => void> = [];
-    const markApiCallAsHandled = async (delay?: RouteMock['delay']) => {
+    const markApiCallAsHandled = async (
+      apiOptions: HttpFetchOptionsWithPath,
+      delay?: RouteMock['delay']
+    ) => {
       inflightApiCalls++;
 
       // If a delay was defined, then await that first
       if (delay) {
-        await delay();
+        await delay(apiOptions);
       }
 
       // We always wait at least 1ms
@@ -200,10 +205,7 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
           // Use the handler defined for the HTTP Mocked interface (not the one passed on input to
           // the factory) for retrieving the response value because that one could have had its
           // response value manipulated by the individual test case.
-
-          markApiCallAsHandled(responseProvider[routeMock.id].mockDelay);
-          await responseProvider[routeMock.id].mockDelay();
-
+          const thisRouteResponseProvider = responseProvider[routeMock.id];
           const fetchOptions: HttpFetchOptionsWithPath = isHttpFetchOptionsWithPath(args[0])
             ? args[0]
             : {
@@ -215,7 +217,9 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
                 path: args[0],
               };
 
-          return responseProvider[routeMock.id](fetchOptions);
+          await markApiCallAsHandled(fetchOptions, thisRouteResponseProvider.mockDelay);
+
+          return thisRouteResponseProvider(fetchOptions);
         } else if (priorMockedFunction) {
           return priorMockedFunction(...args);
         }
