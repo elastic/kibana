@@ -14,6 +14,7 @@ import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useCurrentEuiTheme, EuiThemeType } from '../../../components/color_range_legend';
+import { useRefresh } from '../../../routing/use_refresh';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
 import { JobMapTitle } from './job_map_title';
@@ -51,7 +52,6 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
     elements,
     error,
     fetchAndSetElementsWrapper,
-    isLoading,
     message,
     nodeDetails,
     setElements,
@@ -66,6 +66,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   } = useMlKibana();
   const locator = useMlLocator()!;
   const { euiTheme } = useCurrentEuiTheme();
+  const refresh = useRefresh();
 
   const redirectToAnalyticsManagementPage = async () => {
     const url = await locator.getUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
@@ -117,6 +118,14 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
     }
   }, [message]);
 
+  useEffect(
+    function updateOnTimerRefresh() {
+      if (!refresh) return;
+      fetchAndSetElementsWrapper({ analyticsId, modelId });
+    },
+    [refresh]
+  );
+
   if (error !== undefined) {
     notifications.toasts.addDanger(
       i18n.translate('xpack.ml.dataframe.analyticsMap.fetchDataErrorMessage', {
@@ -147,19 +156,6 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" component="span">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj={`mlAnalyticsRefreshMapButton${isLoading ? ' loading' : ' loaded'}`}
-                onClick={refreshCallback}
-                isLoading={isLoading}
-              >
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsList.refreshMapButtonLabel"
-                  defaultMessage="Refresh"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
