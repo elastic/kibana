@@ -92,7 +92,7 @@ import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
-import type { LensEmbeddableInput } from './embeddable';
+import type { Embeddable, LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import {
   EmbeddableComponentProps,
@@ -452,8 +452,11 @@ export class LensPlugin {
         isCompatible: async (context: { embeddable: IEmbeddable }) => {
           return context.embeddable.type === DOC_TYPE;
         },
-        execute: async (context: { embeddable: IEmbeddable }) => {
-          alert('FOOBAR');
+        execute: async (context: { embeddable: Embeddable }) => {
+          const args = await context.embeddable.getViewUnderlyingDataArgs();
+          startDependencies.discover?.locator?.navigate({
+            ...args,
+          });
         },
       })
     );

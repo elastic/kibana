@@ -21,7 +21,7 @@ import {
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
 import { RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
@@ -138,6 +138,14 @@ export interface LensEmbeddableDeps {
   theme: ThemeServiceStart;
 }
 
+export interface ViewUnderlyingDataArgs {
+  indexPatternId: string;
+  timeRange: TimeRange;
+  filters: Filter[];
+  query: Query | undefined;
+  columns: string[];
+}
+
 const getExpressionFromDocument = async (
   document: Document,
   documentToExpression: LensEmbeddableDeps['documentToExpression']
@@ -237,6 +245,10 @@ export class Embeddable
   } = {};
 
   private indexPatterns: IndexPattern[] = [];
+
+  private viewUnderlyingDataArgs$ = new BehaviorSubject<ViewUnderlyingDataArgs | undefined>(
+    undefined
+  );
 
   constructor(
     private deps: LensEmbeddableDeps,
@@ -691,7 +703,21 @@ export class Embeddable
       timeRange: this.externalSearchContext.timeRange!,
     });
 
-    console.log(viewUnderlyingDataArgs);
+    if (viewUnderlyingDataArgs) {
+      this.viewUnderlyingDataArgs$.next(viewUnderlyingDataArgs);
+    }
+  }
+
+  /**
+   * Returns the necessary arguments to view the underlying data in discover.
+   */
+  public getViewUnderlyingDataArgs() {
+    return new Promise<ViewUnderlyingDataArgs>((resolve) => {
+      const subscription = this.viewUnderlyingDataArgs$.subscribe((val) => {
+        resolve(val);
+        subscription.unsubscribe();
+      });
+    });
   }
 
   async initializeOutput() {
