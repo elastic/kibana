@@ -21,6 +21,7 @@ export default function createTaskManagementScheduledAtTests({ getService }: Ftr
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_tasks');
+      await esArchiver.emptyKibanaIndex();
     });
 
     it('sets scheduledAt to runAt if retryAt is null', async () => {
