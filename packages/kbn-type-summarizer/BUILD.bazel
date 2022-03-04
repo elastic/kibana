@@ -1,17 +1,18 @@
-
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+load("@build_bazel_rules_nodejs//internal/node:node.bzl", "nodejs_binary")
+load("@build_bazel_rules_nodejs//:index.bzl", "directory_file_path")
 
-PKG_BASE_NAME = "kbn-crypto"
-PKG_REQUIRE_NAME = "@kbn/crypto"
+PKG_BASE_NAME = "kbn-type-summarizer"
+PKG_REQUIRE_NAME = "@kbn/type-summarizer"
 
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
   ],
   exclude = [
-    "**/*.test.*",
+    "**/*.test.*"
   ],
 )
 
@@ -24,27 +25,32 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md"
+  "README.md",
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-dev-utils:build",
-  "@npm//node-forge",
+  "@npm//@babel/runtime",
+  "@npm//@microsoft/api-extractor",
+  "@npm//source-map-support",
+  "@npm//chalk",
+  "@npm//getopts",
+  "@npm//is-path-inside",
+  "@npm//normalize-path",
+  "@npm//source-map",
+  "@npm//tslib",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-dev-utils:npm_module_types",
-  "@npm//@types/flot",
+  "@npm//@microsoft/api-extractor",
   "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@types/node-forge",
+  "@npm//@types/normalize-path",
+  "@npm//getopts",
+  "@npm//is-path-inside",
+  "@npm//normalize-path",
+  "@npm//source-map",
+  "@npm//tslib",
 ]
-
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
 
 ts_config(
   name = "tsconfig",
@@ -68,6 +74,12 @@ ts_project(
   tsconfig = ":tsconfig",
 )
 
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
+
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
@@ -76,17 +88,32 @@ js_library(
   visibility = ["//visibility:public"],
 )
 
+directory_file_path(
+  name = "bazel-cli-path",
+  directory = ":target_node",
+  path = "bazel_cli.js",
+)
+
+nodejs_binary(
+  name = "bazel-cli",
+  data = [
+    ":%s" % PKG_BASE_NAME
+  ],
+  entry_point = ":bazel-cli-path",
+  visibility = ["//visibility:public"],
+)
+
 pkg_npm(
   name = "npm_module",
   deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+      ":%s" % PKG_BASE_NAME,
+  ],
 )
 
 filegroup(
   name = "build",
   srcs = [
-    ":npm_module",
+      ":npm_module",
   ],
   visibility = ["//visibility:public"],
 )
