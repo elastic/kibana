@@ -94,20 +94,20 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   };
 
   public render() {
-    const { container, controlsEnabled } = this.props;
+    const { container, controlsEnabled, controlGroup } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const { isEmbeddedExternally, isFullScreenMode, panelCount, title, description, useMargins } =
       this.state;
+
     return (
       <>
         {controlsEnabled ? (
-          <div className="dshDashboardViewport-controls">
-            <ControlsCallout
-              controlEmbeddable={this.props.controlGroup}
-              dashboardPanelCount={panelCount}
-            />
-            <div ref={this.controlsRoot} />
-          </div>
+          <>
+            {isEditMode && panelCount !== 0 && controlGroup?.getPanelCount() === 0 ? (
+              <ControlsCallout controlEmbeddable={controlGroup} />
+            ) : null}
+            <div className="dshDashboardViewport-controls" ref={this.controlsRoot} />
+          </>
         ) : null}
         <div
           data-shared-items-count={panelCount}

@@ -11,18 +11,17 @@ import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import classNames from 'classnames';
 
-import { type ControlGroupContainer } from '../..';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlsIllustration } from './controls_illustration';
+import { ControlGroupContainer } from '../embeddable/control_group_container';
 
 const CONTROLS_CALLOUT_STATE_KEY = 'dashboard:controlsCalloutDismissed';
 
 interface CalloutProps {
   controlEmbeddable: ControlGroupContainer | undefined;
-  dashboardPanelCount: number;
 }
 
-export const ControlsCallout = ({ controlEmbeddable, dashboardPanelCount }: CalloutProps) => {
+export const ControlsCallout = ({ controlEmbeddable }: CalloutProps) => {
   const [controlsCalloutDismissed, setControlsCalloutDismissed] = useLocalStorage(
     CONTROLS_CALLOUT_STATE_KEY,
     false
@@ -31,18 +30,14 @@ export const ControlsCallout = ({ controlEmbeddable, dashboardPanelCount }: Call
     setControlsCalloutDismissed(true);
   };
 
-  const hideUndismissedCallout =
-    dashboardPanelCount === 0 || (controlEmbeddable ? controlEmbeddable.getPanelCount() : -1) > 0;
-  if (controlsCalloutDismissed || hideUndismissedCallout) return null;
+  if (controlsCalloutDismissed) return null;
 
   return (
     <EuiPanel
       borderRadius="m"
       color="plain"
       paddingSize={'s'}
-      className={classNames('controlsWrapper', {
-        'controlsWrapper--empty': true,
-      })}
+      className={classNames('controlsWrapper--empty', 'dshDashboardViewport-controls')}
     >
       <EuiFlexGroup alignItems="center" gutterSize="xs" data-test-subj="controls-empty">
         <EuiFlexItem grow={1} className="controlsIllustration__container">
