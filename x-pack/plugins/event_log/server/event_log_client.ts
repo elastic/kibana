@@ -8,6 +8,7 @@
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IClusterClient, KibanaRequest } from 'src/core/server';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
@@ -59,6 +60,14 @@ export type FindOptionsType = Pick<
 > &
   Partial<TypeOf<typeof findOptionsSchema>>;
 
+export type AggregateOptionsType = Pick<
+  TypeOf<typeof findOptionsSchema>,
+  'start' | 'end' | 'sort_field' | 'sort_order' | 'filter'
+> &
+  Partial<TypeOf<typeof findOptionsSchema>> & {
+    aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  };
+
 interface EventLogServiceCtorParams {
   esContext: EsContext;
   savedObjectGetter: SavedObjectBulkGetterResult;
@@ -100,6 +109,30 @@ export class EventLogClient implements IEventLogClient {
       type,
       ids,
       findOptions,
+      legacyIds,
+    });
+  }
+
+  async aggregateEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    options?: Partial<AggregateOptionsType>,
+    legacyIds?: string[]
+  ) {
+    // const aggregateOptions = findOptionsSchema.validate(options ?? {});
+
+    const space = await this.spacesService?.getActiveSpace(this.request);
+    const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
+
+    // verify the user has the required permissions to view this saved objects
+    await this.savedObjectGetter(type, ids);
+
+    return await this.esContext.esAdapter.aggregateEventsBySavedObjects({
+      index: this.esContext.esNames.indexPattern,
+      namespace,
+      type,
+      ids,
+      findOptions: options as AggregateOptionsType,
       legacyIds,
     });
   }
