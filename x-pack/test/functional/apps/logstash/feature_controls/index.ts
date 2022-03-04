@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('feature controls', function () {
-    this.tags(['ciGroup42']);
-
     loadTestFile(require.resolve('./logstash_security'));
   });
 }

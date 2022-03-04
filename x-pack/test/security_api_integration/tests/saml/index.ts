@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security APIs - SAML', function () {
-    this.tags('ciGroup142');
+    this.tags('ciGroup140');
 
     loadTestFile(require.resolve('./saml_login'));
   });
