@@ -100,7 +100,7 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
       defaultMessage: 'For more information, see our documentation.',
     }),
 
-  flyoutEditItemLoadFailure: (errorMessage: string) =>
+  flyoutEditItemLoadFailure: (errorMessage: string): string =>
     i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditItemLoadFailure', {
       defaultMessage: 'Failed to retrieve item for edit. Reason: {errorMessage}',
       values: { errorMessage },
@@ -115,7 +115,7 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
    *    values: { name },
    *  })
    */
-  flyoutCreateSubmitSuccess: ({ name }: ExceptionListItemSchema) =>
+  flyoutCreateSubmitSuccess: ({ name }: ExceptionListItemSchema): string =>
     i18n.translate('xpack.securitySolution.some_page.flyoutCreateSubmitSuccess', {
       defaultMessage: '"{name}" has been added.',
       values: { name },
@@ -131,7 +131,7 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
    *    values: { name },
    *  })
    */
-  flyoutEditSubmitSuccess: ({ name }: ExceptionListItemSchema) =>
+  flyoutEditSubmitSuccess: ({ name }: ExceptionListItemSchema): string =>
     i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditSubmitSuccess', {
       defaultMessage: '"{name}" has been updated.',
       values: { name },

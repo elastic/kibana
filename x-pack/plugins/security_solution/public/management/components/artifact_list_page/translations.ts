@@ -57,7 +57,7 @@ export const artifactListPageLabels = Object.freeze({
    *    values: { total },
    *  })
    */
-  getShowingCountLabel: (total: number) => {
+  getShowingCountLabel: (total: number): string => {
     return i18n.translate('xpack.securitySolution.artifactListPage.showingTotal', {
       defaultMessage: 'Showing {total, plural, one {# artifact} other {# artifacts}}',
       values: { total },
