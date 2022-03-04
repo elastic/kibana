@@ -29,7 +29,8 @@ import {
   ControlGroupOutput,
   CONTROL_GROUP_TYPE,
 } from '../../../../controls/public';
-import { getDefaultDashboardControlGroupInput } from '../../../common';
+
+import { getDefaultDashboardControlGroupInput } from '../../../common/embeddable/dashboard_control_group';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
