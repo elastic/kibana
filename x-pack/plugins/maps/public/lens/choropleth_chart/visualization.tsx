@@ -102,6 +102,7 @@ export const getVisualization = ({
           filterOperations: (op: OperationMetadata) => op.isBucketed && op.dataType === 'string',
           enableDimensionEditor: true,
           required: true,
+          dataTestSubj: 'lnsChoropleth_regionKeyDimensionPanel',
         },
         {
           groupId: METRIC_GROUP_ID,
@@ -114,6 +115,7 @@ export const getVisualization = ({
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
           enableDimensionEditor: true,
           required: true,
+          dataTestSubj: 'lnsChoropleth_valueDimensionPanel',
         },
       ],
     };
