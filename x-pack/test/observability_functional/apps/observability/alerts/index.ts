@@ -17,8 +17,8 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
 const ACTIVE_ALERTS_CELL_COUNT = 48;
 const RECOVERED_ALERTS_CELL_COUNT = 24;
 const TOTAL_ALERTS_CELL_COUNT = 72;
-const DISABLED_ALERTS_CHECKBOX = 6;
-const ENABLED_ALERTS_CHECKBOX = 4;
+const DISABLED_ALERTS_CHECKBOX = 10;
+const ENABLED_ALERTS_CHECKBOX = 2;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -231,7 +231,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('Bulk Actions', () => {
         before(async () => {
           await security.testUser.setRoles(['global_alerts_logs_all_else_read'], true);
-          await observability.alerts.common.submitQuery('kibana.alert.status: "active"');
+          await observability.alerts.common.setWorkflowStatusFilter('open');
         });
         after(async () => {
           await observability.alerts.common.submitQuery('');
@@ -252,7 +252,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const selectAll = await testSubjects.find('select-all-events');
           await selectAll.click();
           const bulkActionsButton = await testSubjects.find('selectedShowBulkActionsButton');
-          expect(await bulkActionsButton.getVisibleText()).to.be('Selected 4 alerts');
+          expect(await bulkActionsButton.getVisibleText()).to.be('Selected 2 alerts');
           await selectAll.click();
         });
 
@@ -267,14 +267,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'acknowledged-alert-status'
           );
           await bulkActionsAcknowledgedAlertStatusButton.click();
-          await observability.alerts.common.submitQuery(
-            'kibana.alert.workflow_status : "acknowledged"'
-          );
+          await observability.alerts.common.setWorkflowStatusFilter('acknowledged');
 
           await retry.try(async () => {
             const enabledCheckBoxes =
               await observability.alerts.common.getAllEnabledCheckBoxInTable();
-            expect(enabledCheckBoxes.length).to.eql(1);
+            expect(enabledCheckBoxes.length).to.eql(3);
           });
         });
       });
