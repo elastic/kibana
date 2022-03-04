@@ -18,7 +18,7 @@ import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_fr
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
-import { AnalyticsIdSelector } from '../job_map/components/analytics_id_selector';
+import { AnalyticsIdSelector } from '../components/analytics_selector';
 
 export const Page: FC<{
   jobId: string;

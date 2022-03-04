@@ -21,10 +21,10 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import './_index.scss';
 
 import { ml } from '../../../../services/ml_api_service';
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
+import { ModelsTableToConfigMapping } from '../../../../trained_models/models_management';
 import {
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
@@ -73,17 +73,32 @@ const columns = [
 
 const modelColumns = [
   {
-    field: 'model_id', // ModelsTableToConfigMapping.id,
-    name: i18n.translate('xpack.ml.trainedModels.modelsList.modelIdHeader', {
+    field: ModelsTableToConfigMapping.id,
+    name: i18n.translate('xpack.ml.analyticsSelector.modelsList.modelIdHeader', {
       defaultMessage: 'ID',
     }),
     sortable: true,
     truncateText: false,
     'data-test-subj': 'mlAnalyticsSelectorColumnId',
   },
+  {
+    field: ModelsTableToConfigMapping.description,
+    width: '350px',
+    name: i18n.translate('xpack.ml.analyticsSelector.modelsList.modelDescriptionHeader', {
+      defaultMessage: 'Description',
+    }),
+    sortable: false,
+    truncateText: false,
+    'data-test-subj': 'mlAnalyticsSelectorColumnDescription',
+  },
 ];
 
-export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: any) {
+interface Props {
+  setAnalyticsId: React.Dispatch<React.SetStateAction<any>>;
+  jobsOnly?: boolean;
+}
+
+export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props) {
   const [selected, setSelected] = useState<
     { model_id?: string; job_id?: string; analysis_type?: string } | undefined
   >();
@@ -123,7 +138,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: any) {
       });
       setTrainedModels(response);
     } catch (e) {
-      console.error('Error fetching analytics', e); // eslint-disable-line
+      console.error('Error fetching trained models', e); // eslint-disable-line
       toasts.addDanger({
         title: i18n.translate('xpack.ml.analyticsSelector.trainedModelsFetchErrorMessage', {
           defaultMessage: 'An error occurred fetching trained models. Refresh and try again.',
