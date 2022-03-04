@@ -448,6 +448,7 @@ export class SessionIndex {
     logger.debug(`Running cleanup routine.`);
 
     let error: Error | undefined;
+    let haveDeletedSessions = false;
     try {
       for await (const sessionValues of this.getSessionValuesInBatches()) {
         const operations: Array<Required<Pick<BulkOperationContainer, 'delete'>>> = [];
@@ -457,6 +458,7 @@ export class SessionIndex {
           operations.push({ delete: { _id } });
         });
         if (operations.length > 0) {
+          haveDeletedSessions = true;
           const bulkResponse = await elasticsearchClient.bulk(
             {
               index: this.indexName,
@@ -487,6 +489,15 @@ export class SessionIndex {
     } catch (err) {
       logger.error(`Failed to clean up sessions: ${err.message}`);
       error = err;
+    }
+
+    if (haveDeletedSessions) {
+      try {
+        await elasticsearchClient.indices.refresh({ index: this.indexName });
+        logger.debug(`Refreshed session index.`);
+      } catch (err) {
+        logger.error(`Failed to refresh session index: ${err.message}`);
+      }
     }
 
     if (error) {
