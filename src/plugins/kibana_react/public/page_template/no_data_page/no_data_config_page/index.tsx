@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy } from 'react';
-
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { GaugeVisParams } from '../../gauge';
-
-const GaugeOptionsLazy = lazy(() => import('./gauge'));
-
-export const GaugeOptions = (props: VisEditorOptionsProps<GaugeVisParams>) => (
-  <GaugeOptionsLazy {...props} />
-);
+export { NoDataConfigPage, NoDataConfigPageWithSolutionNavBar } from './no_data_config_page';

@@ -7,21 +7,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import { colorSchemas } from '../../../../charts/public';
-import { getPositions, getScaleTypes } from '../../../xy/public';
-
 import { Alignment, GaugeType } from '../types';
 
 export const getGaugeTypes = () => [
   {
-    text: i18n.translate('visTypeVislib.gauge.gaugeTypes.arcText', {
+    text: i18n.translate('visTypeGauge.gauge.gaugeTypes.arcText', {
       defaultMessage: 'Arc',
     }),
     value: GaugeType.Arc,
   },
   {
-    text: i18n.translate('visTypeVislib.gauge.gaugeTypes.circleText', {
+    text: i18n.translate('visTypeGauge.gauge.gaugeTypes.circleText', {
       defaultMessage: 'Circle',
     }),
     value: GaugeType.Circle,
@@ -30,19 +27,19 @@ export const getGaugeTypes = () => [
 
 export const getAlignments = () => [
   {
-    text: i18n.translate('visTypeVislib.gauge.alignmentAutomaticTitle', {
+    text: i18n.translate('visTypeGauge.gauge.alignmentAutomaticTitle', {
       defaultMessage: 'Automatic',
     }),
     value: Alignment.Automatic,
   },
   {
-    text: i18n.translate('visTypeVislib.gauge.alignmentHorizontalTitle', {
+    text: i18n.translate('visTypeGauge.gauge.alignmentHorizontalTitle', {
       defaultMessage: 'Horizontal',
     }),
     value: Alignment.Horizontal,
   },
   {
-    text: i18n.translate('visTypeVislib.gauge.alignmentVerticalTitle', {
+    text: i18n.translate('visTypeGauge.gauge.alignmentVerticalTitle', {
       defaultMessage: 'Vertical',
     }),
     value: Alignment.Vertical,
@@ -52,11 +49,5 @@ export const getAlignments = () => [
 export const getGaugeCollections = () => ({
   gaugeTypes: getGaugeTypes(),
   alignments: getAlignments(),
-  colorSchemas,
-});
-
-export const getHeatmapCollections = () => ({
-  legendPositions: getPositions(),
-  scales: getScaleTypes(),
   colorSchemas,
 });
