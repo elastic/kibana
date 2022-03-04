@@ -333,7 +333,6 @@ describe('xy_visualization', () => {
               {
                 layerId: 'referenceLine',
                 layerType: layerTypes.REFERENCELINE,
-                seriesType: 'line',
                 accessors: [],
               },
             ],
@@ -345,7 +344,6 @@ describe('xy_visualization', () => {
       ).toEqual({
         layerId: 'referenceLine',
         layerType: layerTypes.REFERENCELINE,
-        seriesType: 'line',
         accessors: ['newCol'],
         yConfig: [
           {
@@ -787,7 +785,11 @@ describe('xy_visualization', () => {
           state: {
             ...baseState,
             layers: [
-              { ...baseState.layers[0], accessors: ['a'], seriesType: 'bar_percentage_stacked' },
+              {
+                ...baseState.layers[0],
+                accessors: ['a'],
+                seriesType: 'bar_percentage_stacked',
+              } as XYDataLayerConfig,
             ],
           },
           frame,
@@ -1010,7 +1012,6 @@ describe('xy_visualization', () => {
             {
               layerId: 'referenceLine',
               layerType: layerTypes.REFERENCELINE,
-              seriesType: 'line',
               accessors: [],
               yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
             },

@@ -6,12 +6,12 @@
  */
 
 import type { ExpressionFunctionDefinition } from '../../../../../../../src/plugins/expressions/common';
+import { layerTypes } from '../../../constants';
 import { YConfig } from '../axis_config';
 
-const referenceLine = 'referenceLine' as const;
 export interface XYReferenceLineLayerConfig {
   layerId: string;
-  layerType: typeof referenceLine;
+  layerType: typeof layerTypes.REFERENCELINE;
   accessors: string[];
   yConfig?: YConfig[];
 }
@@ -38,7 +38,7 @@ export const referenceLineLayerConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: '',
     },
-    layerType: { types: ['string'], options: [referenceLine], help: '' },
+    layerType: { types: ['string'], options: [layerTypes.REFERENCELINE], help: '' },
     accessors: {
       types: ['string'],
       help: 'The columns to display on the y axis.',
