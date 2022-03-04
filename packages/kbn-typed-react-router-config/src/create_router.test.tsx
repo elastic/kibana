@@ -10,16 +10,13 @@ import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter } from './create_router';
 import { createMemoryHistory } from 'history';
-import { route } from './route';
 
 describe('createRouter', () => {
-  const routes = route([
-    {
-      path: '/',
+  const routes = {
+    '/': {
       element: <></>,
-      children: [
-        {
-          path: '/',
+      children: {
+        '/': {
           element: <></>,
           params: t.type({
             query: t.type({
@@ -32,31 +29,27 @@ describe('createRouter', () => {
               rangeFrom: 'now-30m',
             },
           },
-          children: [
-            {
-              path: '/services/{serviceName}/errors',
+          children: {
+            '/services/{serviceName}/errors': {
               element: <></>,
               params: t.type({
                 path: t.type({
                   serviceName: t.string,
                 }),
               }),
-              children: [
-                {
-                  path: '/services/{serviceName}/errors/{groupId}',
+              children: {
+                '/services/{serviceName}/errors/{groupId}': {
                   element: <></>,
                   params: t.type({
                     path: t.type({ groupId: t.string }),
                   }),
                 },
-                {
-                  path: '/services/{serviceName}/errors',
+                '/services/{serviceName}/errors': {
                   element: <></>,
                 },
-              ],
+              },
             },
-            {
-              path: '/services',
+            '/services': {
               element: <></>,
               params: t.type({
                 query: t.type({
@@ -64,13 +57,11 @@ describe('createRouter', () => {
                 }),
               }),
             },
-            {
-              path: '/services/{serviceName}',
+            '/services/{serviceName}': {
               element: <></>,
-              children: [
-                {
+              children: {
+                '/services/{serviceName}': {
                   element: <></>,
-                  path: '/services/{serviceName}',
                   params: t.type({
                     path: t.type({
                       serviceName: t.string,
@@ -81,10 +72,9 @@ describe('createRouter', () => {
                     }),
                   }),
                 },
-              ],
+              },
             },
-            {
-              path: '/traces',
+            '/traces': {
               element: <></>,
               params: t.type({
                 query: t.type({
@@ -93,8 +83,7 @@ describe('createRouter', () => {
                 }),
               }),
             },
-            {
-              path: '/service-map',
+            '/service-map': {
               element: <></>,
               params: t.type({
                 query: t.type({
@@ -102,11 +91,11 @@ describe('createRouter', () => {
                 }),
               }),
             },
-          ],
+          },
         },
-      ],
+      },
     },
-  ] as const);
+  };
 
   let history = createMemoryHistory();
   const router = createRouter(routes);
@@ -207,7 +196,15 @@ describe('createRouter', () => {
     it('throws an error if the given path does not match any routes', () => {
       expect(() => {
         router.getParams('/service-map', history.location);
-      }).toThrowError('No matching route found for /service-map');
+      }).toThrowError('/service-map does not match current path /');
+
+      expect(() => {
+        router.getParams('/services/{serviceName}', history.location);
+      }).toThrowError('/services/{serviceName} does not match current path /');
+
+      expect(() => {
+        router.getParams('/service-map', '/services/{serviceName}', history.location);
+      }).toThrowError('None of /service-map, /services/{serviceName} match current path /');
     });
 
     it('does not throw an error if the given path does not match any routes but is marked as optional', () => {
@@ -259,7 +256,7 @@ describe('createRouter', () => {
 
       expect(() => {
         router.matchRoutes('/traces', history.location);
-      }).toThrowError('No matching route found for /traces');
+      }).toThrowError('/traces does not match current path /service-map');
     });
 
     it('applies defaults', () => {

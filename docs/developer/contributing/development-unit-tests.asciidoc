@@ -75,7 +75,7 @@ In order to ease the pain specialized tasks provide alternate methods
 for running the tests.
 
 You could also add the `--debug` option so that `node` is run using
-the `--debug-brk` flag. You’ll need to connect a remote debugger such
+the `--inspect-brk` flag. You’ll need to connect a remote debugger such
 as https://github.com/node-inspector/node-inspector[`node-inspector`]
 to proceed in this mode.
 
@@ -83,6 +83,6 @@ to proceed in this mode.
 === Unit Testing Plugins
 
 Even when using 
-https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator[Kibana
+https://github.com/elastic/kibana/tree/main/packages/kbn-plugin-generator[Kibana
 plugin generator] we do not enforce a way for unit testing your plugin. Please setup and you use 
 the tools of your choice. If the plugin will live inside the Kibana repo `Jest` must be used.

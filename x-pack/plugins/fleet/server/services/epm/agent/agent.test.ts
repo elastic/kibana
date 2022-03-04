@@ -258,4 +258,19 @@ my-package:
     const output = compileTemplate(vars, stringTemplate);
     expect(output).toEqual(targetOutput);
   });
+
+  it('should throw on invalid handlebar template', () => {
+    const streamTemplate = `
+input: log
+paths:
+{{ if test}}
+  - {{ test}}
+{{ end }}
+`;
+    const vars = {};
+
+    expect(() => compileTemplate(vars, streamTemplate)).toThrowError(
+      'Error while compiling agent template: options.inverse is not a function'
+    );
+  });
 });

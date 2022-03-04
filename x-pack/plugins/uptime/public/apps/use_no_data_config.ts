@@ -31,13 +31,13 @@ export function useNoDataConfig(): KibanaPageTemplateProps['noDataConfig'] {
       actions: {
         beats: {
           title: i18n.translate('xpack.uptime.noDataConfig.beatsCard.title', {
-            defaultMessage: 'Add monitors with the Elastic Synthetics integration',
+            defaultMessage: 'Add monitors with Heartbeat',
           }),
           description: i18n.translate('xpack.uptime.noDataConfig.beatsCard.description', {
             defaultMessage:
               'Proactively monitor the availability of your sites and services. Receive alerts and resolve issues faster to optimize your users experience.',
           }),
-          href: basePath + `/app/integrations/detail/synthetics/overview`,
+          href: basePath + `/app/home#/tutorial/uptimeMonitors`,
         },
       },
       docsLink: docLinks!.links.observability.guide,

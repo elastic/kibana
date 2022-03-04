@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { render } from '@testing-library/react';
 import {
   withUnconnectedElementsLoadedTelemetry,
@@ -13,148 +14,137 @@ import {
   WorkpadLoadedWithErrorsMetric,
 } from './workpad_telemetry';
 import { METRIC_TYPE } from '../../lib/ui_metric';
-import { ResolvedArgType } from '../../../types';
+import { ExpressionContext, ResolvedArgType } from '../../../types';
+
+jest.mock('react-redux', () => {
+  const originalModule = jest.requireActual('react-redux');
+
+  return {
+    ...originalModule,
+    useSelector: jest.fn(),
+  };
+});
 
 const trackMetric = jest.fn();
+const useSelectorMock = useSelector as jest.Mock;
+
 const Component = withUnconnectedElementsLoadedTelemetry(() => <div />, trackMetric);
 
 const mockWorkpad = {
   id: 'workpadid',
   pages: [
     {
-      elements: [{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }],
+      elements: [{ id: '0' }, { id: '1' }, { id: '2' }, { id: '3' }],
     },
     {
-      elements: [{ id: '5' }],
+      elements: [{ id: '4' }],
     },
   ],
 };
 
-const resolvedArgsMatchWorkpad = {
-  '1': {} as ResolvedArgType,
-  '2': {} as ResolvedArgType,
-  '3': {} as ResolvedArgType,
-  '4': {} as ResolvedArgType,
-  '5': {} as ResolvedArgType,
-};
+const getMockState = (resolvedArgs: Record<string, ResolvedArgType>) => ({
+  transient: { resolvedArgs },
+});
 
-const resolvedArgsNotMatchWorkpad = {
-  'non-matching-id': {} as ResolvedArgType,
-};
+const getResolveArgWithState = (state: 'pending' | 'ready' | 'error') =>
+  ({
+    expressionRenderable: { value: { as: state, type: 'render' }, state, error: null },
+    expressionContext: {} as ExpressionContext,
+  } as ResolvedArgType);
 
-const pendingCounts = {
-  pending: 5,
-  error: 0,
-  ready: 0,
-};
+const arrayToObject = (array: ResolvedArgType[]) =>
+  array.reduce<Record<number, ResolvedArgType>>((acc, el, index) => {
+    acc[index] = el;
+    return acc;
+  }, {});
 
-const readyCounts = {
-  pending: 0,
-  error: 0,
-  ready: 5,
-};
+const pendingMockState = getMockState(
+  arrayToObject(Array(5).fill(getResolveArgWithState('pending')))
+);
 
-const errorCounts = {
-  pending: 0,
-  error: 1,
-  ready: 4,
-};
+const readyMockState = getMockState(arrayToObject(Array(5).fill(getResolveArgWithState('ready'))));
+
+const errorMockState = getMockState(
+  arrayToObject([
+    ...Array(4).fill(getResolveArgWithState('ready')),
+    ...Array(1).fill(getResolveArgWithState('error')),
+  ])
+);
+
+const emptyElementsMockState = getMockState({});
+
+const notMatchedMockState = getMockState({
+  'non-matching-id': getResolveArgWithState('ready'),
+});
 
 describe('Elements Loaded Telemetry', () => {
   beforeEach(() => {
     trackMetric.mockReset();
   });
 
-  it('tracks when all resolvedArgs are completed', () => {
-    const { rerender } = render(
-      <Component
-        telemetryElementCounts={pendingCounts}
-        telemetryResolvedArgs={resolvedArgsMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
+  afterEach(() => {
+    useSelectorMock.mockClear();
+  });
 
+  it('tracks when all resolvedArgs are completed', () => {
+    useSelectorMock.mockImplementation((callback) => {
+      return callback(pendingMockState);
+    });
+
+    const { rerender } = render(<Component workpad={mockWorkpad} />);
     expect(trackMetric).not.toBeCalled();
 
-    rerender(
-      <Component
-        telemetryElementCounts={readyCounts}
-        telemetryResolvedArgs={resolvedArgsMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
+    useSelectorMock.mockClear();
+    useSelectorMock.mockImplementation((callback) => {
+      return callback(readyMockState);
+    });
 
+    rerender(<Component workpad={mockWorkpad} />);
     expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
   });
 
   it('only tracks loaded once', () => {
-    const { rerender } = render(
-      <Component
-        telemetryElementCounts={pendingCounts}
-        telemetryResolvedArgs={resolvedArgsMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
+    useSelectorMock.mockImplementation((callback) => {
+      return callback(pendingMockState);
+    });
 
+    const { rerender } = render(<Component workpad={mockWorkpad} />);
     expect(trackMetric).not.toBeCalled();
 
-    rerender(
-      <Component
-        telemetryElementCounts={readyCounts}
-        telemetryResolvedArgs={resolvedArgsMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
-    rerender(
-      <Component
-        telemetryElementCounts={readyCounts}
-        telemetryResolvedArgs={resolvedArgsMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
+    useSelectorMock.mockClear();
+    useSelectorMock.mockImplementation((callback) => {
+      return callback(readyMockState);
+    });
 
+    rerender(<Component workpad={mockWorkpad} />);
+    rerender(<Component workpad={mockWorkpad} />);
     expect(trackMetric).toBeCalledTimes(1);
   });
 
   it('does not track if resolvedArgs are never pending', () => {
-    const { rerender } = render(
-      <Component
-        telemetryElementCounts={readyCounts}
-        telemetryResolvedArgs={resolvedArgsMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
+    useSelectorMock.mockImplementation((callback) => {
+      return callback(readyMockState);
+    });
 
-    rerender(
-      <Component
-        telemetryElementCounts={readyCounts}
-        telemetryResolvedArgs={resolvedArgsMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
-
+    const { rerender } = render(<Component workpad={mockWorkpad} />);
+    rerender(<Component workpad={mockWorkpad} />);
     expect(trackMetric).not.toBeCalled();
   });
 
   it('tracks if elements are in error state after load', () => {
-    const { rerender } = render(
-      <Component
-        telemetryElementCounts={pendingCounts}
-        telemetryResolvedArgs={resolvedArgsMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
+    useSelectorMock.mockImplementation((callback) => {
+      return callback(pendingMockState);
+    });
 
+    const { rerender } = render(<Component workpad={mockWorkpad} />);
     expect(trackMetric).not.toBeCalled();
 
-    rerender(
-      <Component
-        telemetryElementCounts={errorCounts}
-        telemetryResolvedArgs={resolvedArgsMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
+    useSelectorMock.mockClear();
+    useSelectorMock.mockImplementation((callback) => {
+      return callback(errorMockState);
+    });
 
+    rerender(<Component workpad={mockWorkpad} />);
     expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, [
       WorkpadLoadedMetric,
       WorkpadLoadedWithErrorsMetric,
@@ -166,42 +156,30 @@ describe('Elements Loaded Telemetry', () => {
       id: 'otherworkpad',
       pages: [
         {
-          elements: [{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }],
+          elements: [{ id: '0' }, { id: '1' }, { id: '2' }, { id: '3' }],
         },
         {
-          elements: [{ id: '5' }],
+          elements: [{ id: '4' }],
         },
       ],
     };
 
-    const { rerender } = render(
-      <Component
-        telemetryElementCounts={readyCounts}
-        telemetryResolvedArgs={resolvedArgsNotMatchWorkpad}
-        workpad={otherWorkpad}
-      />
-    );
+    useSelectorMock.mockImplementation((callback) => {
+      return callback(notMatchedMockState);
+    });
 
+    const { rerender } = render(<Component workpad={otherWorkpad} />);
     expect(trackMetric).not.toBeCalled();
 
-    rerender(
-      <Component
-        telemetryElementCounts={readyCounts}
-        telemetryResolvedArgs={resolvedArgsNotMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
-
+    rerender(<Component workpad={mockWorkpad} />);
     expect(trackMetric).not.toBeCalled();
 
-    rerender(
-      <Component
-        telemetryElementCounts={readyCounts}
-        telemetryResolvedArgs={resolvedArgsMatchWorkpad}
-        workpad={mockWorkpad}
-      />
-    );
+    useSelectorMock.mockClear();
+    useSelectorMock.mockImplementation((callback) => {
+      return callback(readyMockState);
+    });
 
+    rerender(<Component workpad={mockWorkpad} />);
     expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
   });
 
@@ -211,24 +189,12 @@ describe('Elements Loaded Telemetry', () => {
       pages: [],
     };
 
-    const resolvedArgs = {};
+    useSelectorMock.mockImplementation((callback) => {
+      return callback(emptyElementsMockState);
+    });
 
-    const { rerender } = render(
-      <Component
-        telemetryElementCounts={readyCounts}
-        telemetryResolvedArgs={resolvedArgs}
-        workpad={otherWorkpad}
-      />
-    );
-
-    rerender(
-      <Component
-        telemetryElementCounts={readyCounts}
-        telemetryResolvedArgs={resolvedArgs}
-        workpad={otherWorkpad}
-      />
-    );
-
+    const { rerender } = render(<Component workpad={otherWorkpad} />);
+    rerender(<Component workpad={otherWorkpad} />);
     expect(trackMetric).not.toBeCalled();
   });
 });

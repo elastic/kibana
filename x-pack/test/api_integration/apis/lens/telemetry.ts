@@ -20,6 +20,7 @@ const COMMON_HEADERS = {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   async function assertExpectedSavedObjects(num: number) {
     // Make sure that new/deleted docs are available to search
@@ -27,9 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
       index: '.kibana',
     });
 
-    const {
-      body: { count },
-    } = await es.count({
+    const { count } = await es.count({
       index: '.kibana',
       q: 'type:lens-ui-telemetry',
     });
@@ -149,7 +148,6 @@ export default ({ getService }: FtrProviderContext) => {
           getEvent('revert', date1, 'suggestion'),
         ],
       });
-
       const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
 
       expect(result).to.eql({
@@ -173,9 +171,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should collect telemetry on saved visualization types with a painless script', async () => {
-      const esArchiver = getService('esArchiver');
-
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
 
       const results = await getVisualizationCounts(() => Promise.resolve(es), '.kibana');
 
@@ -195,7 +193,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
       expect(results.saved_overall_total).to.eql(3);
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
   });
 };

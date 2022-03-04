@@ -28,16 +28,11 @@ export const defaultState: ExecutorState = {
 export interface ExecutorPureTransitions {
   addFunction: (state: ExecutorState) => (fn: ExpressionFunction) => ExecutorState;
   addType: (state: ExecutorState) => (type: ExpressionType) => ExecutorState;
-  extendContext: (state: ExecutorState) => (extraContext: Record<string, unknown>) => ExecutorState;
 }
 
 export const pureTransitions: ExecutorPureTransitions = {
   addFunction: (state) => (fn) => ({ ...state, functions: { ...state.functions, [fn.name]: fn } }),
   addType: (state) => (type) => ({ ...state, types: { ...state.types, [type.name]: type } }),
-  extendContext: (state) => (extraContext) => ({
-    ...state,
-    context: { ...state.context, ...extraContext },
-  }),
 };
 
 export interface ExecutorPureSelectors {

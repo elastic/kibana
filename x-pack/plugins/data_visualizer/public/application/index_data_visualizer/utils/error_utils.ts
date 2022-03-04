@@ -85,7 +85,7 @@ export function isDVResponseError(error: any): error is DVResponseError {
 }
 
 export function isBoomError(error: any): error is Boom.Boom {
-  return error.isBoom === true;
+  return error?.isBoom === true;
 }
 
 export function isWrappedError(error: any): error is WrappedError {

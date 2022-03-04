@@ -26,6 +26,7 @@ import {
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
+import { useKibana } from '../../../common/lib/kibana';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 
 /**
@@ -75,17 +76,25 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+
+    const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
     const showEmptyState = useShowPagesWithEmptyView();
     const emptyStateProps = showEmptyState ? NO_DATA_PAGE_TEMPLATE_PROPS : {};
 
-    // StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop, which may account for any style discrepancies, such as the bottom border not extending the full width of the page, between EuiPageTemplate and the security solution pages.
-
+    /*
+     * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
+     * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
+     * which may account for any style discrepancies, such as the bottom border not extending the full width of the page,
+     * between EuiPageTemplate and the security solution pages.
+     */
     return (
       <StyledKibanaPageTemplate
         $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         bottomBarProps={SecuritySolutionBottomBarProps}
-        bottomBar={<SecuritySolutionBottomBar onAppLeave={onAppLeave} />}
+        bottomBar={
+          userHasSecuritySolutionVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
+        }
         paddingSize="none"
         solutionNav={solutionNav}
         restrictWidth={false}

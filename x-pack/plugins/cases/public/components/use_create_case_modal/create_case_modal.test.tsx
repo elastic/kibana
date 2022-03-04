@@ -10,11 +10,15 @@ import { mount } from 'enzyme';
 
 import { CreateCaseModal } from './create_case_modal';
 import { TestProviders } from '../../common/mock';
-import { getCreateCaseLazy as getCreateCase } from '../../methods';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { CreateCase } from '../create';
 
-jest.mock('../../methods');
-const getCreateCaseMock = getCreateCase as jest.Mock;
+jest.mock('../create', () => ({
+  CreateCase: jest.fn(),
+}));
+
+const CreateCaseMock = CreateCase as unknown as jest.Mock;
+
 const onCloseCaseModal = jest.fn();
 const onSuccess = jest.fn();
 const defaultProps = {
@@ -26,8 +30,8 @@ const defaultProps = {
 
 describe('CreateCaseModal', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    getCreateCaseMock.mockReturnValue(<></>);
+    jest.clearAllMocks();
+    CreateCaseMock.mockReturnValue(<></>);
   });
 
   it('renders', () => {
@@ -68,7 +72,7 @@ describe('CreateCaseModal', () => {
       </TestProviders>
     );
 
-    expect(getCreateCaseMock.mock.calls[0][0]).toEqual(
+    expect(CreateCaseMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         onSuccess,
         onCancel: onCloseCaseModal,

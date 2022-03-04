@@ -9,7 +9,6 @@ import { EndpointAction } from '../../management/pages/endpoint_hosts/store/acti
 import { PolicyDetailsAction } from '../../management/pages/policy/store/policy_details';
 import { TrustedAppsPageAction } from '../../management/pages/trusted_apps/store/action';
 import { EventFiltersPageAction } from '../../management/pages/event_filters/store/action';
-import { HostIsolationExceptionsPageAction } from '../../management/pages/host_isolation_exceptions/store/action';
 
 export { appActions } from './app';
 export { dragAndDropActions } from './drag_and_drop';
@@ -22,5 +21,4 @@ export type AppAction =
   | RoutingAction
   | PolicyDetailsAction
   | TrustedAppsPageAction
-  | EventFiltersPageAction
-  | HostIsolationExceptionsPageAction;
+  | EventFiltersPageAction;

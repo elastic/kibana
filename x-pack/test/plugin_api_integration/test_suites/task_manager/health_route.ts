@@ -86,6 +86,8 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const request = supertest(url.format(config.get('servers.kibana')));
 
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   function getHealthRequest() {
     return request.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
   }
@@ -94,6 +96,21 @@ export default function ({ getService }: FtrProviderContext) {
     return getHealthRequest()
       .expect(200)
       .then((response) => response.body);
+  }
+
+  function getHealthForSampleTask(): Promise<MonitoringStats> {
+    return retry.try(async () => {
+      const health = await getHealth();
+
+      // only return health stats once they contain sampleTask, if requested
+      if (health.stats.runtime.value.drift_by_type.sampleTask) {
+        return health;
+      }
+
+      // if sampleTask is not in the metrics, wait a bit and retry
+      await delay(500);
+      throw new Error('sampleTask has not yet run');
+    });
   }
 
   function scheduleTask(task: Partial<ConcreteTaskInstance>): Promise<ConcreteTaskInstance> {
@@ -105,11 +122,10 @@ export default function ({ getService }: FtrProviderContext) {
       .then((response: { body: ConcreteTaskInstance }) => response.body);
   }
 
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
   const monitoredAggregatedStatsRefreshRate = 5000;
 
-  describe('health', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/125581
+  describe.skip('health', () => {
     it('should return basic configuration of task manager', async () => {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
@@ -164,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
         // workload is configured to refresh every 5s in FTs
         await delay(monitoredAggregatedStatsRefreshRate);
 
-        const workloadAfterScheduling = (await getHealth()).stats.workload.value;
+        const workloadAfterScheduling = (await getHealthForSampleTask()).stats.workload.value;
 
         expect(
           (workloadAfterScheduling.task_types as { sampleTask: { count: number } }).sampleTask.count
@@ -242,7 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           value: { drift, drift_by_type, load, polling, execution },
         },
-      } = (await getHealth()).stats;
+      } = (await getHealthForSampleTask()).stats;
 
       expect(isNaN(Date.parse(polling.last_successful_poll as string))).to.eql(false);
       expect(isNaN(Date.parse(polling.last_polling_delay as string))).to.eql(false);

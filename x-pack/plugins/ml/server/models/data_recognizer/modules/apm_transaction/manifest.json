@@ -1,29 +1,30 @@
 {
   "id": "apm_transaction",
   "title": "APM",
-  "description": "Detect anomalies in transactions from your APM services.",
+  "description": "Detect anomalies in transaction latency, throughput and failure rate from your APM services for metric data.",
   "type": "Transaction data",
   "logoFile": "logo.json",
-  "defaultIndexPattern": "apm-*-transaction",
+  "defaultIndexPattern": "apm-*-metric,metrics-apm*",
   "query": {
     "bool": {
       "filter": [
-        { "term": { "processor.event": "transaction" } },
-        { "exists": { "field": "transaction.duration" } }
-      ]
+        { "term": { "processor.event": "metric" } },
+        { "term": { "metricset.name": "transaction" } }
+      ],
+      "must_not": { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
     }
   },
   "jobs": [
     {
-      "id": "high_mean_transaction_duration",
-      "file": "high_mean_transaction_duration.json"
+      "id": "apm_tx_metrics",
+      "file": "apm_tx_metrics.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-high_mean_transaction_duration",
-      "file": "datafeed_high_mean_transaction_duration.json",
-      "job_id": "high_mean_transaction_duration"
+      "id": "datafeed-apm_tx_metrics",
+      "file": "datafeed_apm_tx_metrics.json",
+      "job_id": "apm_tx_metrics"
     }
   ]
 }

@@ -7,6 +7,7 @@
  */
 import './app_container.scss';
 
+import { Observable } from 'rxjs';
 import React, {
   Fragment,
   FunctionComponent,
@@ -19,6 +20,7 @@ import { EuiLoadingElastic } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { MountPoint } from '../../types';
+import { CoreTheme } from '../../theme';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';
@@ -29,6 +31,7 @@ interface Props {
   appPath: string;
   appId: string;
   mounter?: Mounter;
+  theme$: Observable<CoreTheme>;
   appStatus: AppStatus;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
@@ -45,6 +48,7 @@ export const AppContainer: FunctionComponent<Props> = ({
   createScopedHistory,
   appStatus,
   setIsMounting,
+  theme$,
 }: Props) => {
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
@@ -77,6 +81,7 @@ export const AppContainer: FunctionComponent<Props> = ({
             appBasePath: mounter.appBasePath,
             history: createScopedHistory(appPath),
             element: elementRef.current!,
+            theme$,
             onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
           })) || null;
@@ -104,6 +109,7 @@ export const AppContainer: FunctionComponent<Props> = ({
     setAppActionMenu,
     appPath,
     setIsMounting,
+    theme$,
   ]);
 
   return (

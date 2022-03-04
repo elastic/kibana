@@ -10,7 +10,7 @@ import { SavedObjectDecoratorConfig } from '../../../saved_objects/public';
 import { tagDecoratorFactory, decoratorId } from './factory';
 import { InternalTagDecoratedSavedObject } from './types';
 
-export { TagDecoratedSavedObject } from './types';
+export type { TagDecoratedSavedObject } from './types';
 
 export const tagDecoratorConfig: SavedObjectDecoratorConfig<InternalTagDecoratedSavedObject> = {
   id: decoratorId,

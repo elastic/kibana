@@ -14,7 +14,7 @@ import {
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 
@@ -102,7 +102,7 @@ export default {
     },
     indexPattern: {
       description:
-        '`IndexPatternBase` - index patterns used to populate field options and value autocomplete.',
+        '`DataViewBase` - index patterns used to populate field options and value autocomplete.',
       type: {
         required: true,
       },

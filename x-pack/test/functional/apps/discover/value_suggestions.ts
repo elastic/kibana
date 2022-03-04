@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
@@ -29,10 +29,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
+      await kibanaServer.uiSettings.update({
+        'doc_table:legacy': true,
+      });
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
+      await kibanaServer.uiSettings.unset('doc_table:legacy');
     });
 
     describe('useTimeRange enabled', () => {
@@ -56,16 +60,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           await queryBar.setQuery('extension.raw : ');
-          const suggestions = await queryBar.getSuggestions();
-          expect(suggestions.length).to.be(0);
+          await queryBar.expectSuggestions({ count: 0 });
         });
 
         it('show up if in range', async () => {
           await PageObjects.timePicker.setDefaultAbsoluteRange();
           await queryBar.setQuery('extension.raw : ');
-          const suggestions = await queryBar.getSuggestions();
-          expect(suggestions.length).to.be(5);
-          expect(suggestions).to.contain('"jpg"');
+          await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
         });
       });
 
@@ -116,17 +117,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await queryBar.setQuery('extension.raw : ');
-        const suggestions = await queryBar.getSuggestions();
-        expect(suggestions.length).to.be(5);
-        expect(suggestions).to.contain('"jpg"');
+        await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
       });
 
       it('show up', async () => {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await queryBar.setQuery('extension.raw : ');
-        const suggestions = await queryBar.getSuggestions();
-        expect(suggestions.length).to.be(5);
-        expect(suggestions).to.contain('"jpg"');
+        await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
       });
     });
   });

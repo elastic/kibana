@@ -50,16 +50,10 @@
 
 // Removes EUI focus ring
 @mixin removeEuiFocusRing {
-  @include kbnThemeStyle('v7') {
-    animation: none !important; // sass-lint:disable-line no-important
-  }
+  outline: none;
 
-  @include kbnThemeStyle('v8') {
-    outline: none;
-
-    &:focus-visible {
-      outline-style: none;
-    }
+  &:focus-visible {
+    outline-style: none;
   }
 }
 
@@ -69,23 +63,14 @@
 
   #{$target} {
     @include euiFocusBackground;
-
-    @include kbnThemeStyle('v7') {
-      @include euiFocusRing;
-    }
-
-    @include kbnThemeStyle('v8') {
-      outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
-    }
+    outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
   }
 
-  @include kbnThemeStyle('v8') {
-    &:focus-visible #{$target} {
-      outline-style: auto; // Chrome
-    }
+  &:focus-visible #{$target} {
+    outline-style: auto; // Chrome
+  }
 
-    &:not(:focus-visible) #{$target} {
-      outline: none;
-    }
+  &:not(:focus-visible) #{$target} {
+    outline: none;
   }
 }

@@ -22,7 +22,8 @@ export const usePacks = ({
   return useQuery(
     [PACKS_ID, { pageIndex, pageSize, sortField, sortDirection }],
     async () =>
-      http.get('/internal/osquery/packs', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      http.get<any>('/internal/osquery/packs', {
         query: { pageIndex, pageSize, sortField, sortDirection },
       }),
     {

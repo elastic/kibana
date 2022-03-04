@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  ElasticsearchClient,
-  Logger,
-  SharedGlobalConfig,
-  PluginInitializerContext,
-} from 'kibana/server';
+import { CoreSetup, ElasticsearchClient, Logger, PluginInitializerContext } from 'kibana/server';
 import url from 'url';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MonitoringConfig } from './config';
 import { PluginsSetup } from './types';
 import { mbSafeQuery } from './lib/mb_safe_query';
@@ -25,7 +19,6 @@ interface InitSetupOptions {
   config: MonitoringConfig;
   getLogger: GetLogger;
   log: Logger;
-  legacyConfig: SharedGlobalConfig;
   setupPlugins: PluginsSetup;
 }
 
@@ -82,7 +75,7 @@ export class Globals {
           'cluster.getSettings': (p) => client.cluster.getSettings(p),
           'cluster.putSettings': (p) => client.cluster.putSettings(p),
         };
-        const { body } = await endpointMap[endpoint](params);
+        const body = await endpointMap[endpoint](params);
         return body;
       });
 

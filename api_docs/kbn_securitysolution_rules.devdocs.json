@@ -1,0 +1,365 @@
+{
+  "id": "@kbn/securitysolution-rules",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.flattenWithPrefix",
+        "type": "Function",
+        "tags": [],
+        "label": "flattenWithPrefix",
+        "description": [],
+        "signature": [
+          "(prefix: string, maybeObj: unknown) => Record<string, SearchTypes>"
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-server.flattenWithPrefix.$1",
+            "type": "string",
+            "tags": [],
+            "label": "prefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-server.flattenWithPrefix.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "maybeObj",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.isRuleType",
+        "type": "Function",
+        "tags": [],
+        "label": "isRuleType",
+        "description": [],
+        "signature": [
+          "(ruleType: unknown) => ruleType is \"eql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-server.isRuleType.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "ruleType",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.isRuleTypeId",
+        "type": "Function",
+        "tags": [],
+        "label": "isRuleTypeId",
+        "description": [],
+        "signature": [
+          "(ruleTypeId: unknown) => ruleTypeId is ",
+          {
+            "pluginId": "@kbn/securitysolution-rules",
+            "scope": "server",
+            "docId": "kibKbnSecuritysolutionRulesPluginApi",
+            "section": "def-server.RuleTypeId",
+            "text": "RuleTypeId"
+          }
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-server.isRuleTypeId.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "ruleTypeId",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.EQL_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EQL_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"siem.eqlRule\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.INDICATOR_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INDICATOR_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"siem.indicatorRule\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.ML_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ML_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"siem.mlRule\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.QUERY_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "QUERY_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"siem.queryRule\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.RuleType",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleType",
+        "description": [],
+        "signature": [
+          "\"eql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.RuleTypeId",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeId",
+        "description": [],
+        "signature": [
+          "\"siem.eqlRule\" | \"siem.indicatorRule\" | \"siem.mlRule\" | \"siem.queryRule\" | \"siem.savedQueryRule\" | \"siem.thresholdRule\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.SAVED_QUERY_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_QUERY_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"siem.savedQueryRule\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.SIGNALS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SIGNALS_ID",
+        "description": [
+          "\nId for the legacy siem signals alerting type"
+        ],
+        "signature": [
+          "\"siem.signals\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.THRESHOLD_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "THRESHOLD_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"siem.thresholdRule\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.ruleTypeMappings",
+        "type": "Object",
+        "tags": [],
+        "label": "ruleTypeMappings",
+        "description": [
+          "\nMaps legacy rule types to RAC rule type IDs."
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-server.ruleTypeMappings.eql",
+            "type": "string",
+            "tags": [],
+            "label": "eql",
+            "description": [],
+            "signature": [
+              "\"siem.eqlRule\""
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-server.ruleTypeMappings.machine_learning",
+            "type": "string",
+            "tags": [],
+            "label": "machine_learning",
+            "description": [],
+            "signature": [
+              "\"siem.mlRule\""
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-server.ruleTypeMappings.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "\"siem.queryRule\""
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-server.ruleTypeMappings.saved_query",
+            "type": "string",
+            "tags": [],
+            "label": "saved_query",
+            "description": [],
+            "signature": [
+              "\"siem.savedQueryRule\""
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-server.ruleTypeMappings.threat_match",
+            "type": "string",
+            "tags": [],
+            "label": "threat_match",
+            "description": [],
+            "signature": [
+              "\"siem.indicatorRule\""
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-server.ruleTypeMappings.threshold",
+            "type": "string",
+            "tags": [],
+            "label": "threshold",
+            "description": [],
+            "signature": [
+              "\"siem.thresholdRule\""
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

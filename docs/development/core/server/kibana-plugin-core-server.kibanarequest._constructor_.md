@@ -16,9 +16,9 @@ constructor(request: Request, params: Params, query: Query, body: Body, withoutS
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  request | <code>Request</code> |  |
-|  params | <code>Params</code> |  |
-|  query | <code>Query</code> |  |
-|  body | <code>Body</code> |  |
-|  withoutSecretHeaders | <code>boolean</code> |  |
+|  request | Request |  |
+|  params | Params |  |
+|  query | Query |  |
+|  body | Body |  |
+|  withoutSecretHeaders | boolean |  |
 

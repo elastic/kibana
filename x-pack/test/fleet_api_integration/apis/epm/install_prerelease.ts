@@ -14,11 +14,12 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
 
-  const testPackage = 'prerelease-0.1.0-dev.0+abc';
+  const testPackage = 'prerelease';
+  const testPackageVersion = '0.1.0-dev.0+abc';
   const server = dockerServers.get('registry');
 
-  const deletePackage = async (pkgkey: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+  const deletePackage = async (pkg: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
   describe('installs package that has a prerelease version', async () => {
@@ -27,13 +28,13 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
-        await deletePackage(testPackage);
+        await deletePackage(testPackage, testPackageVersion);
       }
     });
 
     it('should install the package correctly', async function () {
       await supertest
-        .post(`/api/fleet/epm/packages/${testPackage}`)
+        .post(`/api/fleet/epm/packages/${testPackage}/${testPackageVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });

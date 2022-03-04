@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await transform.securityUI.logout();
       });
 
@@ -67,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
         await transform.api.cleanTransformIndices();
+        await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
       });
 
       it('should display elements in the Transform list page correctly', async () => {
@@ -149,20 +151,12 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.testExecution.logTestStep('should have the destination inputs enabled');
         await transform.editFlyout.openTransformEditAccordionDestinationSettings();
         await transform.editFlyout.assertTransformEditFlyoutInputEnabled('DestinationIndex', true);
-        await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
-          'DestinationPipeline',
-          true
-        );
+        await transform.editFlyout.assertTransformEditFlyoutIngestPipelineFieldSelectExists();
 
         await transform.testExecution.logTestStep(
-          'should have the retention policy inputs enabled'
+          'should have the retention policy switch enabled'
         );
-        await transform.editFlyout.openTransformEditAccordionRetentionPolicySettings();
-        await transform.editFlyout.assertTransformEditFlyoutRetentionPolicySelectEnabled(true);
-        await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
-          'RetentionPolicyMaxAge',
-          true
-        );
+        await transform.editFlyout.assertTransformEditFlyoutRetentionPolicySwitchEnabled(true);
 
         await transform.testExecution.logTestStep(
           'should have the advanced settings inputs enabled'

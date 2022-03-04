@@ -34,6 +34,7 @@ export type GetTransformsRequestSchema = TypeOf<typeof getTransformsRequestSchem
 export interface GetTransformsResponseSchema {
   count: number;
   transforms: TransformConfigUnion[];
+  errors?: Array<{ reason: string; type: string }>;
 }
 
 // schemas shared by parts of the preview, create and update endpoint
@@ -94,6 +95,13 @@ function transformConfigPayloadValidator<
   }
 }
 
+export const _metaSchema = schema.object(
+  {},
+  {
+    unknowns: 'allow',
+  }
+);
+
 // PUT transforms/{transformId}
 export const putTransformsRequestSchema = schema.object(
   {
@@ -112,6 +120,11 @@ export const putTransformsRequestSchema = schema.object(
     settings: schema.maybe(settingsSchema),
     source: sourceSchema,
     sync: schema.maybe(syncSchema),
+    /**
+     * This _meta field stores an arbitrary key-value map
+     * where keys are strings and values are arbitrary objects (possibly also maps).
+     */
+    _meta: schema.maybe(_metaSchema),
   },
   {
     validate: transformConfigPayloadValidator,

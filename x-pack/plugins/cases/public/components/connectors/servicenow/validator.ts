@@ -9,16 +9,16 @@ import { ValidationConfig } from '../../../common/shared_imports';
 import { CaseActionConnector } from '../../types';
 
 /**
- * The user can not use a legacy connector
+ * The user can not create cases with connectors that use the table API
  */
 
 export const connectorValidator = (
   connector: CaseActionConnector
 ): ReturnType<ValidationConfig['validator']> => {
   const {
-    config: { isLegacy },
+    config: { usesTableApi },
   } = connector;
-  if (isLegacy) {
+  if (usesTableApi) {
     return {
       message: 'Deprecated connector',
     };

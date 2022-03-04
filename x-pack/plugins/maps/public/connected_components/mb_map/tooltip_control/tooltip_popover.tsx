@@ -9,7 +9,7 @@ import React, { Component, RefObject } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { GeoJsonProperties, Geometry } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { FeaturesTooltip } from './features_tooltip';
 import { LAT_INDEX, LON_INDEX, RawValue } from '../../../../common/constants';
@@ -88,31 +88,16 @@ export class TooltipPopover extends Component<Props, State> {
 
   _loadFeatureProperties = async ({
     layerId,
-    featureId,
-    mbProperties,
+    properties,
   }: {
     layerId: string;
-    featureId?: string | number;
-    mbProperties?: GeoJsonProperties;
+    properties: GeoJsonProperties;
   }) => {
     const tooltipLayer = this.props.findLayerById(layerId);
     if (!tooltipLayer) {
       return [];
     }
 
-    let targetFeature;
-    if (typeof featureId !== 'undefined') {
-      targetFeature = tooltipLayer.getFeatureById(featureId);
-    }
-
-    let properties: GeoJsonProperties | undefined;
-    if (mbProperties) {
-      properties = mbProperties;
-    } else if (targetFeature?.properties) {
-      properties = targetFeature?.properties;
-    } else {
-      properties = {};
-    }
     return await tooltipLayer.getPropertiesForTooltip(properties);
   };
 

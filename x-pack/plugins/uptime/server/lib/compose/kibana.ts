@@ -9,9 +9,9 @@ import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
 import { requests } from '../requests';
 import { licenseCheck } from '../domains';
 import { UMServerLibs } from '../lib';
-import { UptimeCoreSetup } from '../adapters/framework';
+import { UptimeServerSetup } from '../adapters/framework';
 
-export function compose(server: UptimeCoreSetup): UMServerLibs {
+export function compose(server: UptimeServerSetup): UMServerLibs {
   const framework = new UMKibanaBackendFrameworkAdapter(server);
 
   return {

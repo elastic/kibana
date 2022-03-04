@@ -13,7 +13,7 @@ import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
@@ -123,11 +123,11 @@ describe('Connectors', () => {
     ).toBe('Update My Connector');
   });
 
-  test('it shows the deprecated callout when the connector is legacy', async () => {
+  test('it shows the deprecated callout when the connector is deprecated', async () => {
     render(
       <Connectors
         {...props}
-        selectedConnector={{ id: 'servicenow-legacy', type: ConnectorTypes.serviceNowITSM }}
+        selectedConnector={{ id: 'servicenow-uses-table-api', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
         // wrapper: TestProviders produces a TS error

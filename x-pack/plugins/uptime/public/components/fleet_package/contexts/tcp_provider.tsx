@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { TCPFields, ITCPSimpleFields, ITCPAdvancedFields } from '../types';
+import { TCPFields, TCPSimpleFields, TCPAdvancedFields } from '../types';
 import {
   TCPSimpleFieldsContextProvider,
   TCPAdvancedFieldsContextProvider,
@@ -21,20 +21,20 @@ interface TCPContextProviderProps {
 }
 
 export const TCPContextProvider = ({ defaultValues, children }: TCPContextProviderProps) => {
-  const simpleKeys = Object.keys(defaultTCPSimpleFields) as Array<keyof ITCPSimpleFields>;
-  const advancedKeys = Object.keys(defaultTCPAdvancedFields) as Array<keyof ITCPAdvancedFields>;
-  const formattedDefaultSimpleFields = formatDefaultValues<ITCPSimpleFields>(
+  const simpleKeys = Object.keys(defaultTCPSimpleFields) as Array<keyof TCPSimpleFields>;
+  const advancedKeys = Object.keys(defaultTCPAdvancedFields) as Array<keyof TCPAdvancedFields>;
+  const formattedDefaultSimpleFields = formatDefaultValues<TCPSimpleFields>(
     simpleKeys,
     defaultValues || {}
   );
-  const formattedDefaultAdvancedFields = formatDefaultValues<ITCPAdvancedFields>(
+  const formattedDefaultAdvancedFields = formatDefaultValues<TCPAdvancedFields>(
     advancedKeys,
     defaultValues || {}
   );
-  const simpleFields: ITCPSimpleFields | undefined = defaultValues
+  const simpleFields: TCPSimpleFields | undefined = defaultValues
     ? formattedDefaultSimpleFields
     : undefined;
-  const advancedFields: ITCPAdvancedFields | undefined = defaultValues
+  const advancedFields: TCPAdvancedFields | undefined = defaultValues
     ? formattedDefaultAdvancedFields
     : undefined;
   return (

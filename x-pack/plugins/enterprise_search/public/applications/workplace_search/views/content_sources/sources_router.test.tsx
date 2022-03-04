@@ -34,7 +34,7 @@ describe('SourcesRouter', () => {
   });
 
   it('renders sources routes', () => {
-    const TOTAL_ROUTES = 61;
+    const TOTAL_ROUTES = 86;
     const wrapper = shallow(<SourcesRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
@@ -45,8 +45,8 @@ describe('SourcesRouter', () => {
     setMockValues({ ...mockValues, hasPlatinumLicense: false });
     const wrapper = shallow(<SourcesRouter />);
 
-    expect(wrapper.find(Redirect).first().prop('from')).toEqual(ADD_SOURCE_PATH);
-    expect(wrapper.find(Redirect).first().prop('to')).toEqual(SOURCES_PATH);
+    expect(wrapper.find(Redirect).last().prop('from')).toEqual(ADD_SOURCE_PATH);
+    expect(wrapper.find(Redirect).last().prop('to')).toEqual(SOURCES_PATH);
   });
 
   it('redirects when cannot create sources', () => {

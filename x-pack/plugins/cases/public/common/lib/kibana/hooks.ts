@@ -10,11 +10,16 @@ import moment from 'moment-timezone';
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common';
+import {
+  FEATURE_ID,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+} from '../../../../common/constants';
 import { AuthenticatedUser } from '../../../../../security/common/model';
 import { convertToCamelCase } from '../../../containers/utils';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
+import { NavigateToAppOptions } from '../../../../../../../src/core/public';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 
@@ -103,4 +108,68 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     fetchUser();
   }, [fetchUser]);
   return user;
+};
+
+/**
+ * Returns a full URL to the provided page path by using
+ * kibana's `getUrlForApp()`
+ */
+export const useAppUrl = (appId: string) => {
+  const { getUrlForApp } = useKibana().services.application;
+
+  const getAppUrl = useCallback(
+    (options?: { deepLinkId?: string; path?: string; absolute?: boolean }) =>
+      getUrlForApp(appId, options),
+    [appId, getUrlForApp]
+  );
+  return { getAppUrl };
+};
+
+/**
+ * Navigate to any app using kibana's `navigateToApp()`
+ * or by url using `navigateToUrl()`
+ */
+export const useNavigateTo = (appId: string) => {
+  const { navigateToApp, navigateToUrl } = useKibana().services.application;
+
+  const navigateTo = useCallback(
+    ({
+      url,
+      ...options
+    }: {
+      url?: string;
+    } & NavigateToAppOptions) => {
+      if (url) {
+        navigateToUrl(url);
+      } else {
+        navigateToApp(appId, options);
+      }
+    },
+    [appId, navigateToApp, navigateToUrl]
+  );
+  return { navigateTo };
+};
+
+/**
+ * Returns navigateTo and getAppUrl navigation hooks
+ *
+ */
+export const useNavigation = (appId: string) => {
+  const { navigateTo } = useNavigateTo(appId);
+  const { getAppUrl } = useAppUrl(appId);
+  return { navigateTo, getAppUrl };
+};
+
+/**
+ * Returns the capabilities of the main cases application
+ *
+ */
+export const useApplicationCapabilities = (): { crud: boolean; read: boolean } => {
+  const capabilities = useKibana().services.application.capabilities;
+  const casesCapabilities = capabilities[FEATURE_ID];
+
+  return {
+    crud: !!casesCapabilities?.crud_cases,
+    read: !!casesCapabilities?.read_cases,
+  };
 };

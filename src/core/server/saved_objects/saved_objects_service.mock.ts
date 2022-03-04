@@ -60,7 +60,10 @@ const createSetupContractMock = () => {
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),
+    getKibanaIndex: jest.fn(),
   };
+
+  setupContract.getKibanaIndex.mockReturnValue('.kibana');
 
   return setupContract;
 };

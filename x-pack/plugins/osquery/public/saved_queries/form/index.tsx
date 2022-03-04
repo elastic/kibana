@@ -22,7 +22,7 @@ import React, {
   useState,
 } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
@@ -156,7 +156,12 @@ const SavedQueryFormComponent = forwardRef<SavedQueryFormRefObject, SavedQueryFo
             <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {playgroundVisible && <PlaygroundFlyout enabled={isValid} onClose={handleHidePlayground} />}
+        {playgroundVisible && (
+          <PlaygroundFlyout
+            enabled={isValid !== undefined ? isValid : true}
+            onClose={handleHidePlayground}
+          />
+        )}
       </>
     );
   }

@@ -32,7 +32,6 @@ const incidentTypesResponse = {
     { id: 16, name: 'TBD / Unknown' },
     { id: 15, name: 'Vendor / 3rd party error' },
   ],
-  actionId: 'te/st',
 };
 
 const severityResponse = {
@@ -42,7 +41,6 @@ const severityResponse = {
     { id: 5, name: 'Medium' },
     { id: 6, name: 'High' },
   ],
-  actionId: 'te/st',
 };
 
 describe('Resilient API', () => {
@@ -53,14 +51,14 @@ describe('Resilient API', () => {
   describe('getIncidentTypes', () => {
     test('should call get choices API', async () => {
       const abortCtrl = new AbortController();
-      http.post.mockResolvedValueOnce(incidentTypesResponse);
+      http.post.mockResolvedValueOnce({ ...incidentTypesResponse, connector_id: 'te/st' });
       const res = await getIncidentTypes({
         http,
         signal: abortCtrl.signal,
         connectorId: 'te/st',
       });
 
-      expect(res).toEqual(incidentTypesResponse);
+      expect(res).toEqual({ ...incidentTypesResponse, actionId: 'te/st' });
       expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"incidentTypes","subActionParams":{}}}',
         signal: abortCtrl.signal,
@@ -71,14 +69,15 @@ describe('Resilient API', () => {
   describe('getSeverity', () => {
     test('should call get choices API', async () => {
       const abortCtrl = new AbortController();
-      http.post.mockResolvedValueOnce(severityResponse);
+      http.post.mockResolvedValueOnce({ ...severityResponse, connector_id: 'te/st' });
       const res = await getSeverity({
         http,
         signal: abortCtrl.signal,
         connectorId: 'te/st',
       });
 
-      expect(res).toEqual(severityResponse);
+      expect(res).toEqual({ ...severityResponse, actionId: 'te/st' });
+
       expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"severity","subActionParams":{}}}',
         signal: abortCtrl.signal,

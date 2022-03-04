@@ -6,7 +6,6 @@
  */
 
 import { Readable, Writable } from 'stream';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { kibanaResponseFactory } from 'src/core/server';
 import { CSV_JOB_TYPE, PDF_JOB_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../..';
@@ -62,7 +61,7 @@ describe('deleteJobResponseHandler', () => {
   });
 
   it('should return unauthorized response when the job type is not valid', async () => {
-    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as UnwrapPromise<
+    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as Awaited<
       ReturnType<typeof jobsQuery.get>
     >);
     await deleteJobResponseHandler(
@@ -80,7 +79,7 @@ describe('deleteJobResponseHandler', () => {
     jobsQuery.get.mockResolvedValueOnce({
       jobtype: PDF_JOB_TYPE,
       index: '.reporting-12345',
-    } as UnwrapPromise<ReturnType<typeof jobsQuery.get>>);
+    } as Awaited<ReturnType<typeof jobsQuery.get>>);
     await deleteJobResponseHandler(
       core,
       response,
@@ -95,7 +94,7 @@ describe('deleteJobResponseHandler', () => {
   });
 
   it('should return a custom error on exception', async () => {
-    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as UnwrapPromise<
+    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as Awaited<
       ReturnType<typeof jobsQuery.get>
     >);
     jobsQuery.delete.mockRejectedValueOnce(
@@ -125,7 +124,7 @@ describe('downloadJobResponseHandler', () => {
   });
 
   it('should return unauthorized response when the job type is not valid', async () => {
-    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as UnwrapPromise<
+    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as Awaited<
       ReturnType<typeof jobsQuery.get>
     >);
     await downloadJobResponseHandler(
@@ -140,12 +139,12 @@ describe('downloadJobResponseHandler', () => {
   });
 
   it('should return bad request response when the job content type is not allowed', async () => {
-    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as UnwrapPromise<
+    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as Awaited<
       ReturnType<typeof jobsQuery.get>
     >);
     getDocumentPayload.mockResolvedValueOnce({
       contentType: 'image/jpeg',
-    } as unknown as UnwrapPromise<ReturnType<typeof getDocumentPayload>>);
+    } as unknown as Awaited<ReturnType<typeof getDocumentPayload>>);
     await downloadJobResponseHandler(
       core,
       response,
@@ -158,7 +157,7 @@ describe('downloadJobResponseHandler', () => {
   });
 
   it('should return custom response with payload contents', async () => {
-    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as UnwrapPromise<
+    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as Awaited<
       ReturnType<typeof jobsQuery.get>
     >);
     getDocumentPayload.mockResolvedValueOnce({
@@ -168,7 +167,7 @@ describe('downloadJobResponseHandler', () => {
         'Content-Length': 10,
       },
       statusCode: 200,
-    } as unknown as UnwrapPromise<ReturnType<typeof getDocumentPayload>>);
+    } as unknown as Awaited<ReturnType<typeof getDocumentPayload>>);
     await downloadJobResponseHandler(
       core,
       response,
@@ -188,7 +187,7 @@ describe('downloadJobResponseHandler', () => {
   });
 
   it('should return custom response with error message', async () => {
-    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as UnwrapPromise<
+    jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as Awaited<
       ReturnType<typeof jobsQuery.get>
     >);
     getDocumentPayload.mockResolvedValueOnce({
@@ -196,7 +195,7 @@ describe('downloadJobResponseHandler', () => {
       contentType: 'application/json',
       headers: {},
       statusCode: 500,
-    } as unknown as UnwrapPromise<ReturnType<typeof getDocumentPayload>>);
+    } as unknown as Awaited<ReturnType<typeof getDocumentPayload>>);
     await downloadJobResponseHandler(
       core,
       response,

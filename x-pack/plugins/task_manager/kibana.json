@@ -1,10 +1,10 @@
 {
   "id": "taskManager",
   "server": true,
-  "version": "8.0.0",
+  "version": "8.2.0",
   "owner": {
-    "name": "Kibana Alerting",
-    "githubTeam": "kibana-alerting-services"
+    "name": "Response Ops",
+    "githubTeam": "response-ops"
   },
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "task_manager"],

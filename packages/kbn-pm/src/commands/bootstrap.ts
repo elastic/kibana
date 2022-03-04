@@ -15,6 +15,7 @@ import { linkProjectExecutables } from '../utils/link_project_executables';
 import { getNonBazelProjectsOnly, topologicallyBatchProjects } from '../utils/projects';
 import { ICommand } from './';
 import { readYarnLock } from '../utils/yarn_lock';
+import { sortPackageJson } from '../utils/sort_package_json';
 import { validateDependencies } from '../utils/validate_dependencies';
 import {
   ensureYarnIntegrityFileExists,
@@ -22,6 +23,7 @@ import {
   runBazel,
   yarnIntegrityFileExists,
 } from '../utils/bazel';
+import { setupRemoteCache } from '../utils/bazel/setup_remote_cache';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
@@ -53,6 +55,9 @@ export const BootstrapCommand: ICommand = {
 
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);
+
+    // Setup remote cache settings in .bazelrc.cache if needed
+    await setupRemoteCache(rootPath);
 
     // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
@@ -107,6 +112,8 @@ export const BootstrapCommand: ICommand = {
       }
     }
 
+    await sortPackageJson(kbn);
+
     const yarnLock = await readYarnLock(kbn);
 
     if (options.validate) {
@@ -128,16 +135,6 @@ export const BootstrapCommand: ICommand = {
         env: process.env,
       },
       { prefix: '[vscode]', debug: false }
-    );
-
-    await spawnStreaming(
-      process.execPath,
-      ['scripts/build_ts_refs', '--ignore-type-failures'],
-      {
-        cwd: kbn.getAbsolute(),
-        env: process.env,
-      },
-      { prefix: '[ts refs]', debug: false }
     );
 
     // send timings

@@ -9,9 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
-import { DataView } from '../../../../data_views/common';
+import { DataViewListItem } from '../../../../data_views/common';
 
 import { ToolbarButton, ToolbarButtonProps } from '../../../../kibana_react/public';
+
+import './data_view_picker.scss';
 
 export type DataViewTriggerProps = ToolbarButtonProps & {
   label: string;
@@ -21,14 +23,14 @@ export type DataViewTriggerProps = ToolbarButtonProps & {
 export function DataViewPicker({
   dataViews,
   selectedDataViewId,
-  onChangeIndexPattern,
+  onChangeDataViewId,
   trigger,
   selectableProps,
 }: {
-  dataViews: DataView[];
+  dataViews: DataViewListItem[];
   selectedDataViewId?: string;
   trigger: DataViewTriggerProps;
-  onChangeIndexPattern: (newId: string) => void;
+  onChangeDataViewId: (newId: string) => void;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -47,6 +49,7 @@ export function DataViewPicker({
     return (
       <ToolbarButton
         title={title}
+        data-test-subj="open-data-view-picker"
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         fullWidth
         {...colorProp}
@@ -66,49 +69,53 @@ export function DataViewPicker({
         display="block"
         panelPaddingSize="s"
         ownFocus
+        panelClassName="presDataViewPicker__panel"
       >
-        <div>
-          <EuiPopoverTitle>
-            {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
-              defaultMessage: 'Data view',
-            })}
-          </EuiPopoverTitle>
-          <EuiSelectable<{
-            key?: string;
-            label: string;
-            value?: string;
-            checked?: 'on' | 'off' | undefined;
-          }>
-            {...selectableProps}
-            searchable
-            singleSelection="always"
-            options={dataViews.map(({ title, id }) => ({
-              key: id,
-              label: title,
-              value: id,
-              checked: id === selectedDataViewId ? 'on' : undefined,
-            }))}
-            onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked) as unknown as {
-                value: string;
-              };
-              onChangeIndexPattern(choice.value);
-              setPopoverIsOpen(false);
-            }}
-            searchProps={{
-              compressed: true,
-              ...(selectableProps ? selectableProps.searchProps : undefined),
-            }}
-          >
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
-        </div>
+        <EuiPopoverTitle data-test-subj="data-view-picker-title">
+          {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
+            defaultMessage: 'Data view',
+          })}
+        </EuiPopoverTitle>
+        <EuiSelectable<{
+          key?: string;
+          label: string;
+          value?: string;
+          checked?: 'on' | 'off' | undefined;
+        }>
+          {...selectableProps}
+          searchable
+          singleSelection="always"
+          options={dataViews.map(({ title, id }) => ({
+            key: id,
+            label: title,
+            value: id,
+            'data-test-subj': `data-view-picker-${title}`,
+            checked: id === selectedDataViewId ? 'on' : undefined,
+          }))}
+          onChange={(choices) => {
+            const choice = choices.find(({ checked }) => checked) as unknown as {
+              value: string;
+            };
+            onChangeDataViewId(choice.value);
+            setPopoverIsOpen(false);
+          }}
+          searchProps={{
+            compressed: true,
+            ...(selectableProps ? selectableProps.searchProps : undefined),
+          }}
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
       </EuiPopover>
     </>
   );
 }
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default DataViewPicker;

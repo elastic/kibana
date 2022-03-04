@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, FC, useContext } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
 import { useNavigateToPath } from '../../../../../../../contexts/kibana';

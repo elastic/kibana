@@ -9,17 +9,17 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { validateExpression } from './validation';
 import { EsQueryAlertParams } from './types';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 
-export function getAlertType(): AlertTypeModel<EsQueryAlertParams> {
+export function getAlertType(): RuleTypeModel<EsQueryAlertParams> {
   return {
     id: '.es-query',
     description: i18n.translate('xpack.stackAlerts.esQuery.ui.alertType.descriptionText', {
-      defaultMessage: 'Alert on matches against an Elasticsearch query.',
+      defaultMessage: 'Alert when matches are found during the latest query run.',
     }),
     iconClass: 'logoElastic',
     documentationUrl: (docLinks) => docLinks.links.alerting.esQuery,
-    alertParamsExpression: lazy(() => import('./expression')),
+    ruleParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.alertType.defaultActionMessage',

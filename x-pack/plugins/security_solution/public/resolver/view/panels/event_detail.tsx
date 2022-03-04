@@ -9,7 +9,7 @@
 
 import React, { memo, useMemo, Fragment, HTMLAttributes } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';

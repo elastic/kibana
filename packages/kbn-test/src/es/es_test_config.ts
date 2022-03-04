@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson as pkg } from '@kbn/dev-utils';
+import { kibanaPackageJson as pkg } from '@kbn/utils';
 import Url from 'url';
-import { adminTestUser } from '../kbn';
+import { systemIndicesSuperuser } from '../kbn';
 
 class EsTestConfig {
   getVersion() {
@@ -51,8 +51,8 @@ class EsTestConfig {
       };
     }
 
-    const username = process.env.TEST_ES_USERNAME || adminTestUser.username;
-    const password = process.env.TEST_ES_PASSWORD || adminTestUser.password;
+    const username = process.env.TEST_ES_USERNAME || systemIndicesSuperuser.username;
+    const password = process.env.TEST_ES_PASSWORD || systemIndicesSuperuser.password;
 
     const port = process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220;
 

@@ -11,5 +11,5 @@ toJSON(): Readonly<KibanaExecutionContext>;
 ```
 <b>Returns:</b>
 
-`Readonly<KibanaExecutionContext>`
+Readonly&lt;KibanaExecutionContext&gt;
 

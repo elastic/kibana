@@ -11,6 +11,7 @@ import { shallow } from 'enzyme';
 import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
 import { CategoryAxis } from '../../../../types';
 import { LabelOptions } from './label_options';
+import { TruncateLabelsOption } from '../../common';
 import { categoryAxis } from './mocks';
 import { Position } from '@elastic/charts';
 
@@ -29,6 +30,7 @@ describe('CategoryAxisPanel component', () => {
       axis,
       onPositionChanged,
       setCategoryAxis,
+      useMultiLayerAxis: false,
     };
   });
 
@@ -54,5 +56,17 @@ describe('CategoryAxisPanel component', () => {
 
     expect(setCategoryAxis).toHaveBeenLastCalledWith({ ...axis, position: value });
     expect(onPositionChanged).toBeCalledWith(value);
+  });
+
+  it('should disable label options with multilayer axis', () => {
+    const comp = shallow(<CategoryAxisPanel {...defaultProps} useMultiLayerAxis={true} />);
+    const labelOptions = comp.find(LabelOptions).dive();
+    const rotateLabelsOption = labelOptions.find({ paramName: 'rotate' });
+    const filterLabelOption = labelOptions.find({ paramName: 'filter' });
+    const truncateLabelOption = labelOptions.find(TruncateLabelsOption);
+
+    expect(rotateLabelsOption.prop('disabled')).toBe(true);
+    expect(filterLabelOption.prop('disabled')).toBe(true);
+    expect(truncateLabelOption.prop('disabled')).toBe(true);
   });
 });

@@ -48,7 +48,7 @@ export const createMigration = async ({
 
   const { size, ...reindexQueryOptions } = reindexOptions;
 
-  const response = await esClient.reindex<{ task: string }>({
+  const response = await esClient.reindex({
     body: {
       dest: { index: migrationIndex },
       source: { index, size },
@@ -80,6 +80,9 @@ export const createMigration = async ({
                 if(ctx._source.signal?.status == "in-progress") {
                   ctx._source.signal.status = "acknowledged";
                 }
+                if(ctx._source['kibana.alert.workflow_status'] == "in-progress") {
+                  ctx._source['kibana.alert.workflow_status'] = "acknowledged";
+                }
               `,
         params: {
           version,
@@ -94,7 +97,7 @@ export const createMigration = async ({
   return {
     destinationIndex: migrationIndex,
     sourceIndex: index,
-    taskId: String(response.body.task),
+    taskId: String(response.task),
     version,
   };
 };

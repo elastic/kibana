@@ -12,7 +12,9 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { mockEngineValues, mockEngineActions } from '../../__mocks__';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
@@ -228,10 +230,10 @@ describe('RelevanceTuningLogic', () => {
       });
     });
 
-    describe('updatePrecision', () => {
+    describe('setPrecision', () => {
       it('should set precision inside search settings and set unsavedChanges to true', () => {
         mount();
-        RelevanceTuningLogic.actions.updatePrecision(9);
+        RelevanceTuningLogic.actions.setPrecision(9);
 
         expect(RelevanceTuningLogic.values).toEqual({
           ...DEFAULT_VALUES,
@@ -319,14 +321,9 @@ describe('RelevanceTuningLogic', () => {
         });
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-        http.get.mockReturnValueOnce(Promise.reject('error'));
-
         RelevanceTuningLogic.actions.initializeRelevanceTuning();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -1007,15 +1004,24 @@ describe('RelevanceTuningLogic', () => {
       });
     });
 
-    describe('updateSearchValue', () => {
-      it('should update the query then update search results', () => {
+    describe('setSearchQuery', () => {
+      it('shoulds update search results', () => {
         mount();
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchQuery');
         jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
-        RelevanceTuningLogic.actions.updateSearchValue('foo');
+        RelevanceTuningLogic.actions.setSearchQuery('foo');
 
-        expect(RelevanceTuningLogic.actions.setSearchQuery).toHaveBeenCalledWith('foo');
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+    });
+
+    describe('setPrecision', () => {
+      it('shoulds update search results', () => {
+        mount();
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.setPrecision(9);
+
         expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
     });

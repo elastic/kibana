@@ -32,13 +32,28 @@ const DATA_FRAME_ANALYTICS_DEEP_LINK: AppDeepLink = {
     defaultMessage: 'Data Frame Analytics',
   }),
   path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`,
+};
+
+const MODEL_MANAGEMENT_DEEP_LINK: AppDeepLink = {
+  id: 'mlModelManagementDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.trainedModels', {
+    defaultMessage: 'Trained Models',
+  }),
+  path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
   deepLinks: [
     {
-      id: 'mlTrainedModelsDeepLink',
-      title: i18n.translate('xpack.ml.deepLink.trainedModels', {
-        defaultMessage: 'Trained Models',
+      id: 'mlNodesOverviewDeepLink',
+      title: i18n.translate('xpack.ml.deepLink.modelManagement', {
+        defaultMessage: 'Model Management',
       }),
-      path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_MODELS_MANAGE}`,
+      path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
+    },
+    {
+      id: 'mlNodesOverviewDeepLink',
+      title: i18n.translate('xpack.ml.deepLink.nodesOverview', {
+        defaultMessage: 'Nodes',
+      }),
+      path: `/${ML_PAGES.TRAINED_MODELS_NODES}`,
     },
   ],
 };
@@ -56,6 +71,7 @@ const FILE_UPLOAD_DEEP_LINK: AppDeepLink = {
   title: i18n.translate('xpack.ml.deepLink.fileUpload', {
     defaultMessage: 'File Upload',
   }),
+  keywords: ['CSV', 'JSON'],
   path: `/${ML_PAGES.DATA_VISUALIZER_FILE}`,
 };
 
@@ -103,6 +119,7 @@ export function getDeepLinks(isFullLicense: boolean) {
       OVERVIEW_LINK_DEEP_LINK,
       ANOMALY_DETECTION_DEEP_LINK,
       DATA_FRAME_ANALYTICS_DEEP_LINK,
+      MODEL_MANAGEMENT_DEEP_LINK,
       SETTINGS_DEEP_LINK
     );
   }

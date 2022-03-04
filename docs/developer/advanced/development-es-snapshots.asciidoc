@@ -13,6 +13,7 @@ https://ci.kibana.dev/es-snapshots[A dashboard] is available that shows the curr
 2. Each snapshot is uploaded to a public Google Cloud Storage bucket, `kibana-ci-es-snapshots-daily`.
 ** At this point, the snapshot is not automatically used in CI or local development. It needs to be tested/verified first.
 3. Each snapshot is tested with the latest commit of the corresponding {kib} branch, using the full CI suite.
+3a. If a test fails during snapshot verification the Kibana Operations team will skip it and create an issue for the team to fix the test, or work with the Elasticsearch team to get a fix implemented there. Once the fix is ready a Kibana PR can be opened to unskip the test.
 4. After CI
 ** If the snapshot passes, it is promoted and automatically used in CI and local development.
 ** If the snapshot fails, the issue must be investigated and resolved. A new incompatibility may exist between {es} and {kib}.
@@ -81,7 +82,7 @@ Each day, a https://kibana-ci.elastic.co/job/elasticsearch+snapshots+trigger/[Je
 
 https://kibana-ci.elastic.co/job/elasticsearch+snapshots+build/[This Jenkins job] builds the {es} snapshots and uploads them to GCS.
 
-The Jenkins job pipeline definition is https://github.com/elastic/kibana/blob/master/.ci/es-snapshots/Jenkinsfile_build_es[in the {kib} repo].
+The Jenkins job pipeline definition is https://github.com/elastic/kibana/blob/main/.ci/es-snapshots/Jenkinsfile_build_es[in the {kib} repo].
 
 1. Checkout {es} repo for the given branch/version.
 2. Run `./gradlew -p distribution/archives assemble --parallel` to create all of the {es} distributions.
@@ -97,7 +98,7 @@ The Jenkins job pipeline definition is https://github.com/elastic/kibana/blob/ma
 
 https://kibana-ci.elastic.co/job/elasticsearch+snapshots+verify/[This Jenkins job] tests the latest {es} snapshot with the full {kib} CI pipeline, and promotes if it there are no test failures.
 
-The Jenkins job pipeline definition is https://github.com/elastic/kibana/blob/master/.ci/es-snapshots/Jenkinsfile_verify_es[in the {kib} repo].
+The Jenkins job pipeline definition is https://github.com/elastic/kibana/blob/main/.ci/es-snapshots/Jenkinsfile_verify_es[in the {kib} repo].
 
 1. Checkout {kib} and set up CI environment as normal.
 2. Set the `ES_SNAPSHOT_MANIFEST` env var to point to the latest snapshot manifest.

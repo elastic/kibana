@@ -41,7 +41,7 @@ export function buildSavedObject(
 ) {
   applyDecorators(savedObject, config, decorators);
 
-  const { indexPatterns, savedObjectsClient } = services;
+  const { dataViews, savedObjectsClient } = services;
   // type name for this object, used as the ES-type
   const esType = config.type || '';
 
@@ -77,7 +77,7 @@ export function buildSavedObject(
    * @return {Promise<IndexPattern | null>}
    */
   savedObject.hydrateIndexPattern = (id?: string) =>
-    hydrateIndexPattern(id || '', savedObject, indexPatterns, config);
+    hydrateIndexPattern(id || '', savedObject, dataViews, config);
   /**
    * Asynchronously initialize this object - will only run
    * once even if called multiple times.

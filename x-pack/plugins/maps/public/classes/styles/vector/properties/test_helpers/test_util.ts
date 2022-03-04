@@ -8,33 +8,27 @@
 // eslint-disable-next-line max-classes-per-file
 import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../../common/constants';
 import { StyleMeta } from '../../style_meta';
-import {
-  CategoryFieldMeta,
-  GeometryTypes,
-  RangeFieldMeta,
-  StyleMetaDescriptor,
-} from '../../../../../../common/descriptor_types';
 import { AbstractField, IField } from '../../../../fields/field';
 import { IStyle } from '../../../style';
 
 export class MockField extends AbstractField {
   private readonly _dataType: string;
-  private readonly _supportsAutoDomain: boolean;
+  private readonly _supportsFieldMetaFromLocalData: boolean;
 
   constructor({
     fieldName,
     origin = FIELD_ORIGIN.SOURCE,
     dataType = 'string',
-    supportsAutoDomain = true,
+    supportsFieldMetaFromLocalData = true,
   }: {
     fieldName: string;
     origin?: FIELD_ORIGIN;
     dataType?: string;
-    supportsAutoDomain?: boolean;
+    supportsFieldMetaFromLocalData?: boolean;
   }) {
     super({ fieldName, origin });
     this._dataType = dataType;
-    this._supportsAutoDomain = supportsAutoDomain;
+    this._supportsFieldMetaFromLocalData = supportsFieldMetaFromLocalData;
   }
 
   async getLabel(): Promise<string> {
@@ -45,11 +39,11 @@ export class MockField extends AbstractField {
     return this._dataType;
   }
 
-  supportsAutoDomain(): boolean {
-    return this._supportsAutoDomain;
+  supportsFieldMetaFromLocalData(): boolean {
+    return this._supportsFieldMetaFromLocalData;
   }
 
-  supportsFieldMeta(): boolean {
+  supportsFieldMetaFromEs(): boolean {
     return true;
   }
 }
@@ -77,40 +71,32 @@ export class MockStyle implements IStyle {
   }
 
   getStyleMeta(): StyleMeta {
-    const geomTypes: GeometryTypes = {
-      isPointsOnly: false,
-      isLinesOnly: false,
-      isPolygonsOnly: false,
-    };
-    const rangeFieldMeta: RangeFieldMeta = {
-      min: this._min,
-      max: this._max,
-      delta: this._max - this._min,
-    };
-    const catFieldMeta: CategoryFieldMeta = {
-      categories: [
-        {
-          key: 'US',
-          count: 10,
-        },
-        {
-          key: 'CN',
-          count: 8,
-        },
-      ],
-    };
-
-    const styleMetaDescriptor: StyleMetaDescriptor = {
-      geometryTypes: geomTypes,
+    return new StyleMeta({
+      geometryTypes: {
+        isPointsOnly: false,
+        isLinesOnly: false,
+        isPolygonsOnly: false,
+      },
       fieldMeta: {
         foobar: {
-          range: rangeFieldMeta,
-          categories: catFieldMeta,
+          range: {
+            min: this._min,
+            max: this._max,
+            delta: this._max - this._min,
+          },
+          categories: [
+            {
+              key: 'US',
+              count: 10,
+            },
+            {
+              key: 'CN',
+              count: 8,
+            },
+          ],
         },
       },
-    };
-
-    return new StyleMeta(styleMetaDescriptor);
+    });
   }
 }
 

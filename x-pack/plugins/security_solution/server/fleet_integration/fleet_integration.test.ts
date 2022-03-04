@@ -40,11 +40,9 @@ import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/m
 import { Manifest } from '../endpoint/lib/artifacts';
 import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
-import {
-  allowedExperimentalValues,
-  ExperimentalFeatures,
-} from '../../common/experimental_features';
 import { DeletePackagePoliciesResponse } from '../../../fleet/common';
+import { createMockPolicyData } from '../endpoint/services/feature_usage';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
@@ -64,11 +62,16 @@ describe('ingest_integration tests ', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
+
+    jest
+      .spyOn(endpointAppContextMock.endpointMetadataService, 'getFleetEndpointPackagePolicy')
+      .mockResolvedValue(createMockPolicyData());
   });
 
   afterEach(() => {
     licenseService.stop();
     licenseEmitter.complete();
+    jest.clearAllMocks();
   });
 
   describe('package policy init callback (atifacts manifest initialisation tests)', () => {
@@ -251,7 +254,12 @@ describe('ingest_integration tests ', () => {
     it('returns an error if paid features are turned on in the policy', async () => {
       const mockPolicy = policyFactory(); // defaults with paid features on
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       await expect(() => callback(policyConfig, ctx, req)).rejects.toThrow(
@@ -262,7 +270,12 @@ describe('ingest_integration tests ', () => {
       const mockPolicy = policyFactoryWithoutPaidFeatures();
       mockPolicy.windows.malware.mode = ProtectionModes.detect;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
@@ -278,7 +291,12 @@ describe('ingest_integration tests ', () => {
       const mockPolicy = policyFactory();
       mockPolicy.windows.popup.malware.message = 'paid feature';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
@@ -286,44 +304,41 @@ describe('ingest_integration tests ', () => {
     });
   });
 
-  describe('package policy delete callback with trusted apps by policy enabled', () => {
-    const invokeDeleteCallback = async (
-      experimentalFeatures?: ExperimentalFeatures
-    ): Promise<void> => {
-      const callback = getPackagePolicyDeleteCallback(exceptionListClient, experimentalFeatures);
+  describe('package policy delete callback', () => {
+    const invokeDeleteCallback = async (): Promise<void> => {
+      const callback = getPackagePolicyDeleteCallback(exceptionListClient);
       await callback(deletePackagePolicyMock());
     };
 
     let removedPolicies: DeletePackagePoliciesResponse;
     let policyId: string;
-    let fakeTA: ExceptionListSchema;
+    let fakeArtifact: ExceptionListSchema;
 
     beforeEach(() => {
       removedPolicies = deletePackagePolicyMock();
       policyId = removedPolicies[0].id;
-      fakeTA = {
+      fakeArtifact = {
         ...getExceptionListSchemaMock(),
         tags: [`policy:${policyId}`],
       };
 
-      exceptionListClient.findExceptionListItem = jest
+      exceptionListClient.findExceptionListsItem = jest
         .fn()
-        .mockResolvedValueOnce({ data: [fakeTA], total: 1 });
+        .mockResolvedValueOnce({ data: [fakeArtifact], total: 1 });
       exceptionListClient.updateExceptionListItem = jest
         .fn()
-        .mockResolvedValueOnce({ ...fakeTA, tags: [] });
+        .mockResolvedValueOnce({ ...fakeArtifact, tags: [] });
     });
 
-    it('removes policy from trusted app FF enabled', async () => {
-      await invokeDeleteCallback({
-        ...allowedExperimentalValues,
-        trustedAppsByPolicyEnabled: true, // Needs to be enabled, it needs also a test with this disabled.
-      });
+    it('removes policy from artifact', async () => {
+      await invokeDeleteCallback();
 
-      expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledWith({
-        filter: `exception-list-agnostic.attributes.tags:"policy:${policyId}"`,
-        listId: 'endpoint_trusted_apps',
-        namespaceType: 'agnostic',
+      expect(exceptionListClient.findExceptionListsItem).toHaveBeenCalledWith({
+        listId: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+        filter: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(
+          () => `exception-list-agnostic.attributes.tags:"policy:${policyId}"`
+        ),
+        namespaceType: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(() => 'agnostic'),
         page: 1,
         perPage: 50,
         sortField: undefined,
@@ -331,21 +346,11 @@ describe('ingest_integration tests ', () => {
       });
 
       expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledWith({
-        ...fakeTA,
-        namespaceType: fakeTA.namespace_type,
-        osTypes: fakeTA.os_types,
+        ...fakeArtifact,
+        namespaceType: fakeArtifact.namespace_type,
+        osTypes: fakeArtifact.os_types,
         tags: [],
       });
-    });
-
-    it("doesn't remove policy from trusted app if feature flag is disabled", async () => {
-      await invokeDeleteCallback({
-        ...allowedExperimentalValues,
-        trustedAppsByPolicyEnabled: false, // since it was changed to `true` by default
-      });
-
-      expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledTimes(0);
-      expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledTimes(0);
     });
   });
 });

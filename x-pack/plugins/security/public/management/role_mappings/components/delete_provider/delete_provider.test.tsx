@@ -9,7 +9,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from 'src/core/public/mocks';
 
 import type { RoleMapping } from '../../../../../common/model';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
 
 /**
  * @deprecated consider using `FormattedDate` from `x-pack/plugins/security_solution/public/common/components/formatted_date/index.tsx:95`

@@ -15,11 +15,25 @@ import type { ChromeStart } from '../../../../core/public';
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
   chrome: ChromeStart;
+  /**
+   * Optional argument that determines whether we toggle the chrome bar
+   * the button unmounts.
+   *
+   * @note The intended use for this prop is that it is either `true` or `false`
+   * for the lifetime of the button.
+   *
+   * @default true
+   */
+  toggleChrome?: boolean;
 }
 
 import './index.scss';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
+  static defaultProps = {
+    toggleChrome: true,
+  };
+
   public onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
       this.props.onExitFullScreenMode();
@@ -27,12 +41,12 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   };
 
   public componentDidMount() {
-    this.props.chrome.setIsVisible(false);
+    if (this.props.toggleChrome) this.props.chrome.setIsVisible(false);
     document.addEventListener('keydown', this.onKeyDown, false);
   }
 
   public componentWillUnmount() {
-    this.props.chrome.setIsVisible(true);
+    if (this.props.toggleChrome) this.props.chrome.setIsVisible(true);
     document.removeEventListener('keydown', this.onKeyDown, false);
   }
 
@@ -87,4 +101,5 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   }
 }
 
+/** @deprecated Use `ExitFullScreenButton` from `src/plugins/shared_ux/public`. */
 export const ExitFullScreenButton = ExitFullScreenButtonUi;

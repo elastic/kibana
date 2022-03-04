@@ -1,0 +1,149 @@
+[[data-views]]
+=== Create a data view
+
+{kib} requires a data view to access the {es} data that you want to explore.
+A data view selects the data to use and allows you to define properties of the fields.
+
+A data view can point to one or more indices, {ref}/data-streams.html[data stream], or {ref}/alias.html[index aliases].
+For example, a data view can point to your log data from yesterday,
+or all indices that contain your data.
+
+[float]
+[[data-views-read-only-access]]
+=== Required permissions
+
+* Access to *Data Views* requires the <<kibana-role-management, {kib} privilege>>
+`Data View Management`.
+
+* To create a data view, you must have the <<kibana-role-management,{es} privilege>>
+`view_index_metadata`.
+
+* If a read-only indicator appears in {kib}, you have insufficient privileges
+to create or save data views. The buttons to create new data views or
+save existing data views are not visible. For more information,
+refer to <<xpack-security-authorization,Granting access to {kib}>>.
+
+[float]
+[[settings-create-pattern]]
+=== Create a data view
+
+If you collected data using one of the {kib} <<connect-to-elasticsearch,ingest options>>,
+uploaded a file, or added sample data,
+you get a data view for free, and can start exploring your data.
+If you loaded your own data, follow these steps to create a data view.
+
+. Open the main menu, then click *Stack Management > Data Views*.
+
+. Click *Create data view*.
+
+. Start typing in the *name* field, and {kib} looks for the names of
+indices, data streams, and aliases that match your input.
++
+[role="screenshot"]
+image:management/index-patterns/images/create-data-view.png["Create data view"]
++
+** To match multiple sources, use a wildcard (*). For example, `filebeat-*` matches
+`filebeat-apache-a`, `filebeat-apache-b`, and so on.
++
+** To match multiple single sources, enter their names,
+separated with a comma.  Do not include a space after the comma.
+`filebeat-a,filebeat-b` matches two indices, but not match `filebeat-c`.
++
+** To exclude a source, use a minus sign (-), for example, `-test3`.
+
+. If {kib} detects an index with a timestamp, expand the *Timestamp field* menu,
+and then select the default field for filtering your data by time.
++
+** If your index doesn’t have time-based data, choose *I don’t want to use the time filter*.
++
+** If you don’t set a default time field, you can't use
+global time filters on your dashboards. This is useful if
+you have multiple time fields and want to create dashboards that combine visualizations
+based on different timestamps.
+
+. Click *Create data view*.
++
+[[reload-fields]] {kib} is now configured to use your {es} data. When a new field is added to an index,
+the data view field list is updated
+the next time the data view is loaded, for example, when you load the page or
+move between {kib} apps.
+
+. Select this data view when you search and visualize your data.
+
+[float]
+[[rollup-data-view]]
+==== Create a data view for rolled up data
+
+A data view can match one rollup index.  For a combination rollup
+data view with both raw and rolled up data, use the standard notation:
+
+```ts
+rollup_logstash,kibana_sample_data_logs
+```
+For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up data>>.
+
+[float]
+[[management-cross-cluster-search]]
+==== Create a data view that searches across clusters
+
+If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}],
+you can create a {data-source} to search across the clusters of your choosing.
+You specify data streams, indices, and aliases in a remote cluster using the
+following syntax:
+
+```ts
+<remote_cluster_name>:<target>
+```
+
+To query {ls} indices across two {es} clusters
+that you set up for {ccs}, named `cluster_one` and `cluster_two`:
+
+```ts
+ cluster_one:logstash-*,cluster_two:logstash-*
+```
+
+Use wildcards in your cluster names
+to match any number of clusters. To search {ls} indices across
+clusters named `cluster_foo`, `cluster_bar`, and so on:
+
+```ts
+cluster_*:logstash-*
+```
+
+To query across all {es} clusters that have been configured for {ccs},
+use a standalone wildcard for your cluster name:
+
+```ts
+*:logstash-*
+```
+
+To match indices starting with `logstash-`, but exclude those starting with `logstash-old`, from
+all clusters having a name starting with `cluster_`:
+
+```ts
+`cluster_*:logstash-*,cluster_*:-logstash-old*`
+```
+
+To exclude a cluster having a name starting with `cluster_`:
+
+```ts
+`cluster_*:logstash-*,cluster_one:-*`
+```
+
+Once you configure a data view to use the {ccs} syntax, all searches and
+aggregations using that data view in {kib} take advantage of {ccs}.
+
+[float]
+[[delete-data-view]]
+=== Delete data views
+
+When you delete a data view, you cannot recover the associated field formatters, runtime fields, source filters,
+and field popularity data. Deleting a data view does not remove any indices or data documents from {es}.
+
+WARNING: Deleting a data view breaks all visualizations, saved searches, and other saved objects that reference the data view.
+
+. Open the main menu, then click *Stack Management > Data Views*.
+
+. Click the data view to delete.
+
+. Delete (image:management/index-patterns/images/delete.png[Delete icon]) the data view.

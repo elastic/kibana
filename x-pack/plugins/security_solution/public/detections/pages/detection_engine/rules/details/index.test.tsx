@@ -20,10 +20,9 @@ import {
 import { RuleDetailsPage } from './index';
 import { createStore, State } from '../../../../../common/store';
 import { useUserData } from '../../../../components/user_info';
-import { useRuleStatus } from '../../../../containers/detection_engine/rules';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 
-import { useSourcererScope } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../common/mock/router';
 
@@ -85,7 +84,6 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../containers/detection_engine/alerts/use_preview_index');
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
@@ -128,19 +126,10 @@ describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {
     (useUserData as jest.Mock).mockReturnValue([{}]);
     (useParams as jest.Mock).mockReturnValue({});
-    (useSourcererScope as jest.Mock).mockReturnValue({
+    (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
-    (useRuleStatus as jest.Mock).mockReturnValue([
-      false,
-      {
-        status: 'succeeded',
-        last_failure_at: new Date().toISOString(),
-        last_failure_message: 'my fake failure message',
-        failures: [],
-      },
-    ]);
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       error: null,
       loading: false,

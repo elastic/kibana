@@ -6,7 +6,7 @@
  */
 
 import { UrlStateType } from '../url_state/constants';
-import { SecurityPageName } from '../../../app/types';
+import type { SecurityPageName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
 import { SiemRouteType } from '../../utils/route/types';
 
@@ -43,8 +43,10 @@ export interface NavTab {
 export type SecurityNavKey =
   | SecurityPageName.administration
   | SecurityPageName.alerts
+  | SecurityPageName.blocklist
   | SecurityPageName.case
   | SecurityPageName.endpoints
+  | SecurityPageName.policies
   | SecurityPageName.eventFilters
   | SecurityPageName.exceptions
   | SecurityPageName.hostIsolationExceptions
@@ -54,7 +56,7 @@ export type SecurityNavKey =
   | SecurityPageName.rules
   | SecurityPageName.timelines
   | SecurityPageName.trustedApps
-  | SecurityPageName.ueba;
+  | SecurityPageName.users;
 
 export type SecurityNav = Record<SecurityNavKey, NavTab>;
 

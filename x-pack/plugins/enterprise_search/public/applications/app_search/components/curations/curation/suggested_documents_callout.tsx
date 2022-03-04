@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { ENGINE_CURATION_SUGGESTION_PATH } from '../../../routes';
-import { generateEnginePath } from '../../engine';
+import { EngineLogic, generateEnginePath } from '../../engine';
 
 import { SuggestionsCallout } from '../components/suggestions_callout';
 
@@ -21,13 +21,21 @@ export const SuggestedDocumentsCallout: React.FC = () => {
   const {
     curation: { suggestion, queries },
   } = useValues(CurationLogic);
+  const {
+    engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },
+  } = useValues(EngineLogic);
 
-  if (typeof suggestion === 'undefined' || suggestion.status !== 'pending') {
+  if (
+    typeof suggestion === 'undefined' ||
+    suggestion.status !== 'pending' ||
+    adaptiveRelevanceSuggestionsActive === false
+  ) {
     return null;
   }
 
   return (
     <SuggestionsCallout
+      style={{ marginTop: '24px' }}
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curation.suggestedDocumentsCallout.title',
         { defaultMessage: 'New suggested documents for this query' }

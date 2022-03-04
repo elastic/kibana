@@ -6,7 +6,7 @@
  */
 
 import { EuiPortal, EuiTabs, EuiTab, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { EuiOutsideClickDetector } from '@elastic/eui';
@@ -22,7 +22,7 @@ import { PropertiesTab } from './tabs/properties/index';
 import { AnomaliesTab } from './tabs/anomalies/anomalies';
 import { OsqueryTab } from './tabs/osquery';
 import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
-import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../observability/public';
 import { getNodeDetailUrl } from '../../../../link_to';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
 import { createUptimeLink } from '../../lib/create_uptime_link';

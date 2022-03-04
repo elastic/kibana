@@ -7,10 +7,11 @@
 
 import expect from '@kbn/expect';
 import fixture from './fixtures/multicluster_pipelines';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('pipelines listing multicluster mb', () => {
     const archive =
@@ -25,11 +26,11 @@ export default function ({ getService }) {
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should get the pipelines', async () => {

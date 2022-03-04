@@ -34,7 +34,6 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange, codePaths })
         .expect(200);
-
       expect(body).to.eql(clusterFixture);
     });
   });

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
+  const retryService = getService('retry');
 
   return {
     /**
@@ -49,6 +51,34 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       return await testSubjects.find('advancedPolicyButton');
     },
 
+    async isAdvancedSettingsExpanded() {
+      return await testSubjects.exists('advancedPolicyPanel');
+    },
+
+    /**
+     * shows the advanced settings section and scrolls it into view
+     */
+    async showAdvancedSettingsSection() {
+      if (!(await this.isAdvancedSettingsExpanded())) {
+        const expandButton = await this.findAdvancedPolicyButton();
+        await expandButton.click();
+      }
+
+      await testSubjects.existOrFail('advancedPolicyPanel');
+      await testSubjects.scrollIntoView('advancedPolicyPanel');
+    },
+
+    /**
+     * Hides the advanced settings section
+     */
+    async hideAdvancedSettingsSection() {
+      if (await this.isAdvancedSettingsExpanded()) {
+        const expandButton = await this.findAdvancedPolicyButton();
+        await expandButton.click();
+      }
+      await testSubjects.missingOrFail('advancedPolicyPanel');
+    },
+
     /**
      * Finds and returns the linux connection_delay Advanced Policy field
      */
@@ -69,7 +99,17 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async confirmAndSave() {
       await this.ensureIsOnDetailsPage();
-      await (await this.findSaveButton()).click();
+
+      const saveButton = await this.findSaveButton();
+
+      // Sometimes, data retrieval errors may have been encountered by other security solution processes
+      // (ex. index fields search here: `x-pack/plugins/security_solution/public/common/containers/source/index.tsx:181`)
+      // which are displayed using one or more Toast messages. This in turn prevents the user from
+      // actually clicking the Save button. Because those errors are not associated with Policy details,
+      // we'll first check that all toasts are cleared
+      await pageObjects.common.clearAllToasts();
+
+      await saveButton.click();
       await testSubjects.existOrFail('policyDetailsConfirmModal');
       await pageObjects.common.clickConfirmOnModal();
     },
@@ -92,6 +132,20 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async findPackagePolicyEndpointCustomConfiguration(onEditPage: boolean = false) {
       return await testSubjects.find(`endpointPackagePolicy_${onEditPage ? 'edit' : 'create'}`);
+    },
+
+    /**
+     * Waits for a Checkbox/Radiobutton to have its `isSelected()` value match the provided expected value
+     * @param selector
+     * @param expectedSelectedValue
+     */
+    async waitForCheckboxSelectionChange(
+      selector: string,
+      expectedSelectedValue: boolean
+    ): Promise<void> {
+      await retryService.try(async () => {
+        expect(await testSubjects.isSelected(selector)).to.be(expectedSelectedValue);
+      });
     },
   };
 }

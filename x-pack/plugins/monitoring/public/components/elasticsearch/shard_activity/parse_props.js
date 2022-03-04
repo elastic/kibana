@@ -29,6 +29,7 @@ export const parseProps = (props) => {
     stage,
     index,
     index_name: indexName,
+    name: mbIndexName,
     primary: isPrimary,
     start_time_in_millis: startTimeInMillis,
     total_time_in_millis: totalTimeInMillis,
@@ -42,7 +43,7 @@ export const parseProps = (props) => {
   const { files, size } = index;
 
   return {
-    name: indexName || index.name,
+    name: indexName || mbIndexName,
     shard: `${id} / ${isPrimary ? 'Primary' : 'Replica'}`,
     relocationType: type === 'PRIMARY_RELOCATION' ? 'Primary Relocation' : normalizeString(type),
     stage: normalizeString(stage),

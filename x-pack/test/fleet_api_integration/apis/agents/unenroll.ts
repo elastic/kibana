@@ -30,21 +30,19 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
-      const { body: accessAPIKeyBody } = await esClient.security.createApiKey({
+      const accessAPIKeyBody = await esClient.security.createApiKey({
         body: {
           name: `test access api key: ${uuid.v4()}`,
         },
       });
       accessAPIKeyId = accessAPIKeyBody.id;
-      const { body: outputAPIKeyBody } = await esClient.security.createApiKey({
+      const outputAPIKeyBody = await esClient.security.createApiKey({
         body: {
           name: `test output api key: ${uuid.v4()}`,
         },
       });
       outputAPIKeyId = outputAPIKeyBody.id;
-      const {
-        body: { _source: agentDoc },
-      } = await esClient.get({
+      const { _source: agentDoc } = await esClient.get({
         index: '.fleet-agents',
         id: 'agent1',
       });
@@ -104,15 +102,11 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      const {
-        body: { api_keys: accessAPIKeys },
-      } = await esClient.security.getApiKey({ id: accessAPIKeyId });
+      const { api_keys: accessAPIKeys } = await esClient.security.getApiKey({ id: accessAPIKeyId });
       expect(accessAPIKeys).length(1);
       expect(accessAPIKeys[0].invalidated).eql(true);
 
-      const {
-        body: { api_keys: outputAPIKeys },
-      } = await esClient.security.getApiKey({ id: outputAPIKeyId });
+      const { api_keys: outputAPIKeys } = await esClient.security.getApiKey({ id: outputAPIKeyId });
       expect(outputAPIKeys).length(1);
       expect(outputAPIKeys[0].invalidated).eql(true);
     });

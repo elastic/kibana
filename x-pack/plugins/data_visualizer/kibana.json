@@ -10,25 +10,28 @@
     "embeddable",
     "share",
     "discover",
-    "fileUpload"
+    "fileUpload",
+    "uiActions",
+    "charts"
   ],
   "optionalPlugins": [
     "security",
     "maps",
     "home",
     "lens",
-    "indexPatternFieldEditor",
-    "customIntegrations"
+    "dataViewFieldEditor",
+    "customIntegrations",
+    "cloud"
   ],
   "requiredBundles": [
     "home",
     "kibanaReact",
     "maps",
     "esUiShared",
-    "fieldFormats"
-  ],
-  "extraPublicDirs": [
-    "common"
+    "fieldFormats",
+    "uiActions",
+    "lens",
+    "cloud"
   ],
   "owner": {
     "name": "Machine Learning UI",

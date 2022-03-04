@@ -27,22 +27,17 @@ you can create <<external-plugin-development, your own plugin>>.
 === View surrounding documents
 
 To inspect the documents that occurred immediately before and after a document,
-your index pattern must contain time-based events.
+your {data-source} must contain time-based events.
 
 . In the document table, click the expand icon (>).
 . In the expanded view, click **View surrounding documents**.
 +
 Documents are displayed using the same set of columns as the *Discover* view from which
-the context was opened. The anchor document is highlighted in blue.
-+
-[role="screenshot"]
-image::images/discover-context.png[Image showing context view feature, with anchor documents highlighted in blue]
-+
-The filters you applied in *Discover* are carried over to the context view. Pinned
+the context was opened. The filters you applied are also carried over. Pinned
 filters remain active, while normal filters are copied in a disabled state.
 +
 [role="screenshot"]
-image::images/discover-context-filters-inactive.png[Filter in context view]
+image::images/discover-context.png[Image showing context view feature, with anchor documents highlighted in blue]
 
 . To find the documents of interest, add filters.
 

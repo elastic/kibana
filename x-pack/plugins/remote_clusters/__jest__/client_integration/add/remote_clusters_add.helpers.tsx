@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 
 import { RemoteClusterAdd } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';

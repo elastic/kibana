@@ -6,7 +6,7 @@
  */
 
 import supertest from 'supertest';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { format as formatUrl } from 'url';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -29,6 +29,7 @@ export function getEsClientForAPIKey({ getService }: FtrProviderContext, esApiKe
       apiKey: esApiKey,
     },
     requestTimeout: config.get('timeouts.esRequestTimeout'),
+    Connection: HttpConnection,
   });
 }
 
@@ -36,10 +37,8 @@ export function setupFleetAndAgents(providerContext: FtrProviderContext) {
   before(async () => {
     // Use elastic/fleet-server service account to execute setup to verify privilege configuration
     const es = providerContext.getService('es');
-    const {
-      body: { token },
-      // @ts-expect-error SecurityCreateServiceTokenRequest should not require `name`
-    } = await es.security.createServiceToken({
+    // @ts-expect-error SecurityCreateServiceTokenRequest should not require `name`
+    const { token } = await es.security.createServiceToken({
       namespace: 'elastic',
       service: 'fleet-server',
     });

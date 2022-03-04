@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 import { setupEnvironment } from '../../helpers';
 import { initTestBed } from '../init_test_bed';
 import { getDefaultHotPhasePolicy, POLICY_NAME } from '../constants';

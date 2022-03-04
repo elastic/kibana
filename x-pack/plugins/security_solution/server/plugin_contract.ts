@@ -25,7 +25,7 @@ import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/
 import { IEventLogClientService, IEventLogService } from '../../event_log/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { FleetStartContract as FleetPluginStart } from '../../fleet/server';
-import { LicensingPluginStart } from '../../licensing/server';
+import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/server';
 import { ListPluginSetup } from '../../lists/server';
 import { MlPluginSetup } from '../../ml/server';
 import {
@@ -33,7 +33,7 @@ import {
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
 } from '../../rule_registry/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { SpacesPluginSetup } from '../../spaces/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import {
   TaskManagerSetupContract as TaskManagerPluginSetup,
   TaskManagerStartContract as TaskManagerPluginStart,
@@ -57,6 +57,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   taskManager?: TaskManagerPluginSetup;
   telemetry?: TelemetryPluginSetup;
   usageCollection?: UsageCollectionPluginSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
@@ -68,6 +69,7 @@ export interface SecuritySolutionPluginStartDependencies {
   licensing: LicensingPluginStart;
   ruleRegistry: RuleRegistryPluginStart;
   security: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
 }

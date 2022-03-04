@@ -12,7 +12,7 @@ const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
-const UiSharedDepsSrc = require('./src');
+const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
@@ -33,7 +33,7 @@ module.exports = {
   context: __dirname,
   devtool: 'cheap-source-map',
   output: {
-    path: UiSharedDepsSrc.distDir,
+    path: UiSharedDepsSrcDistDir,
     filename: '[name].js',
     chunkFilename: 'kbn-ui-shared-deps-src.chunk.[id].js',
     sourceMapFilename: '[file].map',
@@ -57,17 +57,6 @@ module.exports = {
         ],
       },
       {
-        include: [require.resolve('./src/theme.ts')],
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            },
-          },
-        ],
-      },
-      {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
@@ -85,6 +74,7 @@ module.exports = {
     extensions: ['.js', '.ts'],
     symlinks: false,
     alias: {
+      '@elastic/eui$': '@elastic/eui/optimize/es',
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4

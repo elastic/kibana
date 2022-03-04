@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { ML_JOB_AGGREGATION } from '../../../../../../../../../common/constants/aggregation_types';

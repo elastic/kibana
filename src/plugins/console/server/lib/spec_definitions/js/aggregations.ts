@@ -79,12 +79,45 @@ const rules = {
         },
       },
     },
+    boxplot: {
+      __template: {
+        field: '',
+      },
+      field: '{field}',
+      compression: 100,
+      missing: 0,
+    },
+    t_test: {
+      a: {
+        field: '{field}',
+        filter: { __scope_link: 'GLOBAL.filter' },
+      },
+      b: {
+        field: '{field}',
+        filter: { __scope_link: 'GLOBAL.filter' },
+      },
+      type: { __one_of: ['paired', 'homoscedastic', 'heteroscedastic'] },
+      __template: {
+        a: {
+          field: '',
+        },
+        b: {
+          field: '',
+        },
+        type: '',
+      },
+    },
     adjacency_matrix: {
       filters: {},
     },
     diversified_sampler: {
-      shard_size: '',
-      field: '',
+      shard_size: 100,
+      field: '{field}',
+      max_docs_per_value: 1,
+      execution_hint: {
+        __template: 'global_ordinals',
+        __one_of: ['global_ordinals', 'map', 'bytes_hash'],
+      },
     },
     min: simple_metric,
     max: simple_metric,
@@ -418,13 +451,7 @@ const rules = {
     },
     sampler: {
       __template: {},
-      field: '{field}',
-      script: {
-        // populated by a global rule
-      },
       shard_size: 100,
-      max_docs_per_value: 3,
-      execution_hint: { __one_of: ['map', 'global_ordinals', 'bytes_hash'] },
     },
     children: {
       __template: {

@@ -20,7 +20,7 @@ import { docLinks } from '../doc_links';
 
 import { NO_USERS_TITLE, NO_USERS_DESCRIPTION, ENABLE_USERS_LINK } from './constants';
 
-const USERS_DOCS_URL = `${docLinks.enterpriseSearchBase}/users-access.html`;
+const USERS_DOCS_URL = `${docLinks.enterpriseSearchUsersAccess}`;
 
 export const UsersEmptyPrompt: React.FC = () => (
   <EuiFlexGroup alignItems="center" justifyContent="center">

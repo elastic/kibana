@@ -20,11 +20,18 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useGetSettings, useUrlModal, sendGetOneAgentPolicy, useFleetStatus } from '../../hooks';
+import {
+  useGetSettings,
+  sendGetOneAgentPolicy,
+  useFleetStatus,
+  useAgentEnrollmentFlyoutData,
+} from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy } from '../../types';
+
+import { Loading } from '..';
 
 import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
@@ -39,6 +46,7 @@ export interface Props extends BaseProps {
 }
 
 export * from './agent_policy_selection';
+export * from './agent_policy_select_create';
 export * from './managed_instructions';
 export * from './standalone_instructions';
 export * from './steps';
@@ -46,28 +54,24 @@ export * from './steps';
 export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentPolicy,
-  agentPolicies,
   viewDataStep,
   defaultMode = 'managed',
 }) => {
   const [mode, setMode] = useState<FlyoutMode>(defaultMode);
 
-  const { modal } = useUrlModal();
-  const [lastModal, setLastModal] = useState(modal);
   const settings = useGetSettings();
   const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
-
-  // Refresh settings when there is a modal/flyout change
-  useEffect(() => {
-    if (modal !== lastModal) {
-      settings.resendRequest();
-      setLastModal(modal);
-    }
-  }, [modal, lastModal, settings]);
 
   const fleetStatus = useFleetStatus();
   const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
+
+  const {
+    agentPolicies,
+    isLoadingInitialAgentPolicies,
+    isLoadingAgentPolicies,
+    refreshAgentPolicies,
+  } = useAgentEnrollmentFlyoutData();
 
   useEffect(() => {
     async function checkPolicyIsFleetServer() {
@@ -137,7 +141,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
       <EuiFlyoutBody
         banner={
           fleetStatus.isReady &&
-          !isFleetServerPolicySelected &&
           !isLoadingInitialRequest &&
           fleetServerHosts.length === 0 &&
           mode === 'managed' ? (
@@ -145,7 +148,9 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           ) : undefined
         }
       >
-        {mode === 'managed' ? (
+        {isLoadingInitialAgentPolicies ? (
+          <Loading />
+        ) : mode === 'managed' ? (
           <ManagedInstructions
             settings={settings.data?.item}
             setSelectedPolicyId={setSelectedPolicyId}
@@ -153,9 +158,15 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             agentPolicies={agentPolicies}
             viewDataStep={viewDataStep}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
+            refreshAgentPolicies={refreshAgentPolicies}
+            isLoadingAgentPolicies={isLoadingAgentPolicies}
           />
         ) : (
-          <StandaloneInstructions agentPolicy={agentPolicy} agentPolicies={agentPolicies} />
+          <StandaloneInstructions
+            agentPolicy={agentPolicy}
+            agentPolicies={agentPolicies}
+            refreshAgentPolicies={refreshAgentPolicies}
+          />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

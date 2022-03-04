@@ -68,7 +68,7 @@ export function getActionsMigrations(
       doc.attributes.actionTypeId === '.servicenow' ||
       doc.attributes.actionTypeId === '.servicenow-sir' ||
       doc.attributes.actionTypeId === '.email',
-    pipeMigrations(markOldServiceNowITSMConnectorAsLegacy, setServiceConfigIfNotSet)
+    pipeMigrations(addUsesTableApiToServiceNowConnectors, setServiceConfigIfNotSet)
   );
 
   const migrationActions800 = createEsoMigration(
@@ -197,7 +197,7 @@ const addIsMissingSecretsField = (
   };
 };
 
-const markOldServiceNowITSMConnectorAsLegacy = (
+const addUsesTableApiToServiceNowConnectors = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
   if (
@@ -213,7 +213,7 @@ const markOldServiceNowITSMConnectorAsLegacy = (
       ...doc.attributes,
       config: {
         ...doc.attributes.config,
-        isLegacy: true,
+        usesTableApi: true,
       },
     },
   };

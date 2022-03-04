@@ -11,7 +11,6 @@ import {
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
 import { ConfigType } from './config';
-import { UnderlyingLogClient } from './lib/detection_engine/rule_execution_log/types';
 
 export const createMockConfig = (): ConfigType => {
   const enableExperimental: string[] = [];
@@ -23,18 +22,12 @@ export const createMockConfig = (): ConfigType => {
     maxTimelineImportExportSize: 10000,
     maxTimelineImportPayloadBytes: 10485760,
     enableExperimental,
-    endpointResultListDefaultFirstPageIndex: 0,
-    endpointResultListDefaultPageSize: 10,
     packagerTaskInterval: '60s',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
     prebuiltRulesFromFileSystem: true,
     prebuiltRulesFromSavedObjects: false,
-    ruleExecutionLog: {
-      underlyingClient: UnderlyingLogClient.savedObjects,
-    },
 
-    kibanaIndex: '.kibana',
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
   };
 };

@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { SharedGlobalConfig, Logger } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Logger } from 'kibana/server';
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { SEARCH_SESSION_TYPE } from '../../../../../src/plugins/data/common';
 import { ReportedUsage } from './register';
@@ -17,12 +15,11 @@ interface SessionPersistedTermsBucket {
   doc_count: number;
 }
 
-export function fetchProvider(config$: Observable<SharedGlobalConfig>, logger: Logger) {
+export function fetchProvider(kibanaIndex: string, logger: Logger) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
     try {
-      const config = await config$.pipe(first()).toPromise();
-      const { body: esResponse } = await esClient.search<unknown>({
-        index: config.kibana.index,
+      const esResponse = await esClient.search<unknown>({
+        index: kibanaIndex,
         body: {
           size: 0,
           aggs: {
@@ -37,10 +34,10 @@ export function fetchProvider(config$: Observable<SharedGlobalConfig>, logger: L
 
       const aggs = esResponse.aggregations as Record<
         string,
-        estypes.AggregationsMultiBucketAggregate<SessionPersistedTermsBucket>
+        estypes.AggregationsMultiBucketAggregateBase<SessionPersistedTermsBucket>
       >;
 
-      const buckets = aggs.persisted.buckets;
+      const buckets = aggs.persisted.buckets as SessionPersistedTermsBucket[];
       if (!buckets.length) {
         return { transientCount: 0, persistedCount: 0, totalCount: 0 };
       }

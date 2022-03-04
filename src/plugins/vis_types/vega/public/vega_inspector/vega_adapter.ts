@@ -6,14 +6,35 @@
  * Side Public License, v 1.
  */
 
-import { Observable, ReplaySubject, fromEventPattern, merge, timer } from 'rxjs';
-import { map, switchMap, filter, debounce } from 'rxjs/operators';
-import { View, Runtime, Spec } from 'vega';
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
+
+import { Observable, ReplaySubject, fromEventPattern, merge, timer, BehaviorSubject } from 'rxjs';
+import { map, switchMap, filter, debounce } from 'rxjs/operators';
+import type { View, Spec } from 'vega';
+import type { Assign } from '@kbn/utility-types';
 
 interface DebugValues {
-  view: View;
+  view: Assign<
+    {
+      _runtime: {
+        data: Record<
+          string,
+          {
+            values: {
+              value: Array<Record<string, unknown>>;
+            };
+          }
+        >;
+        signals: Record<
+          string,
+          {
+            value: unknown;
+          }
+        >;
+      };
+    },
+    View
+  >;
   spec: Spec;
 }
 
@@ -38,8 +59,11 @@ const vegaAdapterValueLabel = i18n.translate('visTypeVega.inspector.vegaAdapter.
 /** Get Runtime Scope for Vega View
  * @link https://vega.github.io/vega/docs/api/debugging/#scope
  **/
-const getVegaRuntimeScope = (debugValues: DebugValues) =>
-  (debugValues.view as any)._runtime as Runtime;
+const getVegaRuntimeScope = (debugValues: DebugValues) => {
+  const { data, signals } = debugValues.view._runtime ?? {};
+
+  return { data, signals };
+};
 
 const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
   const nonSerializableFieldLabel = '(..)';
@@ -57,6 +81,7 @@ const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
 
 export class VegaAdapter {
   private debugValuesSubject = new ReplaySubject<DebugValues>();
+  private error = new BehaviorSubject<string | undefined>(undefined);
 
   bindInspectValues(debugValues: DebugValues) {
     this.debugValuesSubject.next(debugValues);
@@ -69,7 +94,7 @@ export class VegaAdapter {
         const runtimeScope = getVegaRuntimeScope(debugValues);
 
         return Object.keys(runtimeScope.data || []).reduce((acc: InspectDataSets[], key) => {
-          const value = runtimeScope.data[key].values.value;
+          const { value } = runtimeScope.data[key].values;
 
           if (value && value[0]) {
             const columns = Object.keys(value[0]);
@@ -134,5 +159,17 @@ export class VegaAdapter {
       filter((debugValues) => Boolean(debugValues)),
       map((debugValues) => JSON.stringify(debugValues.spec, null, 2))
     );
+  }
+
+  getErrorObservable() {
+    return this.error.asObservable();
+  }
+
+  setError(error: string) {
+    this.error.next(error);
+  }
+
+  clearError() {
+    this.error.next(undefined);
   }
 }

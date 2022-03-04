@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import { EmptyPage } from './empty_page';
-import * as i18n from '../../components/app/cases/translations';
+import * as i18n from './translations';
 import { useKibana } from '../../utils/kibana_react';
 
 export const CaseFeatureNoPermissions = React.memo(() => {
@@ -29,7 +29,7 @@ export const CaseFeatureNoPermissions = React.memo(() => {
     <EmptyPage
       actions={actions}
       message={i18n.CASES_FEATURE_NO_PERMISSIONS_MSG}
-      data-test-subj="no_feature_permissions"
+      data-test-subj="noFeaturePermissions"
       title={i18n.CASES_FEATURE_NO_PERMISSIONS_TITLE}
     />
   );

@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`custom link get transaction fetches with all filter 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "service.name": Array [
+                "foo",
+              ],
+            },
+          },
+          Object {
+            "terms": Object {
+              "service.environment": Array [
+                "bar",
+              ],
+            },
+          },
+          Object {
+            "terms": Object {
+              "transaction.name": Array [
+                "baz",
+              ],
+            },
+          },
+          Object {
+            "terms": Object {
+              "transaction.type": Array [
+                "qux",
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  "size": 1,
+  "terminate_after": 1,
+}
+`;
+
+exports[`custom link get transaction fetches without filter 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [],
+      },
+    },
+  },
+  "size": 1,
+  "terminate_after": 1,
+}
+`;

@@ -10,17 +10,23 @@ import { PluginFunctionalProviderContext } from 'test/plugin_functional/services
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, loadTestFile }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('search examples', function () {
     this.tags('ciGroup13');
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic'); // need at least one index pattern
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      ); // need at least one index pattern
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     loadTestFile(require.resolve('./search_session_example'));

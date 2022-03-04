@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertType } from '../../types';
-import { InitialAlert } from '../sections/alert_form/alert_reducer';
+import { RuleType } from '../../types';
+import { InitialRule } from '../sections/rule_form/rule_reducer';
 
 /**
  * NOTE: Applications that want to show the alerting UIs will need to add
@@ -23,9 +23,9 @@ export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
 export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.delete;
 
-export function hasAllPrivilege(alert: InitialAlert, alertType?: AlertType): boolean {
-  return alertType?.authorizedConsumers[alert.consumer]?.all ?? false;
+export function hasAllPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
+  return ruleType?.authorizedConsumers[rule.consumer]?.all ?? false;
 }
-export function hasReadPrivilege(alert: InitialAlert, alertType?: AlertType): boolean {
-  return alertType?.authorizedConsumers[alert.consumer]?.read ?? false;
+export function hasReadPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
+  return ruleType?.authorizedConsumers[rule.consumer]?.read ?? false;
 }

@@ -10,13 +10,6 @@ import { InfraWaffleMapOptions, InfraFormatterType } from '../../../../lib/lib';
 import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 
 const options: InfraWaffleMapOptions = {
-  fields: {
-    container: 'container.id',
-    pod: 'kubernetes.pod.uid',
-    host: 'host.name',
-    timestamp: '@timestanp',
-    tiebreaker: '@timestamp',
-  },
   formatter: InfraFormatterType.percent,
   formatTemplate: '{{value}}',
   metric: { type: 'cpu' },

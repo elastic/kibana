@@ -18,8 +18,10 @@ export interface AppLeaveConfirmAction
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [callback](./kibana-plugin-core-public.appleaveconfirmaction.callback.md) | <code>() =&gt; void</code> |  |
-|  [text](./kibana-plugin-core-public.appleaveconfirmaction.text.md) | <code>string</code> |  |
-|  [title](./kibana-plugin-core-public.appleaveconfirmaction.title.md) | <code>string</code> |  |
-|  [type](./kibana-plugin-core-public.appleaveconfirmaction.type.md) | <code>AppLeaveActionType.confirm</code> |  |
+|  [buttonColor?](./kibana-plugin-core-public.appleaveconfirmaction.buttoncolor.md) | ButtonColor | <i>(Optional)</i> |
+|  [callback?](./kibana-plugin-core-public.appleaveconfirmaction.callback.md) | () =&gt; void | <i>(Optional)</i> |
+|  [confirmButtonText?](./kibana-plugin-core-public.appleaveconfirmaction.confirmbuttontext.md) | string | <i>(Optional)</i> |
+|  [text](./kibana-plugin-core-public.appleaveconfirmaction.text.md) | string |  |
+|  [title?](./kibana-plugin-core-public.appleaveconfirmaction.title.md) | string | <i>(Optional)</i> |
+|  [type](./kibana-plugin-core-public.appleaveconfirmaction.type.md) | AppLeaveActionType.confirm |  |
 

@@ -2023,17 +2023,36 @@ ace.define(
       // parses and returns the method
       method = function () {
         switch (ch) {
+          case 'g':
+            next('g');
+            next('e');
+            next('t');
+            return 'get';
           case 'G':
             next('G');
             next('E');
             next('T');
             return 'GET';
+          case 'h':
+            next('h');
+            next('e');
+            next('a');
+            next('d');
+            return 'head';
           case 'H':
             next('H');
             next('E');
             next('A');
             next('D');
             return 'HEAD';
+          case 'd':
+            next('d');
+            next('e');
+            next('l');
+            next('e');
+            next('t');
+            next('e');
+            return 'delete';
           case 'D':
             next('D');
             next('E');
@@ -2042,6 +2061,22 @@ ace.define(
             next('T');
             next('E');
             return 'DELETE';
+          case 'p':
+            next('p');
+            switch (ch) {
+              case 'u':
+                next('u');
+                next('t');
+                return 'put';
+              case 'o':
+                next('o');
+                next('s');
+                next('t');
+                return 'post';
+              default:
+                error('Unexpected \'' + ch + '\'');
+            }
+            break;
           case 'P':
             next('P');
             switch (ch) {

@@ -14,7 +14,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
@@ -40,13 +40,10 @@ export const updateRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const rulesClient = context.alerting?.getRulesClient();
+      const rulesClient = context.alerting.getRulesClient();
+      const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
       const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution?.getAppClient();
-
-      if (!siemClient || !rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
+      const siemClient = context.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
         license: context.licensing.license,
@@ -55,7 +52,6 @@ export const updateRulesBulkRoute = (
         savedObjectsClient,
       });
 
-      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
@@ -69,7 +65,7 @@ export const updateRulesBulkRoute = (
               });
             }
 
-            throwHttpError(await mlAuthz.validateRuleType(payloadRule.type));
+            throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
 
             const existingRule = await readRules({
               isRuleRegistryEnabled,
@@ -78,28 +74,26 @@ export const updateRulesBulkRoute = (
               id: payloadRule.id,
             });
 
-            await legacyMigrate({
+            const migratedRule = await legacyMigrate({
               rulesClient,
               savedObjectsClient,
               rule: existingRule,
             });
 
             const rule = await updateRules({
-              spaceId: context.securitySolution.getSpaceId(),
               rulesClient,
-              ruleStatusClient,
-              savedObjectsClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
+              existingRule: migratedRule,
               ruleUpdate: payloadRule,
-              isRuleRegistryEnabled,
             });
             if (rule != null) {
-              const ruleStatuses = await ruleStatusClient.find({
-                logsCount: 1,
-                ruleId: rule.id,
-                spaceId: context.securitySolution.getSpaceId(),
-              });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses, isRuleRegistryEnabled);
+              const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
+              return transformValidateBulkError(
+                rule.id,
+                rule,
+                ruleExecutionSummary,
+                isRuleRegistryEnabled
+              );
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

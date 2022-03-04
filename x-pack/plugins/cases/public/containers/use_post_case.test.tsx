@@ -8,7 +8,8 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { usePostCase, UsePostCase } from './use_post_case';
 import * as api from './api';
-import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../common';
+import { ConnectorTypes } from '../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { basicCasePost } from './mock';
 
 jest.mock('./api');

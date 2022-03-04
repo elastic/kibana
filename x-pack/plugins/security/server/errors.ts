@@ -33,7 +33,7 @@ export function wrapIntoCustomErrorResponse(error: any) {
  */
 export function getErrorStatusCode(error: any): number {
   if (error instanceof errors.ResponseError) {
-    return error.statusCode;
+    return error.statusCode!;
   }
 
   return Boom.isBoom(error) ? error.output.statusCode : error.statusCode || error.status;

@@ -20,7 +20,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CheckInEmptyCircle, PartialClock } from './custom_icons';
 import './search_session_indicator.scss';
@@ -148,7 +148,7 @@ const searchSessionIndicatorViewStateToProps: {
   [SearchSessionState.None]: null,
   [SearchSessionState.Loading]: {
     button: {
-      color: 'subdued',
+      color: 'text',
       iconType: PartialClock,
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.loadingResultsIconAriaLabel',
@@ -179,7 +179,7 @@ const searchSessionIndicatorViewStateToProps: {
   },
   [SearchSessionState.Completed]: {
     button: {
-      color: 'subdued',
+      color: 'text',
       iconType: 'check',
       'aria-label': i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
         defaultMessage: 'Search session complete',

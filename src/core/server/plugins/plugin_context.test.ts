@@ -8,7 +8,7 @@
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { fromRoot } from '@kbn/utils';
 import {
   createPluginInitializerContext,
@@ -124,9 +124,6 @@ describe('createPluginInitializerContext', () => {
         .pipe(first())
         .toPromise();
       expect(configObject).toStrictEqual({
-        kibana: {
-          index: '.kibana',
-        },
         elasticsearch: {
           shardTimeout: duration(30, 's'),
           requestTimeout: duration(30, 's'),

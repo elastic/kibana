@@ -27,6 +27,17 @@ export class DuplicateField extends KbnError {
 }
 
 /**
+ * when a user is attempting to create a field with disallowed character in the name, like *
+ * @param {String} character - the character not allowed in name
+ * @param {String} name - the field name
+ */
+export class CharacterNotAllowedInField extends KbnError {
+  constructor(character: string, name: string) {
+    super(`The field "${name}" cannot have "${character}" in the name`);
+  }
+}
+
+/**
  * A saved object was not found
  */
 export class SavedObjectNotFound extends KbnError {

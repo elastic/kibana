@@ -7,9 +7,14 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../flash_messages';
+import { toastAPIErrors } from '../../flash_messages';
+import { getErrorsFromHttpResponse } from '../../flash_messages/handle_api_errors';
 
 import { HttpLogic } from '../../http';
+import {
+  InlineEditableTableLogic,
+  InlineEditableTableProps as InlineEditableTableLogicProps,
+} from '../inline_editable_table/inline_editable_table_logic';
 
 import { ItemWithAnID } from '../types';
 
@@ -83,13 +88,18 @@ export const GenericEndpointInlineEditableTableLogic = kea<
       const { addRoute, onAdd, dataProperty } = props;
 
       try {
-        const response = await http.post(addRoute, { body: JSON.stringify(item) });
+        const response = await http.post<Record<string, ItemWithAnID[]>>(addRoute, {
+          body: JSON.stringify(item),
+        });
         const itemsFromResponse = response[dataProperty];
 
         onAdd(item, itemsFromResponse);
         onSuccess();
       } catch (e) {
-        flashAPIErrors(e);
+        const errors = getErrorsFromHttpResponse(e);
+        InlineEditableTableLogic({
+          instanceId: props.instanceId,
+        } as InlineEditableTableLogicProps<ItemWithAnID>).actions.setRowErrors(errors);
       } finally {
         actions.clearLoading();
       }
@@ -99,13 +109,16 @@ export const GenericEndpointInlineEditableTableLogic = kea<
       const { deleteRoute, onDelete, dataProperty } = props;
 
       try {
-        const response = await http.delete(deleteRoute(item));
+        const response = await http.delete<Record<string, ItemWithAnID[]>>(deleteRoute(item));
         const itemsFromResponse = response[dataProperty];
 
         onDelete(item, itemsFromResponse);
         onSuccess();
       } catch (e) {
-        flashAPIErrors(e);
+        const errors = getErrorsFromHttpResponse(e);
+        InlineEditableTableLogic({
+          instanceId: props.instanceId,
+        } as InlineEditableTableLogicProps<ItemWithAnID>).actions.setRowErrors(errors);
       } finally {
         actions.clearLoading();
       }
@@ -116,7 +129,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
 
       const dataToSubmit = stripIdAndCreatedAtFromItem(item);
       try {
-        const response = await http.put(updateRoute(item), {
+        const response = await http.put<Record<string, ItemWithAnID[]>>(updateRoute(item), {
           body: JSON.stringify(dataToSubmit),
         });
         const itemsFromResponse = response[dataProperty];
@@ -124,7 +137,10 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onUpdate(item, itemsFromResponse);
         onSuccess();
       } catch (e) {
-        flashAPIErrors(e);
+        const errors = getErrorsFromHttpResponse(e);
+        InlineEditableTableLogic({
+          instanceId: props.instanceId,
+        } as InlineEditableTableLogicProps<ItemWithAnID>).actions.setRowErrors(errors);
       } finally {
         actions.clearLoading();
       }
@@ -141,7 +157,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
       try {
         actions.setLoading();
 
-        const response = await http.put(reorderRoute, {
+        const response = await http.put<Record<string, ItemWithAnID[]>>(reorderRoute, {
           body: JSON.stringify({ [dataProperty]: reorderedItemIds }),
         });
         const itemsFromResponse = response[dataProperty];
@@ -150,7 +166,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onSuccess();
       } catch (e) {
         onReorder(oldItems);
-        flashAPIErrors(e);
+        toastAPIErrors(e);
       }
 
       actions.clearLoading();

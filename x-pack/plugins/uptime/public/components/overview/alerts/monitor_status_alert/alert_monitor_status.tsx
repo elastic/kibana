@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiSpacer, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FiltersExpressionsSelect, StatusExpressionSelect } from '../monitor_expressions';
 import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';
@@ -17,13 +17,13 @@ import { useGetUrlParams } from '../../../../hooks';
 import { FILTER_FIELDS } from '../../../../../common/constants';
 
 export interface AlertMonitorStatusProps {
-  alertParams: { [key: string]: any };
+  ruleParams: { [key: string]: any };
   enabled: boolean;
   isOldAlert: boolean;
   snapshotCount: number;
   snapshotLoading?: boolean;
   numTimes: number;
-  setAlertParams: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
   timerange: {
     from: string;
     to: string;
@@ -39,9 +39,9 @@ export const hasFilters = (filters?: { [key: string]: string[] }) => {
 };
 
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
-  const { alertParams, isOldAlert, setAlertParams, snapshotCount, snapshotLoading } = props;
+  const { ruleParams, isOldAlert, setRuleParams, snapshotCount, snapshotLoading } = props;
 
-  const alertFilters = alertParams?.filters ?? {};
+  const alertFilters = ruleParams?.filters ?? {};
   const [newFilters, setNewFilters] = useState<string[]>(
     Object.keys(alertFilters).filter((f) => alertFilters[f].length)
   );
@@ -50,16 +50,16 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
   useEffect(() => {
     if (search) {
-      setAlertParams('search', search);
+      setRuleParams('search', search);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSearchChange = useCallback(
     (value: string) => {
-      setAlertParams('search', value);
+      setRuleParams('search', value);
     },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   return (
@@ -83,12 +83,12 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <EuiSpacer size="s" />
 
-      <AlertQueryBar query={alertParams.search || ''} onChange={onSearchChange} />
+      <AlertQueryBar query={ruleParams.search || ''} onChange={onSearchChange} />
 
       <EuiSpacer size="s" />
 
       <AddFilterButton
-        alertFilters={alertParams.filters}
+        alertFilters={ruleParams.filters}
         newFilters={newFilters}
         onNewFilter={(newFilter) => {
           setNewFilters([...newFilters, newFilter]);
@@ -96,32 +96,32 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
       />
 
       <FiltersExpressionsSelect
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         newFilters={newFilters}
         onRemoveFilter={(removeFilter: string) => {
           if (newFilters.includes(removeFilter)) {
             setNewFilters(newFilters.filter((item) => item !== removeFilter));
           }
         }}
-        setAlertParams={setAlertParams}
+        setRuleParams={setRuleParams}
         shouldUpdateUrl={false}
       />
 
       <EuiHorizontalRule />
 
       <StatusExpressionSelect
-        alertParams={alertParams}
-        setAlertParams={setAlertParams}
-        hasFilters={hasFilters(alertParams?.filters)}
+        ruleParams={ruleParams}
+        setRuleParams={setRuleParams}
+        hasFilters={hasFilters(ruleParams?.filters)}
       />
 
       <EuiHorizontalRule />
 
       <AvailabilityExpressionSelect
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         isOldAlert={isOldAlert}
-        setAlertParams={setAlertParams}
-        hasFilters={hasFilters(alertParams?.filters)}
+        setRuleParams={setRuleParams}
+        hasFilters={hasFilters(ruleParams?.filters)}
       />
 
       <EuiSpacer size="m" />

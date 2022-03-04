@@ -12,6 +12,10 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
 
+  const getPackagePolicyById = async (id: string) => {
+    const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
+    return body;
+  };
   // use function () {} and not () => {} here
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
@@ -68,7 +72,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'filetest-1',
+          name: 'filetest',
           description: '',
           namespace: 'default',
           policy_id: hostedPolicy.id,
@@ -85,7 +89,7 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(responseWithoutForce.statusCode).to.be(400);
       expect(responseWithoutForce.message).to.contain(
-        'Cannot add integrations to hosted agent policy'
+        'Cannot update integrations of hosted agent policy'
       );
 
       // try same request with `force: true`
@@ -122,7 +126,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'filetest-1',
+          name: 'filetest-2',
           description: '',
           namespace: 'default',
           policy_id: agentPolicyId,
@@ -214,7 +218,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '0.13.0',
+            version: '1.4.1',
           },
         })
         .expect(200);
@@ -232,7 +236,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '0.13.0',
+            version: '1.5.0',
           },
         })
         .expect(400);
@@ -275,6 +279,175 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(400);
+    });
+
+    it('should return a 400 if there is a package policy with the same name on a different policy', async function () {
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy 2',
+          namespace: 'default',
+        });
+      const otherAgentPolicyId = agentPolicyResponse.item.id;
+
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'same-name-test-2',
+          description: '',
+          namespace: 'default',
+          policy_id: otherAgentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'same-name-test-2',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+    });
+
+    it('should return a 400 with required variables not provided', async function () {
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'pacakge-policy-required-variables-test-456',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [
+            {
+              enabled: true,
+              streams: [
+                {
+                  data_stream: {
+                    dataset: 'with_required_variables.log',
+                    type: 'logs',
+                  },
+                  enabled: true,
+                  vars: {},
+                },
+              ],
+              type: 'test_input',
+            },
+          ],
+          package: {
+            name: 'with_required_variables',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).contain('Package policy is invalid');
+    });
+
+    it('should work with required variables provided', async function () {
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'pacakge-policy-required-variables-test-123',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [
+            {
+              enabled: true,
+              streams: [
+                {
+                  data_stream: {
+                    dataset: 'with_required_variables.log',
+                    type: 'logs',
+                  },
+                  enabled: true,
+                  vars: {
+                    test_var_required: {
+                      value: 'I am required',
+                    },
+                  },
+                },
+              ],
+              type: 'test_input',
+            },
+          ],
+          package: {
+            name: 'with_required_variables',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+    });
+
+    it('should trim whitespace from policy name', async function () {
+      const nameWithWhitespace = '  package-policy-with-whitespace-prefix-and-suffix  ';
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: nameWithWhitespace,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [
+            {
+              enabled: true,
+              streams: [
+                {
+                  data_stream: {
+                    dataset: 'with_required_variables.log',
+                    type: 'logs',
+                  },
+                  enabled: true,
+                  vars: {
+                    test_var_required: {
+                      value: 'I am required',
+                    },
+                  },
+                },
+              ],
+              type: 'test_input',
+            },
+          ],
+          package: {
+            name: 'with_required_variables',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+
+      const policyId = body.item.id;
+
+      const { item: policy } = await getPackagePolicyById(policyId);
+
+      expect(policy.name).to.equal(nameWithWhitespace.trim());
     });
   });
 }

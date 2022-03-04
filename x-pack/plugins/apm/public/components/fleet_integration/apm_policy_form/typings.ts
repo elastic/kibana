@@ -7,12 +7,12 @@
 import * as t from 'io-ts';
 import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
 
-export {
+export type {
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
 } from '../../../../../fleet/public';
 
-export {
+export type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyConfigRecordEntry,
@@ -35,7 +35,8 @@ export interface BasicSettingRow {
     | 'boolean'
     | 'integer'
     | 'bytes'
-    | 'duration';
+    | 'duration'
+    | 'yaml';
   key: string;
   rowTitle?: string;
   rowDescription?: string;

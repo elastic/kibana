@@ -7,4 +7,3 @@
 
 export { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate'; // FIXME: should not need to register each immediate export type separately
 export { registerJobGenerationRoutes } from './generate_from_jobparams';
-export { registerLegacy } from './legacy';

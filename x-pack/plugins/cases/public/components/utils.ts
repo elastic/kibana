@@ -6,17 +6,12 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { ConnectorTypes } from '../../common';
+import { ConnectorTypes } from '../../common/api';
 import { FieldConfig, ValidationConfig } from '../common/shared_imports';
-import { StartPlugins } from '../types';
+import { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import { connectorValidator as servicenowConnectorValidator } from './connectors/servicenow/validator';
 import { CaseActionConnector } from './types';
-import {
-  ENABLE_NEW_SN_ITSM_CONNECTOR,
-  ENABLE_NEW_SN_SIR_CONNECTOR,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../actions/server/constants/connectors';
 
 export const getConnectorById = (
   id: string,
@@ -53,7 +48,7 @@ export const getConnectorsFormValidators = ({
 });
 
 export const getConnectorIcon = (
-  triggersActionsUi: StartPlugins['triggersActionsUi'],
+  triggersActionsUi: CasesPluginStart['triggersActionsUi'],
   type?: string
 ): IconType => {
   /**
@@ -78,18 +73,21 @@ export const getConnectorIcon = (
 };
 
 // TODO: Remove when the applications are certified
-export const isLegacyConnector = (connector?: CaseActionConnector) => {
+export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
   if (connector == null) {
-    return true;
+    return false;
   }
 
-  if (!ENABLE_NEW_SN_ITSM_CONNECTOR && connector.actionTypeId === '.servicenow') {
-    return true;
+  if (connector.actionTypeId === '.servicenow' || connector.actionTypeId === '.servicenow-sir') {
+    /**
+     * Connector's prior to the Elastic ServiceNow application
+     * use the Table API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_TableAPI)
+     * Connectors after the Elastic ServiceNow application use the
+     * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)
+     * A ServiceNow connector is considered deprecated if it uses the Table API.
+     */
+    return !!connector.config.usesTableApi;
   }
 
-  if (!ENABLE_NEW_SN_SIR_CONNECTOR && connector.actionTypeId === '.servicenow-sir') {
-    return true;
-  }
-
-  return connector.config.isLegacy;
+  return false;
 };

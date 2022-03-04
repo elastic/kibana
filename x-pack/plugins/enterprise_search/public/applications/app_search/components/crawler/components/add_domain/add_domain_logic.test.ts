@@ -26,7 +26,7 @@ jest.mock('./utils', () => ({
   getDomainWithProtocol: jest.fn().mockImplementation((domain) => domain),
 }));
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { CrawlerLogic } from '../../crawler_logic';
 import { CrawlerDomain } from '../../types';
@@ -37,6 +37,7 @@ import { getDomainWithProtocol } from './utils';
 const DEFAULT_VALUES: AddDomainLogicValues = {
   addDomainFormInputValue: 'https://',
   entryPointValue: '/',
+  canIgnoreValidationFailure: false,
   displayValidation: false,
   domainValidationResult: {
     steps: {
@@ -47,6 +48,7 @@ const DEFAULT_VALUES: AddDomainLogicValues = {
     },
   },
   allowSubmit: false,
+  ignoreValidationFailure: false,
   isValidationLoading: false,
   hasBlockingFailure: false,
   hasValidationCompleted: false,
@@ -190,6 +192,31 @@ describe('AddDomainLogic', () => {
             networkConnectivity: { state: '' },
           },
         });
+      });
+    });
+
+    describe('setIgnoreValidationFailure', () => {
+      beforeEach(() => {
+        mount({
+          addDomainFormInputValue: 'https://elastic.co',
+          entryPointValue: '/customers',
+          hasValidationCompleted: true,
+          errors: ['first error', 'second error'],
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'loading' },
+              indexingRestrictions: { state: 'loading' },
+              initialValidation: { state: 'loading' },
+              networkConnectivity: { state: 'loading' },
+            },
+          },
+        });
+
+        AddDomainLogic.actions.setIgnoreValidationFailure(true);
+      });
+
+      it('should set the input value', () => {
+        expect(AddDomainLogic.values.ignoreValidationFailure).toEqual(true);
       });
     });
 
@@ -480,16 +507,16 @@ describe('AddDomainLogic', () => {
             networkConnectivity: {
               state: 'invalid',
               message:
-                'Unable to establish a network connection because the "Initial Validation" check failed.',
+                'Unable to establish a network connection because the "Initial validation" check failed.',
             },
             indexingRestrictions: {
               state: 'invalid',
               message:
-                'Unable to determine indexing restrictions because the "Network Connectivity" check failed.',
+                'Unable to determine indexing restrictions because the "Network connectivity" check failed.',
             },
             contentVerification: {
               state: 'invalid',
-              message: 'Unable to verify content because the "Indexing Restrictions" check failed.',
+              message: 'Unable to verify content because the "Indexing restrictions" check failed.',
             },
           });
         });
@@ -575,16 +602,16 @@ describe('AddDomainLogic', () => {
             networkConnectivity: {
               state: 'invalid',
               message:
-                'Unable to establish a network connection because the "Initial Validation" check failed.',
+                'Unable to establish a network connection because the "Initial validation" check failed.',
             },
             indexingRestrictions: {
               state: 'invalid',
               message:
-                'Unable to determine indexing restrictions because the "Network Connectivity" check failed.',
+                'Unable to determine indexing restrictions because the "Network connectivity" check failed.',
             },
             contentVerification: {
               state: 'invalid',
-              message: 'Unable to verify content because the "Indexing Restrictions" check failed.',
+              message: 'Unable to verify content because the "Indexing restrictions" check failed.',
             },
           });
         });
@@ -663,6 +690,32 @@ describe('AddDomainLogic', () => {
       });
     });
 
+    describe('canIgnoreValidationFailure', () => {
+      it('is true when any steps have blocking failures', () => {
+        mount({
+          hasValidationCompleted: true,
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'invalid', blockingFailure: true },
+              indexingRestrictions: { state: 'valid' },
+              initialValidation: { state: 'valid' },
+              networkConnectivity: { state: 'valid' },
+            },
+          },
+        });
+
+        expect(AddDomainLogic.values.canIgnoreValidationFailure).toEqual(true);
+      });
+
+      it('is false when validation has not completed', () => {
+        mount({
+          hasValidationCompleted: false,
+        });
+
+        expect(AddDomainLogic.values.canIgnoreValidationFailure).toEqual(false);
+      });
+    });
+
     describe('allowSubmit', () => {
       it('is true when a user has validated all steps and has no failures', () => {
         mount({
@@ -672,6 +725,22 @@ describe('AddDomainLogic', () => {
               indexingRestrictions: { state: 'valid' },
               initialValidation: { state: 'valid' },
               networkConnectivity: { state: 'valid' },
+            },
+          },
+        });
+
+        expect(AddDomainLogic.values.allowSubmit).toEqual(true);
+      });
+
+      it('is true when a user ignores validation failure', () => {
+        mount({
+          ignoreValidationFailure: true,
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'valid' },
+              indexingRestrictions: { state: 'valid' },
+              initialValidation: { state: 'invalid' },
+              networkConnectivity: { state: 'invalid' },
             },
           },
         });

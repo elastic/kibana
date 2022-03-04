@@ -13,7 +13,7 @@ import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import * as i18n from './translations';
 import { DefaultDraggable } from '../../../../common/components/draggables';
-import type { GenericBuckets } from '../../../../../common';
+import type { GenericBuckets } from '../../../../../common/search_strategy';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { AlertsCountAggregation } from './types';
 
@@ -35,7 +35,7 @@ const getAlertsCountTableColumns = (
     {
       field: 'key',
       name: selectedStackByOption,
-      truncateText: true,
+      truncateText: false,
       render: function DraggableStackOptionField(value: string) {
         return (
           <DefaultDraggable

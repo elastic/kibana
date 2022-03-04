@@ -49,6 +49,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
       source: asHttpRequestExecutionSource(request),
     });
@@ -74,6 +75,7 @@ describe('execute()', () => {
       {
         actionId: '123',
         params: { baz: false },
+        executionId: '123abc',
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
       {
@@ -119,6 +121,7 @@ describe('execute()', () => {
       spaceId: 'default',
       apiKey: Buffer.from('123:abc').toString('base64'),
       source: asHttpRequestExecutionSource(request),
+      executionId: '123abc',
       relatedSavedObjects: [
         {
           id: 'some-id',
@@ -134,6 +137,7 @@ describe('execute()', () => {
         actionId: '123',
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
+        executionId: '123abc',
         relatedSavedObjects: [
           {
             id: 'related_some-type_0',
@@ -196,6 +200,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
       source: asSavedObjectExecutionSource(source),
     });
@@ -221,6 +226,7 @@ describe('execute()', () => {
       {
         actionId: '123',
         params: { baz: false },
+        executionId: '123abc',
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
       {
@@ -273,6 +279,7 @@ describe('execute()', () => {
       spaceId: 'default',
       apiKey: Buffer.from('123:abc').toString('base64'),
       source: asSavedObjectExecutionSource(source),
+      executionId: '123abc',
       relatedSavedObjects: [
         {
           id: 'some-id',
@@ -305,6 +312,7 @@ describe('execute()', () => {
         actionId: '123',
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
+        executionId: '123abc',
         relatedSavedObjects: [
           {
             id: 'related_some-type_0',
@@ -343,6 +351,7 @@ describe('execute()', () => {
         id: '123',
         params: { baz: false },
         spaceId: 'default',
+        executionId: '123abc',
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -372,6 +381,7 @@ describe('execute()', () => {
         id: '123',
         params: { baz: false },
         spaceId: 'default',
+        executionId: '123abc',
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -404,6 +414,7 @@ describe('execute()', () => {
         id: '123',
         params: { baz: false },
         spaceId: 'default',
+        executionId: '123abc',
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
@@ -446,6 +457,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
+      executionId: '123abc',
       apiKey: null,
     });
 

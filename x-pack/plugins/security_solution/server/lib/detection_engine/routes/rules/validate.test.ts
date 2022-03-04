@@ -8,11 +8,10 @@
 import { transformValidate, transformValidateBulkError } from './validate';
 import { BulkError } from '../utils';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { getAlertMock, getRuleExecutionStatuses } from '../__mocks__/request_responses';
+import { getAlertMock, getRuleExecutionSummarySucceeded } from '../__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export const ruleOutput = (): RulesSchema => ({
   actions: [],
@@ -73,7 +72,7 @@ describe.each([
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      const [validated, errors] = transformValidate(ruleAlert, undefined, isRuleRegistryEnabled);
+      const [validated, errors] = transformValidate(ruleAlert, null, isRuleRegistryEnabled);
       expect(validated).toEqual(ruleOutput());
       expect(errors).toEqual(null);
     });
@@ -82,7 +81,7 @@ describe.each([
       const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
-      const [validated, errors] = transformValidate(ruleAlert, undefined, isRuleRegistryEnabled);
+      const [validated, errors] = transformValidate(ruleAlert, null, isRuleRegistryEnabled);
       expect(validated).toEqual(null);
       expect(errors).toEqual('Invalid value "undefined" supplied to "name"');
     });
@@ -94,7 +93,7 @@ describe.each([
       const validatedOrError = transformValidateBulkError(
         'rule-1',
         ruleAlert,
-        undefined,
+        null,
         isRuleRegistryEnabled
       );
       expect(validatedOrError).toEqual(ruleOutput());
@@ -107,7 +106,7 @@ describe.each([
       const validatedOrError = transformValidateBulkError(
         'rule-1',
         ruleAlert,
-        undefined,
+        null,
         isRuleRegistryEnabled
       );
       const expected: BulkError = {
@@ -120,21 +119,18 @@ describe.each([
       expect(validatedOrError).toEqual(expected);
     });
 
-    test('it should do a validation correctly of a rule id with ruleStatus passed in', () => {
-      const ruleStatuses = getRuleExecutionStatuses();
-      const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+    test('it should do a validation correctly of a rule id with rule execution summary passed in', () => {
+      const rule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const ruleExecutionSumary = getRuleExecutionSummarySucceeded();
       const validatedOrError = transformValidateBulkError(
         'rule-1',
-        ruleAlert,
-        ruleStatuses,
+        rule,
+        ruleExecutionSumary,
         isRuleRegistryEnabled
       );
       const expected: RulesSchema = {
         ...ruleOutput(),
-        status: RuleExecutionStatus.succeeded,
-        status_date: '2020-02-18T15:26:49.783Z',
-        last_success_at: '2020-02-18T15:26:49.783Z',
-        last_success_message: 'succeeded',
+        execution_summary: ruleExecutionSumary,
       };
       expect(validatedOrError).toEqual(expected);
     });
@@ -146,7 +142,7 @@ describe.each([
       const validatedOrError = transformValidateBulkError(
         'rule-1',
         ruleAlert,
-        undefined,
+        null,
         isRuleRegistryEnabled
       );
       const expected: BulkError = {

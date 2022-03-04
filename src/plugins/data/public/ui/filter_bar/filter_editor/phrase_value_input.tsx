@@ -7,7 +7,7 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
@@ -43,7 +43,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
             })}
             value={this.props.value}
             onChange={this.props.onChange}
-            type={this.props.field ? this.props.field.type : 'string'}
+            field={this.props.field}
           />
         )}
       </EuiFormRow>

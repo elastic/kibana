@@ -17,10 +17,6 @@ export interface UserActionGet {
    * The ID of the case
    */
   caseId: string;
-  /**
-   * If specified then a sub case will be used for finding all the user actions
-   */
-  subCaseId?: string;
 }
 
 /**

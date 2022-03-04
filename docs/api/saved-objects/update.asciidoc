@@ -45,10 +45,16 @@ WARNING: When you update, attributes are not validated, which allows you to pass
 `200`::
     Indicates a successful call.
 
+`404`::
+    Indicates the object was not found.
+
+`409`::
+    Indicates a <<saved-objects-api-update-conflict-errors,conflict error>>.
+
 [[saved-objects-api-update-example]]
 ==== Example
 
-Update an existing index pattern object,`my-pattern`, with a different title:
+Update an existing {data-source} object,`my-pattern`, with a different title:
 
 [source,sh]
 --------------------------------------------------
@@ -74,3 +80,10 @@ The API returns the following:
   }
 }
 --------------------------------------------------
+
+[[saved-objects-api-update-conflict-errors]]
+==== Conflict errors
+
+Starting in {kib} 8.0, saved objects can exist in multiple spaces. As a result, you may encounter a 409 *alias conflict* error when using
+the `upsert` option. The Update API response is limited and does not include additional metadata. You can get more details about this error
+by using the <<saved-objects-api-bulk-create,Bulk create API>> instead.

@@ -8,7 +8,7 @@
 import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SpacesDataEntry } from '../../types';
 import type { CopyOptions, CopyToSpaceSavedObjectTarget } from '../types';

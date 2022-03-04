@@ -62,7 +62,7 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${match.params.uuid}/pipelines`;
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<any>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -105,16 +105,18 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
       cluster={cluster}
     >
       {data.pipelines && (
-        <PipelineListing
-          className="monitoringLogstashPipelinesTable"
-          onBrush={onBrush}
-          zoomInfo={zoomInfo}
-          stats={data.nodeSummary}
-          data={data.pipelines}
-          statusComponent={DetailStatus}
-          {...getPaginationTableProps()}
-          upgradeMessage={makeUpgradeMessage(data.nodeSummary.version)}
-        />
+        <div data-test-subj="logstashPipelinesListing">
+          <PipelineListing
+            className="monitoringLogstashPipelinesTable"
+            onBrush={onBrush}
+            zoomInfo={zoomInfo}
+            stats={data.nodeSummary}
+            data={data.pipelines}
+            statusComponent={DetailStatus}
+            {...getPaginationTableProps()}
+            upgradeMessage={makeUpgradeMessage(data.nodeSummary.version)}
+          />
+        </div>
       )}
     </LogstashTemplate>
   );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PreconfiguredOutputsSchema, PreconfiguredAgentPoliciesSchema } from './preconfiguration';
+import { PreconfiguredOutputsSchema } from './preconfiguration';
 
 describe('Test preconfiguration schema', () => {
   describe('PreconfiguredOutputsSchema', () => {
@@ -17,15 +17,37 @@ describe('Test preconfiguration schema', () => {
             name: 'Output 1',
             type: 'elasticsearch',
             is_default: true,
+            hosts: ['http://test.fr:9200'],
           },
           {
             id: 'output-2',
             name: 'Output 2',
             type: 'elasticsearch',
             is_default: true,
+            hosts: ['http://test.fr:9200'],
           },
         ]);
-      }).toThrowError('preconfigured outputs need to have only one default output.');
+      }).toThrowError('preconfigured outputs can only have one default output.');
+    });
+    it('should not allow multiple default monitoring output', () => {
+      expect(() => {
+        PreconfiguredOutputsSchema.validate([
+          {
+            id: 'output-1',
+            name: 'Output 1',
+            type: 'elasticsearch',
+            is_default_monitoring: true,
+            hosts: ['http://test.fr:9200'],
+          },
+          {
+            id: 'output-2',
+            name: 'Output 2',
+            type: 'elasticsearch',
+            is_default_monitoring: true,
+            hosts: ['http://test.fr:9200'],
+          },
+        ]);
+      }).toThrowError('preconfigured outputs can only have one default monitoring output.');
     });
     it('should not allow multiple output with same ids', () => {
       expect(() => {
@@ -34,11 +56,13 @@ describe('Test preconfiguration schema', () => {
             id: 'nonuniqueid',
             name: 'Output 1',
             type: 'elasticsearch',
+            hosts: ['http://test.fr:9200'],
           },
           {
             id: 'nonuniqueid',
             name: 'Output 2',
             type: 'elasticsearch',
+            hosts: ['http://test.fr:9200'],
           },
         ]);
       }).toThrowError('preconfigured outputs need to have unique ids.');
@@ -50,32 +74,16 @@ describe('Test preconfiguration schema', () => {
             id: 'output-1',
             name: 'nonuniquename',
             type: 'elasticsearch',
+            hosts: ['http://test.fr:9200'],
           },
           {
             id: 'output-2',
             name: 'nonuniquename',
             type: 'elasticsearch',
+            hosts: ['http://test.fr:9200'],
           },
         ]);
       }).toThrowError('preconfigured outputs need to have unique names.');
-    });
-  });
-
-  describe('PreconfiguredAgentPoliciesSchema', () => {
-    it('should not allow multiple outputs in one policy', () => {
-      expect(() => {
-        PreconfiguredAgentPoliciesSchema.validate([
-          {
-            id: 'policy-1',
-            name: 'Policy 1',
-            package_policies: [],
-            data_output_id: 'test1',
-            monitoring_output_id: 'test2',
-          },
-        ]);
-      }).toThrowError(
-        '[0]: Currently Fleet only support one output per agent policy data_output_id should be the same as monitoring_output_id.'
-      );
     });
   });
 });

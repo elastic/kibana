@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { IScopedClusterClient } from 'kibana/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
@@ -17,6 +17,7 @@ export interface MlDatafeedsResponse {
   datafeeds: Datafeed[];
   count: number;
 }
+
 export interface MlDatafeedsStatsResponse {
   datafeeds: DatafeedStats[];
   count: number;
@@ -90,7 +91,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   async function openJob(jobId: string) {
     let opened = false;
     try {
-      const { body } = await mlClient.openJob({ job_id: jobId });
+      const body = await mlClient.openJob({ job_id: jobId });
       opened = body.opened;
     } catch (error) {
       if (error.statusCode === 409) {
@@ -117,7 +118,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
 
     for (const datafeedId of datafeedIds) {
       try {
-        const { body } = await mlClient.stopDatafeed({
+        const body = await mlClient.stopDatafeed({
           datafeed_id: datafeedId,
         });
         results[datafeedId] = { stopped: body.stopped };
@@ -137,7 +138,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   }
 
   async function forceDeleteDatafeed(datafeedId: string) {
-    const { body } = await mlClient.deleteDatafeed<{ acknowledged: boolean }>({
+    const body = await mlClient.deleteDatafeed({
       datafeed_id: datafeedId,
       force: true,
     });
@@ -145,9 +146,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   }
 
   async function getDatafeedIdsByJobId() {
-    const {
-      body: { datafeeds },
-    } = await mlClient.getDatafeeds<MlDatafeedsResponse>();
+    const { datafeeds } = await mlClient.getDatafeeds();
 
     return datafeeds.reduce((acc, cur) => {
       acc[cur.job_id] = cur.datafeed_id;
@@ -156,9 +155,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   }
 
   async function getJobIdsByDatafeedId() {
-    const {
-      body: { datafeeds },
-    } = await mlClient.getDatafeeds<MlDatafeedsResponse>();
+    const { datafeeds } = await mlClient.getDatafeeds();
 
     return datafeeds.reduce((acc, cur) => {
       acc[cur.datafeed_id] = cur.job_id;
@@ -185,9 +182,9 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     async function findDatafeed() {
       // if the job was doesn't use the standard datafeedId format
       // get all the datafeeds and match it with the jobId
-      const {
-        body: { datafeeds },
-      } = await mlClient.getDatafeeds(excludeGenerated ? { exclude_generated: true } : {});
+      const { datafeeds } = await mlClient.getDatafeeds(
+        excludeGenerated ? { exclude_generated: true } : {}
+      );
       if (typeof jobId === 'string') {
         return datafeeds.find((v) => v.job_id === jobId);
       }
@@ -196,13 +193,12 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
         return datafeeds.filter((v) => jobIds.includes(v.job_id));
       }
     }
+
     // if the job was created by the wizard,
     // then we can assume it uses the standard format of the datafeedId
     const assumedDefaultDatafeedId = jobIds.map((v) => `datafeed-${v}`).join(',');
     try {
-      const {
-        body: { datafeeds: datafeedsResults },
-      } = await mlClient.getDatafeeds({
+      const { datafeeds: datafeedsResults } = await mlClient.getDatafeeds({
         datafeed_id: assumedDefaultDatafeedId,
         ...(excludeGenerated ? { exclude_generated: true } : {}),
       });

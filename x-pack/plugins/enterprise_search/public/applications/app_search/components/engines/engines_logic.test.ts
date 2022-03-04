@@ -11,10 +11,11 @@ import {
   mockFlashMessageHelpers,
 } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { EngineDetails, EngineTypes } from '../engine/types';
 
 import { EnginesLogic } from './';
@@ -171,14 +172,9 @@ describe('EnginesLogic', () => {
         expect(EnginesLogic.actions.onEnginesLoad).toHaveBeenCalledWith(MOCK_ENGINES_API_RESPONSE);
       });
 
-      it('handles errors', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-
         EnginesLogic.actions.loadEngines();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -203,14 +199,9 @@ describe('EnginesLogic', () => {
         );
       });
 
-      it('handles errors', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-
         EnginesLogic.actions.loadMetaEngines();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 

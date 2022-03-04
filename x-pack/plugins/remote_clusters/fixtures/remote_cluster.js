@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getRandomString } from '@kbn/test/jest';
+import { getRandomString } from '@kbn/test-jest-helpers';
 
 import { SNIFF_MODE } from '../common/constants';
 

@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, IToasts } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
 import { getChoices } from './api';
 import { Choice } from './types';
@@ -14,10 +14,7 @@ import * as i18n from './translations';
 
 export interface UseGetChoicesProps {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: IToasts;
   actionConnector?: ActionConnector;
   fields: string[];
   onSuccess?: (choices: Choice[]) => void;
@@ -66,7 +63,7 @@ export const useGetChoices = ({
         if (res.status && res.status === 'error') {
           toastNotifications.addDanger({
             title: i18n.CHOICES_API_ERROR,
-            text: `${res.service_message ?? res.message}`,
+            text: `${res.serviceMessage ?? res.message}`,
           });
         } else if (onSuccess) {
           onSuccess(data);

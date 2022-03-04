@@ -39,6 +39,7 @@ const strings = {
       defaultMessage: 'Save',
     }),
 };
+
 export class DatasourceComponent extends PureComponent {
   static propTypes = {
     args: PropTypes.object.isRequired,
@@ -182,13 +183,7 @@ export class DatasourceComponent extends PureComponent {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    disabled={isInvalid}
-                    size="s"
-                    onClick={this.save}
-                    fill
-                    color="secondary"
-                  >
+                  <EuiButton disabled={isInvalid} size="s" onClick={this.save} fill color="success">
                     {strings.getSaveButtonLabel()}
                   </EuiButton>
                 </EuiFlexItem>

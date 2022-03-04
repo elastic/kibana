@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__/kea_logic';
+import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { recursivelyFetchEngines } from './';
 
 describe('recursivelyFetchEngines', () => {
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   const MOCK_PAGE_1 = {
     meta: {
@@ -100,12 +101,7 @@ describe('recursivelyFetchEngines', () => {
     });
   });
 
-  it('handles errors', async () => {
-    http.get.mockReturnValueOnce(Promise.reject('error'));
-
+  itShowsServerErrorAsFlashMessage(http.get, () => {
     recursivelyFetchEngines({ endpoint: '/error', onComplete: MOCK_CALLBACK });
-    await nextTick();
-
-    expect(flashAPIErrors).toHaveBeenCalledWith('error');
   });
 });

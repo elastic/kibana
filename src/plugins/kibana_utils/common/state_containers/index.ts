@@ -8,15 +8,14 @@
 
 /**
  * State containers are Redux-store-like objects meant to help you manage state in your services or apps.
- * Refer to {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_containers | guides and examples} for more info
+ * Refer to {@link https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_containers | guides and examples} for more info
  *
  * @packageDocumentation
  */
 
-export {
+export type {
   BaseState,
   BaseStateContainer,
-  TransitionDescription,
   StateContainer,
   ReduxLikeStateContainer,
   Dispatch,
@@ -36,8 +35,13 @@ export {
   PureSelector,
   PureTransition,
   Transition,
+  TransitionDescription,
 } from './types';
-export { createStateContainer, CreateStateContainerOptions } from './create_state_container';
+
+export type { CreateStateContainerOptions } from './create_state_container';
+
+export { createStateContainer } from './create_state_container';
+
 export {
   createStateContainerReactHelpers,
   useContainerSelector,

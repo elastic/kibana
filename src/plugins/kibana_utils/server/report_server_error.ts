@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { KibanaResponseFactory } from 'kibana/server';
 import { KbnError } from '../common';
 
@@ -27,8 +27,8 @@ export function getKbnServerError(e: Error) {
   if (e instanceof KbnServerError) return e;
   return new KbnServerError(
     e.message ?? 'Unknown error',
-    e instanceof ResponseError ? e.statusCode : 500,
-    e instanceof ResponseError ? e.body : undefined
+    e instanceof errors.ResponseError ? e.statusCode! : 500,
+    e instanceof errors.ResponseError ? e.body : undefined
   );
 }
 

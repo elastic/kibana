@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { JOB_FIELD_TYPES } from '../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
 import type {
   FileBasedFieldVisConfig,
   FileBasedUnknownFieldVisConfig,
-} from '../stats_table/types/field_vis_config';
+} from '../../../../../common/types/field_vis_config';
 
 export function filterFields(
   fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>,

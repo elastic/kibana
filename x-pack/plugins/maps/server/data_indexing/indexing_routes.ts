@@ -52,7 +52,8 @@ export function initIndexingRoutes({
       const { index, mappings } = request.body;
       const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
         context.core.savedObjects.client,
-        context.core.elasticsearch.client.asCurrentUser
+        context.core.elasticsearch.client.asCurrentUser,
+        request
       );
       const result = await createDocSource(
         index,
@@ -122,11 +123,12 @@ export function initIndexingRoutes({
     },
     async (context, request, response) => {
       try {
-        const { body: resp } = await context.core.elasticsearch.client.asCurrentUser.delete({
+        const resp = await context.core.elasticsearch.client.asCurrentUser.delete({
           index: request.body.index,
           id: request.params.featureId,
           refresh: true,
         });
+        // @ts-expect-error always false
         if (resp.result === 'Error') {
           throw resp;
         } else {
@@ -192,7 +194,7 @@ export function initIndexingRoutes({
     async (context, request, response) => {
       const { index } = request.query;
       try {
-        const { body: mappingsResp } =
+        const mappingsResp =
           await context.core.elasticsearch.client.asCurrentUser.indices.getMapping({
             index: request.query.index,
           });

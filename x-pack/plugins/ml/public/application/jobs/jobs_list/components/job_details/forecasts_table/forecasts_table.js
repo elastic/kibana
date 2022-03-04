@@ -23,7 +23,7 @@ import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/st
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
 import { mlForecastService } from '../../../../../services/forecast_service';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,

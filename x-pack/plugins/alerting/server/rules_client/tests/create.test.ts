@@ -16,10 +16,10 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
+import { getDefaultRuleMonitoring } from '../../task_runner/task_runner';
 
 jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -33,7 +33,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -52,6 +52,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  minimumScheduleInterval: '1m',
 };
 
 beforeEach(() => {
@@ -70,7 +71,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions<{
     tags: ['foo'],
     alertTypeId: '123',
     consumer: 'bar',
-    schedule: { interval: '10s' },
+    schedule: { interval: '1m' },
     throttle: null,
     notifyWhen: null,
     params: {
@@ -141,7 +142,7 @@ describe('create()', () => {
         type: 'alert',
         attributes: {
           alertTypeId: '123',
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           params: {
             bar: true,
           },
@@ -284,7 +285,7 @@ describe('create()', () => {
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -365,7 +366,7 @@ describe('create()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -407,6 +408,14 @@ describe('create()', () => {
         "meta": Object {
           "versionApiKeyLastmodified": "v8.0.0",
         },
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [],
+          },
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -415,7 +424,7 @@ describe('create()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "tags": Array [
           "foo",
@@ -441,12 +450,13 @@ describe('create()', () => {
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
                                                                           Object {
+                                                                            "id": "1",
                                                                             "params": Object {
                                                                               "alertId": "1",
                                                                               "spaceId": "default",
                                                                             },
                                                                             "schedule": Object {
-                                                                              "interval": "10s",
+                                                                              "interval": "1m",
                                                                             },
                                                                             "scope": Array [
                                                                               "alerting",
@@ -477,7 +487,7 @@ describe('create()', () => {
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -536,7 +546,7 @@ describe('create()', () => {
       ...data,
       legacyId: '123',
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -599,6 +609,14 @@ describe('create()', () => {
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
         },
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [],
+          },
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -607,7 +625,7 @@ describe('create()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "tags": Array [
           "foo",
@@ -683,7 +701,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -781,7 +799,7 @@ describe('create()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -872,7 +890,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -965,7 +983,7 @@ describe('create()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -1013,13 +1031,14 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -1146,7 +1165,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
           parameterThatIsSavedObjectRef: 'soRef_0',
@@ -1209,13 +1228,14 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -1258,7 +1278,7 @@ describe('create()', () => {
           "parameterThatIsSavedObjectId": "9",
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -1311,7 +1331,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
           parameterThatIsSavedObjectRef: 'action_0',
@@ -1374,13 +1394,14 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -1423,7 +1444,7 @@ describe('create()', () => {
           "parameterThatIsSavedObjectId": "8",
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -1475,7 +1496,7 @@ describe('create()', () => {
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -1536,7 +1557,7 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         throttle: '10m',
         notifyWhen: 'onActionGroupChange',
         muteAll: false,
@@ -1547,6 +1568,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -1585,7 +1607,7 @@ describe('create()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -1603,7 +1625,7 @@ describe('create()', () => {
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -1664,7 +1686,7 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         throttle: '10m',
         notifyWhen: 'onThrottleInterval',
         muteAll: false,
@@ -1675,6 +1697,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -1713,7 +1736,7 @@ describe('create()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -1731,7 +1754,7 @@ describe('create()', () => {
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -1792,7 +1815,7 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
@@ -1803,6 +1826,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -1841,7 +1865,7 @@ describe('create()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -1923,6 +1947,52 @@ describe('create()', () => {
     });
   });
 
+  test('fails if task scheduling fails due to conflict', async () => {
+    const data = getMockData();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockRejectedValueOnce(
+      Object.assign(new Error('Conflict!'), { statusCode: 409 })
+    );
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Conflict!"`
+    );
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+                                                                                                                  Array [
+                                                                                                                    "alert",
+                                                                                                                    "1",
+                                                                                                                  ]
+                                                                            `);
+  });
+
   test('attempts to remove saved object if scheduling failed', async () => {
     const data = getMockData();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1930,7 +2000,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1974,7 +2044,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -2030,7 +2100,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -2097,7 +2167,7 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
@@ -2108,6 +2178,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -2129,7 +2200,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -2196,7 +2267,7 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
@@ -2207,6 +2278,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -2269,7 +2341,7 @@ describe('create()', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
-  test('throws error when updating with an interval less than the minimum configured one', async () => {
+  test('throws error when creating with an interval less than the minimum configured one', async () => {
     ruleTypeRegistry.get.mockImplementation(() => ({
       id: '123',
       name: 'Test',
@@ -2280,16 +2352,15 @@ describe('create()', () => {
       isExportable: true,
       async executor() {},
       producer: 'alerts',
-      minimumScheduleInterval: '5m',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
     }));
 
-    const data = getMockData({ schedule: { interval: '1m' } });
+    const data = getMockData({ schedule: { interval: '1s' } });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error updating rule: the interval is less than the minimum interval of 5m"`
+      `"Error creating rule: the interval is less than the allowed minimum interval of 1m"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();

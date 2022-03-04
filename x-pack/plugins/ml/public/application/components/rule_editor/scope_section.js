@@ -17,7 +17,7 @@ import { EuiCallOut, EuiCheckbox, EuiLink, EuiSpacer, EuiTitle } from '@elastic/
 import { ScopeExpression } from './scope_expression';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { getScopeFieldDefaults } from './utils';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 

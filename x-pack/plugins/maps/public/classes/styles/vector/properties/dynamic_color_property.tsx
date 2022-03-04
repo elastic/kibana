@@ -101,7 +101,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   supportsFieldMeta() {
-    if (!this.isComplete() || !this._field || !this._field.supportsFieldMeta()) {
+    if (!this.isComplete() || !this._field || !this._field.supportsFieldMetaFromEs()) {
       return false;
     }
 
@@ -135,7 +135,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getMbColor() {
-    if (!this.getFieldName()) {
+    if (!this.getMbFieldName()) {
       return null;
     }
 
@@ -145,7 +145,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getOrdinalColorMbExpression() {
-    const targetName = this.getFieldName();
+    const targetName = this.getMbFieldName();
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete
@@ -263,8 +263,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       };
     }
 
-    const fieldMeta = this.getCategoryFieldMeta();
-    if (!fieldMeta || !fieldMeta.categories) {
+    const categories = this.getCategoryFieldMeta();
+    if (categories.length === 0) {
       return EMPTY_STOPS;
     }
 
@@ -275,14 +275,14 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       return EMPTY_STOPS;
     }
 
-    const maxLength = Math.min(colors.length, fieldMeta.categories.length + 1);
+    const maxLength = Math.min(colors.length, categories.length + 1);
     const stops = [];
 
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
-        stop: fieldMeta.categories[i].key,
+        stop: categories[i].key,
         color: this._chartsPaletteServiceGetColor
-          ? this._chartsPaletteServiceGetColor(fieldMeta.categories[i].key)
+          ? this._chartsPaletteServiceGetColor(categories[i].key)
           : colors[i],
       });
     }
@@ -321,7 +321,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     }
 
     mbStops.push(defaultColor); // last color is default color
-    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
   _getOrdinalBreaks(symbolId?: string): Break[] {
@@ -425,7 +425,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     if (defaultColor) {
       breaks.push({
         color: defaultColor,
-        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
         symbolId,
       });
     }

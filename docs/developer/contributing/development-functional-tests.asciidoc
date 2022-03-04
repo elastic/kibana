@@ -105,7 +105,9 @@ There are also command line flags for `--bail` and `--grep`, which behave just l
 
 Logging can also be customized with `--quiet`, `--debug`, or `--verbose` flags.
 
-Use the `--help` flag for more options.
+There are also options like `--include` to run only the tests defined in a single file or set of files.
+
+Run `node scripts/functional_test_runner --help` to see all available options.
 
 
 [discrete]
@@ -114,7 +116,7 @@ Use the `--help` flag for more options.
 [discrete]
 ==== Environment
 
-The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/master/packages/kbn-expect[@kbn/expect] for assertions.
+The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/main/packages/kbn-expect[@kbn/expect] for assertions.
 
 We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
@@ -204,7 +206,7 @@ Tests should normally setRoles() in the before() and restoreDefaults() in the af
 [discrete]
 ==== Anatomy of a test file
 
-This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/master/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
+This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/main/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
 
 ["source","js"]
 ----
@@ -490,7 +492,7 @@ From the command line run:
 
 ["source","shell"]
 -----------
-node --debug-brk --inspect scripts/functional_test_runner
+node --inspect-brk scripts/functional_test_runner
 -----------
 
 This prints out a URL that you can visit in Chrome and debug your functional tests in the browser.
@@ -515,3 +517,12 @@ macOS users on a machine with a discrete graphics card may see significant speed
 * Open "Advanced GPU Settings..."
 * Uncheck the "Prefer integrated to discrete GPU" option
 * Restart iTerm
+
+[discrete]
+== Flaky Test Runner
+
+If your functional tests are flaky then the Operations team might skip them and ask that you make them less flaky before enabling them once again. This process usually involves looking at the failures which are logged on the relevant Github issue and finding incorrect assumptions or conditions which need to be awaited at some point in the test. To determine if your changes make the test fail less often you can run your tests in the Flaky Test Runner. This tool runs up to 500 executions of a specific ciGroup. To start a build of the Flaky Test Runner create a PR with your changes and then visit https://ci-stats.kibana.dev/trigger_flaky_test_runner, select your PR, choose the CI Group that your tests are in, and trigger the build.
+
+This will take you to Buildkite where your build will run and tell you if it failed in any execution.
+
+A flaky test may only fail once in 1000 runs, so keep this in mind and make sure you use enough executions to really prove that a test isn't flaky anymore.

@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -74,11 +74,11 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     }
   };
 
-  const pluginDocLink = (
+  const snapshotRepoDocLink = (
     <EuiLink href={docLinks.links.plugins.snapshotRestoreRepos} target="_blank">
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryForm.fields.typePluginsDocLinkText"
-        defaultMessage="Learn more about plugins."
+        defaultMessage="Learn more about repository types."
       />
     </EuiLink>
   );
@@ -206,7 +206,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             id="xpack.snapshotRestore.repositoryForm.noRepositoryTypesErrorMessage"
             defaultMessage="You can install plugins to enable different repository types. {docLink}"
             values={{
-              docLink: pluginDocLink,
+              docLink: snapshotRepoDocLink,
             }}
           />
         </EuiCallOut>
@@ -233,25 +233,13 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText id="repositoryTypeDescription" size="s" color="subdued">
-          {repositoryTypes.includes(REPOSITORY_TYPES.fs) &&
-          repositoryTypes.includes(REPOSITORY_TYPES.url) ? (
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.fields.defaultTypeDescription"
-              defaultMessage="Elasticsearch supports file system and read-only URL repositories.
-                Additional types require plugins. {docLink}"
-              values={{
-                docLink: pluginDocLink,
-              }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.fields.cloudTypeDescription"
-              defaultMessage="Elasticsearch provides core plugins for custom repositories. {docLink}"
-              values={{
-                docLink: pluginDocLink,
-              }}
-            />
-          )}
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.fields.defaultTypeDescription"
+            defaultMessage="Storage location for your snapshots. {docLink}"
+            values={{
+              docLink: snapshotRepoDocLink,
+            }}
+          />
         </EuiText>
         <EuiFormRow
           hasEmptyLabelSpace

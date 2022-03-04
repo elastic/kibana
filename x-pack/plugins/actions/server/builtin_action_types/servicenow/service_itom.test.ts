@@ -83,7 +83,7 @@ describe('ServiceNow SIR service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=em_event^element=severity&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=em_event^element=severity^language=en&sysparm_fields=label,value,dependent_value,element',
       });
     });
   });

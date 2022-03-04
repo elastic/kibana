@@ -8,6 +8,7 @@
 import { ManagementSetup } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { RegisterManagementAppArgs } from 'src/plugins/management/public';
+import { SharePluginSetup } from 'src/plugins/share/public';
 import { I18nStart } from 'kibana/public';
 import { CloudSetup } from '../../cloud/public';
 
@@ -15,6 +16,7 @@ export interface Dependencies {
   management: ManagementSetup;
   usageCollection: UsageCollectionSetup;
   cloud: CloudSetup;
+  share: SharePluginSetup;
 }
 
 export interface ClientConfigType {
@@ -23,6 +25,6 @@ export interface ClientConfigType {
   };
 }
 
-export { RegisterManagementAppArgs };
+export type { RegisterManagementAppArgs };
 
-export { I18nStart };
+export type { I18nStart };

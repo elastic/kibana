@@ -19,15 +19,11 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../../shared/doc_links';
 import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
-import {
-  getSourcesPath,
-  ADD_SOURCE_PATH,
-  SECURITY_PATH,
-  PRIVATE_SOURCES_DOCS_URL,
-} from '../../../../routes';
+import { getSourcesPath, ADD_SOURCE_PATH, SECURITY_PATH } from '../../../../routes';
 
 import {
   CONFIG_COMPLETED_PRIVATE_SOURCES_DISABLED_LINK,
@@ -126,7 +122,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
                         <EuiLink
                           target="_blank"
                           data-test-subj="ConfigCompletedPrivateSourcesDocsLink"
-                          href={PRIVATE_SOURCES_DOCS_URL}
+                          href={docLinks.workplaceSearchPermissions}
                         >
                           {CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK}
                         </EuiLink>

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { getPutPayloadSchema } from './put_payload';
+import { KibanaFeature } from '../../../../../../features/common';
+import { ALL_SPACES_ID } from '../../../../../common/constants';
+import { getPutPayloadSchema, validateKibanaPrivileges } from './put_payload';
 
 const basePrivilegeNamesMap = {
   global: ['all', 'read'],
@@ -343,5 +345,123 @@ describe('Put payload schema', () => {
         },
       }
     `);
+  });
+});
+
+describe('validateKibanaPrivileges', () => {
+  const fooFeature = new KibanaFeature({
+    id: 'foo',
+    name: 'Foo',
+    privileges: {
+      all: {
+        requireAllSpaces: true,
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+      read: {
+        disabled: true,
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+    app: [],
+    category: { id: 'foo', label: 'foo' },
+  });
+
+  test('allows valid privileges', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooFeature],
+        [
+          {
+            spaces: [ALL_SPACES_ID],
+            base: [],
+            feature: {
+              foo: ['all'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([]);
+  });
+
+  test('does not reject unknown features', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooFeature],
+        [
+          {
+            spaces: [ALL_SPACES_ID],
+            base: [],
+            feature: {
+              foo: ['all'],
+              bar: ['all'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([]);
+  });
+
+  test('returns errors if requireAllSpaces: true and not all spaces specified', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooFeature],
+        [
+          {
+            spaces: ['foo-space'],
+            base: [],
+            feature: {
+              foo: ['all'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([
+      `Feature privilege [foo.all] requires all spaces to be selected but received [foo-space]`,
+    ]);
+  });
+
+  test('returns errors if disabled: true and privilege is specified', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooFeature],
+        [
+          {
+            spaces: [ALL_SPACES_ID],
+            base: [],
+            feature: {
+              foo: ['read'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([`Feature [foo] does not support privilege [read].`]);
+  });
+
+  test('returns multiple errors when necessary', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooFeature],
+        [
+          {
+            spaces: ['foo-space'],
+            base: [],
+            feature: {
+              foo: ['all', 'read'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([
+      `Feature privilege [foo.all] requires all spaces to be selected but received [foo-space]`,
+      `Feature [foo] does not support privilege [read].`,
+    ]);
   });
 });

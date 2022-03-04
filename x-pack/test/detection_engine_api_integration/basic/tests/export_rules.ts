@@ -23,20 +23,21 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('export_rules', () => {
     describe('exporting rules', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
-        await createRule(supertest, getSimpleRule());
+        await createRule(supertest, log, getSimpleRule());
 
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -48,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export a single rule with a rule_id', async () => {
-        await createRule(supertest, getSimpleRule());
+        await createRule(supertest, log, getSimpleRule());
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -64,7 +65,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export a exported count with a single rule_id', async () => {
-        await createRule(supertest, getSimpleRule());
+        await createRule(supertest, log, getSimpleRule());
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -78,6 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(bodySplitAndParsed).to.eql({
           exported_exception_list_count: 0,
           exported_exception_list_item_count: 0,
+          exported_count: 1,
           exported_rules_count: 1,
           missing_exception_list_item_count: 0,
           missing_exception_list_items: [],
@@ -89,8 +91,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export exactly two rules given two rules', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
-        await createRule(supertest, getSimpleRule('rule-2'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-2'));
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)

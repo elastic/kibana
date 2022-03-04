@@ -217,9 +217,9 @@ Cons:
 - brittle tests
 
 ###### Example
-You can reuse existing [api_integration](https://github.com/elastic/kibana/blob/master/test/api_integration/config.js) setup by registering a test file within a
-[test loader](https://github.com/elastic/kibana/blob/master/test/api_integration/apis/index.ts). More about the existing FTR setup in the
-[contribution guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#running-specific-kibana-tests)
+You can reuse existing [api_integration](https://github.com/elastic/kibana/blob/main/test/api_integration/config.js) setup by registering a test file within a
+[test loader](https://github.com/elastic/kibana/blob/main/test/api_integration/apis/index.ts). More about the existing FTR setup in the
+[contribution guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md#running-specific-kibana-tests)
 
 The tests cover:
 - authenticated / non-authenticated user access (when applicable)
@@ -409,7 +409,7 @@ While applications do get an opportunity to unmount and run cleanup logic, it is
 
 #### Example
 
-By following the [renderApp](https://github.com/elastic/kibana/blob/master/src/core/CONVENTIONS.md#applications) convention, you can greatly reduce the amount of logic in your application's mount function. This makes testing your application's actual rendering logic easier.
+By following the [renderApp](https://github.com/elastic/kibana/blob/main/src/core/CONVENTIONS.md#applications) convention, you can greatly reduce the amount of logic in your application's mount function. This makes testing your application's actual rendering logic easier.
 
 ```typescript jsx
 /** public/plugin.ts */
@@ -458,7 +458,7 @@ describe('Plugin', () => {
     const [coreStartMock, startDepsMock] = await coreSetup.getStartServices();
     const unmountMock = jest.fn();
     renderAppMock.mockReturnValue(unmountMock);
-    const params = coreMock.createAppMountParamters('/fake/base/path');
+    const params = coreMock.createAppMountParameters('/fake/base/path');
 
     new Plugin(coreMock.createPluginInitializerContext()).setup(coreSetup);
     // Grab registered mount function
@@ -528,7 +528,7 @@ import { renderApp } from './application';
 
 describe('renderApp', () => {
   it('mounts and unmounts UI', () => {
-    const params = coreMock.createAppMountParamters('/fake/base/path');
+    const params = coreMock.createAppMountParameters('/fake/base/path');
     const core = coreMock.createStart();
 
     // Verify some expected DOM element is rendered into the element
@@ -540,7 +540,7 @@ describe('renderApp', () => {
   });
 
   it('unsubscribes from uiSettings', () => {
-    const params = coreMock.createAppMountParamters('/fake/base/path');
+    const params = coreMock.createAppMountParameters('/fake/base/path');
     const core = coreMock.createStart();
     // Create a fake Subject you can use to monitor observers
     const settings$ = new Subject();
@@ -555,7 +555,7 @@ describe('renderApp', () => {
   });
 
   it('resets chrome visibility', () => {
-    const params = coreMock.createAppMountParamters('/fake/base/path');
+    const params = coreMock.createAppMountParameters('/fake/base/path');
     const core = coreMock.createStart();
 
     // Verify stateful Core API was called on mount

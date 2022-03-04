@@ -10,10 +10,11 @@ import { EuiButton, EuiCallOut } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { IHttpFetchError } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 
 import {
+  ERROR_COMPATIBILITY_FAILURE,
   ERROR_CONFIGURE_FAILURE,
   ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
   ERROR_ENROLL_FAILURE,
@@ -29,7 +30,7 @@ export interface SubmitErrorCalloutProps {
 }
 
 export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (props) => {
-  const error = props.error as IHttpFetchError;
+  const error = props.error as IHttpFetchError<ResponseErrorBody>;
 
   if (
     error.body?.statusCode === 404 ||
@@ -118,6 +119,15 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
         <FormattedMessage
           id="interactiveSetup.submitErrorCallout.pingFailureErrorDescription"
           defaultMessage="Check the address and retry."
+        />
+      ) : error.body?.attributes?.type === ERROR_COMPATIBILITY_FAILURE ? (
+        <FormattedMessage
+          id="interactiveSetup.submitErrorCallout.compatibilityFailureErrorDescription"
+          defaultMessage="The Elasticsearch cluster (v{elasticsearchVersion}) is incompatible with this version of Kibana (v{kibanaVersion})."
+          values={{
+            elasticsearchVersion: error.body?.attributes?.elasticsearchVersion as string,
+            kibanaVersion: error.body?.attributes?.kibanaVersion as string,
+          }}
         />
       ) : (
         error.body?.message || error.message

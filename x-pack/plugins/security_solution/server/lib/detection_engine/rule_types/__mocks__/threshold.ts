@@ -13,26 +13,27 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_NAMESPACE,
-  ALERT_INSTANCE_ID,
   ALERT_UUID,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+
 import { TypeOfFieldMap } from '../../../../../../rule_registry/common/field_map';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ANCHOR_DATE } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { flattenWithPrefix } from '../factories/utils/flatten_with_prefix';
-import { RulesFieldMap } from '../field_maps';
+import { RulesFieldMap } from '../../../../../common/field_maps';
 import {
   ALERT_ANCESTORS,
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
-} from '../field_maps/field_names';
-import { WrappedRACAlert } from '../types';
+} from '../../../../../common/field_maps/field_names';
 
 export const mockThresholdResults = {
   rawResponse: {
@@ -76,14 +77,14 @@ export const mockThresholdResults = {
   },
 };
 
-export const sampleThresholdAlert: WrappedRACAlert = {
+export const sampleThresholdAlert = {
   _id: 'b3ad77a4-65bd-4c4e-89cf-13c46f54bc4d',
   _index: 'some-index',
   _source: {
     '@timestamp': '2020-04-20T21:26:30.000Z',
     [SPACE_IDS]: ['default'],
-    [ALERT_INSTANCE_ID]: 'b3ad77a4-65bd-4c4e-89cf-13c46f54bc4d',
     [ALERT_UUID]: '310158f7-994d-4a38-8cdc-152139ac4d29',
+    [ALERT_INSTANCE_ID]: '',
     [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
     [ALERT_ANCESTORS]: [
       {
@@ -110,6 +111,30 @@ export const sampleThresholdAlert: WrappedRACAlert = {
     [ALERT_RULE_PRODUCER]: 'siem',
     [ALERT_RULE_TYPE_ID]: 'query-rule-id',
     [ALERT_RULE_UUID]: '151af49f-2e82-4b6f-831b-7f8cb341a5ff',
+    [ALERT_RULE_PARAMETERS]: {
+      author: [],
+      description: 'some description',
+      false_positives: ['false positive 1', 'false positive 2'],
+      from: 'now-6m',
+      immutable: false,
+      query: 'user.name: root or user.name: admin',
+      references: ['test 1', 'test 2'],
+      severity: 'high',
+      severity_mapping: [],
+      to: 'now',
+      type: 'query',
+      threat: [],
+      threshold: {
+        field: ['source.ip', 'host.name'],
+        value: 1,
+      },
+      max_signals: 100,
+      risk_score: 55,
+      risk_score_mapping: [],
+      language: 'kuery',
+      rule_id: 'f88a544c-1d4e-4652-ae2a-c953b38da5d0',
+      exceptions_list: getListArrayMock(),
+    },
     ...(flattenWithPrefix(ALERT_RULE_NAMESPACE, {
       author: [],
       uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
@@ -124,25 +149,13 @@ export const sampleThresholdAlert: WrappedRACAlert = {
       name: 'Query with a rule id',
       query: 'user.name: root or user.name: admin',
       references: ['test 1', 'test 2'],
-      severity: 'high',
-      severity_mapping: [],
       updated_by: 'elastic_kibana',
       tags: ['some fake tag 1', 'some fake tag 2'],
       to: 'now',
       type: 'query',
       threat: [],
-      threshold: {
-        field: ['source.ip', 'host.name'],
-        value: 1,
-      },
       version: 1,
-      status: 'succeeded',
-      status_date: '2020-02-22T16:47:50.047Z',
-      last_success_at: '2020-02-22T16:47:50.047Z',
-      last_success_message: 'succeeded',
       max_signals: 100,
-      risk_score: 55,
-      risk_score_mapping: [],
       language: 'kuery',
       rule_id: 'f88a544c-1d4e-4652-ae2a-c953b38da5d0',
       interval: '5m',

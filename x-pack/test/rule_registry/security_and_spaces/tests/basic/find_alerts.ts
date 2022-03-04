@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
           aggs: {
             alertsByGroupingCount: {
               terms: {
-                field: 'signal.rule.name',
+                field: 'kibana.alert.rule.name',
                 order: {
                   _count: 'desc',
                 },
@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
               aggs: {
                 test: {
                   terms: {
-                    field: 'signal.rule.name',
+                    field: 'kibana.alert.rule.name',
                     size: 10,
                     script: {
                       source: 'SCRIPT',
@@ -142,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
           aggs: {
             alertsByGroupingCount: {
               terms: {
-                field: 'signal.rule.name',
+                field: 'kibana.alert.rule.name',
                 order: {
                   _count: 'desc',
                 },
@@ -151,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
               aggs: {
                 test: {
                   terms: {
-                    field: 'signal.rule.name',
+                    field: 'kibana.alert.rule.name',
                     size: 10,
                   },
                 },

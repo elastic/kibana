@@ -12,6 +12,7 @@ import { MatrixHistogram } from '.';
 import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { TestProviders } from '../../mock';
+import { mockRuntimeMappings } from '../../containers/source/mock';
 
 jest.mock('../../lib/kibana');
 
@@ -58,6 +59,7 @@ describe('Matrix Histogram Component', () => {
     subtitle: 'mockSubtitle',
     totalCount: -1,
     title: 'mockTitle',
+    runtimeMappings: mockRuntimeMappings,
   };
 
   beforeAll(() => {
@@ -75,6 +77,19 @@ describe('Matrix Histogram Component', () => {
   });
 
   describe('on initial load', () => {
+    test('it requests Matrix Histogram', () => {
+      expect(useMatrixHistogramCombined).toHaveBeenCalledWith({
+        endDate: mockMatrixOverTimeHistogramProps.endDate,
+        errorMessage: mockMatrixOverTimeHistogramProps.errorMessage,
+        histogramType: mockMatrixOverTimeHistogramProps.histogramType,
+        indexNames: mockMatrixOverTimeHistogramProps.indexNames,
+        startDate: mockMatrixOverTimeHistogramProps.startDate,
+        stackByField: mockMatrixOverTimeHistogramProps.defaultStackByOption.value,
+        runtimeMappings: mockMatrixOverTimeHistogramProps.runtimeMappings,
+        isPtrIncluded: mockMatrixOverTimeHistogramProps.isPtrIncluded,
+        skip: mockMatrixOverTimeHistogramProps.skip,
+      });
+    });
     test('it renders MatrixLoader', () => {
       expect(wrapper.find('MatrixLoader').exists()).toBe(true);
     });

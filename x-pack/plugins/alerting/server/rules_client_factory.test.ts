@@ -20,7 +20,6 @@ import { AuthenticatedUser } from '../../security/common/model';
 import { securityMock } from '../../security/server/mocks';
 import { PluginStartContract as ActionsStartContract } from '../../actions/server';
 import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mocks';
-import { LegacyAuditLogger } from '../../security/server';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
@@ -29,7 +28,6 @@ import { AlertingAuthorizationClientFactory } from './alerting_authorization_cli
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
-jest.mock('./authorization/audit_logger');
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
@@ -46,6 +44,7 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
+  minimumScheduleInterval: '1m',
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
   actions: actionsMock.createStart(),
   eventLog: eventLogMock.createStart(),
@@ -93,11 +92,6 @@ test('creates an alerts client with proper constructor arguments when security i
     alertsAuthorization as unknown as AlertingAuthorization
   );
 
-  const logger = {
-    log: jest.fn(),
-  } as jest.Mocked<LegacyAuditLogger>;
-  securityPluginSetup.audit.getLogger.mockReturnValue(logger);
-
   factory.create(request, savedObjectsService);
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
@@ -126,6 +120,7 @@ test('creates an alerts client with proper constructor arguments when security i
     createAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
     kibanaVersion: '7.10.0',
+    minimumScheduleInterval: '1m',
   });
 });
 
@@ -163,6 +158,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
     kibanaVersion: '7.10.0',
+    minimumScheduleInterval: '1m',
   });
 });
 

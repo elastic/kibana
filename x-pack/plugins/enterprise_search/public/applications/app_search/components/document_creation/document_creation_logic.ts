@@ -181,7 +181,10 @@ export const DocumentCreationLogic = kea<
 
       const promises = chunk(documents, CHUNK_SIZE).map((documentsChunk) => {
         const body = JSON.stringify({ documents: documentsChunk });
-        return http.post(`/internal/app_search/engines/${engineName}/documents`, { body });
+        return http.post<DocumentCreationSummary>(
+          `/internal/app_search/engines/${engineName}/documents`,
+          { body }
+        );
       });
 
       try {

@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { TelemetryPluginStart } from 'src/plugins/telemetry/public';
@@ -30,7 +30,7 @@ export interface HomeProps {
   localStorage: Storage;
   urlBasePath: string;
   telemetry: TelemetryPluginStart;
-  hasUserIndexPattern: () => Promise<boolean>;
+  hasUserDataView: () => Promise<boolean>;
 }
 
 interface State {
@@ -89,7 +89,7 @@ export class Home extends Component<HomeProps, State> {
         }
       }, 10000);
 
-      const hasUserIndexPattern = await this.props.hasUserIndexPattern();
+      const hasUserIndexPattern = await this.props.hasUserDataView();
 
       this.endLoading({ isNewKibanaInstance: !hasUserIndexPattern });
     } catch (err) {

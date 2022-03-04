@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import {

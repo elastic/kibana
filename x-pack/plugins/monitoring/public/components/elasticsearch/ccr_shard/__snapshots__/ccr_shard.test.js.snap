@@ -136,6 +136,8 @@ exports[`CcrShard that it renders normally 1`] = `
           </h2>
         </EuiTitle>
       }
+      buttonElement="button"
+      element="div"
       id="ccrLatestStat"
       initialIsOpen={false}
       isLoading={false}

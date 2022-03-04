@@ -9,20 +9,23 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '../../../../../../src/core/public';
 import { StartDeps } from '../../plugin';
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 import {
   IEmbeddable,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
+  isErrorEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
-import { EmbeddableInput } from '../../expression_types';
-import { RendererFactory } from '../../../types';
+import { RendererFactory, EmbeddableInput } from '../../../types';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
+import type { EmbeddableContainerContext } from '../../../../../../src/plugins/embeddable/public/';
 
 const { embeddable: strings } = RendererStrings;
 
+// registry of references to embeddables on the workpad
 const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
@@ -30,14 +33,23 @@ const embeddablesRegistry: {
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
 
-  return (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
+  const embeddableContainerContext: EmbeddableContainerContext = {
+    getCurrentPath: () => window.location.hash,
+  };
+
+  return (embeddableObject: IEmbeddable) => {
     return (
       <div
         className={CANVAS_EMBEDDABLE_CLASSNAME}
-        style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
+        style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
         <I18nContext>
-          <plugins.embeddable.EmbeddablePanel embeddable={embeddableObject} />
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <plugins.embeddable.EmbeddablePanel
+              embeddable={embeddableObject}
+              containerContext={embeddableContainerContext}
+            />
+          </KibanaThemeProvider>
         </I18nContext>
       </div>
     );
@@ -56,6 +68,9 @@ export const embeddableRendererFactory = (
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType }, handlers) => {
       const uniqueId = handlers.getElementId();
+      const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
+        'labs:canvas:byValueEmbeddable'
+      );
 
       if (!embeddablesRegistry[uniqueId]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
@@ -67,15 +82,27 @@ export const embeddableRendererFactory = (
           throw new EmbeddableFactoryNotFoundError(embeddableType);
         }
 
-        const embeddablePromise = factory
-          .createFromSavedObject(input.id, input)
-          .then((embeddable) => {
-            embeddablesRegistry[uniqueId] = embeddable;
-            return embeddable;
-          });
-        embeddablesRegistry[uniqueId] = embeddablePromise;
+        const embeddableInput = { ...input, id: uniqueId };
 
-        const embeddableObject = await (async () => embeddablePromise)();
+        const embeddablePromise = input.savedObjectId
+          ? factory
+              .createFromSavedObject(input.savedObjectId, embeddableInput)
+              .then((embeddable) => {
+                // stores embeddable in registrey
+                embeddablesRegistry[uniqueId] = embeddable;
+                return embeddable;
+              })
+          : factory.create(embeddableInput).then((embeddable) => {
+              if (!embeddable || isErrorEmbeddable(embeddable)) {
+                return;
+              }
+              // stores embeddable in registry
+              embeddablesRegistry[uniqueId] = embeddable as IEmbeddable;
+              return embeddable;
+            });
+        embeddablesRegistry[uniqueId] = embeddablePromise as Promise<IEmbeddable>;
+
+        const embeddableObject = (await (async () => embeddablePromise)()) as IEmbeddable;
 
         const palettes = await plugins.charts.palettes.getPalettes();
 
@@ -86,7 +113,8 @@ export const embeddableRendererFactory = (
           const updatedExpression = embeddableInputToExpression(
             updatedInput,
             embeddableType,
-            palettes
+            palettes,
+            isByValueEnabled
           );
 
           if (updatedExpression) {
@@ -94,15 +122,7 @@ export const embeddableRendererFactory = (
           }
         });
 
-        ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
-          handlers.done()
-        );
-
-        handlers.onResize(() => {
-          ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
-            handlers.done()
-          );
-        });
+        ReactDOM.render(renderEmbeddable(embeddableObject), domNode, () => handlers.done());
 
         handlers.onDestroy(() => {
           subscription.unsubscribe();
@@ -115,6 +135,7 @@ export const embeddableRendererFactory = (
       } else {
         const embeddable = embeddablesRegistry[uniqueId];
 
+        // updating embeddable input with changes made to expression or filters
         if ('updateInput' in embeddable) {
           embeddable.updateInput(input);
           embeddable.reload();

@@ -8,8 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
+import type { Filter } from '@kbn/es-query';
 
-import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import type { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { KueryFilterQuery } from '../../../../../common/types/timeline';
@@ -121,7 +122,7 @@ export const SearchOrFilter = React.memo<Props>(
                   itemClassName={timelineSelectModeItemsClassName}
                   onChange={handleChange}
                   options={options}
-                  popoverClassName={searchOrFilterPopoverClassName}
+                  popoverProps={{ className: searchOrFilterPopoverClassName }}
                   valueOfSelected={kqlMode}
                 />
               </EuiToolTip>

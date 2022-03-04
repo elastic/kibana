@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { entriesList, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';

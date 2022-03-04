@@ -8,7 +8,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexMapping } from '../../../mappings';
 import { SavedObjectsPitParams } from '../../../types';
 import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
@@ -26,7 +26,7 @@ interface GetSearchDslOptions {
   rootSearchFields?: string[];
   searchAfter?: estypes.Id[];
   sortField?: string;
-  sortOrder?: estypes.SearchSortOrder;
+  sortOrder?: estypes.SortOrder;
   namespaces?: string[];
   pit?: SavedObjectsPitParams;
   typeToNamespacesMap?: Map<string, string[] | undefined>;

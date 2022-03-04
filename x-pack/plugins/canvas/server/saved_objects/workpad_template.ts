@@ -7,8 +7,14 @@
 
 import { SavedObjectsType } from 'src/core/server';
 import { TEMPLATE_TYPE } from '../../common/lib/constants';
+import {
+  CanvasSavedObjectTypeMigrationsDeps,
+  templateWorkpadMigrationsFactory,
+} from './migrations';
 
-export const workpadTemplateType: SavedObjectsType = {
+export const workpadTemplateType = (
+  deps: CanvasSavedObjectTypeMigrationsDeps
+): SavedObjectsType => ({
   name: TEMPLATE_TYPE,
   hidden: false,
   namespaceType: 'agnostic',
@@ -44,7 +50,7 @@ export const workpadTemplateType: SavedObjectsType = {
       },
     },
   },
-  migrations: {},
+  migrations: templateWorkpadMigrationsFactory(deps),
   management: {
     importableAndExportable: false,
     icon: 'canvasApp',
@@ -53,4 +59,4 @@ export const workpadTemplateType: SavedObjectsType = {
       return obj.attributes.name;
     },
   },
-};
+});

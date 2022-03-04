@@ -7,12 +7,12 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { Logger } from 'src/core/server';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   fromKueryExpression,
   toElasticsearchQuery,
   luceneStringToDsl,
-  IndexPatternBase,
+  DataViewBase,
   Query,
 } from '@kbn/es-query';
 
@@ -22,7 +22,7 @@ const MAX_TOP_LEVEL_QUERY_SIZE = 0;
 const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
 
-export const getEsFormattedQuery = (query: Query, indexPattern?: IndexPatternBase) => {
+export const getEsFormattedQuery = (query: Query, indexPattern?: DataViewBase) => {
   let esFormattedQuery;
 
   const queryLanguage = query.language;
@@ -49,7 +49,7 @@ export async function getShapesFilters(
   const shapesIdsNamesMap: Record<string, unknown> = {};
   // Get all shapes in index
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { body: boundaryData }: ApiResponse<Record<string, any>> = await esClient.search({
+  const boundaryData = await esClient.search<Record<string, any>>({
     index: boundaryIndexTitle,
     body: {
       size: MAX_SHAPES_QUERY_SIZE,
@@ -71,11 +71,9 @@ export async function getShapesFilters(
     };
   });
   if (boundaryNameField) {
-    boundaryData.hits.hits.forEach(
-      ({ _source, _id }: { _source: Record<string, unknown>; _id: string }) => {
-        shapesIdsNamesMap[_id] = _source[boundaryNameField];
-      }
-    );
+    boundaryData.hits.hits.forEach(({ _source, _id }) => {
+      shapesIdsNamesMap[_id] = _source![boundaryNameField];
+    });
   }
   return {
     shapesFilters: filters,
@@ -202,7 +200,7 @@ export async function executeEsQueryFactory(
 
     let esResult: estypes.SearchResponse<unknown> | undefined;
     try {
-      ({ body: esResult } = await esClient.search(esQuery));
+      esResult = await esClient.search(esQuery);
     } catch (err) {
       log.warn(`${err.message}`);
     }

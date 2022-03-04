@@ -85,7 +85,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/blob/master/src/plugins/ui_actions/README.md',
+          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/ui_actions/README.asciidoc',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

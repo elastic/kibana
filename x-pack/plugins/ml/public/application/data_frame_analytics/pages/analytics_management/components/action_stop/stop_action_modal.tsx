@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 import { StopAction } from './use_stop_action';
@@ -31,7 +31,7 @@ export const StopActionModal: FC<StopAction> = ({ closeModal, item, forceStopAnd
           confirmButtonText={i18n.translate(
             'xpack.ml.dataframe.analyticsList.forceStopModalStartButton',
             {
-              defaultMessage: 'Force stop',
+              defaultMessage: 'Stop',
             }
           )}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}

@@ -63,8 +63,8 @@ Note that the `slowlog` fileset is experimental. \
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/redis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['datastore', 'message_queue'],
   };
 }

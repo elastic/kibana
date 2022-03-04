@@ -35,6 +35,8 @@ import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
+import { themeServiceMock } from '../theme/theme_service.mock';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -84,10 +86,12 @@ describe('PluginsService', () => {
     mockSetupDeps = {
       application: applicationServiceMock.createInternalSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+      executionContext: executionContextServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),
       injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
+      theme: themeServiceMock.createSetupContract(),
     };
     mockSetupContext = {
       ...mockSetupDeps,
@@ -98,6 +102,7 @@ describe('PluginsService', () => {
     mockStartDeps = {
       application: applicationServiceMock.createInternalStartContract(),
       docLinks: docLinksServiceMock.createStartContract(),
+      executionContext: executionContextServiceMock.createStartContract(),
       http: httpServiceMock.createStartContract(),
       chrome: chromeServiceMock.createStartContract(),
       i18n: i18nServiceMock.createStartContract(),
@@ -108,6 +113,7 @@ describe('PluginsService', () => {
       savedObjects: savedObjectsServiceMock.createStartContract(),
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
       deprecations: deprecationsServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
     };
     mockStartContext = {
       ...mockStartDeps,

@@ -34,6 +34,7 @@ describe('DefaultCellRenderer', () => {
   const isExpanded = true;
   const linkValues = ['foo', 'bar', '@baz'];
   const rowIndex = 3;
+  const colIndex = 0;
   const setCellProps = jest.fn();
   const timelineId = 'test';
   const ecsData = {} as Ecs;
@@ -66,6 +67,7 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
             />
@@ -100,6 +102,7 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
               truncate={truncate}
@@ -148,6 +151,7 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
             />
@@ -159,5 +163,121 @@ describe('DefaultCellRenderer', () => {
     expect(
       wrapper.find('[data-test-subj="data-grid-expanded-cell-value-actions"]').exists()
     ).toBeTruthy();
+  });
+});
+
+describe('host link rendering', () => {
+  const data = cloneDeep(mockTimelineData[0].data);
+  const hostNameHeader = cloneDeep(defaultHeaders[4]);
+
+  beforeEach(() => {
+    const { getColumnRenderer: realGetColumnRenderer } = jest.requireActual(
+      '../body/renderers/get_column_renderer'
+    );
+
+    getColumnRendererMock.mockImplementation(realGetColumnRenderer); // link rendering tests must use the real renderer
+  });
+
+  test('it renders a link button for `host.name` when `isTimeline` is true', () => {
+    const id = 'host.name';
+    const isTimeline = true;
+
+    const wrapper = mount(
+      <TestProviders>
+        <DragDropContextWrapper browserFields={mockBrowserFields}>
+          <DroppableWrapper droppableId="testing">
+            <DefaultCellRenderer
+              browserFields={undefined}
+              columnId={id}
+              ecsData={undefined}
+              data={data}
+              eventId="_id-123"
+              header={hostNameHeader}
+              isDetails={false}
+              isDraggable={true}
+              isExpandable={false}
+              isExpanded={false}
+              isTimeline={isTimeline}
+              linkValues={[]}
+              rowIndex={3}
+              colIndex={0}
+              setCellProps={jest.fn()}
+              timelineId={'timeline-1-query'}
+            />
+          </DroppableWrapper>
+        </DragDropContextWrapper>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="host-details-button"]').first().text()).toEqual('apache');
+  });
+
+  test('it does NOT render a link button for `host.name` when `isTimeline` is false', () => {
+    const id = 'host.name';
+    const isTimeline = false;
+
+    const wrapper = mount(
+      <TestProviders>
+        <DragDropContextWrapper browserFields={mockBrowserFields}>
+          <DroppableWrapper droppableId="testing">
+            <DefaultCellRenderer
+              browserFields={undefined}
+              columnId={id}
+              ecsData={undefined}
+              data={data}
+              eventId="_id-123"
+              header={hostNameHeader}
+              isDetails={false}
+              isDraggable={true}
+              isExpandable={false}
+              isExpanded={false}
+              isTimeline={isTimeline}
+              linkValues={[]}
+              rowIndex={3}
+              colIndex={0}
+              setCellProps={jest.fn()}
+              timelineId={'timeline-1-query'}
+            />
+          </DroppableWrapper>
+        </DragDropContextWrapper>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="host-details-button"]').exists()).toBe(false);
+  });
+
+  test('it does NOT render a link button for non-host fields when `isTimeline` is true', () => {
+    const id = '@timestamp'; // a non-host field
+    const isTimeline = true;
+    const timestampHeader = cloneDeep(defaultHeaders[0]);
+
+    const wrapper = mount(
+      <TestProviders>
+        <DragDropContextWrapper browserFields={mockBrowserFields}>
+          <DroppableWrapper droppableId="testing">
+            <DefaultCellRenderer
+              browserFields={undefined}
+              columnId={id}
+              ecsData={undefined}
+              data={data}
+              eventId="_id-123"
+              header={timestampHeader}
+              isDetails={false}
+              isDraggable={true}
+              isExpandable={false}
+              isExpanded={false}
+              isTimeline={isTimeline}
+              linkValues={[]}
+              rowIndex={3}
+              colIndex={0}
+              setCellProps={jest.fn()}
+              timelineId={'timeline-1-query'}
+            />
+          </DroppableWrapper>
+        </DragDropContextWrapper>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="host-details-button"]').exists()).toBe(false);
   });
 });

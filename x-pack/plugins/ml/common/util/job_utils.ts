@@ -8,7 +8,7 @@
 import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -71,6 +71,12 @@ export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean 
     isMappable = functionName === ML_JOB_AGGREGATION.LAT_LONG;
   }
   return isMappable;
+}
+
+// Returns a boolean indicating whether the specified job is suitable for maps plugin.
+export function isJobWithGeoData(job: Job): boolean {
+  const { detectors } = job.analysis_config;
+  return detectors.some((detector) => detector.function === ML_JOB_AGGREGATION.LAT_LONG);
 }
 
 /**

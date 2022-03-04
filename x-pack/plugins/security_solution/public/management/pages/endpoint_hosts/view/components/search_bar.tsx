@@ -9,7 +9,8 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
 import styled from 'styled-components';
-import { Query, SearchBar, TimeHistory } from '../../../../../../../../../src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
+import { SearchBar, TimeHistory } from '../../../../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../../../../src/plugins/kibana_utils/public';
 import { urlFromQueryParams } from '../url_from_query_params';
 import { useEndpointSelector } from '../hooks';
@@ -60,6 +61,7 @@ export const AdminSearchBar = memo(() => {
             indexPatterns={clonedIndexPatterns}
             timeHistory={timeHistory}
             onQuerySubmit={onQuerySubmit}
+            fillSubmitButton={true}
             isLoading={false}
             iconType="search"
             showFilterBar={false}

@@ -17,7 +17,7 @@ import {
   Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { JobGroup } from '../job_group';
 import { useMlKibana } from '../../../../contexts/kibana';
 
@@ -72,7 +72,9 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
   };
 
   useEffect(() => {
-    setFilters(queryInstance);
+    if (queryText !== undefined) {
+      setFilters(queryInstance);
+    }
   }, [queryText]);
 
   const filters: SearchFilterConfig[] = useMemo(

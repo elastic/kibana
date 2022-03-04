@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ActionParamsProps,
   AlertHistoryEsIndexConnectorId,
@@ -108,7 +108,7 @@ export const IndexParamsFields = ({
         >
           <EuiIcon type="refresh" />
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.resetDefaultIndexLabel"
+            id="xpack.triggersActionsUI.sections.rulesList.resetDefaultIndexLabel"
             defaultMessage="Reset default index"
           />
         </EuiLink>

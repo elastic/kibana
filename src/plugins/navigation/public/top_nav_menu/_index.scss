@@ -1,12 +1,6 @@
 .kbnTopNavMenu {
-  @include kbnThemeStyle('v7') {
-    margin-right: $euiSizeXS;
-  }
-
-  @include kbnThemeStyle('v8') {
-    button:last-child {
-      margin-right: 0;
-    }
+  button:last-child {
+    margin-right: 0;
   }
 }
 
@@ -17,4 +11,17 @@
 
 .kbnTopNavMenu__badgeGroup {
   margin-right: $euiSizeM;
+}
+
+.kbnTopNavMenu__betaBadgeItem {
+  margin-right: $euiSizeS;
+  vertical-align: middle;
+
+  button:hover &,
+  button:focus & {
+    text-decoration: underline;
+  }
+  button:hover & {
+    cursor: pointer;
+  }
 }

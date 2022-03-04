@@ -1,0 +1,2279 @@
+{
+  "id": "inspector",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.InspectorPublicPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "InspectorPublicPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "inspector",
+            "scope": "public",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-public.InspectorPublicPlugin",
+            "text": "InspectorPublicPlugin"
+          },
+          " implements ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "public",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-public.Setup",
+            "text": "Setup"
+          },
+          ", ",
+          {
+            "pluginId": "inspector",
+            "scope": "public",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-public.Start",
+            "text": "Start"
+          },
+          ", object, object>"
+        ],
+        "path": "src/plugins/inspector/public/plugin.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorPublicPlugin.views",
+            "type": "Object",
+            "tags": [],
+            "label": "views",
+            "description": [],
+            "signature": [
+              "InspectorViewRegistry",
+              " | undefined"
+            ],
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorPublicPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.InspectorPublicPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initializerContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<object>"
+                ],
+                "path": "src/plugins/inspector/public/plugin.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorPublicPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>) => { registerView: (view: ",
+              {
+                "pluginId": "inspector",
+                "scope": "public",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-public.InspectorViewDescription",
+                "text": "InspectorViewDescription"
+              },
+              ") => void; __LEGACY: { views: ",
+              "InspectorViewRegistry",
+              "; }; }"
+            ],
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.InspectorPublicPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "src/plugins/inspector/public/plugin.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorPublicPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              },
+              ", startDeps: ",
+              "InspectorPluginStartDeps",
+              ") => { isAvailable: (adapters?: ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              " | undefined) => boolean; open: (adapters: ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", options?: ",
+              {
+                "pluginId": "inspector",
+                "scope": "public",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-public.InspectorOptions",
+                "text": "InspectorOptions"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.OverlayRef",
+                "text": "OverlayRef"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.InspectorPublicPlugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "src/plugins/inspector/public/plugin.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.InspectorPublicPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "startDeps",
+                "description": [],
+                "signature": [
+                  "InspectorPluginStartDeps"
+                ],
+                "path": "src/plugins/inspector/public/plugin.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorPublicPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.RequestAdapter",
+        "type": "Class",
+        "tags": [
+          "extends"
+        ],
+        "label": "RequestAdapter",
+        "description": [
+          "\nAn generic inspector adapter to log requests.\nThese can be presented in the inspector using the requests view.\nThe adapter is not coupled to a specific implementation or even Elasticsearch\ninstead it offers a generic API to log requests of any kind."
+        ],
+        "signature": [
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.RequestAdapter",
+            "text": "RequestAdapter"
+          },
+          " extends EventEmitter"
+        ],
+        "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestAdapter.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestAdapter.start",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "start",
+            "description": [
+              "\nStart logging a new request into this request adapter. The new request will\nby default be in a processing state unless you explicitly finish it via\n{@link RequestResponder#finish}, {@link RequestResponder#ok} or\n{@link RequestResponder#error}.\n"
+            ],
+            "signature": [
+              "(name: string, params?: ",
+              "RequestParams",
+              ", startTime?: number) => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestResponder",
+                "text": "RequestResponder"
+              }
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestAdapter.start.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [
+                  "The name of this request as it should be shown in the UI."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestAdapter.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Additional arguments for the request."
+                ],
+                "signature": [
+                  "RequestParams"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestAdapter.start.$3",
+                "type": "number",
+                "tags": [],
+                "label": "startTime",
+                "description": [
+                  "Set an optional start time for the request"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "An instance to add information to the request and finish it."
+            ]
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestAdapter.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestAdapter.resetRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "resetRequest",
+            "description": [],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestAdapter.resetRequest.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestAdapter.getRequests",
+            "type": "Function",
+            "tags": [],
+            "label": "getRequests",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.RequestResponder",
+        "type": "Class",
+        "tags": [],
+        "label": "RequestResponder",
+        "description": [
+          "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
+        ],
+        "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestResponder.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestResponder.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.Request",
+                    "text": "Request"
+                  }
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestResponder.Unnamed.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestResponder.json",
+            "type": "Function",
+            "tags": [],
+            "label": "json",
+            "description": [],
+            "signature": [
+              "(reqJson: object) => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestResponder",
+                "text": "RequestResponder"
+              }
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestResponder.json.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "reqJson",
+                "description": [],
+                "signature": [
+                  "object"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestResponder.stats",
+            "type": "Function",
+            "tags": [],
+            "label": "stats",
+            "description": [],
+            "signature": [
+              "(stats: ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatistics",
+                "text": "RequestStatistics"
+              },
+              ") => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestResponder",
+                "text": "RequestResponder"
+              }
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestResponder.stats.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "stats",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.RequestStatistics",
+                    "text": "RequestStatistics"
+                  }
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestResponder.finish",
+            "type": "Function",
+            "tags": [],
+            "label": "finish",
+            "description": [],
+            "signature": [
+              "(status: ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatus",
+                "text": "RequestStatus"
+              },
+              ", response: ",
+              "Response",
+              ") => void"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestResponder.finish.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "status",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.RequestStatus",
+                    "text": "RequestStatus"
+                  }
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestResponder.finish.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "response",
+                "description": [],
+                "signature": [
+                  "Response"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestResponder.ok",
+            "type": "Function",
+            "tags": [],
+            "label": "ok",
+            "description": [],
+            "signature": [
+              "(response: ",
+              "Response",
+              ") => void"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestResponder.ok.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "response",
+                "description": [],
+                "signature": [
+                  "Response"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestResponder.error",
+            "type": "Function",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "(response: ",
+              "Response",
+              ") => void"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestResponder.error.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "response",
+                "description": [],
+                "signature": [
+                  "Response"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.Adapters",
+        "type": "Interface",
+        "tags": [],
+        "label": "Adapters",
+        "description": [
+          "\nThe interface that the adapters used to open an inspector have to fullfill."
+        ],
+        "path": "src/plugins/inspector/common/adapters/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.Adapters.requests",
+            "type": "Object",
+            "tags": [],
+            "label": "requests",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestAdapter",
+                "text": "RequestAdapter"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.Adapters.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.InspectorOptions",
+        "type": "Interface",
+        "tags": [
+          "property",
+          "property"
+        ],
+        "label": "InspectorOptions",
+        "description": [
+          "\nOptions that can be specified when opening the inspector."
+        ],
+        "path": "src/plugins/inspector/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorOptions.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/inspector/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorOptions.options",
+            "type": "Unknown",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/inspector/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.InspectorViewDescription",
+        "type": "Interface",
+        "tags": [
+          "typedef"
+        ],
+        "label": "InspectorViewDescription",
+        "description": [
+          "\nAn object describing an inspector view."
+        ],
+        "path": "src/plugins/inspector/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorViewDescription.component",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "React.ComponentClass<",
+              {
+                "pluginId": "inspector",
+                "scope": "public",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-public.InspectorViewProps",
+                "text": "InspectorViewProps"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ">, any> | React.FunctionComponent<",
+              {
+                "pluginId": "inspector",
+                "scope": "public",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-public.InspectorViewProps",
+                "text": "InspectorViewProps"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/inspector/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorViewDescription.help",
+            "type": "string",
+            "tags": [],
+            "label": "help",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/inspector/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorViewDescription.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/inspector/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorViewDescription.shouldShow",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShow",
+            "description": [],
+            "signature": [
+              "((adapters: ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ") => boolean) | undefined"
+            ],
+            "path": "src/plugins/inspector/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.InspectorViewDescription.shouldShow.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "adapters",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.Adapters",
+                    "text": "Adapters"
+                  }
+                ],
+                "path": "src/plugins/inspector/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorViewDescription.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/inspector/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.InspectorViewProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "InspectorViewProps",
+        "description": [
+          "\nThe props interface that a custom inspector view component, that will be passed\nto {@link InspectorViewDescription#component}, must use."
+        ],
+        "signature": [
+          {
+            "pluginId": "inspector",
+            "scope": "public",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-public.InspectorViewProps",
+            "text": "InspectorViewProps"
+          },
+          "<TAdapters>"
+        ],
+        "path": "src/plugins/inspector/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorViewProps.adapters",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "adapters",
+            "description": [
+              "\nAdapters used to open the inspector."
+            ],
+            "signature": [
+              "TAdapters"
+            ],
+            "path": "src/plugins/inspector/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorViewProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "\nThe title that the inspector is currently using e.g. a visualization name."
+            ],
+            "path": "src/plugins/inspector/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorViewProps.options",
+            "type": "Unknown",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "\nA set of specific options for each view."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/inspector/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.Request",
+        "type": "Interface",
+        "tags": [],
+        "label": "Request",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Request",
+            "text": "Request"
+          },
+          " extends ",
+          "RequestParams"
+        ],
+        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.Request.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.Request.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.Request.json",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "json",
+            "description": [],
+            "signature": [
+              "object | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.Request.response",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Response",
+              " | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.Request.startTime",
+            "type": "number",
+            "tags": [],
+            "label": "startTime",
+            "description": [],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.Request.stats",
+            "type": "Object",
+            "tags": [],
+            "label": "stats",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatistics",
+                "text": "RequestStatistics"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.Request.status",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatus",
+                "text": "RequestStatus"
+              }
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.Request.time",
+            "type": "number",
+            "tags": [],
+            "label": "time",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.RequestStatistic",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestStatistic",
+        "description": [],
+        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestStatistic.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestStatistic.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestStatistic.value",
+            "type": "Any",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.RequestStatistics",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestStatistics",
+        "description": [],
+        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestStatistics.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: RequestStatistic",
+            "description": [],
+            "signature": [
+              "[key: string]:  ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatistic",
+                "text": "RequestStatistic"
+              }
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.RequestStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "RequestStatus",
+        "description": [
+          "\nThe status a request can have."
+        ],
+        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.InspectorSession",
+        "type": "Type",
+        "tags": [],
+        "label": "InspectorSession",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.OverlayRef",
+            "text": "OverlayRef"
+          }
+        ],
+        "path": "src/plugins/inspector/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "inspector",
+      "id": "def-public.Setup",
+      "type": "Interface",
+      "tags": [],
+      "label": "Setup",
+      "description": [],
+      "path": "src/plugins/inspector/public/plugin.tsx",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "inspector",
+          "id": "def-public.Setup.registerView",
+          "type": "Function",
+          "tags": [],
+          "label": "registerView",
+          "description": [],
+          "signature": [
+            "(view: ",
+            {
+              "pluginId": "inspector",
+              "scope": "public",
+              "docId": "kibInspectorPluginApi",
+              "section": "def-public.InspectorViewDescription",
+              "text": "InspectorViewDescription"
+            },
+            ") => void"
+          ],
+          "path": "src/plugins/inspector/public/plugin.tsx",
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "inspector",
+              "id": "def-public.Setup.registerView.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "view",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "inspector",
+                  "scope": "public",
+                  "docId": "kibInspectorPluginApi",
+                  "section": "def-public.InspectorViewDescription",
+                  "text": "InspectorViewDescription"
+                }
+              ],
+              "path": "src/plugins/inspector/public/view_registry.ts",
+              "deprecated": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "inspector",
+          "id": "def-public.Setup.__LEGACY",
+          "type": "Object",
+          "tags": [],
+          "label": "__LEGACY",
+          "description": [],
+          "signature": [
+            "{ views: ",
+            "InspectorViewRegistry",
+            "; }"
+          ],
+          "path": "src/plugins/inspector/public/plugin.tsx",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "inspector",
+      "id": "def-public.Start",
+      "type": "Interface",
+      "tags": [],
+      "label": "Start",
+      "description": [],
+      "path": "src/plugins/inspector/public/plugin.tsx",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "inspector",
+          "id": "def-public.Start.isAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "isAvailable",
+          "description": [
+            "\nChecks if a inspector panel could be shown based on the passed adapters.\n"
+          ],
+          "signature": [
+            "(adapters?: ",
+            {
+              "pluginId": "inspector",
+              "scope": "common",
+              "docId": "kibInspectorPluginApi",
+              "section": "def-common.Adapters",
+              "text": "Adapters"
+            },
+            " | undefined) => boolean"
+          ],
+          "path": "src/plugins/inspector/public/plugin.tsx",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "inspector",
+              "id": "def-public.Start.isAvailable.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "adapters",
+              "description": [
+                "- An object of adapters. This should be the same\nyou would pass into `open`."
+              ],
+              "signature": [
+                {
+                  "pluginId": "inspector",
+                  "scope": "common",
+                  "docId": "kibInspectorPluginApi",
+                  "section": "def-common.Adapters",
+                  "text": "Adapters"
+                },
+                " | undefined"
+              ],
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "deprecated": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": [
+            "True, if a call to `open` with the same adapters\nwould have shown the inspector panel, false otherwise."
+          ]
+        },
+        {
+          "parentPluginId": "inspector",
+          "id": "def-public.Start.open",
+          "type": "Function",
+          "tags": [
+            "return",
+            "throws"
+          ],
+          "label": "open",
+          "description": [
+            "\nOpens the inspector panel for the given adapters and close any previously opened\ninspector panel. The previously panel will be closed also if no new panel will be\nopened (e.g. because of the passed adapters no view is available). You can use\n{@link InspectorSession#close} on the return value to close that opened panel again.\n"
+          ],
+          "signature": [
+            "(adapters: ",
+            {
+              "pluginId": "inspector",
+              "scope": "common",
+              "docId": "kibInspectorPluginApi",
+              "section": "def-common.Adapters",
+              "text": "Adapters"
+            },
+            ", options?: ",
+            {
+              "pluginId": "inspector",
+              "scope": "public",
+              "docId": "kibInspectorPluginApi",
+              "section": "def-public.InspectorOptions",
+              "text": "InspectorOptions"
+            },
+            " | undefined) => ",
+            {
+              "pluginId": "core",
+              "scope": "public",
+              "docId": "kibCorePluginApi",
+              "section": "def-public.OverlayRef",
+              "text": "OverlayRef"
+            }
+          ],
+          "path": "src/plugins/inspector/public/plugin.tsx",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "inspector",
+              "id": "def-public.Start.open.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "adapters",
+              "description": [
+                "- An object of adapters for which you want to show\nthe inspector panel."
+              ],
+              "signature": [
+                {
+                  "pluginId": "inspector",
+                  "scope": "common",
+                  "docId": "kibInspectorPluginApi",
+                  "section": "def-common.Adapters",
+                  "text": "Adapters"
+                }
+              ],
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "deprecated": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "inspector",
+              "id": "def-public.Start.open.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [
+                "- Options that configure the inspector. See InspectorOptions type."
+              ],
+              "signature": [
+                {
+                  "pluginId": "inspector",
+                  "scope": "public",
+                  "docId": "kibInspectorPluginApi",
+                  "section": "def-public.InspectorOptions",
+                  "text": "InspectorOptions"
+                },
+                " | undefined"
+              ],
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "deprecated": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": [
+            "The session instance for the opened inspector."
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "inspector",
+        "id": "def-common.RequestAdapter",
+        "type": "Class",
+        "tags": [
+          "extends"
+        ],
+        "label": "RequestAdapter",
+        "description": [
+          "\nAn generic inspector adapter to log requests.\nThese can be presented in the inspector using the requests view.\nThe adapter is not coupled to a specific implementation or even Elasticsearch\ninstead it offers a generic API to log requests of any kind."
+        ],
+        "signature": [
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.RequestAdapter",
+            "text": "RequestAdapter"
+          },
+          " extends EventEmitter"
+        ],
+        "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestAdapter.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestAdapter.start",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "start",
+            "description": [
+              "\nStart logging a new request into this request adapter. The new request will\nby default be in a processing state unless you explicitly finish it via\n{@link RequestResponder#finish}, {@link RequestResponder#ok} or\n{@link RequestResponder#error}.\n"
+            ],
+            "signature": [
+              "(name: string, params?: ",
+              "RequestParams",
+              ", startTime?: number) => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestResponder",
+                "text": "RequestResponder"
+              }
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestAdapter.start.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [
+                  "The name of this request as it should be shown in the UI."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestAdapter.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Additional arguments for the request."
+                ],
+                "signature": [
+                  "RequestParams"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestAdapter.start.$3",
+                "type": "number",
+                "tags": [],
+                "label": "startTime",
+                "description": [
+                  "Set an optional start time for the request"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "An instance to add information to the request and finish it."
+            ]
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestAdapter.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestAdapter.resetRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "resetRequest",
+            "description": [],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestAdapter.resetRequest.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestAdapter.getRequests",
+            "type": "Function",
+            "tags": [],
+            "label": "getRequests",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-common.RequestResponder",
+        "type": "Class",
+        "tags": [],
+        "label": "RequestResponder",
+        "description": [
+          "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
+        ],
+        "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestResponder.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestResponder.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.Request",
+                    "text": "Request"
+                  }
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestResponder.Unnamed.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestResponder.json",
+            "type": "Function",
+            "tags": [],
+            "label": "json",
+            "description": [],
+            "signature": [
+              "(reqJson: object) => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestResponder",
+                "text": "RequestResponder"
+              }
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestResponder.json.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "reqJson",
+                "description": [],
+                "signature": [
+                  "object"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestResponder.stats",
+            "type": "Function",
+            "tags": [],
+            "label": "stats",
+            "description": [],
+            "signature": [
+              "(stats: ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatistics",
+                "text": "RequestStatistics"
+              },
+              ") => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestResponder",
+                "text": "RequestResponder"
+              }
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestResponder.stats.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "stats",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.RequestStatistics",
+                    "text": "RequestStatistics"
+                  }
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestResponder.finish",
+            "type": "Function",
+            "tags": [],
+            "label": "finish",
+            "description": [],
+            "signature": [
+              "(status: ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatus",
+                "text": "RequestStatus"
+              },
+              ", response: ",
+              "Response",
+              ") => void"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestResponder.finish.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "status",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.RequestStatus",
+                    "text": "RequestStatus"
+                  }
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestResponder.finish.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "response",
+                "description": [],
+                "signature": [
+                  "Response"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestResponder.ok",
+            "type": "Function",
+            "tags": [],
+            "label": "ok",
+            "description": [],
+            "signature": [
+              "(response: ",
+              "Response",
+              ") => void"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestResponder.ok.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "response",
+                "description": [],
+                "signature": [
+                  "Response"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestResponder.error",
+            "type": "Function",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "(response: ",
+              "Response",
+              ") => void"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestResponder.error.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "response",
+                "description": [],
+                "signature": [
+                  "Response"
+                ],
+                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "inspector",
+        "id": "def-common.Adapters",
+        "type": "Interface",
+        "tags": [],
+        "label": "Adapters",
+        "description": [
+          "\nThe interface that the adapters used to open an inspector have to fullfill."
+        ],
+        "path": "src/plugins/inspector/common/adapters/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.Adapters.requests",
+            "type": "Object",
+            "tags": [],
+            "label": "requests",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestAdapter",
+                "text": "RequestAdapter"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.Adapters.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-common.Request",
+        "type": "Interface",
+        "tags": [],
+        "label": "Request",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Request",
+            "text": "Request"
+          },
+          " extends ",
+          "RequestParams"
+        ],
+        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.Request.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.Request.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.Request.json",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "json",
+            "description": [],
+            "signature": [
+              "object | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.Request.response",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Response",
+              " | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.Request.startTime",
+            "type": "number",
+            "tags": [],
+            "label": "startTime",
+            "description": [],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.Request.stats",
+            "type": "Object",
+            "tags": [],
+            "label": "stats",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatistics",
+                "text": "RequestStatistics"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.Request.status",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatus",
+                "text": "RequestStatus"
+              }
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.Request.time",
+            "type": "number",
+            "tags": [],
+            "label": "time",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-common.RequestStatistic",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestStatistic",
+        "description": [],
+        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestStatistic.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestStatistic.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestStatistic.value",
+            "type": "Any",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-common.RequestStatistics",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestStatistics",
+        "description": [],
+        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestStatistics.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: RequestStatistic",
+            "description": [],
+            "signature": [
+              "[key: string]:  ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatistic",
+                "text": "RequestStatistic"
+              }
+            ],
+            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "inspector",
+        "id": "def-common.RequestStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "RequestStatus",
+        "description": [
+          "\nThe status a request can have."
+        ],
+        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

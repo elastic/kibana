@@ -6,10 +6,22 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import ipaddr from 'ipaddr.js';
+import { sum } from 'lodash';
 import moment from 'moment';
 
 const KibanaServerSchema = schema.object({
-  hostname: schema.maybe(schema.string({ hostname: true })),
+  hostname: schema.maybe(
+    schema.string({
+      hostname: true,
+      validate(value) {
+        if (ipaddr.isValid(value) && !sum(ipaddr.parse(value).toByteArray())) {
+          // prevent setting a hostname that fails in Chromium on Windows
+          return `cannot use '0.0.0.0' as Kibana host name, consider using the default (localhost) instead`;
+        }
+      },
+    })
+  ),
   port: schema.maybe(schema.number()),
   protocol: schema.maybe(
     schema.string({
@@ -34,20 +46,6 @@ const QueueSchema = schema.object({
   }),
 });
 
-const RulesSchema = schema.object({
-  allow: schema.boolean(),
-  host: schema.maybe(schema.string()),
-  protocol: schema.maybe(
-    schema.string({
-      validate(value) {
-        if (!/:$/.test(value)) {
-          return 'must end in colon';
-        }
-      },
-    })
-  ),
-});
-
 const CaptureSchema = schema.object({
   timeouts: schema.object({
     openUrl: schema.oneOf([schema.number(), schema.duration()], {
@@ -60,55 +58,9 @@ const CaptureSchema = schema.object({
       defaultValue: moment.duration({ seconds: 30 }),
     }),
   }),
-  networkPolicy: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    rules: schema.arrayOf(RulesSchema, {
-      defaultValue: [
-        { host: undefined, allow: true, protocol: 'http:' },
-        { host: undefined, allow: true, protocol: 'https:' },
-        { host: undefined, allow: true, protocol: 'ws:' },
-        { host: undefined, allow: true, protocol: 'wss:' },
-        { host: undefined, allow: true, protocol: 'data:' },
-        { host: undefined, allow: false, protocol: undefined }, // Default action is to deny!
-      ],
-    }),
-  }),
   zoom: schema.number({ defaultValue: 2 }),
   loadDelay: schema.oneOf([schema.number(), schema.duration()], {
     defaultValue: moment.duration({ seconds: 3 }),
-  }),
-  browser: schema.object({
-    autoDownload: schema.conditional(
-      schema.contextRef('dist'),
-      true,
-      schema.boolean({ defaultValue: false }),
-      schema.boolean({ defaultValue: true })
-    ),
-    chromium: schema.object({
-      inspect: schema.conditional(
-        schema.contextRef('dist'),
-        true,
-        schema.boolean({ defaultValue: false }),
-        schema.maybe(schema.never())
-      ),
-      disableSandbox: schema.maybe(schema.boolean()), // default value is dynamic in createConfig$
-      proxy: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-        server: schema.conditional(
-          schema.siblingRef('enabled'),
-          true,
-          schema.uri({ scheme: ['http', 'https'] }),
-          schema.maybe(schema.never())
-        ),
-        bypass: schema.conditional(
-          schema.siblingRef('enabled'),
-          true,
-          schema.arrayOf(schema.string()),
-          schema.maybe(schema.never())
-        ),
-      }),
-    }),
-    type: schema.string({ defaultValue: 'chromium' }),
   }),
   maxAttempts: schema.conditional(
     schema.contextRef('dist'),

@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -22,7 +22,7 @@ import {
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
-  AlertAction,
+  RuleAction,
   ActionTypeIndex,
   ActionConnector,
   ActionType,
@@ -40,20 +40,21 @@ import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
+import { OmitMessageVariablesType } from '../../lib/action_variables';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
-  omitOptionalMessageVariables?: boolean;
+  omitMessageVariables?: OmitMessageVariablesType;
   defaultActionMessage?: string;
 }
 
 export interface ActionAccordionFormProps {
-  actions: AlertAction[];
+  actions: RuleAction[];
   defaultActionGroupId: string;
   actionGroups?: ActionGroupWithMessageVariables[];
   defaultActionMessage?: string;
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
-  setActions: (actions: AlertAction[]) => void;
+  setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariables;
@@ -306,7 +307,7 @@ export const ActionForm = ({
       </EuiTitle>
       <EuiSpacer size="m" />
       {actionTypesIndex &&
-        actions.map((actionItem: AlertAction, index: number) => {
+        actions.map((actionItem: RuleAction, index: number) => {
           const actionConnector = connectors.find((field) => field.id === actionItem.id);
           // connectors doesn't exists
           if (!actionConnector) {
@@ -321,11 +322,11 @@ export const ActionForm = ({
                 connectors={connectors}
                 onDeleteConnector={() => {
                   const updatedActions = actions.filter(
-                    (_item: AlertAction, i: number) => i !== index
+                    (_item: RuleAction, i: number) => i !== index
                   );
                   setActions(updatedActions);
                   setIsAddActionPanelOpen(
-                    updatedActions.filter((item: AlertAction) => item.id !== actionItem.id)
+                    updatedActions.filter((item: RuleAction) => item.id !== actionItem.id)
                       .length === 0
                   );
                   setActiveActionItem(undefined);
@@ -334,7 +335,7 @@ export const ActionForm = ({
                   setActiveActionItem({
                     actionTypeId: actionItem.actionTypeId,
                     indices: actions
-                      .map((item: AlertAction, idx: number) =>
+                      .map((item: RuleAction, idx: number) =>
                         item.id === actionItem.id ? idx : -1
                       )
                       .filter((idx: number) => idx >= 0),
@@ -374,11 +375,11 @@ export const ActionForm = ({
               actionTypeRegistry={actionTypeRegistry}
               onDeleteAction={() => {
                 const updatedActions = actions.filter(
-                  (_item: AlertAction, i: number) => i !== index
+                  (_item: RuleAction, i: number) => i !== index
                 );
                 setActions(updatedActions);
                 setIsAddActionPanelOpen(
-                  updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length ===
+                  updatedActions.filter((item: RuleAction) => item.id !== actionItem.id).length ===
                     0
                 );
                 setActiveActionItem(undefined);

@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     afterEach(async () => {
-      await testSubjects.click('closeFlyoutButton');
+      await PageObjects.settings.closeIndexPatternFieldEditor();
       await PageObjects.settings.removeIndexPattern();
       // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
     });
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should be reset on cancel', async function () {
       // Cancel saving the popularity change
-      await testSubjects.click('closeFlyoutButton');
+      await PageObjects.settings.closeIndexPatternFieldEditor();
       await PageObjects.settings.openControlsByName(fieldName);
       // check that it is 0 (previous increase was cancelled
       const popularity = await PageObjects.settings.getPopularity();

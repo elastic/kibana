@@ -11,11 +11,13 @@ Saved objects can only be imported into the same version, a newer minor on the s
 
 |=======
 | Exporting version | Importing version | Compatible?
-| 6.7.0 | 6.8.1 | Yes
-| 6.8.1 | 7.3.0 | Yes
-| 7.3.0 | 7.11.1 | Yes
-| 7.11.1 | 7.6.0 | No
-| 6.8.1 | 8.0.0 | No
+| 6.7.x | 6.8.x | Yes
+| 6.x.x | 7.x.x | Yes
+| 7.x.x | 8.x.x | Yes
+| 7.1.x | 7.15.x | Yes
+| 7.x.x | 6.x.x | No
+| 7.15.x | 7.1.x | No
+| 6.x.x | 8.x.x | No
 |=======
 
 [[saved-objects-api-import-request]]
@@ -93,7 +95,7 @@ to resolve errors, refer to the <<saved-objects-api-import-example,examples>>.
 [[saved-objects-api-import-example-1]]
 ===== Successful import with `createNewCopies` enabled
 
-Import an index pattern and dashboard:
+Import {a-data-source} and dashboard:
 
 [source,sh]
 --------------------------------------------------
@@ -145,7 +147,7 @@ The result indicates a successful import, and both objects are created. Since th
 [[saved-objects-api-import-example-2]]
 ===== Successful import with `createNewCopies` disabled
 
-Import an index pattern and dashboard:
+Import {a-data-source} and dashboard:
 
 [source,sh]
 --------------------------------------------------
@@ -194,7 +196,7 @@ The result indicates a successful import, and both objects are created.
 [[saved-objects-api-import-example-3]]
 ===== Failed import with conflict errors
 
-Import an index pattern, visualization, *Canvas* workpad, and dashboard that include saved objects:
+Import {a-data-source}, visualization, *Canvas* workpad, and dashboard that include saved objects:
 
 [source,sh]
 --------------------------------------------------
@@ -283,10 +285,10 @@ The API returns the following:
 }
 --------------------------------------------------
 
-The result indicates an unsuccessful import because the index pattern, visualization, *Canvas* workpad, and dashboard resulted in a conflict
+The result indicates an unsuccessful import because the {data-source}, visualization, *Canvas* workpad, and dashboard resulted in a conflict
 error:
 
-* An index pattern with the same ID already exists, which resulted in a conflict error. To resolve the error, overwrite the existing object,
+* A {data-source} with the same ID already exists, which resulted in a conflict error. To resolve the error, overwrite the existing object,
 or skip the object.
 
 * A visualization with a different ID, but the same origin already exists, which resulted in a conflict error. The `destinationId` field
@@ -305,7 +307,7 @@ Objects are created when the error is resolved using the <<saved-objects-api-res
 [[saved-objects-api-import-example-4]]
 ===== Failed import with missing reference errors
 
-Import a visualization and dashboard when the index pattern for the visualization doesn't exist:
+Import a visualization and dashboard when the {data-source} for the visualization doesn't exist:
 
 [source,sh]
 --------------------------------------------------

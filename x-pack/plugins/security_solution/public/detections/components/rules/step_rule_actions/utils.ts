@@ -9,16 +9,12 @@ import mustache from 'mustache';
 import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 
 import {
-  AlertAction,
+  RuleAction,
   ActionTypeRegistryContract,
 } from '../../../../../../triggers_actions_ui/public';
 import * as I18n from './translations';
 
-const UUID_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
-
-export const isUuid = (id: AlertAction['id']) => !!id.match(UUID_REGEX);
-
-export const getActionTypeName = (actionTypeId: AlertAction['actionTypeId']) => {
+export const getActionTypeName = (actionTypeId: RuleAction['actionTypeId']) => {
   if (!actionTypeId) return '';
   const actionType = actionTypeId.split('.')[1];
 
@@ -27,7 +23,7 @@ export const getActionTypeName = (actionTypeId: AlertAction['actionTypeId']) => 
   return startCase(actionType);
 };
 
-export const validateMustache = (params: AlertAction['params']) => {
+export const validateMustache = (params: RuleAction['params']) => {
   const errors: string[] = [];
   Object.entries(params).forEach(([paramKey, paramValue]) => {
     if (!isString(paramValue)) return;
@@ -42,7 +38,7 @@ export const validateMustache = (params: AlertAction['params']) => {
 };
 
 export const validateActionParams = async (
-  actionItem: AlertAction,
+  actionItem: RuleAction,
   actionTypeRegistry: ActionTypeRegistryContract
 ): Promise<string[]> => {
   const actionErrors = await actionTypeRegistry

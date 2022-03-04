@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { TimeRangeComparisonType } from '../../../../common/runtime_types/comparison_type_rt';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { ImpactBar } from '../ImpactBar';
-import { TransactionDetailLink } from '../Links/apm/transaction_detail_link';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { ImpactBar } from '../impact_bar';
+import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
 import { ListMetric } from '../list_metric';
+import { ITableColumn } from '../managed_table';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { getLatencyColumnLabel } from './get_latency_column_label';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../charts/helper/get_timeseries_color';
 
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -42,13 +43,15 @@ export function getColumns({
   transactionGroupDetailedStatistics,
   comparisonEnabled,
   shouldShowSparkPlots = true,
+  comparisonType,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
   transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
-}): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
+  comparisonType?: TimeRangeComparisonType;
+}): Array<ITableColumn<ServiceTransactionGroupItem>> {
   return [
     {
       field: 'name',
@@ -67,6 +70,8 @@ export function getColumns({
                 transactionName={name}
                 transactionType={type}
                 latencyAggregationType={latencyAggregationType}
+                comparisonEnabled={comparisonEnabled}
+                comparisonType={comparisonType}
               >
                 {name}
               </TransactionDetailLink>
@@ -85,9 +90,14 @@ export function getColumns({
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.latency;
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.latency;
+
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.LATENCY_AVG
+        );
+
         return (
           <ListMetric
-            color="euiColorVis1"
+            color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
@@ -95,6 +105,7 @@ export function getColumns({
               comparisonEnabled ? previousTimeseries : undefined
             }
             valueLabel={asMillisecondDuration(latency)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -113,9 +124,14 @@ export function getColumns({
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]
             ?.throughput;
+
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.THROUGHPUT
+        );
+
         return (
           <ListMetric
-            color="euiColorVis0"
+            color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
@@ -123,6 +139,7 @@ export function getColumns({
               comparisonEnabled ? previousTimeseries : undefined
             }
             valueLabel={asTransactionRate(throughput)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -140,9 +157,14 @@ export function getColumns({
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.errorRate;
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.errorRate;
+
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
+
         return (
           <ListMetric
-            color="euiColorVis7"
+            color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
@@ -150,6 +172,7 @@ export function getColumns({
               comparisonEnabled ? previousTimeseries : undefined
             }
             valueLabel={asPercent(errorRate, 1)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },

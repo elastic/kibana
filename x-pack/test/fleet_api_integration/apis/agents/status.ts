@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return the status of agents', async () => {
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agent-status`).expect(200);
+      const { body: apiResponse } = await supertest.get(`/api/fleet/agent_status`).expect(200);
 
       expect(apiResponse).to.eql({
         results: {
@@ -82,6 +82,10 @@ export default function ({ getService }: FtrProviderContext) {
           inactive: 0,
         },
       });
+    });
+
+    it('should work with deprecated api', async () => {
+      await supertest.get(`/api/fleet/agent-status`).expect(200);
     });
   });
 }

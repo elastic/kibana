@@ -13,5 +13,5 @@ hasHeaderBanner$(): Observable<boolean>;
 ```
 <b>Returns:</b>
 
-`Observable<boolean>`
+Observable&lt;boolean&gt;
 

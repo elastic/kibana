@@ -5,40 +5,27 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../common/mock/match_media';
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { HeaderPage } from './index';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
-  return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
-    }),
-  };
-});
+jest.mock('../../common/navigation/hooks');
 
 describe('HeaderPage', () => {
   const mount = useMountAppended();
 
   test('it renders', () => {
     const wrapper = shallow(
-      <HeaderPage
-        badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
-        border
-        subtitle="Test subtitle"
-        subtitle2="Test subtitle 2"
-        title="Test title"
-      >
-        <p>{'Test supplement'}</p>
-      </HeaderPage>
+      <TestProviders>
+        <HeaderPage border subtitle="Test subtitle" subtitle2="Test subtitle 2" title="Test title">
+          <p>{'Test supplement'}</p>
+        </HeaderPage>
+      </TestProviders>
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -47,10 +34,7 @@ describe('HeaderPage', () => {
   test('it renders the back link when provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPage
-          backOptions={{ href: '#', text: 'Test link', onClick: jest.fn() }}
-          title="Test title"
-        />
+        <HeaderPage showBackButton title="Test title" />
       </TestProviders>
     );
 
@@ -153,5 +137,37 @@ describe('HeaderPage', () => {
 
     expect(casesHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
     expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+  });
+
+  describe('Badges', () => {
+    let appMock: AppMockRenderer;
+
+    beforeEach(() => {
+      appMock = createAppMockRenderer();
+    });
+
+    it('does not render the badge if the release is ga', () => {
+      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.queryByText('Beta')).toBeFalsy();
+      expect(renderResult.queryByText('Technical preview')).toBeFalsy();
+    });
+
+    it('does render the beta badge', () => {
+      appMock = createAppMockRenderer({ releasePhase: 'beta' });
+      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.getByText('Beta')).toBeInTheDocument();
+    });
+
+    it('does render the experimental badge', () => {
+      appMock = createAppMockRenderer({ releasePhase: 'experimental' });
+      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.getByText('Technical preview')).toBeInTheDocument();
+    });
   });
 });

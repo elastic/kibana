@@ -28,7 +28,7 @@ const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendTo
     <EuiButtonIcon
       type="button"
       iconType="list"
-      color="subdued"
+      color="text"
       onClick={onClick}
       className={classNames('echLegend__toggle', `echLegend__toggle--position-${legendPosition}`, {
         // eslint-disable-next-line @typescript-eslint/naming-convention

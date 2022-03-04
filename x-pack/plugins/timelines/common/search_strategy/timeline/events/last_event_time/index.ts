@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestBasicOptions } from '../..';
 
 export enum LastEventIndexKey {
   hostDetails = 'hostDetails',
   hosts = 'hosts',
+  users = 'users',
+  userDetails = 'userDetails',
   ipDetails = 'ipDetails',
   network = 'network',
-  ueba = 'ueba', // TODO: Steph/ueba implement this
 }
 
 export interface LastTimeDetails {
   hostName?: Maybe<string>;
+  userName?: Maybe<string>;
   ip?: Maybe<string>;
 }
 
@@ -26,6 +28,7 @@ export interface TimelineEventsLastEventTimeStrategyResponse extends IEsSearchRe
   lastSeen: Maybe<string>;
   inspect?: Maybe<Inspect>;
 }
+export type TimelineKpiStrategyRequest = Omit<TimelineRequestBasicOptions, 'runtimeMappings'>;
 
 export interface TimelineKpiStrategyResponse extends IEsSearchResponse {
   destinationIpCount: number;
@@ -37,7 +40,7 @@ export interface TimelineKpiStrategyResponse extends IEsSearchResponse {
 }
 
 export interface TimelineEventsLastEventTimeRequestOptions
-  extends Omit<TimelineRequestBasicOptions, 'filterQuery' | 'timerange'> {
+  extends Omit<TimelineRequestBasicOptions, 'filterQuery' | 'timerange' | 'runtimeMappings'> {
   indexKey: LastEventIndexKey;
   details: LastTimeDetails;
 }

@@ -22,6 +22,10 @@ FldList [
 ]
 `;
 
+exports[`IndexPatterns createAndSave will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: undefined]`;
+
+exports[`IndexPatterns delete will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: 1]`;
+
 exports[`IndexPatterns savedObjectToSpec 1`] = `
 Object {
   "allowNoIndex": undefined,
@@ -36,7 +40,7 @@ Object {
   },
   "fields": Object {},
   "id": "id",
-  "intervalName": undefined,
+  "namespaces": undefined,
   "runtimeFieldMap": Object {
     "aRuntimeField": Object {
       "script": Object {
@@ -60,3 +64,5 @@ Object {
   "version": "version",
 }
 `;
+
+exports[`IndexPatterns updateSavedObject will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: id]`;

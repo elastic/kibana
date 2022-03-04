@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
 import { incrementByKey } from './get_high_level_stats';
@@ -300,7 +300,7 @@ export async function fetchLogstashStats(
     },
   };
 
-  const { body: results } = await callCluster.search<LogstashStats>(params, {
+  const results = await callCluster.search<LogstashStats>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },
@@ -361,7 +361,7 @@ export async function fetchLogstashState(
     },
   };
 
-  const { body: results } = await callCluster.search<LogstashState>(params, {
+  const results = await callCluster.search<LogstashState>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },

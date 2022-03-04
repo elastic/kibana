@@ -54,13 +54,6 @@ describe('OperationTypeSelect', function () {
 
     fireEvent.click(screen.getByTestId('operationTypeSelect'));
 
-    expect(setSeries).toHaveBeenCalledWith(0, {
-      operationType: 'median',
-      dataType: 'ux',
-      time: { from: 'now-15m', to: 'now' },
-      name: 'performance-distribution',
-    });
-
     fireEvent.click(screen.getByText('95th Percentile'));
     expect(setSeries).toHaveBeenCalledWith(0, {
       operationType: '95th',

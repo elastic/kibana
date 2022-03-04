@@ -138,55 +138,33 @@ export const getSavedObjects = (): SavedObject[] => [
     version: 'WzIzLDFd',
   },
   {
-    attributes: {
-      description: '',
-      layerListJSON:
-        '[{"id":"0hmz5","alpha":1,"sourceDescriptor":{"type":"EMS_TMS","isAutoSelect":true},"visible":true,"style":{},"type":"VECTOR_TILE","minZoom":0,"maxZoom":24},{"id":"7ameq","label":null,"minZoom":0,"maxZoom":24,"alpha":1,"sourceDescriptor":{"type":"EMS_FILE","id":"world_countries","tooltipProperties":["name","iso2"]},"visible":true,"style":{"type":"VECTOR","properties":{"fillColor":{"type":"DYNAMIC","options":{"field":{"name":"__kbnjoin__count__741db9c6-8ebb-4ea9-9885-b6b4ac019d14","origin":"join"},"color":"Green to Red","fieldMetaOptions":{"isEnabled":false,"sigma":3}}},"lineColor":{"type":"STATIC","options":{"color":"#FFFFFF"}},"lineWidth":{"type":"STATIC","options":{"size":1}},"iconSize":{"type":"STATIC","options":{"size":10}},"symbolizeAs":{"options":{"value":"circle"}},"icon":{"type":"STATIC","options":{"value":"marker"}}}},"type":"VECTOR","joins":[{"leftField":"iso2","right":{"type":"ES_TERM_SOURCE","id":"741db9c6-8ebb-4ea9-9885-b6b4ac019d14","indexPatternTitle":"kibana_sample_data_ecommerce","term":"geoip.country_iso_code","indexPatternRefName":"layer_1_join_0_index_pattern","metrics":[{"type":"count","label":"sales count"}],"applyGlobalQuery":true}}]},{"id":"jmtgf","label":"United States","minZoom":0,"maxZoom":24,"alpha":1,"sourceDescriptor":{"type":"EMS_FILE","id":"usa_states","tooltipProperties":["name"]},"visible":true,"style":{"type":"VECTOR","properties":{"fillColor":{"type":"DYNAMIC","options":{"field":{"name":"__kbnjoin__count__30a0ec24-49b6-476a-b4ed-6c1636333695","origin":"join"},"color":"Blues","fieldMetaOptions":{"isEnabled":false,"sigma":3}}},"lineColor":{"type":"STATIC","options":{"color":"#FFFFFF"}},"lineWidth":{"type":"STATIC","options":{"size":1}},"iconSize":{"type":"STATIC","options":{"size":10}},"symbolizeAs":{"options":{"value":"circle"}},"icon":{"type":"STATIC","options":{"value":"marker"}}}},"type":"VECTOR","joins":[{"leftField":"name","right":{"type":"ES_TERM_SOURCE","id":"30a0ec24-49b6-476a-b4ed-6c1636333695","indexPatternTitle":"kibana_sample_data_ecommerce","term":"geoip.region_name","indexPatternRefName":"layer_2_join_0_index_pattern","metrics":[{"type":"count","label":"sales count"}],"applyGlobalQuery":true}}]},{"id":"ui5f8","label":"France","minZoom":0,"maxZoom":24,"alpha":1,"sourceDescriptor":{"type":"EMS_FILE","id":"france_departments","tooltipProperties":["label_en"]},"visible":true,"style":{"type":"VECTOR","properties":{"fillColor":{"type":"DYNAMIC","options":{"field":{"name":"__kbnjoin__count__e325c9da-73fa-4b3b-8b59-364b99370826","origin":"join"},"color":"Blues","fieldMetaOptions":{"isEnabled":false,"sigma":3}}},"lineColor":{"type":"STATIC","options":{"color":"#FFFFFF"}},"lineWidth":{"type":"STATIC","options":{"size":1}},"iconSize":{"type":"STATIC","options":{"size":10}},"symbolizeAs":{"options":{"value":"circle"}},"icon":{"type":"STATIC","options":{"value":"marker"}}}},"type":"VECTOR","joins":[{"leftField":"label_en","right":{"type":"ES_TERM_SOURCE","id":"e325c9da-73fa-4b3b-8b59-364b99370826","indexPatternTitle":"kibana_sample_data_ecommerce","term":"geoip.region_name","indexPatternRefName":"layer_3_join_0_index_pattern","metrics":[{"type":"count","label":"sales count"}],"applyGlobalQuery":true}}]},{"id":"y3fjb","label":"United Kingdom","minZoom":0,"maxZoom":24,"alpha":1,"sourceDescriptor":{"type":"EMS_FILE","id":"uk_subdivisions","tooltipProperties":["label_en"]},"visible":true,"style":{"type":"VECTOR","properties":{"fillColor":{"type":"DYNAMIC","options":{"field":{"name":"__kbnjoin__count__612d805d-8533-43a9-ac0e-cbf51fe63dcd","origin":"join"},"color":"Blues","fieldMetaOptions":{"isEnabled":false,"sigma":3}}},"lineColor":{"type":"STATIC","options":{"color":"#FFFFFF"}},"lineWidth":{"type":"STATIC","options":{"size":1}},"iconSize":{"type":"STATIC","options":{"size":10}},"symbolizeAs":{"options":{"value":"circle"}},"icon":{"type":"STATIC","options":{"value":"marker"}}}},"type":"VECTOR","joins":[{"leftField":"label_en","right":{"type":"ES_TERM_SOURCE","id":"612d805d-8533-43a9-ac0e-cbf51fe63dcd","indexPatternTitle":"kibana_sample_data_ecommerce","term":"geoip.region_name","indexPatternRefName":"layer_4_join_0_index_pattern","metrics":[{"type":"count","label":"sales count"}],"applyGlobalQuery":true}}]},{"id":"c54wk","label":"Sales","minZoom":9,"maxZoom":24,"alpha":1,"sourceDescriptor":{"id":"04c983b0-8cfa-4e6a-a64b-52c10b7008fe","type":"ES_SEARCH","geoField":"geoip.location","limit":2048,"filterByMapBounds":true,"tooltipProperties":["category","customer_gender","manufacturer","order_id","total_quantity","total_unique_products","taxful_total_price","order_date","geoip.region_name","geoip.country_iso_code"],"indexPatternRefName":"layer_5_source_index_pattern","applyGlobalQuery":true,"scalingType":"LIMIT"},"visible":true,"style":{"type":"VECTOR","properties":{"fillColor":{"type":"DYNAMIC","options":{"field":{"name":"taxful_total_price","origin":"source"},"color":"Greens","fieldMetaOptions":{"isEnabled":false,"sigma":3}}},"lineColor":{"type":"STATIC","options":{"color":"#FFFFFF"}},"lineWidth":{"type":"STATIC","options":{"size":1}},"iconSize":{"type":"STATIC","options":{"size":10}},"symbolizeAs":{"options":{"value":"circle"}},"icon":{"type":"STATIC","options":{"value":"marker"}}}},"type":"VECTOR"},{"id":"qvhh3","label":"Total Sales Revenue","minZoom":0,"maxZoom":9,"alpha":1,"sourceDescriptor":{"type":"ES_GEO_GRID","resolution":"COARSE","id":"aa7f87b8-9dc5-42be-b19e-1a2fa09b6cad","geoField":"geoip.location","requestType":"point","metrics":[{"type":"count","label":"sales count"},{"type":"sum","field":"taxful_total_price","label":"total sales price"}],"indexPatternRefName":"layer_6_source_index_pattern","applyGlobalQuery":true},"visible":true,"style":{"type":"VECTOR","properties":{"fillColor":{"type":"DYNAMIC","options":{"field":{"name":"doc_count","origin":"source"},"color":"Greens","fieldMetaOptions":{"isEnabled":false,"sigma":3}}},"lineColor":{"type":"STATIC","options":{"color":"#cccccc"}},"lineWidth":{"type":"STATIC","options":{"size":1}},"iconSize":{"type":"DYNAMIC","options":{"field":{"name":"sum_of_taxful_total_price","origin":"source"},"minSize":1,"maxSize":20,"fieldMetaOptions":{"isEnabled":false,"sigma":3}}},"labelText":{"type":"DYNAMIC","options":{"field":{"name":"sum_of_taxful_total_price","origin":"source"},"fieldMetaOptions":{"isEnabled":false,"sigma":3}}},"labelSize":{"type":"DYNAMIC","options":{"field":{"name":"sum_of_taxful_total_price","origin":"source"},"minSize":12,"maxSize":24,"fieldMetaOptions":{"isEnabled":false,"sigma":3}}},"labelBorderSize":{"options":{"size":"MEDIUM"}},"symbolizeAs":{"options":{"value":"circle"}},"icon":{"type":"STATIC","options":{"value":"marker"}}}},"type":"VECTOR"}]',
-      mapStateJSON:
-        '{"zoom":2.11,"center":{"lon":-15.07605,"lat":45.88578},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"query":"","language":"kuery"},"settings":{"autoFitToDataBounds":false}}',
-      title: '[eCommerce] Orders by Country',
-      uiStateJSON: '{"isDarkMode":false}',
-    },
+    id: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
+    type: 'visualization',
+    updated_at: '2021-10-28T15:07:24.077Z',
+    version: '1',
     coreMigrationVersion: '8.0.0',
-    id: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
-    migrationVersion: {
-      map: '7.14.0',
+    migrationVersion: { visualization: '8.0.0' },
+    attributes: {
+      title: i18n.translate('home.sampleData.ecommerceSpec.salesCountMapTitle', {
+        defaultMessage: '[eCommerce] Sales Count Map',
+      }),
+      visState:
+        '{"title":"[eCommerce] Sales Count Map","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega/v5.json\\n  config: {\\n    kibana: {type: \\"map\\", latitude: 25, longitude: -40, zoom: 3}\\n  }\\n  data: [\\n    {\\n      name: table\\n      url: {\\n        index: kibana_sample_data_ecommerce\\n        %context%: true\\n        %timefield%: order_date\\n        body: {\\n          size: 0\\n          aggs: {\\n            gridSplit: {\\n              geotile_grid: {field: \\"geoip.location\\", precision: 4, size: 10000}\\n              aggs: {\\n                gridCentroid: {\\n                  geo_centroid: {\\n                    field: \\"geoip.location\\"\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n      format: {property: \\"aggregations.gridSplit.buckets\\"}\\n      transform: [\\n        {\\n          type: geopoint\\n          projection: projection\\n          fields: [\\n            gridCentroid.location.lon\\n            gridCentroid.location.lat\\n          ]\\n        }\\n      ]\\n    }\\n  ]\\n  scales: [\\n    {\\n      name: gridSize\\n      type: linear\\n      domain: {data: \\"table\\", field: \\"doc_count\\"}\\n      range: [\\n        50\\n        1000\\n      ]\\n    }\\n  ]\\n  marks: [\\n    {\\n      name: gridMarker\\n      type: symbol\\n      from: {data: \\"table\\"}\\n      encode: {\\n        update: {\\n          size: {scale: \\"gridSize\\", field: \\"doc_count\\"}\\n          xc: {signal: \\"datum.x\\"}\\n          yc: {signal: \\"datum.y\\"}\\n        }\\n      }\\n    },\\n    {\\n      name: gridLabel\\n      type: text\\n      from: {data: \\"table\\"}\\n      encode: {\\n        enter: {\\n          fill: {value: \\"firebrick\\"}\\n          text: {signal: \\"datum.doc_count\\"}\\n        }\\n        update: {\\n          x: {signal: \\"datum.x\\"}\\n          y: {signal: \\"datum.y\\"}\\n          dx: {value: -6}\\n          dy: {value: 6}\\n          fontSize: {value: 18}\\n          fontWeight: {value: \\"bold\\"}\\n        }\\n      }\\n    }\\n  ]\\n}"}}',
+      uiStateJSON: '{}',
+      description: '',
+      version: 1,
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
     },
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'layer_1_join_0_index_pattern',
-        type: 'index-pattern',
-      },
-      {
-        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'layer_2_join_0_index_pattern',
-        type: 'index-pattern',
-      },
-      {
-        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'layer_3_join_0_index_pattern',
-        type: 'index-pattern',
-      },
-      {
-        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'layer_4_join_0_index_pattern',
-        type: 'index-pattern',
-      },
-      {
-        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'layer_5_source_index_pattern',
-        type: 'index-pattern',
-      },
-      {
-        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'layer_6_source_index_pattern',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
     ],
-    type: 'map',
-    updated_at: '2021-08-05T12:23:57.577Z',
-    version: 'WzI5LDFd',
   },
   {
     attributes: {
@@ -566,7 +544,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Tx. last week',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                     timeShift: '1w',
                   },
                   'ddc92e50-4d5c-413e-b91b-3e504889fa65': {
@@ -576,7 +554,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Transactions',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'eadae280-2da3-4d1d-a0e1-f9733f89c15b': {
                     customLabel: true,
@@ -765,7 +743,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Count of records',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   '9f61a7df-198e-4754-b34c-81ed544136ba': {
                     dataType: 'string',
@@ -1092,7 +1070,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Items',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'd77cdd24-dedc-48dd-9a4b-d34c6f1a6c46': {
                     customLabel: true,
@@ -1208,7 +1186,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Items',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'd77cdd24-dedc-48dd-9a4b-d34c6f1a6c46': {
                     customLabel: true,
@@ -1351,9 +1329,9 @@ export const getSavedObjects = (): SavedObject[] => [
         type: 'search',
       },
       {
-        id: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+        id: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
         name: '11:panel_11',
-        type: 'map',
+        type: 'visualization',
       },
       {
         id: 'c00d1f90-f5ea-11eb-a78e-83aac3c38a60',

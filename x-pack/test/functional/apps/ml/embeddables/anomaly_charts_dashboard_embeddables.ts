@@ -6,42 +6,16 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-
-// @ts-expect-error not full interface
-const JOB_CONFIG: Job = {
-  job_id: `fq_multi_1_ae`,
-  description:
-    'mean/min/max(responsetime) partition=airline on farequote dataset with 1h bucket span',
-  groups: ['farequote', 'automated', 'multi-metric'],
-  analysis_config: {
-    bucket_span: '1h',
-    influencers: ['airline'],
-    detectors: [
-      { function: 'mean', field_name: 'responsetime', partition_field_name: 'airline' },
-      { function: 'min', field_name: 'responsetime', partition_field_name: 'airline' },
-      { function: 'max', field_name: 'responsetime', partition_field_name: 'airline' },
-    ],
-  },
-  data_description: { time_field: '@timestamp' },
-  analysis_limits: { model_memory_limit: '20mb' },
-  model_plot_config: { enabled: true },
-};
-
-// @ts-expect-error not full interface
-const DATAFEED_CONFIG: Datafeed = {
-  datafeed_id: 'datafeed-fq_multi_1_ae',
-  indices: ['ft_farequote'],
-  job_id: 'fq_multi_1_ae',
-  query: { bool: { must: [{ match_all: {} }] } },
-};
+import { JOB_CONFIG, DATAFEED_CONFIG, ML_EMBEDDABLE_TYPES } from './constants';
 
 const testDataList = [
   {
+    type: 'testData',
     suiteSuffix: 'with multi metric job',
     panelTitle: `ML anomaly charts for ${JOB_CONFIG.job_id}`,
     jobConfig: JOB_CONFIG,
     datafeedConfig: DATAFEED_CONFIG,
+    dashboardTitle: `ML anomaly charts for fq_multi_1_ae ${Date.now()}`,
     expected: {
       influencers: [
         {
@@ -59,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
 
-  describe('anomaly charts', function () {
+  describe('anomaly charts in dashboard', function () {
     this.tags(['mlqa']);
 
     before(async () => {
@@ -67,6 +41,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
+    });
+
+    after(async () => {
+      await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
@@ -80,13 +59,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         after(async () => {
-          await ml.api.cleanMlIndices();
+          await ml.testResources.deleteDashboardByTitle(testData.dashboardTitle);
         });
 
         it('can open job selection flyout', async () => {
-          await PageObjects.dashboard.clickCreateDashboardPrompt();
+          await PageObjects.dashboard.clickNewDashboard();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
-          await ml.dashboardEmbeddables.openJobSelectionFlyout();
+          await ml.dashboardEmbeddables.openAnomalyJobSelectionFlyout(
+            ML_EMBEDDABLE_TYPES.ANOMALY_CHARTS
+          );
         });
 
         it('can select jobs', async () => {
@@ -109,6 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.timePicker.pauseAutoRefresh();
           await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();
           await ml.dashboardEmbeddables.assertAnomalyChartsExists();
+          await PageObjects.dashboard.saveDashboard(testData.dashboardTitle);
         });
       });
     }

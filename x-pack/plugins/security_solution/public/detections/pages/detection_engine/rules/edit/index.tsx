@@ -14,7 +14,7 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -29,7 +29,6 @@ import {
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../components/user_info';
-import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
@@ -56,7 +55,8 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../common/constants';
+import { HeaderPage } from '../../../../../common/components/header_page';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -300,7 +300,7 @@ const EditRulePageComponent: FC = () => {
   const goToDetailsRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         path: getRuleDetailsUrl(ruleId ?? ''),
       });
@@ -318,7 +318,7 @@ const EditRulePageComponent: FC = () => {
 
   if (isSaved) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),
     });
@@ -333,13 +333,13 @@ const EditRulePageComponent: FC = () => {
       needsListsConfiguration
     )
   ) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.alerts,
       path: getDetectionEngineUrl(),
     });
     return null;
   } else if (!userHasPermissions(canUserCRUD)) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),
     });
@@ -351,7 +351,7 @@ const EditRulePageComponent: FC = () => {
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup direction="row" justifyContent="spaceAround">
           <MaxWidthEuiFlexItem>
-            <DetectionEngineHeaderPage
+            <HeaderPage
               backOptions={{
                 path: getRuleDetailsUrl(ruleId ?? ''),
                 text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,

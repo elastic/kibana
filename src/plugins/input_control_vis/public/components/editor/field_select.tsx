@@ -9,10 +9,10 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n-react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { IndexPattern, IndexPatternField } from '../../../../data/public';
+import { DataView, DataViewField } from '../../../../data_views/public';
 
 interface FieldSelectUiState {
   isLoading: boolean;
@@ -21,11 +21,11 @@ interface FieldSelectUiState {
 }
 
 export type FieldSelectUiProps = InjectedIntlProps & {
-  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<DataView>;
   indexPatternId: string;
   onChange: (value: any) => void;
   fieldName?: string;
-  filterField?: (field: IndexPatternField) => boolean;
+  filterField?: (field: DataViewField) => boolean;
   controlIndex: number;
 };
 
@@ -74,7 +74,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
       return;
     }
 
-    let indexPattern: IndexPattern;
+    let indexPattern: DataView;
     try {
       indexPattern = await this.props.getIndexPattern(indexPatternId);
     } catch (err) {
@@ -96,7 +96,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
     const fields: Array<EuiComboBoxOptionOption<string>> = [];
     indexPattern.fields
       .filter(this.props.filterField ?? (() => true))
-      .forEach((field: IndexPatternField) => {
+      .forEach((field: DataViewField) => {
         const fieldsList = fieldsByTypeMap.get(field.type) ?? [];
         fieldsList.push(field.name);
         fieldsByTypeMap.set(field.type, fieldsList);

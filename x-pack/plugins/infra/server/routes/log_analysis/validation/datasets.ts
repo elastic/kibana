@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {

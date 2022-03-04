@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { run, REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
+import { run, ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import chalk from 'chalk';
 import cheerio from 'cheerio';
 import fs from 'fs';

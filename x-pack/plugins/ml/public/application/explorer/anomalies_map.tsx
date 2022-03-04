@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
@@ -126,7 +126,7 @@ export const getChoroplethAnomaliesLayer = (
       isTimeAware: true,
     },
     visible: false,
-    type: LAYER_TYPE.VECTOR,
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 };
 
@@ -222,7 +222,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
 
   return (
     <>
-      <EuiPanel>
+      <EuiPanel data-test-subj="mlAnomaliesMapContainer" hasShadow={false} hasBorder>
         <EuiAccordion
           id="mlAnomalyExplorerAnomaliesMapAccordionId"
           initialIsOpen={true}

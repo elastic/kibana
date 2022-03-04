@@ -13,5 +13,5 @@ getProtocol(): string | null;
 ```
 <b>Returns:</b>
 
-`string | null`
+string \| null
 

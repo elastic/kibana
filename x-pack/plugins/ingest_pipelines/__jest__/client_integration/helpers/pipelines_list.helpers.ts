@@ -7,12 +7,17 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
+  findTestSubject,
+} from '@kbn/test-jest-helpers';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
 import { WithAppDependencies } from './setup_environment';
 import { getListPath, ROUTES } from '../../../public/application/services/navigation';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [getListPath()],
     componentRoutePath: ROUTES.list,
@@ -96,7 +101,7 @@ export const setup = async (): Promise<PipelineListTestBed> => {
 export type PipelineListTestSubjects =
   | 'appTitle'
   | 'documentationLink'
-  | 'createPipelineButton'
+  | 'createPipelineDropdown'
   | 'pipelinesTable'
   | 'pipelineDetails'
   | 'pipelineDetails.title'

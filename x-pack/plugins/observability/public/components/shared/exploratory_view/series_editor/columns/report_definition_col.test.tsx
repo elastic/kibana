@@ -16,6 +16,7 @@ import {
   render,
 } from '../../rtl_helpers';
 import { ReportDefinitionCol } from './report_definition_col';
+import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
 describe('Series Builder ReportDefinitionCol', function () {
   mockAppIndexPattern();
@@ -25,6 +26,7 @@ describe('Series Builder ReportDefinitionCol', function () {
     reportType: 'data-distribution',
     indexPattern: mockIndexPattern,
     dataType: 'ux',
+    reportConfigMap: obsvReportConfigMap,
   });
 
   mockUseValuesList([{ label: 'elastic-co', count: 10 }]);

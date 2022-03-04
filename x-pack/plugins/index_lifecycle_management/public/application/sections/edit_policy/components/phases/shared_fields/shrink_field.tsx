@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 
@@ -19,6 +19,7 @@ import { i18nTexts } from '../../../i18n_texts';
 import { LearnMoreLink, DescribedFormRow } from '../../';
 import { byteSizeUnits } from '../../../constants';
 import { UnitField } from './unit_field';
+import { useKibana } from '../../../../../../shared_imports';
 
 interface Props {
   phase: 'hot' | 'warm';
@@ -35,6 +36,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
   const path = `phases.${phase}.actions.shrink.${
     isUsingShardSize ? 'max_primary_shard_size' : 'number_of_shards'
   }`;
+  const { docLinks } = useKibana().services;
   return (
     <DescribedFormRow
       title={
@@ -51,7 +53,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
             id="xpack.indexLifecycleMgmt.editPolicy.shrinkIndexExplanationText"
             defaultMessage="Shrink the index to a new index with fewer primary shards."
           />{' '}
-          <LearnMoreLink docPath="ilm-shrink.html" />
+          <LearnMoreLink docPath={docLinks.links.elasticsearch.ilmShrink} />
         </EuiTextColor>
       }
       titleSize="xs"

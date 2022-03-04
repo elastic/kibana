@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';

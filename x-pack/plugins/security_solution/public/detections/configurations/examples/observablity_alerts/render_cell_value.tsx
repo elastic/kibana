@@ -9,11 +9,11 @@ import moment from 'moment';
 import React from 'react';
 
 import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
-import { ALERT_DURATION, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_DURATION, ALERT_REASON, ALERT_SEVERITY, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { Status } from '../../../components/status';
@@ -26,60 +26,66 @@ const reason =
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> =
-  ({
-    columnId,
-    data,
-    eventId,
-    header,
-    isDetails,
-    isDraggable,
-    isExpandable,
-    isExpanded,
-    linkValues,
-    rowIndex,
-    setCellProps,
-    timelineId,
-  }) => {
-    const value =
-      getMappedNonEcsValue({
-        data,
-        fieldName: columnId,
-      })?.reduce((x) => x[0]) ?? '';
+export const RenderCellValue: React.FC<
+  EuiDataGridCellValueElementProps & CellValueElementProps
+> = ({
+  columnId,
+  data,
+  eventId,
+  header,
+  isDetails,
+  isDraggable,
+  isExpandable,
+  isExpanded,
+  linkValues,
+  rowIndex,
+  colIndex,
+  setCellProps,
+  timelineId,
+}) => {
+  const value =
+    useGetMappedNonEcsValue({
+      data,
+      fieldName: columnId,
+    })?.reduce((x) => x[0]) ?? '';
 
-    switch (columnId) {
-      case ALERT_STATUS:
-        return (
-          <Status data-test-subj="alert-status" status={random(0, 1) ? 'recovered' : 'active'} />
-        );
-      case ALERT_DURATION:
-        return <span data-test-subj="alert-duration">{moment().fromNow(true)}</span>;
-      case 'signal.rule.severity':
-        return <Severity data-test-subj="rule-severity" severity={value} />;
-      case 'signal.reason':
-        return (
-          <EuiLink data-test-subj="reason">
-            <TruncatableText>{reason}</TruncatableText>
-          </EuiLink>
-        );
-      default:
-        // NOTE: we're using `DefaultCellRenderer` in this example configuration as a fallback, but
-        // using `DefaultCellRenderer` here is entirely optional
-        return (
-          <DefaultCellRenderer
-            columnId={columnId}
-            data={data}
-            eventId={eventId}
-            header={header}
-            isDetails={isDetails}
-            isDraggable={isDraggable}
-            isExpandable={isExpandable}
-            isExpanded={isExpanded}
-            linkValues={linkValues}
-            rowIndex={rowIndex}
-            setCellProps={setCellProps}
-            timelineId={timelineId}
-          />
-        );
-    }
-  };
+  switch (columnId) {
+    case ALERT_STATUS:
+      return (
+        <Status data-test-subj="alert-status" status={random(0, 1) ? 'recovered' : 'active'} />
+      );
+    case ALERT_DURATION:
+    case 'signal.duration.us':
+      return <span data-test-subj="alert-duration">{moment().fromNow(true)}</span>;
+    case ALERT_SEVERITY:
+    case 'signal.rule.severity':
+      return <Severity data-test-subj="rule-severity" severity={value} />;
+    case ALERT_REASON:
+    case 'signal.reason':
+      return (
+        <EuiLink data-test-subj="reason">
+          <TruncatableText>{reason}</TruncatableText>
+        </EuiLink>
+      );
+    default:
+      // NOTE: we're using `DefaultCellRenderer` in this example configuration as a fallback, but
+      // using `DefaultCellRenderer` here is entirely optional
+      return (
+        <DefaultCellRenderer
+          columnId={columnId}
+          data={data}
+          eventId={eventId}
+          header={header}
+          isDetails={isDetails}
+          isDraggable={isDraggable}
+          isExpandable={isExpandable}
+          isExpanded={isExpanded}
+          linkValues={linkValues}
+          rowIndex={rowIndex}
+          colIndex={colIndex}
+          setCellProps={setCellProps}
+          timelineId={timelineId}
+        />
+      );
+  }
+};

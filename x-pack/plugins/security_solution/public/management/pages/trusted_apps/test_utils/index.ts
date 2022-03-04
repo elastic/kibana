@@ -6,7 +6,8 @@
  */
 
 import { combineReducers, createStore } from 'redux';
-import { TrustedApp, OperatingSystem } from '../../../../../common/endpoint/types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { TrustedApp } from '../../../../../common/endpoint/types';
 import { RoutingAction } from '../../../../common/store/routing';
 
 import {
@@ -80,7 +81,6 @@ export const createTrustedAppsListData = (
     totalItemsCount: fullPagination.totalItemCount,
     timestamp,
     filter: '',
-    excludedPolicies: '',
     includedPolicies: '',
   };
 };

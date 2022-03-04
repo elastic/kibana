@@ -8,11 +8,10 @@
 
 import React, { useMemo, useEffect, HTMLAttributes } from 'react';
 import { EuiCode } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 // @ts-ignore
 import { aggToComponent } from '../lib/agg_to_component';
-// @ts-ignore
-import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
 import { getInvalidAggComponent } from './invalid_agg';
 // @ts-expect-error not typed yet
 import { seriesChangeHandler } from '../lib/series_change_handler';
@@ -33,13 +32,13 @@ interface AggProps extends HTMLAttributes<HTMLElement> {
   siblings: Metric[];
   uiRestrictions: TimeseriesUIRestrictions;
   dragHandleProps: DragHandleProps;
-  onChange: (part: Partial<Series>) => void;
+  onModelChange: (part: Partial<Series>) => void;
   onAdd: () => void;
   onDelete: () => void;
 }
 
 export function Agg(props: AggProps) {
-  const { model, uiRestrictions, series, name, onChange, fields, siblings } = props;
+  const { model, uiRestrictions, series, name, onModelChange, fields, siblings } = props;
 
   let Component = aggToComponent[model.type];
 
@@ -72,8 +71,8 @@ export function Agg(props: AggProps) {
   const isKibanaIndexPattern = props.panel.use_kibana_indexes || indexPattern === '';
 
   const onAggChange = useMemo(
-    () => seriesChangeHandler({ name, model: series, onChange }, siblings),
-    [name, onChange, siblings, series]
+    () => seriesChangeHandler({ name, model: series, onChange: onModelChange }, siblings),
+    [name, onModelChange, siblings, series]
   );
 
   useEffect(() => {
@@ -86,17 +85,25 @@ export function Agg(props: AggProps) {
       );
 
       if (isNumberFormatter && !isNumericMetric) {
-        onChange({ formatter: DATA_FORMATTERS.DEFAULT });
+        onModelChange({ formatter: DATA_FORMATTERS.DEFAULT });
       }
       // in case of string index pattern mode, change default formatter depending on metric type
       // "number" formatter for numeric metric and "" as custom formatter for any other type
       if (formatterType === DATA_FORMATTERS.DEFAULT && !isKibanaIndexPattern) {
-        onChange({
+        onModelChange({
           formatter: isNumericMetric ? DATA_FORMATTERS.NUMBER : '',
         });
       }
     }
-  }, [indexPattern, model, onChange, fields, series.formatter, isKibanaIndexPattern, siblings]);
+  }, [
+    indexPattern,
+    model,
+    onModelChange,
+    fields,
+    series.formatter,
+    isKibanaIndexPattern,
+    siblings,
+  ]);
 
   return (
     <div className={props.className} style={style}>

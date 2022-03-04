@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +43,7 @@ import {
 import { AppAction } from '../../../../../common/store/actions';
 import { useTrustedAppsSelector } from '../hooks';
 
-import { ABOUT_TRUSTED_APPS, CREATE_TRUSTED_APP_ERROR } from '../translations';
+import { ABOUT_TRUSTED_APPS } from '../translations';
 import { defaultNewTrustedApp } from '../../store/builders';
 import { getTrustedAppsListPath } from '../../../../common/routing';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
@@ -51,7 +51,6 @@ import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_gen
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isGlobalEffectScope } from '../../state/type_guards';
 import { NewTrustedApp } from '../../../../../../common/endpoint/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
@@ -84,35 +83,9 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       };
     }, [isLoadingPolicies, policyList]);
 
-    const creationErrorsMessage = useMemo<string | undefined>(() => {
-      let errorMessage = creationErrors
-        ? CREATE_TRUSTED_APP_ERROR[creationErrors.message.replace(/(\[(.*)\]\: )/, '')] ||
-          creationErrors.message
-        : undefined;
-
-      if (
-        creationErrors &&
-        creationErrors.attributes &&
-        creationErrors.attributes.type === 'TrustedApps/PolicyNotFound'
-      ) {
-        policies.options.forEach((policy) => {
-          errorMessage = errorMessage?.replace(policy.id, policy.name);
-        });
-      } else if (
-        creationErrors &&
-        creationErrors.attributes &&
-        creationErrors.attributes.type === 'EndpointLicenseError'
-      ) {
-        errorMessage = i18n.translate(
-          'xpack.securitySolution.trustedapps.createTrustedAppFlyout.byPolicyLicenseError',
-          {
-            defaultMessage:
-              'Your Kibana license has been downgraded. As such, individual policy configuration is no longer supported.',
-          }
-        );
-      }
-      return errorMessage;
-    }, [creationErrors, policies]);
+    const creationErrorsMessage = useMemo<CreateTrustedAppFormProps['error'] | undefined>(() => {
+      return creationErrors?.message ?? [];
+    }, [creationErrors]);
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 
@@ -142,19 +115,21 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       [dispatch, formValues]
     );
 
-    const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
-      'trustedAppsByPolicyEnabled'
-    );
+    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalEffectScope(formValues.effectScope));
+    // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
+    useEffect(() => {
+      if (!isFormDirty && formValues.effectScope) {
+        setWasByPolicy(!isGlobalEffectScope(formValues.effectScope));
+      }
+    }, [isFormDirty, formValues.effectScope]);
 
     const isGlobal = useMemo(() => {
       return isGlobalEffectScope((formValues as NewTrustedApp).effectScope);
     }, [formValues]);
 
     const showExpiredLicenseBanner = useMemo(() => {
-      return (
-        isTrustedAppsByPolicyEnabled && !isPlatinumPlus && isEditMode && (!isGlobal || isFormDirty)
-      );
-    }, [isTrustedAppsByPolicyEnabled, isPlatinumPlus, isEditMode, isGlobal, isFormDirty]);
+      return !isPlatinumPlus && isEditMode && wasByPolicy && (!isGlobal || isFormDirty);
+    }, [isPlatinumPlus, isEditMode, isGlobal, isFormDirty, wasByPolicy]);
 
     // If there was a failure trying to retrieve the Trusted App for edit item,
     // then redirect back to the list ++ show toast message.
@@ -223,7 +198,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
               id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseMessage"
               defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
             />
-            <EuiLink external href={`${docLinks.links.securitySolution.trustedApps}`}>
+            <EuiLink target="_blank" href={`${docLinks.links.securitySolution.trustedApps}`}>
               <FormattedMessage
                 id="xpack.securitySolution.trustedapps.docsLink"
                 defaultMessage="Trusted applications documentation."
@@ -254,6 +229,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             isInvalid={!!creationErrors}
             isEditMode={isEditMode}
             isDirty={isFormDirty}
+            wasByPolicy={wasByPolicy}
             error={creationErrorsMessage}
             policies={policies}
             trustedApp={formValues}

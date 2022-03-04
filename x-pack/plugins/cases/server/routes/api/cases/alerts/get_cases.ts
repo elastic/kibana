@@ -6,41 +6,35 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from '@hapi/boom';
 
-import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError } from '../../utils';
-import { CASE_ALERTS_URL, CasesByAlertIDRequest } from '../../../../../common';
+import { CasesByAlertIDRequest } from '../../../../../common/api';
+import { CASE_ALERTS_URL } from '../../../../../common/constants';
+import { createCaseError } from '../../../../common/error';
+import { createCasesRoute } from '../../create_cases_route';
 
-export function initGetCasesByAlertIdApi({ router, logger }: RouteDeps) {
-  router.get(
-    {
-      path: CASE_ALERTS_URL,
-      validate: {
-        params: schema.object({
-          alert_id: schema.string(),
-        }),
-        query: escapeHatch,
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const alertID = request.params.alert_id;
-        if (alertID == null || alertID === '') {
-          throw Boom.badRequest('The `alertId` is not valid');
-        }
-        const casesClient = await context.cases.getCasesClient();
-        const options = request.query as CasesByAlertIDRequest;
+export const getCasesByAlertIdRoute = createCasesRoute({
+  method: 'get',
+  path: CASE_ALERTS_URL,
+  params: {
+    params: schema.object({
+      alert_id: schema.string({ minLength: 1 }),
+    }),
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const alertID = request.params.alert_id;
 
-        return response.ok({
-          body: await casesClient.cases.getCasesByAlertID({ alertID, options }),
-        });
-      } catch (error) {
-        logger.error(
-          `Failed to retrieve case ids for this alert id: ${request.params.alert_id}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
+      const casesClient = await context.cases.getCasesClient();
+      const options = request.query as CasesByAlertIDRequest;
+
+      return response.ok({
+        body: await casesClient.cases.getCasesByAlertID({ alertID, options }),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to retrieve case ids for this alert id: ${request.params.alert_id}: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});

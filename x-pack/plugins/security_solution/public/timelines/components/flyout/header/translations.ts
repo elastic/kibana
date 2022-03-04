@@ -7,12 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CLOSE_TIMELINE = i18n.translate(
-  'xpack.securitySolution.timeline.flyout.header.closeTimelineButtonLabel',
-  {
-    defaultMessage: 'Close timeline',
-  }
-);
+export const CLOSE_TIMELINE_OR_TEMPLATE = (isTimeline: boolean) =>
+  i18n.translate('xpack.securitySolution.timeline.flyout.header.closeTimelineButtonLabel', {
+    defaultMessage: 'Close {isTimeline, select, true {timeline} false {template}}',
+    values: {
+      isTimeline,
+    },
+  });
 
 export const UNSAVED = i18n.translate('xpack.securitySolution.timeline.properties.unsavedLabel', {
   defaultMessage: 'Unsaved',

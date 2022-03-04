@@ -1,0 +1,60 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects the occurrence of mailbox audit bypass associations. The mailbox audit is responsible for logging specified mailbox events (like accessing a folder or a message or permanently deleting a message). However, actions taken by some authorized accounts, such as accounts used by third-party tools or accounts used for lawful monitoring, can create a large number of mailbox audit log entries and may not be of interest to your organization. Because of this, administrators can create bypass associations, allowing certain accounts to perform their tasks without being logged. Attackers can abuse this allowlist mechanism to conceal actions taken, as the mailbox audit will log no activity done by the account.",
+  "false_positives": [
+    "Legitimate allowlisting of noisy accounts"
+  ],
+  "from": "now-30m",
+  "index": [
+    "filebeat-*",
+    "logs-o365*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "O365 Mailbox Audit Logging Bypass",
+  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.action:Set-MailboxAuditBypassAssociation and event.outcome:success\n",
+  "references": [
+    "https://twitter.com/misconfig/status/1476144066807140355"
+  ],
+  "risk_score": 47,
+  "rule_id": "675239ea-c1bc-4467-a6d3-b9e2cc7f676d",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Microsoft 365",
+    "Continuous Monitoring",
+    "SecOps",
+    "Initial Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 3
+}

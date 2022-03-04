@@ -59,19 +59,19 @@ export const eventLoopDelaysUsageSchema: MakeSchemaFrom<EventLoopDelaysUsageRepo
       min: {
         type: 'long',
         _meta: {
-          description: 'The minimum recorded event loop delay.',
+          description: 'The minimum recorded event loop delay in ms.',
         },
       },
       max: {
         type: 'long',
         _meta: {
-          description: 'The maximum recorded event loop delay.',
+          description: 'The maximum recorded event loop delay in ms.',
         },
       },
       mean: {
         type: 'long',
         _meta: {
-          description: 'The mean of the recorded event loop delays.',
+          description: 'The mean of the recorded event loop delays in ms.',
         },
       },
       exceeds: {
@@ -84,32 +84,32 @@ export const eventLoopDelaysUsageSchema: MakeSchemaFrom<EventLoopDelaysUsageRepo
       stddev: {
         type: 'long',
         _meta: {
-          description: 'The standard deviation of the recorded event loop delays.',
+          description: 'The standard deviation of the recorded event loop delays  in ms.',
         },
       },
       percentiles: {
         '50': {
           type: 'long',
           _meta: {
-            description: 'The 50th accumulated percentile distribution',
+            description: 'The 50th accumulated percentile distribution in ms',
           },
         },
         '75': {
           type: 'long',
           _meta: {
-            description: 'The 75th accumulated percentile distribution',
+            description: 'The 75th accumulated percentile distribution in ms',
           },
         },
         '95': {
           type: 'long',
           _meta: {
-            description: 'The 95th accumulated percentile distribution',
+            description: 'The 95th accumulated percentile distribution in ms',
           },
         },
         '99': {
           type: 'long',
           _meta: {
-            description: 'The 99th accumulated percentile distribution',
+            description: 'The 99th accumulated percentile distribution in ms',
           },
         },
       },

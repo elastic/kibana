@@ -38,7 +38,7 @@ import { ManifestClient } from '../manifest_client';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
-import { EndpointError } from '../../../errors';
+import { EndpointError } from '../../../../../common/endpoint/errors';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -485,7 +485,7 @@ export class ManifestManager {
               try {
                 await this.packagePolicyService.update(
                   this.savedObjectsClient,
-                  // @ts-ignore
+                  // @ts-expect-error TS2345
                   undefined,
                   id,
                   newPackagePolicy

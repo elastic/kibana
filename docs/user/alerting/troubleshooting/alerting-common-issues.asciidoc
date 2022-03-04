@@ -35,7 +35,7 @@ Actions run long after the status of a rule changes, sending a notification of t
 *Solution*
 
 Rules and actions run as background tasks by each {kib} instance at a default rate of ten tasks every three seconds.
-When diagnosing issues related to Alerting, focus on the tasks that begin with `alerting:` and `actions:`.
+When diagnosing issues related to alerting, focus on the tasks that begin with `alerting:` and `actions:`.
 
 Alerting tasks always begin with `alerting:`. For example, the `alerting:.index-threshold` tasks back the <<rule-type-index-threshold, index threshold stack rule>>.
 Action tasks always begin with `actions:`. For example, the `actions:.index` tasks back the <<index-action-type, index action>>.

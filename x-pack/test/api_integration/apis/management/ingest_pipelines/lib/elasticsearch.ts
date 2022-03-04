@@ -37,11 +37,10 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
       pipelinesCreated.push(pipeline.id);
     }
 
-    return es.ingest.putPipeline(pipeline).then(({ body }) => body);
+    return es.ingest.putPipeline(pipeline);
   };
 
-  const deletePipeline = (pipelineId: string) =>
-    es.ingest.deletePipeline({ id: pipelineId }).then(({ body }) => body);
+  const deletePipeline = (pipelineId: string) => es.ingest.deletePipeline({ id: pipelineId });
 
   const cleanupPipelines = () =>
     Promise.all(pipelinesCreated.map(deletePipeline))
@@ -54,11 +53,11 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
       });
 
   const createIndex = (index: { index: string; id: string; body: object }) => {
-    return es.index(index).then(({ body }) => body);
+    return es.index(index);
   };
 
   const deleteIndex = (indexName: string) => {
-    return es.indices.delete({ index: indexName }).then(({ body }) => body);
+    return es.indices.delete({ index: indexName });
   };
 
   return {

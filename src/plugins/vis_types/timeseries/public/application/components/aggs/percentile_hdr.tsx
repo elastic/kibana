@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface PercentileHdrProps {
   value: number | undefined;

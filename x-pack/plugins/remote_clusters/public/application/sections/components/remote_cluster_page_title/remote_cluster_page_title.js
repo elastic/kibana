@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { remoteClustersUrl } from '../../../services/documentation';
 
 import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';

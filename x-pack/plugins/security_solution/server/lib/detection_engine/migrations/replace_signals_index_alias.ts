@@ -40,4 +40,13 @@ export const replaceSignalsIndexAlias = async ({
       ],
     },
   });
+  // TODO: space-aware?
+  await esClient.indices.updateAliases({
+    body: {
+      actions: [
+        { remove: { index: oldIndex, alias: '.siem-signals-default' } },
+        { add: { index: newIndex, alias: '.siem-signals-default', is_write_index: false } },
+      ],
+    },
+  });
 };

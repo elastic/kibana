@@ -46,7 +46,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
     cluster_uuid: clusterUuid,
   }) as any;
   const [data, setData] = useState({} as any);
-  const [detailVertexId, setDetailVertexId] = useState<string | null>(null);
+  const [detailVertexId, setDetailVertexId] = useState<string | null | undefined>(undefined);
   const { updateTotalItemCount } = useTable('logstash.pipelines');
 
   const title = i18n.translate('xpack.monitoring.logstash.pipeline.routeTitle', {
@@ -65,7 +65,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
       ? `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`
       : `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}`;
 
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<any>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -128,24 +128,26 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
   const timeseriesTooltipXValueFormatter = (xValue: any) => moment(xValue).format(dateFormat);
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
 
-  const onVertexChange = useCallback(
-    (vertex: any) => {
-      if (!vertex) {
-        setDetailVertexId(null);
-      } else {
-        setDetailVertexId(vertex.id);
-      }
+  const onVertexChange = useCallback((vertex: any) => {
+    if (!vertex) {
+      setDetailVertexId(null);
+    } else {
+      setDetailVertexId(vertex.id);
+    }
+  }, []);
 
+  useEffect(() => {
+    if (detailVertexId !== undefined) {
       getPageData();
-    },
-    [getPageData]
-  );
+    }
+  }, [detailVertexId, getPageData]);
 
-  const onChangePipelineHash = useCallback(() => {
-    window.location.hash = getSafeForExternalLink(
-      `#/logstash/pipelines/${pipelineId}/${pipelineHash}`
-    );
-  }, [pipelineId, pipelineHash]);
+  const onChangePipelineHash = useCallback(
+    (hash) => {
+      window.location.hash = getSafeForExternalLink(`#/logstash/pipelines/${pipelineId}/${hash}`);
+    },
+    [pipelineId]
+  );
 
   useEffect(() => {
     if (cluster) {

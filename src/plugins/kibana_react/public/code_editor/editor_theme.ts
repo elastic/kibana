@@ -8,8 +8,7 @@
 
 import { monaco } from '@kbn/monaco';
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 
 // NOTE: For talk around where this theme information will ultimately live,
 // please see this discuss issue: https://github.com/elastic/kibana/issues/43814
@@ -33,7 +32,7 @@ export function createTheme(
       { token: 'strong', fontStyle: 'bold' },
 
       { token: 'variable', foreground: euiTheme.euiColorPrimary },
-      { token: 'variable.predefined', foreground: euiTheme.euiColorSecondary },
+      { token: 'variable.predefined', foreground: euiTheme.euiColorSuccess },
       { token: 'constant', foreground: euiTheme.euiColorAccent },
       { token: 'comment', foreground: euiTheme.euiColorMediumShade },
       { token: 'number', foreground: euiTheme.euiColorAccent },
@@ -50,7 +49,7 @@ export function createTheme(
       { token: 'tag.id.jade', foreground: euiTheme.euiColorPrimary },
       { token: 'tag.class.jade', foreground: euiTheme.euiColorPrimary },
       { token: 'meta.scss', foreground: euiTheme.euiColorAccent },
-      { token: 'metatag', foreground: euiTheme.euiColorSecondary },
+      { token: 'metatag', foreground: euiTheme.euiColorSuccess },
       { token: 'metatag.content.html', foreground: euiTheme.euiColorDanger },
       { token: 'metatag.html', foreground: euiTheme.euiColorMediumShade },
       { token: 'metatag.xml', foreground: euiTheme.euiColorMediumShade },
@@ -61,7 +60,7 @@ export function createTheme(
       { token: 'string.value.json', foreground: euiTheme.euiColorPrimary },
 
       { token: 'attribute.name', foreground: euiTheme.euiColorDanger },
-      { token: 'attribute.name.css', foreground: euiTheme.euiColorSecondary },
+      { token: 'attribute.name.css', foreground: euiTheme.euiColorSuccess },
       { token: 'attribute.value', foreground: euiTheme.euiColorPrimary },
       { token: 'attribute.value.number', foreground: euiTheme.euiColorWarning },
       { token: 'attribute.value.unit', foreground: euiTheme.euiColorWarning },

@@ -11,9 +11,9 @@ import type { ApmUrlParams } from '../../../../../context/url_params_context/typ
 import {
   IWaterfall,
   WaterfallLegendType,
-} from './Waterfall/waterfall_helpers/waterfall_helpers';
-import { Waterfall } from './Waterfall';
-import { WaterfallLegends } from './WaterfallLegends';
+} from './waterfall/waterfall_helpers/waterfall_helpers';
+import { Waterfall } from './waterfall';
+import { WaterfallLegends } from './waterfall_legends';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 
 interface Props {

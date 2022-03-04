@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
+import type { Filter, Query } from '@kbn/es-query';
 import {
   ErrorEmbeddable,
   isErrorEmbeddable,
@@ -19,18 +20,20 @@ import { Loader } from '../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../common/components/toasters';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
-import { EmbeddableHeader } from './embeddable_header';
 import { createEmbeddable } from './embedded_map_helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapEmbeddable } from '../../../../../../plugins/maps/public/embeddable';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../common/lib/kibana';
-import { getDefaultSourcererSelector } from './selector';
 import { getLayerList } from './map_config';
+import { sourcererSelectors } from '../../../common/store/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+
+export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -71,6 +74,17 @@ const EmbeddableMap = styled.div.attrs(() => ({
       }
     `}
 `;
+
+const StyledEuiText = styled(EuiText)`
+  margin-right: 16px;
+`;
+
+const StyledEuiAccordion = styled(EuiAccordion)`
+  & .euiAccordion__triggerWrapper {
+    padding: 16px;
+  }
+`;
+
 EmbeddableMap.displayName = 'EmbeddableMap';
 
 export interface EmbeddedMapProps {
@@ -91,17 +105,25 @@ export const EmbeddedMapComponent = ({
   const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | undefined | ErrorEmbeddable>(
     undefined
   );
+
+  const { services } = useKibana();
+  const { storage } = services;
+
   const [isError, setIsError] = useState(false);
   const [isIndexError, setIsIndexError] = useState(false);
+  const [storageValue, setStorageValue] = useState(storage.get(NETWORK_MAP_VISIBLE) ?? true);
 
   const [, dispatchToaster] = useStateToaster();
-  const defaultSourcererScopeSelector = useMemo(getDefaultSourcererSelector, []);
-  const { kibanaIndexPatterns, sourcererScope } = useDeepEqualSelector(
-    defaultSourcererScopeSelector
+
+  const getDataViewsSelector = useMemo(
+    () => sourcererSelectors.getSourcererDataViewsSelector(),
+    []
   );
+  const { kibanaDataViews } = useDeepEqualSelector((state) => getDataViewsSelector(state));
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.default);
 
   const [mapIndexPatterns, setMapIndexPatterns] = useState(
-    kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title))
+    kibanaDataViews.filter((dataView) => selectedPatterns.includes(dataView.title))
   );
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
@@ -110,12 +132,10 @@ export const EmbeddedMapComponent = ({
   // Search InPortal/OutPortal for implementation touch points
   const portalNode = React.useMemo(() => createPortalNode(), []);
 
-  const { services } = useKibana();
-
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {
-      const newIndexPatterns = kibanaIndexPatterns.filter((kip) =>
-        sourcererScope.selectedPatterns.includes(kip.title)
+      const newIndexPatterns = kibanaDataViews.filter((dataView) =>
+        selectedPatterns.includes(dataView.title)
       );
       if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
         if (newIndexPatterns.length === 0) {
@@ -125,7 +145,7 @@ export const EmbeddedMapComponent = ({
       }
       return prevMapIndexPatterns;
     });
-  }, [kibanaIndexPatterns, sourcererScope.selectedPatterns]);
+  }, [kibanaDataViews, selectedPatterns]);
 
   // Initial Load useEffect
   useEffect(() => {
@@ -158,7 +178,7 @@ export const EmbeddedMapComponent = ({
         }
       }
     }
-    if (embeddable == null && sourcererScope.selectedPatterns.length > 0) {
+    if (embeddable == null && selectedPatterns.length > 0) {
       setupEmbeddable();
     }
 
@@ -174,7 +194,7 @@ export const EmbeddedMapComponent = ({
     query,
     portalNode,
     services.embeddable,
-    sourcererScope.selectedPatterns,
+    selectedPatterns,
     setQuery,
     startDate,
   ]);
@@ -217,30 +237,50 @@ export const EmbeddedMapComponent = ({
     }
   }, [embeddable, startDate, endDate]);
 
+  const setDefaultMapVisibility = useCallback(
+    (isOpen: boolean) => {
+      storage.set(NETWORK_MAP_VISIBLE, isOpen);
+      setStorageValue(isOpen);
+    },
+    [storage]
+  );
+
   return isError ? null : (
-    <Embeddable>
-      <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
-        <EuiText size="xs">
+    <StyledEuiAccordion
+      onToggle={setDefaultMapVisibility}
+      id={'network-map'}
+      arrowDisplay="right"
+      arrowProps={{
+        color: 'primary',
+        'data-test-subj': `${storageValue}-toggle-network-map`,
+      }}
+      buttonContent={<strong>{i18n.EMBEDDABLE_HEADER_TITLE}</strong>}
+      extraAction={
+        <StyledEuiText size="xs">
           <EuiLink href={`${services.docLinks.links.siem.networkMap}`} target="_blank">
             {i18n.EMBEDDABLE_HEADER_HELP}
           </EuiLink>
-        </EuiText>
-      </EmbeddableHeader>
+        </StyledEuiText>
+      }
+      paddingSize="none"
+      initialIsOpen={storageValue}
+    >
+      <Embeddable>
+        <InPortal node={portalNode}>
+          <MapToolTip />
+        </InPortal>
 
-      <InPortal node={portalNode}>
-        <MapToolTip />
-      </InPortal>
-
-      <EmbeddableMap maintainRatio={!isIndexError}>
-        {isIndexError ? (
-          <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
-        ) : embeddable != null ? (
-          <services.embeddable.EmbeddablePanel embeddable={embeddable} />
-        ) : (
-          <Loader data-test-subj="loading-panel" overlay size="xl" />
-        )}
-      </EmbeddableMap>
-    </Embeddable>
+        <EmbeddableMap maintainRatio={!isIndexError}>
+          {isIndexError ? (
+            <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
+          ) : embeddable != null ? (
+            <services.embeddable.EmbeddablePanel embeddable={embeddable} />
+          ) : (
+            <Loader data-test-subj="loading-panel" overlay size="xl" />
+          )}
+        </EmbeddableMap>
+      </Embeddable>
+    </StyledEuiAccordion>
   );
 };
 

@@ -6,18 +6,14 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "../../../typings/**/*"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json"},
+    { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/discover/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
     { "path": "../../../src/plugins/screenshot_mode/tsconfig.json" },
     { "path": "../../../src/plugins/share/tsconfig.json" },
@@ -26,7 +22,8 @@
     { "path": "../../../src/plugins/field_formats/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
+    { "path": "../screenshotting/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" }
   ]
 }

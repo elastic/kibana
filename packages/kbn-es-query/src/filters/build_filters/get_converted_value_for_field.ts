@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase } from '../../es_query';
+import { DataViewFieldBase } from '../../es_query';
 
 /**
  * @internal
@@ -18,7 +18,7 @@ import { IndexPatternFieldBase } from '../../es_query';
  * https://github.com/elastic/elasticsearch/pull/22201
  **/
 export const getConvertedValueForField = (
-  field: IndexPatternFieldBase,
+  field: DataViewFieldBase,
   value: string | boolean | number
 ) => {
   if (typeof value !== 'boolean' && field.type === 'boolean') {

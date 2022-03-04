@@ -25,9 +25,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
 
       await supertest.put('/api/telemetry/v2/userHasSeenNotice').set('kbn-xsrf', 'xxx').expect(200);
 
-      const {
-        body: { _source },
-      } = await client.get<{ telemetry: { userHasSeenNotice: boolean } }>({
+      const { _source } = await client.get<{ telemetry: { userHasSeenNotice: boolean } }>({
         index: '.kibana',
         id: 'telemetry:telemetry',
       });

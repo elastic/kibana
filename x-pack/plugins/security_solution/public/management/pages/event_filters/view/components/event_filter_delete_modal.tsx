@@ -5,30 +5,36 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { i18n } from '@kbn/i18n';
-import { useEventFiltersSelector } from '../hooks';
+import { AutoFocusButton } from '../../../../../common/components/autofocus_button/autofocus_button';
+import { useToasts } from '../../../../../common/lib/kibana';
+import { AppAction } from '../../../../../common/store/actions';
+import {
+  getArtifactPoliciesIdByTag,
+  isGlobalPolicyEffected,
+} from '../../../../components/effected_policy_select/utils';
 import {
   getDeleteError,
   getItemToDelete,
   isDeletionInProgress,
   wasDeletionSuccessful,
 } from '../../store/selector';
-import { AppAction } from '../../../../../common/store/actions';
-import { useToasts } from '../../../../../common/lib/kibana';
+import { useEventFiltersSelector } from '../hooks';
 
 export const EventFilterDeleteModal = memo<{}>(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
@@ -52,7 +58,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
     if (wasDeleted) {
       toasts.addSuccess(
         i18n.translate('xpack.securitySolution.eventFilters.deletionDialog.deleteSuccess', {
-          defaultMessage: '"{name}" has been removed from the Event Filters list.',
+          defaultMessage: '"{name}" has been removed from the event filters list.',
           values: { name: eventFilter?.name },
         })
       );
@@ -67,7 +73,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
       toasts.addDanger(
         i18n.translate('xpack.securitySolution.eventFilters.deletionDialog.deleteFailure', {
           defaultMessage:
-            'Unable to remove "{name}" from the Event Filters list. Reason: {message}',
+            'Unable to remove "{name}" from the event filters list. Reason: {message}',
           values: { name: eventFilter?.name, message: deleteError.message },
         })
       );
@@ -80,20 +86,38 @@ export const EventFilterDeleteModal = memo<{}>(() => {
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.deletionDialog.title"
-            defaultMessage="Remove event filter"
+            defaultMessage='Delete "{name}"'
+            values={{ name: <b className="eui-textBreakWord">{eventFilter?.name ?? ''}</b> }}
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody data-test-subj="eventFilterDeleteModalBody">
         <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolution.eventFilters.deletionDialog.mainMessage"
-              defaultMessage='You are removing event filter "{name}".'
-              values={{ name: <b className="eui-textBreakWord">{eventFilter?.name}</b> }}
-            />
-          </p>
+          <EuiCallOut
+            data-test-subj="eventFilterDeleteModalCallout"
+            title={i18n.translate(
+              'xpack.securitySolution.eventFilters.deletionDialog.calloutTitle',
+              {
+                defaultMessage: 'Warning',
+              }
+            )}
+            color="danger"
+            iconType="alert"
+          >
+            <p data-test-subj="eventFilterDeleteModalCalloutMessage">
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.deletionDialog.calloutMessage"
+                defaultMessage="Deleting this entry will remove it from {count} associated {count, plural, one {policy} other {policies}}."
+                values={{
+                  count: isGlobalPolicyEffected(Array.from(eventFilter?.tags || []))
+                    ? 'all'
+                    : getArtifactPoliciesIdByTag(eventFilter?.tags as string[]).length,
+                }}
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
           <p>
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.deletionDialog.subMessage"
@@ -115,7 +139,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
           />
         </EuiButtonEmpty>
 
-        <EuiButton
+        <AutoFocusButton
           fill
           color="danger"
           onClick={onConfirm}
@@ -124,9 +148,9 @@ export const EventFilterDeleteModal = memo<{}>(() => {
         >
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.deletionDialog.confirmButton"
-            defaultMessage="Remove event filter"
+            defaultMessage="Delete"
           />
-        </EuiButton>
+        </AutoFocusButton>
       </EuiModalFooter>
     </EuiModal>
   );

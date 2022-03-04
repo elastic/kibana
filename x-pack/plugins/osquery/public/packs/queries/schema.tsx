@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FIELD_TYPES } from '../../shared_imports';
 
@@ -29,7 +29,7 @@ export const createFormSchema = (ids: Set<string>) => ({
   description: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.descriptionFieldLabel', {
-      defaultMessage: 'Description',
+      defaultMessage: 'Description (optional)',
     }),
     validations: [],
   },

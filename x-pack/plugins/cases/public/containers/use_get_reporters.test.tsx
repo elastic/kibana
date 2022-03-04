@@ -11,7 +11,7 @@ import { useGetReporters, UseGetReporters } from './use_get_reporters';
 import { reporters, respReporters } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
-import { SECURITY_SOLUTION_OWNER } from '../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -24,14 +24,11 @@ describe('useGetReporters', () => {
   });
 
   it('init', async () => {
+    const { result } = renderHook<string, UseGetReporters>(() => useGetReporters(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(
-        () => useGetReporters(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
       expect(result.current).toEqual({
         reporters: [],
         respReporters: [],
@@ -49,7 +46,6 @@ describe('useGetReporters', () => {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
-      await waitForNextUpdate();
       expect(spyOnGetReporters).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
     });
   });
@@ -62,7 +58,6 @@ describe('useGetReporters', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
         reporters,
@@ -84,7 +79,6 @@ describe('useGetReporters', () => {
         }
       );
       await waitForNextUpdate();
-      await waitForNextUpdate();
       result.current.fetchReporters();
       expect(spyOnGetReporters).toHaveBeenCalledTimes(2);
     });
@@ -103,7 +97,6 @@ describe('useGetReporters', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(result.current).toEqual({

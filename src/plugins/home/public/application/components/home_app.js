@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
@@ -27,7 +27,7 @@ export function HomeApp({ directories, solutions }) {
     addBasePath,
     environmentService,
     telemetry,
-    indexPatternService,
+    dataViewsService,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
@@ -76,7 +76,7 @@ export function HomeApp({ directories, solutions }) {
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               telemetry={telemetry}
-              hasUserIndexPattern={() => indexPatternService.hasUserDataView()}
+              hasUserDataView={() => dataViewsService.hasUserDataView()}
             />
           </Route>
           <Redirect to="/" />

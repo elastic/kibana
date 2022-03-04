@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { TemplateCreate } from '../../../public/application/sections/template_create';
 import { WithAppDependencies } from '../helpers';
 
@@ -16,7 +16,7 @@ export const setup: any = (isLegacy: boolean = false) => {
     ? { pathname: '/create_template', search: '?legacy=true' }
     : { pathname: '/create_template' };
 
-  const testBedConfig: TestBedConfig = {
+  const testBedConfig: AsyncTestBedConfig = {
     memoryRouter: {
       initialEntries: [route],
       componentRoutePath: route,

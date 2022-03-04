@@ -22,4 +22,4 @@ export interface PropertySpec {
   value?: string;
 }
 export { ViewMode } from '../../common/types';
-export { Adapters };
+export type { Adapters };

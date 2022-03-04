@@ -1,0 +1,76 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies when SAML activity has occurred in AWS. An adversary could manipulate SAML to maintain access to the target.",
+  "false_positives": [
+    "SAML Provider could be updated by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. SAML Provider updates by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS SAML Activity",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:(iam.amazonaws.com or sts.amazonaws.com) and event.action:(Assumerolewithsaml or \nUpdateSAMLProvider) and event.outcome:success\n",
+  "references": [
+    "https://docs.aws.amazon.com/IAM/latest/APIReference/API_UpdateSAMLProvider.html",
+    "https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRoleWithSAML.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "979729e7-0c52-4c4c-b71e-88103304a79f",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1550",
+          "name": "Use Alternate Authentication Material",
+          "reference": "https://attack.mitre.org/techniques/T1550/",
+          "subtechnique": [
+            {
+              "id": "T1550.001",
+              "name": "Application Access Token",
+              "reference": "https://attack.mitre.org/techniques/T1550/001/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

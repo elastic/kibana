@@ -6,12 +6,12 @@
  */
 
 import { IField } from '../field';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../src/plugins/data/common';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 
 export interface IESAggField extends IField {
-  getValueAggDsl(indexPattern: IndexPattern): unknown | null;
+  getValueAggDsl(indexPattern: DataView): unknown | null;
   getBucketCount(): number;
 }
 
@@ -19,5 +19,4 @@ export interface CountAggFieldParams {
   label?: string;
   source: IESAggSource;
   origin: FIELD_ORIGIN;
-  canReadFromGeoJson?: boolean;
 }

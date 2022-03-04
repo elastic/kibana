@@ -17,28 +17,32 @@ import type {
   KibanaExecutionContext,
 } from 'kibana/public';
 import { History } from 'history';
+import type { Filter } from '@kbn/es-query';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ScreenshotModePluginStart } from 'src/plugins/screenshot_mode/public';
-import { Query, Filter, IndexPattern, RefreshInterval, TimeRange } from './services/data';
-import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
+
+import { DataView } from './services/data_views';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
+import { Query, RefreshInterval, TimeRange } from './services/data';
 import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
-import { DataPublicPluginStart, IndexPatternsContract } from './services/data';
+import { DataPublicPluginStart, DataViewsContract } from './services/data';
+import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
+import type { ScreenshotModePluginStart } from './services/screenshot_mode';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
-import { DashboardContainer, DashboardSavedObject } from '.';
+import type { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
+import type { DashboardControlGroupInput } from './application/lib/dashboard_control_group';
 
-export { SavedDashboardPanel };
+export type { SavedDashboardPanel };
 
 export type NavAction = (anchorElement?: any) => void;
 export interface SavedDashboardPanelMap {
@@ -65,6 +69,9 @@ export interface DashboardState {
   expandedPanelId?: string;
   options: DashboardOptions;
   panels: DashboardPanelMap;
+  timeRange?: TimeRange;
+
+  controlGroupInput?: DashboardControlGroupInput;
 }
 
 /**
@@ -74,11 +81,13 @@ export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: Saved
 
 export interface DashboardContainerInput extends ContainerInput {
   dashboardCapabilities?: DashboardAppCapabilities;
+  controlGroupInput?: DashboardControlGroupInput;
   refreshConfig?: RefreshInterval;
   isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;
   expandedPanelId?: string;
   timeRange: TimeRange;
+  timeRestore: boolean;
   description?: string;
   useMargins: boolean;
   syncColors?: boolean;
@@ -98,7 +107,7 @@ export interface DashboardContainerInput extends ContainerInput {
  */
 export interface DashboardAppState {
   hasUnsavedChanges?: boolean;
-  indexPatterns?: IndexPattern[];
+  dataViews?: DataView[];
   updateLastSavedState?: () => void;
   resetToLastSavedState?: () => void;
   savedDashboard?: DashboardSavedObject;
@@ -115,7 +124,7 @@ export interface DashboardAppState {
 export type DashboardBuildContext = Pick<
   DashboardAppServices,
   | 'embeddable'
-  | 'indexPatterns'
+  | 'dataViews'
   | 'savedDashboards'
   | 'usageCollection'
   | 'initializerContext'
@@ -194,7 +203,7 @@ export interface DashboardAppServices {
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
   visualizations: VisualizationsStart;
-  indexPatterns: IndexPatternsContract;
+  dataViews: DataViewsContract;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardAppCapabilities;
@@ -202,9 +211,9 @@ export interface DashboardAppServices {
   onAppLeave: AppMountParameters['onAppLeave'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedObjectsClient: SavedObjectsClientContract;
+  screenshotModeService: ScreenshotModePluginStart;
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   spacesService?: SpacesPluginStart;
-  screenshotModeService?: ScreenshotModePluginStart;
 }

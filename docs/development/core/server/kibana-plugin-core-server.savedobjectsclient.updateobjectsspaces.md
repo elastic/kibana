@@ -16,12 +16,12 @@ updateObjectsSpaces(objects: SavedObjectsUpdateObjectsSpacesObject[], spacesToAd
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>SavedObjectsUpdateObjectsSpacesObject[]</code> |  |
-|  spacesToAdd | <code>string[]</code> |  |
-|  spacesToRemove | <code>string[]</code> |  |
-|  options | <code>SavedObjectsUpdateObjectsSpacesOptions</code> |  |
+|  objects | SavedObjectsUpdateObjectsSpacesObject\[\] |  |
+|  spacesToAdd | string\[\] |  |
+|  spacesToRemove | string\[\] |  |
+|  options | SavedObjectsUpdateObjectsSpacesOptions |  |
 
 <b>Returns:</b>
 
-`Promise<import("./lib").SavedObjectsUpdateObjectsSpacesResponse>`
+Promise&lt;import("./lib").SavedObjectsUpdateObjectsSpacesResponse&gt;
 

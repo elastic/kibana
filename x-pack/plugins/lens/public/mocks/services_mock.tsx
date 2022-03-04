@@ -18,7 +18,8 @@ import { dashboardPluginMock } from '../../../../../src/plugins/dashboard/public
 import type {
   LensByValueInput,
   LensByReferenceInput,
-  ResolvedLensSavedObjectAttributes,
+  LensSavedObjectAttributes,
+  LensUnwrapMetaInfo,
 } from '../embeddable/embeddable';
 import {
   mockAttributeService,
@@ -39,7 +40,7 @@ export const defaultDoc = {
   visualizationType: 'testVis',
   state: {
     query: 'kuery',
-    filters: [{ query: { match_phrase: { src: 'test' } } }],
+    filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
     datasourceStates: {
       testDatasource: 'datasource',
     },
@@ -49,7 +50,9 @@ export const defaultDoc = {
 } as unknown as Document;
 
 export const exactMatchDoc = {
-  ...defaultDoc,
+  attributes: {
+    ...defaultDoc,
+  },
   sharingSavedObjectProps: {
     outcome: 'exactMatch',
   },
@@ -83,9 +86,10 @@ export function makeDefaultServices(
 
   function makeAttributeService(): LensAttributeService {
     const attributeServiceMock = mockAttributeService<
-      ResolvedLensSavedObjectAttributes,
+      LensSavedObjectAttributes,
       LensByValueInput,
-      LensByReferenceInput
+      LensByReferenceInput,
+      LensUnwrapMetaInfo
     >(
       DOC_TYPE,
       {
@@ -108,6 +112,7 @@ export function makeDefaultServices(
     chrome: core.chrome,
     overlays: core.overlays,
     uiSettings: core.uiSettings,
+    executionContext: core.executionContext,
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),

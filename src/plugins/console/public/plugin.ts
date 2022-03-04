@@ -52,12 +52,12 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           defaultMessage: 'Console',
         }),
         enableRouting: false,
-        mount: async ({ element }) => {
+        mount: async ({ element, theme$ }) => {
           const [core] = await getStartServices();
 
           const {
             i18n: { Context: I18nContext },
-            docLinks: { DOC_LINK_VERSION },
+            docLinks: { DOC_LINK_VERSION, links },
           } = core;
 
           const { renderApp } = await import('./application');
@@ -65,10 +65,12 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           return renderApp({
             http,
             docLinkVersion: DOC_LINK_VERSION,
+            docLinks: links,
             I18nContext,
             notifications,
             usageCollection,
             element,
+            theme$,
           });
         },
       });

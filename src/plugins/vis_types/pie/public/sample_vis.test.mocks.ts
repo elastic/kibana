@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { LegendDisplay } from '../../../chart_expressions/expression_partition_vis/common';
+
 export const samplePieVis = {
   type: {
     name: 'pie',
@@ -24,7 +26,7 @@ export const samplePieVis = {
       defaults: {
         type: 'pie',
         addTooltip: true,
-        addLegend: true,
+        legendDisplay: LegendDisplay.SHOW,
         legendPosition: 'right',
         isDonut: true,
         nestedLegend: true,
@@ -87,7 +89,16 @@ export const samplePieVis = {
             title: 'Split slices',
             min: 0,
             max: null,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: [
+              '!geohash_grid',
+              '!geotile_grid',
+              '!filter',
+              '!sampler',
+              '!diversified_sampler',
+              '!rare_terms',
+              '!multi_terms',
+              '!significant_text',
+            ],
             editor: false,
             params: [],
           },
@@ -98,7 +109,16 @@ export const samplePieVis = {
             mustBeFirst: true,
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: [
+              '!geohash_grid',
+              '!geotile_grid',
+              '!filter',
+              '!sampler',
+              '!diversified_sampler',
+              '!rare_terms',
+              '!multi_terms',
+              '!significant_text',
+            ],
             params: [
               {
                 name: 'row',
@@ -120,7 +140,7 @@ export const samplePieVis = {
   params: {
     type: 'pie',
     addTooltip: true,
-    addLegend: true,
+    legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
     isDonut: true,
     labels: {

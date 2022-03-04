@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { JSDocTag, Node } from 'ts-morph';
+import { JSDocTag, Node, TypeFormatFlags } from 'ts-morph';
 import { ApiDeclaration } from '../types';
 import { maybeCollectReferences } from './get_references';
 import { getSignature } from './get_signature';
@@ -24,17 +24,31 @@ export function buildBasicApiDeclaration(node: Node, opts: BuildApiDecOpts): Api
   const deprecated = tags.find((t) => t.getTagName() === 'deprecated') !== undefined;
   const removeByTag = tags.find((t) => t.getTagName() === 'removeBy');
 
+  let label = opts.name;
+
+  if (Node.isIndexSignatureDeclaration(node)) {
+    // These nodes never have a name, so the label will just equal "Unnamed".
+    if (label !== 'Unnamed') {
+      throw new Error(`Assumption is incorrect! Index signature with name: ${label}.`);
+    }
+
+    // If we could include links in label names, we could just use `getSignature`.
+    label = `[${node.getKeyName()}: ${node.getKeyType().getText()}]: ${node
+      .getReturnType()
+      .getText(undefined, TypeFormatFlags.OmitParameterModifiers)}`;
+  }
+
   const apiDec = {
     parentPluginId: opts.currentPluginId,
     id: opts.id,
     type: getTypeKind(node),
     tags: getTagNames(tags),
-    label: opts.name,
+    label,
     description: getCommentsFromNode(node),
     signature: getSignature(node, opts.plugins, opts.log),
     path: getSourceForNode(node),
     deprecated,
-    removeBy: removeByTag ? removeByTag.getComment() : undefined,
+    removeBy: removeByTag ? removeByTag.getCommentText() : undefined,
   };
   return {
     ...apiDec,

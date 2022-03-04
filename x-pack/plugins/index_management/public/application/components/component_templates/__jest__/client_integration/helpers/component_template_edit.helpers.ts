@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { BASE_PATH } from '../../../../../../../common';
 import { ComponentTemplateEdit } from '../../../component_template_wizard';
 
@@ -19,7 +19,7 @@ export type ComponentTemplateEditTestBed = TestBed<ComponentTemplateFormTestSubj
   actions: ReturnType<typeof getFormActions>;
 };
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`${BASE_PATH}/edit_component_template/comp-1`],
     componentRoutePath: `${BASE_PATH}/edit_component_template/:name`,

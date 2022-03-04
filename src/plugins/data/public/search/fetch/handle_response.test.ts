@@ -13,6 +13,7 @@ import { handleResponse } from './handle_response';
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
 import { setNotifications } from '../../services';
 import { IKibanaSearchResponse } from 'src/plugins/data/common';
+import { themeServiceMock } from 'src/core/public/mocks';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -21,6 +22,8 @@ jest.mock('@kbn/i18n', () => {
     },
   };
 });
+
+const theme = themeServiceMock.createStartContract();
 
 describe('handleResponse', () => {
   const notifications = notificationServiceMock.createStartContract();
@@ -37,7 +40,7 @@ describe('handleResponse', () => {
         timed_out: true,
       },
     } as IKibanaSearchResponse<any>;
-    const result = handleResponse(request, response);
+    const result = handleResponse(request, response, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -57,7 +60,7 @@ describe('handleResponse', () => {
         },
       },
     } as IKibanaSearchResponse<any>;
-    const result = handleResponse(request, response);
+    const result = handleResponse(request, response, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -70,7 +73,7 @@ describe('handleResponse', () => {
     const response = {
       rawResponse: {},
     } as IKibanaSearchResponse<any>;
-    const result = handleResponse(request, response);
+    const result = handleResponse(request, response, theme);
     expect(result).toBe(response);
   });
 });

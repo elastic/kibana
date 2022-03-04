@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { Client } from '@elastic/elasticsearch';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { without, uniq } from 'lodash';
 import { SuperTest } from 'supertest';
 import {
@@ -35,6 +37,7 @@ export interface UpdateObjectsSpacesTestCase {
   objects: Array<{
     id: string;
     existingNamespaces: string[];
+    expectAliasDifference?: number;
     failure?: 400 | 404;
   }>;
   spacesToAdd: string[];
@@ -54,7 +57,11 @@ const getTestTitle = ({ objects, spacesToAdd, spacesToRemove }: UpdateObjectsSpa
   return `{objects: [${objStr}], spacesToAdd: [${addStr}], spacesToRemove: [${remStr}]}`;
 };
 
-export function updateObjectsSpacesTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function updateObjectsSpacesTestSuiteFactory(
+  es: Client,
+  esArchiver: any,
+  supertest: SuperTest<any>
+) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody =
     (
@@ -68,7 +75,10 @@ export function updateObjectsSpacesTestSuiteFactory(esArchiver: any, supertest: 
       } else {
         const { objects, spacesToAdd, spacesToRemove } = testCase;
         const apiResponse = response.body as SavedObjectsUpdateObjectsSpacesResponse;
-        objects.forEach(({ id, existingNamespaces, failure }, i) => {
+
+        let hasRefreshed = false;
+        for (let i = 0; i < objects.length; i++) {
+          const { id, existingNamespaces, expectAliasDifference, failure } = objects[i];
           const object = apiResponse.objects[i];
           if (failure === 404) {
             const error = SavedObjectsErrorHelpers.createGenericNotFoundError(TYPE, id);
@@ -84,8 +94,28 @@ export function updateObjectsSpacesTestSuiteFactory(esArchiver: any, supertest: 
             expect(result.type).to.eql(TYPE);
             expect(result.id).to.eql(id);
             expect(result.spaces.sort()).to.eql(expectedSpaces.sort());
+
+            if (expectAliasDifference !== undefined) {
+              // if we deleted an object that had an alias pointing to it, the alias should have been deleted as well
+              if (!hasRefreshed) {
+                await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
+                hasRefreshed = true;
+              }
+              const searchResponse = await es.search({
+                index: '.kibana',
+                body: {
+                  size: 0,
+                  query: { terms: { type: ['legacy-url-alias'] } },
+                  track_total_hits: true,
+                },
+              });
+              expect((searchResponse.hits.total as SearchTotalHits).value).to.eql(
+                // Six aliases exist in the test fixtures
+                6 + expectAliasDifference
+              );
+            }
           }
-        });
+        }
       }
     };
   const createTestDefinitions = (

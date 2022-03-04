@@ -144,7 +144,7 @@ export const validateNumTopFeatureImportanceValues = (
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern, includes } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -159,6 +159,8 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
+
+  const analyzedFields = jobConfig?.analyzed_fields?.includes || [];
 
   const resultsFieldEmptyString =
     typeof jobConfig?.dest?.results_field === 'string' &&
@@ -189,12 +191,10 @@ export const validateAdvancedEditor = (state: State): State => {
   ) {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
     dependentVariableEmpty = dependentVariableName === '';
-
     if (
       !dependentVariableEmpty &&
-      includes !== undefined &&
-      includes.length > 0 &&
-      !includes.includes(dependentVariableName)
+      analyzedFields.length > 0 &&
+      !analyzedFields.includes(dependentVariableName)
     ) {
       includesValid = false;
 

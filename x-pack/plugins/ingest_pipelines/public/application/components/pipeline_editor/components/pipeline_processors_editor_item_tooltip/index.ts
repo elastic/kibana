@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { PipelineProcessorsItemTooltip, Position } from './pipeline_processors_editor_item_tooltip';
+export type { Position } from './pipeline_processors_editor_item_tooltip';
+export { PipelineProcessorsItemTooltip } from './pipeline_processors_editor_item_tooltip';

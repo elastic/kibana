@@ -34,6 +34,8 @@ const transformConnector: RewriteRequestCase<
 });
 
 export async function loadAllActions({ http }: { http: HttpSetup }): Promise<ActionConnector[]> {
-  const res = await http.get(`${BASE_ACTION_API_PATH}/connectors`);
+  const res = await http.get<Parameters<typeof rewriteResponseRes>[0]>(
+    `${BASE_ACTION_API_PATH}/connectors`
+  );
   return rewriteResponseRes(res);
 }

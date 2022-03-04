@@ -5,10 +5,20 @@
  * 2.0.
  */
 import { fetchLicenses } from './fetch_licenses';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { estypes } from '@elastic/elasticsearch';
+
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+import { Globals } from '../../static_globals';
 
 describe('fetchLicenses', () => {
   const clusterName = 'MyCluster';
@@ -21,23 +31,20 @@ describe('fetchLicenses', () => {
 
   it('return a list of licenses', async () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _source: {
-                license,
-                cluster_uuid: clusterUuid,
-              },
+    esClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _source: {
+              license,
+              cluster_uuid: clusterUuid,
             },
-          ],
-        },
-      } as estypes.SearchResponse)
-    );
+          },
+        ],
+      },
+    } as any);
     const clusters = [{ clusterUuid, clusterName }];
-    const index = '.monitoring-es-*';
-    const result = await fetchLicenses(esClient, clusters, index);
+    const result = await fetchLicenses(esClient, clusters);
     expect(result).toEqual([
       {
         status: license.status,
@@ -51,8 +58,7 @@ describe('fetchLicenses', () => {
   it('should only search for the clusters provided', async () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     const clusters = [{ clusterUuid, clusterName }];
-    const index = '.monitoring-es-*';
-    await fetchLicenses(esClient, clusters, index);
+    await fetchLicenses(esClient, clusters);
     const params = esClient.search.mock.calls[0][0] as any;
     expect(params?.body?.query.bool.filter[0].terms.cluster_uuid).toEqual([clusterUuid]);
   });
@@ -60,9 +66,66 @@ describe('fetchLicenses', () => {
   it('should limit the time period in the query', async () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     const clusters = [{ clusterUuid, clusterName }];
-    const index = '.monitoring-es-*';
-    await fetchLicenses(esClient, clusters, index);
+    await fetchLicenses(esClient, clusters);
     const params = esClient.search.mock.calls[0][0] as any;
     expect(params?.body?.query.bool.filter[2].range.timestamp.gte).toBe('now-2m');
+  });
+  it('should call ES with correct query', async () => {
+    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return Promise.resolve({} as any);
+    });
+    const clusters = [{ clusterUuid, clusterName }];
+    await fetchLicenses(esClient, clusters);
+    expect(params).toStrictEqual({
+      index:
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+      filter_path: [
+        'hits.hits._source.license.*',
+        'hits.hits._source.elasticsearch.cluster.stats.license.*',
+        'hits.hits._source.cluster_uuid',
+        'hits.hits._source.elasticsearch.cluster.id',
+        'hits.hits._index',
+      ],
+      body: {
+        size: 1,
+        sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+        query: {
+          bool: {
+            filter: [
+              { terms: { cluster_uuid: ['clusterA'] } },
+              {
+                bool: {
+                  should: [
+                    { term: { type: 'cluster_stats' } },
+                    { term: { 'metricset.name': 'cluster_stats' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              { range: { timestamp: { gte: 'now-2m' } } },
+            ],
+          },
+        },
+        collapse: { field: 'cluster_uuid' },
+      },
+    });
+  });
+  it('should call ES with correct query  when ccs disabled', async () => {
+    // @ts-ignore
+    Globals.app.config.ui.ccs.enabled = false;
+    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return Promise.resolve({} as any);
+    });
+    const clusters = [{ clusterUuid, clusterName }];
+    await fetchLicenses(esClient, clusters);
+    // @ts-ignore
+    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from 'kibana/public';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -117,8 +117,9 @@ export function SearchSessionsMgmtTable({
       {...props}
       id={SEARCH_SESSIONS_TABLE_ID}
       data-test-subj={SEARCH_SESSIONS_TABLE_ID}
-      rowProps={() => ({
-        'data-test-subj': 'searchSessionsRow',
+      rowProps={(searchSession: UISession) => ({
+        'data-test-subj': `searchSessionsRow`,
+        'data-test-search-session-id': `id-${searchSession.id}`,
       })}
       columns={getColumns(core, plugins, api, config, timezone, onActionComplete, kibanaVersion)}
       items={tableData}

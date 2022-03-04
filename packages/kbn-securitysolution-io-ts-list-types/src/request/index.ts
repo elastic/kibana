@@ -23,6 +23,8 @@ export * from './find_exception_list_item_schema';
 export * from './find_list_item_schema';
 export * from './find_list_schema';
 export * from './import_list_item_query_schema';
+export * from './import_exception_list_schema';
+export * from './import_exception_item_schema';
 export * from './import_list_item_schema';
 export * from './patch_list_item_schema';
 export * from './patch_list_schema';

@@ -45,7 +45,7 @@ export const PROJECTS = [
     { name: 'enterprise_search/shared/cypress' }
   ),
   createProject(
-    'x-pack/plugins/enterprise_search/public/applications/enterprise_search/cypress/tsconfig.json',
+    'x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/cypress/tsconfig.json',
     { name: 'enterprise_search/overview/cypress' }
   ),
   createProject(
@@ -62,6 +62,9 @@ export const PROJECTS = [
   createProject('x-pack/plugins/apm/ftr_e2e/tsconfig.json', {
     name: 'apm/ftr_e2e',
     disableTypeCheck: true,
+  }),
+  createProject('x-pack/plugins/fleet/cypress/tsconfig.json', {
+    name: 'fleet/cypress',
   }),
 
   createProject('x-pack/plugins/uptime/e2e/tsconfig.json', {

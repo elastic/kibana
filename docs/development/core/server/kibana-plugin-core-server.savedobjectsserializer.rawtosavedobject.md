@@ -16,10 +16,10 @@ rawToSavedObject<T = unknown>(doc: SavedObjectsRawDoc, options?: SavedObjectsRaw
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  doc | <code>SavedObjectsRawDoc</code> |  |
-|  options | <code>SavedObjectsRawDocParseOptions</code> |  |
+|  doc | SavedObjectsRawDoc | The raw ES document to be converted to saved object format. |
+|  options | SavedObjectsRawDocParseOptions | Options for parsing the raw document. |
 
 <b>Returns:</b>
 
-`SavedObjectSanitizedDoc<T>`
+SavedObjectSanitizedDoc&lt;T&gt;
 

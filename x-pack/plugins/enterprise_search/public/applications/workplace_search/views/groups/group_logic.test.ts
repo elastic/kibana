@@ -14,8 +14,9 @@ import {
 import { groups } from '../../__mocks__/groups.mock';
 import { mockGroupValues } from './__mocks__/group_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { GROUPS_PATH } from '../../routes';
 
 import { GroupLogic } from './group_logic';
@@ -24,8 +25,7 @@ describe('GroupLogic', () => {
   const { mount } = new LogicMounter(GroupLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setQueuedErrorMessage } =
-    mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast, setQueuedErrorMessage } = mockFlashMessageHelpers;
 
   const group = groups[0];
   const sourceIds = ['123', '124'];
@@ -45,13 +45,16 @@ describe('GroupLogic', () => {
       it('sets reducers', () => {
         GroupLogic.actions.onInitializeGroup(group);
 
-        expect(GroupLogic.values.group).toEqual(group);
-        expect(GroupLogic.values.dataLoading).toEqual(false);
-        expect(GroupLogic.values.groupNameInputValue).toEqual(group.name);
-        expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
-        expect(GroupLogic.values.cachedSourcePriorities).toEqual(sourcePriorities);
-        expect(GroupLogic.values.activeSourcePriorities).toEqual(sourcePriorities);
-        expect(GroupLogic.values.groupPrioritiesUnchanged).toEqual(true);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          group,
+          dataLoading: false,
+          groupNameInputValue: group.name,
+          selectedGroupSources: sourceIds,
+          cachedSourcePriorities: sourcePriorities,
+          activeSourcePriorities: sourcePriorities,
+          groupPrioritiesUnchanged: true,
+        });
       });
     });
 
@@ -63,8 +66,11 @@ describe('GroupLogic', () => {
         };
         GroupLogic.actions.onGroupNameChanged(renamedGroup);
 
-        expect(GroupLogic.values.group).toEqual(renamedGroup);
-        expect(GroupLogic.values.groupNameInputValue).toEqual(renamedGroup.name);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          group: renamedGroup,
+          groupNameInputValue: renamedGroup.name,
+        });
       });
     });
 
@@ -72,9 +78,12 @@ describe('GroupLogic', () => {
       it('sets reducers', () => {
         GroupLogic.actions.onGroupPrioritiesChanged(group);
 
-        expect(GroupLogic.values.dataLoading).toEqual(false);
-        expect(GroupLogic.values.cachedSourcePriorities).toEqual(sourcePriorities);
-        expect(GroupLogic.values.activeSourcePriorities).toEqual(sourcePriorities);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          cachedSourcePriorities: sourcePriorities,
+          activeSourcePriorities: sourcePriorities,
+          dataLoading: false,
+        });
       });
     });
 
@@ -83,7 +92,10 @@ describe('GroupLogic', () => {
         const name = 'new name';
         GroupLogic.actions.onGroupNameInputChange(name);
 
-        expect(GroupLogic.values.groupNameInputValue).toEqual(name);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          groupNameInputValue: name,
+        });
       });
     });
 
@@ -91,7 +103,10 @@ describe('GroupLogic', () => {
       it('sets reducer', () => {
         GroupLogic.actions.addGroupSource(sourceIds[0]);
 
-        expect(GroupLogic.values.selectedGroupSources).toEqual([sourceIds[0]]);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          selectedGroupSources: [sourceIds[0]],
+        });
       });
     });
 
@@ -101,7 +116,10 @@ describe('GroupLogic', () => {
         GroupLogic.actions.addGroupSource(sourceIds[1]);
         GroupLogic.actions.removeGroupSource(sourceIds[0]);
 
-        expect(GroupLogic.values.selectedGroupSources).toEqual([sourceIds[1]]);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          selectedGroupSources: [sourceIds[1]],
+        });
       });
     });
 
@@ -109,11 +127,14 @@ describe('GroupLogic', () => {
       it('sets reducers', () => {
         GroupLogic.actions.onGroupSourcesSaved(group);
 
-        expect(GroupLogic.values.group).toEqual(group);
-        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(false);
-        expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
-        expect(GroupLogic.values.cachedSourcePriorities).toEqual(sourcePriorities);
-        expect(GroupLogic.values.activeSourcePriorities).toEqual(sourcePriorities);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          group,
+          orgSourcesModalVisible: false,
+          cachedSourcePriorities: sourcePriorities,
+          activeSourcePriorities: sourcePriorities,
+          selectedGroupSources: sourceIds,
+        });
       });
     });
 
@@ -122,7 +143,10 @@ describe('GroupLogic', () => {
         const errors = ['this is an error'];
         GroupLogic.actions.setGroupModalErrors(errors);
 
-        expect(GroupLogic.values.managerModalFormErrors).toEqual(errors);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          managerModalFormErrors: errors,
+        });
       });
     });
 
@@ -130,8 +154,11 @@ describe('GroupLogic', () => {
       it('sets reducers', () => {
         GroupLogic.actions.hideOrgSourcesModal(group);
 
-        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(false);
-        expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          orgSourcesModalVisible: false,
+          selectedGroupSources: sourceIds,
+        });
       });
     });
 
@@ -139,7 +166,10 @@ describe('GroupLogic', () => {
       it('sets reducers', () => {
         GroupLogic.actions.selectAllSources(group.contentSources);
 
-        expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          selectedGroupSources: sourceIds,
+        });
       });
     });
 
@@ -148,10 +178,11 @@ describe('GroupLogic', () => {
         const PRIORITY_VALUE = 4;
         GroupLogic.actions.updatePriority(sourceIds[0], PRIORITY_VALUE);
 
-        expect(GroupLogic.values.activeSourcePriorities).toEqual({
-          [sourceIds[0]]: PRIORITY_VALUE,
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          activeSourcePriorities: { [sourceIds[0]]: PRIORITY_VALUE },
+          groupPrioritiesUnchanged: false,
         });
-        expect(GroupLogic.values.groupPrioritiesUnchanged).toEqual(false);
       });
     });
 
@@ -159,8 +190,11 @@ describe('GroupLogic', () => {
       it('sets reducers', () => {
         GroupLogic.actions.resetGroup();
 
-        expect(GroupLogic.values.group).toEqual({});
-        expect(GroupLogic.values.dataLoading).toEqual(true);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          group: {},
+          dataLoading: true,
+        });
       });
     });
 
@@ -169,7 +203,10 @@ describe('GroupLogic', () => {
         GroupLogic.actions.showConfirmDeleteModal();
         GroupLogic.actions.hideConfirmDeleteModal();
 
-        expect(GroupLogic.values.confirmDeleteModalVisible).toEqual(false);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          confirmDeleteModalVisible: false,
+        });
       });
     });
   });
@@ -210,11 +247,24 @@ describe('GroupLogic', () => {
     describe('deleteGroup', () => {
       beforeEach(() => {
         GroupLogic.actions.onInitializeGroup(group);
+        GroupLogic.actions.showConfirmDeleteModal();
       });
       it('deletes a group', async () => {
         http.delete.mockReturnValue(Promise.resolve(true));
 
         GroupLogic.actions.deleteGroup();
+
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          group,
+          dataLoading: false,
+          groupNameInputValue: group.name,
+          selectedGroupSources: sourceIds,
+          cachedSourcePriorities: sourcePriorities,
+          activeSourcePriorities: sourcePriorities,
+          groupPrioritiesUnchanged: true,
+          confirmDeleteModalVisible: false,
+        });
         expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/groups/123');
 
         await nextTick();
@@ -222,13 +272,8 @@ describe('GroupLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalledWith('Group "group" was successfully deleted.');
       });
 
-      it('handles error', async () => {
-        http.delete.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         GroupLogic.actions.deleteGroup();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -253,13 +298,8 @@ describe('GroupLogic', () => {
         );
       });
 
-      it('handles error', async () => {
-        http.put.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         GroupLogic.actions.updateGroupName();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -284,13 +324,8 @@ describe('GroupLogic', () => {
         );
       });
 
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         GroupLogic.actions.saveGroupSources();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -322,13 +357,8 @@ describe('GroupLogic', () => {
         expect(onGroupPrioritiesChangedSpy).toHaveBeenCalledWith(group);
       });
 
-      it('handles error', async () => {
-        http.put.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         GroupLogic.actions.saveGroupSourcePrioritization();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -336,7 +366,10 @@ describe('GroupLogic', () => {
       it('sets reducer and clears flash messages', () => {
         GroupLogic.actions.showConfirmDeleteModal();
 
-        expect(GroupLogic.values.confirmDeleteModalVisible).toEqual(true);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          confirmDeleteModalVisible: true,
+        });
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
@@ -345,7 +378,10 @@ describe('GroupLogic', () => {
       it('sets reducer and clears flash messages', () => {
         GroupLogic.actions.showOrgSourcesModal();
 
-        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(true);
+        expect(GroupLogic.values).toEqual({
+          ...mockGroupValues,
+          orgSourcesModalVisible: true,
+        });
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });

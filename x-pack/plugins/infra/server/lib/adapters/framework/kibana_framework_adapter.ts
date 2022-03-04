@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import {
-  IndicesExistsAlias,
-  IndicesGet,
-  MlGetBuckets,
-} from '@elastic/elasticsearch/api/requestParams';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
-import { estypes } from '@elastic/elasticsearch';
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-import {
-  InfraRouteConfig,
-  InfraServerPluginSetupDeps,
-  CallWithRequestParams,
-  InfraDatabaseSearchResponse,
-  InfraDatabaseMultiResponse,
-  InfraDatabaseFieldCapsResponse,
-  InfraDatabaseGetIndicesResponse,
-  InfraDatabaseGetIndicesAliasResponse,
-} from './adapter_types';
-import { TSVBMetricModel } from '../../../../common/inventory_models/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportRequestParams } from '@elastic/elasticsearch';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import {
   CoreSetup,
   IRouter,
   KibanaRequest,
+  RequestHandler,
   RouteMethod,
 } from '../../../../../../../src/core/server';
-import { RequestHandler } from '../../../../../../../src/core/server';
-import { InfraConfig } from '../../../plugin';
-import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
 import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
-import { InfraServerPluginStartDeps } from './adapter_types';
+import { TSVBMetricModel } from '../../../../common/inventory_models/types';
+import { InfraConfig } from '../../../plugin';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
+import {
+  CallWithRequestParams,
+  InfraDatabaseFieldCapsResponse,
+  InfraDatabaseGetIndicesAliasResponse,
+  InfraDatabaseGetIndicesResponse,
+  InfraDatabaseMultiResponse,
+  InfraDatabaseSearchResponse,
+  InfraRouteConfig,
+  InfraServerPluginSetupDeps,
+  InfraServerPluginStartDeps,
+} from './adapter_types';
+
+interface FrozenIndexParams {
+  ignore_throttled?: boolean;
+}
 
 export class KibanaFramework {
   public router: IRouter<InfraPluginRequestHandlerContext>;
@@ -133,7 +132,7 @@ export class KibanaFramework {
   ) {
     const { elasticsearch, uiSettings } = requestContext.core;
 
-    const includeFrozen = await uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
+    const includeFrozen = await uiSettings.client.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
     if (endpoint === 'msearch') {
       const maxConcurrentShardRequests = await uiSettings.client.get(
         UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
@@ -143,11 +142,17 @@ export class KibanaFramework {
       }
     }
 
-    const frozenIndicesParams = ['search', 'msearch'].includes(endpoint)
-      ? {
-          ignore_throttled: !includeFrozen,
-        }
-      : {};
+    // Only set the "ignore_throttled" value (to false) if the Kibana setting
+    // for "search:includeFrozen" is true (i.e. don't ignore throttled indices, a triple negative!)
+    // More information:
+    // - https://github.com/elastic/kibana/issues/113197
+    // - https://github.com/elastic/elasticsearch/pull/77479
+    //
+    // NOTE: these params only need to be spread onto the search and msearch calls below
+    const frozenIndicesParams: FrozenIndexParams = {};
+    if (includeFrozen) {
+      frozenIndicesParams.ignore_throttled = false;
+    }
 
     let apiResult;
     switch (endpoint) {
@@ -166,41 +171,35 @@ export class KibanaFramework {
       case 'fieldCaps':
         apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
           ...params,
-          ...frozenIndicesParams,
         });
         break;
       case 'indices.existsAlias':
         apiResult = elasticsearch.client.asCurrentUser.indices.existsAlias({
           ...params,
-          ...frozenIndicesParams,
-        } as IndicesExistsAlias);
+        } as estypes.IndicesExistsAliasRequest);
         break;
       case 'indices.getAlias':
         apiResult = elasticsearch.client.asCurrentUser.indices.getAlias({
           ...params,
-          ...frozenIndicesParams,
         });
         break;
       case 'indices.get':
         apiResult = elasticsearch.client.asCurrentUser.indices.get({
           ...params,
-          ...frozenIndicesParams,
-        } as IndicesGet);
+        } as estypes.IndicesGetRequest);
         break;
       case 'transport.request':
         apiResult = elasticsearch.client.asCurrentUser.transport.request({
           ...params,
-          ...frozenIndicesParams,
         } as TransportRequestParams);
         break;
       case 'ml.getBuckets':
         apiResult = elasticsearch.client.asCurrentUser.ml.getBuckets({
           ...params,
-          ...frozenIndicesParams,
-        } as MlGetBuckets<any>);
+        } as estypes.MlGetBucketsRequest);
         break;
     }
-    return apiResult ? (await apiResult).body : undefined;
+    return apiResult ? await apiResult : undefined;
   }
 
   public async getIndexPatternsServiceWithRequestContext(

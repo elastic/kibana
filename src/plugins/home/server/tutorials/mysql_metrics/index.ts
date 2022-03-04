@@ -56,8 +56,8 @@ export function mysqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/mysql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['datastore'],
   };
 }

@@ -30,11 +30,11 @@ export function getCommentsFromNode(node: Node): TextWithLinks | undefined {
 }
 
 export function getJSDocs(node: Node): JSDoc[] | undefined {
-  if (Node.isJSDocableNode(node)) {
+  if (Node.isJSDocable(node)) {
     return node.getJsDocs();
   } else if (Node.isVariableDeclaration(node)) {
     const gparent = node.getParent()?.getParent();
-    if (Node.isJSDocableNode(gparent)) {
+    if (Node.isJSDocable(gparent)) {
       return gparent.getJsDocs();
     }
   }
@@ -43,14 +43,14 @@ export function getJSDocs(node: Node): JSDoc[] | undefined {
 export function getJSDocReturnTagComment(node: Node | JSDoc[]): TextWithLinks {
   const tags = getJSDocTags(node);
   const returnTag = tags.find((tag) => Node.isJSDocReturnTag(tag));
-  if (returnTag) return getTextWithLinks(returnTag.getComment());
+  if (returnTag) return getTextWithLinks(returnTag.getCommentText());
   return [];
 }
 
 export function getJSDocParamComment(node: Node | JSDoc[], name: string): TextWithLinks {
   const tags = getJSDocTags(node);
   const paramTag = tags.find((tag) => Node.isJSDocParameterTag(tag) && tag.getName() === name);
-  if (paramTag) return getTextWithLinks(paramTag.getComment());
+  if (paramTag) return getTextWithLinks(paramTag.getCommentText());
   return [];
 }
 

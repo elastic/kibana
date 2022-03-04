@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Spaces } from '../../scenarios';
 import {
   ESTestIndexTool,
@@ -123,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(0);
+        expect((searchResult.hits.total as estypes.SearchTotalHits).value).to.eql(0);
       });
     });
 
@@ -174,7 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        const total = (runningSearchResult.body.hits.total as estypes.SearchTotalHits).value;
+        const total = (runningSearchResult.hits.total as estypes.SearchTotalHits).value;
         expect(total).to.eql(1);
       });
 
@@ -195,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        const total = (runningSearchResult.body.hits.total as estypes.SearchTotalHits).value;
+        const total = (runningSearchResult.hits.total as estypes.SearchTotalHits).value;
         expect(total).to.eql(0);
       });
     });

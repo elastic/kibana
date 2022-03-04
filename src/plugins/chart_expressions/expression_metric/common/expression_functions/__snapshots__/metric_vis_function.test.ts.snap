@@ -6,7 +6,8 @@ Object {
     Object {
       "id": "col-0-1",
       "meta": Object {
-        "dimensionName": undefined,
+        "dimensionName": "Metric",
+        "type": "number",
       },
       "name": "Count",
     },
@@ -27,31 +28,65 @@ Object {
   "value": Object {
     "visConfig": Object {
       "dimensions": Object {
-        "metrics": undefined,
+        "metrics": Array [
+          Object {
+            "accessor": 0,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+        ],
       },
       "metric": Object {
-        "colorSchema": "Green to Red",
-        "colorsRange": "{range from=0 to=10000}",
-        "invertColors": false,
+        "autoScale": undefined,
+        "colorFullBackground": false,
         "labels": Object {
+          "position": "bottom",
           "show": true,
+          "style": Object {
+            "css": "",
+            "spec": Object {
+              "fontSize": "24px",
+            },
+            "type": "style",
+          },
         },
-        "metricColorMode": "\\"None\\"",
+        "metricColorMode": "None",
+        "palette": Object {
+          "colors": Array [
+            "rgb(0, 0, 0, 0)",
+            "rgb(112, 38, 231)",
+          ],
+          "gradient": false,
+          "range": "number",
+          "rangeMax": 150,
+          "rangeMin": 0,
+          "stops": Array [
+            0,
+            10000,
+          ],
+        },
         "percentageMode": false,
         "style": Object {
           "bgColor": false,
-          "bgFill": "\\"#000\\"",
-          "fontSize": 60,
+          "css": "",
           "labelColor": false,
-          "subText": "\\"\\"",
+          "spec": Object {
+            "fontSize": "60px",
+          },
+          "type": "style",
         },
-        "useRanges": false,
       },
     },
     "visData": Object {
       "columns": Array [
         Object {
           "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
           "name": "Count",
         },
       ],
@@ -66,3 +101,9 @@ Object {
   },
 }
 `;
+
+exports[`interpreter/functions#metric returns error if bucket and colorFullBackground specified 1`] = `"Full background coloring cannot be applied to visualizations that have a bucket specified."`;
+
+exports[`interpreter/functions#metric returns error if data includes several rows and colorFullBackground specified 1`] = `"Full background coloring cannot be applied to a visualization with multiple metrics."`;
+
+exports[`interpreter/functions#metric returns error if several metrics and colorFullBackground specified 1`] = `"Full background coloring cannot be applied to a visualization with multiple metrics."`;

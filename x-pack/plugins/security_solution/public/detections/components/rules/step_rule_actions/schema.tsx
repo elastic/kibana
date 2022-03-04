@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  AlertAction,
+  RuleAction,
   ActionTypeRegistryContract,
 } from '../../../../../../triggers_actions_ui/public';
 import {
@@ -20,17 +20,12 @@ import {
   ValidationError,
 } from '../../../../shared_imports';
 import { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
-import * as I18n from './translations';
-import { isUuid, getActionTypeName, validateMustache, validateActionParams } from './utils';
+import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 export const validateSingleAction = async (
-  actionItem: AlertAction,
+  actionItem: RuleAction,
   actionTypeRegistry: ActionTypeRegistryContract
 ): Promise<string[]> => {
-  if (!isUuid(actionItem.id)) {
-    return [I18n.NO_CONNECTOR_SELECTED];
-  }
-
   const actionParamsErrors = await validateActionParams(actionItem, actionTypeRegistry);
   const mustacheErrors = validateMustache(actionItem.params);
 
@@ -42,7 +37,7 @@ export const validateRuleActionsField =
   async (
     ...data: Parameters<ValidationFunc>
   ): Promise<ValidationError<ERROR_CODE> | void | undefined> => {
-    const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
+    const [{ value, path }] = data as [{ value: RuleAction[]; path: string }];
 
     const errors = [];
     for (const actionItem of value) {

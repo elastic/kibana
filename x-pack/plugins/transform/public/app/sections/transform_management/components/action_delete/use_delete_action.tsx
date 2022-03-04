@@ -38,6 +38,7 @@ export const useDeleteAction = (forceDisable: boolean) => {
 
   const {
     userCanDeleteIndex,
+    userCanDeleteDataView,
     deleteDestIndex,
     indexPatternExists,
     deleteIndexPattern,
@@ -50,7 +51,7 @@ export const useDeleteAction = (forceDisable: boolean) => {
 
     const shouldDeleteDestIndex = userCanDeleteIndex && deleteDestIndex;
     const shouldDeleteDestIndexPattern =
-      userCanDeleteIndex && indexPatternExists && deleteIndexPattern;
+      userCanDeleteIndex && userCanDeleteDataView && indexPatternExists && deleteIndexPattern;
     // if we are deleting multiple transforms, then force delete all if at least one item has failed
     // else, force delete only when the item user picks has failed
     const forceDelete = isBulkAction
@@ -69,8 +70,6 @@ export const useDeleteAction = (forceDisable: boolean) => {
   };
 
   const openModal = (newItems: TransformListRow[]) => {
-    // EUI issue: Might trigger twice, one time as an array,
-    // one time as a single object. See https://github.com/elastic/eui/issues/3679
     if (Array.isArray(newItems)) {
       setItems(newItems);
       setModalVisible(true);
@@ -113,5 +112,6 @@ export const useDeleteAction = (forceDisable: boolean) => {
     toggleDeleteIndex,
     toggleDeleteIndexPattern,
     userCanDeleteIndex,
+    userCanDeleteDataView,
   };
 };

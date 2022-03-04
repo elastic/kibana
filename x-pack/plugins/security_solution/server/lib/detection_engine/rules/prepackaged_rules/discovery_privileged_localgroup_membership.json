@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies instances of an unusual process enumerating built-in Windows privileged local groups membership like Administrators or Remote Desktop users.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Enumeration of Privileged Local Groups Membership",
+  "note": "## Config\n\nThis will require Windows security event 4799 by enabling audit success for the Windows Account Management category and\nthe Security Group Management subcategory.\n",
+  "query": "iam where event.action == \"user-member-enumerated\" and\n\n /* noisy and usual legit processes excluded */\n not winlog.event_data.CallerProcessName:\n              (\"?:\\\\Windows\\\\System32\\\\VSSVC.exe\",\n               \"?:\\\\Windows\\\\System32\\\\SearchIndexer.exe\",\n               \"?:\\\\Windows\\\\System32\\\\CompatTelRunner.exe\",\n               \"?:\\\\Windows\\\\System32\\\\oobe\\\\msoobe.exe\",\n               \"?:\\\\Windows\\\\System32\\\\net1.exe\",\n               \"?:\\\\Windows\\\\System32\\\\svchost.exe\",\n               \"?:\\\\Windows\\\\System32\\\\Netplwiz.exe\",\n               \"?:\\\\Windows\\\\System32\\\\msiexec.exe\",\n               \"?:\\\\Windows\\\\System32\\\\CloudExperienceHostBroker.exe\",\n               \"?:\\\\Windows\\\\System32\\\\wbem\\\\WmiPrvSE.exe\",\n               \"?:\\\\Windows\\\\System32\\\\SrTasks.exe\",\n               \"?:\\\\Windows\\\\System32\\\\lsass.exe\",\n               \"?:\\\\Windows\\\\System32\\\\diskshadow.exe\",\n               \"?:\\\\Windows\\\\System32\\\\dfsrs.exe\",\n               \"?:\\\\Program Files\\\\*.exe\",\n               \"?:\\\\Program Files (x86)\\\\*.exe\") and\n  /* privileged local groups */\n (group.name:(\"admin*\",\"RemoteDesktopUsers\") or\n  winlog.event_data.TargetSid:(\"S-1-5-32-544\",\"S-1-5-32-555\"))\n",
+  "risk_score": 43,
+  "rule_id": "291a0de9-937a-4189-94c0-3e847c8b13e4",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1069",
+          "name": "Permission Groups Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1069/",
+          "subtechnique": [
+            {
+              "id": "T1069.001",
+              "name": "Local Groups",
+              "reference": "https://attack.mitre.org/techniques/T1069/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

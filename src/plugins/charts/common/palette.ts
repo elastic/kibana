@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { i18n } from '@kbn/i18n';
+import { last } from 'lodash';
 import { paletteIds } from './constants';
+import { checkIsMaxContinuity, checkIsMinContinuity } from './static';
+
+import type { PaletteContinuity } from './types';
 
 export interface CustomPaletteArguments {
   color?: string[];
@@ -18,7 +22,7 @@ export interface CustomPaletteArguments {
   range?: 'number' | 'percent';
   rangeMin?: number;
   rangeMax?: number;
-  continuity?: 'above' | 'below' | 'all' | 'none';
+  continuity?: PaletteContinuity;
 }
 
 export interface CustomPaletteState {
@@ -28,7 +32,7 @@ export interface CustomPaletteState {
   range: 'number' | 'percent';
   rangeMin: number;
   rangeMax: number;
-  continuity?: 'above' | 'below' | 'all' | 'none';
+  continuity?: PaletteContinuity;
 }
 
 export interface SystemPaletteArguments {
@@ -141,21 +145,24 @@ export function palette(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const {
-        color,
-        continuity,
-        reverse,
-        gradient,
-        stop,
-        range,
-        rangeMin = 0,
-        rangeMax = 100,
-      } = args;
+      const { color, continuity, reverse, gradient, stop, range, rangeMin, rangeMax } = args;
       const colors = ([] as string[]).concat(color || defaultCustomColors);
       const stops = ([] as number[]).concat(stop || []);
       if (stops.length > 0 && colors.length !== stops.length) {
         throw Error('When stop is used, each color must have an associated stop value.');
       }
+
+      // If the user has defined stops, choose rangeMin/Max, provided by user or range,
+      // taken from first/last element of ranges or default range (0 or 100).
+      const calculateRange = (
+        userRange: number | undefined,
+        stopsRange: number | undefined,
+        defaultRange: number
+      ) => userRange ?? stopsRange ?? defaultRange;
+
+      const rangeMinDefault = 0;
+      const rangeMaxDefault = 100;
+
       return {
         type: 'palette',
         name: 'custom',
@@ -165,8 +172,12 @@ export function palette(): ExpressionFunctionDefinition<
           range: range ?? 'percent',
           gradient,
           continuity,
-          rangeMin,
-          rangeMax,
+          rangeMin: checkIsMinContinuity(continuity)
+            ? Number.NEGATIVE_INFINITY
+            : calculateRange(rangeMin, stops[0], rangeMinDefault),
+          rangeMax: checkIsMaxContinuity(continuity)
+            ? Number.POSITIVE_INFINITY
+            : calculateRange(rangeMax, last(stops), rangeMaxDefault),
         },
       };
     },

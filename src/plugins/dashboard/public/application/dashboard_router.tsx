@@ -11,7 +11,7 @@ import React from 'react';
 import { History } from 'history';
 import { Provider } from 'react-redux';
 import { first } from 'rxjs/operators';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
@@ -20,7 +20,7 @@ import { DashboardListing } from './listing';
 import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
 import { DashboardNoMatch } from './listing/dashboard_no_match';
-import { KibanaContextProvider } from '../services/kibana_react';
+import { KibanaContextProvider, KibanaThemeProvider } from '../services/kibana_react';
 import { addHelpMenuToAppChrome, DashboardSessionStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
@@ -109,7 +109,8 @@ export async function mountApp({
     embeddable: embeddableStart,
     uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
-    indexPatterns: dataStart.indexPatterns,
+    screenshotModeService: screenshotMode,
+    dataViews: dataStart.dataViews,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
@@ -131,7 +132,6 @@ export async function mountApp({
       activeSpaceId || 'default'
     ),
     spacesService: spacesApi,
-    screenshotModeService: screenshotMode,
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
@@ -212,7 +212,7 @@ export async function mountApp({
       .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, false)
   );
   if (!hasEmbeddableIncoming) {
-    dataStart.indexPatterns.clearCache();
+    dataStart.dataViews.clearCache();
   }
 
   // dispatch synthetic hash change event to update hash history objects
@@ -226,26 +226,28 @@ export async function mountApp({
       <Provider store={dashboardStateStore}>
         <KibanaContextProvider services={dashboardServices}>
           <presentationUtil.ContextProvider>
-            <HashRouter>
-              <Switch>
-                <Route
-                  path={[
-                    DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                    `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                  ]}
-                  render={renderDashboard}
-                />
-                <Route
-                  exact
-                  path={DashboardConstants.LANDING_PAGE_PATH}
-                  render={renderListingPage}
-                />
-                <Route exact path="/">
-                  <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-                </Route>
-                <Route render={renderNoMatch} />
-              </Switch>
-            </HashRouter>
+            <KibanaThemeProvider theme$={core.theme.theme$}>
+              <HashRouter>
+                <Switch>
+                  <Route
+                    path={[
+                      DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                      `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                    ]}
+                    render={renderDashboard}
+                  />
+                  <Route
+                    exact
+                    path={DashboardConstants.LANDING_PAGE_PATH}
+                    render={renderListingPage}
+                  />
+                  <Route exact path="/">
+                    <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+                  </Route>
+                  <Route render={renderNoMatch} />
+                </Switch>
+              </HashRouter>
+            </KibanaThemeProvider>
           </presentationUtil.ContextProvider>
         </KibanaContextProvider>
       </Provider>

@@ -13,6 +13,7 @@ import { getClustersStats } from './get_clusters_stats';
 import { flagSupportedClusters } from './flag_supported_clusters';
 import { getMlJobsForCluster } from '../elasticsearch';
 import { getKibanasForClusters } from '../kibana';
+import { getEnterpriseSearchForClusters } from '../enterprise_search';
 import { getLogstashForClusters } from '../logstash';
 import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
@@ -26,6 +27,7 @@ import {
   CODE_PATH_LOGSTASH,
   CODE_PATH_BEATS,
   CODE_PATH_APM,
+  CODE_PATH_ENTERPRISE_SEARCH,
 } from '../../../common/constants';
 
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
@@ -48,18 +50,10 @@ export async function getClustersFromRequest(
     start,
     end,
     codePaths,
-  }: { clusterUuid: string; start: number; end: number; codePaths: string[] }
+  }: { clusterUuid?: string; start?: number; end?: number; codePaths: string[] }
 ) {
-  const {
-    esIndexPattern,
-    kbnIndexPattern,
-    lsIndexPattern,
-    beatsIndexPattern,
-    apmIndexPattern,
-    filebeatIndexPattern,
-  } = indexPatterns;
+  const { filebeatIndexPattern } = indexPatterns;
 
-  const config = req.server.config();
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
   let clusters: Cluster[] = [];
@@ -68,13 +62,11 @@ export async function getClustersFromRequest(
     clusters.push(getStandaloneClusterDefinition());
   } else {
     // get clusters with stats and cluster state
-    clusters = await getClustersStats(req, esIndexPattern, clusterUuid);
+    clusters = await getClustersStats(req, clusterUuid, '*');
   }
 
   if (!clusterUuid && !isStandaloneCluster) {
-    const indexPatternsToCheckForNonClusters = [lsIndexPattern, beatsIndexPattern, apmIndexPattern];
-
-    if (await hasStandaloneClusters(req, indexPatternsToCheckForNonClusters)) {
+    if (await hasStandaloneClusters(req, '*')) {
       clusters.push(getStandaloneClusterDefinition());
     }
   }
@@ -98,19 +90,20 @@ export async function getClustersFromRequest(
 
     // add ml jobs and alerts data
     const mlJobs = isInCodePath(codePaths, [CODE_PATH_ML])
-      ? await getMlJobsForCluster(req, esIndexPattern, cluster)
+      ? await getMlJobsForCluster(req, cluster, '*')
       : null;
     if (mlJobs !== null) {
       cluster.ml = { jobs: mlJobs };
     }
 
-    cluster.logs = isInCodePath(codePaths, [CODE_PATH_LOGS])
-      ? await getLogTypes(req, filebeatIndexPattern, {
-          clusterUuid: get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid),
-          start,
-          end,
-        })
-      : [];
+    cluster.logs =
+      start && end && isInCodePath(codePaths, [CODE_PATH_LOGS])
+        ? await getLogTypes(req, filebeatIndexPattern, {
+            clusterUuid: get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid),
+            start,
+            end,
+          })
+        : [];
   } else if (!isStandaloneCluster) {
     // get all clusters
     if (!clusters || clusters.length === 0) {
@@ -120,7 +113,7 @@ export async function getClustersFromRequest(
     }
 
     // update clusters with license check results
-    const getSupportedClusters = flagSupportedClusters(req, kbnIndexPattern);
+    const getSupportedClusters = flagSupportedClusters(req, '*');
     clusters = await getSupportedClusters(clusters);
 
     // add alerts data
@@ -176,7 +169,7 @@ export async function getClustersFromRequest(
   // add kibana data
   const kibanas =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
-      ? await getKibanasForClusters(req, kbnIndexPattern, clusters)
+      ? await getKibanasForClusters(req, clusters, '*')
       : [];
   // add the kibana data to each cluster
   kibanas.forEach((kibana) => {
@@ -189,8 +182,8 @@ export async function getClustersFromRequest(
 
   // add logstash data
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
-    const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
-    const pipelines = await getLogstashPipelineIds({ req, lsIndexPattern, clusterUuid, size: 1 });
+    const logstashes = await getLogstashForClusters(req, clusters, '*');
+    const pipelines = await getLogstashPipelineIds({ req, clusterUuid, size: 1, ccs: '*' });
     logstashes.forEach((logstash) => {
       const clusterIndex = clusters.findIndex(
         (cluster) =>
@@ -206,7 +199,7 @@ export async function getClustersFromRequest(
 
   // add beats data
   const beatsByCluster = isInCodePath(codePaths, [CODE_PATH_BEATS])
-    ? await getBeatsForClusters(req, beatsIndexPattern, clusters)
+    ? await getBeatsForClusters(req, clusters, '*')
     : [];
   beatsByCluster.forEach((beats) => {
     const clusterIndex = clusters.findIndex(
@@ -218,7 +211,7 @@ export async function getClustersFromRequest(
 
   // add apm data
   const apmsByCluster = isInCodePath(codePaths, [CODE_PATH_APM])
-    ? await getApmsForClusters(req, apmIndexPattern, clusters)
+    ? await getApmsForClusters(req, clusters, '*')
     : [];
   apmsByCluster.forEach((apm) => {
     const clusterIndex = clusters.findIndex(
@@ -234,10 +227,26 @@ export async function getClustersFromRequest(
     }
   });
 
-  // check ccr configuration
-  const isCcrEnabled = await checkCcrEnabled(req, esIndexPattern);
+  // add Enterprise Search data
+  const enterpriseSearchByCluster = isInCodePath(codePaths, [CODE_PATH_ENTERPRISE_SEARCH])
+    ? await getEnterpriseSearchForClusters(req, clusters, '*')
+    : [];
+  enterpriseSearchByCluster.forEach((entSearch) => {
+    const clusterIndex = clusters.findIndex(
+      (cluster) =>
+        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) === entSearch.clusterUuid
+    );
+    if (clusterIndex >= 0) {
+      Reflect.set(clusters[clusterIndex], 'enterpriseSearch', {
+        ...entSearch,
+      });
+    }
+  });
 
-  const kibanaUuid = config.get('server.uuid')!;
+  // check ccr configuration
+  const isCcrEnabled = await checkCcrEnabled(req, '*');
+
+  const kibanaUuid = req.server.instanceUuid;
 
   return getClustersSummary(req.server, clusters as EnhancedClusters[], kibanaUuid, isCcrEnabled);
 }

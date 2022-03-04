@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { IStateStorage } from './types';
-export { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
-export {
-  createSessionStorageStateStorage,
-  ISessionStorageStateStorage,
-} from './create_session_storage_state_storage';
+export type { IStateStorage } from './types';
+export type { IKbnUrlStateStorage } from './create_kbn_url_state_storage';
+export { createKbnUrlStateStorage } from './create_kbn_url_state_storage';
+export type { ISessionStorageStateStorage } from './create_session_storage_state_storage';
+export { createSessionStorageStateStorage } from './create_session_storage_state_storage';

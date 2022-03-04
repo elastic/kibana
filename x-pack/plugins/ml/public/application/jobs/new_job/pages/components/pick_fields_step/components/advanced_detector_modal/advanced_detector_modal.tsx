@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, Fragment, useState, useContext, useEffect } from 'react';
 import {
   EuiComboBox,

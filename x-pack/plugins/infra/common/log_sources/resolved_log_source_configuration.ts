@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
-import { ObjectEntries } from '../utility_types';
+import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../constants';
 import { ResolveLogSourceConfigurationError } from './errors';
 import {
   LogSourceColumnConfiguration,
@@ -61,9 +61,10 @@ const resolveLegacyReference = async (
 
   return {
     indices: sourceConfiguration.logIndices.indexName,
-    timestampField: sourceConfiguration.fields.timestamp,
-    tiebreakerField: sourceConfiguration.fields.tiebreaker,
+    timestampField: TIMESTAMP_FIELD,
+    tiebreakerField: TIEBREAKER_FIELD,
     messageField: sourceConfiguration.fields.message,
+    // @ts-ignore
     fields,
     runtimeMappings: {},
     columns: sourceConfiguration.logColumns,
@@ -91,8 +92,8 @@ const resolveKibanaIndexPatternReference = async (
 
   return {
     indices: indexPattern.title,
-    timestampField: indexPattern.timeFieldName ?? '@timestamp',
-    tiebreakerField: '_doc',
+    timestampField: indexPattern.timeFieldName ?? TIMESTAMP_FIELD,
+    tiebreakerField: TIEBREAKER_FIELD,
     messageField: ['message'],
     fields: indexPattern.fields,
     runtimeMappings: resolveRuntimeMappings(indexPattern),
@@ -104,27 +105,5 @@ const resolveKibanaIndexPatternReference = async (
 
 // this might take other sources of runtime fields into account in the future
 const resolveRuntimeMappings = (indexPattern: DataView): estypes.MappingRuntimeFields => {
-  const { runtimeFields } = indexPattern.getComputedFields();
-
-  const runtimeMappingsFromIndexPattern = (
-    Object.entries(runtimeFields) as ObjectEntries<typeof runtimeFields>
-  ).reduce<estypes.MappingRuntimeFields>(
-    (accumulatedMappings, [runtimeFieldName, runtimeFieldSpec]) => ({
-      ...accumulatedMappings,
-      [runtimeFieldName]: {
-        type: runtimeFieldSpec.type,
-        ...(runtimeFieldSpec.script != null
-          ? {
-              script: {
-                lang: 'painless', // required in the es types
-                source: runtimeFieldSpec.script.source,
-              },
-            }
-          : {}),
-      },
-    }),
-    {}
-  );
-
-  return runtimeMappingsFromIndexPattern;
+  return indexPattern.getRuntimeMappings();
 };

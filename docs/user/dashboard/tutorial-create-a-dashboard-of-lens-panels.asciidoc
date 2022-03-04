@@ -1,21 +1,24 @@
 [[create-a-dashboard-of-panels-with-web-server-data]]
-== Build your first dashboard
+== Create your first dashboard
 
-Learn the most common ways to build a dashboard from your own data.
+Learn the most common ways to create a dashboard from your own data.
 The tutorial will use sample data from the perspective of an analyst looking
 at website logs, but this type of dashboard works on any type of data.
-Before using this tutorial, you should be familiar with the <<kibana-concepts-analysts>>.
+
+When you're done, you'll have a complete overview of the sample web logs data. 
 
 [role="screenshot"]
-image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
+image::images/lens_logsDashboard_7.16.png[Logs dashboard]
+
+Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
 [discrete]
 [[add-the-data-and-create-the-dashboard]]
 === Add the data and create the dashboard
 
-Add the sample web logs data that you'll use to create the dashboard panels.
+Add the sample web logs data, and create and set up the dashboard.
 
-. Go to the {kib} *Home* page, then click *Try our sample data*.
+. Go to the *Home* page, then click *Try sample data*.
 
 . On the *Sample web logs* card, click *Add data*.
 
@@ -29,57 +32,71 @@ Create the dashboard where you'll display the visualization panels.
 
 [float]
 [[open-and-set-up-lens]]
-=== Open Lens and get familiar with the data
+=== Open the visualization editor and get familiar with the data
+
+Open the visualization editor, then make sure the correct fields appear.
 
 . On the dashboard, click *Create visualization*.
 
 . Make sure the *kibana_sample_data_logs* index appears.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_1_2.png[Lens index pattern selector, width=50%]
+image::images/lens_dataViewDropDown_8.0.png[Data view dropdown]
 
-. To create the visualizations in this tutorial, you'll use the *Records*, *timestamp*, *bytes*, *clientip*, and *referer.keyword* fields. To see the most frequent values of a field, hover over the field name, then click *i*.
+To create the visualizations in this tutorial, you'll use the following fields:
+
+* *Records*
+
+* *timestamp*
+
+* *bytes*
+
+* *clientip*
+
+* *referer.keyword*
+
+To see the most frequent values in a field, hover over the field name, then click *i*.
 
 [discrete]
 [[view-the-number-of-website-visitors]]
 === Create your first visualization
 
-Pick a field you want to analyze, such as *clientip*. If you want
-to analyze only this field, you can use the *Metric* visualization to display a big number.
-The only number function that you can use with *clientip* is *Unique count*.
-*Unique count*, also referred to as cardinality, approximates the number of unique values
-of the *clientip* field.
+Pick a field you want to analyze, such as *clientip*. To analyze only the *clientip* field, use the *Metric* visualization to display the field as a number.
 
-. To select the visualization type, open the *Chart type* dropdown, then select *Metric*.
+The only number function that you can use with *clientip* is *Unique count*, also referred to as cardinality, which approximates the number of unique values.
+
+. Open the *Visualization type* dropdown, then select *Metric*.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected, width=50%]
+image::images/lens_visualizationTypeDropdown_8.0.png[Visualization type dropdown]
 
-. From the *Available fields* list, drag *clientip* to the workspace.
+. From the *Available fields* list, drag *clientip* to the workspace or layer pane.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
+image::images/lens_metricUniqueCountOfClientip_7.16.png[Metric visualization of the clientip field]
 +
-*Lens* selects the *Unique count* function because it is the only numeric function
-that works for IP addresses. You can also drag *clientip* to the layer pane for the same result.
+In the layer pane, *Unique count of clientip* appears because the editor automatically applies the *Unique count* function to the *clientip* field. *Unique count* is the only numeric function that works with IP addresses.
 
 . In the layer pane, click *Unique count of clientip*.
 
 .. In the *Display name* field, enter `Unique visitors`.
 
 .. Click *Close*.
++
+[role="screenshot"]
+image::images/lens_metricUniqueVisitors_7.16.png[Metric visualization that displays number of unique visitors]
 
 . Click *Save and return*.
 +
-The metric visualization has its own label, so you do not need to add a panel title.
+*[No Title]* appears in the visualization panel header. Since the visualization has its own `Unique visitors` label, you do not need to add a panel title.
 
 [discrete]
 [[mixed-multiaxis]]
 === View a metric over time
 
-*Lens* has two shortcuts that simplify viewing metrics over time. 
-If you drag a numeric field to the workspace, *Lens* adds the default
-time field from the index pattern. When you use the *Date histogram* function, you can
+There are two shortcuts you can use to view metrics over time. 
+When you drag a numeric field to the workspace, the visualization editor adds the default
+time field from the {data-source}. When you use the *Date histogram* function, you can
 replace the time field by dragging the field to the workspace.
 
 To visualize the *bytes* field over time:
@@ -88,78 +105,76 @@ To visualize the *bytes* field over time:
 
 . From the *Available fields* list, drag *bytes* to the workspace. 
 +
-*Lens* creates a bar chart with the *timestamp* and *Median of bytes* fields, and automatically chooses a date interval. 
+The visualization editor creates a bar chart with the *timestamp* and *Median of bytes* fields. 
 
-. To zoom in on the data you want to view, click and drag your cursor across the bars. 
+. To zoom in on the data, click and drag your cursor across the bars. 
 +
 [role="screenshot"]
 image::images/lens_end_to_end_3_1_1.gif[Zoom in on the data]
 
-To emphasize the change in *Median of bytes* over time, change to a line chart with one of the following options:
+To emphasize the change in *Median of bytes* over time, change the visualization type to *Line* with one of the following options:
 
-* From the *Suggestions*, click the line chart.
-* Open the *Chart type* dropdown in the editor toolbar, then select *Line*.
-* Open the *Chart type* menu in the layer pane, then click the line chart.
+* In the *Suggestions*, click the line chart.
+* In the editor toolbar, open the *Visualization type* dropdown, then select *Line*.
+* In the layer pane, open the *Layer visualization type* menu, then click *Line*.
 
-You can increase and decrease the minimum interval that *Lens* uses, but you are unable to decrease the interval
-below the <<advanced-options,*Advanced Settings*>>. 
-
-To set the minimum time interval:
+To increase the minimum time interval:
 
 . In the layer pane, click *timestamp*.
 
 . Select *Customize time interval*.
 
 . Change the *Minimum interval* to *1 days*, then click *Close*.
++
+You can increase and decrease the minimum interval, but you are unable to decrease the interval below the <<advanced-options,*Advanced Settings*>>. 
 
-To save space on the dashboard, hide the vertical and horizontal axis labels.
+To save space on the dashboard, hide the axis labels.
 
 . Open the *Left axis* menu, then deselect *Show*.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_4_3.png[Turn off axis label]
+image::images/lens_leftAxisMenu_7.16.png[Left axis menu]
 
 . Open the *Bottom axis* menu, then deselect *Show*.
++
+[role="screenshot"]
+image::images/lens_lineChartMetricOverTime_7.16.png[Line chart that displays metric data over time]
 
 . Click *Save and return*
 
-Add a panel title to explain the panel, which is necessary because you removed the axis labels.
+Since you removed the axis labels, add a panel title:
 
-.. Open the panel menu, then select *Edit panel title*.
+. Open the panel menu, then select *Edit panel title*.
 
-.. In the *Panel title* field, enter `Median of bytes`, then click *Save*.
+. In the *Panel title* field, enter `Median of bytes`, then click *Save*.
 
 [discrete]
 [[view-the-distribution-of-visitors-by-operating-system]]
 === View the top values of a field
 
+Create a visualization that displays the most frequent values of *request.keyword* on your website, ranked by the unique visitors.
+To create the visualization, use *Top values of request.keyword* ranked by *Unique count of clientip*, instead of being ranked by *Count of records*.
+
 The *Top values* function ranks the unique values of a field by another function.
 The values are the most frequent when ranked by a *Count* function, and the largest when ranked by the *Sum* function.
-
-Create a visualization that displays the most frequent values of *request.keyword* on your website, ranked by the unique visitors.
-To create the visualization, use *Top values of request.keyword* ranked by *Unique count of clientip*, instead of
-being ranked by *Count of records*.
 
 . On the dashboard, click *Create visualization*. 
 
 . From the *Available fields* list, drag *clientip* to the *Vertical axis* field in the layer pane. 
 +
-*Lens* automatically chooses the *Unique count* function. If you drag *clientip* to the workspace, *Lens* adds the field to the incorrect axis.
-+
-When you drag a text or IP address field to the workspace,
-*Lens* adds the *Top values* function ranked by *Count of records* to show the most frequent values.
+The visualization editor automatically applies the *Unique count* function. If you drag *clientip* to the workspace, the editor adds the field to the incorrect axis.
 
 . Drag *request.keyword* to the workspace.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_2_1_1.png[Vertical bar chart with top values of request.keyword by most unique visitors]
 +
-*Lens* adds *Top values of request.keyword* to the *Horizontal axis*.
+When you drag a text or IP address field to the workspace,
+the editor adds the *Top values* function ranked by *Count of records* to show the most frequent values.
 
-The chart is hard to read because the *request.keyword* field contains long text. You could try
-using one of the *Suggestions*, but the suggestions also have issues with long text. Instead, create a *Table* visualization.
+The chart labels are unable to display because the *request.keyword* field contains long text fields. You could use one of the *Suggestions*, but the suggestions also have issues with long text. The best way to display long text fields is with the *Table* visualization.
 
-. Open the *Chart type* dropdown, then select *Table*.
+. Open the *Visualization type* dropdown, then select *Table*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_2_1_2.png[Table with top values of request.keyword by most unique visitors]
@@ -171,16 +186,19 @@ image::images/lens_end_to_end_2_1_2.png[Table with top values of request.keyword
 .. In the *Display name* field, enter `Page URL`.
 
 .. Click *Close*.
++
+[role="screenshot"]
+image::images/lens_tableTopFieldValues_7.16.png[Table that displays the top field values]
 
 . Click *Save and return*.
 +
-The table does not need a panel title because the columns are clearly labeled.
+Since the table columns are labeled, you do not need to add a panel title.
 
 [discrete]
 [[custom-ranges]]
 === Compare a subset of documents to all documents
 
-Create a proportional visualization that helps you to determine if your users transfer more bytes from documents under 10KB versus documents over 10 Kb.
+Create a proportional visualization that helps you determine if your users transfer more bytes from documents under 10KB versus documents over 10Kb.
 
 . On the dashboard, click *Create visualization*. 
 
@@ -190,12 +208,14 @@ Create a proportional visualization that helps you to determine if your users tr
 
 . From the *Available fields* list, drag *bytes* to the *Break down by* field in the layer pane.
 
-Use the *Intervals* function to select documents based on the number range of a field. 
-If the ranges were non numeric, or if the query required multiple clauses, you could use the *Filters* function.
+To select documents based on the number range of a field, use the *Intervals* function.
+When the ranges are non numeric, or the query requires multiple clauses, you could use the *Filters* function.
 
-. To specify the file size ranges, click *bytes* in the layer pane.
+Specify the file size ranges: 
 
-. Click *Create custom ranges*, enter the following, then press Return:
+. In the layer pane, click *bytes*.
+
+. Click *Create custom ranges*, enter the following in the *Ranges* field, then press Return:
 
 * *Ranges* &mdash; `0` -> `10240`
 
@@ -214,27 +234,30 @@ image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
 
 To display the values as a percentage of the sum of all values, use the *Pie* chart. 
 
-. Open the *Chart Type* dropdown, then select *Pie*.
+. Open the *Visualization Type* dropdown, then select *Pie*.
++
+[role="screenshot"]
+image::images/lens_pieChartCompareSubsetOfDocs_7.16.png[Pie chart that compares a subset of documents to all documents]
 
 . Click *Save and return*.
 
-. Add a panel title.
+Add a panel title:
 
-.. Open the panel menu, then select *Edit panel title*.
+. Open the panel menu, then select *Edit panel title*.
 
-.. In the *Panel title* field, enter `Sum of bytes from large requests`, then click *Save*.
+. In the *Panel title* field, enter `Sum of bytes from large requests`, then click *Save*.
 
 [discrete]
 [[histogram]]
 === View the distribution of a number field
 
-Knowing the distribution of a number helps you find patterns. For example, you can analyze the website traffic per hour to find the best time to do routine maintenance.
+The distribution of a number can help you find patterns. For example, you can analyze the website traffic per hour to find the best time for routine maintenance.
 
 . On the dashboard, click *Create visualization*. 
 
 . From the *Available fields* list, drag *bytes* to *Vertical axis* field in the layer pane.
 
-. In the layer pane, click *Median of bytes*
+. In the layer pane, click *Median of bytes*.
 
 .. Click the *Sum* function.
 
@@ -246,70 +269,80 @@ Knowing the distribution of a number helps you find patterns. For example, you c
 
 . In the layer pane, click *hour_of_day*, then slide the *Intervals granularity* slider until the horizontal axis displays hourly intervals.
 +
-The *Intervals* function displays an evenly spaced distribution of the field.
+[role="screenshot"]
+image::images/lens_barChartDistributionOfNumberField_7.16.png[Bar chart that displays the distribution of a number field]
 
 . Click *Save and return*.
+
+Add a panel title:
+
+. Open the panel menu, then select *Edit panel title*.
+
+. In the *Panel title* field, enter `Website traffic`, then click *Save*.
 
 [discrete]
 [[treemap]]
 === Create a multi-level chart
 
-You can use multiple functions in data tables and proportion charts. For example,
-to create a chart that breaks down the traffic sources and user geography, use *Filters* and
-*Top values*.
+*Table* and *Proportion* visualizations support multiple functions. For example, to create visualizations that break down the data by website traffic sources and user geography, apply the *Filters* and *Top values* functions.
 
 . On the dashboard, click *Create visualization*. 
 
-. Open the *Chart type* dropdown, then select *Treemap*.
+. Open the *Visualization type* dropdown, then select *Treemap*.
 
 . From the *Available fields* list, drag *Records* to the *Size by* field in the layer pane. 
 
-. In the editor, click the *Drop a field or click to add* field for *Group by*, then create a filter for each website traffic source.
+. In the editor, click *Add or drag-and-drop a field* for *Group by*.
 
-.. From *Select a function*, click *Filters*.
+Create a filter for each website traffic source:
 
-.. Click *All records*, enter the following, then press Return:
+. From *Select a function*, click *Filters*.
+
+. Click *All records*, enter the following in the query bar, then press Return:
 
 * *KQL* &mdash; `referer : *facebook.com*`
 
 * *Label* &mdash; `Facebook`
 
-.. Click *Add a filter*, enter the following, then press Return:
+. Click *Add a filter*, enter the following in the query bar, then press Return:
 
 * *KQL* &mdash; `referer : *twitter.com*`
 
 * *Label* &mdash; `Twitter`
 
-.. Click *Add a filter*, enter the following, then press Return:
+. Click *Add a filter*, enter the following in the query bar, then press Return:
 
 * *KQL* &mdash; `NOT referer : *twitter.com* OR NOT referer: *facebook.com*`
 
 * *Label* &mdash; `Other`
 
-.. Click *Close*.
+. Click *Close*.
 
-Add a geography grouping:
+Add the user geography grouping:
 
-. From the *Available fields* list, drag *geo.src* to the workspace.
+. From the *Available fields* list, drag *geo.srcdest* to the workspace.
 
-. To change the *Group by* order, drag *Top values of geo.src* so that it appears first.
+. To change the *Group by* order, drag *Top values of geo.srcdest* in the layer pane so that appears first.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_7_2.png[Treemap visualization]
 
-. To view only the Facebook and Twitter data, remove the *Other* category. 
+Remove the documents that do not match the filter criteria:
 
-.. In the layer pane, click *Top values of geo.src*.
+. In the layer pane, click *Top values of geo.srcdest*.
 
-.. Open the *Advanced* dropdown, deselect *Group other values as "Other"*, then click *Close*.
+. Click *Advanced*, then deselect *Group other values as "Other"*, the click *Close*.
++
+[role="screenshot"]
+image::images/lens_treemapMultiLevelChart_7.16.png[Treemap visualization]
 
 . Click *Save and return*.
 
-. Add a panel title.
+Add a panel title:
 
-.. Open the panel menu, then select *Edit panel title*.
+. Open the panel menu, then select *Edit panel title*.
 
-.. In the *Panel title* field, enter `Page views by location and referrer`, then click *Save*.
+. In the *Panel title* field, enter `Page views by location and referrer`, then click *Save*.
 
 [float]
 [[arrange-the-lens-panels]]
@@ -317,7 +350,7 @@ image::images/lens_end_to_end_7_2.png[Treemap visualization]
 
 Resize and move the panels so they all appear on the dashboard without scrolling.
 
-Decrease the size of the following panels, then move them to the first row:
+Decrease the size of the following panels, then move the panels to the first row:
 
 * *Unique visitors* 
 
@@ -325,7 +358,10 @@ Decrease the size of the following panels, then move them to the first row:
 
 * *Sum of bytes from large requests*
 
-* *hour_of_day*
+* *Website traffic*
++
+[role="screenshot"]
+image::images/lens_logsDashboard_7.16.png[Logs dashboard]
 
 [discrete]
 === Save the dashboard

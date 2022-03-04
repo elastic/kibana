@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
@@ -30,7 +30,11 @@ export async function mountManagementSection(
   render(
     <I18nProvider>
       <KibanaContextProvider
-        services={{ http: coreSetup.http, application: coreStart.application }}
+        services={{
+          http: coreSetup.http,
+          application: coreStart.application,
+          uiSettings: coreStart.uiSettings,
+        }}
       >
         <InternalApiClientProvider apiClient={apiClient}>
           <IlmPolicyStatusContextProvider>

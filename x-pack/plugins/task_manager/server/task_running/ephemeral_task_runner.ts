@@ -12,6 +12,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity } from 'lodash';
 import { Logger, ExecutionContextStart } from '../../../../../src/core/server';
@@ -47,6 +48,9 @@ import {
   TaskRunner,
   TaskRunningInstance,
   TaskRunResult,
+  TASK_MANAGER_RUN_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
 
 type Opts = {
@@ -75,6 +79,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
+  private uuid: string;
   private readonly executionContext: ExecutionContextStart;
 
   /**
@@ -102,6 +107,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.executionContext = executionContext;
+    this.uuid = uuid.v4();
   }
 
   /**
@@ -109,6 +115,21 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
    */
   public get id() {
     return this.instance.task.id;
+  }
+
+  /**
+   * Gets the exeuction id of this task instance.
+   */
+  public get taskExecutionId() {
+    return `${this.id}::${this.uuid}`;
+  }
+
+  /**
+   * Test whether given execution ID identifies a different execution of this same task
+   * @param id
+   */
+  public isSameTask(executionId: string) {
+    return executionId.startsWith(this.id);
   }
 
   /**
@@ -188,9 +209,11 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
     this.logger.debug(`Running ephemeral task ${this}`);
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager ephemeral run', {
+    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
+    apmTrans?.addLabels({ ephemeral: true });
+
     const modifiedContext = await this.beforeRun({
       taskInstance: asConcreteInstance(this.instance.task),
     });
@@ -243,7 +266,11 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {
@@ -277,6 +304,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   public async cancel() {
     const { task } = this;
     if (task?.cancel) {
+      // it will cause the task state of "running" to be cleared
       this.task = undefined;
       return task.cancel();
     }

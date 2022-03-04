@@ -6,86 +6,57 @@
  */
 
 import React, { ReactNode, useMemo } from 'react';
-import { Observable, of } from 'rxjs';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { useHistory } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { merge } from 'lodash';
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { createCallApmApi } from '../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { MlLocatorDefinition } from '../../../../ml/public';
 
-const uiSettings: Record<string, unknown> = {
-  [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
-    {
-      from: 'now/d',
-      to: 'now/d',
-      display: 'Today',
-    },
-    {
-      from: 'now/w',
-      to: 'now/w',
-      display: 'This week',
-    },
-  ],
-  [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
-    from: 'now-15m',
-    to: 'now',
-  },
-  [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
-    pause: false,
-    value: 100000,
-  },
-};
+const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
-const mockCore = {
+const mockCore = merge({}, coreStart, {
   application: {
     capabilities: {
       apm: {},
       ml: {},
     },
-    currentAppId$: new Observable(),
-    getUrlForApp: (appId: string) => '',
-    navigateToUrl: (url: string) => {},
-  },
-  chrome: {
-    docTitle: { change: () => {} },
-    setBreadcrumbs: () => {},
-    setHelpExtension: () => {},
-    setBadge: () => {},
-  },
-  docLinks: {
-    DOC_LINK_VERSION: '0',
-    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-    links: {
-      apm: {},
-    },
-  },
-  http: {
-    basePath: {
-      prepend: (path: string) => `/basepath${path}`,
-      get: () => `/basepath`,
-    },
-  },
-  i18n: {
-    Context: ({ children }: { children: ReactNode }) => children,
-  },
-  notifications: {
-    toasts: {
-      addWarning: () => {},
-      addDanger: () => {},
-    },
   },
   uiSettings: {
-    get: (key: string) => uiSettings[key],
-    get$: (key: string) => of(mockCore.uiSettings.get(key)),
+    get: (key: string) => {
+      const uiSettings: Record<string, unknown> = {
+        [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
+          {
+            from: 'now/d',
+            to: 'now/d',
+            display: 'Today',
+          },
+          {
+            from: 'now/w',
+            to: 'now/w',
+            display: 'This week',
+          },
+        ],
+        [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
+          from: 'now-15m',
+          to: 'now',
+        },
+        [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
+          pause: false,
+          value: 100000,
+        },
+      };
+      return uiSettings[key];
+    },
   },
-};
+});
 
 const mockConfig: ConfigSchema = {
   serviceMapEnabled: true,
@@ -118,16 +89,22 @@ const mockPlugin = {
   },
 };
 
-const mockAppMountParameters = {
-  setHeaderActionMenu: () => {},
+const mockCorePlugins = {
+  embeddable: {},
+  inspector: {},
+  maps: {},
+  observability: {},
+  data: {},
 };
 
 export const mockApmPluginContextValue = {
-  appMountParameters: mockAppMountParameters,
+  appMountParameters: coreMock.createAppMountParameters('/basepath'),
   config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+  corePlugins: mockCorePlugins,
+  deps: {},
 };
 
 export function MockApmPluginContextWrapper({
@@ -135,7 +112,7 @@ export function MockApmPluginContextWrapper({
   value = {} as ApmPluginContextValue,
   history,
 }: {
-  children?: React.ReactNode;
+  children?: ReactNode;
   value?: ApmPluginContextValue;
   history?: History;
 }) {

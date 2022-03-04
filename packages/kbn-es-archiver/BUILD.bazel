@@ -1,6 +1,6 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-es-archiver"
 PKG_REQUIRE_NAME = "@kbn/es-archiver"
@@ -34,7 +34,6 @@ RUNTIME_DEPS = [
   "//packages/kbn-utils",
   "@npm//@elastic/elasticsearch",
   "@npm//aggregate-error",
-  "@npm//bluebird",
   "@npm//chance",
   "@npm//globby",
   "@npm//json-stable-stringify",
@@ -44,14 +43,13 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-test",
-  "//packages/kbn-utils",
+  "//packages/kbn-dev-utils:npm_module_types",
+  "//packages/kbn-test:npm_module_types",
+  "//packages/kbn-utils:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//aggregate-error",
   "@npm//globby",
   "@npm//zlib",
-  "@npm//@types/bluebird",
   "@npm//@types/chance",
   "@npm//@types/jest",
   "@npm//@types/json-stable-stringify",
@@ -81,10 +79,8 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )
@@ -92,7 +88,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -108,6 +104,23 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

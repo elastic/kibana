@@ -45,13 +45,16 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName(scriptedFiledName);
       await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
-      const response = await es.update({
-        index: '.kibana',
-        id: 'index-pattern:logstash-*',
-        body: {
-          doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
+      const response = await es.update(
+        {
+          index: '.kibana',
+          id: 'index-pattern:logstash-*',
+          body: {
+            doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
+          },
         },
-      });
+        { meta: true }
+      );
       log.debug(JSON.stringify(response));
       expect(response.body.result).to.be('updated');
       await PageObjects.settings.setFieldFormat('url');
@@ -76,13 +79,16 @@ export default function ({ getService, getPageObjects }) {
         ).findAllByCssSelector('[data-test-subj="toggle"]')
       )[0].click();
       await PageObjects.settings.setFieldFormat('url');
-      const response = await es.update({
-        index: '.kibana',
-        id: 'index-pattern:logstash-*',
-        body: {
-          doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },
+      const response = await es.update(
+        {
+          index: '.kibana',
+          id: 'index-pattern:logstash-*',
+          body: {
+            doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },
+          },
         },
-      });
+        { meta: true }
+      );
       log.debug(JSON.stringify(response));
       expect(response.body.result).to.be('updated');
       await PageObjects.settings.controlChangeSave();

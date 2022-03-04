@@ -23,6 +23,7 @@ import {
   CrawlerDomain,
   CrawlerDomainValidationResult,
   CrawlerDomainValidationResultChange,
+  CrawlerDomainValidationResultFromServer,
   CrawlerDomainValidationStepName,
 } from '../../types';
 import { crawlDomainValidationToResult, crawlerDataServerToClient } from '../../utils';
@@ -36,11 +37,13 @@ import {
 export interface AddDomainLogicValues {
   addDomainFormInputValue: string;
   allowSubmit: boolean;
+  canIgnoreValidationFailure: boolean;
   domainValidationResult: CrawlerDomainValidationResult;
   entryPointValue: string;
   errors: string[];
   hasBlockingFailure: boolean;
   hasValidationCompleted: boolean;
+  ignoreValidationFailure: boolean;
   isValidationLoading: boolean;
   displayValidation: boolean;
 }
@@ -60,6 +63,7 @@ export interface AddDomainLogicActions {
   setDomainValidationResult(change: CrawlerDomainValidationResultChange): {
     change: CrawlerDomainValidationResultChange;
   };
+  setIgnoreValidationFailure(newValue: boolean): boolean;
   startDomainValidation(): void;
   submitNewDomain(): void;
   validateDomainInitialVerification(
@@ -83,6 +87,7 @@ const DEFAULT_SELECTOR_VALUES = {
     },
   } as CrawlerDomainValidationResult,
   allowSubmit: false,
+  ignoreValidationFailure: false,
   isValidationLoading: false,
 };
 
@@ -96,6 +101,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
     onSubmitNewDomainError: (errors) => ({ errors }),
     setAddDomainFormInputValue: (newValue) => newValue,
     setDomainValidationResult: (change: CrawlerDomainValidationResultChange) => ({ change }),
+    setIgnoreValidationFailure: (newValue) => newValue,
     startDomainValidation: true,
     submitNewDomain: true,
     validateDomainInitialVerification: (newValue, newEntryPointValue) => ({
@@ -154,6 +160,14 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         onSubmitNewDomainError: (_, { errors }) => errors,
       },
     ],
+    ignoreValidationFailure: [
+      DEFAULT_SELECTOR_VALUES.ignoreValidationFailure,
+      {
+        clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.ignoreValidationFailure,
+        setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.ignoreValidationFailure,
+        setIgnoreValidationFailure: (_, newValue: boolean) => newValue,
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
     isValidationLoading: [
@@ -173,9 +187,32 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       (domainValidationResult: CrawlerDomainValidationResult) =>
         !!Object.values(domainValidationResult.steps).find((step) => step.blockingFailure),
     ],
+    canIgnoreValidationFailure: [
+      () => [selectors.hasValidationCompleted, selectors.domainValidationResult],
+      (hasValidationCompleted: boolean, domainValidationResult: CrawlerDomainValidationResult) => {
+        if (!hasValidationCompleted) {
+          return false;
+        }
+
+        return (
+          domainValidationResult.steps.indexingRestrictions.blockingFailure ||
+          domainValidationResult.steps.contentVerification.blockingFailure
+        );
+      },
+    ],
     allowSubmit: [
-      () => [selectors.hasValidationCompleted, selectors.hasBlockingFailure],
-      (hasValidationCompleted, hasBlockingFailure) => hasValidationCompleted && !hasBlockingFailure,
+      () => [
+        selectors.ignoreValidationFailure,
+        selectors.hasValidationCompleted,
+        selectors.hasBlockingFailure,
+      ],
+      (ignoreValidationFailure, hasValidationCompleted, hasBlockingFailure) => {
+        if (ignoreValidationFailure) {
+          return true;
+        }
+
+        return hasValidationCompleted && !hasBlockingFailure;
+      },
     ],
     displayValidation: [
       () => [selectors.isValidationLoading, selectors.hasValidationCompleted],
@@ -207,7 +244,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       const route = '/internal/app_search/crawler/validate_url';
 
       try {
-        const data = await http.post(route, {
+        const data = await http.post<CrawlerDomainValidationResultFromServer>(route, {
           body: JSON.stringify({ url: values.addDomainFormInputValue.trim(), checks }),
         });
         const result = crawlDomainValidationToResult(data);

@@ -9,13 +9,13 @@ import { SavedObjectSanitizedDoc } from 'kibana/server';
 import {
   CaseAttributes,
   CaseFullExternalService,
-  CASE_SAVED_OBJECT,
   ConnectorTypes,
-  noneConnectorId,
-} from '../../../common';
-import { getNoneCaseConnector } from '../../common';
+  NONE_CONNECTOR_ID,
+} from '../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { getNoneCaseConnector } from '../../common/utils';
 import { createExternalService, ESCaseConnectorWithId } from '../../services/test_utils';
-import { caseConnectorIdMigration } from './cases';
+import { caseConnectorIdMigration, removeCaseType } from './cases';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const create_7_14_0_case = ({
@@ -116,7 +116,7 @@ describe('case migrations', () => {
 
     it('does not create a reference when the external_service.connector_id is none', () => {
       const caseSavedObject = create_7_14_0_case({
-        externalService: createExternalService({ connector_id: noneConnectorId }),
+        externalService: createExternalService({ connector_id: NONE_CONNECTOR_ID }),
       });
 
       const migratedConnector = caseConnectorIdMigration(
@@ -247,7 +247,7 @@ describe('case migrations', () => {
     it('does not create a reference and preserves the existing external_service fields when connector_id is null', () => {
       const caseSavedObject = create_7_14_0_case({
         externalService: {
-          connector_id: null,
+          connector_id: 'none',
           connector_name: '.jira',
           external_id: '100',
           external_title: 'awesome',
@@ -348,6 +348,27 @@ describe('case migrations', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('removeCaseType', () => {
+    it('removes the type field from the document', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          type: 'individual',
+          title: 'case',
+        },
+        type: 'abc',
+        references: [],
+      };
+
+      expect(removeCaseType(doc)).toEqual({
+        ...doc,
+        attributes: {
+          title: doc.attributes.title,
+        },
+      });
     });
   });
 });

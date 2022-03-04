@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import SimpleGit from 'simple-git';
-import { fromNode as fcb } from 'bluebird';
+import SimpleGit from 'simple-git/promise';
 
 import { REPO_ROOT } from '@kbn/utils';
 import { File } from '../file';
@@ -22,7 +21,7 @@ import { File } from '../file';
 export async function getFilesForCommit(gitRef) {
   const simpleGit = new SimpleGit(REPO_ROOT);
   const gitRefForDiff = gitRef ? gitRef : '--cached';
-  const output = await fcb((cb) => simpleGit.diff(['--name-status', gitRefForDiff], cb));
+  const output = await simpleGit.diff(['--name-status', gitRefForDiff]);
 
   return (
     output

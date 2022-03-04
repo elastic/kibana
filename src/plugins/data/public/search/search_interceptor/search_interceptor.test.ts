@@ -8,7 +8,7 @@
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup, CoreStart } from '../../../../../core/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../core/public/mocks';
 import { IEsSearchRequest } from '../../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../../../kibana_utils/public';
@@ -119,7 +119,9 @@ describe('SearchInterceptor', () => {
       }),
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
+      executionContext: mockCoreSetup.executionContext,
       session: sessionService,
+      theme: themeServiceMock.createSetupContract(),
     });
   });
 
@@ -141,7 +143,6 @@ describe('SearchInterceptor', () => {
         new PainlessError({
           statusCode: 400,
           message: 'search_phase_execution_exception',
-          // @ts-expect-error searchPhaseException is not properly typed json
           attributes: searchPhaseException.error,
         })
       );
@@ -543,7 +544,12 @@ describe('SearchInterceptor', () => {
           .catch(() => {});
         expect(fetchMock.mock.calls[0][0]).toEqual(
           expect.objectContaining({
-            options: { sessionId, isStored: true, isRestore: true, strategy: 'ese' },
+            options: {
+              sessionId,
+              isStored: true,
+              isRestore: true,
+              strategy: 'ese',
+            },
           })
         );
 

@@ -7,7 +7,7 @@
 
 import { ExistsFilter, Filter } from '@kbn/es-query';
 import {
-  buildAlertsRuleIdFilter,
+  buildAlertsFilter,
   buildAlertStatusesFilter,
   buildAlertStatusFilter,
   buildThreatMatchFilter,
@@ -18,21 +18,21 @@ jest.mock('./actions');
 describe('alerts default_config', () => {
   describe('buildAlertsRuleIdFilter', () => {
     test('given a rule id this will return an array with a single filter', () => {
-      const filters: Filter[] = buildAlertsRuleIdFilter('rule-id-1');
+      const filters: Filter[] = buildAlertsFilter('rule-id-1');
       const expectedFilter: Filter = {
         meta: {
           alias: null,
           negate: false,
           disabled: false,
           type: 'phrase',
-          key: 'signal.rule.id',
+          key: 'kibana.alert.rule.rule_id',
           params: {
             query: 'rule-id-1',
           },
         },
         query: {
           match_phrase: {
-            'signal.rule.id': 'rule-id-1',
+            'kibana.alert.rule.rule_id': 'rule-id-1',
           },
         },
       };
@@ -48,15 +48,10 @@ describe('alerts default_config', () => {
             alias: null,
             disabled: false,
             negate: false,
-            key: 'signal.rule.threat_mapping',
-            type: 'exists',
-            value: 'exists',
+            key: 'kibana.alert.rule.type',
+            type: 'term',
           },
-          query: {
-            exists: {
-              field: 'signal.rule.threat_mapping',
-            },
-          },
+          query: { term: { 'kibana.alert.rule.type': 'threat_match' } },
         };
         expect(filters).toHaveLength(1);
         expect(filters[0]).toEqual(expectedFilter);
@@ -75,7 +70,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'signal.status',
+          key: 'kibana.alert.workflow_status',
           negate: false,
           params: {
             query: 'acknowledged',
@@ -87,12 +82,12 @@ describe('alerts default_config', () => {
             should: [
               {
                 term: {
-                  'signal.status': 'acknowledged',
+                  'kibana.alert.workflow_status': 'acknowledged',
                 },
               },
               {
                 term: {
-                  'signal.status': 'in-progress',
+                  'kibana.alert.workflow_status': 'in-progress',
                 },
               },
             ],
@@ -109,7 +104,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'signal.status',
+          key: 'kibana.alert.workflow_status',
           negate: false,
           params: {
             query: 'open',
@@ -118,7 +113,7 @@ describe('alerts default_config', () => {
         },
         query: {
           term: {
-            'signal.status': 'open',
+            'kibana.alert.workflow_status': 'open',
           },
         },
       };
@@ -141,17 +136,17 @@ describe('alerts default_config', () => {
             should: [
               {
                 term: {
-                  'signal.status': 'open',
+                  'kibana.alert.workflow_status': 'open',
                 },
               },
               {
                 term: {
-                  'signal.status': 'acknowledged',
+                  'kibana.alert.workflow_status': 'acknowledged',
                 },
               },
               {
                 term: {
-                  'signal.status': 'in-progress',
+                  'kibana.alert.workflow_status': 'in-progress',
                 },
               },
             ],

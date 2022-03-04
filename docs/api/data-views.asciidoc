@@ -1,0 +1,42 @@
+[[data-views-api]]
+== Data views API
+
+experimental[] Manage data views, formerly known as {kib} index patterns.
+
+WARNING: Do not write documents directly to the `.kibana` index. When you write directly
+to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
+
+WARNING: Use the data views APIs for managing data views instead of lower-level <<saved-objects-api, saved objects API>>.
+
+The following data views APIs are available: 
+
+* Data views
+    ** <<data-views-api-get, Get data view API>> to retrieve a single data view
+    ** <<data-views-api-create, Create data view API>> to create data view
+    ** <<data-views-api-update, Update data view API>> to partially updated data view
+    ** <<data-views-api-delete, Delete data view API>> to delete a data view
+* Default data views
+    ** <<data-views-api-default-get, Get default data view API>> to retrieve a default data view
+    ** <<data-views-api-default-set, Set default data view API>> to set a default data view
+* Fields
+    ** <<data-views-fields-api-update, Update data view field>> to change field metadata, such as `count`, `customLabel` and `format`
+* Runtime fields
+    ** <<data-views-runtime-field-api-get, Get runtime field API>> to retrieve a runtime field
+    ** <<data-views-runtime-field-api-create, Create runtime field API>> to create a runtime field
+    ** <<data-views-runtime-field-api-upsert, Upsert runtime field API>> to create or update a runtime field
+    ** <<data-views-runtime-field-api-update, Update runtime field API>> to partially update an existing runtime field
+    ** <<data-views-runtime-field-api-delete, Delete runtime field API>> to delete a runtime field
+
+include::data-views/get.asciidoc[]
+include::data-views/create.asciidoc[]
+include::data-views/update.asciidoc[]
+include::data-views/delete.asciidoc[]
+include::data-views/default-get.asciidoc[]
+include::data-views/default-set.asciidoc[]
+include::data-views/update-fields.asciidoc[]
+include::data-views/runtime-fields/get.asciidoc[]
+include::data-views/runtime-fields/create.asciidoc[]
+include::data-views/runtime-fields/upsert.asciidoc[]
+include::data-views/runtime-fields/update.asciidoc[]
+include::data-views/runtime-fields/delete.asciidoc[]
+

@@ -37,6 +37,7 @@ export function EsDeleteAllIndicesProvider({ getService }: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         const indices = Object.keys(resp.body) as string[];

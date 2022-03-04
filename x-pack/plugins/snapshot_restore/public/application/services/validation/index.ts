@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-export {
-  RepositoryValidation,
-  RepositorySettingsValidation,
-  validateRepository,
-} from './validate_repository';
+export type { RepositoryValidation, RepositorySettingsValidation } from './validate_repository';
+export { validateRepository } from './validate_repository';
 
-export { RestoreValidation, validateRestore } from './validate_restore';
+export type { RestoreValidation } from './validate_restore';
+export { validateRestore } from './validate_restore';
 
-export { PolicyValidation, validatePolicy, ValidatePolicyHelperData } from './validate_policy';
+export type { PolicyValidation, ValidatePolicyHelperData } from './validate_policy';
+export { validatePolicy } from './validate_policy';

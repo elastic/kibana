@@ -10,8 +10,7 @@ import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../../common/mock/match_media';
-import { mockIndexPattern } from '../../../common/mock/index_pattern';
-import { TestProviders } from '../../../common/mock/test_providers';
+import { mockIndexPattern, TestProviders } from '../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
 import { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
@@ -24,8 +23,14 @@ jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 
+jest.mock('../../../common/lib/kibana/hooks', () => ({
+  useNavigateTo: () => ({
+    navigateTo: jest.fn(),
+  }),
+}));
+
 jest.mock('../../../common/containers/source', () => ({
-  useWithSource: jest.fn().mockReturnValue({ indicesExist: true, indexPattern: mockIndexPattern }),
+  useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
 }));
 
 jest.mock('../../../common/containers/use_global_time', () => ({

@@ -7,17 +7,17 @@
 
 import React, { memo } from 'react';
 import { EuiCallOut, EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../common/lib/kibana';
-import { APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { getEndpointListPath } from '../../../management/common/routing';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
 export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) => {
   const { getUrlForApp } = useKibana().services.application;
   const endpointsPath = getEndpointListPath({ name: 'endpointList' });
-  const endpointsLink = getUrlForApp(APP_ID, { path: endpointsPath });
-  const handleGetStartedClick = useNavigateToAppEventHandler(APP_ID, {
+  const endpointsLink = getUrlForApp(APP_UI_ID, { path: endpointsPath });
+  const handleGetStartedClick = useNavigateToAppEventHandler(APP_UI_ID, {
     path: endpointsPath,
   });
 

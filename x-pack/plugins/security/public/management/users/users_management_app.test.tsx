@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { act } from '@testing-library/react';
+import { noop } from 'lodash';
+
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
+import type { Unmount } from 'src/plugins/management/public/types';
 
 import { securityMock } from '../../mocks';
 import { usersManagementApp } from './users_management_app';
@@ -22,16 +26,20 @@ describe('usersManagementApp', () => {
     const setBreadcrumbs = jest.fn();
     const history = scopedHistoryMock.create({ pathname: '/create' });
 
-    const unmount = await usersManagementApp.create({ authc, getStartServices }).mount({
-      basePath: '/',
-      element,
-      setBreadcrumbs,
-      history,
+    let unmount: Unmount = noop;
+    await act(async () => {
+      unmount = await usersManagementApp.create({ authc, getStartServices }).mount({
+        basePath: '/',
+        element,
+        setBreadcrumbs,
+        history,
+        theme$: themeServiceMock.createTheme$(),
+      });
     });
 
     expect(setBreadcrumbs).toHaveBeenLastCalledWith([
       { href: '/', text: 'Users' },
-      { href: '/create', text: 'Create' },
+      { text: 'Create' },
     ]);
 
     unmount();

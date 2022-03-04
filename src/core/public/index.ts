@@ -64,6 +64,8 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
+import type { ThemeServiceSetup, ThemeServiceStart } from './theme';
+import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
 
 export type {
   PackageInfo,
@@ -157,6 +159,7 @@ export type {
   IAnonymousPaths,
   IExternalUrl,
   IHttpInterceptController,
+  ResponseErrorBody,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,
 } from './http';
@@ -184,13 +187,19 @@ export type {
   ErrorToastOptions,
 } from './notifications';
 
+export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from './theme';
+
 export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
 
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
 
-export type { KibanaExecutionContext } from './execution_context';
+export type {
+  KibanaExecutionContext,
+  ExecutionContextSetup,
+  ExecutionContextStart,
+} from './execution_context';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -217,6 +226,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   notifications: NotificationsSetup;
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
+  /** {@link ExecutionContextSetup} */
+  executionContext: ExecutionContextSetup;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -226,6 +237,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
+  /** {@link ThemeServiceSetup} */
+  theme: ThemeServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
@@ -258,6 +271,8 @@ export interface CoreStart {
   chrome: ChromeStart;
   /** {@link DocLinksStart} */
   docLinks: DocLinksStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
   /** {@link HttpStart} */
   http: HttpStart;
   /** {@link SavedObjectsStart} */
@@ -274,6 +289,8 @@ export interface CoreStart {
   fatalErrors: FatalErrorsStart;
   /** {@link DeprecationsServiceStart} */
   deprecations: DeprecationsServiceStart;
+  /** {@link ThemeServiceStart} */
+  theme: ThemeServiceStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values

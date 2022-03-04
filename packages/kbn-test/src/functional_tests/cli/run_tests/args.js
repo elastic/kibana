@@ -10,6 +10,7 @@ import { resolve } from 'path';
 
 import dedent from 'dedent';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { EsVersion } from '../../../functional_test_runner';
 
 const options = {
   help: { desc: 'Display this menu and exit.' },
@@ -64,6 +65,7 @@ const options = {
   debug: { desc: 'Run in debug mode.' },
   quiet: { desc: 'Only log errors.' },
   silent: { desc: 'Log nothing.' },
+  'dry-run': { desc: 'Report tests without executing them.' },
 };
 
 export function displayHelp() {
@@ -135,6 +137,11 @@ export function processOptions(userOptions, defaultConfigPaths) {
   userOptions.assertNoneExcluded = !!userOptions['assert-none-excluded'];
   delete userOptions['assert-none-excluded'];
 
+  if (userOptions['dry-run']) {
+    userOptions.dryRun = userOptions['dry-run'];
+    delete userOptions['dry-run'];
+  }
+
   function createLogger() {
     return new ToolingLog({
       level: pickLevelFromFlags(userOptions),
@@ -147,6 +154,7 @@ export function processOptions(userOptions, defaultConfigPaths) {
     configs: configs.map((c) => resolve(c)),
     createLogger,
     extraKbnOpts: userOptions._,
+    esVersion: EsVersion.getDefault(),
   };
 }
 

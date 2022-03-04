@@ -8,7 +8,7 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -50,6 +50,7 @@ interface Props {
   addPairControlLabel: string | React.ReactElement;
   defaultPairs: Pair[];
   onChange: (pairs: Pair[]) => void;
+  onBlur?: () => void;
   'data-test-subj'?: string;
 }
 
@@ -57,6 +58,7 @@ export const KeyValuePairsField = ({
   addPairControlLabel,
   defaultPairs,
   onChange,
+  onBlur,
   'data-test-subj': dataTestSubj,
 }: Props) => {
   const [pairs, setPairs] = useState<Pair[]>(defaultPairs);
@@ -167,6 +169,7 @@ export const KeyValuePairsField = ({
                     data-test-subj={`keyValuePairsKey${index}`}
                     value={key}
                     onChange={(event) => handleOnChange(event, index, true)}
+                    onBlur={() => onBlur?.()}
                   />
                 }
                 endControl={
@@ -177,6 +180,7 @@ export const KeyValuePairsField = ({
                     data-test-subj={`keyValuePairsValue${index}`}
                     value={value}
                     onChange={(event) => handleOnChange(event, index, false)}
+                    onBlur={() => onBlur?.()}
                   />
                 }
                 delimiter=":"

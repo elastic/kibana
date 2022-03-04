@@ -35,6 +35,7 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+            id: 'test',
           },
           dns: {
             question: {
@@ -68,6 +69,7 @@ describe('TelemetryEventsSender', () => {
               malware_signature: {
                 key1: 'X',
               },
+              header_bytes: 'data in here',
               quarantine_result: true,
               quarantine_message: 'this file is bad',
               something_else: 'nope',
@@ -107,6 +109,7 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+            id: 'test',
           },
           dns: {
             question: {
@@ -132,6 +135,7 @@ describe('TelemetryEventsSender', () => {
                 key1: 'X',
                 key2: 'Y',
               },
+              header_bytes: 'data in here',
               malware_classification: {
                 key1: 'X',
               },

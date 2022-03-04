@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DOCS_PREFIX } from '../../routes';
+import { DOCS_URL } from '../../routes';
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 
 import { getEngineBreadcrumbs } from '../engine';
@@ -26,7 +26,7 @@ export const EmptyEngineOverview: React.FC = () => {
           { defaultMessage: 'Engine setup' }
         ),
         rightSideItems: [
-          <EuiButton href={`${DOCS_PREFIX}/index.html`} target="_blank" iconType="popout">
+          <EuiButton href={DOCS_URL} target="_blank" iconType="popout">
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.overview.empty.headingAction',
               { defaultMessage: 'View documentation' }

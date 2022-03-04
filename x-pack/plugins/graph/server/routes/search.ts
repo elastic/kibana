@@ -44,14 +44,12 @@ export function registerSearchRoute({
         try {
           return response.ok({
             body: {
-              resp: (
-                await esClient.asCurrentUser.search({
-                  index: request.body.index,
-                  body: request.body.body,
-                  track_total_hits: true,
-                  ignore_throttled: !includeFrozen,
-                })
-              ).body,
+              resp: await esClient.asCurrentUser.search({
+                index: request.body.index,
+                body: request.body.body,
+                track_total_hits: true,
+                ...(includeFrozen ? { ignore_throttled: false } : {}),
+              }),
             },
           });
         } catch (error) {

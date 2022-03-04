@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-export {
-  ISavedObjectDecoratorRegistry,
-  SavedObjectDecoratorRegistry,
-  SavedObjectDecoratorConfig,
-} from './registry';
-export { SavedObjectDecorator, SavedObjectDecoratorFactory } from './types';
+export type { ISavedObjectDecoratorRegistry, SavedObjectDecoratorConfig } from './registry';
+export { SavedObjectDecoratorRegistry } from './registry';
+export type { SavedObjectDecorator, SavedObjectDecoratorFactory } from './types';

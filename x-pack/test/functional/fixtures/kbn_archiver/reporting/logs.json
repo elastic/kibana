@@ -1,0 +1,498 @@
+{
+  "attributes": {
+    "fields": "[{\"name\":\"referer\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"agent\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:image:width\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"xss.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"headings.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:description\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"meta.user.lastname\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.article:tag.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"geo.dest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.twitter:image\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.article:section.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"utc_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.twitter:card\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"meta.char\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"clientip\",\"type\":\"ip\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:image:height\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"host\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"machine.ram\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"links\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"id\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@tags.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"phpmemory\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.twitter:card.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"ip\",\"type\":\"ip\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:image\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.article:modified_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:site_name.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"request.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.article:tag\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"agent.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"spaces\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:site.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"headings\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"relatedContent.og:image.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"request\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"index.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"extension\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"memory\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"relatedContent.twitter:site\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:description\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"geo.coordinates\",\"type\":\"geo_point\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"meta.related\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:title.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:title.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"response.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@message.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"machine.os\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.article:section\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"xss\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"links.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:title\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"geo.srcdest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"extension.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"machine.os.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@tags\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"host.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:type.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"geo.src\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"spaces.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:image:height.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:description.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:site_name\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:title\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"@message\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:image.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@timestamp\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"bytes\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"response\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"meta.user.firstname\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:image:width.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:description.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.article:published_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false}]",
+    "timeFieldName": "@timestamp",
+    "title": "logstash-*"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "logstash-*",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzIsMl0="
+}
+
+{
+  "attributes": {
+    "columns": [
+      "clientip",
+      "extension"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[{\"meta\":{\"alias\":\"datefilter🥜\",\"negate\":false,\"type\":\"range\",\"key\":\"@timestamp\",\"value\":\"Sep 20, 2015 @ 03:19:40.307 to Sep 20, 2015 @ 03:26:56.221\",\"params\":{\"gte\":\"2015-09-20T10:19:40.307Z\",\"lt\":\"2015-09-20T10:26:56.221Z\"},\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"range\":{\"@timestamp\":{\"gte\":\"2015-09-20T10:19:40.307Z\",\"lt\":\"2015-09-20T10:26:56.221Z\"}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "A Saved Search With a DATE FILTER",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "d7a79750-3edd-11e9-99cc-4d80163ee9e7",
+  "migrationVersion": {
+    "search": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2019-03-05T00:34:28.706Z",
+  "version": "WzMsMl0="
+}
+
+{
+  "attributes": {
+    "buildNum": 9007199254740991,
+    "dateFormat:tz": "UTC",
+    "defaultIndex": "89655130-5013-11e9-bce7-4dabcb8bef24",
+    "csv:quoteValues": true,
+    "csv:separator": ",",
+    "search:queryLanguage": "lucene"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "8.0.0",
+  "migrationVersion": {
+    "config": "8.0.0"
+  },
+  "references": [],
+  "type": "config",
+  "updated_at": "2019-07-09T21:57:57.129Z",
+  "version": "WzMsMl0="
+}
+
+{
+  "attributes": {
+    "fieldFormatMap": "{\"date\":{\"id\":\"date_nanos\"}}",
+    "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"date\",\"type\":\"date\",\"esTypes\":[\"date_nanos\"],\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"message\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+    "title": "nanos"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "907bc200-a294-11e9-a900-ef10e0ac769e",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2019-07-09T22:07:17.154Z",
+  "version": "WzQsMl0="
+}
+
+{
+  "attributes": {
+    "columns": [
+      "date",
+      "message",
+      "_id"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "date",
+        "desc"
+      ]
+    ],
+    "title": "TESTS DATE NANOS",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "e4035040-a295-11e9-a900-ef10e0ac769e",
+  "migrationVersion": {
+    "search": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "907bc200-a294-11e9-a900-ef10e0ac769e",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2019-07-09T22:07:22.318Z",
+  "version": "WzUsMl0="
+}
+
+{
+  "id": "timeless-sales",
+  "attributes": {
+    "fields": "[{\"name\":\"@date\",\"type\":\"date\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"metric\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"name\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"power\",\"type\":\"number\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"success\",\"type\":\"boolean\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+    "title": "sales"
+  },
+  "migrationVersion": {
+    "index-pattern": "6.5.0"
+  },
+  "references": [
+  ],
+  "type": "index-pattern",
+  "updated_at": "2019-03-05T22:52:35.474Z"
+}
+
+{
+  "id": "71e3ee20-3f99-11e9-b8ee-6b9604f2f877",
+  "migrationVersion": {
+    "search": "7.0.0"
+  },
+  "references": [
+    {
+      "id": "timeless-sales",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "timeless-sales",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "attributes": {
+    "columns": [
+      "name",
+      "power"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"key\":\"power\",\"negate\":false,\"params\":{\"gte\":1,\"lt\":null},\"type\":\"range\",\"value\":\"1 to \",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"range\":{\"power\":{\"gte\":1,\"lt\":null}}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [[
+      "power",
+      "asc"
+    ]],
+    "title": "SALE POWER",
+    "version": 1
+  },
+  "type": "search",
+  "updated_at": "2019-03-05T22:53:08.481Z"
+}
+
+{
+  "attributes": {
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "0385075d-0f3b-4a12-b3c0-68a95781d48d": {
+              "columnOrder": [
+                "03195b79-6315-40f7-b513-5222330367d7",
+                "2cb8226c-bfe5-4505-9c66-9f99ff6b5822"
+              ],
+              "columns": {
+                "03195b79-6315-40f7-b513-5222330367d7": {
+                  "dataType": "date",
+                  "isBucketed": true,
+                  "label": "date",
+                  "operationType": "date_histogram",
+                  "params": {
+                    "interval": "auto"
+                  },
+                  "scale": "interval",
+                  "sourceField": "date"
+                },
+                "2cb8226c-bfe5-4505-9c66-9f99ff6b5822": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "scale": "ratio",
+                  "sourceField": "Records"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "layers": [
+          {
+            "accessors": [
+              "2cb8226c-bfe5-4505-9c66-9f99ff6b5822"
+            ],
+            "layerId": "0385075d-0f3b-4a12-b3c0-68a95781d48d",
+            "layerType": "data",
+            "position": "top",
+            "seriesType": "bar_stacked",
+            "showGridlines": false,
+            "xAccessor": "03195b79-6315-40f7-b513-5222330367d7"
+          }
+        ],
+        "legend": {
+          "isVisible": true,
+          "position": "right"
+        },
+        "preferredSeriesType": "bar_stacked",
+        "title": "Empty XY chart",
+        "valueLabels": "hide"
+      }
+    },
+    "title": "distogram",
+    "visualizationType": "lnsXY"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "4b498150-6821-11eb-9375-4bd700f7d8d4",
+  "migrationVersion": {
+    "lens": "8.0.0"
+  },
+  "references": [],
+  "type": "lens",
+  "updated_at": "2021-02-06T02:16:17.129Z",
+  "version": "WzgsMl0="
+}
+
+{
+  "attributes": {
+    "fieldAttrs": "{\"_id\":{\"count\":1},\"gender\":{\"count\":1},\"name\":{\"count\":1},\"value\":{\"count\":1},\"year\":{\"count\":1},\"years_ago\":{\"count\":1},\"date_informal\":{\"count\":1}}",
+    "fieldFormatMap": "{\"years_ago\":{\"id\":\"number\",\"params\":{\"pattern\":\"0,0.00000000000000000000\"}},\"year\":{\"id\":\"number\",\"params\":{\"pattern\":\"0\"}},\"date_informal\":{\"id\":\"date\",\"params\":{\"parsedUrl\":{\"origin\":\"http://localhost:5620\",\"pathname\":\"/app/dashboards\",\"basePath\":\"\"},\"pattern\":\"MMM Do YY\"}}}",
+    "fields": "[{\"count\":1,\"script\":\"2019 - doc['year'].value\",\"lang\":\"painless\",\"name\":\"years_ago\",\"type\":\"number\",\"scripted\":true,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"count\":1,\"script\":\"doc['date'].value\",\"lang\":\"painless\",\"name\":\"date_informal\",\"type\":\"date\",\"scripted\":true,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "date",
+    "title": "babynames"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "89655130-5013-11e9-bce7-4dabcb8bef24",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2021-02-06T02:15:25.565Z",
+  "version": "WzcsMl0="
+}
+
+{
+  "attributes": {
+    "columns": [
+      "_id",
+      "name",
+      "gender",
+      "value",
+      "year",
+      "years_ago",
+      "date_informal"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"sort\":[{\"date\":\"desc\"}],\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"fieldsFromSource\":[\"_id\",\"_index\",\"_score\",\"_source\",\"_type\",\"date\",\"gender\",\"name\",\"percent\",\"value\",\"year\",\"years_ago\",\"date_informal\"],\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "date",
+        "desc"
+      ]
+    ],
+    "title": "namessearch",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "cdb908f0-6820-11eb-9375-4bd700f7d8d4",
+  "migrationVersion": {
+    "search": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "89655130-5013-11e9-bce7-4dabcb8bef24",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2021-02-06T02:15:31.253Z",
+  "version": "WzYsMl0="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"version\":\"7.11.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":13,\"i\":\"56f914c9-9597-4781-bfc6-229d40b382c7\"},\"panelIndex\":\"56f914c9-9597-4781-bfc6-229d40b382c7\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_56f914c9-9597-4781-bfc6-229d40b382c7\"},{\"version\":\"7.11.0\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":13,\"w\":48,\"h\":14,\"i\":\"f3ea512f-e441-4206-8aa7-000b1418ea2b\"},\"panelIndex\":\"f3ea512f-e441-4206-8aa7-000b1418ea2b\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_f3ea512f-e441-4206-8aa7-000b1418ea2b\"}]",
+    "timeRestore": false,
+    "title": "names dashboard",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "52af6d10-6821-11eb-9375-4bd700f7d8d4",
+  "migrationVersion": {
+    "dashboard": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "cdb908f0-6820-11eb-9375-4bd700f7d8d4",
+      "name": "56f914c9-9597-4781-bfc6-229d40b382c7:panel_56f914c9-9597-4781-bfc6-229d40b382c7",
+      "type": "search"
+    },
+    {
+      "id": "4b498150-6821-11eb-9375-4bd700f7d8d4",
+      "name": "f3ea512f-e441-4206-8aa7-000b1418ea2b:panel_f3ea512f-e441-4206-8aa7-000b1418ea2b",
+      "type": "lens"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2021-02-06T02:16:29.540Z",
+  "version": "WzksMl0="
+}
+
+{
+  "attributes": {
+    "@created": "2020-07-16T20:33:21.826Z",
+    "@timestamp": "2020-07-16T20:34:01.093Z",
+    "assets": {},
+    "colors": [
+      "#37988d",
+      "#c19628",
+      "#b83c6f",
+      "#3f9939",
+      "#1785b0",
+      "#ca5f35",
+      "#45bdb0",
+      "#f2bc33",
+      "#e74b8b",
+      "#4fbf48",
+      "#1ea6dc",
+      "#fd7643",
+      "#72cec3",
+      "#f5cc5d",
+      "#ec77a8",
+      "#7acf74",
+      "#4cbce4",
+      "#fd986f",
+      "#a1ded7",
+      "#f8dd91",
+      "#f2a4c5",
+      "#a6dfa2",
+      "#86d2ed",
+      "#fdba9f",
+      "#000000",
+      "#444444",
+      "#777777",
+      "#BBBBBB",
+      "#FFFFFF",
+      "rgba(255,255,255,0)"
+    ],
+    "css": ".canvasPage {\n\n}",
+    "height": 720,
+    "isWriteable": true,
+    "name": "Workpad of Death",
+    "page": 0,
+    "pages": [
+      {
+        "elements": [
+          {
+            "expression": "image \n  dataurl=\"https://via.placeholder.com/728x90.png?text=test+external+image\" mode=\"contain\"\n| render",
+            "id": "element-4612f502-7880-418b-8107-a629e9b842bc",
+            "position": {
+              "angle": 0,
+              "height": 300,
+              "left": 20,
+              "parent": null,
+              "top": 20,
+              "width": 500
+            }
+          }
+        ],
+        "groups": [],
+        "id": "page-28d24ed2-c162-408c-92b3-978d7433aa1d",
+        "style": {
+          "background": "#FFF"
+        },
+        "transition": {}
+      }
+    ],
+    "variables": [],
+    "width": 1080
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "workpad-e7464259-0b75-4b8c-81c8-8422b15ff201",
+  "migrationVersion": {
+    "canvas-workpad": "8.0.0"
+  },
+  "references": [],
+  "type": "canvas-workpad",
+  "updated_at": "2020-07-16T20:34:01.098Z",
+  "version": "WzIsMl0="
+}
+
+{
+  "attributes": {
+    "fieldAttrs": "{\"name\":{\"count\":1},\"updated_at\":{\"count\":1}}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "timestamp",
+    "title": "sparse_data",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "8e5af470-62de-11ec-a5fd-9f30aac1abbf",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2021-12-22T04:22:06.170Z",
+  "version": "WzI0MTQsMV0="
+}
+
+{
+  "attributes": {
+    "columns": [
+      "name",
+      "updated_at"
+    ],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "timestamp",
+        "desc"
+      ]
+    ],
+    "title": "Sparse Columns"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "c4367dd0-62de-11ec-a5fd-9f30aac1abbf",
+  "migrationVersion": {
+    "search": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "8e5af470-62de-11ec-a5fd-9f30aac1abbf",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2021-12-22T04:22:25.584Z",
+  "version": "WzI0MjAsMV0="
+}

@@ -378,9 +378,29 @@ describe('getOperationTypesForField', () => {
                 "operationType": "formula",
                 "type": "managedReference",
               },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "date",
+              "isBucketed": false,
+              "scale": "ratio",
+            },
+            "operations": Array [
               Object {
-                "operationType": "static_value",
-                "type": "managedReference",
+                "field": "timestamp",
+                "operationType": "min",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "max",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "last_value",
+                "type": "field",
               },
             ],
           },
@@ -395,6 +415,20 @@ describe('getOperationTypesForField', () => {
                 "field": "source",
                 "operationType": "last_value",
                 "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "number",
+              "isBucketed": false,
+              "isStaticValue": true,
+              "scale": "ratio",
+            },
+            "operations": Array [
+              Object {
+                "operationType": "static_value",
+                "type": "managedReference",
               },
             ],
           },

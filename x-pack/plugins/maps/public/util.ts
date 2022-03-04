@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import _ from 'lodash';
+import type { KibanaExecutionContext } from 'kibana/public';
+import { FONTS_API_PATH } from '../common/constants';
 import {
-  GIS_API_PATH,
-  EMS_FILES_CATALOGUE_PATH,
-  EMS_TILES_CATALOGUE_PATH,
-  EMS_GLYPHS_PATH,
-  EMS_APP_NAME,
-  FONTS_API_PATH,
-} from '../common/constants';
-import { getHttp, getTilemap, getKibanaVersion, getEMSSettings } from './kibana_services';
+  getHttp,
+  getTilemap,
+  getEMSSettings,
+  getMapsEmsStart,
+  getExecutionContext,
+} from './kibana_services';
 import { getLicenseId } from './licensed_features';
+import { makeExecutionContext } from '../common/execution_context';
 
 export function getKibanaTileMap(): unknown {
   return getTilemap();
@@ -28,7 +27,7 @@ export async function getEmsFileLayers(): Promise<FileLayer[]> {
     return [];
   }
 
-  return getEMSClient().getFileLayers();
+  return (await getEMSClient()).getFileLayers();
 }
 
 export async function getEmsTmsServices(): Promise<TMSService[]> {
@@ -36,45 +35,23 @@ export async function getEmsTmsServices(): Promise<TMSService[]> {
     return [];
   }
 
-  return getEMSClient().getTMSServices();
+  return (await getEMSClient()).getTMSServices();
 }
 
-function relativeToAbsolute(url: string): string {
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}
-
-let emsClient: EMSClient | null = null;
+let emsClientPromise: Promise<EMSClient> | null = null;
 let latestLicenseId: string | undefined;
-export function getEMSClient(): EMSClient {
-  if (!emsClient) {
-    const emsSettings = getEMSSettings();
-    const proxyPath = '';
-    const tileApiUrl = emsSettings!.isProxyElasticMapsServiceInMaps()
-      ? relativeToAbsolute(
-          getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}`)
-        )
-      : emsSettings!.getEMSTileApiUrl();
-    const fileApiUrl = emsSettings!.isProxyElasticMapsServiceInMaps()
-      ? relativeToAbsolute(
-          getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_FILES_CATALOGUE_PATH}`)
-        )
-      : emsSettings!.getEMSFileApiUrl();
-
-    emsClient = new EMSClient({
-      language: i18n.getLocale(),
-      appVersion: getKibanaVersion(),
-      appName: EMS_APP_NAME,
-      tileApiUrl,
-      fileApiUrl,
-      landingPageUrl: emsSettings!.getEMSLandingPageUrl(),
-      fetchFunction(url: string) {
-        return fetch(url);
-      },
-      proxyPath,
+async function getEMSClient(): Promise<EMSClient> {
+  if (!emsClientPromise) {
+    emsClientPromise = new Promise(async (resolve, reject) => {
+      try {
+        const emsClient = await getMapsEmsStart().createEMSClient();
+        resolve(emsClient);
+      } catch (error) {
+        reject(error);
+      }
     });
   }
+  const emsClient = await emsClientPromise;
   const licenseId = getLicenseId();
   if (latestLicenseId !== licenseId) {
     latestLicenseId = licenseId;
@@ -89,15 +66,28 @@ export function getGlyphUrl(): string {
     return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
 
-  return emsSettings!.isProxyElasticMapsServiceInMaps()
-    ? relativeToAbsolute(
-        getHttp().basePath.prepend(
-          `/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`
-        )
-      ) + `/{fontstack}/{range}`
-    : emsSettings!.getEMSFontLibraryUrl();
+  return emsSettings!.getEMSFontLibraryUrl();
 }
 
 export function isRetina(): boolean {
   return window.devicePixelRatio === 2;
+}
+
+export function makePublicExecutionContext(description: string): KibanaExecutionContext {
+  const topLevelContext = getExecutionContext().get();
+  const context = makeExecutionContext({
+    url: window.location.pathname,
+    description,
+  });
+
+  // Distinguish between running in maps app vs. embedded
+  return topLevelContext.name !== undefined && topLevelContext.name !== context.name
+    ? {
+        ...topLevelContext,
+        child: context,
+      }
+    : {
+        ...topLevelContext,
+        ...context,
+      };
 }

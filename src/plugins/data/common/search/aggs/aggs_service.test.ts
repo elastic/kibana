@@ -67,11 +67,16 @@ describe('Aggs service', () => {
           "date_range",
           "ip_range",
           "terms",
+          "multi_terms",
+          "rare_terms",
           "filter",
           "filters",
           "significant_terms",
+          "significant_text",
           "geohash_grid",
           "geotile_grid",
+          "sampler",
+          "diversified_sampler",
           "foo",
         ]
       `);
@@ -115,11 +120,16 @@ describe('Aggs service', () => {
           "date_range",
           "ip_range",
           "terms",
+          "multi_terms",
+          "rare_terms",
           "filter",
           "filters",
           "significant_terms",
+          "significant_text",
           "geohash_grid",
           "geotile_grid",
+          "sampler",
+          "diversified_sampler",
         ]
       `);
       expect(bStart.types.getAll().metrics.map((t) => t(aggTypesDependencies).name))
@@ -196,11 +206,10 @@ describe('Aggs service', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = service.start(startDeps);
-      expect(Object.keys(start).length).toBe(4);
+      expect(Object.keys(start).length).toBe(3);
       expect(start).toHaveProperty('calculateAutoTimeExpression');
       expect(start).toHaveProperty('createAggConfigs');
       expect(start).toHaveProperty('types');
-      expect(start).toHaveProperty('datatableUtilities');
     });
 
     test('types registry returns uninitialized type providers', () => {

@@ -104,12 +104,14 @@ export default function ({ getService }: FtrProviderContext) {
             'indexPatterns',
             'graph',
             'monitoring',
+            'observabilityCases',
             'savedObjectsManagement',
             'savedObjectsTagging',
             'ml',
             'apm',
             'stackAlerts',
             'canvas',
+            'generalCases',
             'infrastructure',
             'logs',
             'maps',
@@ -118,6 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
             'siem',
             'securitySolutionCases',
             'fleet',
+            'fleetv2',
           ].sort()
         );
       });

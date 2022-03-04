@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
 import {
@@ -117,6 +117,7 @@ export const useIndexData = (
     if (combinedRuntimeMappings !== undefined) {
       result = Object.keys(combinedRuntimeMappings).map((fieldName) => {
         const field = combinedRuntimeMappings[fieldName];
+        // @ts-expect-error @elastic/elasticsearch does not support yet "composite" type for runtime fields
         const schema = getDataGridSchemaFromESFieldType(field.type);
         return { id: fieldName, schema };
       });
@@ -203,11 +204,11 @@ export const useIndexData = (
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
     setCcsWarning(isCrossClusterSearch && isMissingFields);
-    setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
+    setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
     setRowCountRelation(
       typeof resp.hits.total === 'number'
         ? ('eq' as estypes.SearchTotalHitsRelation)
-        : resp.hits.total.relation
+        : resp.hits.total!.relation
     );
     setTableItems(docs);
     setStatus(INDEX_STATUS.LOADED);

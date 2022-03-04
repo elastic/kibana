@@ -14,14 +14,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
 import { StatefulTopN } from '../../top_n';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
-import { useSourcererScope } from '../../../containers/sourcerer';
+import { useSourcererDataView } from '../../../containers/sourcerer';
 import { TooltipWithKeyboardShortcut } from '../../accessibility';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from '../keyboard_shortcut_constants';
-import { Filter } from '../../../../../../../../src/plugins/data/public';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.hoverActions.showTopTooltip', {
@@ -85,7 +85,8 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           )
         ? SourcererScopeName.detections
         : SourcererScopeName.default;
-    const { browserFields, indexPattern } = useSourcererScope(activeScope);
+    const { browserFields, indexPattern } = useSourcererDataView(activeScope);
+
     const icon = iconType ?? 'visBarVertical';
     const side = iconSide ?? 'left';
     const buttonTitle = title ?? SHOW_TOP(field);

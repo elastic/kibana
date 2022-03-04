@@ -34,7 +34,6 @@ export const mapping = {
       },
     },
   },
-  browser_type: { type: 'keyword' },
   migration_version: { type: 'keyword' }, // new field (7.14) to distinguish reports that were scheduled with Task Manager
   jobtype: { type: 'keyword' },
   payload: { type: 'object', enabled: false },
@@ -54,10 +53,41 @@ export const mapping = {
   output: {
     type: 'object',
     properties: {
+      error_code: { type: 'keyword' },
       chunk: { type: 'long' },
       content_type: { type: 'keyword' },
       size: { type: 'long' },
       content: { type: 'object', enabled: false },
+    },
+  },
+  metrics: {
+    type: 'object',
+    properties: {
+      csv: {
+        type: 'object',
+        properties: {
+          rows: { type: 'long' },
+        },
+      },
+      pdf: {
+        type: 'object',
+        properties: {
+          pages: { type: 'long' },
+          cpu: { type: 'double' },
+          cpuInPercentage: { type: 'double' },
+          memory: { type: 'long' },
+          memoryInMegabytes: { type: 'double' },
+        },
+      },
+      png: {
+        type: 'object',
+        properties: {
+          cpu: { type: 'double' },
+          cpuInPercentage: { type: 'double' },
+          memory: { type: 'long' },
+          memoryInMegabytes: { type: 'double' },
+        },
+      },
     },
   },
 } as const;

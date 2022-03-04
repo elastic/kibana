@@ -36,7 +36,7 @@ const mapStatusCodeToBadgeColor = (statusCode: number) => {
   }
 
   if (statusCode <= 299) {
-    return 'secondary';
+    return 'success';
   }
 
   if (statusCode <= 399) {

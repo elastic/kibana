@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { InferSearchResponseOf, AggregateOf as AggregationResultOf, SearchHit } from './search';
 
 export type ESFilter = estypes.QueryDslQueryContainer;

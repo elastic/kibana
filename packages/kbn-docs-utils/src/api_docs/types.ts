@@ -34,6 +34,10 @@ export enum TypeKind {
   EnumKind = 'Enum',
   InterfaceKind = 'Interface',
   /**
+   * Interface children defined like [key: string]: Foo will be tagged as "any" type by typescript. Let's use a specialized type.
+   */
+  IndexSignature = 'IndexSignature',
+  /**
    * Maps to the typescript syntax kind `TypeReferences`. For example,
    * export type FooFn = () => string will be a TypeKind, not a FunctionKind.
    */
@@ -230,6 +234,17 @@ export interface ReferencedDeprecationsByPlugin {
   [key: string]: Array<{ deprecatedApi: ApiDeclaration; ref: ApiReference }>;
 }
 
+// A mapping of plugin owner to it's plugin deprecation list.
+export interface ReferencedDeprecationsByTeam {
+  // Key is the plugin owner.
+  [key: string]: ReferencedDeprecationsByPlugin;
+}
+
+export interface UnreferencedDeprecationsByPlugin {
+  // Key is the plugin id.
+  [key: string]: ApiDeclaration[];
+}
+
 // A mapping of deprecated API id to the places that are still referencing it.
 export interface ReferencedDeprecationsByAPI {
   [key: string]: { deprecatedApi: ApiDeclaration; references: ApiReference[] };
@@ -242,6 +257,7 @@ export interface ApiStats {
   apiCount: number;
   missingExports: number;
   deprecatedAPIsReferencedCount: number;
+  unreferencedDeprecatedApisCount: number;
 }
 
 export type PluginMetaInfo = ApiStats & {

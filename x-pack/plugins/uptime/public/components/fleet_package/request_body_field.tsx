@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { stringify, parse } from 'query-string';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabbedContent } from '@elastic/eui';
 import { Mode, MonacoEditorLangId } from './types';
@@ -15,6 +15,7 @@ import { CodeEditor } from './code_editor';
 
 interface Props {
   onChange: (requestBody: { type: Mode; value: string }) => void;
+  onBlur?: () => void;
   type: Mode;
   value: string;
 }
@@ -25,7 +26,7 @@ enum ResponseBodyType {
 }
 
 // TO DO: Look into whether or not code editor reports errors, in order to prevent form submission on an error
-export const RequestBodyField = ({ onChange, type, value }: Props) => {
+export const RequestBodyField = ({ onChange, onBlur, type, value }: Props) => {
   const [values, setValues] = useState<Record<ResponseBodyType, string>>({
     [ResponseBodyType.FORM]: type === Mode.FORM ? value : '',
     [ResponseBodyType.CODE]: type !== Mode.FORM ? value : '',
@@ -93,9 +94,10 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
           )}
           id={Mode.PLAINTEXT}
           languageId={MonacoEditorLangId.PLAINTEXT}
-          onChange={(code) =>
-            setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }))
-          }
+          onChange={(code) => {
+            setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }));
+            onBlur?.();
+          }}
           value={values[ResponseBodyType.CODE]}
         />
       ),
@@ -114,9 +116,10 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
           )}
           id={Mode.JSON}
           languageId={MonacoEditorLangId.JSON}
-          onChange={(code) =>
-            setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }))
-          }
+          onChange={(code) => {
+            setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }));
+            onBlur?.();
+          }}
           value={values[ResponseBodyType.CODE]}
         />
       ),
@@ -135,9 +138,10 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
           )}
           id={Mode.XML}
           languageId={MonacoEditorLangId.XML}
-          onChange={(code) =>
-            setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }))
-          }
+          onChange={(code) => {
+            setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }));
+            onBlur?.();
+          }}
           value={values[ResponseBodyType.CODE]}
         />
       ),
@@ -156,6 +160,7 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
           }
           defaultPairs={defaultFormPairs}
           onChange={onChangeFormFields}
+          onBlur={() => onBlur?.()}
         />
       ),
     },

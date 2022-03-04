@@ -11,8 +11,7 @@ import { format } from 'url';
 import del from 'del';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
-import { Client } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/dev-utils';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
@@ -51,7 +50,7 @@ export interface ICluster {
   start: () => Promise<void>;
   stop: () => Promise<void>;
   cleanup: () => Promise<void>;
-  getClient: () => KibanaClient;
+  getClient: () => Client;
   getHostUrls: () => string[];
 }
 
@@ -245,9 +244,10 @@ export function createTestEsCluster<
             esArgs: assignArgs(esArgs, overriddenArgs),
             esJavaOpts,
             // If we have multiple nodes, we shouldn't try setting up the native realm
-            // right away, or ES will complain as the cluster isn't ready. So we only
+            // right away or wait for ES to be green, the cluster isn't ready. So we only
             // set it up after the last node is started.
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+            skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
           });
         });
       }
@@ -280,9 +280,10 @@ export function createTestEsCluster<
     /**
      * Returns an ES Client to the configured cluster
      */
-    getClient(): KibanaClient {
+    getClient(): Client {
       return new Client({
         node: this.getHostUrls()[0],
+        Connection: HttpConnection,
       });
     }
 

@@ -10,9 +10,9 @@ import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { createInventoryMetricAlertType } from './alerting/inventory';
-import { createLogThresholdAlertType } from './alerting/log_threshold';
-import { createMetricThresholdAlertType } from './alerting/metric_threshold';
+import { createInventoryMetricRuleType } from './alerting/inventory';
+import { createLogThresholdRuleType } from './alerting/log_threshold';
+import { createMetricThresholdRuleType } from './alerting/metric_threshold';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
@@ -35,14 +35,12 @@ export class Plugin implements InfraClientPluginClass {
     }
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createInventoryMetricAlertType()
+      createInventoryMetricRuleType()
     );
 
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(createLogThresholdRuleType());
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdAlertType()
-    );
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createMetricThresholdAlertType()
+      createMetricThresholdRuleType()
     );
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_logs',

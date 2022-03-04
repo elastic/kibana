@@ -28,9 +28,6 @@ describe('Telemetry Collection Manager', () => {
   describe('everything works when no collection mechanisms are registered', () => {
     const telemetryCollectionManager = new TelemetryCollectionManagerPlugin(initializerContext);
     const setupApi = telemetryCollectionManager.setup(coreMock.createSetup(), { usageCollection });
-    test('All collectors are ready (there are none)', async () => {
-      await expect(setupApi.areAllCollectorsReady()).resolves.toBe(true);
-    });
     test('getStats returns empty', async () => {
       const config: StatsGetterConfig = { unencrypted: false };
       await expect(setupApi.getStats(config)).resolves.toStrictEqual([]);
@@ -45,6 +42,12 @@ describe('Telemetry Collection Manager', () => {
     const telemetryCollectionManager = new TelemetryCollectionManagerPlugin(initializerContext);
     const setupApi = telemetryCollectionManager.setup(coreMock.createSetup(), { usageCollection });
     const collectionStrategy = createCollectionStrategy(1);
+    beforeEach(() => {
+      // Reset cache on every request.
+      // 10s cache to avoid misatekly invalidating cache during test runs
+      // eslint-disable-next-line dot-notation
+      telemetryCollectionManager['cacheManager'].resetCache();
+    });
 
     describe('before start', () => {
       test('registers a collection strategy', () => {
@@ -132,6 +135,45 @@ describe('Telemetry Collection Manager', () => {
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
             ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
+
+          it('calls getStats with passed refreshCache config', async () => {
+            const getStatsCollectionConfig: jest.SpyInstance<
+              TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
+              // @ts-expect-error spying on private method.
+            > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
+            await setupApi.getStats(config);
+            await setupApi.getStats({ ...config, refreshCache: false });
+            await setupApi.getStats({ ...config, refreshCache: true });
+
+            expect(getStatsCollectionConfig).toBeCalledTimes(3);
+            expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(1, config, usageCollection);
+            expect(getStatsCollectionConfig).toHaveNthReturnedWith(
+              1,
+              expect.objectContaining({ refreshCache: false })
+            );
+
+            expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(
+              2,
+              expect.objectContaining({ refreshCache: false }),
+              usageCollection
+            );
+            expect(getStatsCollectionConfig).toHaveNthReturnedWith(
+              2,
+              expect.objectContaining({ refreshCache: false })
+            );
+
+            expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(
+              3,
+              expect.objectContaining({ refreshCache: true }),
+              usageCollection
+            );
+            expect(getStatsCollectionConfig).toHaveNthReturnedWith(
+              3,
+              expect.objectContaining({ refreshCache: true })
+            );
+
+            getStatsCollectionConfig.mockRestore();
+          });
         });
 
         describe('getOptInStats', () => {
@@ -175,9 +217,10 @@ describe('Telemetry Collection Manager', () => {
         });
       });
       describe('unencrypted: true', () => {
+        const mockRequest = httpServerMock.createKibanaRequest();
         const config: StatsGetterConfig = {
           unencrypted: true,
-          request: httpServerMock.createKibanaRequest(),
+          request: mockRequest,
         };
 
         describe('getStats', () => {
@@ -196,12 +239,39 @@ describe('Telemetry Collection Manager', () => {
             await expect(setupApi.getStats(config)).resolves.toStrictEqual([
               {
                 clusterUuid: 'clusterUuid',
-                stats: { ...basicStats, collectionSource: 'test_collection' },
+                stats: {
+                  ...basicStats,
+                  cacheDetails: { updatedAt: expect.any(String), fetchedAt: expect.any(String) },
+                  collectionSource: 'test_collection',
+                },
               },
             ]);
+
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
             ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+
+          it('calls getStats with config { refreshCache: true } even if set to false', async () => {
+            const getStatsCollectionConfig: jest.SpyInstance<
+              TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
+              // @ts-expect-error spying on private method.
+            > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
+            await setupApi.getStats(config);
+
+            expect(getStatsCollectionConfig).toBeCalledTimes(1);
+            expect(getStatsCollectionConfig).toBeCalledWith(
+              expect.not.objectContaining({ refreshCache: true }),
+              usageCollection
+            );
+            expect(getStatsCollectionConfig).toReturnWith(
+              expect.objectContaining({
+                refreshCache: true,
+                kibanaRequest: mockRequest,
+              })
+            );
+
+            getStatsCollectionConfig.mockRestore();
           });
         });
 

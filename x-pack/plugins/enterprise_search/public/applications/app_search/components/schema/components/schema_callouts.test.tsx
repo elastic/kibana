@@ -30,6 +30,7 @@ describe('SchemaCallouts', () => {
       hasErrors: false,
       activeReindexJobId: 'some-id',
     },
+    myRole: { canManageEngines: true },
   };
 
   beforeEach(() => {
@@ -78,6 +79,31 @@ describe('SchemaCallouts', () => {
     const wrapper = shallow(<SchemaCallouts />);
 
     expect(wrapper.find(UnconfirmedFieldsCallout)).toHaveLength(1);
+  });
+
+  describe('non-owner/admins', () => {
+    it('does not render an unsearched fields callout if user does not have access', () => {
+      setMockValues({
+        ...values,
+        hasUnconfirmedFields: true,
+        hasNewUnsearchedFields: true,
+        myRole: { canManageEngines: false },
+      });
+      const wrapper = shallow(<SchemaCallouts />);
+
+      expect(wrapper.find(UnsearchedFieldsCallout)).toHaveLength(0);
+    });
+
+    it('does not render an unconfirmed fields callout if user does not have access', () => {
+      setMockValues({
+        ...values,
+        hasUnconfirmedFields: true,
+        myRole: { canManageEngines: false },
+      });
+      const wrapper = shallow(<SchemaCallouts />);
+
+      expect(wrapper.find(UnconfirmedFieldsCallout)).toHaveLength(0);
+    });
   });
 
   describe('UnsearchedFieldsCallout', () => {

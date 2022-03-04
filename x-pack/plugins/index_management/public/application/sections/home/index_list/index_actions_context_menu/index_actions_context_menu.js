@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { every } from 'lodash';
 import {
@@ -70,7 +70,6 @@ export class IndexActionsContextMenu extends Component {
       return indexStatusByName[indexName] === INDEX_OPEN;
     });
     const allFrozen = every(indices, (index) => index.isFrozen);
-    const allUnfrozen = every(indices, (index) => !index.isFrozen);
     const selectedIndexCount = indexNames.length;
     const items = [];
     if (!detailPanel && selectedIndexCount === 1) {
@@ -178,23 +177,13 @@ export class IndexActionsContextMenu extends Component {
       });
       if (allFrozen) {
         items.push({
+          'data-test-subj': 'unfreezeIndexMenuButton',
           name: i18n.translate('xpack.idxMgmt.indexActionsMenu.unfreezeIndexLabel', {
             defaultMessage: 'Unfreeze {selectedIndexCount, plural, one {index} other {indices} }',
             values: { selectedIndexCount },
           }),
           onClick: () => {
             this.closePopoverAndExecute(unfreezeIndices);
-          },
-        });
-      } else if (allUnfrozen) {
-        items.push({
-          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.freezeIndexLabel', {
-            defaultMessage: 'Freeze {selectedIndexCount, plural, one {index} other {indices} }',
-            values: { selectedIndexCount },
-          }),
-          onClick: () => {
-            this.closePopover();
-            this.setState({ renderConfirmModal: this.renderConfirmFreezeModal });
           },
         });
       }
@@ -619,76 +608,6 @@ export class IndexActionsContextMenu extends Component {
     );
   };
 
-  renderConfirmFreezeModal = () => {
-    const { freezeIndices, indexNames } = this.props;
-
-    return (
-      <EuiConfirmModal
-        title={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle',
-          {
-            defaultMessage: 'Confirm freeze {count, plural, one {index} other {indices}}',
-            values: {
-              count: indexNames.length,
-            },
-          }
-        )}
-        onCancel={this.closeConfirmModal}
-        onConfirm={() => this.closePopoverAndExecute(freezeIndices)}
-        cancelButtonText={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.cancelButtonText',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText',
-          {
-            defaultMessage: 'Freeze {count, plural, one {index} other {indices}}',
-            values: {
-              count: indexNames.length,
-            },
-          }
-        )}
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeDescription"
-            defaultMessage="You are about to freeze {count, plural, one {this index} other {these indices}}:"
-            values={{ count: indexNames.length }}
-          />
-        </p>
-
-        <ul>
-          {indexNames.map((indexName) => (
-            <li key={indexName}>{indexName}</li>
-          ))}
-        </ul>
-
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle',
-            {
-              defaultMessage: 'Proceed with caution',
-            }
-          )}
-          color="warning"
-          iconType="help"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeEntityWarningDescription"
-              defaultMessage="
-                  A frozen index has little overhead on the cluster and is blocked for write operations.
-                  You can search a frozen index, but expect queries to be slower.
-                "
-            />
-          </p>
-        </EuiCallOut>
-      </EuiConfirmModal>
-    );
-  };
-
   render() {
     return (
       <AppContextConsumer>
@@ -740,9 +659,9 @@ export class IndexActionsContextMenu extends Component {
                 repositionOnScroll
               >
                 <EuiContextMenu
+                  data-test-subj="indexContextMenu"
                   initialPanelId={0}
                   panels={panels}
-                  data-test-subj="indexContextMenu"
                 />
               </EuiPopover>
             </div>

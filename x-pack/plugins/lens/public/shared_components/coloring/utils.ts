@@ -7,7 +7,7 @@
 
 import chroma from 'chroma-js';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { isColorDark } from '@elastic/eui';
 import type { Datatable } from 'src/plugins/expressions/public';
 import {
@@ -16,8 +16,16 @@ import {
   DEFAULT_COLOR_STEPS,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
+  DEFAULT_CONTINUITY,
 } from './constants';
+import type { ColorRange } from './color_ranges';
+import { toColorStops, sortColorRanges } from './color_ranges/utils';
+import type { PaletteConfigurationState, DataBounds } from './types';
 import type { CustomPaletteParams, ColorStop } from '../../../common';
+import {
+  checkIsMinContinuity,
+  checkIsMaxContinuity,
+} from '../../../../../../src/plugins/charts/common';
 
 /**
  * Some name conventions here:
@@ -36,30 +44,192 @@ import type { CustomPaletteParams, ColorStop } from '../../../common';
  * for a single change.
  */
 
+export function updateRangeType(
+  newRangeType: CustomPaletteParams['rangeType'],
+  activePalette: PaletteConfigurationState['activePalette'],
+  dataBounds: DataBounds,
+  palettes: PaletteRegistry,
+  colorRanges: PaletteConfigurationState['colorRanges']
+) {
+  const continuity = activePalette.params?.continuity ?? DEFAULT_CONTINUITY;
+  const params: CustomPaletteParams = { rangeType: newRangeType };
+  const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
+  const { min: oldMin, max: oldMax } = getDataMinMax(activePalette.params?.rangeType, dataBounds);
+  const newColorStops = getStopsFromColorRangesByNewInterval(colorRanges, {
+    oldInterval: oldMax - oldMin,
+    newInterval: newMax - newMin,
+    newMin,
+    oldMin,
+  });
+
+  if (activePalette.name === CUSTOM_PALETTE) {
+    const stops = getPaletteStops(
+      palettes,
+      { ...activePalette.params, colorStops: newColorStops, ...params },
+      { dataBounds }
+    );
+    params.colorStops = newColorStops;
+    params.stops = stops;
+  } else {
+    params.stops = getPaletteStops(
+      palettes,
+      { ...activePalette.params, ...params },
+      { prevPalette: activePalette.name, dataBounds }
+    );
+  }
+
+  const lastStop =
+    activePalette.name === CUSTOM_PALETTE
+      ? newColorStops[newColorStops.length - 1].stop
+      : params.stops[params.stops.length - 1].stop;
+
+  params.rangeMin = checkIsMinContinuity(continuity)
+    ? Number.NEGATIVE_INFINITY
+    : activePalette.name === CUSTOM_PALETTE
+    ? newColorStops[0].stop
+    : params.stops[0].stop;
+
+  params.rangeMax = checkIsMaxContinuity(continuity)
+    ? Number.POSITIVE_INFINITY
+    : activePalette.params?.rangeMax
+    ? calculateStop(activePalette.params.rangeMax, newMin, oldMin, oldMax - oldMin, newMax - newMin)
+    : lastStop > newMax
+    ? lastStop + 1
+    : newMax;
+
+  return params;
+}
+
+export function changeColorPalette(
+  newPalette: PaletteConfigurationState['activePalette'],
+  activePalette: PaletteConfigurationState['activePalette'],
+  palettes: PaletteRegistry,
+  dataBounds: DataBounds,
+  disableSwitchingContinuity: boolean
+) {
+  const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
+  const newParams: CustomPaletteParams = {
+    ...activePalette.params,
+    name: newPalette.name,
+    colorStops: undefined,
+    continuity: disableSwitchingContinuity
+      ? activePalette.params?.continuity ?? DEFAULT_CONTINUITY
+      : DEFAULT_CONTINUITY,
+    reverse: false, // restore the reverse flag
+  };
+
+  // we should pass colorStops so that correct calculate new color stops (if there was before) for custom palette
+  const newColorStops = getColorStops(
+    palettes,
+    activePalette.params?.colorStops || [],
+    activePalette,
+    dataBounds
+  );
+
+  if (isNewPaletteCustom) {
+    newParams.colorStops = newColorStops;
+  }
+
+  return {
+    ...newPalette,
+    params: {
+      ...newParams,
+      stops: getPaletteStops(palettes, newParams, {
+        prevPalette:
+          isNewPaletteCustom || activePalette.name === CUSTOM_PALETTE ? undefined : newPalette.name,
+        dataBounds,
+        mapFromMinValue: true,
+      }),
+      rangeMin: checkIsMinContinuity(newParams.continuity)
+        ? Number.NEGATIVE_INFINITY
+        : Math.min(dataBounds.min, newColorStops[0].stop),
+      rangeMax: checkIsMaxContinuity(newParams.continuity)
+        ? Number.POSITIVE_INFINITY
+        : Math.min(dataBounds.max, newColorStops[newColorStops.length - 1].stop),
+    },
+  };
+}
+
+export function withUpdatingPalette(
+  palettes: PaletteRegistry,
+  activePalette: PaletteConfigurationState['activePalette'],
+  colorRanges: ColorRange[],
+  dataBounds: DataBounds,
+  continuity?: CustomPaletteParams['continuity']
+) {
+  const currentContinuity = continuity ?? activePalette.params?.continuity ?? DEFAULT_CONTINUITY;
+  let sortedColorRanges = colorRanges;
+  if (
+    colorRanges.some((value, index) =>
+      index !== colorRanges.length - 1 ? value.start > colorRanges[index + 1].start : false
+    )
+  ) {
+    sortedColorRanges = sortColorRanges(colorRanges);
+  }
+
+  const { max, colorStops } = toColorStops(sortedColorRanges, currentContinuity);
+
+  const newPallete = getSwitchToCustomParams(
+    palettes,
+    activePalette!,
+    {
+      continuity: currentContinuity,
+      colorStops,
+      steps: activePalette!.params?.steps || DEFAULT_COLOR_STEPS,
+      reverse: activePalette!.params?.reverse,
+      rangeMin: colorStops[0]?.stop,
+      rangeMax: max,
+    },
+    dataBounds!
+  );
+
+  return {
+    activePalette: newPallete,
+    colorRanges,
+  };
+}
+
+export function withUpdatingColorRanges(
+  palettes: PaletteRegistry,
+  activePalette: PaletteConfigurationState['activePalette'],
+  dataBounds: DataBounds
+) {
+  return {
+    colorRanges: toColorRanges(
+      palettes,
+      activePalette.params?.colorStops || [],
+      activePalette,
+      dataBounds
+    ),
+    activePalette,
+  };
+}
+
 export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>(
   palettes: PaletteRegistry,
   activePalette: T,
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) {
   // make a copy of it as they have to be manipulated later on
-  let displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
+  const displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
     dataBounds,
     defaultPaletteName: activePalette?.name,
   });
 
   if (activePalette?.params?.reverse && activePalette?.params?.name !== CUSTOM_PALETTE) {
-    displayStops = reversePalette(displayStops);
+    return reversePalette(displayStops);
   }
   return displayStops;
 }
 
 // Need to shift the Custom palette in order to correctly visualize it when in display mode
-function shiftPalette(stops: ColorStop[], max: number) {
+export function shiftPalette(stops: ColorStop[], max: number) {
   // shift everything right and add an additional stop at the end
   const result = stops.map((entry, i, array) => ({
     ...entry,
     stop: i + 1 < array.length ? array[i + 1].stop : max,
   }));
+
   if (stops[stops.length - 1].stop === max) {
     // extends the range by a fair amount to make it work the extra case for the last stop === max
     const computedStep = getStepValue(stops, result, max) || 1;
@@ -68,6 +238,20 @@ function shiftPalette(stops: ColorStop[], max: number) {
     result[stops.length - 1].stop = max + step;
   }
   return result;
+}
+
+/** @internal **/
+export function calculateStop(
+  stopValue: number,
+  newMin: number,
+  oldMin: number,
+  oldInterval: number,
+  newInterval: number
+) {
+  if (oldInterval === 0) {
+    return newInterval + newMin;
+  }
+  return roundValue(newMin + ((stopValue - oldMin) * newInterval) / oldInterval);
 }
 
 // Utility to remap color stops within new domain
@@ -83,18 +267,40 @@ export function remapStopsByNewInterval(
   return (controlStops || []).map(({ color, stop }) => {
     return {
       color,
-      stop: newMin + ((stop - oldMin) * newInterval) / oldInterval,
+      stop: calculateStop(stop, newMin, oldMin, oldInterval, newInterval),
     };
   });
 }
 
-function getOverallMinMax(
-  params: CustomPaletteParams | undefined,
-  dataBounds: { min: number; max: number }
+// Utility to remap color stops within new domain
+export function getStopsFromColorRangesByNewInterval(
+  colorRanges: ColorRange[],
+  {
+    newInterval,
+    oldInterval,
+    newMin,
+    oldMin,
+  }: { newInterval: number; oldInterval: number; newMin: number; oldMin: number }
 ) {
+  return (colorRanges || []).map(({ color, start }) => {
+    let stop = calculateStop(start, newMin, oldMin, oldInterval, newInterval);
+
+    if (oldInterval === 0) {
+      stop = newInterval + newMin;
+    }
+
+    return {
+      color,
+      stop: roundValue(stop),
+    };
+  });
+}
+
+function getOverallMinMax(params: CustomPaletteParams | undefined, dataBounds: DataBounds) {
   const { min: dataMin, max: dataMax } = getDataMinMax(params?.rangeType, dataBounds);
-  const minStopValue = params?.colorStops?.[0]?.stop ?? Infinity;
-  const maxStopValue = params?.colorStops?.[params.colorStops.length - 1]?.stop ?? -Infinity;
+  const minStopValue = params?.colorStops?.[0]?.stop ?? Number.POSITIVE_INFINITY;
+  const maxStopValue =
+    params?.colorStops?.[params.colorStops.length - 1]?.stop ?? Number.NEGATIVE_INFINITY;
   const overallMin = Math.min(dataMin, minStopValue);
   const overallMax = Math.max(dataMax, maxStopValue);
   return { min: overallMin, max: overallMax };
@@ -102,7 +308,7 @@ function getOverallMinMax(
 
 export function getDataMinMax(
   rangeType: CustomPaletteParams['rangeType'] | undefined,
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) {
   const dataMin = rangeType === 'number' ? dataBounds.min : DEFAULT_MIN_STOP;
   const dataMax = rangeType === 'number' ? dataBounds.max : DEFAULT_MAX_STOP;
@@ -123,7 +329,7 @@ export function getPaletteStops(
     defaultPaletteName,
   }: {
     prevPalette?: string;
-    dataBounds: { min: number; max: number };
+    dataBounds: DataBounds;
     mapFromMinValue?: boolean;
     defaultPaletteName?: string;
   }
@@ -136,16 +342,18 @@ export function getPaletteStops(
     // need to generate the palette from the existing controlStops
     return shiftPalette(activePaletteParams.colorStops, maxValue);
   }
+
+  const steps = activePaletteParams?.steps || defaultPaletteParams.steps;
   // generate a palette from predefined ones and customize the domain
   const colorStopsFromPredefined = palettes
     .get(
       prevPalette || activePaletteParams?.name || defaultPaletteName || defaultPaletteParams.name
     )
-    .getCategoricalColors(defaultPaletteParams.steps, otherParams);
+    .getCategoricalColors(steps, otherParams);
 
-  const newStopsMin = mapFromMinValue ? minValue : interval / defaultPaletteParams.steps;
+  const newStopsMin = mapFromMinValue || interval === 0 ? minValue : interval / steps;
 
-  const stops = remapStopsByNewInterval(
+  return remapStopsByNewInterval(
     colorStopsFromPredefined.map((color, index) => ({ color, stop: index })),
     {
       newInterval: interval,
@@ -154,7 +362,6 @@ export function getPaletteStops(
       oldMin: 0,
     }
   );
-  return stops;
 }
 
 export function reversePalette(paletteColorRepresentation: ColorStop[] = []) {
@@ -196,11 +403,8 @@ export function isValidColor(colorString: string) {
   return colorString !== '' && /^#/.test(colorString) && isValidPonyfill(colorString);
 }
 
-export function roundStopValues(colorStops: ColorStop[]) {
-  return colorStops.map(({ color, stop }) => {
-    const roundedStop = Number(stop.toFixed(2));
-    return { color, stop: roundedStop };
-  });
+export function roundValue(value: number, fractionDigits: number = 2) {
+  return Number((Math.floor(value * 100) / 100).toFixed(fractionDigits));
 }
 
 // very simple heuristic: pick last two stops and compute a new stop based on the same distance
@@ -210,7 +414,8 @@ export function roundStopValues(colorStops: ColorStop[]) {
 export function getStepValue(colorStops: ColorStop[], newColorStops: ColorStop[], max: number) {
   const length = newColorStops.length;
   // workout the steps from the last 2 items
-  const dataStep = newColorStops[length - 1].stop - newColorStops[length - 2].stop || 1;
+  const dataStep =
+    length > 1 ? newColorStops[length - 1].stop - newColorStops[length - 2].stop || 1 : 1;
   let step = Number(dataStep.toFixed(2));
   if (max < colorStops[length - 1].stop + step) {
     const diffToMax = max - colorStops[length - 1].stop;
@@ -224,7 +429,7 @@ export function getSwitchToCustomParams(
   palettes: PaletteRegistry,
   activePalette: PaletteOutput<CustomPaletteParams>,
   newParams: CustomPaletteParams,
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) {
   // if it's already a custom palette just return the params
   if (activePalette?.params?.name === CUSTOM_PALETTE) {
@@ -269,7 +474,7 @@ export function getColorStops(
   palettes: PaletteRegistry,
   colorStops: Required<CustomPaletteParams>['stops'],
   activePalette: PaletteOutput<CustomPaletteParams>,
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) {
   // just forward the current stops if custom
   if (activePalette?.name === CUSTOM_PALETTE && colorStops?.length) {
@@ -290,36 +495,64 @@ export function getColorStops(
   return freshColorStops;
 }
 
-export function getContrastColor(color: string, isDarkTheme: boolean) {
-  const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorInk;
-  const lightColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorGhost;
+/**
+ * Both table coloring logic and EuiPaletteDisplay format implementation works differently than our current `colorStops`,
+ * by having the stop values at the end of each color segment rather than at the beginning: `stops` values are computed by a rightShift of `colorStops`.
+ * EuiPaletteDisplay has an additional requirement as it is always mapped against a domain [0, N]: from `stops` the `displayStops` are computed with
+ * some continuity enrichment and a remap against a [0, 100] domain to make the palette component work ok.
+ *
+ * These naming conventions would be useful to track the code flow in this feature as multiple transformations are happening
+ * for a single change.
+ */
+export function toColorRanges(
+  palettes: PaletteRegistry,
+  colorStops: CustomPaletteParams['colorStops'],
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  dataBounds: DataBounds
+) {
+  const {
+    continuity = defaultPaletteParams.continuity,
+    rangeType = defaultPaletteParams.rangeType,
+  } = activePalette.params ?? {};
+  const { min: dataMin, max: dataMax } = getDataMinMax(rangeType, dataBounds);
+
+  return getColorStops(palettes, colorStops || [], activePalette, dataBounds).map(
+    (colorStop, index, array) => {
+      const isFirst = index === 0;
+      const isLast = index === array.length - 1;
+
+      return {
+        color: colorStop.color,
+        start:
+          isFirst && checkIsMinContinuity(continuity)
+            ? Number.NEGATIVE_INFINITY
+            : colorStop.stop ?? activePalette.params?.rangeMin ?? dataMin,
+        end:
+          isLast && checkIsMaxContinuity(continuity)
+            ? Number.POSITIVE_INFINITY
+            : array[index + 1]?.stop ?? activePalette.params?.rangeMax ?? dataMax,
+      };
+    }
+  );
+}
+
+export function getContrastColor(
+  color: string,
+  isDarkTheme: boolean,
+  darkTextProp: 'euiColorInk' | 'euiTextColor' = 'euiColorInk',
+  lightTextProp: 'euiColorGhost' | 'euiTextColor' = 'euiColorGhost'
+) {
+  // when in light theme both text color and colorInk are dark and the choice
+  // may depends on the specific context.
+  const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars[darkTextProp];
+  // Same thing for light color in dark theme
+  const lightColor = isDarkTheme ? euiDarkVars[lightTextProp] : euiLightVars.euiColorGhost;
   const backgroundColor = isDarkTheme
     ? euiDarkVars.euiPageBackgroundColor
     : euiLightVars.euiPageBackgroundColor;
   const finalColor =
     chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
   return isColorDark(...finalColor.rgb()) ? lightColor : darkColor;
-}
-
-/**
- * Same as stops, but remapped against a range 0-100
- */
-export function getStopsForFixedMode(stops: ColorStop[], colorStops?: ColorStop[]) {
-  const referenceStops =
-    colorStops || stops.map(({ color }, index) => ({ color, stop: 20 * index }));
-  const fallbackStops = stops;
-
-  // what happens when user set two stops with the same value? we'll fallback to the display interval
-  const oldInterval =
-    referenceStops[referenceStops.length - 1].stop - referenceStops[0].stop ||
-    fallbackStops[fallbackStops.length - 1].stop - fallbackStops[0].stop;
-
-  return remapStopsByNewInterval(stops, {
-    newInterval: 100,
-    oldInterval,
-    newMin: 0,
-    oldMin: referenceStops[0].stop,
-  });
 }
 
 function getId(id: string) {
@@ -333,17 +566,35 @@ export function getNumericValue(rowValue: number | number[] | undefined) {
   return rowValue;
 }
 
+export const getFallbackDataBounds = (
+  rangeType: CustomPaletteParams['rangeType'] = 'percent'
+): DataBounds =>
+  rangeType === 'percent'
+    ? {
+        min: 0,
+        max: 100,
+        fallback: true,
+      }
+    : {
+        min: 1,
+        max: 1,
+        fallback: true,
+      };
+
 export const findMinMaxByColumnId = (
   columnIds: string[],
   table: Datatable | undefined,
   getOriginalId: (id: string) => string = getId
 ) => {
-  const minMax: Record<string, { min: number; max: number; fallback?: boolean }> = {};
+  const minMax: Record<string, DataBounds> = {};
 
   if (table != null) {
     for (const columnId of columnIds) {
       const originalId = getOriginalId(columnId);
-      minMax[originalId] = minMax[originalId] || { max: -Infinity, min: Infinity };
+      minMax[originalId] = minMax[originalId] || {
+        max: Number.NEGATIVE_INFINITY,
+        min: Number.POSITIVE_INFINITY,
+      };
       table.rows.forEach((row) => {
         const rowValue = row[columnId];
         const numericValue = getNumericValue(rowValue);
@@ -357,8 +608,8 @@ export const findMinMaxByColumnId = (
         }
       });
       // what happens when there's no data in the table? Fallback to a percent range
-      if (minMax[originalId].max === -Infinity) {
-        minMax[originalId] = { max: 100, min: 0, fallback: true };
+      if (minMax[originalId].max === Number.NEGATIVE_INFINITY) {
+        minMax[originalId] = getFallbackDataBounds();
       }
     }
   }

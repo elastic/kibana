@@ -1,0 +1,378 @@
+{
+  "id": "expressionError",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "expressionError",
+        "id": "def-public.debugRendererFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "debugRendererFactory",
+        "description": [],
+        "signature": [
+          "(core: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreSetup",
+            "text": "CoreSetup"
+          },
+          "<object, unknown>) => () => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<any>"
+        ],
+        "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionError",
+            "id": "def-public.debugRendererFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>"
+            ],
+            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionError",
+        "id": "def-public.errorRendererFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "errorRendererFactory",
+        "description": [],
+        "signature": [
+          "(core: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreSetup",
+            "text": "CoreSetup"
+          },
+          "<object, unknown>) => () => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<",
+          "ErrorRendererConfig",
+          ">"
+        ],
+        "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionError",
+            "id": "def-public.errorRendererFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>"
+            ],
+            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionError",
+        "id": "def-public.getDebugRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "getDebugRenderer",
+        "description": [],
+        "signature": [
+          "(theme$?: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreTheme",
+            "text": "CoreTheme"
+          },
+          ">) => () => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<any>"
+        ],
+        "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionError",
+            "id": "def-public.getDebugRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionError",
+        "id": "def-public.getErrorRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "getErrorRenderer",
+        "description": [],
+        "signature": [
+          "(theme$?: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreTheme",
+            "text": "CoreTheme"
+          },
+          ">) => () => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<",
+          "ErrorRendererConfig",
+          ">"
+        ],
+        "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionError",
+            "id": "def-public.getErrorRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionError",
+        "id": "def-public.LazyDebugComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyDebugComponent",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<{ payload: unknown; }> & { readonly _result: ({ payload }: { payload: unknown; }) => JSX.Element; }"
+        ],
+        "path": "src/plugins/expression_error/public/components/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "expressionError",
+            "id": "def-public.LazyDebugComponent.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionError",
+        "id": "def-public.LazyErrorComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyErrorComponent",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          " & { children?: React.ReactNode; }> & { readonly _result: React.FC<",
+          "Props",
+          ">; }"
+        ],
+        "path": "src/plugins/expression_error/public/components/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "expressionError",
+            "id": "def-public.LazyErrorComponent.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "expressionError",
+      "id": "def-public.ExpressionErrorPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ExpressionErrorPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "src/plugins/expression_error/public/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "expressionError",
+        "id": "def-common.JSON",
+        "type": "string",
+        "tags": [],
+        "label": "JSON",
+        "description": [],
+        "signature": [
+          "\"JSON\""
+        ],
+        "path": "src/plugins/expression_error/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionError",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"expressionError\""
+        ],
+        "path": "src/plugins/expression_error/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionError",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"expressionError\""
+        ],
+        "path": "src/plugins/expression_error/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public/';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
@@ -22,7 +22,7 @@ import {
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { TOUR_RESTORE_STEP_KEY, TOUR_TAKING_TOO_LONG_STEP_KEY } from './search_session_tour';
 import userEvent from '@testing-library/user-event';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createSearchUsageCollectorMock } from '../../../../../../../src/plugins/data/public/search/collectors/mocks';
 
 const coreStart = coreMock.createStart();

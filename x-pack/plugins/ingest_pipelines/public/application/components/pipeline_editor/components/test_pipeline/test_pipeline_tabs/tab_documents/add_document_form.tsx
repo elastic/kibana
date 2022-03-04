@@ -194,10 +194,10 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="check" color="secondary" />
+                <EuiIcon type="check" color="success" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText color="secondary" data-test-subj="addDocumentSuccess">
+                <EuiText color="success" data-test-subj="addDocumentSuccess">
                   {i18nTexts.addDocumentSuccessMessage}
                 </EuiText>
               </EuiFlexItem>

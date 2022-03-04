@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic",
+    "Austin Songer"
+  ],
+  "description": "Identifies when an AWS Route Table has been created.",
+  "false_positives": [
+    "Route Tables may be created by a system or network administrators. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Route Table creation by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule. Automated processes that use Terraform may lead to false positives."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS Route Table Created",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.action:(CreateRoute or CreateRouteTable) and \nevent.outcome:success\n",
+  "references": [
+    "https://docs.datadoghq.com/security_platform/default_rules/cloudtrail-aws-route-table-modified/",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRoute.html",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRouteTable"
+  ],
+  "risk_score": 21,
+  "rule_id": "e12c0318-99b1-44f2-830c-3a38a43207ca",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Network Security"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

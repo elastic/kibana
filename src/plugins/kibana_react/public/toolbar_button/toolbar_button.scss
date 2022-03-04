@@ -5,10 +5,8 @@
   // todo: once issue https://github.com/elastic/eui/issues/4730 is merged, this code might be safe to remove
   // Some toolbar buttons are just icons, but EuiButton comes with margin and min-width that need to be removed
   min-width: 0;
-  @include kbnThemeStyle('v8') {
-    border-width: $euiBorderWidthThin;
-    border-style: solid;
-  }
+  border-width: $euiBorderWidthThin;
+  border-style: solid;
 
   &[class*='--text'] {
     // Lighten the border color for all states

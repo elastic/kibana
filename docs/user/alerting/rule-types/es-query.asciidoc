@@ -2,12 +2,17 @@
 [[rule-type-es-query]]
 === {es} query
 
-The {es} query rule type runs a user-configured {es} query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.
+The {es} query rule type runs a user-configured query, compares the number of 
+matches to a configured threshold, and schedules actions to run when the 
+threshold condition is met.
+
 
 [float]
 ==== Create the rule
 
-Fill in the <<defining-rules-general-details, rule details>>, then select *{es} query*.
+Fill in the <<defining-rules-general-details, rule details>>, then select 
+*{es} query*.
+
 
 [float]
 ==== Define the conditions
@@ -17,30 +22,55 @@ Define properties to detect the condition.
 [role="screenshot"]
 image::user/alerting/images/rule-types-es-query-conditions.png[Five clauses define the condition to detect]
 
-Index:: This clause requires an *index or index pattern* and a *time field* that will be used for the *time window*.
-Size:: This clause specifies the number of documents to pass to the configured actions when the the threshold condition is met.
-{es} query:: This clause specifies the ES DSL query to execute. The number of documents that match this query will be evaluated against the threshold
-condition. Aggregations are not supported at this time. 
-Threshold:: This clause defines a threshold value and a comparison operator  (`is above`, `is above or equals`, `is below`, `is below or equals`, or `is between`). The number of documents that match the specified query is compared to this threshold.
-Time window:: This clause determines how far back to search for documents, using the *time field* set in the *index* clause. Generally this value should be set to a value higher than the *check every* value in the <<defining-rules-general-details, general rule details>>, to avoid gaps in detection. 
+Index:: Specifies an *index or data view* and a *time field* that is used for 
+the *time window*.
+Size:: Specifies the number of documents to pass to the configured actions when 
+the threshold condition is met.
+{es} query:: Specifies the ES DSL query to execute. The number of documents that 
+match this query is evaluated against the threshold condition. Only the `query` 
+field is used, other DSL fields are not considered. 
+Threshold:: Defines a threshold value and a comparison operator  (`is above`, 
+`is above or equals`, `is below`, `is below or equals`, or `is between`). The 
+number of documents that match the specified query is compared to this 
+threshold.
+Time window:: Defines how far back to search for documents, using the 
+*time field* set in the *index* clause. Generally this value should be set to a 
+value higher than the *check every* value in the 
+<<defining-rules-general-details, general rule details>>, to avoid gaps in 
+detection. 
+
 
 [float]
 ==== Add action variables
 
-<<defining-rules-actions-details, Add an action>> to run when the rule condition is met. The following variables are specific to the {es} query rule. You can also specify <<defining-rules-actions-variables, variables common to all rules>>.
+<<defining-rules-actions-details, Add an action>> to run when the rule condition 
+is met. The following variables are specific to the {es} query rule. You can 
+also specify 
+<<defining-rules-actions-variables, variables common to all rules>>.
 
-`context.title`:: A preconstructed title for the rule. Example: `rule term match alert query matched`.
+`context.title`:: A preconstructed title for the rule. Example: 
+`rule term match alert query matched`.
+
 `context.message`:: A preconstructed message for the rule. Example: +
-`rule 'term match alert' is active:` +
-`- Value: 42` +
-`- Conditions Met: count greater than 4 over 5m` +
-`- Timestamp: 2020-01-01T00:00:00.000Z`
+`rule 'my es-query' is active:` +
+`- Value: 2` +
+`- Conditions Met: Number of matching documents is greater than 1 over 5m` +
+`- Timestamp: 2022-02-03T20:29:27.732Z`
 
-`context.group`:: The name of the action group associated with the condition. Example: `query matched`.
-`context.date`:: The date, in ISO format, that the rule met the condition. Example: `2020-01-01T00:00:00.000Z`.
+`context.group`:: The name of the action group associated with the condition. 
+Example: `query matched`.
+
+`context.date`:: The date, in ISO format, that the rule met the condition. 
+Example: `2022-02-03T20:29:27.732Z`.
+
 `context.value`:: The value of the rule that met the condition.
-`context.conditions`:: A description of the condition. Example: `count greater than 4`.
-`context.hits`:: The most recent ES documents that matched the query. Using the https://mustache.github.io/[Mustache] template array syntax, you can iterate over these hits to get values from the ES documents into your actions.
+
+`context.conditions`:: A description of the condition. Example: 
+`count greater than 4`.
+
+`context.hits`:: The most recent documents that matched the query. Using the 
+https://mustache.github.io/[Mustache] template array syntax, you can iterate 
+over these hits to get values from the ES documents into your actions.
 +
 [role="screenshot"]
 image::images/rule-types-es-query-example-action-variable.png[Iterate over hits using Mustache template syntax]
@@ -51,8 +81,8 @@ image::images/rule-types-es-query-example-action-variable.png[Iterate over hits 
 
 Use the *Test query* feature to verify that your query DSL is valid.
 
-* Valid queries are executed against the configured *index* using the configured *time window*. The number of documents that
-match the query will be displayed.
+* Valid queries are executed against the configured *index* using the configured 
+*time window*. The number of documents that match the query is displayed.
 +
 [role="screenshot"]
 image::user/alerting/images/rule-types-es-query-valid.png[Test {es} query returns number of matches when valid]
@@ -63,29 +93,35 @@ image::user/alerting/images/rule-types-es-query-valid.png[Test {es} query return
 image::user/alerting/images/rule-types-es-query-invalid.png[Test {es} query shows error when invalid]
 
 [float]
-==== Match de-duplication
+==== Handling multiple matches of the same document
 
-The {es} query rule type performs de-duplication of document matches across rule executions. If you configure the rule with a schedule interval smaller than the time window, and a document matches a query in multiple rule executions, it will be alerted on only once.
+This rule type checks for duplication of document matches across rule 
+executions. If you configure the rule with a schedule interval smaller than the 
+time window, and a document matches a query in multiple rule executions, it is 
+alerted on only once.
 
-Suppose you have a rule configured to run every minute.  The rule uses a time window of 1 hour and checks if there are more than 99 matches for the query. The {es} query rule type will do the following:
+The rule uses the timestamp of the matches to avoid alerting on the same match 
+multiple times. The timestamp of the latest match is used for evaluating the 
+rule conditions when the rule is executed. Only matches between the latest 
+timestamp from the previous execution and the actual rule execution are 
+considered.
+
+Suppose you have a rule configured to run every minute. The rule uses a time 
+window of 1 hour and checks if there are more than 99 matches for the query. The 
+{es} query rule type does the following:
 
 [cols="3*<"]
 |===
-
 | `Execution 1 (0:00)`
 | Rule finds 113 matches in the last hour: `113 > 99`
-| Rule is active and user will be alerted.
-
+| Rule is active and user is alerted.
 | `Execution 2 (0:01)`
-| Rule finds 127 matches in the last hour. 105 of the matches are duplicates that were alerted on in Execution 1, so you actually have 22 matches: `22 !> 99`
+| Rule finds 127 matches in the last hour. 105 of the matches are duplicates that were already alerted on previously, so you actually have 22 matches: `22 !> 99`
 | No alert.
-
 | `Execution 3 (0:02)`
-| Rule finds 159 matches in the last hour. 88 of the matches are duplicates that were alerted on in Execution 1, so you actually have 71 matches: `71 !> 99`
+| Rule finds 159 matches in the last hour. 88 of the matches are duplicates that were already alerted on previously, so you actually have 71 matches: `71 !> 99`
 | No alert.
-
 | `Execution 4 (0:03)`
-| Rule finds 190 matches in the last hour. 71 of them are duplicates that were alerted on in Exeuction 1, so you actually have 119 matches: `119 > 99`
-| Rule is active and user will be alerted.
-
+| Rule finds 190 matches in the last hour. 71 of them are duplicates that were already alerted on previously, so you actually have 119 matches: `119 > 99`
+| Rule is active and user is alerted.
 |===

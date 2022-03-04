@@ -12,7 +12,8 @@ import Fs from 'fs/promises';
 import execa from 'execa';
 import { safeLoad } from 'js-yaml';
 
-import { run, REPO_ROOT } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
 
 const RELATIVE_JOBS_YAML_PATH = '.ci/ci_groups.yml';

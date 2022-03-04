@@ -14,14 +14,10 @@ const esTypes = tsEstree.AST_NODE_TYPES;
 const babelTypes = require('@babel/types');
 
 /** @typedef {import("eslint").Rule.RuleModule} Rule */
-/** @typedef {import("@typescript-eslint/parser").ParserServices} ParserServices */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Expression} Expression */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.ArrowFunctionExpression} ArrowFunctionExpression */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.FunctionExpression} FunctionExpression */
-/** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.TryStatement} TryStatement */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.NewExpression} NewExpression */
-/** @typedef {import("typescript").ExportDeclaration} ExportDeclaration */
-/** @typedef {import("eslint").Rule.RuleFixer} Fixer */
 
 const ERROR_MSG =
   'Passing an async function to the Promise constructor leads to a hidden promise being created and prevents handling rejections';

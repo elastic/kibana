@@ -8,7 +8,7 @@
 import Path from 'path';
 
 import { EsArchiver } from '@kbn/es-archiver';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import * as KibanaServer from '../../../../test/common/services/kibana_server';
 

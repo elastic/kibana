@@ -39,7 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await assertAlertsPageState({
         kuery: 'kibana.alert.evaluation.threshold > 75',
-        workflowStatus: 'Closed',
+        // workflowStatus: 'Closed',
         timeRange: '~ a month ago - ~ 10 days ago',
       });
     });
@@ -55,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await assertAlertsPageState({
         kuery: '',
-        workflowStatus: 'Open',
+        // workflowStatus: 'Open',
         timeRange: 'Last 15 minutes',
       });
     });
@@ -77,15 +77,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     async function assertAlertsPageState(expected: {
       kuery: string;
-      workflowStatus: string;
+      // workflowStatus: string;
       timeRange: string;
     }) {
       expect(await (await observability.alerts.common.getQueryBar()).getVisibleText()).to.be(
         expected.kuery
       );
-      expect(await observability.alerts.common.getWorkflowStatusFilterValue()).to.be(
-        expected.workflowStatus
-      );
+      // expect(await observability.alerts.common.getWorkflowStatusFilterValue()).to.be(
+      //   expected.workflowStatus
+      // );
       const timeRange = await observability.alerts.common.getTimeRange();
       expect(timeRange).to.be(expected.timeRange);
     }
@@ -93,8 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     async function assertLogsStreamPageTimeRange(expected: string) {
       // Only handles relative time ranges
       const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
-      const buttonText = await datePickerButton.getVisibleText();
-      const timerange = buttonText.substring(0, buttonText.indexOf('\n'));
+      const timerange = await datePickerButton.getVisibleText();
       expect(timerange).to.be(expected);
     }
 

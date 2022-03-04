@@ -14,7 +14,7 @@
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/elastic/kibana/tree/master/packages/elastic-eslint-config-kibana"
+    "url": "https://github.com/elastic/kibana/tree/main/packages/elastic-eslint-config-kibana"
   },
-  "homepage": "https://github.com/elastic/kibana/tree/master/packages/elastic-eslint-config-kibana"
+  "homepage": "https://github.com/elastic/kibana/tree/main/packages/elastic-eslint-config-kibana"
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HostAuthenticationsStrategyResponse } from '../../../../common/search_strategy/security_solution/hosts/authentications';
 
 export const mockData: { Authentications: HostAuthenticationsStrategyResponse } = {

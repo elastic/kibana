@@ -6,14 +6,15 @@ exports[`HeaderSection it renders 1`] = `
 >
   <EuiFlexGroup
     alignItems="center"
-    gutterSize="none"
+    direction="row"
+    gutterSize="s"
   >
     <EuiFlexItem
       grow={true}
     >
       <EuiFlexGroup
         alignItems="center"
-        gutterSize="none"
+        gutterSize="s"
         responsive={false}
       >
         <EuiFlexItem>
@@ -23,7 +24,11 @@ exports[`HeaderSection it renders 1`] = `
             <h4
               data-test-subj="header-section-title"
             >
-              Test title
+              <span
+                className="eui-textBreakNormal"
+              >
+                Test title
+              </span>
             </h4>
           </EuiTitle>
           <Subtitle

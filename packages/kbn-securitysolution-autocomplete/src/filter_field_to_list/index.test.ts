@@ -10,7 +10,7 @@ import { filterFieldToList } from '.';
 
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getListResponseMock } from '../list_schema/index.mock';
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 
 describe('#filterFieldToList', () => {
   test('it returns empty array if given a undefined for field', () => {
@@ -19,7 +19,7 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns empty array if filed does not contain esTypes', () => {
-    const field: IndexPatternFieldBase = {
+    const field: DataViewFieldBase = {
       name: 'some-name',
       type: 'some-type',
     };
@@ -28,7 +28,7 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns single filtered list of ip_range -> ip', () => {
-    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+    const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['ip'],
       name: 'some-name',
       type: 'ip',
@@ -40,7 +40,7 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns single filtered list of ip -> ip', () => {
-    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+    const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['ip'],
       name: 'some-name',
       type: 'ip',
@@ -52,7 +52,7 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns single filtered list of keyword -> keyword', () => {
-    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+    const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['keyword'],
       name: 'some-name',
       type: 'keyword',
@@ -64,7 +64,7 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns single filtered list of text -> text', () => {
-    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+    const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['text'],
       name: 'some-name',
       type: 'text',
@@ -76,7 +76,7 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns 2 filtered lists of ip_range -> ip', () => {
-    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+    const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['ip'],
       name: 'some-name',
       type: 'ip',
@@ -89,7 +89,7 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns 1 filtered lists of ip_range -> ip if the 2nd is not compatible type', () => {
-    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+    const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['ip'],
       name: 'some-name',
       type: 'ip',

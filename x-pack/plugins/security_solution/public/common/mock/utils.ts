@@ -12,7 +12,7 @@ import { tGridReducer } from '../../../../timelines/public';
 
 import { hostsReducer } from '../../hosts/store';
 import { networkReducer } from '../../network/store';
-import { uebaReducer } from '../../ueba/store';
+import { usersReducer } from '../../users/store';
 import { timelineReducer } from '../../timelines/store/timeline/reducer';
 import { managementReducer } from '../../management/store/reducer';
 import { ManagementPluginReducer } from '../../management';
@@ -56,11 +56,11 @@ const combineTimelineReducer = reduceReducers<any>(
 export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
   hosts: hostsReducer,
   network: networkReducer,
-  ueba: uebaReducer,
+  users: usersReducer,
   timeline: combineTimelineReducer,
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.
    */
-  management: managementReducer as ManagementPluginReducer['management'],
+  management: managementReducer as unknown as ManagementPluginReducer['management'],
 };

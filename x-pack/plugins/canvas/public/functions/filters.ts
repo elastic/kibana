@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import { get } from 'lodash';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
-import { interpretAst } from '../lib/run_interpreter';
-// @ts-expect-error untyped local
-import { getState } from '../state/store';
-import { getGlobalFilters, getWorkpadVariablesAsObject } from '../state/selectors/workpad';
-import { ExpressionValueFilter } from '../../types';
-import { getFunctionHelp } from '../../i18n';
+import { pluginServices } from '../services';
+import type { FiltersFunction } from '../../common/functions';
+import { buildFiltersFunction } from '../../common/functions';
 import { InitializeArguments } from '.';
 
 export interface Arguments {
@@ -30,7 +26,7 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
     // remove all allFilters that belong to a group
     return allFilters.filter((filter: string) => {
       const ast = fromExpression(filter);
-      const expGroups = get(ast, 'chain[0].arguments.filterGroup', []);
+      const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
       return expGroups.length === 0;
     });
   }
@@ -42,50 +38,22 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
   });
 }
 
-type FiltersFunction = ExpressionFunctionDefinition<
-  'filters',
-  null,
-  Arguments,
-  ExpressionValueFilter
->;
-
 export function filtersFunctionFactory(initialize: InitializeArguments): () => FiltersFunction {
-  return function filters(): FiltersFunction {
-    const { help, args: argHelp } = getFunctionHelp().filters;
+  const fn: FiltersFunction['fn'] = (input, { group, ungrouped }) => {
+    const { expressions, filters: filtersService } = pluginServices.getServices();
 
-    return {
-      name: 'filters',
-      type: 'filter',
-      help,
-      context: {
-        types: ['null'],
-      },
-      args: {
-        group: {
-          aliases: ['_'],
-          types: ['string'],
-          help: argHelp.group,
-          multi: true,
-        },
-        ungrouped: {
-          aliases: ['nogroup', 'nogroups'],
-          types: ['boolean'],
-          help: argHelp.ungrouped,
-          default: false,
-        },
-      },
-      fn: (input, { group, ungrouped }) => {
-        const filterList = getFiltersByGroup(getGlobalFilters(getState()), group, ungrouped);
+    const filterList = getFiltersByGroup(filtersService.getFilters(), group, ungrouped);
 
-        if (filterList && filterList.length) {
-          const filterExpression = filterList.join(' | ');
-          const filterAST = fromExpression(filterExpression);
-          return interpretAst(filterAST, getWorkpadVariablesAsObject(getState()));
-        } else {
-          const filterType = initialize.types.filter;
-          return filterType?.from(null, {});
-        }
-      },
-    };
+    if (filterList && filterList.length) {
+      const filterExpression = filterList.join(' | ');
+      const filterAST = fromExpression(filterExpression);
+      const { variables } = filtersService.getFiltersContext();
+      return expressions.interpretAst(filterAST, variables);
+    } else {
+      const filterType = initialize.types.filter;
+      return filterType?.from(null, {});
+    }
   };
+
+  return buildFiltersFunction(fn);
 }

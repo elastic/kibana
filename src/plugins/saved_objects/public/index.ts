@@ -8,33 +8,18 @@
 
 import { SavedObjectsPublicPlugin } from './plugin';
 
-export {
-  OnSaveProps,
-  SavedObjectSaveModal,
-  SavedObjectSaveModalOrigin,
-  OriginSaveModalProps,
-  SaveModalState,
-  SaveResult,
-  showSaveModal,
-} from './save_modal';
-export {
-  getSavedObjectFinder,
-  SavedObjectFinderUi,
-  SavedObjectFinderUiProps,
-  SavedObjectMetaData,
-} from './finder';
-export {
-  SavedObjectLoader,
-  SavedObjectLoaderFindOptions,
-  checkForDuplicateTitle,
-  saveWithConfirmation,
-  isErrorNonFatal,
+export type { OnSaveProps, OriginSaveModalProps, SaveModalState, SaveResult } from './save_modal';
+export { SavedObjectSaveModal, SavedObjectSaveModalOrigin, showSaveModal } from './save_modal';
+export type { SavedObjectFinderUiProps, SavedObjectMetaData } from './finder';
+export { getSavedObjectFinder, SavedObjectFinderUi } from './finder';
+export type {
   SavedObjectDecorator,
   SavedObjectDecoratorFactory,
   SavedObjectDecoratorConfig,
 } from './saved_object';
-export { SavedObjectSaveOpts, SavedObject, SavedObjectConfig } from './types';
+export { checkForDuplicateTitle, saveWithConfirmation, isErrorNonFatal } from './saved_object';
+export type { SavedObjectSaveOpts, SavedObject, SavedObjectConfig } from './types';
 export { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
-export { SavedObjectsStart, SavedObjectSetup } from './plugin';
+export type { SavedObjectsStart, SavedObjectSetup } from './plugin';
 
 export const plugin = () => new SavedObjectsPublicPlugin();

@@ -7,7 +7,7 @@
 
 import React, { FC, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { switchMap, takeWhile, tap } from 'rxjs/operators';

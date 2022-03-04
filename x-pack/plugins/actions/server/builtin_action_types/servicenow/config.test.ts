@@ -24,6 +24,7 @@ describe('config', () => {
       table: 'incident',
       useImportAPI: true,
       commentFieldKey: 'work_notes',
+      appId: '7148dbc91bf1f450ced060a7234bcb88',
     });
   });
 
@@ -35,6 +36,7 @@ describe('config', () => {
       table: 'sn_si_incident',
       useImportAPI: true,
       commentFieldKey: 'work_notes',
+      appId: '2f0746801baeb01019ae54e4604bcb0f',
     });
   });
 
@@ -44,7 +46,7 @@ describe('config', () => {
       importSetTable: 'x_elas2_inc_int_elastic_incident',
       appScope: 'x_elas2_inc_int',
       table: 'em_event',
-      useImportAPI: true,
+      useImportAPI: false,
       commentFieldKey: 'work_notes',
     });
   });

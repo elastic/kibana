@@ -7,9 +7,9 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import type { DataViewField, DataView } from 'src/plugins/data/common';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
@@ -26,8 +26,8 @@ interface Props {
 }
 
 interface State {
-  indexPattern: IndexPattern | null;
-  fields: IndexPatternField[];
+  indexPattern: DataView | null;
+  fields: DataViewField[];
 }
 
 export class UpdateSourceEditor extends Component<Props, State> {

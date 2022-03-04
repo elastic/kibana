@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { ElasticsearchClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_BEATS } from '../../common/constants';
 
@@ -361,7 +361,7 @@ async function fetchBeatsByType(
     },
   };
 
-  const { body: results } = await callCluster.search<BeatsStats>(params);
+  const results = await callCluster.search<BeatsStats>(params);
   const hitsLength = results?.hits?.hits.length || 0;
   if (hitsLength > 0) {
     // further augment the clusters object with more stats

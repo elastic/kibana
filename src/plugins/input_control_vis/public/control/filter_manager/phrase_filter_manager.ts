@@ -18,17 +18,14 @@ import {
   PhraseFilter,
 } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
-import {
-  IndexPatternsContract,
-  FilterManager as QueryFilterManager,
-} from '../../../../data/public';
+import { DataViewsContract, FilterManager as QueryFilterManager } from '../../../../data/public';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(
     controlId: string,
     fieldName: string,
     indexPatternId: string,
-    indexPatternsService: IndexPatternsContract,
+    indexPatternsService: DataViewsContract,
     queryFilter: QueryFilterManager
   ) {
     super(controlId, fieldName, indexPatternId, indexPatternsService, queryFilter);
@@ -97,8 +94,8 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     // scripted field filter
-    if (_.has(kbnFilter, 'script')) {
-      return _.get(kbnFilter, 'script.script.params.value');
+    if (_.has(kbnFilter, 'query.script')) {
+      return _.get(kbnFilter, 'query.script.script.params.value');
     }
 
     // single phrase filter

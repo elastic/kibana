@@ -14,7 +14,10 @@ export type StaticPage =
   | 'policies'
   | 'policies_list'
   | 'enrollment_tokens'
-  | 'data_streams';
+  | 'data_streams'
+  | 'settings'
+  | 'settings_edit_fleet_server_hosts'
+  | 'settings_create_outputs';
 
 export type DynamicPage =
   | 'integrations_all'
@@ -25,13 +28,15 @@ export type DynamicPage =
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_policy_edit'
+  | 'integration_policy_upgrade'
   | 'policy_details'
   | 'add_integration_to_policy'
   | 'edit_integration'
   | 'upgrade_package_policy'
   | 'agent_list'
   | 'agent_details'
-  | 'agent_details_logs';
+  | 'agent_details_logs'
+  | 'settings_edit_outputs';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -57,6 +62,10 @@ export const FLEET_ROUTING_PATHS = {
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
   enrollment_tokens: '/enrollment-tokens',
   data_streams: '/data-streams',
+  settings: '/settings',
+  settings_edit_fleet_server_hosts: '/settings/edit-fleet-server-hosts',
+  settings_create_outputs: '/settings/create-outputs',
+  settings_edit_outputs: '/settings/outputs/:outputId',
 
   // TODO: Move this to the integrations app
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
@@ -74,6 +83,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_custom: '/detail/:pkgkey/custom',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
+  integration_policy_upgrade: '/edit-integration/:packagePolicyId',
 };
 
 export const pagePathGetters: {
@@ -118,6 +128,12 @@ export const pagePathGetters: {
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],
+  // Upgrades happen on the same edit form, just with a flag set. Separate page record here
+  // allows us to set different breadcrumbds for upgrades when needed.
+  integration_policy_upgrade: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/edit-integration/${packagePolicyId}`,
+  ],
   policies: () => [FLEET_BASE_PATH, '/policies'],
   policies_list: () => [FLEET_BASE_PATH, '/policies'],
   policy_details: ({ policyId, tabId }) => [
@@ -145,4 +161,14 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
+  settings: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings],
+  settings_edit_fleet_server_hosts: () => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts,
+  ],
+  settings_edit_outputs: ({ outputId }) => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_edit_outputs.replace(':outputId', outputId),
+  ],
+  settings_create_outputs: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings_create_outputs],
 };

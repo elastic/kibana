@@ -5,27 +5,28 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
 import { act } from '@testing-library/react';
-import React from 'react';
-import { EventFilterDeleteModal } from './event_filter_delete_modal';
 import { fireEvent } from '@testing-library/dom';
+import { EventFilterDeleteModal } from './event_filter_delete_modal';
+import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { showDeleteModal } from '../../store/selector';
 import { isFailedResourceState, isLoadedResourceState } from '../../../../state';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('When event filters delete modal is shown', () => {
-  let renderAndSetup: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let renderAndSetup: (
+    customEventFilterProps?: Partial<ExceptionListItemSchema>
+  ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let coreStart: AppContextTestRender['coreStart'];
   let history: AppContextTestRender['history'];
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let store: AppContextTestRender['store'];
-
-  const getBody = () =>
-    renderResult.baseElement.querySelector('[data-test-subj="eventFilterDeleteModalBody"]')!;
 
   const getConfirmButton = () =>
     renderResult.baseElement.querySelector(
@@ -43,7 +44,7 @@ describe('When event filters delete modal is shown', () => {
     const mockedContext = createAppRootMockRenderer();
 
     ({ history, store, coreStart } = mockedContext);
-    renderAndSetup = async () => {
+    renderAndSetup = async (customEventFilterProps) => {
       renderResult = mockedContext.render(<EventFilterDeleteModal />);
 
       await act(async () => {
@@ -53,10 +54,12 @@ describe('When event filters delete modal is shown', () => {
 
         mockedContext.store.dispatch({
           type: 'eventFilterForDeletion',
-          payload: {
+          payload: getExceptionListItemSchemaMock({
             id: '123',
             name: 'tic-tac-toe',
-          },
+            tags: [],
+            ...(customEventFilterProps ? customEventFilterProps : {}),
+          }),
         });
       });
 
@@ -66,9 +69,32 @@ describe('When event filters delete modal is shown', () => {
     waitForAction = mockedContext.middlewareSpy.waitForAction;
   });
 
-  it('should display name of event filter in body message', async () => {
-    await renderAndSetup();
-    expect(getBody().textContent).toMatch(/You are removing event filter "tic-tac-toe"/);
+  it("should display calllout when it's assigned to one policy", async () => {
+    await renderAndSetup({ tags: ['policy:1'] });
+    expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
+      /Deleting this entry will remove it from 1 associated policy./
+    );
+  });
+
+  it("should display calllout when it's assigned to more than one policy", async () => {
+    await renderAndSetup({ tags: ['policy:1', 'policy:2', 'policy:3'] });
+    expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
+      /Deleting this entry will remove it from 3 associated policies./
+    );
+  });
+
+  it("should display calllout when it's assigned globally", async () => {
+    await renderAndSetup({ tags: ['policy:all'] });
+    expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
+      /Deleting this entry will remove it from all associated policies./
+    );
+  });
+
+  it("should display calllout when it's unassigned", async () => {
+    await renderAndSetup({ tags: [] });
+    expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
+      /Deleting this entry will remove it from 0 associated policies./
+    );
   });
 
   it('should close dialog if cancel button is clicked', async () => {
@@ -125,7 +151,7 @@ describe('When event filters delete modal is shown', () => {
     });
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-      '"tic-tac-toe" has been removed from the Event Filters list.'
+      '"tic-tac-toe" has been removed from the event filters list.'
     );
   });
 
@@ -144,7 +170,7 @@ describe('When event filters delete modal is shown', () => {
     });
 
     expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Unable to remove "tic-tac-toe" from the Event Filters list. Reason: oh oh'
+      'Unable to remove "tic-tac-toe" from the event filters list. Reason: oh oh'
     );
     expect(showDeleteModal(getCurrentState())).toBe(true);
   });

@@ -23,4 +23,5 @@ export type BaseResponseType =
   | 'text/tab-separated-values'
   | 'text/plain'
   | 'application/yaml'
-  | 'unknown';
+  | 'unknown'
+  | 'application/vnd.mapbox-vector-tile';

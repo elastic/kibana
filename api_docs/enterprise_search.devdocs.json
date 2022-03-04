@@ -1,0 +1,70 @@
+{
+  "id": "enterpriseSearch",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "enterpriseSearch",
+        "id": "def-server.ConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly host?: string | undefined; readonly ssl: Readonly<{ certificateAuthorities?: string | string[] | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; }>; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; }"
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "enterpriseSearch",
+        "id": "def-server.configSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "configSchema",
+        "description": [],
+        "signature": [
+          "ObjectType",
+          "<{ host: ",
+          "Type",
+          "<string | undefined>; accessCheckTimeout: ",
+          "Type",
+          "<number>; accessCheckTimeoutWarning: ",
+          "Type",
+          "<number>; ssl: ",
+          "ObjectType",
+          "<{ certificateAuthorities: ",
+          "Type",
+          "<string | string[] | undefined>; verificationMode: ",
+          "Type",
+          "<\"none\" | \"full\" | \"certificate\">; }>; }>"
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -45,3 +45,6 @@ include::management.asciidoc[]
 include::api.asciidoc[]
 
 include::plugins.asciidoc[]
+
+include::troubleshooting/index.asciidoc[]
+

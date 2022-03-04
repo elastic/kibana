@@ -5,29 +5,20 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, ISavedObjectsRepository } from 'kibana/server';
-import { SavedObjectsClient } from '../../../../src/core/server';
-import {
-  IndexPatternsCommonService,
-  IndexPatternsServiceStart,
-} from '../../../../src/plugins/data/server';
+import { CoreStart } from '../../../../src/core/server';
+import { StartDeps } from './types';
 
-let internalRepository: ISavedObjectsRepository;
-export const setInternalRepository = (
-  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository
-) => {
-  internalRepository = createInternalRepository();
-};
-export const getInternalRepository = () => internalRepository;
+let coreStart: CoreStart;
+let pluginsStart: StartDeps;
+export function setStartServices(core: CoreStart, plugins: StartDeps) {
+  coreStart = core;
+  pluginsStart = plugins;
+}
 
-let indexPatternsService: IndexPatternsCommonService;
-export const setIndexPatternsService = async (
-  indexPatternsServiceFactory: IndexPatternsServiceStart['indexPatternsServiceFactory'],
-  elasticsearchClient: ElasticsearchClient
-) => {
-  indexPatternsService = await indexPatternsServiceFactory(
-    new SavedObjectsClient(getInternalRepository()),
-    elasticsearchClient
-  );
+export const getSavedObjectClient = (extraTypes?: string[]) => {
+  return coreStart.savedObjects.createInternalRepository(extraTypes);
 };
-export const getIndexPatternsService = () => indexPatternsService;
+
+export const getIndexPatternsServiceFactory = () =>
+  pluginsStart.data.indexPatterns.indexPatternsServiceFactory;
+export const getElasticsearch = () => coreStart.elasticsearch;

@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-import type { SharedGlobalConfig } from 'src/core/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 
@@ -23,7 +20,7 @@ interface SavedObjectsCountUsage {
 
 export function registerSavedObjectsCountUsageCollector(
   usageCollection: UsageCollectionSetup,
-  legacyConfig$: Observable<SharedGlobalConfig>
+  kibanaIndex: string
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<SavedObjectsCountUsage>({
@@ -45,10 +42,7 @@ export function registerSavedObjectsCountUsageCollector(
         },
       },
       async fetch({ esClient }) {
-        const {
-          kibana: { index },
-        } = await legacyConfig$.pipe(take(1)).toPromise();
-        const buckets = await getSavedObjectsCounts(esClient, index);
+        const buckets = await getSavedObjectsCounts(esClient, kibanaIndex);
         return {
           by_type: buckets.map(({ key: type, doc_count: count }) => {
             return { type, count };

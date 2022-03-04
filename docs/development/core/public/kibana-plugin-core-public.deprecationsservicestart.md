@@ -16,8 +16,8 @@ export interface DeprecationsServiceStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [getAllDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getalldeprecations.md) | <code>() =&gt; Promise&lt;DomainDeprecationDetails[]&gt;</code> | Grabs deprecations details for all domains. |
-|  [getDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getdeprecations.md) | <code>(domainId: string) =&gt; Promise&lt;DomainDeprecationDetails[]&gt;</code> | Grabs deprecations for a specific domain. |
-|  [isDeprecationResolvable](./kibana-plugin-core-public.deprecationsservicestart.isdeprecationresolvable.md) | <code>(details: DomainDeprecationDetails) =&gt; boolean</code> | Returns a boolean if the provided deprecation can be automatically resolvable. |
-|  [resolveDeprecation](./kibana-plugin-core-public.deprecationsservicestart.resolvedeprecation.md) | <code>(details: DomainDeprecationDetails) =&gt; Promise&lt;ResolveDeprecationResponse&gt;</code> | Calls the correctiveActions.api to automatically resolve the depprecation. |
+|  [getAllDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getalldeprecations.md) | () =&gt; Promise&lt;DomainDeprecationDetails\[\]&gt; | Grabs deprecations details for all domains. |
+|  [getDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getdeprecations.md) | (domainId: string) =&gt; Promise&lt;DomainDeprecationDetails\[\]&gt; | Grabs deprecations for a specific domain. |
+|  [isDeprecationResolvable](./kibana-plugin-core-public.deprecationsservicestart.isdeprecationresolvable.md) | (details: DomainDeprecationDetails) =&gt; boolean | Returns a boolean if the provided deprecation can be automatically resolvable. |
+|  [resolveDeprecation](./kibana-plugin-core-public.deprecationsservicestart.resolvedeprecation.md) | (details: DomainDeprecationDetails) =&gt; Promise&lt;ResolveDeprecationResponse&gt; | Calls the correctiveActions.api to automatically resolve the depprecation. |
 

@@ -60,12 +60,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('Average of bytes');
 
-      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
+      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger', 1);
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('Average of bytes');
 
-      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
+      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger', 4);
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Top values of ip');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
@@ -144,11 +144,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.changePaletteTo('temperature');
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_percent');
       // now tweak the value
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '30', {
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '30', {
         clearWithKeyboard: true,
       });
       // when clicking on another row will trigger a sorting + update
-      await testSubjects.click('lnsPalettePanel_dynamicColoring_stop_value_1');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_range_value_1');
       await PageObjects.header.waitUntilLoadingHasFinished();
       // pick a cell without color as is below the range
       const styleObj = await PageObjects.lens.getDatatableCellStyle(3, 3);
@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow the user to reverse the palette', async () => {
-      await testSubjects.click('lnsPalettePanel_dynamicColoring_reverse');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(1, 1);
       expect(styleObj['background-color']).to.be('rgb(168, 191, 218)');

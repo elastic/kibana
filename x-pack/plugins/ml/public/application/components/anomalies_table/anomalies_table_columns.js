@@ -11,7 +11,7 @@ import React from 'react';
 import { get } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   formatHumanReadableDate,
@@ -91,7 +91,7 @@ export function getColumns(
                 })
           }
           data-row-id={item.rowId}
-          data-test-subj="mlJobListRowDetailsToggle"
+          data-test-subj="mlAnomaliesListRowDetailsToggle"
         />
       ),
     },

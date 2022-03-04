@@ -11,8 +11,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESQuery } from '../../../common/typed_json';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
+import {
+  DataView,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../src/plugins/data/common';
+
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
@@ -73,16 +79,18 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   : TimelineEventsAllStrategyResponse;
 
 export interface UseTimelineEventsProps {
+  dataViewId: string | null;
   docValueFields?: DocValueFields[];
-  filterQuery?: ESQuery | string;
-  skip?: boolean;
   endDate: string;
   eqlOptions?: EqlOptionsSelected;
-  id: string;
   fields: string[];
+  filterQuery?: ESQuery | string;
+  id: string;
   indexNames: string[];
   language?: KueryFilterQueryKind;
   limit: number;
+  runtimeMappings: MappingRuntimeFields;
+  skip?: boolean;
   sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
@@ -124,6 +132,7 @@ const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
 });
 
 export const useTimelineEvents = ({
+  dataViewId,
   docValueFields,
   endDate,
   eqlOptions = undefined,
@@ -131,6 +140,7 @@ export const useTimelineEvents = ({
   indexNames,
   fields,
   filterQuery,
+  runtimeMappings,
   startDate,
   language = 'kuery',
   limit,
@@ -203,7 +213,7 @@ export const useTimelineEvents = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
-  const { addError, addWarning } = useAppToasts();
+  const { addWarning } = useAppToasts();
 
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
@@ -223,6 +233,8 @@ export const useTimelineEvents = ({
             strategy:
               request.language === 'eql' ? 'timelineEqlSearchStrategy' : 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
+            // we only need the id to throw better errors
+            indexPattern: { id: dataViewId } as unknown as DataView,
           })
           .subscribe({
             next: (response) => {
@@ -245,6 +257,7 @@ export const useTimelineEvents = ({
                       activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
                       activeTimeline.setEqlResponse(newTimelineResponse);
                     } else {
+                      // @ts-expect-error EqlSearchRequest.query is not compatible with QueryDslQueryContainer
                       activeTimeline.setRequest(request);
                       activeTimeline.setResponse(newTimelineResponse);
                     }
@@ -260,9 +273,7 @@ export const useTimelineEvents = ({
             },
             error: (msg) => {
               setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_TIMELINE_EVENTS,
-              });
+              data.search.showError(msg);
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -316,9 +327,9 @@ export const useTimelineEvents = ({
       skip,
       id,
       data.search,
+      dataViewId,
       setUpdated,
       addWarning,
-      addError,
       refetchGrid,
       wrappedLoadPage,
     ]
@@ -340,6 +351,7 @@ export const useTimelineEvents = ({
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
+        runtimeMappings: prevRequest?.runtimeMappings ?? {},
         ...deStructureEqlOptions(prevEqlRequest),
       };
 
@@ -353,6 +365,7 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
+        runtimeMappings,
         ...deStructureEqlOptions(eqlOptions),
       };
 
@@ -372,6 +385,7 @@ export const useTimelineEvents = ({
           querySize: limit,
         },
         language,
+        runtimeMappings,
         sort,
         timerange: {
           interval: '12h',
@@ -410,6 +424,7 @@ export const useTimelineEvents = ({
     startDate,
     sort,
     fields,
+    runtimeMappings,
   ]);
 
   useEffect(() => {

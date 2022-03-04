@@ -58,7 +58,7 @@ export interface IndexJob extends IIndexingStatus {
 }
 
 export interface FieldCoercionError {
-  external_id: string;
+  id: string;
   error: string;
 }
 export type FieldCoercionErrors = Record<string, FieldCoercionError[]>;

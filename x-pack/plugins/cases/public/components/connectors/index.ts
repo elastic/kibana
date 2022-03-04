@@ -17,9 +17,7 @@ import {
   ServiceNowSIRFieldsType,
   ResilientFieldsType,
   SwimlaneFieldsType,
-} from '../../../common';
-
-export { getActionType as getCaseConnectorUi } from './case';
+} from '../../../common/api';
 
 export * from './types';
 

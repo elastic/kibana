@@ -9,7 +9,7 @@ import React, { MouseEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { EventsTdContent } from '../t_grid/styles';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../t_grid/helpers';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../t_grid/body/constants';
 
 interface ActionIconItemProps {
   ariaLabel?: string;
@@ -23,7 +23,7 @@ interface ActionIconItemProps {
 }
 
 const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
-  width = DEFAULT_ICON_BUTTON_WIDTH,
+  width = DEFAULT_ACTION_BUTTON_WIDTH,
   dataTestSubj,
   content,
   ariaLabel,

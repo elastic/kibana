@@ -58,7 +58,7 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
                         content={strings.getOverriddenIconTipLabel()}
                         position="top"
                         type="dot"
-                        color="secondary"
+                        color="success"
                       />
                     </span>
                   ) : null}

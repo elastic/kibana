@@ -66,23 +66,27 @@ export interface Configuration {
   needsConfiguration?: boolean;
   hasOauthRedirect: boolean;
   baseUrlTitle?: string;
-  helpText: string;
+  helpText?: string;
   documentationUrl: string;
   applicationPortalUrl?: string;
   applicationLinkTitle?: string;
+  githubRepository?: string;
 }
 
 export interface SourceDataItem {
   name: string;
+  iconName: string;
+  categories?: string[];
   serviceType: string;
   configuration: Configuration;
   configured?: boolean;
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
-  addPath: string;
-  editPath: string;
   accountContextOnly: boolean;
+  internalConnectorAvailable?: boolean;
+  externalConnectorAvailable?: boolean;
+  customConnectorAvailable?: boolean;
 }
 
 export interface ContentSource {
@@ -168,6 +172,18 @@ export interface BlockedWindow {
   end: string;
 }
 
+export interface IndexingRuleExclude {
+  filterType: 'object_type' | 'path_template' | 'file_extension';
+  exclude: string;
+}
+
+export interface IndexingRuleInclude {
+  filterType: 'object_type' | 'path_template' | 'file_extension';
+  include: string;
+}
+
+export type IndexingRule = IndexingRuleInclude | IndexingRuleExclude;
+
 export interface IndexingConfig {
   enabled: boolean;
   features: {
@@ -178,7 +194,14 @@ export interface IndexingConfig {
       enabled: boolean;
     };
   };
+  rules: IndexingRule[];
   schedule: IndexingSchedule;
+}
+
+interface AppSecret {
+  app_id: string;
+  fingerprint: string;
+  base_url?: string;
 }
 
 export interface ContentSourceFullData extends ContentSourceDetails {
@@ -201,6 +224,7 @@ export interface ContentSourceFullData extends ContentSourceDetails {
   urlFieldIsLinkable: boolean;
   createdAt: string;
   serviceName: string;
+  secret?: AppSecret; // undefined for all content sources except GitHub apps
 }
 
 export interface ContentSourceStatus {
@@ -257,7 +281,7 @@ export type CustomAPIFieldValue =
 export interface Result {
   content_source_id: string;
   last_updated: string;
-  external_id: string;
+  id: string;
   updated_at: string;
   source: string;
   [key: string]: CustomAPIFieldValue;
@@ -294,4 +318,10 @@ export interface RoleGroup {
 export interface WSRoleMapping extends RoleMapping {
   allGroups: boolean;
   groups: RoleGroup[];
+}
+
+export interface ApiToken {
+  key?: string;
+  id?: string;
+  name: string;
 }

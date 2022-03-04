@@ -26,6 +26,7 @@
     "model_memory_limit": "32mb"
   },
   "custom_settings": {
+    "managed": true,
     "created_by": "ml-module-metrics-ui-hosts",
     "custom_urls": [
       {

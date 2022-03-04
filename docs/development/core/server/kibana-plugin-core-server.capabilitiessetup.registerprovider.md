@@ -16,11 +16,11 @@ registerProvider(provider: CapabilitiesProvider): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  provider | <code>CapabilitiesProvider</code> |  |
+|  provider | CapabilitiesProvider |  |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Example
 
@@ -41,6 +41,5 @@ public setup(core: CoreSetup, deps: {}) {
      }
    });
 }
-
 ```
 

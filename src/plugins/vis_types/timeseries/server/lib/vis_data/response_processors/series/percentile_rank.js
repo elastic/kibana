@@ -12,6 +12,7 @@ import { getSplits } from '../../helpers/get_splits';
 import { getLastMetric } from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
+import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 export function percentileRank(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
@@ -33,7 +34,7 @@ export function percentileRank(resp, panel, series, meta, extractFields) {
 
         results.push({
           data,
-          id: `${split.id}:${percentileRank}:${index}`,
+          id: `${split.id}${SERIES_SEPARATOR}${percentileRank}${SERIES_SEPARATOR}${index}`,
           label: `(${percentileRank || 0}) ${split.label}`,
           color:
             series.split_mode === 'everything' && metric.colors

@@ -8,49 +8,68 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-
+import { Datatable } from '../../../../expressions/common';
 import MetricVisComponent, { MetricVisComponentProps } from './metric_component';
+import { LabelPosition } from '../../common/constants';
 
-jest.mock('../format_service', () => ({
-  getFormatService: () => ({
-    deserialize: () => {
-      return {
-        convert: (x: unknown) => x,
-      };
-    },
-  }),
+jest.mock('../../../expression_metric/public/services', () => ({
+  getFormatService: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getFormatService } = require('../__mocks__/services');
+    return getFormatService();
+  },
+  getPaletteService: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getPaletteService } = require('../__mocks__/services');
+    return getPaletteService();
+  },
 }));
 
 type Props = MetricVisComponentProps;
 
-const baseVisData = {
-  columns: [{ id: 'col-0', name: 'Count' }],
+const visData: Datatable = {
+  type: 'datatable',
+  columns: [{ id: 'col-0', name: 'Count', meta: { type: 'number' } }],
   rows: [{ 'col-0': 4301021 }],
-} as any;
+};
 
 describe('MetricVisComponent', function () {
-  const visParams = {
-    type: 'metric',
-    addTooltip: false,
-    addLegend: false,
+  const visParams: Props['visParams'] = {
     metric: {
-      colorSchema: 'Green to Red',
-      colorsRange: [{ from: 0, to: 1000 }],
-      style: {},
+      metricColorMode: 'None',
+      percentageMode: false,
+      palette: {
+        colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
+        stops: [0, 10000],
+        gradient: false,
+        rangeMin: 0,
+        rangeMax: 1000,
+        range: 'number',
+      },
+      style: {
+        type: 'style',
+        spec: {},
+        css: '',
+        bgColor: false,
+        labelColor: false,
+      },
+      colorFullBackground: false,
       labels: {
         show: true,
+        style: { spec: {}, type: 'style', css: '' },
+        position: LabelPosition.BOTTOM,
       },
     },
     dimensions: {
-      metrics: [{ accessor: 0 } as any],
+      metrics: [{ accessor: 0, type: 'vis_dimension', format: { params: {}, id: 'number' } }],
       bucket: undefined,
     },
   };
 
   const getComponent = (propOverrides: Partial<Props> = {} as Partial<Props>) => {
     const props: Props = {
-      visParams: visParams as any,
-      visData: baseVisData,
+      visParams,
+      visData,
       renderComplete: jest.fn(),
       fireEvent: jest.fn(),
       ...propOverrides,
@@ -70,9 +89,10 @@ describe('MetricVisComponent', function () {
   it('should render correct structure for multi-value metrics', function () {
     const component = getComponent({
       visData: {
+        type: 'datatable',
         columns: [
-          { id: 'col-0', name: '1st percentile of bytes' },
-          { id: 'col-1', name: '99th percentile of bytes' },
+          { id: 'col-0', name: '1st percentile of bytes', meta: { type: 'number' } },
+          { id: 'col-1', name: '99th percentile of bytes', meta: { type: 'number' } },
         ],
         rows: [{ 'col-0': 182, 'col-1': 445842.4634666484 }],
       },
@@ -80,10 +100,13 @@ describe('MetricVisComponent', function () {
         ...visParams,
         dimensions: {
           ...visParams.dimensions,
-          metrics: [{ accessor: 0 }, { accessor: 1 }],
+          metrics: [
+            { accessor: 0, type: 'vis_dimension', format: { id: 'number', params: {} } },
+            { accessor: 1, type: 'vis_dimension', format: { id: 'number', params: {} } },
+          ],
         },
       },
-    } as any);
+    });
 
     expect(component).toMatchSnapshot();
   });

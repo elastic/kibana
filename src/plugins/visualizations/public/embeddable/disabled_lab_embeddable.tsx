@@ -8,11 +8,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { Embeddable, EmbeddableOutput } from '../../../../plugins/embeddable/public';
 
 import { DisabledLabVisualization } from './disabled_lab_visualization';
 import { VisualizeInput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { getTheme } from '../services';
 
 export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, EmbeddableOutput> {
   private domNode?: HTMLElement;
@@ -26,7 +28,12 @@ export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, Embeddable
   public render(domNode: HTMLElement) {
     if (this.title) {
       this.domNode = domNode;
-      ReactDOM.render(<DisabledLabVisualization title={this.title} />, domNode);
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={getTheme().theme$}>
+          <DisabledLabVisualization title={this.title} />
+        </KibanaThemeProvider>,
+        domNode
+      );
     }
   }
 

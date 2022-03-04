@@ -14,18 +14,19 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const requiredPackage = 'elastic_agent-0.0.7';
+  const requiredPackage = 'elastic_agent';
+  const pkgVersion = '0.0.7';
 
-  const installPackage = async (pkgkey: string) => {
+  const installPackage = async (name: string, version: string) => {
     await supertest
-      .post(`/api/fleet/epm/packages/${pkgkey}`)
+      .post(`/api/fleet/epm/packages/${name}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true });
   };
 
-  const deletePackage = async (pkgkey: string) => {
+  const deletePackage = async (name: string, version: string) => {
     await supertest
-      .delete(`/api/fleet/epm/packages/${pkgkey}`)
+      .delete(`/api/fleet/epm/packages/${name}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true });
   };
@@ -34,31 +35,39 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
     before(async () => {
-      await installPackage(requiredPackage);
+      await installPackage(requiredPackage, pkgVersion);
     });
     after(async () => {
-      await deletePackage(requiredPackage);
+      await deletePackage(requiredPackage, pkgVersion);
     });
 
-    it('should return 400 if trying to uninstall a required package', async function () {
+    it('should return 200 if trying to uninstall a required package', async function () {
       await supertest
-        .delete(`/api/fleet/epm/packages/${requiredPackage}`)
+        .delete(`/api/fleet/epm/packages/${requiredPackage}/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
-        .expect(400);
+        .expect(200);
     });
 
-    it('should return 200 if trying to force uninstall a required package', async function () {
+    it.skip('should return 200 if trying to force uninstall a required package', async function () {
       await supertest
-        .delete(`/api/fleet/epm/packages/${requiredPackage}`)
+        .delete(`/api/fleet/epm/packages/${requiredPackage}/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
 
-    it('should return 403 for read-only users', async () => {
+    it('should return 403 for users without integrations all permissions', async () => {
       await supertestWithoutAuth
-        .delete(`/api/fleet/epm/packages/${requiredPackage}`)
-        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+        .delete(`/api/fleet/epm/packages/${requiredPackage}/${pkgVersion}`)
+        .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(403);
+    });
+
+    it('should return 403 for users without fleet all permissions', async () => {
+      await supertestWithoutAuth
+        .delete(`/api/fleet/epm/packages/${requiredPackage}/${pkgVersion}`)
+        .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
         .set('kbn-xsrf', 'xxxx')
         .expect(403);
     });

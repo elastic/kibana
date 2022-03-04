@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import { DocLinksStart } from '../../../../../../core/public';
 
@@ -38,14 +38,14 @@ export const NotFoundErrors = ({ type, docLinks }: NotFoundErrors) => {
         return (
           <FormattedMessage
             id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
-            defaultMessage="The index pattern associated with this object no longer exists."
+            defaultMessage="The data view associated with this object no longer exists."
           />
         );
       case 'index-pattern-field':
         return (
           <FormattedMessage
             id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
-            defaultMessage="A field associated with this object no longer exists in the index pattern."
+            defaultMessage="A field associated with this object no longer exists in the data view."
           />
         );
       default:

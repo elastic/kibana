@@ -15,13 +15,16 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { FC, ReactNode, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { FC, ReactNode, useEffect, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 
 export interface Option {
   name?: string | ReactNode;
   value: string;
   checked?: 'on' | 'off';
+  disabled?: boolean;
 }
 
 const NoFilterItems = () => {
@@ -41,6 +44,15 @@ const NoFilterItems = () => {
   );
 };
 
+export function useCurrentEuiTheme() {
+  const { services } = useDataVisualizerKibana();
+  const uiSettings = services.uiSettings;
+  return useMemo(
+    () => (uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight),
+    [uiSettings]
+  );
+}
+
 export const MultiSelectPicker: FC<{
   options: Option[];
   onChange?: (items: string[]) => void;
@@ -48,6 +60,8 @@ export const MultiSelectPicker: FC<{
   checkedOptions: string[];
   dataTestSubj: string;
 }> = ({ options, onChange, title, checkedOptions, dataTestSubj }) => {
+  const euiTheme = useCurrentEuiTheme();
+
   const [items, setItems] = useState<Option[]>(options);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -68,6 +82,7 @@ export const MultiSelectPicker: FC<{
 
   const closePopover = () => {
     setIsPopoverOpen(false);
+    setSearchTerm('');
   };
 
   const handleOnChange = (index: number) => {
@@ -126,7 +141,13 @@ export const MultiSelectPicker: FC<{
                   checked={checked ? 'on' : undefined}
                   key={index}
                   onClick={() => handleOnChange(index)}
-                  style={{ flexDirection: 'row' }}
+                  style={{
+                    flexDirection: 'row',
+                    color:
+                      item.disabled === true
+                        ? euiTheme.euiColorDisabledText
+                        : euiTheme.euiTextColor,
+                  }}
                   data-test-subj={`${dataTestSubj}-option-${item.value}${
                     checked ? '-checked' : ''
                   }`}

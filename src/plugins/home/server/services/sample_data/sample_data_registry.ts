@@ -11,8 +11,8 @@ import { SavedObject } from 'src/core/public';
 import {
   SampleDatasetProvider,
   SampleDatasetSchema,
-  AppLinkSchema,
   SampleDatasetDashboardPanel,
+  AppLinkData,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
@@ -27,6 +27,7 @@ import { registerSampleDatasetWithIntegration } from './lib/register_with_integr
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly sampleDatasets: SampleDatasetSchema[] = [];
+  private readonly appLinksMap = new Map<string, AppLinkData[]>();
 
   private registerSampleDataSet(specProvider: SampleDatasetProvider) {
     let value: SampleDatasetSchema;
@@ -61,21 +62,18 @@ export class SampleDataRegistry {
     customIntegrations?: CustomIntegrationsPluginSetup
   ) {
     if (usageCollections) {
-      makeSampleDataUsageCollector(usageCollections, this.initContext);
+      const kibanaIndex = core.savedObjects.getKibanaIndex();
+      makeSampleDataUsageCollector(usageCollections, kibanaIndex);
     }
     const usageTracker = usage(
       core.getStartServices().then(([coreStart]) => coreStart.savedObjects),
       this.initContext.logger.get('sample_data', 'usage')
     );
     const router = core.http.createRouter();
-    createListRoute(router, this.sampleDatasets);
-    createInstallRoute(
-      router,
-      this.sampleDatasets,
-      this.initContext.logger.get('sampleData'),
-      usageTracker
-    );
-    createUninstallRoute(router, this.sampleDatasets, usageTracker);
+    const logger = this.initContext.logger.get('sampleData');
+    createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
+    createInstallRoute(router, this.sampleDatasets, logger, usageTracker);
+    createUninstallRoute(router, this.sampleDatasets, logger, usageTracker);
 
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);
@@ -99,7 +97,7 @@ export class SampleDataRegistry {
         sampleDataset.savedObjects = sampleDataset.savedObjects.concat(savedObjects);
       },
 
-      addAppLinksToSampleDataset: (id: string, appLinks: AppLinkSchema[]) => {
+      addAppLinksToSampleDataset: (id: string, appLinks: AppLinkData[]) => {
         const sampleDataset = this.sampleDatasets.find((dataset) => {
           return dataset.id === id;
         });
@@ -108,9 +106,8 @@ export class SampleDataRegistry {
           throw new Error(`Unable to find sample dataset with id: ${id}`);
         }
 
-        sampleDataset.appLinks = sampleDataset.appLinks
-          ? sampleDataset.appLinks.concat(appLinks)
-          : [];
+        const existingAppLinks = this.appLinksMap.get(id) ?? [];
+        this.appLinksMap.set(id, [...existingAppLinks, ...appLinks]);
       },
 
       replacePanelInSampleDatasetDashboard: ({

@@ -8,18 +8,18 @@
 
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   Plugin,
-  AppNavLinkStatus,
 } from '../../../src/core/public';
 import {
-  SearchExamplesPluginSetup,
-  SearchExamplesPluginStart,
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
+  SearchExamplesPluginSetup,
+  SearchExamplesPluginStart,
 } from './types';
-import { createSearchSessionsExampleUrlGenerator } from './search_sessions/url_generator';
+import { SearchSessionsExamplesAppLocatorDefinition } from './search_sessions/app_locator';
 import { PLUGIN_NAME } from '../common';
 import img from './search_examples.png';
 
@@ -59,7 +59,7 @@ export class SearchExamplesPlugin
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/master/src/plugins/data/README.mdx',
+          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/data/README.mdx',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',
@@ -67,14 +67,10 @@ export class SearchExamplesPlugin
       ],
     });
 
-    // we need an URL generator for search session examples for restoring a search session
-    share.urlGenerators.registerUrlGenerator(
-      createSearchSessionsExampleUrlGenerator(() => {
-        return core
-          .getStartServices()
-          .then(([coreStart]) => ({ appBasePath: coreStart.http.basePath.get() }));
-      })
-    );
+    // we need an locator for search session examples for restoring a search session
+    const getAppBasePath = () =>
+      core.getStartServices().then(([coreStart]) => coreStart.http.basePath.get());
+    share.url.locators.create(new SearchSessionsExamplesAppLocatorDefinition(getAppBasePath));
 
     return {};
   }

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
-
 import * as Rx from 'rxjs';
 import { Writable } from 'stream';
 import { ReportingCore } from '../../../';
-import { CancellationToken } from '../../../../common';
+import { CancellationToken } from '../../../../common/cancellation_token';
 import { cryptoFactory, LevelLogger } from '../../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { generatePdfObservable } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 import { runTaskFnFactory } from './';
+
+jest.mock('../lib/generate_pdf');
 
 let content: string;
 let mockReporting: ReportingCore;
@@ -56,16 +56,13 @@ beforeEach(async () => {
   };
   const mockSchema = createMockConfigSchema(reportingConfig);
   mockReporting = await createMockReportingCore(mockSchema);
-
-  (generatePdfObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });
 
-afterEach(() => (generatePdfObservableFactory as jest.Mock).mockReset());
+afterEach(() => (generatePdfObservable as jest.Mock).mockReset());
 
 test(`passes browserTimezone to generatePdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
-  const generatePdfObservable = (await generatePdfObservableFactory(mockReporting)) as jest.Mock;
-  generatePdfObservable.mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
+  (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
   const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
@@ -81,8 +78,13 @@ test(`passes browserTimezone to generatePdf`, async () => {
     stream
   );
 
-  const tzParam = generatePdfObservable.mock.calls[0][3];
-  expect(tzParam).toBe('UTC');
+  expect(generatePdfObservable).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.anything(),
+    expect.anything(),
+    expect.objectContaining({ browserTimezone: 'UTC' }),
+    undefined
+  );
 });
 
 test(`returns content_type of application/pdf`, async () => {
@@ -90,7 +92,6 @@ test(`returns content_type of application/pdf`, async () => {
   const runTask = runTaskFnFactory(mockReporting, logger);
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
   const { content_type: contentType } = await runTask(
@@ -104,7 +105,6 @@ test(`returns content_type of application/pdf`, async () => {
 
 test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const testContent = 'test content';
-  const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
   const runTask = runTaskFnFactory(mockReporting, getMockLogger());

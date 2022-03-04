@@ -34,6 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('deleting signals migrations', () => {
     let outdatedSignalsIndexName: string;
@@ -41,10 +42,11 @@ export default ({ getService }: FtrProviderContext): void => {
     let finalizedMigration: FinalizeResponse;
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
       outdatedSignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
+
+      await createSignalsIndex(supertest, log);
 
       ({
         body: {
@@ -56,24 +58,28 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ index: [outdatedSignalsIndexName] })
         .expect(200));
 
-      await waitFor(async () => {
-        ({
-          body: {
-            migrations: [finalizedMigration],
-          },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: [createdMigration.migration_id] })
-          .expect(200));
+      await waitFor(
+        async () => {
+          ({
+            body: {
+              migrations: [finalizedMigration],
+            },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: [createdMigration.migration_id] })
+            .expect(200));
 
-        return finalizedMigration.completed ?? false;
-      }, `polling finalize_migration until all complete`);
+          return finalizedMigration.completed ?? false;
+        },
+        `polling finalize_migration until all complete`,
+        log
+      );
     });
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     it('returns the deleted migration SavedObjects', async () => {
@@ -95,10 +101,13 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ migration_ids: [createdMigration.migration_id] })
         .expect(200);
 
-      const { body } = await es.indices.getSettings({ index: createdMigration.index });
+      const { body } = await es.indices.getSettings(
+        { index: createdMigration.index },
+        { meta: true }
+      );
       // @ts-expect-error @elastic/elasticsearch supports flatten 'index.*' keys only
       const indexSettings = body[createdMigration.index].settings.index;
-      expect(indexSettings.lifecycle.name).to.eql(
+      expect(indexSettings?.lifecycle?.name).to.eql(
         `${DEFAULT_SIGNALS_INDEX}-default-migration-cleanup`
       );
     });

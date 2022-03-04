@@ -14,7 +14,7 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Kibana Presentation Utility Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/master/src/plugins/presentation_util',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/plugins/presentation_util',
   }),
   showPanel: true.valueOf,
   selectedPanel: PANEL_ID,

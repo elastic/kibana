@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Filter } from 'src/plugins/data/common';
+
+import type { Filter } from '@kbn/es-query';
 
 import { ThreatListDoc, ThreatListItem } from './types';
 
@@ -80,7 +81,6 @@ export const getThreatListSearchResponseMock = (): estypes.SearchResponse<Threat
 export const getThreatListItemMock = (overrides: Partial<ThreatListItem> = {}): ThreatListItem => ({
   _id: '123',
   _index: 'threat_index',
-  _type: '_doc',
   _score: 0,
   _source: {
     '@timestamp': '2020-09-09T21:59:13Z',

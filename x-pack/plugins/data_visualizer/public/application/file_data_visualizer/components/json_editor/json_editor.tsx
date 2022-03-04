@@ -7,8 +7,12 @@
 
 import React, { FC } from 'react';
 
-import { EuiCodeEditor, EuiCodeEditorProps } from '@elastic/eui';
-import { expandLiteralStrings, XJsonMode } from '../../../shared_imports';
+import {
+  expandLiteralStrings,
+  XJsonMode,
+  EuiCodeEditor,
+  EuiCodeEditorProps,
+} from '../../../shared_imports';
 
 export const EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 

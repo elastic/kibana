@@ -7,7 +7,6 @@
  */
 
 import fn from './yaxis';
-import Bluebird from 'bluebird';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
@@ -25,7 +24,7 @@ describe('yaxis.js', () => {
   });
 
   it('puts odd numbers of the left, even on the right, by default', () => {
-    return Bluebird.all([
+    return Promise.all([
       invoke(fn, [seriesList, 1]).then((r) => {
         expect(r.output.list[0]._global.yaxes[0].position).to.equal('left');
       }),
@@ -39,7 +38,7 @@ describe('yaxis.js', () => {
   });
 
   it('it lets you override default positions', () => {
-    return Bluebird.all([
+    return Promise.all([
       invoke(fn, [seriesList, 1, null, null, 'right']).then((r) => {
         expect(r.output.list[0]._global.yaxes[0].position).to.equal('right');
       }),
@@ -50,7 +49,7 @@ describe('yaxis.js', () => {
   });
 
   it('sets the minimum (default: no min)', () => {
-    return Bluebird.all([
+    return Promise.all([
       invoke(fn, [seriesList, 1, null]).then((r) => {
         expect(r.output.list[0]._global.yaxes[0].min).to.equal(null);
       }),
@@ -61,7 +60,7 @@ describe('yaxis.js', () => {
   });
 
   it('sets the max (default: no max)', () => {
-    return Bluebird.all([
+    return Promise.all([
       invoke(fn, [seriesList, 1, null]).then((r) => {
         expect(r.output.list[0]._global.yaxes[0].max).to.equal(undefined);
       }),
@@ -72,7 +71,7 @@ describe('yaxis.js', () => {
   });
 
   it('sets the units (default: no unit', () => {
-    return Bluebird.all([
+    return Promise.all([
       invoke(fn, [seriesList, 1, null, null, null, null, null, null]).then((r) => {
         expect(r.output.list[0]._global.yaxes[0].units).to.equal(undefined);
       }),

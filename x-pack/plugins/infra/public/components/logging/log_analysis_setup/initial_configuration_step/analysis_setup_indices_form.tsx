@@ -7,7 +7,7 @@
 
 import { EuiTitle, EuiText, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { QualityWarning } from '../../../../../common/log_analysis';
 import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
@@ -35,7 +35,7 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 export class WebElementWrapper {
   private By = By;
   private Keys = Key;
-  public isChromium: boolean = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
+  public isChromium: boolean;
 
   public static create(
     webElement: WebElement | WebElementWrapper,
@@ -69,7 +69,9 @@ export class WebElementWrapper {
     private fixedHeaderHeight: number,
     private logger: ToolingLog,
     private browserType: Browsers
-  ) {}
+  ) {
+    this.isChromium = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
+  }
 
   private async _findWithCustomTimeout(
     findFunction: () => Promise<Array<WebElement | WebElementWrapper>>,
@@ -121,7 +123,7 @@ export class WebElementWrapper {
         `finding element '${this.locator.toString()}' again, ${attemptsRemaining - 1} attempts left`
       );
 
-      await delay(200);
+      await setTimeoutAsync(200);
       this._webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
@@ -201,6 +203,18 @@ export class WebElementWrapper {
   }
 
   /**
+   * If possible, opens 'href' of this element directly through the URL
+   *
+   * @return {Promise<void>}
+   */
+  public async openHref() {
+    const href = await this.getAttribute('href');
+    if (href) {
+      await this.driver.get(href);
+    }
+  }
+
+  /**
    * Check if webelement wrapper has a specific class.
    *
    * @return {Promise<boolean>}
@@ -240,7 +254,7 @@ export class WebElementWrapper {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
         await this.pressKeys(this.Keys.BACK_SPACE);
-        await delay(100);
+        await setTimeoutAsync(100);
       }
     } else {
       if (this.isChromium) {
@@ -279,7 +293,7 @@ export class WebElementWrapper {
       for (const char of value) {
         await this.retryCall(async function type(wrapper) {
           await wrapper._webElement.sendKeys(char);
-          await delay(100);
+          await setTimeoutAsync(100);
         });
       }
     } else {
@@ -488,8 +502,7 @@ export class WebElementWrapper {
   public async findByTestSubject(selector: string) {
     return await this.retryCall(async function find(wrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector))),
-        wrapper.By.css(selector)
+        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector)))
       );
     });
   }

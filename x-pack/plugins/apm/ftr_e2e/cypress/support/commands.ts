@@ -6,6 +6,11 @@
  */
 import 'cypress-real-events/support';
 import { Interception } from 'cypress/types/net-stubbing';
+import 'cypress-axe';
+import {
+  AXE_CONFIG,
+  AXE_OPTIONS,
+} from 'test/accessibility/services/a11y/constants';
 
 Cypress.Commands.add('loginAsReadOnlyUser', () => {
   cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
@@ -43,6 +48,22 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
 });
 
 Cypress.Commands.add(
+  'selectAbsoluteTimeRange',
+  (start: string, end: string) => {
+    cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').click();
+    cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+      .eq(0)
+      .clear()
+      .type(start, { force: true });
+    cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').click();
+    cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+      .eq(1)
+      .clear()
+      .type(end, { force: true });
+  }
+);
+
+Cypress.Commands.add(
   'expectAPIsToHaveBeenCalledWith',
   ({
     apisIntercepted,
@@ -62,3 +83,25 @@ Cypress.Commands.add(
     });
   }
 );
+
+// A11y configuration
+
+const axeConfig = {
+  ...AXE_CONFIG,
+};
+const axeOptions = {
+  ...AXE_OPTIONS,
+  runOnly: [...AXE_OPTIONS.runOnly, 'best-practice'],
+};
+
+export const checkA11y = ({ skipFailures }: { skipFailures: boolean }) => {
+  // https://github.com/component-driven/cypress-axe#cychecka11y
+  cy.injectAxe();
+  cy.configureAxe(axeConfig);
+  const context = '.kbnAppWrapper'; // Scopes a11y checks to only our app
+  /**
+   * We can get rid of the last two params when we don't need to add skipFailures
+   * params = (context, options, violationCallback, skipFailures)
+   */
+  cy.checkA11y(context, axeOptions, undefined, skipFailures);
+};

@@ -16,21 +16,22 @@ import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
 import { getClustersState } from './get_clusters_state';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from './get_index_patterns';
+import { Globals } from '../../static_globals';
 
 /**
  * This will fetch the cluster stats and cluster state as a single object per cluster.
  *
  * @param  {Object} req The incoming user's request
- * @param  {String} esIndexPattern The Elasticsearch index pattern
  * @param  {String} clusterUuid (optional) If not undefined, getClusters will filter for a single cluster
  * @return {Promise} A promise containing an array of clusters.
  */
-export function getClustersStats(req: LegacyRequest, esIndexPattern: string, clusterUuid: string) {
+export function getClustersStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
   return (
-    fetchClusterStats(req, esIndexPattern, clusterUuid)
+    fetchClusterStats(req, clusterUuid, ccs)
       .then((response) => handleClusterStats(response))
       // augment older documents (e.g., from 2.x - 5.4) with their cluster_state
-      .then((clusters) => getClustersState(req, esIndexPattern, clusters))
+      .then((clusters) => getClustersState(req, clusters))
   );
 }
 
@@ -38,21 +39,28 @@ export function getClustersStats(req: LegacyRequest, esIndexPattern: string, clu
  * Query cluster_stats for all the cluster data
  *
  * @param {Object} req (required) - server request
- * @param {String} esIndexPattern (required) - index pattern to use in searching for cluster_stats data
  * @param {String} clusterUuid (optional) - if not undefined, getClusters filters for a single clusterUuid
  * @return {Promise} Object representing each cluster.
  */
-function fetchClusterStats(req: LegacyRequest, esIndexPattern: string, clusterUuid: string) {
-  checkParam(esIndexPattern, 'esIndexPattern in getClusters');
+function fetchClusterStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
+  const dataset = 'cluster_stats';
+  const moduleType = 'elasticsearch';
+  const indexPattern = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType,
+    dataset,
+    // this is will be either *, a request value, or null
+    ccs: ccs || req.payload.ccs,
+  });
 
-  const config = req.server.config();
+  const config = req.server.config;
   // Get the params from the POST body for the request
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
   const metric = ElasticsearchMetric.getMetricFields();
   const params = {
-    index: esIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    index: indexPattern,
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     filter_path: [
       'hits.hits._index',
@@ -80,7 +88,15 @@ function fetchClusterStats(req: LegacyRequest, esIndexPattern: string, clusterUu
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
     ],
     body: {
-      query: createQuery({ type: 'cluster_stats', start, end, metric, clusterUuid }),
+      query: createQuery({
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
+        start,
+        end,
+        metric,
+        clusterUuid,
+      }),
       collapse: {
         field: 'cluster_uuid',
       },

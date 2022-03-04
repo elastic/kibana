@@ -1,0 +1,84 @@
+title: Preconfigured agent policies
+type: object
+properties:
+  name:
+    type: string
+  description:
+    type: string
+  is_managed:
+    type: string
+  unenroll_timeout:
+    type: number
+  monitoring_enabled:
+    type: array
+    items:
+      type: string
+      enum:
+        - 'logs'
+        - 'metrics'
+  namespace:
+    type: string
+  id:
+    oneOf:
+      - type: string
+      - type: number
+  is_default:
+    type: boolean
+    deprecated: true
+  is_default_fleet_server:
+    type: boolean
+    deprecated: true
+  has_fleet_server:
+    type: boolean  
+  data_output_id:
+    type: string
+  monitoring_output_id:
+    type: string
+  package_policies:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          oneOf:
+            - type: string
+            - type: number
+        name:
+          type: string
+        package:
+          type: object
+          properties:
+            name:
+              type: string
+        description:
+          type: string
+        namespace:
+          type: string
+        inputs:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              enabled:
+                type: boolean
+              keep_enabled:
+                type: boolean
+              vars:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  type:
+                    type: string
+                  value:
+                    type: string
+                  frozen:
+                    type: boolean
+            required:
+              - type
+required:
+  - name
+  - namespace
+  - package_policies

@@ -9,15 +9,15 @@ import React from 'react';
 import { EuiCallOut, EuiCallOutProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const LEGACY_CONNECTOR_WARNING_TITLE = i18n.translate(
-  'xpack.cases.connectors.serviceNow.legacyConnectorWarningTitle',
+const DEPRECATED_CONNECTOR_WARNING_TITLE = i18n.translate(
+  'xpack.cases.connectors.serviceNow.deprecatedConnectorWarningTitle',
   {
     defaultMessage: 'This connector type is deprecated',
   }
 );
 
-const LEGACY_CONNECTOR_WARNING_DESC = i18n.translate(
-  'xpack.cases.connectors.serviceNow.legacyConnectorWarningDesc',
+const DEPRECATED_CONNECTOR_WARNING_DESC = i18n.translate(
+  'xpack.cases.connectors.serviceNow.deprecatedConnectorWarningDesc',
   {
     defaultMessage: 'Update this connector, or create a new one.',
   }
@@ -29,13 +29,14 @@ interface Props {
 
 const DeprecatedCalloutComponent: React.FC<Props> = ({ type = 'warning' }) => (
   <EuiCallOut
-    title={LEGACY_CONNECTOR_WARNING_TITLE}
+    title={DEPRECATED_CONNECTOR_WARNING_TITLE}
     color={type}
     iconType="alert"
-    data-test-subj="legacy-connector-warning-callout"
+    data-test-subj="deprecated-connector-warning-callout"
   >
-    {LEGACY_CONNECTOR_WARNING_DESC}
+    {DEPRECATED_CONNECTOR_WARNING_DESC}
   </EuiCallOut>
 );
+DeprecatedCalloutComponent.displayName = 'DeprecatedCallout';
 
 export const DeprecatedCallout = React.memo(DeprecatedCalloutComponent);

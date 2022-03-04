@@ -10,7 +10,6 @@ import type { SavedObjectsClient, ElasticsearchClient } from 'kibana/server';
 
 import { packagePolicyService, settingsService } from '../services';
 import { getAgentStatusForAgentPolicy } from '../services/agents';
-import { isFleetServerSetup } from '../services/fleet_server';
 
 const DEFAULT_USAGE = {
   total_all_statuses: 0,
@@ -36,7 +35,7 @@ export const getFleetServerUsage = async (
   soClient?: SavedObjectsClient,
   esClient?: ElasticsearchClient
 ): Promise<any> => {
-  if (!soClient || !esClient || !(await isFleetServerSetup())) {
+  if (!soClient || !esClient) {
     return DEFAULT_USAGE;
   }
 
@@ -44,7 +43,7 @@ export const getFleetServerUsage = async (
     .getSettings(soClient)
     .then((settings) => settings.fleet_server_hosts?.length ?? 0)
     .catch((err) => {
-      if (isBoom(error) && error.output.statusCode === 404) {
+      if (isBoom(err) && err.output.statusCode === 404) {
         return 0;
       }
 

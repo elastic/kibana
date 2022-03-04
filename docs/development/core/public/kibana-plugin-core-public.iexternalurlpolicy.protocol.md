@@ -19,6 +19,5 @@ protocol?: string;
 // allows access to all destinations over the `https` protocol.
 allow: true,
 protocol: 'https'
-
 ```
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LAYER_TYPE } from '../constants';
 import { migrateJoinAggKey } from './join_agg_key';
 
 describe('migrateJoinAggKey', () => {
@@ -65,7 +64,7 @@ describe('migrateJoinAggKey', () => {
   test('Should migrate vector styles from legacy join agg key to new join agg key', () => {
     const layerListJSON = JSON.stringify([
       {
-        type: LAYER_TYPE.VECTOR,
+        type: 'VECTOR',
         joins,
         style: {
           properties: {

@@ -7,9 +7,9 @@
 
 import { createAsyncAction } from './utils';
 import { MonitorIdParam } from './types';
-import { Alert } from '../../../../triggers_actions_ui/public';
+import { Rule } from '../../../../triggers_actions_ui/public';
 
-export const getExistingAlertAction = createAsyncAction<MonitorIdParam, Alert>(
+export const getExistingAlertAction = createAsyncAction<MonitorIdParam, Rule>(
   'GET EXISTING ALERTS'
 );
 

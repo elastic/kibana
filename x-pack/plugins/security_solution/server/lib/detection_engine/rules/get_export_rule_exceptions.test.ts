@@ -8,15 +8,15 @@
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { getDetectionsExceptionListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+
 import {
   getRuleExceptionsForExport,
   getExportableExceptions,
   getDefaultExportDetails,
 } from './get_export_rule_exceptions';
-import {
-  getListArrayMock,
-  getListMock,
-} from '../../../../common/detection_engine/schemas/types/lists.mock';
+import { getListMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
 describe('get_export_rule_exceptions', () => {
   describe('getRuleExceptionsForExport', () => {
@@ -36,7 +36,24 @@ describe('get_export_rule_exceptions', () => {
         getExceptionListClientMock()
       );
 
-      expect(exportData).toEqual('exportString');
+      expect(exportData).toEqual(
+        `${JSON.stringify(getDetectionsExceptionListSchemaMock())}\n${JSON.stringify(
+          getExceptionListItemSchemaMock({ list_id: 'exception_list_id' })
+        )}`
+      );
+    });
+
+    test('it does not return duplicate exception lists', async () => {
+      const { exportData } = await getRuleExceptionsForExport(
+        [getListMock(), getListMock()],
+        getExceptionListClientMock()
+      );
+
+      expect(exportData).toEqual(
+        `${JSON.stringify(getDetectionsExceptionListSchemaMock())}\n${JSON.stringify(
+          getExceptionListItemSchemaMock({ list_id: 'exception_list_id' })
+        )}`
+      );
     });
 
     test('it does not return a global endpoint list', async () => {
@@ -60,11 +77,15 @@ describe('get_export_rule_exceptions', () => {
     test('it returns stringified exception lists and items', async () => {
       // This rule has 2 exception lists tied to it
       const { exportData } = await getExportableExceptions(
-        getListArrayMock(),
+        [getListMock()],
         getExceptionListClientMock()
       );
 
-      expect(exportData).toEqual('exportStringexportString');
+      expect(exportData).toEqual(
+        `${JSON.stringify(getDetectionsExceptionListSchemaMock())}\n${JSON.stringify(
+          getExceptionListItemSchemaMock({ list_id: 'exception_list_id' })
+        )}`
+      );
     });
 
     test('it throws error if error occurs in getting exceptions', async () => {
@@ -72,7 +93,7 @@ describe('get_export_rule_exceptions', () => {
       exceptionsClient.exportExceptionListAndItems = jest.fn().mockRejectedValue(new Error('oops'));
       // This rule has 2 exception lists tied to it
       await expect(async () => {
-        await getExportableExceptions(getListArrayMock(), exceptionsClient);
+        await getExportableExceptions([getListMock()], exceptionsClient);
       }).rejects.toThrowErrorMatchingInlineSnapshot(`"oops"`);
     });
   });

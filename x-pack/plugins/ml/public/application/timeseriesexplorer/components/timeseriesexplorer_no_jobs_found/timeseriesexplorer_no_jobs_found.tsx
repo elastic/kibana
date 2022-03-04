@@ -10,23 +10,19 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { useMlLink } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { checkPermission } from '../../../capabilities/check_capabilities';
+import { mlNodesAvailable } from '../../../ml_nodes_check';
 
 export const TimeseriesexplorerNoJobsFound = () => {
-  const mlLocator = useMlLocator();
-  const navigateToPath = useNavigateToPath();
+  const jobLink = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
 
-  const redirectToJobsManagementPage = async () => {
-    if (!mlLocator) return;
-    const path = await mlLocator.getUrl({
-      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-    });
-    await navigateToPath(path, true);
-  };
+  const disableCreateAnomalyDetectionJob: boolean =
+    !checkPermission('canCreateJob') || !mlNodesAvailable();
 
   return (
     <EuiEmptyPrompt
@@ -41,7 +37,8 @@ export const TimeseriesexplorerNoJobsFound = () => {
         </h2>
       }
       actions={
-        <EuiButton color="primary" fill onClick={redirectToJobsManagementPage}>
+        // @ts-ignore disabled type expects undefined
+        <EuiButton color="primary" fill href={jobLink} disabled={disableCreateAnomalyDetectionJob}>
           <FormattedMessage
             id="xpack.ml.timeSeriesExplorer.createNewSingleMetricJobLinkText"
             defaultMessage="Create new single metric job"

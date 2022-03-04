@@ -16,6 +16,6 @@ export interface OnPreResponseRender
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body](./kibana-plugin-core-server.onpreresponserender.body.md) | <code>string</code> | the body to use in the response |
-|  [headers](./kibana-plugin-core-server.onpreresponserender.headers.md) | <code>ResponseHeaders</code> | additional headers to attach to the response |
+|  [body](./kibana-plugin-core-server.onpreresponserender.body.md) | string | the body to use in the response |
+|  [headers?](./kibana-plugin-core-server.onpreresponserender.headers.md) | ResponseHeaders | <i>(Optional)</i> additional headers to attach to the response |
 

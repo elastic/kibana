@@ -19,7 +19,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { StyledPanel } from '../styles';
 import { BoldCode, StyledTime } from './styles';
 import { Breadcrumbs } from './breadcrumbs';

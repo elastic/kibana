@@ -1,0 +1,27 @@
+steps:
+  - command: .buildkite/scripts/steps/package_testing/build.sh
+    label: Build Packages
+    agents:
+      queue: c2-16
+    timeout_in_minutes: 60
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+
+  - wait
+
+  - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for deb
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 60
+
+  - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for rpm
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 60
+
+  - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for docker
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 60

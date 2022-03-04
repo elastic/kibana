@@ -10,17 +10,17 @@ In the event that an entity is contained within a boundary, an alert may be gene
 ==== Requirements
 To create a Tracking containment rule, the following requirements must be present:
 
-- *Tracks index or index pattern*: An index containing a `geo_point` field, `date` field,
+- *Tracks index or data view*: An index containing a `geo_point` field, `date` field,
 and some form of entity identifier. An entity identifier is a `keyword` or `number`
 field that consistently identifies the entity to be tracked. The data in this index should be dynamically
 updating so that there are entity movements to alert upon.
-- *Boundaries index or index pattern*: An index containing `geo_shape` data, such as boundary data and bounding box data.
+- *Boundaries index or data view*: An index containing `geo_shape` data, such as boundary data and bounding box data.
 This data is presumed to be static (not updating). Shape data matching the query is
 harvested once when the rule is created and anytime after when the rule is re-enabled
 after disablement.
 
 By design, current interval entity locations (_current_ is determined by `date` in
-the *Tracked index or index pattern*) are queried to determine if they are contained
+the *Tracked index or data view*) are queried to determine if they are contained
 within any monitored boundaries. Entity
 data should be somewhat "real time", meaning the dates of new documents aren’t older
 than the current time minus the amount of the interval. If data older than
@@ -39,13 +39,13 @@ as well as 2 Kuery bars used to provide additional filtering context for each of
 [role="screenshot"]
 image::user/alerting/images/alert-types-tracking-containment-conditions.png[Five clauses define the condition to detect]
 
-Index (entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
+Index (entity):: This clause requires an *index or data view*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
 When entity:: This clause specifies which crossing option to track. The values
 *Entered*, *Exited*, and *Crossed* can be selected to indicate which crossing conditions
 should trigger a rule. *Entered* alerts on entry into a boundary, *Exited* alerts on exit
 from a boundary, and *Crossed* alerts on all boundary crossings whether they be entrances
 or exits.
-Index (Boundary):: This clause requires an *index or index pattern*, a *`geo_shape` field*
+Index (Boundary):: This clause requires an *index or data view*, a *`geo_shape` field*
 identifying boundaries, and an optional *Human-readable boundary name* for better alerting
 messages.
 

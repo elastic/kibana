@@ -12,7 +12,7 @@ import { MultiSelectPicker, Option } from '../multi_select_picker';
 import type {
   FileBasedFieldVisConfig,
   FileBasedUnknownFieldVisConfig,
-} from '../stats_table/types/field_vis_config';
+} from '../../../../../common/types/field_vis_config';
 import { FieldTypeIcon } from '../field_type_icon';
 import { jobTypeLabels } from '../../util/field_types_utils';
 
@@ -50,7 +50,7 @@ export const DataVisualizerFieldTypesFilter: FC<Props> = ({
               <EuiFlexItem grow={true}> {label}</EuiFlexItem>
               {type && (
                 <EuiFlexItem grow={false}>
-                  <FieldTypeIcon type={type} tooltipEnabled={false} needsAria={true} />
+                  <FieldTypeIcon type={type} tooltipEnabled={false} />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

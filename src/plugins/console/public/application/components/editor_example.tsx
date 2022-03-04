@@ -8,8 +8,10 @@
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { createReadOnlyAceEditor } from '../models/legacy_core_editor';
+import React, { useEffect, useRef } from 'react';
+import { createReadOnlyAceEditor, CustomAceEditor } from '../models/sense_editor';
+// @ts-ignore
+import { Mode } from '../models/legacy_core_editor/mode/input';
 
 interface EditorExampleProps {
   panel: string;
@@ -27,21 +29,33 @@ GET index/_doc/1
 `;
 
 export function EditorExample(props: EditorExampleProps) {
-  const elemId = `help-example-${props.panel}`;
   const inputId = `help-example-${props.panel}-input`;
+  const wrapperDivRef = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<CustomAceEditor>();
 
   useEffect(() => {
-    const el = document.getElementById(elemId)!;
-    el.textContent = exampleText.trim();
-    const editor = createReadOnlyAceEditor(el);
-    const textarea = el.querySelector('textarea')!;
-    textarea.setAttribute('id', inputId);
-    textarea.setAttribute('readonly', 'true');
+    if (wrapperDivRef.current) {
+      editorRef.current = createReadOnlyAceEditor(wrapperDivRef.current);
+
+      const editor = editorRef.current;
+      editor.update(exampleText.trim());
+      editor.session.setMode(new Mode());
+      editor.session.setUseWorker(false);
+      editor.setHighlightActiveLine(false);
+
+      const textareaElement = wrapperDivRef.current.querySelector('textarea');
+      if (textareaElement) {
+        textareaElement.setAttribute('id', inputId);
+        textareaElement.setAttribute('readonly', 'true');
+      }
+    }
 
     return () => {
-      editor.destroy();
+      if (editorRef.current) {
+        editorRef.current.destroy();
+      }
     };
-  }, [elemId, inputId]);
+  }, [inputId]);
 
   return (
     <>
@@ -52,7 +66,7 @@ export function EditorExample(props: EditorExampleProps) {
           })}
         </label>
       </EuiScreenReaderOnly>
-      <div id={elemId} className="conHelp__example" />
+      <div ref={wrapperDivRef} className="conHelp__example" />
     </>
   );
 }

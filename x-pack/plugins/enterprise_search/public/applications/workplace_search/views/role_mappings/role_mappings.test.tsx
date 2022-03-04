@@ -35,7 +35,6 @@ describe('RoleMappings', () => {
   const mockValues = {
     roleMappings: [wsRoleMapping],
     dataLoading: false,
-    multipleAuthProvidersConfig: false,
     singleUserRoleMappings: [wsSingleUserRoleMapping],
     singleUserRoleMappingFlyoutOpen: false,
   };

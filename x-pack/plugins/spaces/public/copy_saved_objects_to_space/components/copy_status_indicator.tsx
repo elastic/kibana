@@ -8,7 +8,7 @@
 import { EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SummarizedCopyToSpaceResult, SummarizedSavedObjectResult } from '../lib';
 import type { ImportRetry } from '../types';

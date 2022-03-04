@@ -6,13 +6,13 @@
  */
 import React, { createContext } from 'react';
 import { GlobalState } from '../../url_state';
-import { MonitoringStartPluginDependencies } from '../../types';
+import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
 import { TimeRange, RefreshInterval } from '../../../../../../src/plugins/data/public';
 import { Legacy } from '../../legacy_shims';
 
 interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
-  toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts'];
+  toasts: MonitoringStartServices['notifications']['toasts'];
 }
 
 export interface State {

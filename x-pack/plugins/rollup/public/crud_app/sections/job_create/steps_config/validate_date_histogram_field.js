@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function validateDateHistogramField(dateHistogramField) {
   if (!dateHistogramField || !dateHistogramField.trim()) {

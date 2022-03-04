@@ -14,9 +14,9 @@ static objectFetchError(objects: SavedObject[]): SavedObjectsExportError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>SavedObject[]</code> |  |
+|  objects | SavedObject\[\] |  |
 
 <b>Returns:</b>
 
-`SavedObjectsExportError`
+SavedObjectsExportError
 

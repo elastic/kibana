@@ -1,0 +1,65 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects the use of PSReflect in PowerShell scripts. Attackers leverage PSReflect as a library that enables PowerShell to access win32 API functions.",
+  "false_positives": [
+    "Legitimate PowerShell scripts that make use of PSReflect to access the win32 API"
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "PowerShell PSReflect Script",
+  "note": "## Triage and analysis\n### Investigating PowerShell PSReflect Script\n\nPowerShell is one of the main tools in the belt of system administrators for automation, report routines, and other tasks.\n\nPSReflect is a library that enables PowerShell to access win32 API functions in an uncomplicated way. It also helps to\ncreate enums and structs easily\u2014all without touching the disk.\n\nAlthough this is an interesting project for every developer and admin out there, it is mainly used in the red team and\nmalware tooling for its capabilities.\n\nDetecting the core implementation of PSReflect means detecting most of the tooling that uses Windows API through\nPowerShell, enabling the defender to discover tools being dropped in the environment.\n\n#### Possible investigation steps:\n- Check for additional PowerShell logs that indicate that the script/command was run.\n- Gather the script content that may be split into multiple script blocks, and identify its capabilities.\n- If the action is suspicious for the user, check for any other activities done by the user in the last 48 hours.\n- Look for additional alerts involving the host and the user.\n\n### False Positive Analysis\n- Verify whether the script content is malicious/harmful.\n\n### Related Rules\n- PowerShell Suspicious Discovery Related Windows API Functions - 61ac3638-40a3-44b2-855a-985636ca985e\n- PowerShell Keylogging Script - bd2c86a0-8b61-4457-ab38-96943984e889\n- PowerShell Suspicious Script with Audio Capture Capabilities - 2f2f4939-0b34-40c2-a0a3-844eb7889f43\n- Potential Process Injection via PowerShell - 2e29e96a-b67c-455a-afe4-de6183431d0d\n- PowerShell Reflection Assembly Load - e26f042e-c590-4e82-8e05-41e81bd822ad\n- PowerShell Suspicious Payload Encoded and Compressed - 81fe9dc6-a2d7-4192-a2d8-eed98afc766a\n- PowerShell Suspicious Script with Screenshot Capabilities - 959a7353-1129-4aa7-9084-30746b256a70\n\n### Response and Remediation\n- Immediate response should be taken to validate activity, investigate, and potentially isolate activity to prevent further\npost-compromise behavior.\n\n## Config\nThe 'PowerShell Script Block Logging' logging policy is required be configured (Enable).\n\nSteps to implement the logging policy with with Advanced Audit Configuration:\n```\nComputer Configuration > \nAdministrative Templates > \nWindows PowerShell > \nTurn on PowerShell Script Block Logging (Enable)\n```\nSteps to implement the logging policy via registry:\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+  "query": "event.category:process and \n  powershell.file.script_block_text:(\n    New-InMemoryModule or\n    Add-Win32Type or\n    psenum or\n    DefineDynamicAssembly or\n    DefineDynamicModule or\n    Reflection.TypeAttributes or\n    Reflection.Emit.OpCodes or\n    Reflection.Emit.CustomAttributeBuilder or\n    Runtime.InteropServices.DllImportAttribute\n  )\n",
+  "references": [
+    "https://github.com/mattifestation/PSReflect/blob/master/PSReflect.psm1",
+    "https://github.com/atc-project/atc-data/blob/master/docs/Logging_Policies/LP_0109_windows_powershell_script_block_log.md"
+  ],
+  "risk_score": 47,
+  "rule_id": "56f2e9b5-4803-4e44-a0a4-a52dc79d57fe",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
+        },
+        {
+          "id": "T1106",
+          "name": "Native API",
+          "reference": "https://attack.mitre.org/techniques/T1106/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

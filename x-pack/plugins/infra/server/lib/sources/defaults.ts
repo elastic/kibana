@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  METRICS_INDEX_PATTERN,
-  LOGS_INDEX_PATTERN,
-  TIMESTAMP_FIELD,
-} from '../../../common/constants';
+import { METRICS_INDEX_PATTERN, LOGS_INDEX_PATTERN } from '../../../common/constants';
 import { InfraSourceConfiguration } from '../../../common/source_configuration/source_configuration';
 
 export const defaultSourceConfiguration: InfraSourceConfiguration = {
@@ -21,12 +17,7 @@ export const defaultSourceConfiguration: InfraSourceConfiguration = {
     indexName: LOGS_INDEX_PATTERN,
   },
   fields: {
-    container: 'container.id',
-    host: 'host.name',
     message: ['message', '@message'],
-    pod: 'kubernetes.pod.uid',
-    tiebreaker: '_doc',
-    timestamp: TIMESTAMP_FIELD,
   },
   inventoryDefaultView: '0',
   metricsExplorerDefaultView: '0',

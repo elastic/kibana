@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global all privileges (aka kibana_admin)', () => {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin'], true);
+        await security.testUser.setRoles(['kibana_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard read with manage_ilm', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_read', 'manage_ilm'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'manage_ilm']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -60,7 +60,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Data" section with ILM', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(1);
+        // Changed sections to have a length of 2 because of
+        // https://github.com/elastic/kibana/pull/121262
+        expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'data',
           sectionLinks: ['index_lifecycle_management'],

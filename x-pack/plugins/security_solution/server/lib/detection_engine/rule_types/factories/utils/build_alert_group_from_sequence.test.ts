@@ -11,15 +11,15 @@ import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortId, sampleRuleGuid } from '../../../signals/__mocks__/es_results';
 import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
-import {
-  ALERT_ANCESTORS,
-  ALERT_BUILDING_BLOCK_TYPE,
-  ALERT_DEPTH,
-  ALERT_GROUP_ID,
-} from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import { getCompleteRuleMock, getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
 import { QueryRuleParams } from '../../../schemas/rule_schemas';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_GROUP_ID,
+} from '../../../../../../common/field_maps/field_names';
 
 const SPACE_ID = 'space';
 
@@ -123,8 +123,8 @@ describe('buildAlert', () => {
             },
           ]),
           [ALERT_DEPTH]: 2,
-          [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
           [ALERT_BUILDING_BLOCK_TYPE]: 'default',
+          [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
         }),
       })
     );

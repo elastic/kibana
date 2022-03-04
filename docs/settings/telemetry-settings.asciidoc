@@ -17,29 +17,26 @@ See our https://www.elastic.co/legal/privacy-statement[Privacy Statement] to lea
 [[telemetry-general-settings]]
 ==== General telemetry settings
 
-[cols="2*<"]
-|===
-|[[telemetry-enabled]] `telemetry.enabled`
-  | Set to `true` to send cluster statistics to Elastic. Reporting your
+
+[[telemetry-enabled]] `telemetry.enabled`::
+  Set to `true` to send cluster statistics to Elastic. Reporting your
   cluster statistics helps us improve your user experience. Your data is never
   shared with anyone. Set to `false` to disable statistics reporting from any
   browser connected to the {kib} instance. Defaults to `true`.
 
-| `telemetry.sendUsageFrom`
-  | Set to `'server'` to report the cluster statistics from the {kib} server.
+`telemetry.sendUsageFrom`::
+  Set to `'server'` to report the cluster statistics from the {kib} server.
   If the server fails to connect to our endpoint at https://telemetry.elastic.co/, it assumes
   it is behind a firewall and falls back to `'browser'` to send it from users' browsers
   when they are navigating through {kib}. Defaults to `'server'`.
 
-|[[telemetry-optIn]] `telemetry.optIn`
-  | Set to `true` to automatically opt into reporting cluster statistics. You can also opt out through
+[[telemetry-optIn]] `telemetry.optIn`::
+  Set to `true` to automatically opt into reporting cluster statistics. You can also opt out through
   *Advanced Settings* in {kib}. Defaults to `true`.
 
-| `telemetry.allowChangingOptInStatus`
-  | Set to `true` to allow overwriting the <<telemetry-optIn, `telemetry.optIn`>> setting via the {kib} UI. Defaults to `true`. +
-
-|===
-
+`telemetry.allowChangingOptInStatus`::
+  Set to `true` to allow overwriting the <<telemetry-optIn, `telemetry.optIn`>> setting via the {kib} UI. Defaults to `true`. +
++
 [NOTE]
 ============
 When `false`, <<telemetry-optIn, `telemetry.optIn`>> must be `true`. To disable telemetry and not allow users to change that parameter, use <<telemetry-enabled, `telemetry.enabled`>>.

@@ -7,19 +7,19 @@
 
 import uuid from 'uuid';
 import { merge, flattenDeep } from 'lodash';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { makePing } from './make_ping';
 import { TlsProps } from './make_tls';
 
 interface CheckProps {
-  es: KibanaClient;
+  es: Client;
   monitorId?: string;
   numIps?: number;
   fields?: { [key: string]: any };
   mogrify?: (doc: any) => any;
   refresh?: boolean;
   tls?: boolean | TlsProps;
-  isFleetManaged?: boolean;
+  customIndex?: string;
 }
 
 const getRandomMonitorId = () => {
@@ -33,11 +33,11 @@ export const makeCheck = async ({
   mogrify = (d) => d,
   refresh = true,
   tls = false,
-  isFleetManaged = false,
+  customIndex,
 }: CheckProps): Promise<{ monitorId: string; docs: any }> => {
   const cgFields = {
     monitor: {
-      check_group: uuid.v4(),
+      check_group: fields.monitor?.check_group || uuid.v4(),
     },
   };
 
@@ -52,18 +52,10 @@ export const makeCheck = async ({
         ip: `127.0.0.${i}`,
       },
     });
-    if (i === numIps - 1) {
+    if (i === numIps - 1 && fields.summary !== null) {
       pingFields.summary = summary;
     }
-    const doc = await makePing(
-      es,
-      monitorId,
-      pingFields,
-      mogrify,
-      false,
-      tls as any,
-      isFleetManaged
-    );
+    const doc = await makePing(es, monitorId, pingFields, mogrify, false, tls as any, customIndex);
     docs.push(doc);
     // @ts-ignore
     summary[doc.monitor.status]++;
@@ -77,7 +69,7 @@ export const makeCheck = async ({
 };
 
 export const makeChecks = async (
-  es: KibanaClient,
+  es: Client,
   monitorId: string,
   numChecks: number = 1,
   numIps: number = 1,
@@ -85,7 +77,7 @@ export const makeChecks = async (
   fields: { [key: string]: any } = {},
   mogrify: (doc: any) => any = (d) => d,
   refresh: boolean = true,
-  isFleetManaged: boolean = false
+  customIndex?: string
 ) => {
   const checks = [];
   const oldestTime = new Date().getTime() - numChecks * every;
@@ -109,7 +101,7 @@ export const makeChecks = async (
       fields,
       mogrify,
       refresh: false,
-      isFleetManaged,
+      customIndex,
     });
     checks.push(docs);
   }
@@ -122,7 +114,7 @@ export const makeChecks = async (
 };
 
 export const makeChecksWithStatus = async (
-  es: KibanaClient,
+  es: Client,
   monitorId: string,
   numChecks: number,
   numIps: number,
@@ -131,7 +123,7 @@ export const makeChecksWithStatus = async (
   status: 'up' | 'down',
   mogrify: (doc: any) => any = (d) => d,
   refresh: boolean = true,
-  isFleetManaged: boolean = false
+  customIndex?: string
 ) => {
   const oppositeStatus = status === 'up' ? 'down' : 'up';
 
@@ -152,7 +144,7 @@ export const makeChecksWithStatus = async (
       return mogrify(d);
     },
     refresh,
-    isFleetManaged
+    customIndex
   );
 };
 

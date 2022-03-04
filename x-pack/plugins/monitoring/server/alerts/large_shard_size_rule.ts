@@ -21,18 +21,12 @@ import {
   CommonAlertFilter,
   IndexShardSizeStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
-import {
-  INDEX_PATTERN_ELASTICSEARCH,
-  RULE_LARGE_SHARD_SIZE,
-  RULE_DETAILS,
-} from '../../common/constants';
+import { Alert } from '../../../alerting/server';
+import { RULE_LARGE_SHARD_SIZE, RULE_DETAILS } from '../../common/constants';
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
 export class LargeShardSizeRule extends BaseRule {
@@ -60,19 +54,13 @@ export class LargeShardSizeRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams & { indexPattern: string },
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: string[]
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
     const { threshold, indexPattern: shardIndexPatterns } = params;
 
     const stats = await fetchIndexShardSize(
       esClient,
       clusters,
-      esIndexPattern,
       threshold!,
       shardIndexPatterns,
       Globals.app.config.ui.max_bucket_size,
@@ -161,7 +149,7 @@ export class LargeShardSizeRule extends BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

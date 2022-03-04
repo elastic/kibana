@@ -282,12 +282,12 @@ function endDataLoad(
 
     if (dataId === SOURCE_DATA_REQUEST_ID) {
       const features = data && 'features' in data ? (data as FeatureCollection).features : [];
+      const layer = getLayerById(layerId, getState());
 
       const eventHandlers = getEventHandlers(getState());
       if (eventHandlers && eventHandlers.onDataLoadEnd) {
-        const layer = getLayerById(layerId, getState());
         const resultMeta: ResultMeta = {};
-        if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
+        if (layer && layer.getType() === LAYER_TYPE.GEOJSON_VECTOR) {
           const featuresWithoutCentroids = features.filter((feature) => {
             return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
           });
@@ -301,7 +301,9 @@ function endDataLoad(
         });
       }
 
-      dispatch(updateTooltipStateForLayer(layerId, features));
+      if (layer) {
+        dispatch(updateTooltipStateForLayer(layer, features));
+      }
     }
 
     dispatch({
@@ -344,7 +346,10 @@ function onDataLoadError(
         });
       }
 
-      dispatch(updateTooltipStateForLayer(layerId));
+      const layer = getLayerById(layerId, getState());
+      if (layer) {
+        dispatch(updateTooltipStateForLayer(layer));
+      }
     }
 
     dispatch({
@@ -359,7 +364,10 @@ function onDataLoadError(
 }
 
 export function updateSourceDataRequest(layerId: string, newData: object) {
-  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
       dataId: SOURCE_DATA_REQUEST_ID,
@@ -368,7 +376,10 @@ export function updateSourceDataRequest(layerId: string, newData: object) {
     });
 
     if ('features' in newData) {
-      dispatch(updateTooltipStateForLayer(layerId, (newData as FeatureCollection).features));
+      const layer = getLayerById(layerId, getState());
+      if (layer) {
+        dispatch(updateTooltipStateForLayer(layer, (newData as FeatureCollection).features));
+      }
     }
 
     dispatch(updateStyleMeta(layerId));

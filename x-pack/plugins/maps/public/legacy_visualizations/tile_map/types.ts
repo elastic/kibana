@@ -12,8 +12,6 @@ export const TILE_MAP_VIS_TYPE = 'tile_map';
 
 export enum MapTypes {
   ScaledCircleMarkers = 'Scaled Circle Markers',
-  ShadedCircleMarkers = 'Shaded Circle Markers',
-  ShadedGeohashGrid = 'Shaded Geohash Grid',
   Heatmap = 'Heatmap',
 }
 

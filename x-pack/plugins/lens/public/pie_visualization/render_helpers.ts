@@ -5,33 +5,29 @@
  * 2.0.
  */
 
-import { Datum, LayerValue } from '@elastic/charts';
-import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
-import { LensFilterEvent } from '../types';
+import type { Datatable } from 'src/plugins/expressions/public';
+import type { PieChartType, PieLayerState } from '../../common/types';
+import { PartitionChartsMeta } from './partition_charts_meta';
 
-export function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
-  const value = d[metricColumn.id];
-  return Number.isFinite(value) && value >= 0 ? value : 0;
-}
+export const isPartitionShape = (shape: PieChartType | string) =>
+  ['donut', 'pie', 'treemap', 'mosaic', 'waffle'].includes(shape);
 
-export function getFilterContext(
-  clickedLayers: LayerValue[],
-  layerColumnIds: string[],
-  table: Datatable
-): LensFilterEvent['data'] {
-  const matchingIndex = table.rows.findIndex((row) =>
-    clickedLayers.every((layer, index) => {
-      const columnId = layerColumnIds[index];
-      return row[columnId] === layer.groupByRollup;
-    })
+export const shouldShowValuesInLegend = (layer: PieLayerState, shape: PieChartType) => {
+  if ('showValues' in PartitionChartsMeta[shape]?.legend) {
+    return layer.showValuesInLegend ?? PartitionChartsMeta[shape]?.legend?.showValues ?? true;
+  }
+
+  return false;
+};
+
+export const checkTableForContainsSmallValues = (
+  dataTable: Datatable,
+  columnId: string,
+  minPercentage: number
+) => {
+  const overallSum = dataTable.rows.reduce(
+    (partialSum, row) => Number(row[columnId]) + partialSum,
+    0
   );
-
-  return {
-    data: clickedLayers.map((clickedLayer, index) => ({
-      column: table.columns.findIndex((col) => col.id === layerColumnIds[index]),
-      row: matchingIndex,
-      value: clickedLayer.groupByRollup,
-      table,
-    })),
-  };
-}
+  return dataTable.rows.some((row) => (row[columnId] / overallSum) * 100 < minPercentage);
+};

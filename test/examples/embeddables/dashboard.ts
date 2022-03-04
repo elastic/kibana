@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
   const elasticChart = getService('elasticChart');
-  const PageObjects = getPageObjects(['common', 'visChart']);
+  const PageObjects = getPageObjects(['common', 'visChart', 'dashboard']);
   const monacoEditor = getService('monacoEditor');
 
   describe('dashboard container', () => {
@@ -108,6 +108,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       );
       await PageObjects.common.navigateToApp('dashboardEmbeddableExamples');
       await testSubjects.click('dashboardEmbeddableByValue');
+      await PageObjects.dashboard.waitForRenderComplete();
+
       await updateInput(JSON.stringify(testDashboardInput, null, 4));
     });
 

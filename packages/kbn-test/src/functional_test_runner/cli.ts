@@ -35,12 +35,18 @@ export function runFtrCli() {
   const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
     async ({ flags, log }) => {
+      const esVersion = flags['es-version'] || undefined; // convert "" to undefined
+      if (esVersion !== undefined && typeof esVersion !== 'string') {
+        throw createFlagError('expected --es-version to be a string');
+      }
+
       const functionalTestRunner = new FunctionalTestRunner(
         log,
         makeAbsolutePath(flags.config as string),
         {
           mochaOpts: {
             bail: flags.bail,
+            dryRun: flags['dry-run'],
             grep: flags.grep || undefined,
             invert: flags.invert,
           },
@@ -57,7 +63,8 @@ export function runFtrCli() {
           },
           updateBaselines: flags.updateBaselines || flags.u,
           updateSnapshots: flags.updateSnapshots || flags.u,
-        }
+        },
+        esVersion
       );
 
       if (flags.throttle) {
@@ -131,6 +138,7 @@ export function runFtrCli() {
           'include-tag',
           'exclude-tag',
           'kibana-install-dir',
+          'es-version',
         ],
         boolean: [
           'bail',
@@ -141,6 +149,7 @@ export function runFtrCli() {
           'u',
           'throttle',
           'headless',
+          'dry-run',
         ],
         default: {
           config: 'test/functional/config.js',
@@ -150,6 +159,7 @@ export function runFtrCli() {
           --bail             stop tests after the first failure
           --grep <pattern>   pattern used to select which tests to run
           --invert           invert grep to exclude tests
+          --es-version       the elasticsearch version, formatted as "x.y.z"
           --include=file     a test file to be included, pass multiple times for multiple files
           --exclude=file     a test file to be excluded, pass multiple times for multiple files
           --include-tag=tag  a tag to be included, pass multiple times for multiple tags. Only
@@ -166,6 +176,7 @@ export function runFtrCli() {
           --kibana-install-dir  directory where the Kibana install being tested resides
           --throttle         enable network throttling in Chrome browser
           --headless         run browser in headless mode
+          --dry-run          report tests without executing them
         `,
       },
     }

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -27,6 +27,7 @@ import { useInitApp } from '../../hooks/use_init_app';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public/';
 import { ActionTypeId } from './types';
+import { DefaultEmail } from './default_email';
 
 type ConnectorOption = EuiComboBoxOptionOption<string>;
 
@@ -146,7 +147,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
           />
         }
       >
-        <EuiFormRow
+        <RowWrapper
           describedByIds={['defaultConnectors']}
           error={error}
           fullWidth
@@ -155,6 +156,16 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
             <FormattedMessage
               id="xpack.uptime.sourceConfiguration.defaultConnectors"
               defaultMessage="Default connectors"
+            />
+          }
+          labelAppend={
+            <AddConnectorFlyout
+              isDisabled={isDisabled}
+              focusInput={useCallback(() => {
+                if (inputRef.current) {
+                  inputRef.current.focus();
+                }
+              }, [])}
             />
           }
         >
@@ -175,17 +186,23 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
             data-test-subj={`default-connectors-input-${loading ? 'loading' : 'loaded'}`}
             renderOption={renderOption}
           />
-        </EuiFormRow>
-        <span>
-          <AddConnectorFlyout
-            focusInput={useCallback(() => {
-              if (inputRef.current) {
-                inputRef.current.focus();
-              }
-            }, [])}
-          />
-        </span>
+        </RowWrapper>
       </EuiDescribedFormGroup>
+      <DefaultEmail
+        value={formFields?.defaultEmail}
+        connectors={formFields?.defaultConnectors}
+        onChange={onChange}
+        isLoading={loading}
+        isDisabled={isDisabled}
+        errors={fieldErrors?.invalidEmail}
+      />
+      <EuiSpacer />
     </>
   );
 };
+
+const RowWrapper = styled(EuiFormRow)`
+  &&& > .euiFormRow__labelWrapper {
+    align-items: baseline;
+  }
+`;

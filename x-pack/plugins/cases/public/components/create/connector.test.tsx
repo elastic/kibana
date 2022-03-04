@@ -21,22 +21,10 @@ import { schema, FormProps } from './schema';
 import { TestProviders } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
-import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 import { useKibana } from '../../common/lib/kibana';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
-const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
-
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: {},
-      http: {},
-      triggersActionsUi: mockTriggersActionsUiService,
-    },
-  }),
-}));
-
+jest.mock('../../common/lib/kibana');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/servicenow/use_get_choices');
@@ -93,7 +81,7 @@ describe('Connector', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);

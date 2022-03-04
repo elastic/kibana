@@ -16,6 +16,7 @@ import {
   getFindResultWithSingleHit,
   nonRuleFindResult,
   getEmptySavedObjectsResponse,
+  getRuleExecutionSummarySucceeded,
   resolveAlertMock,
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
@@ -37,7 +38,9 @@ describe.each([
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
-    clients.ruleExecutionLogClient.find.mockResolvedValue([]);
+    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
+      getRuleExecutionSummarySucceeded()
+    );
 
     clients.rulesClient.resolve.mockResolvedValue({
       ...resolveAlertMock(isRuleRegistryEnabled, {
@@ -48,8 +51,8 @@ describe.each([
     readRulesRoute(server.router, logger, isRuleRegistryEnabled);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
+  describe('status codes', () => {
+    test('returns 200', async () => {
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(200);
     });
@@ -83,13 +86,6 @@ describe.each([
       const response = await server.inject(getReadRequestWithId(myFakeId), context);
       expect(response.status).toEqual(200);
       expect(response.body.alias_target_id).toEqual('myaliastargetid');
-    });
-
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const response = await server.inject(getReadRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('returns error if requesting a non-rule', async () => {

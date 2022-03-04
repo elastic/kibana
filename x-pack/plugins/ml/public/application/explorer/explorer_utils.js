@@ -35,7 +35,6 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import { ANNOTATION_EVENT_USER } from '../../../common/constants/annotations';
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
@@ -437,10 +436,7 @@ export function loadOverallAnnotations(selectedJobs, interval, bounds) {
 }
 
 export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
-  const jobIds =
-    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
-      ? selectedCells.lanes
-      : selectedJobs.map((d) => d.id);
+  const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 
   return new Promise((resolve) => {
@@ -450,12 +446,6 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-        fields: [
-          {
-            field: 'event',
-            missing: ANNOTATION_EVENT_USER,
-          },
-        ],
       })
       .toPromise()
       .then((resp) => {
@@ -463,7 +453,7 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
           const errorMessage = extractErrorMessage(resp.error);
           return resolve({
             annotationsData: [],
-            aggregations: {},
+            totalCount: 0,
             error: errorMessage !== '' ? errorMessage : undefined,
           });
         }
@@ -485,14 +475,14 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
               d.key = (i + 1).toString();
               return d;
             }),
-          aggregations: resp.aggregations,
+          totalCount: resp.totalCount,
         });
       })
       .catch((resp) => {
         const errorMessage = extractErrorMessage(resp);
         return resolve({
           annotationsData: [],
-          aggregations: {},
+          totalCount: 0,
           error: errorMessage !== '' ? errorMessage : undefined,
         });
       });

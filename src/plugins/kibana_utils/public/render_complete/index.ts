@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './render_complete_listener';
-export * from './render_complete_dispatcher';
+export { RenderCompleteListener } from './render_complete_listener';
+export {
+  dispatchRenderStart,
+  dispatchRenderComplete,
+  RenderCompleteDispatcher,
+} from './render_complete_dispatcher';

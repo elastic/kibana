@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+export type { FtrProviderContext } from '../../api_integration/ftr_provider_context';

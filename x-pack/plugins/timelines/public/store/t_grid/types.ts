@@ -6,8 +6,10 @@
  */
 
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import type { ColumnHeaderOptions } from '../../../common';
+import type { ColumnHeaderOptions } from '../../../common/types';
 import type { TGridModel, TGridModelSettings } from './model';
+
+export type { TGridModel };
 
 export interface AutoSavedWarningMsg {
   timelineId: string | null;
@@ -45,7 +47,6 @@ export enum TimelineId {
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
-  uebaPageExternalAlerts = 'ueba-page-external-alerts',
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes

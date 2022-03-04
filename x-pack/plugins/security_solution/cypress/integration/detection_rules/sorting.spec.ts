@@ -10,31 +10,23 @@ import {
   RULE_NAME,
   RULE_SWITCH,
   SECOND_RULE,
-  RULE_AUTO_REFRESH_IDLE_MODAL,
   FOURTH_RULE,
   RULES_TABLE,
   pageSelector,
+  RULES_TABLE_REFRESH_INDICATOR,
 } from '../../screens/alerts_detection_rules';
 
+import { goToManageAlertsDetectionRules, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
 import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsPanelToBeLoaded,
-  waitForAlertsIndexToBeCreated,
-} from '../../tasks/alerts';
-import {
-  activateRule,
+  enableRule,
   changeRowsPerPageTo,
-  checkAllRulesIdleModal,
   checkAutoRefresh,
-  dismissAllRulesIdleModal,
   goToPage,
-  resetAllRulesIdleModalTimeout,
-  sortByActivatedRules,
+  sortByEnabledRules,
   waitForRulesTableToBeLoaded,
   waitForRuleToChangeStatus,
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { DEFAULT_RULE_REFRESH_INTERVAL_VALUE } from '../../../common/constants';
 
 import { ALERTS_URL } from '../../urls/navigation';
 import { createCustomRule } from '../../tasks/api_calls/rules';
@@ -46,52 +38,35 @@ import {
   getNewThresholdRule,
 } from '../../objects/rule';
 
+const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
+
 describe('Alerts detection rules', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     createCustomRule(getNewRule(), '1');
     createCustomRule(getExistingRule(), '2');
     createCustomRule(getNewOverrideRule(), '3');
     createCustomRule(getNewThresholdRule(), '4');
   });
 
-  it('Sorts by activated rules', () => {
+  it('Sorts by enabled rules', () => {
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
 
-    cy.get(RULE_NAME)
-      .eq(SECOND_RULE)
-      .invoke('text')
-      .then((secondInitialRuleName) => {
-        activateRule(SECOND_RULE);
-        waitForRuleToChangeStatus();
-        cy.get(RULE_NAME)
-          .eq(FOURTH_RULE)
-          .invoke('text')
-          .then((fourthInitialRuleName) => {
-            activateRule(FOURTH_RULE);
-            waitForRuleToChangeStatus();
-            sortByActivatedRules();
-            cy.get(RULE_NAME)
-              .eq(FIRST_RULE)
-              .invoke('text')
-              .then((firstRuleName) => {
-                cy.get(RULE_NAME)
-                  .eq(SECOND_RULE)
-                  .invoke('text')
-                  .then((secondRuleName) => {
-                    const expectedRulesNames = `${firstRuleName} ${secondRuleName}`;
-                    cy.wrap(expectedRulesNames).should('include', secondInitialRuleName);
-                    cy.wrap(expectedRulesNames).should('include', fourthInitialRuleName);
-                  });
-              });
-            cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
-            cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
-          });
-      });
+    enableRule(SECOND_RULE);
+    waitForRuleToChangeStatus();
+    enableRule(FOURTH_RULE);
+    waitForRuleToChangeStatus();
+
+    cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
+    cy.get(RULE_SWITCH).eq(FOURTH_RULE).should('have.attr', 'role', 'switch');
+
+    sortByEnabledRules();
+
+    cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
+    cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
   });
 
   it('Pagination updates page number and results', () => {
@@ -100,7 +75,6 @@ describe('Alerts detection rules', () => {
 
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
-
     changeRowsPerPageTo(5);
 
     const FIRST_PAGE_SELECTOR = pageSelector(1);
@@ -116,6 +90,7 @@ describe('Alerts detection rules', () => {
       .invoke('text')
       .then((ruleNameFirstPage) => {
         goToPage(2);
+        cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
         cy.get(RULES_TABLE)
           .find(RULE_NAME)
           .first()
@@ -148,19 +123,5 @@ describe('Alerts detection rules', () => {
     // mock 1 minute passing to make sure refresh
     // is conducted
     checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'be.visible');
-
-    // mock 45 minutes passing to check that idle modal shows
-    // and refreshing is paused
-    checkAllRulesIdleModal('be.visible');
-    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
-
-    // clicking on modal to continue, should resume refreshing
-    dismissAllRulesIdleModal();
-    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'be.visible');
-
-    // if mouse movement detected, idle modal should not
-    // show after 45 min
-    resetAllRulesIdleModalTimeout();
-    cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.exist');
   });
 });

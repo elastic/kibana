@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import type { Transform as EsTransform } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy } from 'lodash';
 import { TransformHealthRuleParams } from './schema';
 import {
@@ -29,8 +29,11 @@ interface TestResult {
   context: TransformHealthAlertContext;
 }
 
-// @ts-ignore FIXME update types in the elasticsearch client
-type Transform = EsTransform & { id: string; description?: string; sync: object };
+type Transform = estypes.TransformGetTransformTransformSummary & {
+  id: string;
+  description?: string;
+  sync: object;
+};
 
 type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthAlertRule[] };
 
@@ -65,7 +68,7 @@ export function transformHealthServiceProvider(
           allow_no_match: true,
           size: 1000,
         })
-      ).body.transforms as Transform[];
+      ).transforms as Transform[];
 
       transformsResponse.forEach((t) => {
         transformsDict.set(t.id, t);
@@ -95,7 +98,7 @@ export function transformHealthServiceProvider(
         await esClient.transform.getTransformStats({
           transform_id: transformIds.join(','),
         })
-      ).body.transforms;
+      ).transforms;
 
       return transformsStats
         .filter((t) => t.state !== 'started' && t.state !== 'indexing')

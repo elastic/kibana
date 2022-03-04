@@ -30,7 +30,7 @@ This means that we will basically need to rebuild the service anyway in order to
 - Flexibility to potentially support alternate layouts in the future (see mockups in [reference section](#reference) below)
 
 # Basic example
-This API is influenced heavily by the [application service mounting RFC](https://github.com/elastic/kibana/blob/master/rfcs/text/0004_application_service_mounting.md). The intent is to make the experience consistent with that service; the Management section is basically one big app with a bunch of registered "subapps".
+This API is influenced heavily by the [application service mounting RFC](https://github.com/elastic/kibana/blob/main/rfcs/text/0004_application_service_mounting.md). The intent is to make the experience consistent with that service; the Management section is basically one big app with a bunch of registered "subapps".
 
 ```ts
 // my_plugin/public/plugin.ts

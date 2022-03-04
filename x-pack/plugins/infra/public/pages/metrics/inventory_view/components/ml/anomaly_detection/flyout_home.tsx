@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
@@ -26,7 +26,7 @@ import {
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { LoadingPrompt } from '../../../../../../components/loading_page';
-import { useLinkProps } from '../../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../../observability/public';
 import { AnomaliesTable } from './anomalies_table/anomalies_table';
 
 interface Props {

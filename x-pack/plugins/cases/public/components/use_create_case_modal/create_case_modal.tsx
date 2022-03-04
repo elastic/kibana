@@ -10,43 +10,30 @@ import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@el
 
 import { Case } from '../../containers/types';
 import * as i18n from '../../common/translations';
-import { CaseType } from '../../../common';
-import { getCreateCaseLazy as getCreateCase } from '../../methods';
+import { CreateCase } from '../create';
 
 export interface CreateCaseModalProps {
-  caseType?: CaseType;
-  hideConnectorServiceNowSir?: boolean;
   isModalOpen: boolean;
   onCloseCaseModal: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  owner: string;
 }
 
 const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
-  caseType = CaseType.individual,
-  hideConnectorServiceNowSir,
   isModalOpen,
   onCloseCaseModal,
   onSuccess,
-  owner,
 }) =>
   isModalOpen ? (
     <EuiModal onClose={onCloseCaseModal} data-test-subj="create-case-modal">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{i18n.CREATE_CASE_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {getCreateCase({
-          caseType,
-          hideConnectorServiceNowSir,
-          onCancel: onCloseCaseModal,
-          onSuccess,
-          withSteps: false,
-          owner: [owner],
-        })}
+        <CreateCase onCancel={onCloseCaseModal} onSuccess={onSuccess} withSteps={false} />
       </EuiModalBody>
     </EuiModal>
   ) : null;
+CreateModalComponent.displayName = 'CreateModal';
 
 export const CreateCaseModal = memo(CreateModalComponent);
 

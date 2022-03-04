@@ -18,7 +18,7 @@ $stepStatusToCallOutColor: (
   failed: 'danger',
   complete: 'success',
   paused: 'warning',
-  cancelled: 'danger',
+  cancelled: 'warning',
 );
 
 .upgStepProgress__status--circle {

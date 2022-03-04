@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { partition } from 'lodash';
+import { groupBy, partition } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { layerTypes } from '../../common';
 import type { XYLayerConfig, YConfig } from '../../common/expressions';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
-import type { DatasourcePublicAPI, FramePublicAPI } from '../types';
+import type { AccessorConfig, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
-import { isPercentageSeries, isStackedChart } from './state_helpers';
+import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
 import type { XYState } from './types';
-import { checkScaleOperation } from './visualization_helpers';
+import {
+  checkScaleOperation,
+  getAxisName,
+  isDataLayer,
+  isNumericMetric,
+} from './visualization_helpers';
+import { generateId } from '../id_generator';
+import { LensIconChartBarReferenceLine } from '../assets/chart_bar_reference_line';
 
 export interface ReferenceLineBase {
   label: 'x' | 'yRight' | 'yLeft';
@@ -33,8 +41,8 @@ export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig
   if (!state) {
     return [];
   }
-  const dataLayers = state.layers.filter(
-    ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
+  const dataLayers = state.layers.filter(({ layerType = layerTypes.DATA }) =>
+    isDataLayer({ layerType })
   );
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
   return referenceLayers
@@ -54,8 +62,8 @@ export function getGroupsRelatedToData<T extends ReferenceLineBase>(
   if (!state) {
     return [];
   }
-  const dataLayers = state.layers.filter(
-    ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
+  const dataLayers = state.layers.filter(({ layerType = layerTypes.DATA }) =>
+    isDataLayer({ layerType })
   );
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
   return referenceLayers.filter(({ label }: T) => groupsAvailable[label]);
@@ -104,14 +112,14 @@ export function getStaticValue(
   ) {
     return fallbackValue;
   }
-  return (
-    computeStaticValueForGroup(
-      filteredLayers,
-      accessors,
-      activeData,
-      groupId !== 'x' // histogram axis should compute the min based on the current data
-    ) || fallbackValue
+  const computedValue = computeStaticValueForGroup(
+    filteredLayers,
+    accessors,
+    activeData,
+    groupId !== 'x', // histogram axis should compute the min based on the current data
+    groupId !== 'x'
   );
+  return computedValue ?? fallbackValue;
 }
 
 function getAccessorCriteriaForGroup(
@@ -152,13 +160,15 @@ function getAccessorCriteriaForGroup(
 export function computeOverallDataDomain(
   dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
   accessorIds: string[],
-  activeData: NonNullable<FramePublicAPI['activeData']>
+  activeData: NonNullable<FramePublicAPI['activeData']>,
+  allowStacking: boolean = true
 ) {
   const accessorMap = new Set(accessorIds);
   let min: number | undefined;
   let max: number | undefined;
-  const [stacked, unstacked] = partition(dataLayers, ({ seriesType }) =>
-    isStackedChart(seriesType)
+  const [stacked, unstacked] = partition(
+    dataLayers,
+    ({ seriesType }) => isStackedChart(seriesType) && allowStacking
   );
   for (const { layerId, accessors } of unstacked) {
     const table = activeData[layerId];
@@ -215,7 +225,8 @@ function computeStaticValueForGroup(
   dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
   accessorIds: string[],
   activeData: NonNullable<FramePublicAPI['activeData']>,
-  minZeroOrNegativeBase: boolean = true
+  minZeroOrNegativeBase: boolean = true,
+  allowStacking: boolean = true
 ) {
   const defaultReferenceLineFactor = 3 / 4;
 
@@ -224,7 +235,12 @@ function computeStaticValueForGroup(
       return defaultReferenceLineFactor;
     }
 
-    const { min, max } = computeOverallDataDomain(dataLayers, accessorIds, activeData);
+    const { min, max } = computeOverallDataDomain(
+      dataLayers,
+      accessorIds,
+      activeData,
+      allowStacking
+    );
 
     if (min != null && max != null && isFinite(min) && isFinite(max)) {
       // Custom axis bounds can go below 0, so consider also lower values than 0
@@ -234,3 +250,205 @@ function computeStaticValueForGroup(
     }
   }
 }
+
+export const getReferenceSupportedLayer = (
+  state?: XYState,
+  frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
+) => {
+  const referenceLineGroupIds = [
+    {
+      id: 'yReferenceLineLeft',
+      label: 'yLeft' as const,
+    },
+    {
+      id: 'yReferenceLineRight',
+      label: 'yRight' as const,
+    },
+    {
+      id: 'xReferenceLine',
+      label: 'x' as const,
+    },
+  ];
+  const referenceLineGroups = getGroupsRelatedToData(
+    referenceLineGroupIds,
+    state,
+    frame?.datasourceLayers || {},
+    frame?.activeData
+  );
+  const dataLayers =
+    state?.layers.filter(({ layerType = layerTypes.DATA }) => isDataLayer({ layerType })) || [];
+  const filledDataLayers = dataLayers.filter(
+    ({ accessors, xAccessor }) => accessors.length || xAccessor
+  );
+  const layerHasNumberHistogram = checkScaleOperation(
+    'interval',
+    'number',
+    frame?.datasourceLayers || {}
+  );
+
+  const initialDimensions = state
+    ? referenceLineGroups.map(({ id, label }) => ({
+        groupId: id,
+        columnId: generateId(),
+        dataType: 'number',
+        label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
+        staticValue: getStaticValue(
+          dataLayers,
+          label,
+          { activeData: frame?.activeData },
+          layerHasNumberHistogram
+        ),
+      }))
+    : undefined;
+
+  return {
+    type: layerTypes.REFERENCELINE,
+    label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
+      defaultMessage: 'Reference lines',
+    }),
+    icon: LensIconChartBarReferenceLine,
+    disabled:
+      !filledDataLayers.length ||
+      (!dataLayers.some(layerHasNumberHistogram) &&
+        dataLayers.every(({ accessors }) => !accessors.length)),
+    toolTipContent: filledDataLayers.length
+      ? undefined
+      : i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp', {
+          defaultMessage: 'Add some data to enable reference layer',
+        }),
+    initialDimensions,
+  };
+};
+export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
+  prevState,
+  layerId,
+  columnId,
+  groupId,
+  previousColumn,
+}) => {
+  const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+  if (!foundLayer) {
+    return prevState;
+  }
+  const newLayer = { ...foundLayer };
+
+  newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
+  const hasYConfig = newLayer.yConfig?.some(({ forAccessor }) => forAccessor === columnId);
+  const previousYConfig = previousColumn
+    ? newLayer.yConfig?.find(({ forAccessor }) => forAccessor === previousColumn)
+    : false;
+  if (!hasYConfig) {
+    newLayer.yConfig = [
+      ...(newLayer.yConfig || []),
+      {
+        // override with previous styling,
+        ...previousYConfig,
+        // but keep the new group & id config
+        forAccessor: columnId,
+        axisMode:
+          groupId === 'xReferenceLine'
+            ? 'bottom'
+            : groupId === 'yReferenceLineRight'
+            ? 'right'
+            : 'left',
+      },
+    ];
+  }
+  return {
+    ...prevState,
+    layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+  };
+};
+
+export const getReferenceConfiguration = ({
+  state,
+  frame,
+  layer,
+  sortedAccessors,
+  mappedAccessors,
+}: {
+  state: XYState;
+  frame: FramePublicAPI;
+  layer: XYLayerConfig;
+  sortedAccessors: string[];
+  mappedAccessors: AccessorConfig[];
+}) => {
+  const idToIndex = sortedAccessors.reduce<Record<string, number>>((memo, id, index) => {
+    memo[id] = index;
+    return memo;
+  }, {});
+  const { bottom, left, right } = groupBy(
+    [...(layer.yConfig || [])].sort(
+      ({ forAccessor: forA }, { forAccessor: forB }) => idToIndex[forA] - idToIndex[forB]
+    ),
+    ({ axisMode }) => {
+      return axisMode;
+    }
+  );
+  const groupsToShow = getGroupsToShow(
+    [
+      // When a reference layer panel is added, a static reference line should automatically be included by default
+      // in the first available axis, in the following order: vertical left, vertical right, horizontal.
+      {
+        config: left,
+        id: 'yReferenceLineLeft',
+        label: 'yLeft',
+        dataTestSubj: 'lnsXY_yReferenceLineLeftPanel',
+      },
+      {
+        config: right,
+        id: 'yReferenceLineRight',
+        label: 'yRight',
+        dataTestSubj: 'lnsXY_yReferenceLineRightPanel',
+      },
+      {
+        config: bottom,
+        id: 'xReferenceLine',
+        label: 'x',
+        dataTestSubj: 'lnsXY_xReferenceLinePanel',
+      },
+    ],
+    state,
+    frame.datasourceLayers,
+    frame?.activeData
+  );
+  const isHorizontal = isHorizontalChart(state.layers);
+  return {
+    // Each reference lines layer panel will have sections for each available axis
+    // (horizontal axis, vertical axis left, vertical axis right).
+    // Only axes that support numeric reference lines should be shown
+    groups: groupsToShow.map(({ config = [], id, label, dataTestSubj, valid }) => ({
+      groupId: id,
+      groupLabel: getAxisName(label, { isHorizontal }),
+      accessors: config.map(({ forAccessor, color }) => ({
+        columnId: forAccessor,
+        color: color || mappedAccessors.find(({ columnId }) => columnId === forAccessor)?.color,
+        triggerIcon: 'color' as const,
+      })),
+      filterOperations: isNumericMetric,
+      supportsMoreColumns: true,
+      required: false,
+      enableDimensionEditor: true,
+      supportStaticValue: true,
+      paramEditorCustomProps: {
+        label: i18n.translate('xpack.lens.indexPattern.staticValue.label', {
+          defaultMessage: 'Reference line value',
+        }),
+      },
+      supportFieldFormat: false,
+      dataTestSubj,
+      invalid: !valid,
+      invalidMessage:
+        label === 'x'
+          ? i18n.translate('xpack.lens.configure.invalidBottomReferenceLineDimension', {
+              defaultMessage:
+                'This reference line is assigned to an axis that no longer exists or is no longer valid. You may move this reference line to another available axis or remove it.',
+            })
+          : i18n.translate('xpack.lens.configure.invalidReferenceLineDimension', {
+              defaultMessage:
+                'This reference line is assigned to an axis that no longer exists. You may move this reference line to another available axis or remove it.',
+            }),
+      requiresPreviousColumnOnDuplicate: true,
+    })),
+  };
+};

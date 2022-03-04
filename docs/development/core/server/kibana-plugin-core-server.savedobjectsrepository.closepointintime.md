@@ -18,12 +18,12 @@ closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Pro
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | <code>string</code> |  |
-|  options | <code>SavedObjectsClosePointInTimeOptions</code> |  |
+|  id | string |  |
+|  options | SavedObjectsClosePointInTimeOptions | [SavedObjectsClosePointInTimeOptions](./kibana-plugin-core-server.savedobjectsclosepointintimeoptions.md) |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsClosePointInTimeResponse>`
+Promise&lt;SavedObjectsClosePointInTimeResponse&gt;
 
 {<!-- -->promise<!-- -->} - [SavedObjectsClosePointInTimeResponse](./kibana-plugin-core-server.savedobjectsclosepointintimeresponse.md)
 
@@ -55,6 +55,5 @@ const response = await repository.find({
 });
 
 await repository.closePointInTime(response.pit_id);
-
 ```
 

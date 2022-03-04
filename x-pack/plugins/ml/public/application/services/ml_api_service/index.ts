@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
 import type { HttpStart } from 'kibana/public';
 import { HttpService } from '../http_service';
@@ -99,6 +99,9 @@ const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
     try {
       return getHttp()[prop];
     } catch (e) {
+      if (prop === 'getLoadingCount$') {
+        return () => {};
+      }
       // eslint-disable-next-line no-console
       console.error(e);
     }

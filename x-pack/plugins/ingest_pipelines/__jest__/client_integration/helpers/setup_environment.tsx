@@ -12,10 +12,12 @@ import { LocationDescriptorObject } from 'history';
 import { HttpSetup } from 'kibana/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { sharePluginMock } from '../../../../../../src/plugins/share/public/mocks';
 import {
   notificationServiceMock,
   docLinksServiceMock,
   scopedHistoryMock,
+  uiSettingsServiceMock,
 } from '../../../../../../src/core/public/mocks';
 
 import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
@@ -41,12 +43,16 @@ const appServices = {
   metric: uiMetricService,
   documentation: documentationService,
   api: apiService,
+  fileReader: {
+    readFile: jest.fn((file) => file.text()),
+  },
   notifications: notificationServiceMock.createSetupContract(),
   history,
-  urlGenerators: {
-    getUrlGenerator: jest.fn().mockReturnValue({
-      createUrl: jest.fn(),
-    }),
+  uiSettings: uiSettingsServiceMock.createSetupContract(),
+  url: sharePluginMock.createStartContract().url,
+  fileUpload: {
+    getMaxBytes: jest.fn().mockReturnValue(100),
+    getMaxBytesFormatted: jest.fn().mockReturnValue('100'),
   },
 };
 

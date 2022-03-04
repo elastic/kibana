@@ -9,6 +9,7 @@ import moment from 'moment';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { validateField } from '../../../common/fields_utils';
 import { validateInterval } from '../../../common/validate_interval';
+import { TimeFieldNotSpecifiedError } from '../../../common/errors';
 
 import type { FetchedIndexPattern, Panel, Series } from '../../../common/types';
 
@@ -24,12 +25,21 @@ export function getIntervalAndTimefield(
   { min, max, maxBuckets }: IntervalParams,
   series?: Series
 ) {
-  const timeField =
+  let timeField =
     (series?.override_index_pattern ? series.series_time_field : panel.time_field) ||
     index.indexPattern?.timeFieldName;
 
+  // should use @timestamp as default timeField for es indeces if user doesn't provide timeField
+  if (!panel.use_kibana_indexes && !timeField) {
+    timeField = '@timestamp';
+  }
+
   if (panel.use_kibana_indexes) {
-    validateField(timeField!, index);
+    if (timeField) {
+      validateField(timeField, index);
+    } else {
+      throw new TimeFieldNotSpecifiedError();
+    }
   }
 
   let interval = panel.interval;

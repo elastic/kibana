@@ -10,7 +10,7 @@ import { renderTemplate } from './render_template';
 
 function mockParams() {
   return {
-    themeTag: 'v7',
+    themeTag: 'v8light',
     jsDependencyPaths: ['/js-1', '/js-2'],
     styleSheetPaths: ['/style-1', '/style-2'],
     publicPathMap: '{"foo": "bar"}',

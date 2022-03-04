@@ -5,6 +5,8 @@ properties:
     type: string
   is_default:
     type: boolean
+  is_default_monitoring:
+    type: boolean
   name:
     type: string
   type:
@@ -16,12 +18,23 @@ properties:
       type: string
   ca_sha256:
     type: string
-  api_key:
+  ca_trusted_fingerprint:
     type: string
   config:
     type: object
   config_yaml:
     type: string
+  ssl:
+    type: object
+    properties: 
+      certificate:
+        type: string
+      certificate_authorities:
+        type: array
+        items:
+          type: string
+      key:
+        type: string
 required:
   - id
   - is_default

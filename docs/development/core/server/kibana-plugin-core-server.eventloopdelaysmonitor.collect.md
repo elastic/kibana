@@ -6,6 +6,8 @@
 
 Collect gathers event loop delays metrics from nodejs perf\_hooks.monitorEventLoopDelay the histogram calculations start from the last time `reset` was called or this EventLoopDelaysMonitor instance was created.
 
+Returns metrics in milliseconds.
+
 <b>Signature:</b>
 
 ```typescript
@@ -13,7 +15,7 @@ collect(): IntervalHistogram;
 ```
 <b>Returns:</b>
 
-`IntervalHistogram`
+IntervalHistogram
 
 {<!-- -->IntervalHistogram<!-- -->}
 

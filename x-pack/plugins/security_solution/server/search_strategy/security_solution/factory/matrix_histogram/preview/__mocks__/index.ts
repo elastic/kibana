@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MatrixHistogramType } from '../../../../../../../common';
+import { MatrixHistogramType } from '../../../../../../../common/search_strategy';
 
 export const mockOptions = {
   defaultIndex: ['.siem-preview-signals-default'],
@@ -18,8 +18,8 @@ export const mockOptions = {
 
 export const expectedDsl = {
   index: ['.siem-preview-signals-default'],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {

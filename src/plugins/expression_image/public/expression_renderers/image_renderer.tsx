@@ -9,7 +9,11 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { i18n } from '@kbn/i18n';
-import { getElasticLogo, isValidUrl } from '../../../presentation_util/public';
+import { Observable } from 'rxjs';
+import { CoreTheme } from 'kibana/public';
+import { CoreSetup } from '../../../../core/public';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
+import { getElasticLogo, defaultTheme$, isValidUrl } from '../../../presentation_util/public';
 import { ImageRendererConfig } from '../../common/types';
 
 const strings = {
@@ -23,31 +27,41 @@ const strings = {
     }),
 };
 
-export const imageRenderer = (): ExpressionRenderDefinition<ImageRendererConfig> => ({
-  name: 'image',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render: async (
-    domNode: HTMLElement,
-    config: ImageRendererConfig,
-    handlers: IInterpreterRenderHandlers
-  ) => {
-    const { elasticLogo } = await getElasticLogo();
-    const dataurl = isValidUrl(config.dataurl ?? '') ? config.dataurl : elasticLogo;
+export const getImageRenderer =
+  (theme$: Observable<CoreTheme> = defaultTheme$) =>
+  (): ExpressionRenderDefinition<ImageRendererConfig> => ({
+    name: 'image',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render: async (
+      domNode: HTMLElement,
+      config: ImageRendererConfig,
+      handlers: IInterpreterRenderHandlers
+    ) => {
+      const { elasticLogo } = await getElasticLogo();
+      const dataurl = isValidUrl(config.dataurl ?? '') ? config.dataurl : elasticLogo;
 
-    const style = {
-      height: '100%',
-      backgroundImage: `url(${dataurl})`,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center center',
-      backgroundSize: config.mode as string,
-    };
+      const style = {
+        height: '100%',
+        backgroundImage: `url(${dataurl})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center center',
+        backgroundSize: config.mode as string,
+      };
 
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+      handlers.onDestroy(() => {
+        unmountComponentAtNode(domNode);
+      });
 
-    render(<div style={style} />, domNode, () => handlers.done());
-  },
-});
+      render(
+        <KibanaThemeProvider theme$={theme$}>
+          <div style={style} />
+        </KibanaThemeProvider>,
+        domNode,
+        () => handlers.done()
+      );
+    },
+  });
+
+export const imageRendererFactory = (core: CoreSetup) => getImageRenderer(core.theme.theme$);

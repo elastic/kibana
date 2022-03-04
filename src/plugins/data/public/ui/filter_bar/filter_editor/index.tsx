@@ -20,7 +20,7 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   Filter,
   FieldFilter,
@@ -345,7 +345,7 @@ class FilterEditorUI extends Component<Props, State> {
 
   private renderParamsEditor() {
     const indexPattern = this.state.selectedIndexPattern;
-    if (!indexPattern || !this.state.selectedOperator) {
+    if (!indexPattern || !this.state.selectedOperator || !this.state.selectedField) {
       return '';
     }
 

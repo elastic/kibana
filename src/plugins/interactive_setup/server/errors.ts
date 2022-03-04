@@ -14,7 +14,7 @@ import { errors } from '@elastic/elasticsearch';
  */
 export function getErrorStatusCode(error: any): number {
   if (error instanceof errors.ResponseError) {
-    return error.statusCode;
+    return error.statusCode!;
   }
 
   return error.statusCode || error.status;

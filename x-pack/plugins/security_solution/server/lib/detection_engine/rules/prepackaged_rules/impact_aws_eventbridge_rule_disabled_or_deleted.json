@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies when a user has disabled or deleted an EventBridge rule. This activity can result in an unintended loss of visibility in applications or a break in the flow with other AWS services.",
+  "false_positives": [
+    "EventBridge Rules could be deleted or disabled by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. EventBridge Rules being deleted or disabled by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-20m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS EventBridge Rule Disabled or Deleted",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:eventbridge.amazonaws.com and event.action:(DeleteRule or DisableRule) and \nevent.outcome:success\n",
+  "references": [
+    "https://docs.aws.amazon.com/eventbridge/latest/APIReference/API_DeleteRule.html",
+    "https://docs.aws.amazon.com/eventbridge/latest/APIReference/API_DisableRule.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "87594192-4539-4bc4-8543-23bc3d5bd2b4",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Monitoring"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 3
+}

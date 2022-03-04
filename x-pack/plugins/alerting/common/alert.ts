@@ -10,6 +10,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from 'kibana/server';
+import { RuleExecutionMetrics } from '.';
 import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 export type AlertTypeState = Record<string, unknown>;
@@ -30,10 +31,14 @@ export enum AlertExecutionStatusErrorReasons {
   Execute = 'execute',
   Unknown = 'unknown',
   License = 'license',
+  Timeout = 'timeout',
+  Disabled = 'disabled',
 }
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
+  numberOfTriggeredActions?: number;
+  metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {
@@ -54,6 +59,8 @@ export interface AlertAction {
 
 export interface AlertAggregations {
   alertExecutionStatus: { [status: string]: number };
+  ruleEnabledStatus: { enabled: number; disabled: number };
+  ruleMutedStatus: { muted: number; unmuted: number };
 }
 
 export interface Alert<Params extends AlertTypeParams = never> {
@@ -78,6 +85,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
+  monitoring?: RuleMonitoring;
 }
 
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
@@ -130,4 +138,22 @@ export interface ActionVariable {
   description: string;
   deprecated?: boolean;
   useWithTripleBracesInTemplates?: boolean;
+}
+
+export interface RuleMonitoringHistory extends SavedObjectAttributes {
+  success: boolean;
+  timestamp: number;
+  duration?: number;
+}
+
+export interface RuleMonitoring extends SavedObjectAttributes {
+  execution: {
+    history: RuleMonitoringHistory[];
+    calculated_metrics: {
+      p50?: number;
+      p95?: number;
+      p99?: number;
+      success_ratio: number;
+    };
+  };
 }

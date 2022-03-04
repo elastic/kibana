@@ -12,7 +12,8 @@ import { noop } from 'lodash/fp';
 
 import { TestProviders } from '../../common/mock';
 
-import { CommentRequest, CommentType, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { CommentRequest, CommentType } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { usePostComment } from '../../containers/use_post_comment';
 import { AddComment, AddCommentProps, AddCommentRefObject } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
@@ -74,7 +75,6 @@ describe('AddComment ', () => {
       expect(postComment).toBeCalledWith({
         caseId: addCommentProps.caseId,
         data: sampleData,
-        subCaseId: undefined,
         updateCase: onCommentPosted,
       });
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');
@@ -120,7 +120,7 @@ describe('AddComment ', () => {
   });
 
   it('should insert a quote', async () => {
-    const sampleQuote = 'what a cool quote';
+    const sampleQuote = 'what a cool quote \n with new lines';
     const ref = React.createRef<AddCommentRefObject>();
     const wrapper = mount(
       <TestProviders>
@@ -138,8 +138,38 @@ describe('AddComment ', () => {
     });
 
     expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(
-      `${sampleData.comment}\n\n${sampleQuote}`
+      `${sampleData.comment}\n\n> what a cool quote \n>  with new lines \n\n`
     );
+  });
+
+  it('should call onFocus when adding a quote', async () => {
+    const ref = React.createRef<AddCommentRefObject>();
+
+    mount(
+      <TestProviders>
+        <AddComment {...addCommentProps} ref={ref} />
+      </TestProviders>
+    );
+
+    ref.current!.editor!.textarea!.focus = jest.fn();
+    await act(async () => {
+      ref.current!.addQuote('a comment');
+    });
+
+    expect(ref.current!.editor!.textarea!.focus).toHaveBeenCalled();
+  });
+
+  it('should NOT call onFocus on mount', async () => {
+    const ref = React.createRef<AddCommentRefObject>();
+
+    mount(
+      <TestProviders>
+        <AddComment {...addCommentProps} ref={ref} />
+      </TestProviders>
+    );
+
+    ref.current!.editor!.textarea!.focus = jest.fn();
+    expect(ref.current!.editor!.textarea!.focus).not.toHaveBeenCalled();
   });
 
   it('it should insert a timeline', async () => {

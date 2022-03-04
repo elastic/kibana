@@ -7,42 +7,52 @@
 
 import {
   ALERT_REASON,
+  ALERT_RISK_SCORE,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
+  ALERT_RULE_PARAMETERS,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
-import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
-import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
-import { Ancestor, BaseSignalHit, SimpleHit } from '../../../signals/types';
+import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
 import {
   getField,
   getValidDateFromDoc,
   isWrappedRACAlert,
   isWrappedSignalHit,
 } from '../../../signals/utils';
-import { invariant } from '../../../../../../common/utils/invariant';
 import { RACAlert } from '../../types';
-import { flattenWithPrefix } from './flatten_with_prefix';
+import { SERVER_APP_ID } from '../../../../../../common/constants';
+import { SearchTypes } from '../../../../telemetry/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
-  ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_TIME,
-} from '../../field_maps/field_names';
-import { SERVER_APP_ID } from '../../../../../../common/constants';
+  ALERT_THRESHOLD_RESULT,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_BUILDING_BLOCK_TYPE,
+} from '../../../../../../common/field_maps/field_names';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import {
+  commonParamsCamelToSnake,
+  typeSpecificCamelToSnake,
+} from '../../../schemas/rule_converters';
+import { transformTags } from '../../../routes/rules/utils';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 
 export const generateAlertId = (alert: RACAlert) => {
   return createHash('sha256')
     .update(
-      (alert['kibana.alert.ancestors'] as Ancestor[])
+      (alert[ALERT_ANCESTORS] as Ancestor[])
         .reduce((acc, ancestor) => acc.concat(ancestor.id, ancestor.index), '')
         .concat(alert[ALERT_RULE_UUID] as string)
     )
@@ -60,10 +70,10 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
     id: doc._id,
     type: isSignal ? 'signal' : 'event',
     index: doc._index,
-    depth: isSignal ? getField(doc, 'signal.depth') ?? 1 : 0,
+    depth: isSignal ? getField(doc, ALERT_DEPTH) ?? 1 : 0,
   };
   if (isSignal) {
-    parent.rule = getField(doc, 'signal.rule.id');
+    parent.rule = getField(doc, ALERT_RULE_UUID);
   }
   return parent;
 };
@@ -75,53 +85,53 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
  */
 export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
   const newAncestor = buildParent(doc);
-  const existingAncestors: Ancestor[] = getField(doc, 'signal.ancestors') ?? [];
+  const existingAncestors: Ancestor[] = getField(doc, ALERT_ANCESTORS) ?? [];
   return [...existingAncestors, newAncestor];
-};
-
-/**
- * This removes any alert name clashes such as if a source index has
- * "signal" but is not a signal object we put onto the object. If this
- * is our "signal object" then we don't want to remove it.
- * @param doc The source index doc to a signal.
- */
-export const removeClashes = (doc: SimpleHit) => {
-  if (isWrappedSignalHit(doc)) {
-    invariant(doc._source, '_source field not found');
-    const { signal, ...noSignal } = doc._source;
-    if (signal == null || isEventTypeSignal(doc)) {
-      return doc;
-    } else {
-      return {
-        ...doc,
-        _source: { ...noSignal },
-      };
-    }
-  }
-  return doc;
 };
 
 /**
  * Builds the `kibana.alert.*` fields that are common across all alerts.
  * @param docs The parent alerts/events of the new alert to be built.
  * @param rule The rule that is generating the new alert.
+ * @param spaceId The space ID in which the rule was executed.
+ * @param reason Human readable string summarizing alert.
  */
 export const buildAlert = (
   docs: SimpleHit[],
-  rule: RulesSchema,
+  completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
-  reason: string
+  reason: string,
+  overrides?: {
+    nameOverride: string;
+    severityOverride: string;
+    riskScoreOverride: number;
+  }
 ): RACAlert => {
-  const removedClashes = docs.map(removeClashes);
-  const parents = removedClashes.map(buildParent);
+  const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
-  const ancestors = removedClashes.reduce(
-    (acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)),
-    []
+  const ancestors = docs.reduce((acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)), []);
+
+  const { output_index: outputIndex, ...commonRuleParams } = commonParamsCamelToSnake(
+    completeRule.ruleParams
   );
 
-  const { id, output_index: outputIndex, ...mappedRule } = rule;
-  mappedRule.uuid = id;
+  const ruleParamsSnakeCase = {
+    ...commonRuleParams,
+    ...typeSpecificCamelToSnake(completeRule.ruleParams),
+  };
+
+  const {
+    actions,
+    schedule,
+    name,
+    tags,
+    enabled,
+    createdBy,
+    updatedBy,
+    throttle,
+    createdAt,
+    updatedAt,
+  } = completeRule.ruleConfig;
 
   return {
     [TIMESTAMP]: new Date().toISOString(),
@@ -132,8 +142,30 @@ export const buildAlert = (
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,
-    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, mappedRule as RulesSchema),
+    [ALERT_BUILDING_BLOCK_TYPE]: completeRule.ruleParams.buildingBlockType,
+    [ALERT_SEVERITY]: overrides?.severityOverride ?? completeRule.ruleParams.severity,
+    [ALERT_RISK_SCORE]: overrides?.riskScoreOverride ?? completeRule.ruleParams.riskScore,
+    [ALERT_RULE_PARAMETERS]: ruleParamsSnakeCase,
+    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
+      uuid: completeRule.alertId,
+      actions: actions.map(transformAlertToRuleAction),
+      created_at: createdAt.toISOString(),
+      created_by: createdBy ?? '',
+      enabled,
+      interval: schedule.interval,
+      name: overrides?.nameOverride ?? name,
+      tags: transformTags(tags),
+      throttle: throttle ?? undefined,
+      updated_at: updatedAt.toISOString(),
+      updated_by: updatedBy ?? '',
+      type: completeRule.ruleParams.type,
+      ...commonRuleParams,
+    }),
   } as unknown as RACAlert;
+};
+
+const isThresholdResult = (thresholdResult: SearchTypes): thresholdResult is ThresholdResult => {
+  return typeof thresholdResult === 'object';
 };
 
 /**
@@ -142,16 +174,23 @@ export const buildAlert = (
  * @param doc The parent signal/event of the new signal to be built.
  */
 export const additionalAlertFields = (doc: BaseSignalHit) => {
+  const thresholdResult = doc._source?.threshold_result;
+  if (thresholdResult != null && !isThresholdResult(thresholdResult)) {
+    throw new Error(`threshold_result failed to validate: ${thresholdResult}`);
+  }
   const originalTime = getValidDateFromDoc({
     doc,
     timestampOverride: undefined,
   });
   const additionalFields: Record<string, unknown> = {
     [ALERT_ORIGINAL_TIME]: originalTime != null ? originalTime.toISOString() : undefined,
+    ...(thresholdResult != null ? { [ALERT_THRESHOLD_RESULT]: thresholdResult } : {}),
   };
-  const event = doc._source?.event;
-  if (event != null) {
-    additionalFields[ALERT_ORIGINAL_EVENT] = event;
+
+  for (const [key, val] of Object.entries(doc._source ?? {})) {
+    if (key.startsWith('event.')) {
+      additionalFields[`${ALERT_ORIGINAL_EVENT}.${key.replace('event.', '')}`] = val;
+    }
   }
   return additionalFields;
 };

@@ -170,6 +170,14 @@ exports[`level:warning/type:warning snapshots: output 1`] = `
 "
 `;
 
+exports[`never ignores write messages from the kibana elasticsearch.deprecation logger context 1`] = `
+"         │[elasticsearch.deprecation]
+         │{ foo: { bar: { '1': [Array] } }, bar: { bar: { '1': [Array] } } }
+         │
+         │Infinity
+"
+`;
+
 exports[`throws error if created with invalid level 1`] = `"Invalid log level \\"foo\\" (expected one of silent,error,warning,success,info,debug,verbose)"`;
 
 exports[`throws error if writeTo config is not defined or doesn't have a write method 1`] = `"ToolingLogTextWriter requires the \`writeTo\` option be set to a stream (like process.stdout)"`;

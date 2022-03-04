@@ -28,7 +28,6 @@ import {
 } from '../components/data_mapping';
 import {
   Category,
-  CategoryFieldMeta,
   FieldMetaOptions,
   PercentilesFieldMeta,
   RangeFieldMeta,
@@ -40,19 +39,15 @@ import { IVectorLayer } from '../../../layers/vector_layer';
 import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
-import { pluckRangeFieldMeta } from '../../../../../common/pluck_range_field_meta';
-import {
-  pluckCategoryFieldMeta,
-  trimCategories,
-} from '../../../../../common/pluck_category_field_meta';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
   getField(): IField | null;
   getFieldName(): string;
+  getMbFieldName(): string;
   getFieldOrigin(): FIELD_ORIGIN | null;
   getRangeFieldMeta(): RangeFieldMeta | null;
-  getCategoryFieldMeta(): CategoryFieldMeta | null;
+  getCategoryFieldMeta(): Category[];
   /*
    * Returns hash that signals style meta needs to be re-fetched when value changes
    */
@@ -62,11 +57,9 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   supportsFieldMeta(): boolean;
   getFieldMetaRequest(): Promise<unknown | null>;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
-  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
-  pluckOrdinalStyleMetaFromTileMetaFeatures(features: TileMetaFeature[]): RangeFieldMeta | null;
-  pluckCategoricalStyleMetaFromTileMetaFeatures(
-    features: TileMetaFeature[]
-  ): CategoryFieldMeta | null;
+  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): Category[];
+  pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures: TileMetaFeature[]): RangeFieldMeta | null;
+  pluckCategoricalStyleMetaFromTileMetaFeatures(features: TileMetaFeature[]): Category[];
   getValueSuggestions(query: string): Promise<string[]>;
   enrichGeoJsonAndMbFeatureState(
     featureCollection: FeatureCollection,
@@ -180,19 +173,19 @@ export class DynamicStyleProperty<T>
   _getCategoryFieldMetaFromStyleMetaRequest() {
     const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
     if (!dataRequestId) {
-      return null;
+      return [];
     }
 
     const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
-      return null;
+      return [];
     }
 
     const data = styleMetaDataRequest.getData() as StyleMetaData;
     return this._pluckCategoricalStyleMetaFromFieldMetaData(data);
   }
 
-  getCategoryFieldMeta(): CategoryFieldMeta | null {
+  getCategoryFieldMeta(): Category[] {
     const categoryFieldMetaFromLocalFeatures = this._getCategoryFieldMetaFromLocalFeatures();
 
     if (!this.isFieldMetaEnabled()) {
@@ -200,7 +193,7 @@ export class DynamicStyleProperty<T>
     }
 
     const categoricalFieldMetaFromServer = this._getCategoryFieldMetaFromStyleMetaRequest();
-    return categoricalFieldMetaFromServer
+    return categoricalFieldMetaFromServer.length
       ? categoricalFieldMetaFromServer
       : categoryFieldMetaFromLocalFeatures;
   }
@@ -211,6 +204,10 @@ export class DynamicStyleProperty<T>
 
   getFieldName() {
     return this._field ? this._field.getName() : '';
+  }
+
+  getMbFieldName() {
+    return this._field ? this._field.getMbFieldName() : '';
   }
 
   isDynamic() {
@@ -261,7 +258,7 @@ export class DynamicStyleProperty<T>
   }
 
   supportsFieldMeta() {
-    return this.isComplete() && !!this._field && this._field.supportsFieldMeta();
+    return this.isComplete() && !!this._field && this._field.supportsFieldMetaFromEs();
   }
 
   async getFieldMetaRequest() {
@@ -288,7 +285,7 @@ export class DynamicStyleProperty<T>
   }
 
   supportsMbFeatureState() {
-    return !!this._field && this._field.canReadFromGeoJson();
+    return !!this._field && !this._field.getSource().isMvt();
   }
 
   getMbLookupFunction(): MB_LOOKUP_FUNCTION {
@@ -298,7 +295,20 @@ export class DynamicStyleProperty<T>
   }
 
   getFieldMetaOptions() {
-    return _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+    const fieldMetaOptions = _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+
+    // In 8.0, UI changed to not allow setting isEnabled to false when fieldMeta from local not supported
+    // Saved objects created prior to 8.0 may have a configuration where
+    // fieldMetaOptions.isEnabled is false and the field does not support fieldMeta from local.
+    // In these cases, force isEnabled to true
+    // The exact case that spawned this fix is with ES_SEARCH sources and 8.0 where vector tiles switched
+    // from vector tiles generated via Kibana server to vector tiles generated via Elasticsearch.
+    // Kibana vector tiles supported fieldMeta from local while Elasticsearch vector tiles do not support fieldMeta from local.
+    if (this._field && !this._field.supportsFieldMetaFromLocalData()) {
+      fieldMetaOptions.isEnabled = true;
+    }
+
+    return fieldMetaOptions;
   }
 
   getDataMappingFunction() {
@@ -310,58 +320,31 @@ export class DynamicStyleProperty<T>
   pluckOrdinalStyleMetaFromTileMetaFeatures(
     metaFeatures: TileMetaFeature[]
   ): RangeFieldMeta | null {
-    if (!this.isOrdinal()) {
+    if (!this._field || !this.isOrdinal()) {
       return null;
     }
 
-    const name = this.getFieldName();
     let min = Infinity;
     let max = -Infinity;
     for (let i = 0; i < metaFeatures.length; i++) {
-      const fieldMeta = metaFeatures[i].properties.fieldMeta;
-      if (fieldMeta && fieldMeta[name] && fieldMeta[name].range) {
-        min = Math.min(fieldMeta[name].range?.min as number, min);
-        max = Math.max(fieldMeta[name].range?.max as number, max);
+      const range = this._field.pluckRangeFromTileMetaFeature(metaFeatures[i]);
+      if (range) {
+        min = Math.min(range.min, min);
+        max = Math.max(range.max, max);
       }
     }
-    return {
-      min,
-      max,
-      delta: max - min,
-    };
+
+    return min === Infinity || max === -Infinity
+      ? null
+      : {
+          min,
+          max,
+          delta: max - min,
+        };
   }
 
-  pluckCategoricalStyleMetaFromTileMetaFeatures(
-    metaFeatures: TileMetaFeature[]
-  ): CategoryFieldMeta | null {
-    const size = this.getNumberOfCategories();
-    if (!this.isCategorical() || size <= 0) {
-      return null;
-    }
-
-    const name = this.getFieldName();
-
-    const counts = new Map<string, number>();
-    for (let i = 0; i < metaFeatures.length; i++) {
-      const fieldMeta = metaFeatures[i].properties.fieldMeta;
-      if (fieldMeta && fieldMeta[name] && fieldMeta[name].categories) {
-        const categoryFieldMeta: CategoryFieldMeta = fieldMeta[name]
-          .categories as CategoryFieldMeta;
-        for (let c = 0; c < categoryFieldMeta.categories.length; c++) {
-          const category: Category = categoryFieldMeta.categories[c];
-          // properties object may be sparse, so need to check if the field is effectively present
-          if (typeof category.key !== undefined) {
-            if (counts.has(category.key)) {
-              counts.set(category.key, (counts.get(category.key) as number) + category.count);
-            } else {
-              counts.set(category.key, category.count);
-            }
-          }
-        }
-      }
-    }
-
-    return trimCategories(counts, size);
+  pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures: TileMetaFeature[]): Category[] {
+    return [];
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null {
@@ -370,18 +353,55 @@ export class DynamicStyleProperty<T>
     }
 
     const name = this.getFieldName();
-    return pluckRangeFieldMeta(features, name, (rawValue: unknown) => {
-      return parseFloat(rawValue as string);
-    });
-  }
-
-  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null {
-    const size = this.getNumberOfCategories();
-    if (!this.isCategorical() || size <= 0) {
-      return null;
+    let min = Infinity;
+    let max = -Infinity;
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
+      const newValue = feature.properties ? parseFloat(feature.properties[name]) : NaN;
+      if (!isNaN(newValue)) {
+        min = Math.min(min, newValue);
+        max = Math.max(max, newValue);
+      }
     }
 
-    return pluckCategoryFieldMeta(features, this.getFieldName(), size);
+    return min === Infinity || max === -Infinity
+      ? null
+      : {
+          min,
+          max,
+          delta: max - min,
+        };
+  }
+
+  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): Category[] {
+    const size = this.getNumberOfCategories();
+    if (!this.isCategorical() || size <= 0) {
+      return [];
+    }
+
+    const counts = new Map();
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
+      const term = feature.properties ? feature.properties[this.getFieldName()] : undefined;
+      // properties object may be sparse, so need to check if the field is effectively present
+      if (typeof term !== undefined) {
+        if (counts.has(term)) {
+          counts.set(term, counts.get(term) + 1);
+        } else {
+          counts.set(term, 1);
+        }
+      }
+    }
+
+    const ordered: Category[] = [];
+    for (const [key, value] of counts) {
+      ordered.push({ key, count: value });
+    }
+
+    ordered.sort((a, b) => {
+      return b.count - a.count;
+    });
+    return ordered.slice(0, size);
   }
 
   _pluckOrdinalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): RangeFieldMeta | null {
@@ -408,26 +428,22 @@ export class DynamicStyleProperty<T>
     };
   }
 
-  _pluckCategoricalStyleMetaFromFieldMetaData(
-    styleMetaData: StyleMetaData
-  ): CategoryFieldMeta | null {
+  _pluckCategoricalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): Category[] {
     if (!this.isCategorical() || !this._field) {
-      return null;
+      return [];
     }
 
     const fieldMeta = styleMetaData[`${this._field.getRootName()}_terms`];
     if (!fieldMeta || !('buckets' in fieldMeta)) {
-      return null;
+      return [];
     }
 
-    return {
-      categories: fieldMeta.buckets.map((bucket) => {
-        return {
-          key: bucket.key,
-          count: bucket.doc_count,
-        };
-      }),
-    };
+    return fieldMeta.buckets.map((bucket) => {
+      return {
+        key: bucket.key,
+        count: bucket.doc_count,
+      };
+    });
   }
 
   formatField(value: RawValue): string | number {
@@ -445,13 +461,14 @@ export class DynamicStyleProperty<T>
   }
 
   renderDataMappingPopover(onChange: (updatedOptions: Partial<T>) => void) {
-    if (!this.supportsFieldMeta()) {
+    if (!this._field || !this.supportsFieldMeta()) {
       return null;
     }
     return this.isCategorical() ? (
       <CategoricalDataMappingPopover<T>
         fieldMetaOptions={this.getFieldMetaOptions()}
         onChange={onChange}
+        supportsFieldMetaFromLocalData={this._field.supportsFieldMetaFromLocalData()}
       />
     ) : (
       <OrdinalDataMappingPopover<T>
@@ -460,6 +477,7 @@ export class DynamicStyleProperty<T>
         onChange={onChange}
         dataMappingFunction={this.getDataMappingFunction()}
         supportedDataMappingFunctions={this._getSupportedDataMappingFunctions()}
+        supportsFieldMetaFromLocalData={this._field.supportsFieldMetaFromLocalData()}
       />
     );
   }
@@ -481,13 +499,13 @@ export class DynamicStyleProperty<T>
       // They just re-use the original property-name
       targetName = this._field.getName();
     } else {
-      if (this._field.canReadFromGeoJson() && this._field.supportsAutoDomain()) {
+      if (!this._field.getSource().isMvt() && this._field.supportsFieldMetaFromLocalData()) {
         // Geojson-sources can support rewrite
         // e.g. field-formatters will create duplicate field
         targetName = getComputedFieldName(this.getStyleName(), this._field.getName());
       } else {
         // Non-geojson sources (e.g. 3rd party mvt or ES-source as mvt)
-        targetName = this._field.getName();
+        targetName = this._field.getMbFieldName();
       }
     }
     return targetName;

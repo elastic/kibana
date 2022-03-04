@@ -226,6 +226,42 @@ describe('AggConfigs', () => {
     });
   });
 
+  describe('#getResponseAggById', () => {
+    it('returns aggs by matching id without confusing prefixes', () => {
+      const configStates = [
+        { id: '1', type: 'terms', enabled: true, params: {}, schema: 'split' },
+        { id: '10', type: 'date_histogram', enabled: true, params: {}, schema: 'segment' },
+        { id: '101', type: 'count', enabled: true, params: {}, schema: 'metric' },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      expect(ac.getResponseAggById('1')?.type.name).toEqual('terms');
+      expect(ac.getResponseAggById('10')?.type.name).toEqual('date_histogram');
+      expect(ac.getResponseAggById('101')?.type.name).toEqual('count');
+    });
+
+    it('returns right agg for id within a multi-value agg', () => {
+      const configStates = [
+        { id: '1', type: 'terms', enabled: true, params: {}, schema: 'split' },
+        { id: '10', type: 'date_histogram', enabled: true, params: {}, schema: 'segment' },
+        {
+          id: '101',
+          type: 'percentiles',
+          enabled: true,
+          params: { percents: [1, 10, 3.33] },
+          schema: 'metric',
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      expect(ac.getResponseAggById('1')?.type.name).toEqual('terms');
+      expect(ac.getResponseAggById('10')?.type.name).toEqual('date_histogram');
+      expect(ac.getResponseAggById('101.1')?.type.name).toEqual('percentiles');
+      expect(ac.getResponseAggById('101.10')?.type.name).toEqual('percentiles');
+      expect(ac.getResponseAggById("101['3.33']")?.type.name).toEqual('percentiles');
+    });
+  });
+
   describe('#toDsl', () => {
     it('uses the sorted aggs', () => {
       const configStates = [{ enabled: true, type: 'avg', params: { field: 'bytes' } }];
@@ -360,6 +396,7 @@ describe('AggConfigs', () => {
           "0": Object {
             "range": Object {
               "@timestamp": Object {
+                "format": "strict_date_optional_time",
                 "gte": "2021-05-05T00:00:00.000Z",
                 "lte": "2021-05-10T00:00:00.000Z",
               },
@@ -368,6 +405,7 @@ describe('AggConfigs', () => {
           "86400000": Object {
             "range": Object {
               "@timestamp": Object {
+                "format": "strict_date_optional_time",
                 "gte": "2021-05-04T00:00:00.000Z",
                 "lte": "2021-05-09T00:00:00.000Z",
               },

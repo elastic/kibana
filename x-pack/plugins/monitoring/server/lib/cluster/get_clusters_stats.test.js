@@ -43,7 +43,7 @@ describe('handleClusterStats', () => {
       },
     };
 
-    const clusters = handleClusterStats(response, { log: () => undefined });
+    const clusters = handleClusterStats(response);
 
     expect(clusters.length).toEqual(1);
     expect(clusters[0].ccs).toEqual('cluster_one');

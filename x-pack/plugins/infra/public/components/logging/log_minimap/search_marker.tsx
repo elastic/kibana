@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as React from 'react';
 
 import { euiStyled, keyframes } from '../../../../../../../src/plugins/kibana_react/common';

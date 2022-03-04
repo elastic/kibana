@@ -17,10 +17,12 @@ import {
   getMapsCapabilities,
   getToasts,
   getCoreChrome,
+  getExecutionContext,
   getNavigateToApp,
   getSavedObjectsClient,
   getSavedObjectsTagging,
   getSavedObjects,
+  getTheme,
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
@@ -120,6 +122,12 @@ async function deleteMaps(items: object[]) {
 }
 
 export function MapsListView() {
+  getExecutionContext().set({
+    type: 'application',
+    page: 'list',
+    id: '',
+  });
+
   const isReadOnly = !getMapsCapabilities().save;
 
   getCoreChrome().docTitle.change(getAppTitle());
@@ -148,6 +156,7 @@ export function MapsListView() {
       tableListTitle={getAppTitle()}
       toastNotifications={getToasts()}
       searchFilters={searchFilters}
+      theme={getTheme()}
     />
   );
 }

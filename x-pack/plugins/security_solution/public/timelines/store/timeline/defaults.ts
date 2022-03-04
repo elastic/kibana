@@ -22,6 +22,7 @@ export const timelineDefaults: SubsetTimelineModel &
   documentType: '',
   defaultColumns: defaultHeaders,
   dataProviders: [],
+  dataViewId: null,
   dateRange: { start, end },
   deletedEventIds: [],
   description: '',

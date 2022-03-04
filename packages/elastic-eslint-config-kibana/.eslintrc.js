@@ -79,8 +79,8 @@ module.exports = {
         },
         {
           from: 'react-intl',
-          to: '@kbn/i18n/react',
-          disallowedMessage: `import from @kbn/i18n/react instead`
+          to: '@kbn/i18n-react',
+          disallowedMessage: `import from @kbn/i18n-react instead`
         },
         {
           from: 'styled-components',
@@ -88,11 +88,26 @@ module.exports = {
           exclude: USES_STYLED_COMPONENTS,
           disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in @kbn/dev-utils/src/babel.ts.`
         },
+        ...[
+          '@elastic/eui/dist/eui_theme_light.json',
+          '@elastic/eui/dist/eui_theme_dark.json',
+        ].map(from => ({
+          from,
+          to: false,
+          disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`
+        })),
+        {
+          from: '@kbn/test/jest',
+          to: '@kbn/test-jest-helpers',
+          disallowedMessage: `import from @kbn/test-jest-helpers instead`
+        },
       ],
     ],
 
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
     '@kbn/eslint/no_trailing_import_slash': 'error',
+    '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
+    '@kbn/eslint/no_this_in_property_initializers': 'error',
   },
 };

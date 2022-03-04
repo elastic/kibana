@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEventHandler, memo, useCallback, useMemo } from 'react';
+import React, { ChangeEventHandler, memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,13 +16,8 @@ import {
   EuiSuperSelectOption,
   EuiText,
 } from '@elastic/eui';
-
-import {
-  ConditionEntry,
-  ConditionEntryField,
-  OperatorFieldIds,
-  OperatingSystem,
-} from '../../../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { ConditionEntry, OperatorFieldIds } from '../../../../../../../common/endpoint/types';
 
 import {
   CONDITION_FIELD_DESCRIPTION,
@@ -100,6 +95,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const [isVisited, setIsVisited] = useState(false);
 
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
       const getDropdownDisplay = (field: ConditionEntryField) => (
@@ -155,7 +151,10 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
       if (onVisited) {
         onVisited(entry);
       }
-    }, [entry, onVisited]);
+      if (!isVisited) {
+        setIsVisited(true);
+      }
+    }, [entry, onVisited, isVisited]);
 
     return (
       <InputGroup data-test-subj={dataTestSubj}>
@@ -199,7 +198,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 type: entry.type,
               })}
               fullWidth
-              required
+              required={isVisited}
               onChange={handleValueUpdate}
               onBlur={handleValueOnBlur}
               data-test-subj={getTestId('value')}

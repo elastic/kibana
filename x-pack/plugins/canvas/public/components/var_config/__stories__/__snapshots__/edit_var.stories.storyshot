@@ -72,6 +72,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -104,6 +105,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -141,6 +143,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -234,7 +237,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -359,6 +362,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -391,6 +395,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -428,6 +433,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -462,7 +468,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -587,6 +593,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -619,6 +626,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -656,6 +664,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -690,7 +699,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -790,6 +799,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -822,6 +832,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -859,6 +870,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -893,7 +905,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill euiButton-isDisabled"
+            className="euiButton euiButton--success euiButton--small euiButton--fill euiButton-isDisabled"
             disabled={true}
             onClick={[Function]}
             style={

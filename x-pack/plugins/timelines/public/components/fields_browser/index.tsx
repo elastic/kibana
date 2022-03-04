@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Store } from 'redux';
 import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { FieldBrowserProps } from '../t_grid/toolbar/fields_browser/types';
 import { StatefulFieldsBrowser } from '../t_grid/toolbar/fields_browser';
 export type { FieldBrowserProps } from '../t_grid/toolbar/fields_browser/types';
@@ -28,7 +28,10 @@ export const FieldBrowserWrappedComponent = (props: FieldBrowserWrappedComponent
   return (
     <Provider store={store}>
       <I18nProvider>
-        <StatefulFieldsBrowser {...fieldsBrowseProps} />
+        <StatefulFieldsBrowser
+          data-test-ref="steph-loves-this-fields-browser"
+          {...fieldsBrowseProps}
+        />
       </I18nProvider>
     </Provider>
   );

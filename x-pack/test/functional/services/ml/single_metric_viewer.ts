@@ -22,24 +22,6 @@ export function MachineLearningSingleMetricViewerProvider(
       await testSubjects.existOrFail('mlNoSingleMetricJobsFound');
     },
 
-    async assertForecastButtonExists() {
-      await testSubjects.existOrFail(
-        'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
-      );
-    },
-
-    async assertForecastButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled(
-        'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
-      );
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected "forecast" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
-    },
-
     async assertDetectorInputExist() {
       await testSubjects.existOrFail(
         'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerDetectorSelect'
@@ -95,28 +77,6 @@ export function MachineLearningSingleMetricViewerProvider(
       await testSubjects.existOrFail(`mlAnomalyExplorerAnnotations ${state}`, {
         timeout: 30 * 1000,
       });
-    },
-
-    async openForecastModal() {
-      await testSubjects.click(
-        'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
-      );
-      await testSubjects.existOrFail('mlModalForecast');
-    },
-
-    async closeForecastModal() {
-      await testSubjects.click('mlModalForecast > mlModalForecastButtonClose');
-      await testSubjects.missingOrFail('mlModalForecast');
-    },
-
-    async assertForecastModalRunButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlModalForecast > mlModalForecastButtonRun');
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected forecast "run" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
     },
 
     async openAnomalyExplorer() {

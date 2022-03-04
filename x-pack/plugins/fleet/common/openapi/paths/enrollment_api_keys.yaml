@@ -13,6 +13,11 @@ get:
                 type: array
                 items:
                   $ref: ../components/schemas/enrollment_api_key.yaml
+                deprecated: true
+              items:
+                type: array
+                items:
+                  $ref: ../components/schemas/enrollment_api_key.yaml
               page:
                 type: number
               perPage:
@@ -20,7 +25,7 @@ get:
               total:
                 type: number
             required:
-              - list
+              - items
               - page
               - perPage
               - total

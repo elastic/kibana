@@ -13,5 +13,5 @@ getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
 ```
 <b>Returns:</b>
 
-`Observable<ChromeBreadcrumb[]>`
+Observable&lt;ChromeBreadcrumb\[\]&gt;
 

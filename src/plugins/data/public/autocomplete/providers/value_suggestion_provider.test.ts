@@ -7,8 +7,9 @@
  */
 
 import { stubIndexPattern, stubFields } from '../../stubs';
-import { TimefilterSetup } from '../../query';
-import { setupValueSuggestionProvider, ValueSuggestionsGetFn } from './value_suggestion_provider';
+import type { TimefilterSetup } from '../../query';
+import { setupValueSuggestionProvider } from './value_suggestion_provider';
+import type { ValueSuggestionsGetFn } from './value_suggestion_provider';
 import { IUiSettingsClient, CoreSetup } from 'kibana/public';
 import { UI_SETTINGS } from '../../../common';
 

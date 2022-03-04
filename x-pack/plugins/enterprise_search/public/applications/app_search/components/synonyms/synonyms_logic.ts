@@ -115,12 +115,15 @@ export const SynonymsLogic = kea<MakeLogicType<SynonymsValues, SynonymsActions>>
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/internal/app_search/engines/${engineName}/synonyms`, {
-          query: {
-            'page[current]': meta.page.current,
-            'page[size]': meta.page.size,
-          },
-        });
+        const response = await http.get<SynonymsApiResponse>(
+          `/internal/app_search/engines/${engineName}/synonyms`,
+          {
+            query: {
+              'page[current]': meta.page.current,
+              'page[size]': meta.page.size,
+            },
+          }
+        );
         actions.onSynonymsLoad(response);
       } catch (e) {
         flashAPIErrors(e);

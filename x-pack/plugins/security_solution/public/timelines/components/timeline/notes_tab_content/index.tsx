@@ -21,7 +21,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineActions } from '../../../store/timeline';
 import {
@@ -32,7 +32,7 @@ import { TimelineStatus, TimelineTabs } from '../../../../../common/types/timeli
 import { appSelectors } from '../../../../common/store/app';
 import { AddNote } from '../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../notes/translations';
-import { PARTICIPANTS } from '../../../../cases/translations';
+import { PARTICIPANTS } from '../translations';
 import { NotePreviews } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
 import { getTimelineNoteSelector } from './selectors';
@@ -145,8 +145,9 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     noteIds,
     status: timelineStatus,
   } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
-
-  const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
 
   const getNotesAsCommentsList = useMemo(
     () => appSelectors.selectNotesAsCommentsListSelector(),
@@ -188,11 +189,19 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
           browserFields={browserFields}
           docValueFields={docValueFields}
           handleOnPanelClosed={handleOnPanelClosed}
+          runtimeMappings={runtimeMappings}
           tabType={TimelineTabs.notes}
           timelineId={timelineId}
         />
       ) : null,
-    [browserFields, docValueFields, expandedDetail, handleOnPanelClosed, timelineId]
+    [
+      browserFields,
+      docValueFields,
+      expandedDetail,
+      handleOnPanelClosed,
+      runtimeMappings,
+      timelineId,
+    ]
   );
 
   const SidebarContent = useMemo(

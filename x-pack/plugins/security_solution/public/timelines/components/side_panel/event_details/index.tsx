@@ -17,7 +17,10 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
+import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../common/constants';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
@@ -30,11 +33,10 @@ import {
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
-import { TimelineNonEcsData } from '../../../../../common';
-import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useHostsRiskScore } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
+import { HostRisk } from '../../../../common/containers/hosts_risk/types';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -57,13 +59,12 @@ interface EventDetailsPanelProps {
   expandedEvent: {
     eventId: string;
     indexName: string;
-    ecsData?: Ecs;
-    nonEcsData?: TimelineNonEcsData[];
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
   isDraggable?: boolean;
   isFlyoutView?: boolean;
+  runtimeMappings: MappingRuntimeFields;
   tabType: TimelineTabs;
   timelineId: string;
 }
@@ -76,14 +77,16 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   handleOnEventClosed,
   isDraggable,
   isFlyoutView,
+  runtimeMappings,
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData, rawEventData] = useTimelineEventsDetails({
+  const [loading, detailsData, rawEventData, ecsData] = useTimelineEventsDetails({
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
     eventId: expandedEvent.eventId ?? '',
+    runtimeMappings,
     skip: !expandedEvent.eventId,
   });
 
@@ -92,6 +95,13 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const [isolateAction, setIsolateAction] = useState<'isolateHost' | 'unisolateHost'>(
     'isolateHost'
   );
+
+  const {
+    services: { cases },
+  } = useKibana();
+
+  const CasesContext = cases.getCasesContext();
+  const casesPermissions = useGetUserCasesPermissions();
 
   const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
     useState(false);
@@ -108,10 +118,10 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     }
   }, []);
 
-  const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
+  const isAlert = some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, detailsData);
 
   const ruleName = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'signal.rule.name' }, detailsData),
+    () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.name' }, detailsData),
     [detailsData]
   );
 
@@ -125,9 +135,26 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const hostRisk = useHostsRiskScore({
+  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
     hostName,
+    pagination: {
+      cursorStart: 0,
+      querySize: 1,
+    },
   });
+
+  const hostRisk: HostRisk | null = data
+    ? {
+        loading: hostRiskLoading,
+        isModuleEnabled,
+        result: data,
+      }
+    : null;
+
+  const timestamp = useMemo(
+    () => getFieldValue({ category: 'base', field: '@timestamp' }, detailsData),
+    [detailsData]
+  );
 
   const backToAlertDetailsLink = useMemo(() => {
     return (
@@ -155,7 +182,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     setIsIsolateActionSuccessBannerVisible(true);
     // If a case details refresh ref is defined, then refresh actions and comments
     if (caseDetailsRefresh) {
-      caseDetailsRefresh.refreshUserActionsAndComments();
+      caseDetailsRefresh.refreshCase();
     }
   }, [caseDetailsRefresh]);
 
@@ -169,7 +196,12 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         {isHostIsolationPanelOpen ? (
           backToAlertDetailsLink
         ) : (
-          <ExpandableEventTitle isAlert={isAlert} loading={loading} ruleName={ruleName} />
+          <ExpandableEventTitle
+            isAlert={isAlert}
+            loading={loading}
+            ruleName={ruleName}
+            timestamp={timestamp}
+          />
         )}
       </EuiFlyoutHeader>
       {isIsolateActionSuccessBannerVisible && (
@@ -199,12 +231,14 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             timelineId={timelineId}
             timelineTabType="flyout"
             hostRisk={hostRisk}
+            handleOnEventClosed={handleOnEventClosed}
           />
         )}
       </StyledEuiFlyoutBody>
 
       <EventDetailsFooter
         detailsData={detailsData}
+        detailsEcsData={ecsData}
         expandedEvent={expandedEvent}
         handleOnEventClosed={handleOnEventClosed}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
@@ -214,7 +248,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       />
     </>
   ) : (
-    <>
+    <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
       <ExpandableEventTitle
         isAlert={isAlert}
         loading={loading}
@@ -233,8 +267,19 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         timelineId={timelineId}
         timelineTabType={tabType}
         hostRisk={hostRisk}
+        handleOnEventClosed={handleOnEventClosed}
       />
-    </>
+      <EventDetailsFooter
+        detailsData={detailsData}
+        detailsEcsData={ecsData}
+        expandedEvent={expandedEvent}
+        handleOnEventClosed={handleOnEventClosed}
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        loadingEventDetails={loading}
+        onAddIsolationStatusClick={showHostIsolationPanel}
+        timelineId={timelineId}
+      />
+    </CasesContext>
   );
 };
 

@@ -23,7 +23,7 @@ import {
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_DAYS_LABEL, DAYS_OF_WEEK_LABELS } from '../../../../../shared/constants';
 import { BLOCK_LABEL, BETWEEN_LABEL, ON_LABEL, REMOVE_BUTTON } from '../../../../constants';
@@ -118,7 +118,7 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => 
             options={syncOptions}
             onChange={(value) => setBlockedTimeWindow(index, 'jobType', value)}
             itemClassName="blockedWindowSelectItem"
-            popoverClassName="blockedWindowSelectPopover"
+            popoverProps={{ className: 'blockedWindowSelectPopover' }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

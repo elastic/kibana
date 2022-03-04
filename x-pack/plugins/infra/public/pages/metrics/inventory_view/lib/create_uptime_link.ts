@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { LinkDescriptor } from '../../../../hooks/use_link_props';
+import { getFieldByType } from '../../../../../common/inventory_models';
+import { LinkDescriptor } from '../../../../../../observability/public';
 
 export const createUptimeLink = (
   options: InfraWaffleMapOptions,
@@ -24,7 +24,7 @@ export const createUptimeLink = (
       },
     };
   }
-  const field = get(options, ['fields', nodeType], '');
+  const field = getFieldByType(nodeType);
   return {
     app: 'uptime',
     hash: '/',

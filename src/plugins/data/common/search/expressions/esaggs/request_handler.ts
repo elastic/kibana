@@ -17,8 +17,7 @@ import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 import { tabifyAggResponse } from '../../tabify';
 
-/** @internal */
-export interface RequestHandlerParams {
+interface RequestHandlerParams {
   abortSignal?: AbortSignal;
   aggs: IAggConfigs;
   filters?: Filter[];

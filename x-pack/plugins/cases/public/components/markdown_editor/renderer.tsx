@@ -16,25 +16,36 @@ interface Props {
   disableLinks?: boolean;
 }
 
+const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps> => {
+  const MarkdownLinkProcessingComponent: React.FC<EuiLinkAnchorProps> = memo((props) => (
+    <MarkdownLink {...props} disableLinks={disableLinks} />
+  ));
+
+  MarkdownLinkProcessingComponent.displayName = 'MarkdownLinkProcessingComponent';
+
+  return MarkdownLinkProcessingComponent;
+};
+
 const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) => {
   const { processingPlugins, parsingPlugins } = usePlugins();
-  const MarkdownLinkProcessingComponent: React.FC<EuiLinkAnchorProps> = useMemo(
-    () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,
-    [disableLinks]
-  );
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);
   // This line of code is TS-compatible and it will break if [1][1] change in the future.
-  processingPluginList[1][1].components.a = MarkdownLinkProcessingComponent;
+  processingPluginList[1][1].components.a = useMemo(
+    () => withDisabledLinks(disableLinks),
+    [disableLinks]
+  );
 
   return (
     <EuiMarkdownFormat
       parsingPluginList={parsingPlugins}
       processingPluginList={processingPluginList}
+      grow={false}
     >
       {children}
     </EuiMarkdownFormat>
   );
 };
+MarkdownRendererComponent.displayName = 'MarkdownRenderer';
 
 export const MarkdownRenderer = memo(MarkdownRendererComponent);

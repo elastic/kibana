@@ -7,6 +7,7 @@
 
 import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
 import { generateId } from '../id_generator';
 import type { DatasourceSuggestion, TableChangeType } from '../types';
 import { columnToOperation } from './indexpattern';
@@ -16,13 +17,17 @@ import {
   getMetricOperationTypes,
   getOperationTypesForField,
   operationDefinitionMap,
-  IndexPatternColumn,
+  BaseIndexPatternColumn,
   OperationType,
   getExistingColumnGroups,
   isReferenced,
   getReferencedColumnIds,
+  getSplitByTermsLayer,
+  getSplitByFiltersLayer,
+  computeLayerFromContext,
+  hasTermsWithManyBuckets,
 } from './operations';
-import { hasField } from './utils';
+import { hasField } from './pure_utils';
 import type {
   IndexPattern,
   IndexPatternPrivateState,
@@ -30,7 +35,6 @@ import type {
   IndexPatternField,
 } from './types';
 import { documentField } from './document_field';
-
 export type IndexPatternSuggestion = DatasourceSuggestion<IndexPatternPrivateState>;
 
 function buildSuggestion({
@@ -61,11 +65,11 @@ function buildSuggestion({
   // two match up.
   const layers = mapValues(updatedState.layers, (layer) => ({
     ...layer,
-    columns: pick(layer.columns, layer.columnOrder) as Record<string, IndexPatternColumn>,
+    columns: pick(layer.columns, layer.columnOrder) as Record<string, BaseIndexPatternColumn>,
   }));
 
   const columnOrder = layers[layerId].columnOrder;
-  const columnMap = layers[layerId].columns as Record<string, IndexPatternColumn>;
+  const columnMap = layers[layerId].columns as Record<string, BaseIndexPatternColumn>;
   const isMultiRow = Object.values(columnMap).some((column) => column.isBucketed);
 
   return {
@@ -125,6 +129,92 @@ export function getDatasourceSuggestionsForField(
     } else {
       return getExistingLayerSuggestionsForField(state, mostEmptyLayerId, field);
     }
+  }
+}
+
+// Called when the user navigates from Visualize editor to Lens
+export function getDatasourceSuggestionsForVisualizeCharts(
+  state: IndexPatternPrivateState,
+  context: VisualizeEditorLayersContext[]
+): IndexPatternSuggestion[] {
+  const layers = Object.keys(state.layers);
+  const layerIds = layers.filter(
+    (id) => state.layers[id].indexPatternId === context[0].indexPatternId
+  );
+  if (layerIds.length !== 0) return [];
+  return getEmptyLayersSuggestionsForVisualizeCharts(state, context);
+}
+
+function getEmptyLayersSuggestionsForVisualizeCharts(
+  state: IndexPatternPrivateState,
+  context: VisualizeEditorLayersContext[]
+): IndexPatternSuggestion[] {
+  const suggestions: IndexPatternSuggestion[] = [];
+  for (let layerIdx = 0; layerIdx < context.length; layerIdx++) {
+    const layer = context[layerIdx];
+    const indexPattern = state.indexPatterns[layer.indexPatternId];
+    if (!indexPattern) return [];
+
+    const newId = generateId();
+    let newLayer: IndexPatternLayer | undefined;
+    if (indexPattern.timeFieldName) {
+      newLayer = createNewTimeseriesLayerWithMetricAggregationFromVizEditor(indexPattern, layer);
+    }
+    if (newLayer) {
+      const suggestion = buildSuggestion({
+        state,
+        updatedLayer: newLayer,
+        layerId: newId,
+        changeType: 'initial',
+      });
+      const layerId = Object.keys(suggestion.state.layers)[0];
+      context[layerIdx].layerId = layerId;
+      suggestions.push(suggestion);
+    }
+  }
+  return suggestions;
+}
+
+function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
+  indexPattern: IndexPattern,
+  layer: VisualizeEditorLayersContext
+): IndexPatternLayer | undefined {
+  const { timeFieldName, splitMode, splitFilters, metrics, timeInterval } = layer;
+  const dateField = indexPattern.getFieldByName(timeFieldName!);
+
+  const splitFields = layer.splitFields
+    ? (layer.splitFields
+        .map((item) => indexPattern.getFieldByName(item))
+        .filter(Boolean) as IndexPatternField[])
+    : null;
+
+  // generate the layer for split by terms
+  if (splitMode === 'terms' && splitFields?.length) {
+    return getSplitByTermsLayer(indexPattern, splitFields, dateField, layer);
+    // generate the layer for split by filters
+  } else if (splitMode?.includes('filter') && splitFilters && splitFilters.length) {
+    return getSplitByFiltersLayer(indexPattern, dateField, layer);
+  } else {
+    const copyMetricsArray = [...metrics];
+    const computedLayer = computeLayerFromContext(
+      metrics.length === 1,
+      copyMetricsArray,
+      indexPattern,
+      layer.format,
+      layer.label
+    );
+
+    return insertNewColumn({
+      op: 'date_histogram',
+      layer: computedLayer,
+      columnId: generateId(),
+      field: dateField,
+      indexPattern,
+      visualizationGroups: [],
+      columnParams: {
+        interval: timeInterval,
+      },
+    });
   }
 }
 
@@ -220,7 +310,7 @@ function getExistingLayerSuggestionsForField(
         indexPattern,
         field,
         columnId: generateId(),
-        op: metricOperation.type,
+        op: metricOperation.type as OperationType,
         visualizationGroups: [],
       });
       if (layerWithNewMetric) {
@@ -242,7 +332,7 @@ function getExistingLayerSuggestionsForField(
           indexPattern,
           field,
           columnId: metrics[0],
-          op: metricOperation.type,
+          op: metricOperation.type as OperationType,
           visualizationGroups: [],
         });
         if (layerWithReplacedMetric) {
@@ -335,7 +425,7 @@ function createNewLayerWithMetricAggregation(
   return insertNewColumn({
     op: 'date_histogram',
     layer: insertNewColumn({
-      op: metricOperation.type,
+      op: metricOperation.type as OperationType,
       layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
       columnId: generateId(),
       field,
@@ -424,7 +514,7 @@ export function getDatasourceSuggestionsFromCurrentState(
         );
 
         if (!references.length && metrics.length && buckets.length === 0) {
-          if (timeField) {
+          if (timeField && buckets.length < 1 && !hasTermsWithManyBuckets(layer)) {
             // suggest current metric over time if there is a default time field
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
@@ -436,7 +526,13 @@ export function getDatasourceSuggestionsFromCurrentState(
 
           // base range intervals are of number dataType.
           // Custom range/intervals have a different dataType so they still receive the Over Time suggestion
-          if (!timeDimension && timeField && !hasNumericDimension) {
+          if (
+            !timeDimension &&
+            timeField &&
+            buckets.length < 2 &&
+            !hasNumericDimension &&
+            !hasTermsWithManyBuckets(layer)
+          ) {
             // suggest current configuration over time if there is a default time field
             // and no time dimension yet
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
@@ -612,10 +708,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         noBuckets: false,
       };
 
-      if (availableBucketedColumns.length <= 1) {
-        // Don't simplify when dealing with single-bucket table.
-        return [];
-      } else if (topLevelMetricColumns.length > 1) {
+      if (bucketedColumns.length > 0 && topLevelMetricColumns.length > 1) {
         return [
           {
             ...layer,
@@ -627,9 +720,10 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
             noBuckets: false,
           },
         ];
-      } else {
+      } else if (availableBucketedColumns.length > 1) {
         return allMetricsSuggestion;
       }
+      return [];
     })
   )
     .concat(

@@ -15,7 +15,7 @@ import { licensingMock } from '../../../licensing/public/mocks';
 import { securityMock } from '../../../security/public/mocks';
 
 import { AppSearch } from './app_search';
-import { EnterpriseSearch } from './enterprise_search';
+import { EnterpriseSearchOverview } from './enterprise_search_overview';
 import { KibanaLogic } from './shared/kibana';
 import { WorkplaceSearch } from './workplace_search';
 
@@ -23,7 +23,7 @@ import { renderApp, renderHeaderActions } from './';
 
 describe('renderApp', () => {
   const kibanaDeps = {
-    params: coreMock.createAppMountParamters(),
+    params: coreMock.createAppMountParameters(),
     core: coreMock.createStart(),
     plugins: {
       licensing: licensingMock.createStart(),
@@ -62,8 +62,8 @@ describe('renderApp', () => {
   describe('Enterprise Search apps', () => {
     afterEach(() => unmount());
 
-    it('renders EnterpriseSearch', () => {
-      mount(EnterpriseSearch);
+    it('renders EnterpriseSearchOverview', () => {
+      mount(EnterpriseSearchOverview);
       expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
     });
 

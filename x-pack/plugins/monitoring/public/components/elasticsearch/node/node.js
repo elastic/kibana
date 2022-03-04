@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NodeDetailStatus } from '../node_detail_status';
 import { Logs } from '../../logs';
 import { MonitoringTimeseriesContainer } from '../../chart';
@@ -43,7 +43,6 @@ export const Node = ({ nodeSummary, metrics, logs, alerts, nodeId, clusterUuid, 
  */
   const metricsToShow = [
     metrics.node_jvm_mem,
-    metrics.node_mem,
     metrics.node_total_io,
     metrics.node_cpu_metric,
     metrics.node_load_average,

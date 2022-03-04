@@ -6,7 +6,7 @@
  */
 
 import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
 
 import { DocValueFields, LastEventIndexKey } from '../../../../common/search_strategy';
@@ -17,13 +17,14 @@ import { FormattedRelativePreferenceDate } from '../formatted_date';
 export interface LastEventTimeProps {
   docValueFields: DocValueFields[];
   hostName?: string;
+  userName?: string;
   indexKey: LastEventIndexKey;
   ip?: string;
   indexNames: string[];
 }
 
 export const LastEventTime = memo<LastEventTimeProps>(
-  ({ docValueFields, hostName, indexKey, ip, indexNames }) => {
+  ({ docValueFields, hostName, userName, indexKey, ip, indexNames }) => {
     const [loading, { lastSeen, errorMessage }] = useTimelineLastEventTime({
       docValueFields,
       indexKey,
@@ -31,6 +32,7 @@ export const LastEventTime = memo<LastEventTimeProps>(
       details: {
         hostName,
         ip,
+        userName,
       },
     });
 

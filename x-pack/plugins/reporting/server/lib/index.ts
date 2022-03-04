@@ -11,6 +11,7 @@ export { ContentStream, getContentStream } from './content_stream';
 export { cryptoFactory } from './crypto';
 export { ExportTypesRegistry, getExportTypesRegistry } from './export_types_registry';
 export { LevelLogger } from './level_logger';
+export { PassThroughStream } from './passthrough_stream';
 export { statuses } from './statuses';
 export { ReportingStore, IlmPolicyManager } from './store';
 export { startTrace } from './trace';

@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { CoreStart } from 'src/core/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';

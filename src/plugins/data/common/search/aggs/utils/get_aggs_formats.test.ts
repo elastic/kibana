@@ -13,6 +13,7 @@ import {
   IFieldFormat,
   SerializedFieldFormat,
 } from '../../../../../field_formats/common';
+import { MultiFieldKey } from '../buckets/multi_field_key';
 import { getAggsFormats } from './get_aggs_formats';
 
 const getAggFormat = (
@@ -118,5 +119,36 @@ describe('getAggsFormats', () => {
     expect(format.convert('__other__')).toBe(mapping.params.otherBucketLabel);
     expect(format.convert('__missing__')).toBe(mapping.params.missingBucketLabel);
     expect(getFormat).toHaveBeenCalledTimes(3);
+  });
+
+  test('uses a default separator for multi terms', () => {
+    const terms = ['source', 'geo.src', 'geo.dest'];
+    const mapping = {
+      id: 'multi_terms',
+      params: {
+        paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
+      },
+    };
+
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convert(new MultiFieldKey({ key: terms }))).toBe('source › geo.src › geo.dest');
+    expect(getFormat).toHaveBeenCalledTimes(terms.length);
+  });
+
+  test('uses a custom separator for multi terms when passed', () => {
+    const terms = ['source', 'geo.src', 'geo.dest'];
+    const mapping = {
+      id: 'multi_terms',
+      params: {
+        paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
+        separator: ' - ',
+      },
+    };
+
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convert(new MultiFieldKey({ key: terms }))).toBe('source - geo.src - geo.dest');
+    expect(getFormat).toHaveBeenCalledTimes(terms.length);
   });
 });

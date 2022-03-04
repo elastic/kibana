@@ -1,0 +1,71 @@
+[[data-views-runtime-field-api-update]]
+=== Update runtime field API
+++++
+<titleabbrev>Update runtime field</titleabbrev>
+++++
+
+experimental[] Update an existing runtime field
+
+
+[[data-views-runtime-field-update-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/data_views/data_view/<data_view_id>/runtime_field/<name>`
+
+`POST <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<data_view_id>/runtime_field/<name>`
+
+
+[[data-views-runtime-field-update-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`data_view_id`::
+(Required, string) The ID of the data view.
+
+`name`::
+(Required, string) The name of the runtime field you want to update.
+
+
+[[data-views-runtime-field-update-body]]
+==== Request body
+
+`runtimeField`:: (Required, object) The runtime field definition object.
+
+You can update following fields:
+
+* `type`
+* `script`
+
+
+
+
+[[data-views-runtime-field-update-example]]
+==== Examples
+
+Update an existing runtime field on a data view:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/data_views/data_view/<data_view_id>/runtime_field/<runtime_field_name>
+{
+  "runtimeField": {
+     "script": {
+        "source": "emit(doc["bar"].value)"
+      }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns updated runtime field object array and updated data view object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data_view": {...},
+    "fields": [...]
+}
+--------------------------------------------------
+

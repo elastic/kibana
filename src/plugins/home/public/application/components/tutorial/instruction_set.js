@@ -26,8 +26,8 @@ import {
 } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 class InstructionSetUi extends React.Component {
   constructor(props) {
@@ -37,6 +37,7 @@ class InstructionSetUi extends React.Component {
       return {
         id: variant.id,
         name: getDisplayText(variant.id),
+        initialSelected: variant.initialSelected,
       };
     });
 
@@ -45,7 +46,8 @@ class InstructionSetUi extends React.Component {
     };
 
     if (this.tabs.length > 0) {
-      this.state.selectedTabId = this.tabs[0].id;
+      this.state.selectedTabId =
+        this.tabs.find(({ initialSelected }) => initialSelected)?.id ?? this.tabs[0].id;
     }
   }
 
@@ -298,6 +300,7 @@ const instructionShape = PropTypes.shape({
 const instructionVariantShape = PropTypes.shape({
   id: PropTypes.string.isRequired,
   instructions: PropTypes.arrayOf(instructionShape).isRequired,
+  initialSelected: PropTypes.bool,
 });
 
 const statusCheckConfigShape = PropTypes.shape({

@@ -9,6 +9,6 @@
 import { VisTypePiePlugin } from './plugin';
 
 export { pieVisType } from './vis_type';
-export { Dimensions, Dimension } from './types';
+export type { Dimensions, Dimension } from './types';
 
 export const plugin = () => new VisTypePiePlugin();

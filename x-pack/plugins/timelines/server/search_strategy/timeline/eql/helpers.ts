@@ -6,17 +6,21 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
+import type { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
-import { EqlSearchResponse, EqlSequence, EventHit } from '../../../../common';
-import { TimelineEdges } from '../../../../common/search_strategy';
+import {
+  EqlSearchResponse,
+  EqlSequence,
+  EventHit,
+  TimelineEdges,
+} from '../../../../common/search_strategy';
 import {
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
 } from '../../../../common/search_strategy/timeline/events/eql';
 import { inspectStringifyObject } from '../../../utils/build_query';
-import { TIMELINE_EVENTS_FIELDS } from '../factory/events/all/constants';
-import { formatTimelineData } from '../factory/events/all/helpers';
+import { TIMELINE_EVENTS_FIELDS } from '../factory/helpers/constants';
+import { formatTimelineData } from '../factory/helpers/format_timeline_data';
 
 export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, unknown> => {
   if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {

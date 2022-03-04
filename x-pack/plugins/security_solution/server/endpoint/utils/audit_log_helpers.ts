@@ -6,13 +6,13 @@
  */
 
 import { Logger } from 'kibana/server';
-import { SearchRequest } from 'src/plugins/data/public';
-import { SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { SearchRequest } from 'src/plugins/data/public';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import {
   ENDPOINT_ACTIONS_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   failedFleetActionErrorCode,
 } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
@@ -32,10 +32,12 @@ import {
 import { doesLogsEndpointActionsIndexExist } from '../utils';
 
 const actionsIndices = [AGENT_ACTIONS_INDEX, ENDPOINT_ACTIONS_INDEX];
-const responseIndices = [AGENT_ACTIONS_RESULTS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX];
+// search all responses indices irrelevant of namespace
+const responseIndices = [AGENT_ACTIONS_RESULTS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN];
 export const logsEndpointActionsRegex = new RegExp(`(^\.ds-\.logs-endpoint\.actions-default-).+`);
+// matches index names like .ds-.logs-endpoint.action.responses-name_space---suffix-2022.01.25-000001
 export const logsEndpointResponsesRegex = new RegExp(
-  `(^\.ds-\.logs-endpoint\.action\.responses-default-).+`
+  `(^\.ds-\.logs-endpoint\.action\.responses-\\w+-).+`
 );
 const queryOptions = {
   headers: {
@@ -84,7 +86,7 @@ export const getUniqueLogData = (activityLogEntries: ActivityLogEntry[]): Activi
 export const categorizeResponseResults = ({
   results,
 }: {
-  results: Array<SearchHit<EndpointActionResponse | LogsEndpointActionResponse>>;
+  results: Array<estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>>;
 }): Array<ActivityLogActionResponse | EndpointActivityLogActionResponse> => {
   return results?.length
     ? results?.map((e) => {
@@ -108,7 +110,7 @@ export const categorizeResponseResults = ({
 export const categorizeActionResults = ({
   results,
 }: {
-  results: Array<SearchHit<EndpointAction | LogsEndpointAction>>;
+  results: Array<estypes.SearchHit<EndpointAction | LogsEndpointAction>>;
 }): Array<ActivityLogAction | EndpointActivityLogAction> => {
   return results?.length
     ? results?.map((e) => {
@@ -153,7 +155,7 @@ export const getActionRequestsResult = async ({
   from: number;
 }): Promise<{
   actionIds: string[];
-  actionRequests: ApiResponse<SearchResponse<unknown>, unknown>;
+  actionRequests: TransportResult<estypes.SearchResponse<unknown>, unknown>;
 }> => {
   const dateFilters = getDateFilters({ startDate, endDate });
   const baseActionFilters = [
@@ -189,10 +191,10 @@ export const getActionRequestsResult = async ({
     },
   };
 
-  let actionRequests: ApiResponse<SearchResponse<unknown>, unknown>;
+  let actionRequests: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    actionRequests = await esClient.search(actionsSearchQuery, queryOptions);
+    const esClient = context.core.elasticsearch.client.asInternalUser;
+    actionRequests = await esClient.search(actionsSearchQuery, { ...queryOptions, meta: true });
     const actionIds = actionRequests?.body?.hits?.hits?.map((e) => {
       return logsEndpointActionsRegex.test(e._index)
         ? (e._source as LogsEndpointAction).EndpointActions.action_id
@@ -220,7 +222,7 @@ export const getActionResponsesResult = async ({
   actionIds: string[];
   startDate: string;
   endDate: string;
-}): Promise<ApiResponse<SearchResponse<unknown>, unknown>> => {
+}): Promise<TransportResult<estypes.SearchResponse<unknown>, unknown>> => {
   const dateFilters = getDateFilters({ startDate, endDate });
   const baseResponsesFilter = [
     { term: { agent_id: elasticAgentId } },
@@ -231,7 +233,7 @@ export const getActionResponsesResult = async ({
   const hasLogsEndpointActionResponsesIndex = await doesLogsEndpointActionsIndexExist({
     context,
     logger,
-    indexName: ENDPOINT_ACTION_RESPONSES_INDEX,
+    indexName: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   });
 
   const responsesSearchQuery: SearchRequest = {
@@ -246,10 +248,10 @@ export const getActionResponsesResult = async ({
     },
   };
 
-  let actionResponses: ApiResponse<SearchResponse<unknown>, unknown>;
+  let actionResponses: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    actionResponses = await esClient.search(responsesSearchQuery, queryOptions);
+    const esClient = context.core.elasticsearch.client.asInternalUser;
+    actionResponses = await esClient.search(responsesSearchQuery, { ...queryOptions, meta: true });
   } catch (error) {
     logger.error(error);
     throw error;

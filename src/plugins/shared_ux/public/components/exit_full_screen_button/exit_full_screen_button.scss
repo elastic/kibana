@@ -1,0 +1,12 @@
+
+/**
+ * This file is a stop-gap measure to ensure that EUI mixins that haven't been converted from Emotion
+ * are still applied.  This should be replaced once `EuiButton` and other mixin functionality are
+ * fully converted to Emotion.
+ *
+ * see: https://github.com/elastic/kibana/issues/122594
+ */
+.exitFullScreenButton {
+  @include euiButton;
+  @include euiBottomShadow;
+}

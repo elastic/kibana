@@ -50,7 +50,7 @@ import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
 
 export { Actions } from './actions';
-export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
+export type { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;

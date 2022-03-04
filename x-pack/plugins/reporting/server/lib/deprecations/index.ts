@@ -58,7 +58,7 @@ function deprecationError(title: string, error: Error): DeprecationsDetails[] {
   ];
 }
 
-function getErrorStatusCode(error: any): number {
+function getErrorStatusCode(error: any): number | undefined {
   if (error instanceof errors.ResponseError) {
     return error.statusCode;
   }

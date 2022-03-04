@@ -11,9 +11,12 @@ import {
   getColumnOrder,
   reorderByGroups,
   copyColumn,
+  hasOperationSupportForMultipleFields,
+  getOperationHelperForMultipleFields,
+  replaceColumn,
 } from '../../operations';
 import { mergeLayer } from '../../state_helpers';
-import { isDraggedField } from '../../utils';
+import { isDraggedField } from '../../pure_utils';
 import { getNewOperation, getField } from './get_drop_props';
 import { IndexPatternPrivateState, DraggedField } from '../../types';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -25,7 +28,7 @@ type DropHandlerProps<T> = DatasourceDimensionDropHandlerProps<IndexPatternPriva
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
   const { droppedItem, dropType } = props;
 
-  if (dropType === 'field_add' || dropType === 'field_replace') {
+  if (dropType === 'field_add' || dropType === 'field_replace' || dropType === 'field_combine') {
     return operationOnDropMap[dropType]({
       ...props,
       droppedItem: droppedItem as DraggedField,
@@ -40,6 +43,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
 const operationOnDropMap = {
   field_add: onFieldDrop,
   field_replace: onFieldDrop,
+  field_combine: (props: DropHandlerProps<DraggedField>) => onFieldDrop(props, true),
 
   reorder: onReorder,
 
@@ -56,9 +60,72 @@ const operationOnDropMap = {
 
   swap_compatible: onSwapCompatible,
   swap_incompatible: onSwapIncompatible,
+  combine_compatible: onCombineCompatible,
+  combine_incompatible: onCombineCompatible,
 };
 
-function onFieldDrop(props: DropHandlerProps<DraggedField>) {
+function onCombineCompatible({
+  columnId,
+  setState,
+  state,
+  layerId,
+  droppedItem,
+  dimensionGroups,
+  groupId,
+}: DropHandlerProps<DraggedOperation>) {
+  const layer = state.layers[layerId];
+  const sourceId = droppedItem.columnId;
+  const targetId = columnId;
+  const indexPattern = state.indexPatterns[layer.indexPatternId];
+  const sourceColumn = layer.columns[sourceId];
+  const targetColumn = layer.columns[targetId];
+
+  // extract the field from the source column
+  const sourceField = getField(sourceColumn, indexPattern);
+  const targetField = getField(targetColumn, indexPattern);
+  if (!sourceField || !targetField) {
+    return false;
+  }
+  // pass it to the target column and delete the source column
+  const initialParams = {
+    params:
+      getOperationHelperForMultipleFields(targetColumn.operationType)?.({
+        targetColumn,
+        sourceColumn,
+        indexPattern,
+      }) ?? {},
+  };
+
+  const modifiedLayer = replaceColumn({
+    layer,
+    columnId,
+    indexPattern,
+    op: targetColumn.operationType,
+    field: targetField,
+    visualizationGroups: dimensionGroups,
+    targetGroup: groupId,
+    initialParams,
+    shouldCombineField: true,
+  });
+  const newLayer = deleteColumn({
+    layer: modifiedLayer,
+    columnId: sourceId,
+    indexPattern,
+  });
+
+  // Time to replace
+  setState(
+    mergeLayer({
+      state,
+      layerId,
+      newLayer,
+    })
+  );
+
+  return { deleted: sourceId };
+}
+
+function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boolean) {
   const {
     columnId,
     setState,
@@ -70,23 +137,52 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>) {
     dimensionGroups,
   } = props;
 
+  const prioritizedOperation = dimensionGroups.find(
+    (g) => g.groupId === groupId
+  )?.prioritizedOperation;
+
   const layer = state.layers[layerId];
   const indexPattern = state.indexPatterns[layer.indexPatternId];
   const targetColumn = layer.columns[columnId];
-  const newOperation = getNewOperation(droppedItem.field, filterOperations, targetColumn);
+  const newOperation = shouldAddField
+    ? targetColumn.operationType
+    : getNewOperation(droppedItem.field, filterOperations, targetColumn, prioritizedOperation);
 
-  if (!isDraggedField(droppedItem) || !newOperation) {
+  if (
+    !isDraggedField(droppedItem) ||
+    !newOperation ||
+    (shouldAddField &&
+      !hasOperationSupportForMultipleFields(
+        indexPattern,
+        targetColumn,
+        undefined,
+        droppedItem.field
+      ))
+  ) {
     return false;
   }
+  const field = shouldAddField ? getField(targetColumn, indexPattern) : droppedItem.field;
+  const initialParams = shouldAddField
+    ? {
+        params:
+          getOperationHelperForMultipleFields(targetColumn.operationType)?.({
+            targetColumn,
+            field: droppedItem.field,
+            indexPattern,
+          }) || {},
+      }
+    : undefined;
 
   const newLayer = insertOrReplaceColumn({
     layer,
     columnId,
     indexPattern,
     op: newOperation,
-    field: droppedItem.field,
+    field,
     visualizationGroups: dimensionGroups,
     targetGroup: groupId,
+    shouldCombineField: shouldAddField,
+    initialParams,
   });
 
   trackUiEvent('drop_onto_dimension');

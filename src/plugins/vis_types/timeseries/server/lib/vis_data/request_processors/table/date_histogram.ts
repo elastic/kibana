@@ -9,8 +9,6 @@
 import { overwrite, getBucketSize, isLastValueTimerangeMode, getTimerange } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../../plugins/data/server';
-import { AGG_TYPE, getAggsByType } from '../../../../../common/agg_utils';
-import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
 import type { TableRequestProcessorsFunction, TableSearchRequestMeta } from './types';
 
@@ -26,14 +24,15 @@ export const dateHistogram: TableRequestProcessorsFunction =
 
     const meta: TableSearchRequestMeta = {
       timeField,
-      index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      dataViewId: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      indexPatternString: seriesIndex.indexPatternString,
       panelId: panel.id,
     };
 
-    const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
-    const { timezone } = capabilities;
-
     const overwriteDateHistogramForLastBucketMode = () => {
+      const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
+      const { timezone } = capabilities;
+
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
 
@@ -56,41 +55,19 @@ export const dateHistogram: TableRequestProcessorsFunction =
     };
 
     const overwriteDateHistogramForEntireTimerangeMode = () => {
-      const metricAggs = getAggsByType<string>((agg) => agg.id)[AGG_TYPE.METRIC];
-      let bucketInterval;
+      const intervalString = `${to.valueOf() - from.valueOf()}ms`;
 
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
 
-        // we should use auto_date_histogram only for metric aggregations and math
-        if (
-          column.metrics.every(
-            (metric) => metricAggs.includes(metric.type) || metric.type === TSVB_METRIC_TYPES.MATH
-          )
-        ) {
-          overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
-            field: timeField,
-            buckets: 1,
-          });
-
-          bucketInterval = `${to.valueOf() - from.valueOf()}ms`;
-        } else {
-          overwrite(doc, `${aggRoot}.timeseries.date_histogram`, {
-            field: timeField,
-            min_doc_count: 0,
-            time_zone: timezone,
-            extended_bounds: {
-              min: from.valueOf(),
-              max: to.valueOf(),
-            },
-            ...dateHistogramInterval(intervalString),
-          });
-          bucketInterval = intervalString;
-        }
+        overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
+          field: timeField,
+          buckets: 1,
+        });
 
         overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
           ...meta,
-          intervalString: bucketInterval,
+          intervalString,
         });
       });
     };

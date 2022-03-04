@@ -11,7 +11,7 @@ import { useGetCasesStatus, UseGetCasesStatus } from './use_get_cases_status';
 import { casesStatus } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
-import { SECURITY_SOLUTION_OWNER } from '../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -24,14 +24,11 @@ describe('useGetCasesStatus', () => {
   });
 
   it('init', async () => {
+    const { result } = renderHook<string, UseGetCasesStatus>(() => useGetCasesStatus(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
-        () => useGetCasesStatus(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
       expect(result.current).toEqual({
         countClosedCases: null,
         countOpenCases: null,
@@ -53,7 +50,6 @@ describe('useGetCasesStatus', () => {
         }
       );
       await waitForNextUpdate();
-      await waitForNextUpdate();
       expect(spyOnGetCasesStatus).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
     });
   });
@@ -66,7 +62,6 @@ describe('useGetCasesStatus', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
         countClosedCases: casesStatus.countClosedCases,
@@ -92,7 +87,6 @@ describe('useGetCasesStatus', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(result.current).toEqual({

@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockHttpValues,
-  mockFlashMessageHelpers,
-} from '../../../__mocks__/kea_logic';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { SecurityLogic } from './security_logic';
 
 describe('SecurityLogic', () => {
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SecurityLogic);
 
   beforeEach(() => {
@@ -124,15 +121,8 @@ describe('SecurityLogic', () => {
         expect(setServerPropsSpy).toHaveBeenCalledWith(serverProps);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SecurityLogic.actions.initializeSourceRestrictions();
-        try {
-          await nextTick();
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
       });
     });
 
@@ -150,15 +140,8 @@ describe('SecurityLogic', () => {
         );
       });
 
-      it('handles error', async () => {
-        http.patch.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.patch, () => {
         SecurityLogic.actions.saveSourceRestrictions();
-        try {
-          await nextTick();
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
       });
     });
 

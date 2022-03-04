@@ -16,11 +16,11 @@ resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> | The type of SavedObject to retrieve |
-|  id | <code>string</code> | The ID of the SavedObject to retrieve |
-|  options | <code>SavedObjectsBaseOptions</code> |  |
+|  type | string | The type of SavedObject to retrieve |
+|  id | string | The ID of the SavedObject to retrieve |
+|  options | SavedObjectsBaseOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsResolveResponse<T>>`
+Promise&lt;SavedObjectsResolveResponse&lt;T&gt;&gt;
 

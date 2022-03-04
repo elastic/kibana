@@ -8,18 +8,18 @@
 import React from 'react';
 import { ExpViewActionMenuContent } from './action_menu';
 import HeaderMenuPortal from '../../../header_menu_portal';
-import { usePluginContext } from '../../../../../hooks/use_plugin_context';
 import { TypedLensByValueInput } from '../../../../../../../lens/public';
+import { useExploratoryView } from '../../contexts/exploratory_view_config';
 
 interface Props {
   timeRange?: { from: string; to: string };
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 export function ExpViewActionMenu(props: Props) {
-  const { appMountParameters } = usePluginContext();
+  const { setHeaderActionMenu, theme$ } = useExploratoryView();
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={appMountParameters.setHeaderActionMenu}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
       <ExpViewActionMenuContent {...props} />
     </HeaderMenuPortal>
   );

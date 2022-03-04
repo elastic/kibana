@@ -11,6 +11,8 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
+import { docLinks } from '../../../../shared/doc_links';
+
 import { EmptyState } from './';
 
 describe('EmptyState', () => {
@@ -21,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('No API events in the last 24 hours');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining('/api-reference.html')
+      expect.stringContaining(docLinks.appSearchApis)
     );
   });
 });

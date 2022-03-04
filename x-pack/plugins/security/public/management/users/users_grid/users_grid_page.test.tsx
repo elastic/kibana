@@ -10,7 +10,7 @@ import type { ReactWrapper } from 'enzyme';
 import type { LocationDescriptorObject } from 'history';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { CoreStart, ScopedHistory } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
@@ -71,6 +71,66 @@ describe('UsersGridPage', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(findTestSubject(wrapper, 'userDisabled')).toHaveLength(0);
+  });
+
+  it('renders the loading indication on the table when fetching user with data', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockImplementation(() => {
+      return Promise.resolve<User[]>([
+        {
+          username: 'foo',
+          email: 'foo@bar.net',
+          full_name: 'foo bar',
+          roles: ['kibana_user'],
+          enabled: true,
+        },
+        {
+          username: 'reserved',
+          email: 'reserved@bar.net',
+          full_name: '',
+          roles: ['superuser'],
+          enabled: true,
+          metadata: {
+            _reserved: true,
+          },
+        },
+      ]);
+    });
+
+    const wrapper = mountWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    expect(wrapper.find('.euiBasicTable-loading').exists()).toBeTruthy();
+    await waitForRender(wrapper);
+    expect(wrapper.find('.euiBasicTable-loading').exists()).toBeFalsy();
+  });
+
+  it('renders the loading indication on the table when fetching user with no data', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockImplementation(() => {
+      return Promise.resolve<User[]>([]);
+    });
+
+    const wrapper = mountWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    expect(wrapper.find('.euiBasicTable-loading').exists()).toBeTruthy();
+    await waitForRender(wrapper);
+    expect(wrapper.find('.euiBasicTable-loading').exists()).toBeFalsy();
   });
 
   it('generates valid links when usernames contain special characters', async () => {

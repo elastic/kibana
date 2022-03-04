@@ -7,7 +7,7 @@
 
 import { stringify } from 'query-string';
 import url from 'url';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
@@ -447,8 +447,6 @@ export default function ({ getService }: FtrProviderContext) {
       let sessionCookie: Cookie;
 
       beforeEach(async function () {
-        this.timeout(40000);
-
         const handshakeResponse = await supertest
           .get(
             '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
@@ -465,10 +463,6 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
-
-        // Access token expiration is set to 15s for API integration tests.
-        // Let's wait for 20s to make sure token expires.
-        await delay(20000);
       });
 
       const expectNewSessionCookie = (cookie: Cookie) => {
@@ -479,7 +473,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(cookie.value).to.not.be(sessionCookie.value);
       };
 
-      it('expired access token should be automatically refreshed', async () => {
+      it('expired access token should be automatically refreshed', async function () {
+        this.timeout(60000);
+
+        // Access token expiration is set to 15s for API integration tests.
+        // Let's wait for 20s to make sure token expires.
+        await setTimeoutAsync(20000);
+
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const firstResponse = await supertest
@@ -525,7 +525,13 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should refresh access token even if multiple concurrent requests try to refresh it', async () => {
+      it('should refresh access token even if multiple concurrent requests try to refresh it', async function () {
+        this.timeout(60000);
+
+        // Access token expiration is set to 15s for API integration tests.
+        // Let's wait for 20s to make sure token expires.
+        await setTimeoutAsync(20000);
+
         // Send 5 concurrent requests with a cookie that contains an expired access token.
         await Promise.all(
           Array.from({ length: 5 }).map((value, index) =>
@@ -536,6 +542,54 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(200)
           )
         );
+      });
+
+      describe('post-authentication stage', () => {
+        for (const client of ['start-contract', 'request-context', 'custom']) {
+          it(`expired access token should be automatically refreshed by the ${client} client`, async function () {
+            this.timeout(60000);
+
+            // Access token expiration is set to 15s for API integration tests.
+            // Let's tell test endpoint to wait 30s after authentication and try to make a request to Elasticsearch
+            // triggering token refresh logic.
+            const response = await supertest
+              .post('/authentication/slow/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', sessionCookie.cookieString())
+              .send({ duration: '30s', client })
+              .expect(200);
+
+            const newSessionCookies = response.headers['set-cookie'];
+            expect(newSessionCookies).to.have.length(1);
+
+            const newSessionCookie = parseCookie(newSessionCookies[0])!;
+            expectNewSessionCookie(newSessionCookie);
+            await checkSessionCookie(newSessionCookie);
+
+            // The second new cookie with fresh pair of access and refresh tokens should work.
+            await supertest
+              .get('/internal/security/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', newSessionCookie.cookieString())
+              .expect(200);
+          });
+
+          it(`expired access token should be automatically refreshed by the ${client} client even for multiple concurrent requests`, async function () {
+            this.timeout(60000);
+
+            // Send 5 concurrent requests with a cookie that contains an expired access token.
+            await Promise.all(
+              Array.from({ length: 5 }).map((value, index) =>
+                supertest
+                  .post(`/authentication/slow/me?a=${index}`)
+                  .set('kbn-xsrf', 'xxx')
+                  .set('Cookie', sessionCookie.cookieString())
+                  .send({ duration: '30s', client })
+                  .expect(200)
+              )
+            );
+          });
+        }
       });
     });
 
@@ -568,7 +622,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
       });
 
       it('should redirect user to a page that would capture URL fragment', async () => {
@@ -639,7 +693,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['when access token is valid', async () => {}],
         // Scenario when active cookie has an expired access token. Access token expiration is set
         // to 15s for API integration tests so we need to wait for 20s to make sure token expires.
-        ['when access token is expired', async () => await delay(20000)],
+        ['when access token is expired', async () => await setTimeoutAsync(20000)],
         // Scenario when active cookie references to access/refresh token pair that were already
         // removed from Elasticsearch (to simulate 24h when expired tokens are removed).
         [
@@ -650,7 +704,7 @@ export default function ({ getService }: FtrProviderContext) {
               body: { query: { match: { doc_type: 'token' } } },
               refresh: true,
             });
-            expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+            expect(esResponse).to.have.property('deleted').greaterThan(0);
           },
         ],
       ];

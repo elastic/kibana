@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { RouteComponentProps, useHistory } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { getListPath } from '../../services/navigation';
@@ -22,10 +22,14 @@ interface Props {
   sourcePipeline?: Pipeline;
 }
 
+interface LocationState {
+  sourcePipeline?: Pipeline;
+}
+
 export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
-  history,
   sourcePipeline,
 }) => {
+  const history = useHistory<LocationState>();
   const { services } = useKibana();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -55,6 +59,16 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
     services.breadcrumbs.setBreadcrumbs('create');
   }, [services]);
 
+  const formDefaultValue = useMemo(() => {
+    if (sourcePipeline) {
+      return sourcePipeline;
+    }
+
+    if (history.location.state?.sourcePipeline) {
+      return history.location.state.sourcePipeline;
+    }
+  }, [sourcePipeline, history]);
+
   return (
     <>
       <EuiPageHeader
@@ -71,7 +85,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={services.documentation.getPutPipelineApiUrl()}
+            href={services.documentation.getCreatePipelineUrl()}
             target="_blank"
             iconType="help"
             data-test-subj="documentationLink"
@@ -87,7 +101,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
       <EuiSpacer size="l" />
 
       <PipelineForm
-        defaultValue={sourcePipeline}
+        defaultValue={formDefaultValue}
         onSave={onSave}
         onCancel={onCancel}
         isSaving={isSaving}

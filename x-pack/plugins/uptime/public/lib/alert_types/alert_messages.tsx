@@ -5,25 +5,50 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import type { CoreTheme } from 'kibana/public';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { RedirectAppLinks, toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { ActionConnector } from '../../state/alerts/alerts';
+import { kibanaService } from '../../state/kibana_service';
+import { getUrlForAlert } from './common';
+import type { Rule } from '../../../../triggers_actions_ui/public';
 
-export const simpleAlertEnabled = (defaultActions: ActionConnector[]) => {
+export const simpleAlertEnabled = (
+  defaultActions: ActionConnector[],
+  theme$: Observable<CoreTheme>,
+  rule: Rule
+) => {
+  const alertUrl = getUrlForAlert(rule.id, kibanaService.core.http.basePath.get());
+
   return {
     title: i18n.translate('xpack.uptime.overview.alerts.enabled.success', {
       defaultMessage: 'Rule successfully enabled ',
     }),
     text: toMountPoint(
-      <FormattedMessage
-        id="xpack.uptime.overview.alerts.enabled.success.description"
-        defaultMessage="A message will be sent to {actionConnectors} when this monitor is down."
-        values={{
-          actionConnectors: <strong>{defaultActions.map(({ name }) => name).join(', ')}</strong>,
-        }}
-      />
+      <RedirectAppLinks application={kibanaService.core.application}>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.uptime.overview.alerts.enabled.success.description"
+            defaultMessage="A message will be sent to {actionConnectors} when this monitor is down."
+            values={{
+              actionConnectors: (
+                <strong>{defaultActions.map(({ name }) => name).join(', ')}</strong>
+              ),
+            }}
+          />
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiLink href={alertUrl}>
+          {i18n.translate('xpack.uptime.enableAlert.editAlert', {
+            defaultMessage: 'Edit alert',
+          })}
+        </EuiLink>
+      </RedirectAppLinks>,
+      { theme$ }
     ),
   };
 };

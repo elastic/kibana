@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from '../../../core/server';
-import {
+import type { Plugin, CoreSetup } from 'src/core/server';
+import type {
   ScreenshotModeRequestHandlerContext,
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
@@ -30,9 +30,10 @@ export class ScreenshotModePlugin
     // We use "require" here to ensure the import does not have external references due to code bundling that
     // commonly happens during transpiling. External references would be missing in the environment puppeteer creates.
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { setScreenshotModeEnabled } = require('../common');
+    const { setScreenshotContext, setScreenshotModeEnabled } = require('../common');
 
     return {
+      setScreenshotContext,
       setScreenshotModeEnabled,
       isScreenshotMode,
     };

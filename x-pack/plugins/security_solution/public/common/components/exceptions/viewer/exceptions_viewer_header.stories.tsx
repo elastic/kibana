@@ -9,7 +9,7 @@ import { storiesOf, addDecorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars } from '@kbn/ui-theme';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';

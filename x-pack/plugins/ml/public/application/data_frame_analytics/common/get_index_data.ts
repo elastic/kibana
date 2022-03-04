@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { extractErrorMessage } from '../../../../common/util/errors';
 
 import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
@@ -64,11 +64,11 @@ export const getIndexData = async (
       });
 
       if (!options.didCancel) {
-        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
+        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
         setRowCountRelation(
           typeof resp.hits.total === 'number'
             ? ('eq' as estypes.SearchTotalHitsRelation)
-            : resp.hits.total.relation
+            : resp.hits.total!.relation
         );
         setTableItems(
           resp.hits.hits.map((d) =>

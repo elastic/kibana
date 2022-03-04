@@ -12,7 +12,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildSiemResponse } from '../utils';
 
 import { getIdError } from './utils';
@@ -44,13 +44,9 @@ export const updateRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const rulesClient = context.alerting?.getRulesClient();
+        const rulesClient = context.alerting.getRulesClient();
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution?.getAppClient();
-
-        if (!siemClient || !rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const siemClient = context.securitySolution.getAppClient();
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -58,9 +54,7 @@ export const updateRulesRoute = (
           request,
           savedObjectsClient,
         });
-        throwHttpError(await mlAuthz.validateRuleType(request.body.type));
-
-        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
 
         const existingRule = await readRules({
           isRuleRegistryEnabled,
@@ -69,30 +63,24 @@ export const updateRulesRoute = (
           id: request.body.id,
         });
 
-        await legacyMigrate({
+        const migratedRule = await legacyMigrate({
           rulesClient,
           savedObjectsClient,
           rule: existingRule,
         });
         const rule = await updateRules({
           defaultOutputIndex: siemClient.getSignalsIndex(),
-          isRuleRegistryEnabled,
           rulesClient,
-          ruleStatusClient,
-          savedObjectsClient,
+          existingRule: migratedRule,
           ruleUpdate: request.body,
-          spaceId: context.securitySolution.getSpaceId(),
         });
 
         if (rule != null) {
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 1,
-            ruleId: rule.id,
-            spaceId: context.securitySolution.getSpaceId(),
-          });
+          const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
           const [validated, errors] = transformValidate(
             rule,
-            ruleStatuses[0],
+            ruleExecutionSummary,
             isRuleRegistryEnabled
           );
           if (errors != null) {

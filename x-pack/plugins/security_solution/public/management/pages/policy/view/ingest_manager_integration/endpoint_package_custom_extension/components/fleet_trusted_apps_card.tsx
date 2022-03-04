@@ -8,11 +8,12 @@
 import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
 import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 
 import { useKibana, useToasts } from '../../../../../../../common/lib/kibana';
 import { ExceptionItemsSummary } from './exception_items_summary';
+import { parsePoliciesToKQL } from '../../../../../../common/utils';
 import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
 import {
   StyledEuiFlexGridGroup,
@@ -20,7 +21,7 @@ import {
   StyledEuiFlexItem,
 } from './styled_components';
 
-interface FleetTrustedAppsCardProps {
+export interface FleetTrustedAppsCardProps {
   customLink: React.ReactNode;
   policyId?: string;
   cardSize?: 'm' | 'l';
@@ -40,12 +41,10 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
       isMounted.current = true;
       const fetchStats = async () => {
         try {
-          const response = await trustedAppsApi.getTrustedAppsSummary({
-            kuery: policyId
-              ? `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`
-              : undefined,
-          });
-          if (isMounted) {
+          const response = await trustedAppsApi.getTrustedAppsSummary(
+            policyId ? parsePoliciesToKQL([policyId, 'all']) : undefined
+          );
+          if (isMounted.current) {
             setStats(response);
           }
         } catch (error) {
@@ -63,16 +62,18 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
           }
         }
       };
-      fetchStats();
+      if (!stats) {
+        fetchStats();
+      }
       return () => {
         isMounted.current = false;
       };
-    }, [toasts, trustedAppsApi, policyId]);
+    }, [toasts, trustedAppsApi, policyId, stats]);
 
     const getTitleMessage = () => (
       <FormattedMessage
         id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel"
-        defaultMessage="Trusted Applications"
+        defaultMessage="Trusted applications"
       />
     );
 

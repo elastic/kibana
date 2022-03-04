@@ -38,11 +38,11 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
 
       const { client: clusterClient } = ctx.core.elasticsearch;
 
-      const {
-        body: { has_all_requested: hasAllPrivileges, cluster },
-      } = await clusterClient.asCurrentUser.security.hasPrivileges({
-        body: { cluster: APP_CLUSTER_REQUIRED_PRIVILEGES },
-      });
+      const { has_all_requested: hasAllPrivileges, cluster } =
+        await clusterClient.asCurrentUser.security.hasPrivileges({
+          // @ts-expect-error @elastic/elasticsearch SecurityClusterPrivilege doesn’t contain all the priviledges
+          body: { cluster: APP_CLUSTER_REQUIRED_PRIVILEGES },
+        });
 
       if (!hasAllPrivileges) {
         privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);

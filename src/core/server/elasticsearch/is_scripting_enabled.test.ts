@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
 
@@ -18,9 +18,7 @@ describe('isInlineScriptingEnabled', () => {
   });
 
   const mockSettingsValue = (settings: estypes.ClusterGetSettingsResponse) => {
-    client.cluster.getSettings.mockReturnValue(
-      elasticsearchServiceMock.createSuccessTransportRequestPromise(settings)
-    );
+    client.cluster.getSettings.mockResolvedValue(settings);
   };
 
   it('returns `true` if all settings are empty', async () => {

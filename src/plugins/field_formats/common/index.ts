@@ -12,7 +12,8 @@ import { FieldFormatsRegistry } from './field_formats_registry';
 /** @public */
 type IFieldFormatsRegistry = PublicMethodsOf<FieldFormatsRegistry>;
 
-export { FieldFormatsRegistry, IFieldFormatsRegistry };
+export type { IFieldFormatsRegistry };
+export { FieldFormatsRegistry };
 export { FieldFormat } from './field_format';
 export { baseFormatters } from './constants/base_formatters';
 export {
@@ -20,11 +21,11 @@ export {
   BytesFormat,
   ColorFormat,
   DurationFormat,
+  GeoPointFormat,
   IpFormat,
   NumberFormat,
   PercentFormat,
   RelativeDateFormat,
-  SourceFormat,
   StaticLookupFormat,
   UrlFormat,
   StringFormat,
@@ -39,7 +40,7 @@ export { FORMATS_UI_SETTINGS } from './constants/ui_settings';
 export { FIELD_FORMAT_IDS } from './types';
 export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
 
-export {
+export type {
   FieldFormatsGetConfigFn,
   FieldFormatsContentType,
   FieldFormatConfig,

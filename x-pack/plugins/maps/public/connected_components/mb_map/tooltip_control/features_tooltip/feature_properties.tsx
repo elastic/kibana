@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { GeoJsonProperties } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
 import { isUrlDrilldown } from '../../../../trigger_actions/trigger_utils';
 import { RawValue } from '../../../../../common/constants';
@@ -30,12 +30,10 @@ interface Props {
   mbProperties: GeoJsonProperties;
   loadFeatureProperties: ({
     layerId,
-    featureId,
-    mbProperties,
+    properties,
   }: {
     layerId: string;
-    featureId?: string | number;
-    mbProperties: GeoJsonProperties;
+    properties: GeoJsonProperties;
   }) => Promise<ITooltipProperty[]>;
   showFilterButtons: boolean;
   onCloseTooltip: () => void;
@@ -149,8 +147,7 @@ export class FeatureProperties extends Component<Props, State> {
     try {
       properties = await this.props.loadFeatureProperties({
         layerId: nextLayerId,
-        featureId: nextFeatureId,
-        mbProperties,
+        properties: mbProperties,
       });
     } catch (error) {
       if (this._isMounted) {

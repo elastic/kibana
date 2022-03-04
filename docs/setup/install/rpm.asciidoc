@@ -7,11 +7,11 @@
 
 The RPM for Kibana can be <<install-rpm,downloaded from our website>>
 or from our <<rpm-repo,RPM repository>>. It can be used to install
-Kibana on any RPM-based system such as OpenSuSE, SLES, Centos, Red Hat,
+Kibana on any RPM-based system such as OpenSuSE, SLES, Red Hat,
 and Oracle Enterprise.
 
 NOTE: RPM install is not supported on distributions with old versions of RPM,
-such as SLES 11 and CentOS 5.  Please see <<targz>> instead.
+such as SLES 11. Refer to <<targz>> instead.
 
 This package contains both free and subscription features.
 <<managing-licenses,Start a 30-day trial>> to try out all of the features.
@@ -85,7 +85,7 @@ sudo yum install kibana <1>
 sudo dnf install kibana <2>
 sudo zypper install kibana <3>
 --------------------------------------------------
-<1> Use `yum` on CentOS and older Red Hat based distributions.
+<1> Use `yum` on older Red Hat based distributions.
 <2> Use `dnf` on Fedora and other newer Red Hat distributions.
 <3> Use `zypper` on OpenSUSE based distributions
 
@@ -114,6 +114,30 @@ sudo rpm --install kibana-{version}-x86_64.rpm
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm.sha512[published SHA].
 
 endif::[]
+
+[[rpm-enroll]]
+==== Start {es} and generate an enrollment token for {kib}
+++++
+<titleabbrev>Generate an enrollment token</titleabbrev>
+++++
+
+When you start {es} for the first time, the following security configuration
+occurs automatically:
+
+* Authentication and authorization are enabled, and a password is generated for the `elastic` built-in superuser.
+* Certificates and keys for TLS are generated for the transport and HTTP layer, and TLS is enabled and configured with these keys and certificates.
+
+The password and certificate and keys are output to your terminal.
+
+You can then generate an enrollment token for {kib} with the
+{ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool:
+
+[source,sh]
+----
+bin/elasticsearch-create-enrollment-token -s kibana
+----
+
+Start {kib} and enter the enrollment token to securely connect {kib} with {es}.
 
 [[rpm-running-systemd]]
 include::systemd.asciidoc[]
@@ -150,7 +174,6 @@ locations for an RPM-based system:
   | Configuration files including `kibana.yml`
   | /etc/kibana
   | <<settings,KBN_PATH_CONF>>
- d|
 
 | data
   | The location of the data files written to disk by Kibana and its plugins
@@ -158,9 +181,9 @@ locations for an RPM-based system:
   | path.data
 
 | logs
-    | Logs files location
-    |  /var/log/kibana
-    | path.logs
+  | Logs files location
+  | /var/log/kibana
+  | path.logs
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.

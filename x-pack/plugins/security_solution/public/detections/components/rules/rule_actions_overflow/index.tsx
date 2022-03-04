@@ -30,7 +30,7 @@ import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_d
 import { getToolTipContent } from '../../../../common/utils/privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useKibana } from '../../../../common/lib/kibana';
-import { APP_ID, SecurityPageName } from '../../../../../common/constants';
+import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {
@@ -62,7 +62,7 @@ const RuleActionsOverflowComponent = ({
   const [, dispatchToaster] = useStateToaster();
 
   const onRuleDeletedCallback = useCallback(() => {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),
     });
@@ -82,8 +82,8 @@ const RuleActionsOverflowComponent = ({
                 const createdRules = await duplicateRulesAction(
                   [rule],
                   [rule.id],
-                  noop,
-                  dispatchToaster
+                  dispatchToaster,
+                  noop
                 );
                 if (createdRules?.length) {
                   editRuleAction(createdRules[0].id, navigateToApp);
@@ -104,7 +104,7 @@ const RuleActionsOverflowComponent = ({
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
                 closePopover();
-                await exportRulesAction([rule.rule_id], noop, dispatchToaster);
+                await exportRulesAction([rule.rule_id], dispatchToaster, noop);
               }}
             >
               {i18nActions.EXPORT_RULE}
@@ -116,7 +116,7 @@ const RuleActionsOverflowComponent = ({
               data-test-subj="rules-details-delete-rule"
               onClick={async () => {
                 closePopover();
-                await deleteRulesAction([rule.id], noop, dispatchToaster, onRuleDeletedCallback);
+                await deleteRulesAction([rule.id], dispatchToaster, noop, onRuleDeletedCallback);
               }}
             >
               {i18nActions.DELETE_RULE}

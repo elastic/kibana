@@ -121,7 +121,7 @@ export const EngineCreation: React.FC = () => {
             isLoading={isLoading}
             type="submit"
             data-test-subj="NewEngineSubmitButton"
-            color="secondary"
+            color="success"
             fill
           >
             {ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}

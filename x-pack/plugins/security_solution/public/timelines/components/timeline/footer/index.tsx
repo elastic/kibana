@@ -19,7 +19,7 @@ import {
   EuiPopoverProps,
   EuiPagination,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -387,7 +387,7 @@ export const FooterComponent = ({
               <b>
                 {i18n.AUTO_REFRESH_ACTIVE}{' '}
                 <EuiIconTip
-                  color="subdued"
+                  color="text"
                   content={
                     <FormattedMessage
                       id="xpack.securitySolution.footer.autoRefreshActiveTooltip"

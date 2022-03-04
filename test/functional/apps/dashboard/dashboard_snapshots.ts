@@ -59,7 +59,7 @@ export default function ({
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.02);
+      expect(percentDifference).to.be.lessThan(0.022);
     });
 
     it('compare area chart snapshot', async () => {
@@ -81,7 +81,7 @@ export default function ({
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.02);
+      expect(percentDifference).to.be.lessThan(0.022);
     });
   });
 }

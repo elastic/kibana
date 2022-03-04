@@ -19,12 +19,16 @@ import { Adapters } from '../../../inspector/common/adapters';
  */
 export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapters = unknown> {
   public get isPending(): boolean {
-    const state = this.execution.state.get().state;
-    const finished = state === 'error' || state === 'result';
+    const { state, result } = this.execution.state.get();
+    const finished = state === 'error' || (state === 'result' && !result?.partial);
     return !finished;
   }
 
-  constructor(protected readonly execution: Execution<Input, Output, InspectorAdapters>) {}
+  protected readonly execution: Execution<Input, Output, InspectorAdapters>;
+
+  constructor(execution: Execution<Input, Output, InspectorAdapters>) {
+    this.execution = execution;
+  }
 
   /**
    * Cancel the execution of the expression. This will set abort signal

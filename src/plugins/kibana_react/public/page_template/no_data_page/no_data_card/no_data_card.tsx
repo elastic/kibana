@@ -27,15 +27,14 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   return (
     <EuiCard
       paddingSize="l"
-      textAlign="left"
       // TODO: we should require both title and description to be passed in by consumers since defaults are not adequate.
       // see comment: https://github.com/elastic/kibana/pull/111261/files#r708399140
       title={title!}
       description={i18n.translate('kibana-react.noDataPage.noDataCard.description', {
         defaultMessage: `Proceed without collecting data`,
       })}
-      betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
-      footer={<div className="eui-textCenter">{footer}</div>}
+      betaBadgeProps={{ label: recommended ? NO_DATA_RECOMMENDED : undefined }}
+      footer={footer}
       layout={layout as 'vertical' | undefined}
       {...cardRest}
     />

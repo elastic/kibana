@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CSSProperties } from 'react';
 import React, { memo } from 'react';
 
@@ -26,6 +26,7 @@ export const AgentPolicySummaryLine = memo<{ policy: AgentPolicy }>(({ policy })
           className={`eui-textTruncate`}
           href={getHref('policy_details', { policyId: id })}
           title={name || id}
+          data-test-subj="agentPolicyNameLink"
         >
           {name || id}
         </EuiLink>

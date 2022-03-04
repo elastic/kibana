@@ -9,14 +9,13 @@ import { getOr, omit } from 'lodash/fp';
 
 import { useDispatch } from 'react-redux';
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
-import { APP_NAME, APP_ID } from '../../../../../common/constants';
+import { APP_NAME, APP_UI_ID } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
-import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
-import { getBreadcrumbs as getUebaBreadcrumbs } from '../../../../ueba/pages/details/utils';
+import { getBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
 import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import {
@@ -25,7 +24,7 @@ import {
   NetworkRouteSpyState,
   TimelineRouteSpyState,
   AdministrationRouteSpyState,
-  UebaRouteSpyState,
+  UsersRouteSpyState,
 } from '../../../utils/route/types';
 import { getAppOverviewUrl } from '../../link_to';
 import { timelineActions } from '../../../../../public/timelines/store/timeline';
@@ -71,8 +70,8 @@ const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpySt
 const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.hosts;
 
-const isUebaRoutes = (spyState: RouteSpyState): spyState is UebaRouteSpyState =>
-  spyState != null && spyState.pageName === SecurityPageName.ueba;
+const isUsersRoutes = (spyState: RouteSpyState): spyState is UsersRouteSpyState =>
+  spyState != null && spyState.pageName === SecurityPageName.users;
 
 const isTimelinesRoutes = (spyState: RouteSpyState): spyState is TimelineRouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.timelines;
@@ -92,7 +91,7 @@ export const getBreadcrumbsForRoute = (
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
-  const overviewPath = getUrlForApp(APP_ID, { deepLinkId: SecurityPageName.overview });
+  const overviewPath = getUrlForApp(APP_UI_ID, { deepLinkId: SecurityPageName.overview });
   const siemRootBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
     href: getAppOverviewUrl(overviewPath),
@@ -134,8 +133,9 @@ export const getBreadcrumbsForRoute = (
       ),
     ];
   }
-  if (isUebaRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'ueba', isDetailPage: false };
+
+  if (isUsersRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'users', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
@@ -143,7 +143,7 @@ export const getBreadcrumbsForRoute = (
 
     return [
       siemRootBreadcrumb,
-      ...getUebaBreadcrumbs(
+      ...getUsersBreadcrumbs(
         spyState,
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
@@ -153,6 +153,7 @@ export const getBreadcrumbsForRoute = (
       ),
     ];
   }
+
   if (isRulesRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: SecurityPageName.rules, isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
@@ -174,24 +175,9 @@ export const getBreadcrumbsForRoute = (
   }
 
   if (isCaseRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'case', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
-
-    return [
-      siemRootBreadcrumb,
-      ...getCaseDetailsBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
+    return null; // controlled by Cases routes
   }
+
   if (isTimelinesRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'timeline', isDetailPage: false };
     const urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];

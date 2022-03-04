@@ -11,7 +11,8 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { createAbsolutePathSerializer, REPO_ROOT } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
 import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
@@ -24,7 +25,7 @@ import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
 import { take } from 'rxjs/operators';
-import { DiscoveredPlugin, PluginType } from './types';
+import { DiscoveredPlugin, PluginConfigDescriptor, PluginType } from './types';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 
@@ -292,6 +293,7 @@ describe('PluginsService', () => {
         );
         expect(standardMockPluginSystem.addPlugin).not.toHaveBeenCalled();
       }
+
       async function expectSuccess() {
         await expect(pluginsService.discover({ environment: environmentPreboot })).resolves.toEqual(
           expect.anything()
@@ -1062,6 +1064,67 @@ describe('PluginsService', () => {
       expect(preboot.uiPlugins.browserConfigs.size).toBe(0);
       expect(standard.uiPlugins.browserConfigs.size).toBe(0);
     });
+  });
+
+  test('"root" deprecations from one plugin should be applied before accessing other plugins config', async () => {
+    const pluginA = createPlugin('plugin-1-deprecations', {
+      type: PluginType.standard,
+      path: 'plugin-1-deprecations',
+      version: 'version-1',
+    });
+
+    const pluginB = createPlugin('plugin-2-deprecations', {
+      type: PluginType.standard,
+      path: 'plugin-2-deprecations',
+      version: 'version-2',
+    });
+
+    jest.doMock(
+      join(pluginA.path, 'server'),
+      () => ({
+        config: {
+          schema: schema.object({
+            enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+          }),
+        },
+      }),
+      { virtual: true }
+    );
+
+    jest.doMock(
+      join(pluginB.path, 'server'),
+      (): { config: PluginConfigDescriptor } => ({
+        config: {
+          schema: schema.object({
+            enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+            renamed: schema.string(), // Mandatory string to make sure that the field is actually renamed by deprecations
+          }),
+          deprecations: ({ renameFromRoot }) => [
+            renameFromRoot('plugin-1-deprecations.toBeRenamed', 'plugin-2-deprecations.renamed', {
+              level: 'critical',
+            }),
+          ],
+        },
+      }),
+      { virtual: true }
+    );
+
+    mockDiscover.mockReturnValue({
+      error$: from([]),
+      plugin$: from([pluginA, pluginB]),
+    });
+
+    config$.next({
+      'plugin-1-deprecations': {
+        toBeRenamed: 'renamed',
+      },
+    });
+
+    await expect(
+      pluginsService.discover({
+        environment: environmentPreboot,
+      })
+    ).resolves.not.toThrow(); // If the rename is not applied, it'll fail
   });
 
   describe('plugin initialization', () => {

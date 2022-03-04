@@ -14,6 +14,6 @@ describe('SeverityBadge', () => {
   it('renders correctly', () => {
     const wrapper = shallow(<SeverityBadge value="low" />);
 
-    expect(wrapper.find('EuiHealth')).toHaveLength(1);
+    expect(wrapper.find('HealthTruncateText')).toHaveLength(1);
   });
 });

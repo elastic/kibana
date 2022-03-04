@@ -7,7 +7,7 @@
 
 import { from } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { OverlayStart, NotificationsStart } from 'src/core/public';
+import { OverlayStart, NotificationsStart, ThemeServiceStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { ITagsCache, ITagAssignmentService } from '../../services';
 import { TagBulkAction } from '../types';
@@ -16,6 +16,7 @@ import { getAssignFlyoutOpener } from '../../components/assign_flyout';
 interface GetBulkAssignActionOptions {
   overlays: OverlayStart;
   notifications: NotificationsStart;
+  theme: ThemeServiceStart;
   tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
   assignableTypes: string[];
@@ -25,14 +26,15 @@ interface GetBulkAssignActionOptions {
 export const getBulkAssignAction = ({
   overlays,
   notifications,
+  theme,
   tagCache,
   assignmentService,
-  setLoading,
   assignableTypes,
 }: GetBulkAssignActionOptions): TagBulkAction => {
   const openFlyout = getAssignFlyoutOpener({
     overlays,
     notifications,
+    theme,
     tagCache,
     assignmentService,
     assignableTypes,

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, Fragment, useMemo, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiComboBox,

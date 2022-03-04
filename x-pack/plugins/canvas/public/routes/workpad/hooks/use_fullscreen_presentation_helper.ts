@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useContext, useEffect } from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { usePlatformService } from '../../../services';
 import { WorkpadRoutingContext } from '..';
 
@@ -27,4 +28,10 @@ export const useFullscreenPresentationHelper = () => {
       setFullscreen(true);
     }
   }, [isFullscreen, setFullscreen]);
+
+  // Remove fullscreen when component unmounts
+  useEffectOnce(() => () => {
+    setFullscreen(true);
+    document.querySelector('body')?.classList.remove(fullscreenClass);
+  });
 };

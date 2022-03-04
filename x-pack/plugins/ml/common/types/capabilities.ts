@@ -63,6 +63,8 @@ export const adminMlCapabilities = {
   // Alerts
   canCreateMlAlerts: false,
   canUseMlAlerts: false,
+  // Model management
+  canViewMlNodes: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;
@@ -96,7 +98,7 @@ export function getPluginPrivileges() {
   ];
   const privilege = {
     app: [PLUGIN_ID, 'kibana'],
-    excludeFromBasePrivileges: true,
+    excludeFromBasePrivileges: false,
     management: {
       insightsAndAlerting: ['jobsListLink'],
     },

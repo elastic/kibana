@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';
@@ -19,6 +19,10 @@ import {
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
 } from '../../../../constants';
+
+import { appendMetadataToIngestPipeline } from '../meta';
+
+import { retryTransientEsErrors } from '../retry';
 
 import { deletePipelineRefs } from './remove';
 
@@ -39,7 +43,8 @@ export const installPipelines = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger
 ) => {
   // unlike other ES assets, pipeline names are versioned so after a template is updated
   // it can be created pointing to the new template, without removing the old one and effecting data
@@ -103,8 +108,9 @@ export const installPipelines = async (
             installAllPipelines({
               dataStream,
               esClient,
+              logger,
               paths: pipelinePaths,
-              pkgVersion: installablePackage.version,
+              installablePackage,
             })
           );
         }
@@ -117,8 +123,9 @@ export const installPipelines = async (
       installAllPipelines({
         dataStream: undefined,
         esClient,
+        logger,
         paths: topLevelPipelinePaths,
-        pkgVersion: installablePackage.version,
+        installablePackage,
       })
     );
   }
@@ -149,14 +156,16 @@ export function rewriteIngestPipeline(
 
 export async function installAllPipelines({
   esClient,
-  pkgVersion,
+  logger,
   paths,
   dataStream,
+  installablePackage,
 }: {
   esClient: ElasticsearchClient;
-  pkgVersion: string;
+  logger: Logger;
   paths: string[];
   dataStream?: RegistryDataStream;
+  installablePackage: InstallablePackage;
 }): Promise<EsAssetReference[]> {
   const pipelinePaths = dataStream
     ? paths.filter((path) => isDataStreamPipeline(path, dataStream.path))
@@ -169,7 +178,7 @@ export async function installAllPipelines({
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
       dataStream,
-      packageVersion: pkgVersion,
+      packageVersion: installablePackage.version,
     });
     const content = getAsset(path).toString('utf-8');
     pipelines.push({
@@ -193,7 +202,7 @@ export async function installAllPipelines({
   });
 
   const installationPromises = pipelines.map(async (pipeline) => {
-    return installPipeline({ esClient, pipeline });
+    return installPipeline({ esClient, pipeline, installablePackage, logger });
   });
 
   return Promise.all(installationPromises);
@@ -201,21 +210,30 @@ export async function installAllPipelines({
 
 async function installPipeline({
   esClient,
+  logger,
   pipeline,
+  installablePackage,
 }: {
   esClient: ElasticsearchClient;
+  logger: Logger;
   pipeline: any;
+  installablePackage?: InstallablePackage;
 }): Promise<EsAssetReference> {
+  const pipelineWithMetadata = appendMetadataToIngestPipeline({
+    pipeline,
+    packageName: installablePackage?.name,
+  });
+
   const esClientParams = {
-    id: pipeline.nameForInstallation,
-    body: pipeline.contentForInstallation,
+    id: pipelineWithMetadata.nameForInstallation,
+    body: pipelineWithMetadata.contentForInstallation,
   };
 
   const esClientRequestOptions: TransportRequestOptions = {
     ignore: [404],
   };
 
-  if (pipeline.extension === 'yml') {
+  if (pipelineWithMetadata.extension === 'yml') {
     esClientRequestOptions.headers = {
       // pipeline is YAML
       'Content-Type': 'application/yaml',
@@ -224,18 +242,27 @@ async function installPipeline({
     };
   }
 
-  await esClient.ingest.putPipeline(esClientParams, esClientRequestOptions);
+  await retryTransientEsErrors(
+    () => esClient.ingest.putPipeline(esClientParams, esClientRequestOptions),
+    { logger }
+  );
 
-  return { id: pipeline.nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
+  return {
+    id: pipelineWithMetadata.nameForInstallation,
+    type: ElasticsearchAssetType.ingestPipeline,
+  };
 }
 
-export async function ensureFleetFinalPipelineIsInstalled(esClient: ElasticsearchClient) {
+export async function ensureFleetFinalPipelineIsInstalled(
+  esClient: ElasticsearchClient,
+  logger: Logger
+) {
   const esClientRequestOptions: TransportRequestOptions = {
     ignore: [404],
   };
   const res = await esClient.ingest.getPipeline(
     { id: FLEET_FINAL_PIPELINE_ID },
-    esClientRequestOptions
+    { ...esClientRequestOptions, meta: true }
   );
 
   const installedVersion = res?.body[FLEET_FINAL_PIPELINE_ID]?.version;
@@ -246,6 +273,7 @@ export async function ensureFleetFinalPipelineIsInstalled(esClient: Elasticsearc
   ) {
     await installPipeline({
       esClient,
+      logger,
       pipeline: {
         nameForInstallation: FLEET_FINAL_PIPELINE_ID,
         contentForInstallation: FLEET_FINAL_PIPELINE_CONTENT,

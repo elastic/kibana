@@ -13,6 +13,7 @@ export function MonitoringSetupModeProvider({ getService }) {
   const SUBJ_SETUP_MODE_METRICBEAT_MIGRATION_TOOLTIP =
     'monitoringSetupModeMetricbeatMigrationTooltip';
   const SUBJ_SETUP_MODE_ALERTS_BADGE = 'monitoringSetupModeAlertBadges';
+  const SUBJ_EXIT_SETUP_MODE_BTN = 'exitSetupModeBtn';
 
   return new (class SetupMode {
     async doesSetupModeBtnAppear() {
@@ -33,6 +34,10 @@ export function MonitoringSetupModeProvider({ getService }) {
 
     async doesAlertsTooltipAppear() {
       return await testSubjects.exists(SUBJ_SETUP_MODE_ALERTS_BADGE);
+    }
+
+    async clickExitSetupModeBtn() {
+      return await testSubjects.click(SUBJ_EXIT_SETUP_MODE_BTN);
     }
   })();
 }

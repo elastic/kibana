@@ -28,10 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/92522
-  describe.skip('dashboard filtering', function () {
-    this.tags('includeFirefox');
-
+  describe('dashboard filtering', function () {
     const populateDashboard = async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultDataRange();
@@ -115,13 +112,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowCount(0);
+        await dashboardExpect.savedSearchRowsMissing();
       });
 
-      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
-      // it('timelion is filtered', async () => {
-      //   await dashboardExpect.timelionLegendCount(0);
-      // });
+      it('timelion is filtered', async () => {
+        await dashboardExpect.timelionLegendCount(0);
+      });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
@@ -177,13 +173,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowCount(0);
+        await dashboardExpect.savedSearchRowsMissing();
       });
 
-      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
-      // it('timelion is filtered', async () => {
-      //   await dashboardExpect.timelionLegendCount(0);
-      // });
+      it('timelion is filtered', async () => {
+        await dashboardExpect.timelionLegendCount(0);
+      });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
@@ -206,7 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts', async () => {
-        await dashboardExpect.seriesElementCount(3);
+        await dashboardExpect.seriesElementCount(2);
       });
 
       it('data tables', async () => {
@@ -238,7 +233,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saved searches', async () => {
-        await dashboardExpect.savedSearchRowCount(1);
+        await dashboardExpect.savedSearchRowsExist();
       });
 
       it('vega', async () => {

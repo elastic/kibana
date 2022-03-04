@@ -28,7 +28,7 @@ export function registerLoadRoute({ router, lib: { handleEsError } }: RouteDepen
       const { client } = context.core.elasticsearch;
       const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
-        expand_wildcards: 'none',
+        expand_wildcards: 'none' as const,
         flat_settings: false,
         local: false,
         include_defaults: true,
@@ -36,7 +36,7 @@ export function registerLoadRoute({ router, lib: { handleEsError } }: RouteDepen
       };
 
       try {
-        const { body: hit } = await client.asCurrentUser.indices.getSettings(params);
+        const hit = await client.asCurrentUser.indices.getSettings(params);
         return response.ok({ body: formatHit(hit) });
       } catch (error) {
         return handleEsError({ error, response });

@@ -10,7 +10,8 @@ export { validateProxy } from './validate_proxy';
 export { validateSeeds } from './validate_seeds';
 export { validateSeed } from './validate_seed';
 export { validateServerName } from './validate_server_name';
-export { validateCluster, ClusterErrors } from './validate_cluster';
+export type { ClusterErrors } from './validate_cluster';
+export { validateCluster } from './validate_cluster';
 export {
   isCloudUrlEnabled,
   validateCloudUrl,

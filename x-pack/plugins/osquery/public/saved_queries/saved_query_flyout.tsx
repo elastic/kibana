@@ -18,7 +18,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import React, { useCallback, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Form } from '../shared_imports';
 import { useSavedQueryForm } from './form/use_saved_query_form';

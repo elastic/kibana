@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KueryNode } from '../../../../../src/plugins/data/server';
-import { SavedObjectFindOptions } from '../../common';
+import type { KueryNode } from '@kbn/es-query';
+import { SavedObjectFindOptions } from '../../common/api';
 
 /**
  * This structure holds the alert ID and index from an alert comment

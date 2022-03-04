@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { decompressFromEncodedURIComponent } from 'lz-string';
@@ -240,16 +247,16 @@ function EditorUI({ initialTextValue }: EditorProps) {
                 defaultMessage: 'Click to send request',
               })}
             >
-              <button
+              <EuiLink
+                color="success"
                 onClick={sendCurrentRequestToES}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                   defaultMessage: 'Click to send request',
                 })}
-                className="conApp__editorActionButton conApp__editorActionButton--success"
               >
-                <EuiIcon type="play" />
-              </button>
+                <EuiIcon type="playFilled" />
+              </EuiLink>
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>

@@ -15,6 +15,10 @@ import {
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
+import {
+  getSampleDetailsAsNdjson,
+  getOutputDetailsSampleWithExceptions,
+} from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
 
@@ -100,6 +104,7 @@ describe.each([
         exportDetails: {
           exported_exception_list_count: 0,
           exported_exception_list_item_count: 0,
+          exported_count: 1,
           exported_rules_count: 1,
           missing_exception_list_item_count: 0,
           missing_exception_list_items: [],
@@ -135,10 +140,13 @@ describe.each([
         logger,
         isRuleRegistryEnabled
       );
+      const details = getOutputDetailsSampleWithExceptions({
+        missingRules: [{ rule_id: 'rule-1' }],
+        missingCount: 1,
+      });
       expect(exports).toEqual({
         rulesNdjson: '',
-        exportDetails:
-          '{"exported_rules_count":0,"missing_rules":[{"rule_id":"rule-1"}],"missing_rules_count":1,"exported_exception_list_count":0,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n',
+        exportDetails: getSampleDetailsAsNdjson(details),
         exceptionLists: '',
       });
     });
@@ -179,10 +187,6 @@ describe.each([
             interval: '5m',
             rule_id: 'rule-1',
             language: 'kuery',
-            last_failure_at: undefined,
-            last_failure_message: undefined,
-            last_success_at: undefined,
-            last_success_message: undefined,
             license: 'Elastic License',
             output_index: '.siem-signals',
             max_signals: 10000,
@@ -190,8 +194,6 @@ describe.each([
             risk_score_mapping: [],
             rule_name_override: undefined,
             saved_id: undefined,
-            status: undefined,
-            status_date: undefined,
             name: 'Detect Root/Admin Users',
             query: 'user.name: root or user.name: admin',
             references: ['http://example.com', 'https://example.com'],
@@ -209,6 +211,7 @@ describe.each([
             note: '# Investigative notes',
             version: 1,
             exceptions_list: getListArrayMock(),
+            execution_summary: undefined,
           },
         ],
       };

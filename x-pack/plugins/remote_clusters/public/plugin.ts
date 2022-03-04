@@ -16,6 +16,7 @@ import { init as initUiMetric } from './application/services/ui_metric';
 import { init as initNotification } from './application/services/notification';
 import { init as initRedirect } from './application/services/redirect';
 import { Dependencies, ClientConfigType } from './types';
+import { RemoteClustersLocatorDefinition } from './locator';
 
 export interface RemoteClustersPluginSetup {
   isUiEnabled: boolean;
@@ -28,7 +29,7 @@ export class RemoteClustersUIPlugin
 
   setup(
     { notifications: { toasts }, http, getStartServices }: CoreSetup,
-    { management, usageCollection, cloud }: Dependencies
+    { management, usageCollection, cloud, share }: Dependencies
   ) {
     const {
       ui: { enabled: isRemoteClustersUiEnabled },
@@ -43,7 +44,7 @@ export class RemoteClustersUIPlugin
           defaultMessage: 'Remote Clusters',
         }),
         order: 7,
-        mount: async ({ element, setBreadcrumbs, history }) => {
+        mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
           const [core] = await getStartServices();
           const {
             chrome: { docTitle },
@@ -69,7 +70,8 @@ export class RemoteClustersUIPlugin
             element,
             i18nContext,
             { isCloudEnabled, cloudBaseUrl },
-            history
+            history,
+            theme$
           );
 
           return () => {
@@ -78,6 +80,12 @@ export class RemoteClustersUIPlugin
           };
         },
       });
+
+      share.url.locators.create(
+        new RemoteClustersLocatorDefinition({
+          managementAppLocator: management.locator,
+        })
+      );
     }
 
     return {

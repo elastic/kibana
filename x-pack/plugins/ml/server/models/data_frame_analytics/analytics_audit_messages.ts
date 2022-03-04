@@ -69,7 +69,7 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
       });
     }
 
-    const { body } = await asInternalUser.search({
+    const body = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
       size: SIZE,
@@ -80,7 +80,7 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
     });
 
     let messages: JobMessage[] = [];
-    if (typeof body.hits.total !== 'number' && body.hits.total.value > 0) {
+    if (typeof body.hits.total !== 'number' && body.hits.total?.value) {
       messages = (body.hits.hits as Message[]).map((hit) => hit._source);
       messages.reverse();
     }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig, TestBed } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
 import { PipelinesCreate } from '../../../public/application/sections/pipelines_create';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
@@ -15,7 +15,7 @@ export type PipelinesCreateTestBed = TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
 };
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [getCreatePath()],
     componentRoutePath: ROUTES.create,

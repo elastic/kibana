@@ -8,18 +8,16 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { partition } from 'lodash';
+import { isFilterPinned } from '@kbn/es-query';
 
 import type { SavedObjectReference } from 'kibana/public';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
-import { Document, injectFilterReferences } from '../persistence';
+import { Document, checkForDuplicateTitle } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { esFilters } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
 
@@ -173,7 +171,7 @@ const getDocToSave = (
   references: SavedObjectReference[]
 ) => {
   const docToSave = {
-    ...getLastKnownDocWithoutPinnedFilters(lastKnownDoc)!,
+    ...removePinnedFilters(lastKnownDoc)!,
     references,
   };
 
@@ -352,21 +350,15 @@ export const runSaveLensVisualization = async (
   }
 };
 
-export function getLastKnownDocWithoutPinnedFilters(doc?: Document) {
+export function removePinnedFilters(doc?: Document) {
   if (!doc) return undefined;
-  const [pinnedFilters, appFilters] = partition(
-    injectFilterReferences(doc.state?.filters || [], doc.references),
-    esFilters.isFilterPinned
-  );
-  return pinnedFilters?.length
-    ? {
-        ...doc,
-        state: {
-          ...doc.state,
-          filters: appFilters,
-        },
-      }
-    : doc;
+  return {
+    ...doc,
+    state: {
+      ...doc.state,
+      filters: (doc.state?.filters || []).filter((filter) => !isFilterPinned(filter)),
+    },
+  };
 }
 
 // eslint-disable-next-line import/no-default-export

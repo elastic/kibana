@@ -121,7 +121,7 @@ describe('Search', () => {
     );
 
     expect(wrapper.find('[data-test-subj="categories-count"]').first().text()).toEqual(
-      '10 categories'
+      '12 categories'
     );
   });
 
@@ -154,6 +154,6 @@ describe('Search', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="fields-count"]').first().text()).toEqual('27 fields');
+    expect(wrapper.find('[data-test-subj="fields-count"]').first().text()).toEqual('34 fields');
   });
 });

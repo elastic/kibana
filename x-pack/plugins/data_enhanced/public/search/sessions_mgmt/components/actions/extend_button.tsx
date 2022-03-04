@@ -7,7 +7,7 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import moment from 'moment';
 import { CoreStart } from 'kibana/public';
@@ -81,7 +81,8 @@ export const createExtendActionDescriptor = (
   onClick: async () => {
     const ref = core.overlays.openModal(
       toMountPoint(
-        <ExtendConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />
+        <ExtendConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />,
+        { theme$: core.theme.theme$ }
       )
     );
     await ref.onClose;

@@ -6,7 +6,7 @@
  */
 import React, { memo } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CommonProps, EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 

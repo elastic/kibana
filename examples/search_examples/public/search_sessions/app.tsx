@@ -43,23 +43,18 @@ import {
   DataPublicPluginStart,
   IEsSearchRequest,
   IEsSearchResponse,
-  IndexPattern,
-  IndexPatternField,
   isCompleteResponse,
   isErrorResponse,
   QueryState,
   SearchSessionState,
   TimeRange,
 } from '../../../../src/plugins/data/public';
+import type { DataView, DataViewField } from '../../../../src/plugins/data_views/public';
 import {
   createStateContainer,
   useContainerState,
 } from '../../../../src/plugins/kibana_utils/public';
-import {
-  getInitialStateFromUrl,
-  SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR,
-  SearchSessionExamplesUrlGeneratorState,
-} from './url_generator';
+import { getInitialStateFromUrl, SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR } from './app_locator';
 
 interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];
@@ -81,7 +76,7 @@ enum DemoStep {
 }
 
 interface State extends QueryState {
-  indexPatternId?: string;
+  dataViewId?: string;
   numericFieldName?: string;
 
   /**
@@ -127,10 +122,10 @@ export const SearchSessionsExampleApp = ({
 
   const {
     numericFieldName,
-    indexPattern,
+    dataView,
     selectedField,
     fields,
-    setIndexPattern,
+    setDataView,
     setNumericFieldName,
     state,
   } = useAppState({ data });
@@ -140,23 +135,23 @@ export const SearchSessionsExampleApp = ({
   const enableSessionStorage = useCallback(() => {
     data.search.session.enableStorage({
       getName: async () => 'Search sessions example',
-      getUrlGeneratorData: async () => ({
+      getLocatorData: async () => ({
         initialState: {
           time: data.query.timefilter.timefilter.getTime(),
           filters: data.query.filterManager.getFilters(),
           query: data.query.queryString.getQuery(),
-          indexPatternId: indexPattern?.id,
+          dataViewId: dataView?.id,
           numericFieldName,
-        } as SearchSessionExamplesUrlGeneratorState,
+        },
         restoreState: {
           time: data.query.timefilter.timefilter.getAbsoluteTime(),
           filters: data.query.filterManager.getFilters(),
           query: data.query.queryString.getQuery(),
-          indexPatternId: indexPattern?.id,
+          dataViewId: dataView?.id,
           numericFieldName,
           searchSessionId: data.search.session.getSessionId(),
-        } as SearchSessionExamplesUrlGeneratorState,
-        urlGeneratorId: SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR,
+        },
+        id: SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR,
       }),
     });
   }, [
@@ -164,7 +159,7 @@ export const SearchSessionsExampleApp = ({
     data.query.queryString,
     data.query.timefilter.timefilter,
     data.search.session,
-    indexPattern?.id,
+    dataView?.id,
     numericFieldName,
   ]);
 
@@ -202,11 +197,11 @@ export const SearchSessionsExampleApp = ({
 
   const search = useCallback(
     (restoreSearchSessionId?: string) => {
-      if (!indexPattern) return;
+      if (!dataView) return;
       if (!numericFieldName) return;
       setIsSearching(true);
       const requestId = ++nextRequestIdRef.current;
-      doSearch({ indexPattern, numericFieldName, restoreSearchSessionId }, { data, notifications })
+      doSearch({ dataView, numericFieldName, restoreSearchSessionId }, { data, notifications })
         .then(({ response: res, request: req, tookMs: _tookMs }) => {
           if (requestId !== nextRequestIdRef.current) return; // no longer interested in this result
           if (restoreSearchSessionId) {
@@ -224,7 +219,7 @@ export const SearchSessionsExampleApp = ({
           setIsSearching(false);
         });
     },
-    [data, notifications, indexPattern, numericFieldName]
+    [data, notifications, dataView, numericFieldName]
   );
 
   useEffect(() => {
@@ -247,9 +242,9 @@ export const SearchSessionsExampleApp = ({
               <EuiSpacer />
             </>
           )}
-          {!indexPattern && (
+          {!dataView && (
             <>
-              <NoIndexPatternsCallout />
+              <NoDataViewsCallout />
               <EuiSpacer />
             </>
           )}
@@ -284,25 +279,23 @@ export const SearchSessionsExampleApp = ({
                 appName={PLUGIN_ID}
                 showSearchBar={true}
                 useDefaultBehaviors={true}
-                indexPatterns={indexPattern ? [indexPattern] : undefined}
+                indexPatterns={dataView ? [dataView] : undefined}
                 onQuerySubmit={reset}
               />
               <EuiFlexGroup justifyContent={'flexStart'}>
                 <EuiFlexItem grow={false}>
-                  <EuiFormLabel>Index Pattern</EuiFormLabel>
+                  <EuiFormLabel>Data view</EuiFormLabel>
                   <IndexPatternSelect
-                    placeholder={i18n.translate(
-                      'searchSessionExample.selectIndexPatternPlaceholder',
-                      {
-                        defaultMessage: 'Select index pattern',
-                      }
-                    )}
-                    indexPatternId={indexPattern?.id ?? ''}
+                    placeholder={i18n.translate('searchSessionExample.selectDataViewPlaceholder', {
+                      defaultMessage: 'Select data view',
+                    })}
+                    indexPatternId={dataView?.id ?? ''}
                     onChange={(id) => {
                       if (!id) return;
-                      setIndexPattern(id);
+                      setDataView(id);
                     }}
                     isClearable={false}
+                    data-test-subj="dataViewSelector"
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -312,11 +305,12 @@ export const SearchSessionsExampleApp = ({
                     selectedOptions={formatFieldToComboBox(selectedField)}
                     singleSelection={true}
                     onChange={(option) => {
-                      const fld = indexPattern?.getFieldByName(option[0].label);
+                      const fld = dataView?.getFieldByName(option[0].label);
                       if (!fld) return;
                       setNumericFieldName(fld?.name);
                     }}
                     sortMatchesBy="startsWith"
+                    data-test-subj="searchMetricField"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -338,7 +332,7 @@ export const SearchSessionsExampleApp = ({
                       size="xs"
                       onClick={() => search()}
                       iconType="play"
-                      disabled={isSearching || !indexPattern || !numericFieldName}
+                      disabled={isSearching || !dataView || !numericFieldName}
                       data-test-subj={'startSearch'}
                     >
                       Start the search from low-level client (data.search.search)
@@ -542,7 +536,7 @@ function SearchInspector({
 
 function useAppState({ data }: { data: DataPublicPluginStart }) {
   const stateContainer = useMemo(() => {
-    const { filters, time, searchSessionId, numericFieldName, indexPatternId, query } =
+    const { filters, time, searchSessionId, numericFieldName, dataViewId, query } =
       getInitialStateFromUrl();
 
     if (filters) {
@@ -560,7 +554,7 @@ function useAppState({ data }: { data: DataPublicPluginStart }) {
     return createStateContainer<State>({
       restoreSessionId: searchSessionId,
       numericFieldName,
-      indexPatternId,
+      dataViewId,
     });
   }, [data.query.filterManager, data.query.queryString, data.query.timefilter.timefilter]);
   const setState = useCallback(
@@ -577,78 +571,78 @@ function useAppState({ data }: { data: DataPublicPluginStart }) {
     });
   }, [stateContainer, data.query]);
 
-  const [fields, setFields] = useState<IndexPatternField[]>();
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
+  const [fields, setFields] = useState<DataViewField[]>();
+  const [dataView, setDataView] = useState<DataView | null>();
 
-  // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
+  // Fetch the default data view using the `data.dataViews` service, as the component is mounted.
   useEffect(() => {
     let canceled = false;
-    const loadIndexPattern = async () => {
+    const loadDataView = async () => {
       // eslint-disable-next-line no-console
-      console.warn('Loading default index pattern');
-      let loadedIndexPattern = state.indexPatternId
-        ? await data.indexPatterns.get(state.indexPatternId)
-        : await data.indexPatterns.getDefault();
-      if (!loadedIndexPattern) {
-        // try to find any available index pattern
-        const [id] = await data.indexPatterns.getIds(true);
+      console.warn('Loading default data view');
+      let loadedDataView = state.dataViewId
+        ? await data.dataViews.get(state.dataViewId)
+        : await data.dataViews.getDefault();
+      if (!loadedDataView) {
+        // try to find any available data view
+        const [id] = await data.dataViews.getIds(true);
         if (id) {
-          loadedIndexPattern = await data.indexPatterns.get(id);
+          loadedDataView = await data.dataViews.get(id);
         }
       }
       if (canceled) return;
-      if (!loadedIndexPattern) {
+      if (!loadedDataView) {
         // eslint-disable-next-line no-console
-        console.warn('No index patterns to pick from');
+        console.warn('No data view to pick from');
         return;
       }
-      if (!state.indexPatternId) {
+      if (!state.dataViewId) {
         setState({
-          indexPatternId: loadedIndexPattern.id,
+          dataViewId: loadedDataView.id,
         });
       }
 
-      setIndexPattern(loadedIndexPattern);
+      setDataView(loadedDataView);
     };
 
-    loadIndexPattern();
+    loadDataView();
     return () => {
       canceled = true;
     };
-  }, [data, setState, state.indexPatternId]);
+  }, [data, setState, state.dataViewId]);
 
-  // Update the fields list every time the index pattern is modified.
+  // Update the fields list every time the data view is modified.
   useEffect(() => {
-    setFields(indexPattern?.fields);
-  }, [indexPattern]);
+    setFields(dataView?.fields);
+  }, [dataView]);
   useEffect(() => {
     if (state.numericFieldName) return;
     setState({ numericFieldName: fields?.length ? getNumeric(fields)[0]?.name : undefined });
   }, [setState, fields, state.numericFieldName]);
 
-  const selectedField: IndexPatternField | undefined = useMemo(
-    () => indexPattern?.fields.find((field) => field.name === state.numericFieldName),
-    [indexPattern?.fields, state.numericFieldName]
+  const selectedField: DataViewField | undefined = useMemo(
+    () => dataView?.fields.find((field) => field.name === state.numericFieldName),
+    [dataView?.fields, state.numericFieldName]
   );
 
   return {
     selectedField,
-    indexPattern,
+    dataView,
     numericFieldName: state.numericFieldName,
     fields,
     setNumericFieldName: (field: string) => setState({ numericFieldName: field }),
-    setIndexPattern: (indexPatternId: string) => setState({ indexPatternId }),
+    setDataView: (dataViewId: string) => setState({ dataViewId }),
     state,
   };
 }
 
 function doSearch(
   {
-    indexPattern,
+    dataView,
     numericFieldName,
     restoreSearchSessionId,
   }: {
-    indexPattern: IndexPattern;
+    dataView: DataView;
     numericFieldName: string;
     restoreSearchSessionId?: string;
   },
@@ -657,7 +651,7 @@ function doSearch(
     notifications,
   }: { data: DataPublicPluginStart; notifications: CoreStart['notifications'] }
 ): Promise<{ request: IEsSearchRequest; response: IEsSearchResponse; tookMs?: number }> {
-  if (!indexPattern) return Promise.reject('Select an index patten');
+  if (!dataView) return Promise.reject('Select a data view');
   if (!numericFieldName) return Promise.reject('Select a field to aggregate on');
 
   // start a new session or restore an existing one
@@ -670,7 +664,7 @@ function doSearch(
   const sessionId = restoreSearchSessionId ? restoreSearchSessionId : data.search.session.start();
 
   // Construct the query portion of the search request
-  const query = data.query.getEsQuery(indexPattern, restoreTimeRange);
+  const query = data.query.getEsQuery(dataView, restoreTimeRange);
 
   // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
 
@@ -681,11 +675,11 @@ function doSearch(
       ]
     : [{ type: 'avg', params: { field: numericFieldName } }];
 
-  const aggsDsl = data.search.aggs.createAggConfigs(indexPattern, aggs).toDsl();
+  const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
 
   const req = {
     params: {
-      index: indexPattern.title,
+      index: dataView.title,
       body: {
         aggs: aggsDsl,
         query,
@@ -730,17 +724,17 @@ function doSearch(
     .toPromise();
 }
 
-function getNumeric(fields?: IndexPatternField[]) {
+function getNumeric(fields?: DataViewField[]) {
   if (!fields) return [];
   return fields?.filter((f) => f.type === 'number' && f.aggregatable);
 }
 
-function formatFieldToComboBox(field?: IndexPatternField | null) {
+function formatFieldToComboBox(field?: DataViewField | null) {
   if (!field) return [];
   return formatFieldsToComboBox([field]);
 }
 
-function formatFieldsToComboBox(fields?: IndexPatternField[]) {
+function formatFieldsToComboBox(fields?: DataViewField[]) {
   if (!fields) return [];
 
   return fields?.map((field) => {
@@ -783,10 +777,10 @@ function NoShardDelayCallout() {
   );
 }
 
-function NoIndexPatternsCallout() {
+function NoDataViewsCallout() {
   return (
-    <EuiCallOut title={<>Missing index patterns!</>} color="warning" iconType="help">
-      <p>This demo requires at least one index pattern.</p>
+    <EuiCallOut title={<>Missing data views!</>} color="warning" iconType="help">
+      <p>This demo requires at least one data view.</p>
     </EuiCallOut>
   );
 }

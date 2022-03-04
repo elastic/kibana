@@ -6,6 +6,7 @@
  */
 
 import { newJobCapsProvider } from './index';
+import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 
 import farequoteFieldCaps from './__mocks__/responses/farequote_field_caps.json';
 import cloudwatchFieldCaps from './__mocks__/responses/cloudwatch_field_caps.json';
@@ -22,19 +23,18 @@ describe('job_service - job_caps', () => {
   let dataViews: any;
 
   beforeEach(() => {
-    const asNonRollupMock = {
-      fieldCaps: jest.fn(() => ({ body: farequoteFieldCaps })),
-    };
+    const asNonRollupMock = elasticsearchServiceMock.createElasticsearchClient();
+    asNonRollupMock.fieldCaps.mockResponse(farequoteFieldCaps);
 
     mlClusterClientNonRollupMock = {
       asCurrentUser: asNonRollupMock,
       asInternalUser: asNonRollupMock,
     };
 
-    const callAsRollupMock = {
-      fieldCaps: jest.fn(() => ({ body: cloudwatchFieldCaps })),
-      rollup: { getRollupIndexCaps: jest.fn(() => Promise.resolve({ body: rollupCaps })) },
-    };
+    const callAsRollupMock = elasticsearchServiceMock.createElasticsearchClient();
+    callAsRollupMock.fieldCaps.mockResponse(cloudwatchFieldCaps);
+    // @ts-expect-error incomplete type type
+    callAsRollupMock.rollup.getRollupIndexCaps.mockResponse(rollupCaps);
 
     mlClusterClientRollupMock = {
       asCurrentUser: callAsRollupMock,

@@ -14,7 +14,7 @@ import { InjectedMetadataSetup } from '../injected_metadata';
 import { Sha256 } from '../utils';
 
 interface SetupDeps {
-  location: Pick<Location, 'origin'>;
+  location: Pick<Location, 'href'>;
   injectedMetadata: InjectedMetadataSetup;
 }
 
@@ -50,20 +50,33 @@ function normalizeProtocol(protocol: string) {
   return protocol.endsWith(':') ? protocol.slice(0, -1).toLowerCase() : protocol.toLowerCase();
 }
 
-const createExternalUrlValidation = (
-  rules: IExternalUrlPolicy[],
-  location: Pick<Location, 'origin'>,
+const createIsInternalUrlValidation = (
+  location: Pick<Location, 'href'>,
   serverBasePath: string
 ) => {
-  const base = new URL(location.origin + serverBasePath);
-  return function validateExternalUrl(next: string) {
+  return function isInternallUrl(next: string) {
+    const base = new URL(location.href);
     const url = new URL(next, base);
 
-    const isInternalURL =
+    return (
       url.origin === base.origin &&
-      (!serverBasePath || url.pathname.startsWith(`${serverBasePath}/`));
+      (!serverBasePath || url.pathname.startsWith(`${serverBasePath}/`))
+    );
+  };
+};
 
-    if (isInternalURL) {
+const createExternalUrlValidation = (
+  rules: IExternalUrlPolicy[],
+  location: Pick<Location, 'href'>,
+  serverBasePath: string
+) => {
+  const isInternalUrl = createIsInternalUrlValidation(location, serverBasePath);
+
+  return function validateExternalUrl(next: string) {
+    const base = new URL(location.href);
+    const url = new URL(next, base);
+
+    if (isInternalUrl(next)) {
       return url;
     }
 
@@ -90,6 +103,7 @@ export class ExternalUrlService implements CoreService<IExternalUrl> {
     const { policy } = injectedMetadata.getExternalUrlConfig();
 
     return {
+      isInternalUrl: createIsInternalUrlValidation(location, serverBasePath),
       validateUrl: createExternalUrlValidation(policy, location, serverBasePath),
     };
   }

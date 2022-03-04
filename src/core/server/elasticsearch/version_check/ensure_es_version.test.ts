@@ -18,10 +18,6 @@ const mockLogger = mockLoggerFactory.get('mock logger');
 
 const KIBANA_VERSION = '5.1.0';
 
-const createEsSuccess = elasticsearchClientMock.createSuccessTransportRequestPromise;
-const createEsErrorReturn = (err: any) =>
-  elasticsearchClientMock.createErrorTransportRequestPromise(err);
-
 function createNodes(...versions: string[]): NodesInfo {
   const nodes = {} as any;
   versions
@@ -139,10 +135,11 @@ describe('pollEsNodesVersion', () => {
   });
 
   const nodeInfosSuccessOnce = (infos: NodesInfo) => {
-    internalClient.nodes.info.mockImplementationOnce(() => createEsSuccess(infos));
+    // @ts-expect-error not full interface
+    internalClient.nodes.info.mockResponseOnce(infos);
   };
   const nodeInfosErrorOnce = (error: any) => {
-    internalClient.nodes.info.mockImplementationOnce(() => createEsErrorReturn(new Error(error)));
+    internalClient.nodes.info.mockImplementationOnce(() => Promise.reject(new Error(error)));
   };
 
   it('returns isCompatible=false and keeps polling when a poll request throws', (done) => {
@@ -316,13 +313,9 @@ describe('pollEsNodesVersion', () => {
     expect.assertions(1);
 
     // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-    internalClient.nodes.info.mockReturnValueOnce([
-      { body: createNodes('5.1.0', '5.2.0', '5.0.0') },
-    ]);
+    internalClient.nodes.info.mockReturnValueOnce([createNodes('5.1.0', '5.2.0', '5.0.0')]);
     // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-    internalClient.nodes.info.mockReturnValueOnce([
-      { body: createNodes('5.1.1', '5.2.0', '5.0.0') },
-    ]);
+    internalClient.nodes.info.mockReturnValueOnce([createNodes('5.1.1', '5.2.0', '5.0.0')]);
 
     getTestScheduler().run(({ expectObservable }) => {
       const expected = 'a 99ms (b|)';
@@ -358,11 +351,11 @@ describe('pollEsNodesVersion', () => {
 
       internalClient.nodes.info.mockReturnValueOnce(
         // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-        of({ body: createNodes('5.1.0', '5.2.0', '5.0.0') }).pipe(delay(100))
+        of(createNodes('5.1.0', '5.2.0', '5.0.0')).pipe(delay(100))
       );
       internalClient.nodes.info.mockReturnValueOnce(
         // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-        of({ body: createNodes('5.1.1', '5.2.0', '5.0.0') }).pipe(delay(100))
+        of(createNodes('5.1.1', '5.2.0', '5.0.0')).pipe(delay(100))
       );
 
       const esNodesCompatibility$ = pollEsNodesVersion({

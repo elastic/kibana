@@ -18,7 +18,7 @@ import { HostEcs } from './host';
 import { NetworkEcs } from './network';
 import { RegistryEcs } from './registry';
 import { RuleEcs } from './rule';
-import { SignalEcs } from './signal';
+import { SignalEcs, SignalEcsAAD } from './signal';
 import { SourceEcs } from './source';
 import { SuricataEcs } from './suricata';
 import { TlsEcs } from './tls';
@@ -48,6 +48,9 @@ export interface Ecs {
   network?: NetworkEcs;
   registry?: RegistryEcs;
   rule?: RuleEcs;
+  kibana?: {
+    alert: SignalEcsAAD;
+  };
   signal?: SignalEcs;
   source?: SourceEcs;
   suricata?: SuricataEcs;
@@ -70,4 +73,6 @@ export interface Ecs {
   Memory_protection?: MemoryProtection;
   Target?: Target;
   dll?: DllEcs;
+  'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
+  'kibana.alert.rule.parameters'?: { index: string[] };
 }

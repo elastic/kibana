@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiCode,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiCodeEditor, Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';

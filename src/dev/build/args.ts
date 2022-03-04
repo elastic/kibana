@@ -23,12 +23,14 @@ export function readCliArgs(argv: string[]) {
       'rpm',
       'deb',
       'docker-images',
+      'docker-push',
       'skip-docker-contexts',
       'skip-docker-ubi',
-      'skip-docker-centos',
-      'docker-cloud',
+      'skip-docker-ubuntu',
+      'skip-docker-cloud',
       'release',
       'skip-node-download',
+      'skip-cloud-dependencies-download',
       'verbose',
       'debug',
       'all-platforms',
@@ -39,6 +41,7 @@ export function readCliArgs(argv: string[]) {
       'debug',
       'help',
     ],
+    string: ['epr-registry'],
     alias: {
       v: 'verbose',
       d: 'debug',
@@ -49,7 +52,10 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
+      'docker-push': false,
+      'docker-tag-qualifier': null,
       'version-qualifier': '',
+      'epr-registry': 'snapshot',
     },
     unknown: (flag) => {
       unknownFlags.push(flag);
@@ -91,23 +97,39 @@ export function readCliArgs(argv: string[]) {
     return Boolean(flags[name]);
   }
 
+  const eprRegistry = flags['epr-registry'];
+  if (eprRegistry !== 'snapshot' && eprRegistry !== 'production') {
+    log.error(
+      `Invalid value for --epr-registry, must be 'production' or 'snapshot', got ${eprRegistry}`
+    );
+    return {
+      log,
+      showHelp: true,
+      unknownFlags: [],
+    };
+  }
+
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
+    dockerPush: Boolean(flags['docker-push']),
+    dockerTagQualifier: flags['docker-tag-qualifier'],
     initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
+    downloadCloudDependencies: !Boolean(flags['skip-cloud-dependencies-download']),
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
     createExamplePlugins: Boolean(flags['example-plugins']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
-    createDockerCentOS:
-      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-centos']),
-    createDockerCloud: isOsPackageDesired('docker-images') && Boolean(flags['docker-cloud']),
+    createDockerUbuntu:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
+    createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
+    eprRegistry: flags['epr-registry'],
   };
 
   return {

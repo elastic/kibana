@@ -36,7 +36,7 @@ import './schema_errors_accordion.scss';
 interface Props {
   fieldCoercionErrors: FieldCoercionErrors;
   schema: Schema;
-  generateViewPath?(externalId: string): string;
+  generateViewPath?(id: string): string;
 }
 
 export const SchemaErrorsAccordion: React.FC<Props> = ({
@@ -89,7 +89,7 @@ export const SchemaErrorsAccordion: React.FC<Props> = ({
             </EuiTableHeader>
             <EuiTableBody>
               {errors.map((error) => {
-                const { external_id: id, error: errorMessage } = error;
+                const { id, error: errorMessage } = error;
                 return (
                   <EuiTableRow key={`schemaErrorDocument-${fieldName}-${id}`}>
                     <EuiTableRowCell truncateText>

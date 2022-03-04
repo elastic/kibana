@@ -14,10 +14,11 @@ import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
 import { Tags } from './tags';
 import { schema, FormProps } from './schema';
-import { OwnerProvider } from '../owner_context';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { TestProviders } from '../../common/mock';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
+
 const useGetTagsMock = useGetTags as jest.Mock;
 
 describe('Tags', () => {
@@ -34,14 +35,14 @@ describe('Tags', () => {
     globalForm = form;
 
     return (
-      <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>
+      <TestProviders>
         <Form form={form}>{children}</Form>
-      </OwnerProvider>
+      </TestProviders>
     );
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     useGetTagsMock.mockReturnValue({ tags: ['test'] });
   });
 

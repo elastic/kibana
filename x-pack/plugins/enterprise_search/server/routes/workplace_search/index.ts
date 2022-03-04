@@ -7,6 +7,7 @@
 
 import { RouteDependencies } from '../../plugin';
 
+import { registerApiKeysRoutes } from './api_keys';
 import { registerGroupsRoutes } from './groups';
 import { registerOAuthRoutes } from './oauth';
 import { registerOverviewRoute } from './overview';
@@ -16,6 +17,7 @@ import { registerSettingsRoutes } from './settings';
 import { registerSourcesRoutes } from './sources';
 
 export const registerWorkplaceSearchRoutes = (dependencies: RouteDependencies) => {
+  registerApiKeysRoutes(dependencies);
   registerOverviewRoute(dependencies);
   registerOAuthRoutes(dependencies);
   registerGroupsRoutes(dependencies);

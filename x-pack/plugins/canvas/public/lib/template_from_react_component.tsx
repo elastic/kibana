@@ -5,49 +5,79 @@
  * 2.0.
  */
 
-import React, { ComponentType, FC } from 'react';
-import { unmountComponentAtNode, render } from 'react-dom';
+import React, {
+  ComponentType,
+  forwardRef,
+  ForwardRefRenderFunction,
+  useImperativeHandle,
+  useState,
+} from 'react';
+import { unmountComponentAtNode, createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
-import { ArgumentHandlers } from '../../types/arguments';
+import { ArgumentHandlers, UpdatePropsRef } from '../../types/arguments';
 
 export interface Props {
   renderError: Function;
 }
 
 export const templateFromReactComponent = (Component: ComponentType<any>) => {
-  const WrappedComponent: FC<Props> = (props) => (
-    <ErrorBoundary>
-      {({ error }) => {
-        if (error) {
-          props.renderError();
-          return null;
-        }
+  const WrappedComponent: ForwardRefRenderFunction<UpdatePropsRef<Props>, Props> = (props, ref) => {
+    const [updatedProps, setUpdatedProps] = useState<Props>(props);
 
-        return (
-          <I18nProvider>
-            <Component {...props} />
-          </I18nProvider>
-        );
-      }}
-    </ErrorBoundary>
-  );
+    useImperativeHandle(ref, () => ({
+      updateProps: (newProps: Props) => {
+        setUpdatedProps(newProps);
+      },
+    }));
 
-  WrappedComponent.propTypes = {
+    return (
+      <ErrorBoundary>
+        {({ error }) => {
+          if (error) {
+            props.renderError();
+            return null;
+          }
+
+          return (
+            <I18nProvider>
+              <Component {...updatedProps} />
+            </I18nProvider>
+          );
+        }}
+      </ErrorBoundary>
+    );
+  };
+
+  const ForwardRefWrappedComponent = forwardRef(WrappedComponent);
+
+  ForwardRefWrappedComponent.propTypes = {
     renderError: PropTypes.func,
   };
 
-  return (domNode: HTMLElement, config: Props, handlers: ArgumentHandlers) => {
+  return (
+    domNode: HTMLElement,
+    config: Props,
+    handlers: ArgumentHandlers,
+    onMount?: (ref: UpdatePropsRef<Props> | null) => void
+  ) => {
     try {
-      const el = React.createElement(WrappedComponent, config);
-      render(el, domNode, () => {
-        handlers.done();
-      });
+      const el = (
+        <ForwardRefWrappedComponent
+          {...config}
+          ref={(ref) => {
+            handlers.done();
+            onMount?.(ref);
+          }}
+        />
+      );
 
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
+
+      return createPortal(el, domNode);
     } catch (err) {
       handlers.done();
       config.renderError();

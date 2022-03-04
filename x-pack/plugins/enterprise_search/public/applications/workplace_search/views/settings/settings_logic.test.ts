@@ -13,8 +13,9 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { configuredSources, oauthApplication } from '../../__mocks__/content_sources.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants';
 
 import { SettingsLogic } from './settings_logic';
@@ -22,7 +23,7 @@ import { SettingsLogic } from './settings_logic';
 describe('SettingsLogic', () => {
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SettingsLogic);
   const ORG_NAME = 'myOrg';
   const defaultValues = {
@@ -127,12 +128,8 @@ describe('SettingsLogic', () => {
         expect(setServerPropsSpy).toHaveBeenCalledWith(configuredSources);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SettingsLogic.actions.initializeSettings();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -150,12 +147,8 @@ describe('SettingsLogic', () => {
         expect(onInitializeConnectorsSpy).toHaveBeenCalledWith(serverProps);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SettingsLogic.actions.initializeConnectors();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -176,12 +169,8 @@ describe('SettingsLogic', () => {
         expect(setUpdatedNameSpy).toHaveBeenCalledWith({ organizationName: NAME });
       });
 
-      it('handles error', async () => {
-        http.put.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         SettingsLogic.actions.updateOrgName();
-
-        await nextTick();
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -205,12 +194,8 @@ describe('SettingsLogic', () => {
         expect(setIconSpy).toHaveBeenCalledWith(ICON);
       });
 
-      it('handles error', async () => {
-        http.put.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         SettingsLogic.actions.updateOrgIcon();
-
-        await nextTick();
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -234,12 +219,8 @@ describe('SettingsLogic', () => {
         expect(setLogoSpy).toHaveBeenCalledWith(LOGO);
       });
 
-      it('handles error', async () => {
-        http.put.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         SettingsLogic.actions.updateOrgLogo();
-
-        await nextTick();
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -291,12 +272,8 @@ describe('SettingsLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalledWith(OAUTH_APP_UPDATED_MESSAGE);
       });
 
-      it('handles error', async () => {
-        http.put.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         SettingsLogic.actions.updateOauthApplication();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -313,12 +290,8 @@ describe('SettingsLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
       });
 
-      it('handles error', async () => {
-        http.delete.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         SettingsLogic.actions.deleteSourceConfig(SERVICE_TYPE, NAME);
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 

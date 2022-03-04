@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { LatencyCorrelationsRawResponse } from '../../../../../common/search_strategies/latency_correlations/types';
+import type { LatencyCorrelationsResponse } from '../../../../../common/correlations/latency_correlations/types';
 
 import { getOverallHistogram } from './get_overall_histogram';
 
 describe('getOverallHistogram', () => {
   it('returns "loading" when undefined and running', () => {
     const { overallHistogram, hasData, status } = getOverallHistogram(
-      {} as LatencyCorrelationsRawResponse,
+      {} as LatencyCorrelationsResponse,
       true
     );
     expect(overallHistogram).toStrictEqual(undefined);
@@ -22,7 +22,7 @@ describe('getOverallHistogram', () => {
 
   it('returns "success" when undefined and not running', () => {
     const { overallHistogram, hasData, status } = getOverallHistogram(
-      {} as LatencyCorrelationsRawResponse,
+      {} as LatencyCorrelationsResponse,
       false
     );
     expect(overallHistogram).toStrictEqual([]);
@@ -34,7 +34,7 @@ describe('getOverallHistogram', () => {
     const { overallHistogram, hasData, status } = getOverallHistogram(
       {
         overallHistogram: [{ key: 1, doc_count: 1234 }],
-      } as LatencyCorrelationsRawResponse,
+      } as LatencyCorrelationsResponse,
       true
     );
     expect(overallHistogram).toStrictEqual([{ key: 1, doc_count: 1234 }]);
@@ -46,7 +46,7 @@ describe('getOverallHistogram', () => {
     const { overallHistogram, hasData, status } = getOverallHistogram(
       {
         overallHistogram: [{ key: 1, doc_count: 1234 }],
-      } as LatencyCorrelationsRawResponse,
+      } as LatencyCorrelationsResponse,
       false
     );
     expect(overallHistogram).toStrictEqual([{ key: 1, doc_count: 1234 }]);

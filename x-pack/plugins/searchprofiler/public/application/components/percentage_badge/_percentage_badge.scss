@@ -3,7 +3,7 @@
   display: block;
   background-image:
     linear-gradient(
-      to left,
+      to right,
       $color 0%,
       $color var(--prfDevToolProgressPercentage, auto),
       $euiColorLightestShade var(--prfDevToolProgressPercentage, auto),

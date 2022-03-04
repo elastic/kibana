@@ -1,0 +1,132 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rule registry spaces only: trial Rule Registry API with write permissions when creating a rule writes alerts data to the alert indices 1`] = `
+Object {
+  "event.action": Array [
+    "open",
+  ],
+  "event.kind": Array [
+    "signal",
+  ],
+  "kibana.alert.duration.us": Array [
+    0,
+  ],
+  "kibana.alert.evaluation.threshold": Array [
+    30,
+  ],
+  "kibana.alert.evaluation.value": Array [
+    50,
+  ],
+  "kibana.alert.instance.id": Array [
+    "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
+  ],
+  "kibana.alert.reason": Array [
+    "Failed transactions is 50% in the last 5 mins for opbeans-go. Alert when > 30%.",
+  ],
+  "kibana.alert.rule.category": Array [
+    "Failed transaction rate threshold",
+  ],
+  "kibana.alert.rule.consumer": Array [
+    "apm",
+  ],
+  "kibana.alert.rule.name": Array [
+    "Failed transaction rate threshold | opbeans-go",
+  ],
+  "kibana.alert.rule.producer": Array [
+    "apm",
+  ],
+  "kibana.alert.rule.rule_type_id": Array [
+    "apm.transaction_error_rate",
+  ],
+  "kibana.alert.rule.tags": Array [
+    "apm",
+    "service.name:opbeans-go",
+  ],
+  "kibana.alert.status": Array [
+    "active",
+  ],
+  "kibana.alert.workflow_status": Array [
+    "open",
+  ],
+  "kibana.space_ids": Array [
+    "space1",
+  ],
+  "processor.event": Array [
+    "transaction",
+  ],
+  "service.name": Array [
+    "opbeans-go",
+  ],
+  "tags": Array [
+    "apm",
+    "service.name:opbeans-go",
+  ],
+  "transaction.type": Array [
+    "request",
+  ],
+}
+`;
+
+exports[`rule registry spaces only: trial Rule Registry API with write permissions when creating a rule writes alerts data to the alert indices 2`] = `
+Object {
+  "event.action": Array [
+    "close",
+  ],
+  "event.kind": Array [
+    "signal",
+  ],
+  "kibana.alert.evaluation.threshold": Array [
+    30,
+  ],
+  "kibana.alert.evaluation.value": Array [
+    50,
+  ],
+  "kibana.alert.instance.id": Array [
+    "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
+  ],
+  "kibana.alert.reason": Array [
+    "Failed transactions is 50% in the last 5 mins for opbeans-go. Alert when > 30%.",
+  ],
+  "kibana.alert.rule.category": Array [
+    "Failed transaction rate threshold",
+  ],
+  "kibana.alert.rule.consumer": Array [
+    "apm",
+  ],
+  "kibana.alert.rule.name": Array [
+    "Failed transaction rate threshold | opbeans-go",
+  ],
+  "kibana.alert.rule.producer": Array [
+    "apm",
+  ],
+  "kibana.alert.rule.rule_type_id": Array [
+    "apm.transaction_error_rate",
+  ],
+  "kibana.alert.rule.tags": Array [
+    "apm",
+    "service.name:opbeans-go",
+  ],
+  "kibana.alert.status": Array [
+    "recovered",
+  ],
+  "kibana.alert.workflow_status": Array [
+    "open",
+  ],
+  "kibana.space_ids": Array [
+    "space1",
+  ],
+  "processor.event": Array [
+    "transaction",
+  ],
+  "service.name": Array [
+    "opbeans-go",
+  ],
+  "tags": Array [
+    "apm",
+    "service.name:opbeans-go",
+  ],
+  "transaction.type": Array [
+    "request",
+  ],
+}
+`;

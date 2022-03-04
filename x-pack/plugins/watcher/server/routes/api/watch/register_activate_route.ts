@@ -13,11 +13,9 @@ import { RouteDependencies } from '../../../types';
 import { WatchStatus } from '../../../models/watch_status/index';
 
 function activateWatch(dataClient: IScopedClusterClient, watchId: string) {
-  return dataClient.asCurrentUser.watcher
-    .activateWatch({
-      watch_id: watchId,
-    })
-    .then(({ body }) => body);
+  return dataClient.asCurrentUser.watcher.activateWatch({
+    watch_id: watchId,
+  });
 }
 
 const paramsSchema = schema.object({

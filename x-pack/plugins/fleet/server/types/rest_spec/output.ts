@@ -7,7 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { NewOutputSchema, UpdateOutputSchema } from '../models';
+
 export const GetOneOutputRequestSchema = {
+  params: schema.object({
+    outputId: schema.string(),
+  }),
+};
+
+export const DeleteOutputRequestSchema = {
   params: schema.object({
     outputId: schema.string(),
   }),
@@ -15,14 +23,13 @@ export const GetOneOutputRequestSchema = {
 
 export const GetOutputsRequestSchema = {};
 
+export const PostOutputRequestSchema = {
+  body: NewOutputSchema,
+};
+
 export const PutOutputRequestSchema = {
   params: schema.object({
     outputId: schema.string(),
   }),
-  body: schema.object({
-    hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
-    ca_sha256: schema.maybe(schema.string()),
-    config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    config_yaml: schema.maybe(schema.string()),
-  }),
+  body: UpdateOutputSchema,
 };

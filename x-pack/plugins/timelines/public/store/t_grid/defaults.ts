@@ -63,6 +63,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
 export const tGridDefaults: SubsetTGridModel = {
   columns: defaultHeaders,
   defaultColumns: defaultHeaders,
+  dataViewId: null,
   dateRange: { start: '', end: '' },
   deletedEventIds: [],
   excludedRowRendererIds: [],

@@ -15,6 +15,6 @@ export interface SavedObjectsCheckConflictsObject
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectscheckconflictsobject.id.md) | <code>string</code> |  |
-|  [type](./kibana-plugin-core-server.savedobjectscheckconflictsobject.type.md) | <code>string</code> |  |
+|  [id](./kibana-plugin-core-server.savedobjectscheckconflictsobject.id.md) | string |  |
+|  [type](./kibana-plugin-core-server.savedobjectscheckconflictsobject.type.md) | string |  |
 

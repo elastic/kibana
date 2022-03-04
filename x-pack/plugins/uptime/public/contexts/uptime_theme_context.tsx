@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { createContext, useMemo } from 'react';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { UptimeAppColors } from '../apps/uptime_app';

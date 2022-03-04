@@ -11,8 +11,8 @@ jest.mock('axios', () => ({
 import axios from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 import { actionsConfigMock } from '../../actions_config.mock';
+import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = jest.fn();
@@ -122,7 +122,7 @@ describe('requestOAuthClientCredentialsToken', () => {
 
     expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "error thrown getting the access token from https://test for clientID: 123456: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter \'scope\' is not valid.\\"}",
+        "error thrown getting the access token from https://test for params: {\\"scope\\":\\"test\\",\\"client_id\\":\\"123456\\",\\"client_secret\\":\\"secrert123\\"}: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter 'scope' is not valid.\\"}",
       ]
     `);
   });

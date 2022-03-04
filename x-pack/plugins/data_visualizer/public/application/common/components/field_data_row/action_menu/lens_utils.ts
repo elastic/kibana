@@ -10,15 +10,19 @@ import type { Filter } from '@kbn/es-query';
 import type { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import type {
-  IndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  GenericIndexPatternColumn,
+  RangeIndexPatternColumn,
+  TermsIndexPatternColumn,
   TypedLensByValueInput,
   XYLayerConfig,
 } from '../../../../../../../lens/public';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '../../../../../../../lens/common/constants';
 import { FieldVisConfig } from '../../stats_table/types';
-import { JOB_FIELD_TYPES } from '../../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
 
 interface ColumnsAndLayer {
-  columns: Record<string, IndexPatternColumn>;
+  columns: Record<string, GenericIndexPatternColumn>;
   layer: XYLayerConfig;
 }
 
@@ -32,7 +36,7 @@ const COUNT = i18n.translate('xpack.dataVisualizer.index.lensChart.countLabel', 
 export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: IndexPattern) {
   // if index has no timestamp field
   if (defaultIndexPattern.timeFieldName === undefined) {
-    const columns: Record<string, IndexPatternColumn> = {
+    const columns: Record<string, GenericIndexPatternColumn> = {
       col1: {
         label: item.fieldName!,
         dataType: 'number',
@@ -44,12 +48,12 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
           ranges: [],
         },
         sourceField: item.fieldName!,
-      },
+      } as RangeIndexPatternColumn,
       col2: {
         label: COUNT,
         dataType: 'number',
         isBucketed: false,
-        sourceField: 'Records',
+        sourceField: RECORDS_FIELD,
         operationType: 'count',
       },
     };
@@ -64,7 +68,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
     return { columns, layer };
   }
 
-  const columns: Record<string, IndexPatternColumn> = {
+  const columns: Record<string, GenericIndexPatternColumn> = {
     col2: {
       dataType: 'number',
       isBucketed: false,
@@ -83,7 +87,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
       params: { interval: 'auto' },
       scale: 'interval',
       sourceField: defaultIndexPattern.timeFieldName!,
-    },
+    } as DateHistogramIndexPatternColumn,
   };
 
   const layer: XYLayerConfig = {
@@ -97,14 +101,14 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
   return { columns, layer };
 }
 export function getDateSettings(item: FieldVisConfig) {
-  const columns: Record<string, IndexPatternColumn> = {
+  const columns: Record<string, GenericIndexPatternColumn> = {
     col2: {
       dataType: 'number',
       isBucketed: false,
       label: COUNT,
       operationType: 'count',
       scale: 'ratio',
-      sourceField: 'Records',
+      sourceField: RECORDS_FIELD,
     },
     col1: {
       dataType: 'date',
@@ -114,7 +118,7 @@ export function getDateSettings(item: FieldVisConfig) {
       params: { interval: 'auto' },
       scale: 'interval',
       sourceField: item.fieldName!,
-    },
+    } as DateHistogramIndexPatternColumn,
   };
   const layer: XYLayerConfig = {
     accessors: ['col2'],
@@ -128,7 +132,7 @@ export function getDateSettings(item: FieldVisConfig) {
 }
 
 export function getKeywordSettings(item: FieldVisConfig) {
-  const columns: Record<string, IndexPatternColumn> = {
+  const columns: Record<string, GenericIndexPatternColumn> = {
     col1: {
       label: TOP_VALUES_LABEL,
       dataType: 'string',
@@ -140,12 +144,12 @@ export function getKeywordSettings(item: FieldVisConfig) {
         orderDirection: 'desc',
       },
       sourceField: item.fieldName!,
-    },
+    } as TermsIndexPatternColumn,
     col2: {
       label: COUNT,
       dataType: 'number',
       isBucketed: false,
-      sourceField: 'Records',
+      sourceField: RECORDS_FIELD,
       operationType: 'count',
     },
   };
@@ -161,7 +165,7 @@ export function getKeywordSettings(item: FieldVisConfig) {
 }
 
 export function getBooleanSettings(item: FieldVisConfig) {
-  const columns: Record<string, IndexPatternColumn> = {
+  const columns: Record<string, GenericIndexPatternColumn> = {
     col1: {
       label: TOP_VALUES_LABEL,
       dataType: 'string',
@@ -173,12 +177,12 @@ export function getBooleanSettings(item: FieldVisConfig) {
         orderDirection: 'desc',
       },
       sourceField: item.fieldName!,
-    },
+    } as TermsIndexPatternColumn,
     col2: {
       label: COUNT,
       dataType: 'number',
       isBucketed: false,
-      sourceField: 'Records',
+      sourceField: RECORDS_FIELD,
       operationType: 'count',
     },
   };

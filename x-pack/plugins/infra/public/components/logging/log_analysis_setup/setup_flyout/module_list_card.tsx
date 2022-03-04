@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiCard, EuiIcon, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty, EuiCard, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { SetupStatus } from '../../../../../common/log_analysis';
-import { CreateJobButton, RecreateJobButton } from '../../log_analysis_setup/create_job_button';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { mountReactNode } from '../../../../../../../../src/core/public/utils';
+import { CreateJobButton, RecreateJobButton } from '../../log_analysis_setup/create_job_button';
 
 export const LogAnalysisModuleListCard: React.FC<{
   jobId: string;
@@ -41,12 +41,7 @@ export const LogAnalysisModuleListCard: React.FC<{
   const getMlUrl = async () => {
     if (!ml.locator) {
       toasts.addWarning({
-        title: mountReactNode(
-          <FormattedMessage
-            id="xpack.infra.logs.analysis.mlNotAvailable"
-            defaultMessage="ML plugin is not available"
-          />
-        ),
+        title: mlNotAvailableMessage,
       });
       return;
     }
@@ -65,7 +60,7 @@ export const LogAnalysisModuleListCard: React.FC<{
     moduleStatus.type === 'required' ? (
       <EuiIcon size="xxl" type="machineLearningApp" />
     ) : (
-      <EuiIcon color="secondary" size="xxl" type="check" />
+      <EuiIcon color="success" size="xxl" type="check" />
     );
 
   const moduleSetupButton =
@@ -102,3 +97,7 @@ export const LogAnalysisModuleListCard: React.FC<{
     />
   );
 };
+
+const mlNotAvailableMessage = i18n.translate('xpack.infra.logs.analysis.mlNotAvailable', {
+  defaultMessage: 'ML plugin is not available',
+});

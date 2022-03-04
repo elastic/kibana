@@ -22,10 +22,10 @@ import { FILTER_FIELDS } from '../../../../../common/constants';
 const { TYPE, TAGS, LOCATION, PORT } = FILTER_FIELDS;
 
 interface Props {
-  alertParams: { [key: string]: any };
+  ruleParams: { [key: string]: any };
   enabled: boolean;
   numTimes: number;
-  setAlertParams: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
   timerange: {
     from: string;
     to: string;
@@ -35,50 +35,50 @@ interface Props {
 export const AlertMonitorStatus: React.FC<Props> = ({
   enabled,
   numTimes,
-  setAlertParams,
+  setRuleParams,
   timerange,
-  alertParams,
+  ruleParams,
 }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (alertParams.search) {
-      dispatch(setSearchTextAction(alertParams.search));
+    if (ruleParams.search) {
+      dispatch(setSearchTextAction(ruleParams.search));
     }
-  }, [alertParams, dispatch]);
+  }, [ruleParams, dispatch]);
 
   const { count, loading } = useSnapShotCount({
-    query: alertParams.search,
-    filters: alertParams.filters,
+    query: ruleParams.search,
+    filters: ruleParams.filters,
   });
 
   const isOldAlert = React.useMemo(
     () =>
-      Object.entries(alertParams).length > 0 &&
-      !isRight(AtomicStatusCheckParamsType.decode(alertParams)) &&
-      !isRight(GetMonitorAvailabilityParamsType.decode(alertParams)),
-    [alertParams]
+      Object.entries(ruleParams).length > 0 &&
+      !isRight(AtomicStatusCheckParamsType.decode(ruleParams)) &&
+      !isRight(GetMonitorAvailabilityParamsType.decode(ruleParams)),
+    [ruleParams]
   );
 
   const selectedFilters = useSelector(selectedFiltersSelector);
   useEffect(() => {
-    if (!alertParams.filters && selectedFilters !== null) {
-      setAlertParams('filters', {
+    if (!ruleParams.filters && selectedFilters !== null) {
+      setRuleParams('filters', {
         [PORT]: selectedFilters?.ports ?? [],
         [LOCATION]: selectedFilters?.locations ?? [],
         [TYPE]: selectedFilters?.schemes ?? [],
         [TAGS]: selectedFilters?.tags ?? [],
       });
     }
-  }, [alertParams, setAlertParams, selectedFilters]);
+  }, [ruleParams, setRuleParams, selectedFilters]);
 
   return (
     <AlertMonitorStatusComponent
-      alertParams={alertParams}
+      ruleParams={ruleParams}
       enabled={enabled}
       isOldAlert={isOldAlert}
       numTimes={numTimes}
-      setAlertParams={setAlertParams}
+      setRuleParams={setRuleParams}
       snapshotCount={count.total}
       snapshotLoading={loading}
       timerange={timerange}

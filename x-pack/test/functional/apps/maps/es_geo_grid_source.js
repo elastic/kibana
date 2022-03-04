@@ -13,14 +13,14 @@ export default function ({ getPageObjects, getService }) {
   const DOC_COUNT_PROP_NAME = 'doc_count';
   const security = getService('security');
 
-  describe('layer geo grid aggregation source', () => {
+  describe('geojson vector layer - es geo grid source', () => {
     const DATA_CENTER_LON = -98;
     const DATA_CENTER_LAT = 38;
 
     before(async () => {
       await security.testUser.setRoles(
         ['global_maps_all', 'test_logstash_reader', 'geoshape_data_reader'],
-        false
+        { skipBrowserRefresh: true }
       );
     });
 
@@ -102,69 +102,7 @@ export default function ({ getPageObjects, getService }) {
       });
     }
 
-    describe('heatmap', () => {
-      before(async () => {
-        await PageObjects.maps.loadSavedMap('geo grid heatmap example');
-      });
-
-      const LAYER_ID = '3xlvm';
-      const HEATMAP_PROP_NAME = '__kbn_heatmap_weight__';
-
-      it('should re-fetch geotile_grid aggregation with refresh timer', async () => {
-        const beforeRefreshTimerTimestamp = await getRequestTimestamp();
-        expect(beforeRefreshTimerTimestamp.length).to.be(24);
-        await PageObjects.maps.triggerSingleRefresh(1000);
-        const afterRefreshTimerTimestamp = await getRequestTimestamp();
-        expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
-      });
-
-      it('should decorate feature properties with scaled doc_count property', async () => {
-        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(6);
-
-        mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
-          expect(properties.hasOwnProperty(HEATMAP_PROP_NAME)).to.be(true);
-          expect(properties.hasOwnProperty(DOC_COUNT_PROP_NAME)).to.be(true);
-        });
-      });
-
-      makeRequestTestsForGeoPrecision(LAYER_ID, 4, 2);
-
-      describe('query bar', () => {
-        before(async () => {
-          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
-          await PageObjects.maps.setView(0, 0, 0);
-        });
-
-        after(async () => {
-          await PageObjects.maps.setAndSubmitQuery('');
-        });
-
-        it('should apply query to geotile_grid aggregation request', async () => {
-          const { rawResponse: response } = await PageObjects.maps.getResponse();
-          expect(response.aggregations.gridSplit.buckets.length).to.equal(1);
-        });
-      });
-
-      describe('inspector', () => {
-        afterEach(async () => {
-          await inspector.close();
-        });
-
-        it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          const { rawResponse: response } = await PageObjects.maps.getResponse();
-          expect(response.aggregations.gridSplit.buckets.length).to.equal(4);
-        });
-
-        it('should not contain any elasticsearch request after layer is deleted', async () => {
-          await PageObjects.maps.removeLayer('logstash-*');
-          const noRequests = await PageObjects.maps.doesInspectorHaveRequests();
-          expect(noRequests).to.equal(true);
-        });
-      });
-    });
-
-    describe('vector(grid)', () => {
+    describe('geo_point', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('geo grid vector grid example');
       });
@@ -227,7 +165,7 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    describe('vector grid with geo_shape', () => {
+    describe('geo_shape', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('geo grid vector grid example with shape');
       });

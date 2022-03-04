@@ -13,11 +13,16 @@ import { AppMountParameters } from 'kibana/public';
 import { ManagementApp, ManagementAppDependencies } from './components/management_app';
 
 export const renderApp = async (
-  { history, appBasePath, element }: AppMountParameters,
+  { history, appBasePath, element, theme$ }: AppMountParameters,
   dependencies: ManagementAppDependencies
 ) => {
   ReactDOM.render(
-    <ManagementApp dependencies={dependencies} appBasePath={appBasePath} history={history} />,
+    <ManagementApp
+      dependencies={dependencies}
+      appBasePath={appBasePath}
+      history={history}
+      theme$={theme$}
+    />,
     element
   );
 

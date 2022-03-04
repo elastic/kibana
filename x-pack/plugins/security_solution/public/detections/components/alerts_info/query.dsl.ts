@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { ALERT_WORKFLOW_STATUS, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+
 export const buildLastAlertsQuery = (ruleId: string | undefined | null) => {
   const queryFilter = [
     {
-      bool: { should: [{ match: { 'signal.status': 'open' } }], minimum_should_match: 1 },
+      bool: {
+        should: [{ match: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
+        minimum_should_match: 1,
+      },
     },
   ];
 
@@ -24,7 +29,10 @@ export const buildLastAlertsQuery = (ruleId: string | undefined | null) => {
                 ...queryFilter,
                 {
                   bool: {
-                    should: [{ match: { 'signal.rule.id': ruleId } }],
+                    should: [
+                      { match: { 'signal.rule.id': ruleId } },
+                      { match: { [ALERT_RULE_UUID]: ruleId } },
+                    ],
                     minimum_should_match: 1,
                   },
                 },

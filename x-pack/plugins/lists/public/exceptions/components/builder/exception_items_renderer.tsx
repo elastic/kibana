@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useReducer } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
@@ -31,9 +31,9 @@ import {
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { AndOrBadge } from '../and_or_badge';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
@@ -63,12 +63,14 @@ const initialState: State = {
   errorExists: 0,
   exceptions: [],
   exceptionsToDelete: [],
+  warningExists: 0,
 };
 
 export interface OnChangeProps {
   errorExists: boolean;
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   exceptionsToDelete: ExceptionListItemSchema[];
+  warningExists: boolean;
 }
 
 export interface ExceptionBuilderProps {
@@ -77,17 +79,18 @@ export interface ExceptionBuilderProps {
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
   osTypes?: OsTypeArray;
-  indexPatterns: IndexPatternBase;
+  indexPatterns: DataViewBase;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
+  isOrHidden?: boolean;
   listId: string;
   listNamespaceType: NamespaceType;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IndexPatternBase,
+    pattern: DataViewBase,
     type: ExceptionListType
-  ) => IndexPatternBase;
+  ) => DataViewBase;
   onChange: (arg: OnChangeProps) => void;
   ruleName: string;
   isDisabled?: boolean;
@@ -103,6 +106,7 @@ export const ExceptionBuilderComponent = ({
   isAndDisabled,
   isNestedDisabled,
   isOrDisabled,
+  isOrHidden = false,
   listId,
   listNamespaceType,
   listType,
@@ -121,6 +125,7 @@ export const ExceptionBuilderComponent = ({
       disableNested,
       disableOr,
       errorExists,
+      warningExists,
       exceptions,
       exceptionsToDelete,
     },
@@ -137,6 +142,16 @@ export const ExceptionBuilderComponent = ({
       dispatch({
         errorExists: hasErrors,
         type: 'setErrorsExist',
+      });
+    },
+    [dispatch]
+  );
+
+  const setWarningsExist = useCallback(
+    (hasWarnings: boolean): void => {
+      dispatch({
+        type: 'setWarningsExist',
+        warningExists: hasWarnings,
       });
     },
     [dispatch]
@@ -348,8 +363,9 @@ export const ExceptionBuilderComponent = ({
       errorExists: errorExists > 0,
       exceptionItems: filterExceptionItems(exceptions),
       exceptionsToDelete,
+      warningExists: warningExists > 0,
     });
-  }, [onChange, exceptionsToDelete, exceptions, errorExists]);
+  }, [onChange, exceptionsToDelete, exceptions, errorExists, warningExists]);
 
   useEffect(() => {
     setUpdateExceptions([]);
@@ -414,6 +430,7 @@ export const ExceptionBuilderComponent = ({
                 onDeleteExceptionItem={handleDeleteExceptionItem}
                 onlyShowListOperators={containsValueListEntry(exceptions)}
                 setErrorsExist={setErrorsExist}
+                setWarningsExist={setWarningsExist}
                 osTypes={osTypes}
                 isDisabled={isDisabled}
                 operatorsList={operatorsList}
@@ -422,6 +439,8 @@ export const ExceptionBuilderComponent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       ))}
+
+      <EuiSpacer size="m" />
 
       <MyButtonsContainer data-test-subj={`andOrOperatorButtons`}>
         <EuiFlexGroup gutterSize="s">
@@ -433,6 +452,7 @@ export const ExceptionBuilderComponent = ({
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
               isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
+              isOrHidden={isOrHidden}
               isAndDisabled={isAndDisabled ? isAndDisabled : disableAnd}
               isNestedDisabled={isNestedDisabled ? isNestedDisabled : disableNested}
               isNested={addNested}

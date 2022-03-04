@@ -1,0 +1,197 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`service node queries fetches metadata for a service node 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "containerId": Object {
+        "terms": Object {
+          "field": "container.id",
+          "size": 1,
+        },
+      },
+      "host": Object {
+        "terms": Object {
+          "field": "host.name",
+          "size": 1,
+        },
+      },
+      "nodes": Object {
+        "terms": Object {
+          "field": "service.node.name",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;
+
+exports[`service node queries fetches metadata for unidentified service nodes 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "containerId": Object {
+        "terms": Object {
+          "field": "container.id",
+          "size": 1,
+        },
+      },
+      "host": Object {
+        "terms": Object {
+          "field": "host.name",
+          "size": 1,
+        },
+      },
+      "nodes": Object {
+        "terms": Object {
+          "field": "service.node.name",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.node.name",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;
+
+exports[`service node queries fetches services nodes 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "nodes": Object {
+        "aggs": Object {
+          "cpu": Object {
+            "avg": Object {
+              "field": "system.process.cpu.total.norm.pct",
+            },
+          },
+          "heapMemory": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.used",
+            },
+          },
+          "latest": Object {
+            "top_metrics": Object {
+              "metrics": Array [
+                Object {
+                  "field": "host.name",
+                },
+              ],
+              "sort": Object {
+                "@timestamp": "desc",
+              },
+            },
+          },
+          "nonHeapMemory": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.used",
+            },
+          },
+          "threadCount": Object {
+            "max": Object {
+              "field": "jvm.thread.count",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "service.node.name",
+          "missing": "_service_node_name_missing_",
+          "size": 10000,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;

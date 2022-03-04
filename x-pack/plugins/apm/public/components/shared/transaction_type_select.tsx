@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
 import { useBreakpoints } from '../../hooks/use_breakpoints';
-import * as urlHelpers from './Links/url_helpers';
+import * as urlHelpers from './links/url_helpers';
 
 // The default transaction type (for non-RUM services) is "request". Set the
 // min-width on here to the width when "request" is loaded so it doesn't start

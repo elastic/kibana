@@ -1,0 +1,177 @@
+get:
+  summary: Packages - Info
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  item:
+                    $ref: ../components/schemas/package_info.yaml
+              - properties:
+                  status:
+                    type: string
+                    enum:
+                      - installed
+                      - installing
+                      - install_failed
+                      - not_installed
+                  savedObject:
+                    type: string
+                required:
+                  - status
+                  - savedObject
+  operationId: get-package
+  security:
+    - basicAuth: []
+parameters:
+  - schema:
+      type: string
+    name: pkgName
+    in: path
+    required: true
+  - schema:
+      type: string
+    name: pkgVersion
+    in: path
+    required: true
+post:
+  summary: Packages - Install
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      oneOf:
+                        - $ref: ../components/schemas/kibana_saved_object_type.yaml
+                        - $ref: ../components/schemas/elasticsearch_asset_type.yaml
+                  required:
+                    - id
+                    - type
+              _meta:
+                type: object
+                properties:
+                  install_source:
+                    type: string
+                    enum:
+                      - registry
+                      - upload
+                      - bundled
+            required:
+              - items
+  operationId: install-package
+  description: ''
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            force:
+              type: boolean
+            ignore_constraints:
+              type: boolean
+put:
+  summary: Packages - Update
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      oneOf:
+                        - $ref: ../components/schemas/kibana_saved_object_type.yaml
+                        - $ref: ../components/schemas/elasticsearch_asset_type.yaml
+                  required:
+                    - id
+                    - type
+            required:
+              - items
+  operationId: update-package
+  description: ''
+  parameters:
+    - schema:
+        type: string
+      name: pkgName
+      in: path
+      required: true
+    - schema:
+        type: string
+      name: pkgVersion
+      in: path
+      required: true
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            keepPoliciesUpToDate:
+              type: boolean
+delete:
+  summary: Packages - Delete
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      oneOf:
+                        - $ref: ../components/schemas/kibana_saved_object_type.yaml
+                        - $ref: ../components/schemas/elasticsearch_asset_type.yaml
+                  required:
+                    - id
+                    - type
+            required:
+              - items
+  operationId: delete-package
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            force:
+              type: boolean

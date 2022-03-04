@@ -21,12 +21,14 @@ export const IpContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerIPContent'}>
       <DocumentStatsTable config={config} />
-      <TopValues
-        stats={stats}
-        fieldFormat={fieldFormat}
-        barColor="secondary"
-        onAddFilter={onAddFilter}
-      />
+      {stats && (
+        <TopValues
+          stats={stats}
+          fieldFormat={fieldFormat}
+          barColor="success"
+          onAddFilter={onAddFilter}
+        />
+      )}
     </ExpandedRowContent>
   );
 };

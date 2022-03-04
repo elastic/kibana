@@ -31,4 +31,4 @@ export type ObservabilityClient = RouteRepositoryClient<
   ObservabilityClientOptions
 >;
 
-export { ObservabilityAPIReturnType };
+export type { ObservabilityAPIReturnType };

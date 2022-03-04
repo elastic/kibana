@@ -11,9 +11,15 @@ import { Either } from 'fp-ts/lib/Either';
 import { endpointEntryMatch } from '../entry_match';
 import { endpointEntryMatchAny } from '../entry_match_any';
 import { endpointEntryNested } from '../entry_nested';
+import { endpointEntryMatchWildcard } from '../entry_match_wildcard';
 
 export const endpointEntriesArray = t.array(
-  t.union([endpointEntryMatch, endpointEntryMatchAny, endpointEntryNested])
+  t.union([
+    endpointEntryMatch,
+    endpointEntryMatchAny,
+    endpointEntryMatchWildcard,
+    endpointEntryNested,
+  ])
 );
 export type EndpointEntriesArray = t.TypeOf<typeof endpointEntriesArray>;
 

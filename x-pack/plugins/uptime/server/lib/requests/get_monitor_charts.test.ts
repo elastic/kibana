@@ -36,7 +36,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
   it('inserts empty buckets for missing data', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-    mockEsClient.search.mockResolvedValueOnce(mockChartsData as any);
+    mockEsClient.search.mockResponseImplementationOnce(() => mockChartsData as any);
 
     expect(
       await getMonitorDurationChart({

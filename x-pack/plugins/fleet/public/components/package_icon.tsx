@@ -12,11 +12,12 @@ import { EuiIcon } from '@elastic/eui';
 import type { UsePackageIconType } from '../hooks';
 import { usePackageIconType } from '../hooks';
 
-export const PackageIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> =
-  ({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }) => {
-    const iconType = usePackageIconType({ packageName, integrationName, version, icons, tryApi });
-    return <EuiIcon size="s" type={iconType} {...euiIconProps} />;
-  };
+export const PackageIcon: React.FunctionComponent<
+  UsePackageIconType & Omit<EuiIconProps, 'type'>
+> = ({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }) => {
+  const iconType = usePackageIconType({ packageName, integrationName, version, icons, tryApi });
+  return <EuiIcon size="s" type={iconType} {...euiIconProps} />;
+};
 
 export const CardIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> = (
   props

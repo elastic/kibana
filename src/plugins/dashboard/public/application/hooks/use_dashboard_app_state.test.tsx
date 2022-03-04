@@ -12,25 +12,27 @@ import { Provider } from 'react-redux';
 import { createBrowserHistory } from 'history';
 import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
 
-import { DashboardContainer } from '..';
 import { DashboardSessionStorage } from '../lib';
 import { coreMock } from '../../../../../core/public/mocks';
 import { DashboardConstants } from '../../dashboard_constants';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { SavedObjectLoader } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppState } from '../../types';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { EmbeddableFactory, ViewMode } from '../../services/embeddable';
 import { dashboardStateStore, setDescription, setViewMode } from '../state';
 import { DashboardContainerServices } from '../embeddable/dashboard_container';
 import { createKbnUrlStateStorage, defer } from '../../../../kibana_utils/public';
-import { Filter, IIndexPattern, IndexPatternsContract } from '../../services/data';
 import { useDashboardAppState, UseDashboardStateProps } from './use_dashboard_app_state';
 import {
   getSampleDashboardInput,
   getSavedDashboardMock,
   makeDefaultServices,
 } from '../test_helpers';
+import { DataViewsContract } from '../../services/data';
+import { DataView } from '../../services/data_views';
+import type { Filter } from '@kbn/es-query';
 
 interface SetupEmbeddableFactoryReturn {
   finalizeEmbeddableCreation: () => void;
@@ -52,17 +54,14 @@ const createDashboardAppStateProps = (): UseDashboardStateProps => ({
   savedDashboardId: 'testDashboardId',
   history: createBrowserHistory(),
   isEmbeddedExternally: false,
-  redirectTo: jest.fn(),
 });
 
 const createDashboardAppStateServices = () => {
   const defaults = makeDefaultServices();
-  const indexPatterns = {} as IndexPatternsContract;
-  const defaultIndexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
-  indexPatterns.ensureDefaultDataView = jest.fn().mockImplementation(() => Promise.resolve(true));
-  indexPatterns.getDefault = jest
-    .fn()
-    .mockImplementation(() => Promise.resolve(defaultIndexPattern));
+  const dataViews = {} as DataViewsContract;
+  const defaultDataView = { id: 'foo', fields: [{ name: 'bar' }] } as DataView;
+  dataViews.ensureDefaultDataView = jest.fn().mockImplementation(() => Promise.resolve(true));
+  dataViews.getDefault = jest.fn().mockImplementation(() => Promise.resolve(defaultDataView));
 
   const data = dataPluginMock.createStartContract();
   data.query.filterManager.getUpdates$ = jest.fn().mockImplementation(() => of(void 0));
@@ -72,7 +71,7 @@ const createDashboardAppStateServices = () => {
     .fn()
     .mockImplementation(() => of(void 0));
 
-  return { ...defaults, indexPatterns, data };
+  return { ...defaults, dataViews, data };
 };
 
 const setupEmbeddableFactory = (
@@ -206,7 +205,9 @@ describe('Dashboard container lifecycle', () => {
   });
 });
 
-describe('Dashboard initial state', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/116050
+// FLAKY: https://github.com/elastic/kibana/issues/105018
+describe.skip('Dashboard initial state', () => {
   it('Extracts state from Dashboard Saved Object', async () => {
     const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({});
     const getResult = () => renderHookResult.result.current;
@@ -276,7 +277,8 @@ describe('Dashboard initial state', () => {
   });
 });
 
-describe('Dashboard state sync', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/116043
+describe.skip('Dashboard state sync', () => {
   let defaultDashboardAppStateHookResult: RenderDashboardStateHookReturn;
   const getResult = () => defaultDashboardAppStateHookResult.renderHookResult.result.current;
 

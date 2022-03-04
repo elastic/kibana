@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ApplicationStart } from 'kibana/public';
 import { CoreStart, Plugin } from 'src/core/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';

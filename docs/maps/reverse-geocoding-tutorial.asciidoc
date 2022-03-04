@@ -42,16 +42,16 @@ CSAs generally share the same telecom providers and ad networks. New fast food f
 
 To get the CSA boundary data:
 
-. Download the https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html[Cartographic Boundary shapefile (.shp)] from the Census Bureau’s website.
-. To use the data in Kibana, convert it to GeoJSON format. Follow this https://gist.github.com/YKCzoli/b7f5ff0e0f641faba0f47fa5d16c4d8d[helpful tutorial] to use QGIS to convert the Cartographic Boundary shapefile to GeoJSON. Or, download a https://raw.githubusercontent.com/elastic/examples/master/blog/reverse-geocoding/csba.json[prebuilt GeoJSON version].
-
-Once you have your GeoJSON file:
-
-. Open the main menu, and click *Maps*.
+. Download the "Combined Statistical Areas (CSAs)" zip file from https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html[Census Bureau’s website].
+. Uncompress the zip file.
+. In Kibana, open the main menu, and click *Maps*.
 . Click *Create map*.
 . Click *Add layer*.
-. Click *Upload GeoJSON*.
-. Use the file chooser to import the CSA GeoJSON file.
+. Click *Upload file*.
+. Use the file chooser to select the `.shp` file from the CSA shapefile folder.
+. Use the `.dbf` file chooser to select the `.dbf` file from the CSA shapefile folder.
+. Use the `.prj` file chooser to select the `.prj` file from the CSA shapefile folder.
+. Use the `.shx` file chooser to select the `.shx` file from the CSA shapefile folder.
 . Set index name to *csa* and click *Import file*.
 . When importing is complete, click *Add as document layer*.
 . Add Tooltip fields:
@@ -141,7 +141,7 @@ PUT kibana_sample_data_logs/_settings
 ----------------------------------
 
 . Open the main menu, and click *Discover*.
-. Set the index pattern to *kibana_sample_data_logs*.
+. Set the data view to *kibana_sample_data_logs*.
 . Open the <<set-time-filter, time filter>>, and set the time range to the last 30 days.
 . Scan through the list of *Available fields* until you find the `csa.GEOID` field. You can also search for the field by name.
 . Click image:images/reverse-geocoding-tutorial/add-icon.png[Add icon] to toggle the field into the document table.
@@ -162,10 +162,10 @@ Now that our web traffic contains CSA region identifiers, you'll visualize CSA r
 . Click *Choropleth*.
 . For *Boundaries source*: 
 .. Select *Points, lines, and polygons from Elasticsearch*.
-.. Set *Index pattern* to *csa*.
+.. Set *Data view* to *csa*.
 .. Set *Join field* to *GEOID*.
 . For *Statistics source*:
-.. Set *Index pattern* to *kibana_sample_data_logs*.
+.. Set *Data view* to *kibana_sample_data_logs*.
 .. Set *Join field* to *csa.GEOID.keyword*.
 . Click *Add layer*.
 . Scroll to *Layer Style* and Set *Label* to *Fixed*.

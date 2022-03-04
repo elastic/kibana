@@ -6,10 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
-import { JobParamsPDFLegacy } from '../../export_types/printable_pdf/types';
 import { checkParamsVersion, cryptoFactory, LevelLogger } from '../../lib';
 import { Report } from '../../lib/store';
 import { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
@@ -99,13 +99,13 @@ export class RequestHandler {
       `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );
 
+    // 6. Log the action with event log
+    reporting.getEventLogger(report, task).logScheduleTask();
+
     return report;
   }
 
-  public async handleGenerateRequest(
-    exportTypeId: string,
-    jobParams: BaseParams | JobParamsPDFLegacy
-  ) {
+  public async handleGenerateRequest(exportTypeId: string, jobParams: BaseParams) {
     // ensure the async dependencies are loaded
     if (!this.context.reporting) {
       return handleUnavailable(this.res);
@@ -153,7 +153,13 @@ export class RequestHandler {
       });
     }
 
-    // unknown error, can't convert to 4xx
-    throw err;
+    return this.res.customError({
+      statusCode: 500,
+      body:
+        err?.message ||
+        i18n.translate('xpack.reporting.errorHandler.unknownError', {
+          defaultMessage: 'Unknown error',
+        }),
+    });
   }
 }

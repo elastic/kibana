@@ -8,7 +8,7 @@
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import React, { Component } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { NotificationsSetup } from 'src/core/public';
 

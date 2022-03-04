@@ -12,5 +12,5 @@
   "extraPublicDirs": ["common"],
   "requiredPlugins": ["expressions", "presentationUtil"],
   "optionalPlugins": [],
-  "requiredBundles": []
+  "requiredBundles": ["kibanaReact"]
 }

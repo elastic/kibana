@@ -10,17 +10,19 @@ import { i18n } from '@kbn/i18n';
 
 import { Subscription } from 'rxjs';
 import { I18nStart } from '../i18n';
+import { ThemeServiceStart } from '../theme';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
 import { IUiSettingsClient } from '../ui_settings';
 import { OverlayStart } from '../overlays';
 
-interface SetupDeps {
+export interface SetupDeps {
   uiSettings: IUiSettingsClient;
 }
 
-interface StartDeps {
+export interface StartDeps {
   i18n: I18nStart;
   overlays: OverlayStart;
+  theme: ThemeServiceStart;
   targetDomElement: HTMLElement;
 }
 
@@ -49,13 +51,23 @@ export class NotificationsService {
     return notificationSetup;
   }
 
-  public start({ i18n: i18nDep, overlays, targetDomElement }: StartDeps): NotificationsStart {
+  public start({
+    i18n: i18nDep,
+    overlays,
+    theme,
+    targetDomElement,
+  }: StartDeps): NotificationsStart {
     this.targetDomElement = targetDomElement;
     const toastsContainer = document.createElement('div');
     targetDomElement.appendChild(toastsContainer);
 
     return {
-      toasts: this.toasts.start({ i18n: i18nDep, overlays, targetDomElement: toastsContainer }),
+      toasts: this.toasts.start({
+        i18n: i18nDep,
+        overlays,
+        theme,
+        targetDomElement: toastsContainer,
+      }),
     };
   }
 

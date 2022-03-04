@@ -1,0 +1,74 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies the use of AssumeRole. AssumeRole returns a set of temporary security credentials that can be used to access AWS resources. An adversary could use those credentials to move laterally and escalate privileges.",
+  "false_positives": [
+    "Automated processes that use Terraform may lead to false positives."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS Security Token Service (STS) AssumeRole Usage",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:sts.amazonaws.com and event.action:AssumedRole and \naws.cloudtrail.user_identity.session_context.session_issuer.type:Role and event.outcome:success\n",
+  "references": [
+    "https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "93075852-b0f5-4b8b-89c3-a226efae5726",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1550",
+          "name": "Use Alternate Authentication Material",
+          "reference": "https://attack.mitre.org/techniques/T1550/",
+          "subtechnique": [
+            {
+              "id": "T1550.001",
+              "name": "Application Access Token",
+              "reference": "https://attack.mitre.org/techniques/T1550/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

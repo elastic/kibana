@@ -7,10 +7,12 @@
 
 import React, { useEffect, useState } from 'react';
 import type { FunctionComponent } from 'react';
+import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import type { ScopedHistory } from 'src/core/public';
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../common/constants';
 import { LocatorParams } from '../../common/types';
@@ -18,18 +20,18 @@ import { LocatorParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { SharePluginSetup } from '../shared_imports';
 
+import './redirect_app.scss';
+
 interface Props {
   apiClient: ReportingAPIClient;
   history: ScopedHistory;
+  screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
 }
 
 const i18nTexts = {
   errorTitle: i18n.translate('xpack.reporting.redirectApp.errorTitle', {
     defaultMessage: 'Redirect error',
-  }),
-  redirectingTitle: i18n.translate('xpack.reporting.redirectApp.redirectingMessage', {
-    defaultMessage: 'Redirecting...',
   }),
   consoleMessagePrefix: i18n.translate(
     'xpack.reporting.redirectApp.redirectConsoleErrorPrefixLabel',
@@ -39,36 +41,51 @@ const i18nTexts = {
   ),
 };
 
-export const RedirectApp: FunctionComponent<Props> = ({ share }) => {
+export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMode, share }) => {
   const [error, setError] = useState<undefined | Error>();
 
   useEffect(() => {
-    try {
-      const locatorParams = (window as unknown as Record<string, LocatorParams>)[
-        REPORTING_REDIRECT_LOCATOR_STORE_KEY
-      ];
+    (async () => {
+      try {
+        let locatorParams: undefined | LocatorParams;
 
-      if (!locatorParams) {
-        throw new Error('Could not find locator params for report');
+        const { jobId } = parse(window.location.search);
+
+        if (jobId) {
+          const result = await apiClient.getInfo(jobId as string);
+          locatorParams = result?.locatorParams?.[0];
+        } else {
+          locatorParams = screenshotMode.getScreenshotContext<LocatorParams>(
+            REPORTING_REDIRECT_LOCATOR_STORE_KEY
+          );
+        }
+
+        if (!locatorParams) {
+          throw new Error('Could not find locator params for report');
+        }
+
+        share.navigate(locatorParams);
+      } catch (e) {
+        setError(e);
+        // eslint-disable-next-line no-console
+        console.error(i18nTexts.consoleMessagePrefix, e.message);
+        throw e;
       }
+    })();
+  }, [apiClient, screenshotMode, share]);
 
-      share.navigate(locatorParams);
-    } catch (e) {
-      setError(e);
-      // eslint-disable-next-line no-console
-      console.error(i18nTexts.consoleMessagePrefix, e.message);
-      throw e;
-    }
-  }, [share]);
-
-  return error ? (
-    <EuiCallOut title={i18nTexts.errorTitle} color="danger">
-      <p>{error.message}</p>
-      {error.stack && <EuiCodeBlock>{error.stack}</EuiCodeBlock>}
-    </EuiCallOut>
-  ) : (
-    <EuiTitle>
-      <h1>{i18nTexts.redirectingTitle}</h1>
-    </EuiTitle>
+  return (
+    <div className="reportingRedirectApp__interstitialPage">
+      {error ? (
+        <EuiCallOut title={i18nTexts.errorTitle} color="danger">
+          <p>{error.message}</p>
+          {error.stack && <EuiCodeBlock>{error.stack}</EuiCodeBlock>}
+        </EuiCallOut>
+      ) : (
+        // We don't show anything on this page, the share service will handle showing any issues with
+        // using the locator
+        <div />
+      )}
+    </div>
   );
 };

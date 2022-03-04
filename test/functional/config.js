@@ -45,7 +45,6 @@ export default async function ({ readConfigFile }) {
         '--savedObjects.maxImportPayloadBytes=10485760',
 
         // to be re-enabled once kibana/issues/102552 is completed
-        '--xpack.security.enabled=false',
         '--xpack.reporting.enabled=false',
       ],
     },
@@ -55,6 +54,7 @@ export default async function ({ readConfigFile }) {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
         'visualization:visualize:legacyPieChartsLibrary': true,
+        'visualization:useLegacyTimeAxis': true,
       },
     },
 
@@ -192,6 +192,21 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['kibana_sample*'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        version_test: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['version-test'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },

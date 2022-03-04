@@ -5,17 +5,29 @@
  * 2.0.
  */
 
-import { LayerType } from '../../types';
+import {
+  ColorMode,
+  CustomPaletteState,
+  PaletteOutput,
+} from '../../../../../../src/plugins/charts/common';
+import { CustomPaletteParams, LayerType } from '../../types';
 
 export interface MetricState {
   layerId: string;
   accessor?: string;
   layerType: LayerType;
+  colorMode?: ColorMode;
+  palette?: PaletteOutput<CustomPaletteParams>;
+  titlePosition?: 'top' | 'bottom';
+  size?: string;
+  textAlign?: 'left' | 'right' | 'center';
 }
 
-export interface MetricConfig extends MetricState {
+export interface MetricConfig extends Omit<MetricState, 'palette' | 'colorMode'> {
   title: string;
   description: string;
   metricTitle: string;
   mode: 'reduced' | 'full';
+  colorMode: ColorMode;
+  palette: PaletteOutput<CustomPaletteState>;
 }

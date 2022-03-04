@@ -6,20 +6,17 @@
  * Side Public License, v 1.
  */
 
-const { Client } = require('@elastic/elasticsearch');
 const chalk = require('chalk');
 
 const { log: defaultLog } = require('./log');
 
+export const SYSTEM_INDICES_SUPERUSER =
+  process.env.TEST_ES_SYSTEM_INDICES_USER || 'system_indices_superuser';
+
 exports.NativeRealm = class NativeRealm {
-  constructor({ elasticPassword, port, log = defaultLog, ssl = false, caCert }) {
-    const auth = { username: 'elastic', password: elasticPassword };
-    this._client = new Client(
-      ssl
-        ? { node: `https://localhost:${port}`, ssl: { ca: caCert, rejectUnauthorized: true }, auth }
-        : { node: `http://localhost:${port}`, auth }
-    );
+  constructor({ elasticPassword, log = defaultLog, client }) {
     this._elasticPassword = elasticPassword;
+    this._client = client;
     this._log = log;
   }
 
@@ -57,19 +54,19 @@ exports.NativeRealm = class NativeRealm {
     }
 
     const reservedUsers = await this.getReservedUsers();
-    await Promise.all(
-      reservedUsers.map(async (user) => {
+    this._log.info(`Set up ${reservedUsers.length} ES users`);
+    await Promise.all([
+      ...reservedUsers.map(async (user) => {
         await this.setPassword(user, options[`password.${user}`]);
-      })
-    );
+      }),
+      this._createSystemIndicesUser(),
+    ]);
   }
 
   async getReservedUsers(retryOpts = {}) {
     return await this._autoRetry(retryOpts, async () => {
       const resp = await this._client.security.getUser();
-      const usernames = Object.keys(resp.body).filter(
-        (user) => resp.body[user].metadata._reserved === true
-      );
+      const usernames = Object.keys(resp).filter((user) => resp[user].metadata._reserved === true);
 
       if (!usernames?.length) {
         throw new Error('no reserved users found, unable to set native realm passwords');
@@ -82,9 +79,7 @@ exports.NativeRealm = class NativeRealm {
   async isSecurityEnabled(retryOpts = {}) {
     try {
       return await this._autoRetry(retryOpts, async () => {
-        const {
-          body: { features },
-        } = await this._client.xpack.info({ categories: 'features' });
+        const { features } = await this._client.xpack.info({ categories: 'features' });
         return features.security && features.security.enabled && features.security.available;
       });
     } catch (error) {
@@ -116,5 +111,40 @@ exports.NativeRealm = class NativeRealm {
       };
       return await this._autoRetry(nextOpts, fn);
     }
+  }
+
+  async _createSystemIndicesUser() {
+    if (!(await this.isSecurityEnabled())) {
+      this._log.info('security is not enabled, unable to create role and user');
+      return;
+    }
+
+    await this._client.security.putRole({
+      name: SYSTEM_INDICES_SUPERUSER,
+      refresh: 'wait_for',
+      cluster: ['all'],
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+          allow_restricted_indices: true,
+        },
+      ],
+      applications: [
+        {
+          application: '*',
+          privileges: ['*'],
+          resources: ['*'],
+        },
+      ],
+      run_as: ['*'],
+    });
+
+    await this._client.security.putUser({
+      username: SYSTEM_INDICES_SUPERUSER,
+      refresh: 'wait_for',
+      password: this._elasticPassword,
+      roles: [SYSTEM_INDICES_SUPERUSER],
+    });
   }
 };

@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 function createApiResponseMock<TResponse, TContext>(
-  apiResponse: Pick<ApiResponse<TResponse, TContext>, 'body'> &
-    Partial<Omit<ApiResponse<TResponse, TContext>, 'body'>>
-): ApiResponse<TResponse, TContext> {
+  apiResponse: Pick<TransportResult<TResponse, TContext>, 'body'> &
+    Partial<Omit<TransportResult<TResponse, TContext>, 'body'>>
+): TransportResult<TResponse, TContext> {
   return {
+    // @ts-expect-error null is not supported
     statusCode: null,
-    headers: null,
+    // @ts-expect-error null is not supported
+    headers: undefined,
     warnings: null,
     meta: {} as any,
     ...apiResponse,

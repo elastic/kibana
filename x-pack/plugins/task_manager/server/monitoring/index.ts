@@ -18,10 +18,9 @@ import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 
+export type { MonitoringStats, RawMonitoringStats } from './monitoring_stats_stream';
 export {
-  MonitoringStats,
   HealthStatus,
-  RawMonitoringStats,
   summarizeMonitoringStats,
   createAggregators,
   createMonitoringStatsStream,

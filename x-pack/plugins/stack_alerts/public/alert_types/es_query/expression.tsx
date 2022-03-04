@@ -7,25 +7,27 @@
 
 import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import 'brace/theme/github';
 import { XJsonMode } from '@kbn/ace';
+import 'brace/theme/github';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiButtonEmpty,
-  EuiCodeEditor,
   EuiSpacer,
   EuiFormRow,
   EuiCallOut,
   EuiText,
   EuiTitle,
   EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 import { DocLinksStart, HttpSetup } from 'kibana/public';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
+import { XJson, EuiCodeEditor } from '../../../../../../src/plugins/es_ui_shared/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
   getFields,
@@ -33,7 +35,7 @@ import {
   ThresholdExpression,
   ForLastExpression,
   ValueExpression,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
 import { validateExpression } from './validation';
 import { parseDuration } from '../../../../alerting/common';
@@ -42,7 +44,7 @@ import { EsQueryAlertParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
 
 function totalHitsToNumber(total: estypes.SearchHitsMetadata['total']): number {
-  return typeof total === 'number' ? total : total.value;
+  return typeof total === 'number' ? total : total?.value ?? 0;
 }
 
 const DEFAULT_VALUES = {
@@ -77,8 +79,8 @@ interface KibanaDeps {
 }
 
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<EsQueryAlertParams>
-> = ({ alertParams, setAlertParams, setAlertProperty, errors, data }) => {
+  RuleTypeParamsExpressionProps<EsQueryAlertParams>
+> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
   const {
     index,
     timeField,
@@ -88,10 +90,10 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     threshold,
     timeWindowSize,
     timeWindowUnit,
-  } = alertParams;
+  } = ruleParams;
 
   const getDefaultParams = () => ({
-    ...alertParams,
+    ...ruleParams,
     esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
     size: size ?? DEFAULT_VALUES.SIZE,
     timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
@@ -122,7 +124,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
-      alertParams[errorKey as keyof EsQueryAlertParams] !== undefined
+      ruleParams[errorKey as keyof EsQueryAlertParams] !== undefined
   );
 
   const expressionErrorMessage = i18n.translate(
@@ -133,7 +135,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   );
 
   const setDefaultExpressionValues = async () => {
-    setAlertProperty('params', getDefaultParams());
+    setRuleProperty('params', getDefaultParams());
 
     setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
 
@@ -147,7 +149,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       ...currentAlertParams,
       [paramField]: paramValue,
     });
-    setAlertParams(paramField, paramValue);
+    setRuleParams(paramField, paramValue);
   };
 
   useEffect(() => {
@@ -241,8 +243,8 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
 
           // reset expression fields if indices are deleted
           if (indices.length === 0) {
-            setAlertProperty('params', {
-              ...alertParams,
+            setRuleProperty('params', {
+              ...ruleParams,
               index: indices,
               esQuery: DEFAULT_VALUES.QUERY,
               size: DEFAULT_VALUES.SIZE,
@@ -348,14 +350,31 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         </EuiFormRow>
       )}
       <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
-            defaultMessage="When number of matches"
+      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
+                defaultMessage="When number of matches"
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            position="right"
+            color="subdued"
+            type="questionInCircle"
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
+            content={i18n.translate('xpack.stackAlerts.esQuery.ui.conditionPrompt.toolTip', {
+              defaultMessage: 'The time window defined below applies only to the first rule check.',
+            })}
           />
-        </h5>
-      </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <ThresholdExpression
         data-test-subj="thresholdExpression"

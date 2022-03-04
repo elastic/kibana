@@ -18,27 +18,29 @@ import { UIActions } from './ui';
  * by the various `checkPrivilegesWithRequest` derivatives.
  */
 export class Actions {
-  public readonly api = new ApiActions(this.versionNumber);
-
-  public readonly app = new AppActions(this.versionNumber);
-
-  public readonly cases = new CasesActions(this.versionNumber);
-
-  public readonly login = 'login:';
-
-  public readonly savedObject = new SavedObjectActions(this.versionNumber);
-
-  public readonly alerting = new AlertingActions(this.versionNumber);
-
-  public readonly space = new SpaceActions(this.versionNumber);
-
-  public readonly ui = new UIActions(this.versionNumber);
-
-  public readonly version = `version:${this.versionNumber}`;
+  public readonly api: ApiActions;
+  public readonly app: AppActions;
+  public readonly cases: CasesActions;
+  public readonly login: string;
+  public readonly savedObject: SavedObjectActions;
+  public readonly alerting: AlertingActions;
+  public readonly space: SpaceActions;
+  public readonly ui: UIActions;
+  public readonly version: string;
 
   constructor(private readonly versionNumber: string) {
     if (versionNumber === '') {
       throw new Error(`version can't be an empty string`);
     }
+
+    this.api = new ApiActions(this.versionNumber);
+    this.app = new AppActions(this.versionNumber);
+    this.cases = new CasesActions(this.versionNumber);
+    this.login = 'login:';
+    this.savedObject = new SavedObjectActions(this.versionNumber);
+    this.alerting = new AlertingActions(this.versionNumber);
+    this.space = new SpaceActions(this.versionNumber);
+    this.ui = new UIActions(this.versionNumber);
+    this.version = `version:${this.versionNumber}`;
   }
 }

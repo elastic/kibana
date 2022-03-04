@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { getServices } from '../kibana_services';
 import { discoverRouter } from './discover_router';
-import { toMountPoint } from '../../../kibana_react/public';
+import { toMountPoint, wrapWithTheme } from '../../../kibana_react/public';
+import { DiscoverServices } from '../build_services';
 
-export const renderApp = (element: HTMLElement) => {
-  const services = getServices();
-  const { history: getHistory, capabilities, chrome, data } = services;
+export const renderApp = (element: HTMLElement, services: DiscoverServices) => {
+  const { history: getHistory, capabilities, chrome, data, core } = services;
 
   const history = getHistory();
   if (!capabilities.discover.save) {
@@ -26,7 +25,9 @@ export const renderApp = (element: HTMLElement) => {
       iconType: 'glasses',
     });
   }
-  const unmount = toMountPoint(discoverRouter(services, history))(element);
+  const unmount = toMountPoint(wrapWithTheme(discoverRouter(services, history), core.theme.theme$))(
+    element
+  );
 
   return () => {
     unmount();

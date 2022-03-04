@@ -6,14 +6,14 @@
  */
 
 import {
-  ENTERPRISE_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 /**
  * Generate a document title that generally follows our breadcrumb trails
- * https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md
+ * https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md
  */
 
 type Title = string[];
@@ -30,7 +30,7 @@ export const generateTitle = (pages: Title) => pages.join(' - ');
  */
 
 export const enterpriseSearchTitle = (page: Title = []) =>
-  generateTitle([...page, ENTERPRISE_SEARCH_PLUGIN.NAME]);
+  generateTitle([...page, ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME]);
 
 export const appSearchTitle = (page: Title = []) =>
   generateTitle([...page, APP_SEARCH_PLUGIN.NAME]);

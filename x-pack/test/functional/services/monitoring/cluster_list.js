@@ -46,6 +46,10 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
       return testSubjects.click(ALERTS_MODAL_BUTTON);
     }
 
+    acceptAlertsModal() {
+      return testSubjects.click('alerts-modal-button');
+    }
+
     getClusterLink(clusterUuid) {
       return testSubjects.find(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLink`);
     }
@@ -76,6 +80,9 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
       return testSubjects.getVisibleText(
         `${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLicense`
       );
+    }
+    hasCluster(clusterUuid) {
+      return testSubjects.exists(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid}`);
     }
   })();
 }

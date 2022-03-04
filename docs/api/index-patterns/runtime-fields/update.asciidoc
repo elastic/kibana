@@ -4,6 +4,8 @@
 <titleabbrev>Update runtime field</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-runtime-field-api-update>> instead.]
+
 experimental[] Update an existing runtime field
 
 [[index-patterns-runtime-field-update-request]]

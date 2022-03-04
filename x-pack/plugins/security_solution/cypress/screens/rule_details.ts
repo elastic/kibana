@@ -64,6 +64,8 @@ export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
 
 export const RISK_SCORE_DETAILS = 'Risk score';
 
+export const INDICATOR_PREFIX_OVERRIDE = 'Indicator prefix override';
+
 export const RISK_SCORE_OVERRIDE_DETAILS = 'Risk score override';
 
 export const REFERENCE_URLS_DETAILS = 'Reference URLs';
@@ -94,9 +96,6 @@ export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
 export const TIMELINE_FIELD = (field: string) => {
   return `[data-test-subj="formatted-field-${field}"]`;
 };
-
-export const getDetails = (title: string) =>
-  cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
 
 export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');

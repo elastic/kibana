@@ -6,21 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { SharedGlobalConfig } from 'kibana/server';
 import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { CollectedUsage, ReportedUsage } from './register';
+
 interface SearchTelemetry {
   'search-telemetry': CollectedUsage;
 }
 
-export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
+export function fetchProvider(kibanaIndex: string) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
-    const config = await config$.pipe(first()).toPromise();
-    const { body: esResponse } = await esClient.search<SearchTelemetry>(
+    const esResponse = await esClient.search<SearchTelemetry>(
       {
-        index: config.kibana.index,
+        index: kibanaIndex,
         body: {
           query: { term: { type: { value: 'search-telemetry' } } },
         },

@@ -49,6 +49,12 @@ export interface CustomElement {
   content: string;
 }
 
+export type CustomElementNode = Omit<PositionedElement, 'type'>;
+
+export interface CustomElementContent {
+  selectedNodes: CustomElementNode[];
+}
+
 export interface ElementPosition {
   /**
    * distance from the left edge of the page

@@ -6,29 +6,29 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { IICMPSimpleFields, ConfigKeys, DataStream } from '../types';
+import { ICMPSimpleFields, ConfigKey, DataStream } from '../types';
 import { defaultValues as commonDefaultValues } from '../common/default_values';
 
-interface IICMPSimpleFieldsContext {
-  setFields: React.Dispatch<React.SetStateAction<IICMPSimpleFields>>;
-  fields: IICMPSimpleFields;
-  defaultValues: IICMPSimpleFields;
+interface ICMPSimpleFieldsContext {
+  setFields: React.Dispatch<React.SetStateAction<ICMPSimpleFields>>;
+  fields: ICMPSimpleFields;
+  defaultValues: ICMPSimpleFields;
 }
 
-interface IICMPSimpleFieldsContextProvider {
+interface ICMPSimpleFieldsContextProvider {
   children: React.ReactNode;
-  defaultValues?: IICMPSimpleFields;
+  defaultValues?: ICMPSimpleFields;
 }
 
-export const initialValues: IICMPSimpleFields = {
+export const initialValues: ICMPSimpleFields = {
   ...commonDefaultValues,
-  [ConfigKeys.HOSTS]: '',
-  [ConfigKeys.MONITOR_TYPE]: DataStream.ICMP,
-  [ConfigKeys.WAIT]: '1',
+  [ConfigKey.HOSTS]: '',
+  [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
+  [ConfigKey.WAIT]: '1',
 };
 
-const defaultContext: IICMPSimpleFieldsContext = {
-  setFields: (_fields: React.SetStateAction<IICMPSimpleFields>) => {
+const defaultContext: ICMPSimpleFieldsContext = {
+  setFields: (_fields: React.SetStateAction<ICMPSimpleFields>) => {
     throw new Error(
       'setFields was not initialized for ICMP Simple Fields, set it when you invoke the context'
     );
@@ -42,8 +42,8 @@ export const ICMPSimpleFieldsContext = createContext(defaultContext);
 export const ICMPSimpleFieldsContextProvider = ({
   children,
   defaultValues = initialValues,
-}: IICMPSimpleFieldsContextProvider) => {
-  const [fields, setFields] = useState<IICMPSimpleFields>(defaultValues);
+}: ICMPSimpleFieldsContextProvider) => {
+  const [fields, setFields] = useState<ICMPSimpleFields>(defaultValues);
 
   const value = useMemo(() => {
     return { fields, setFields, defaultValues };

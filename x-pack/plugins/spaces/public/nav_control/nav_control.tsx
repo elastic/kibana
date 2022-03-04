@@ -11,10 +11,12 @@ import ReactDOM from 'react-dom';
 
 import type { CoreStart } from 'src/core/public';
 
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { SpacesManager } from '../spaces_manager';
 
 export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreStart) {
   const I18nContext = core.i18n.Context;
+  const { theme$ } = core.theme;
   core.chrome.navControls.registerLeft({
     order: 1000,
     mount(targetDomElement: HTMLElement) {
@@ -30,15 +32,17 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
 
       ReactDOM.render(
         <I18nContext>
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <LazyNavControlPopover
-              spacesManager={spacesManager}
-              serverBasePath={core.http.basePath.serverBasePath}
-              anchorPosition="downLeft"
-              capabilities={core.application.capabilities}
-              navigateToApp={core.application.navigateToApp}
-            />
-          </Suspense>
+          <KibanaThemeProvider theme$={theme$}>
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <LazyNavControlPopover
+                spacesManager={spacesManager}
+                serverBasePath={core.http.basePath.serverBasePath}
+                anchorPosition="downLeft"
+                capabilities={core.application.capabilities}
+                navigateToApp={core.application.navigateToApp}
+              />
+            </Suspense>
+          </KibanaThemeProvider>
         </I18nContext>,
         targetDomElement
       );

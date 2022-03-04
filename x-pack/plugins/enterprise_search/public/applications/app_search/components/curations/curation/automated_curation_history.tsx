@@ -19,12 +19,12 @@ interface Props {
 
 export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName }) => {
   const filters = [
-    `appsearch.search_relevance_suggestions.query: ${query}`,
+    `appsearch.adaptive_relevance.query: ${query}`,
     'event.kind: event',
     'event.dataset: search-relevance-suggestions',
-    `appsearch.search_relevance_suggestions.engine: ${engineName}`,
+    `appsearch.adaptive_relevance.engine: ${engineName}`,
     'event.action: curation_suggestion',
-    'appsearch.search_relevance_suggestions.suggestion.new_status: automated',
+    'appsearch.adaptive_relevance.suggestion.new_status: automated',
   ];
 
   return (
@@ -35,7 +35,7 @@ export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName })
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curation.detail.historyTableTitle',
             {
-              defaultMessage: 'Automated curation changes',
+              defaultMessage: 'Adaptive relevance changes',
             }
           )}
         </h2>
@@ -43,7 +43,8 @@ export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName })
       subtitle={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curation.detail.historyTableDescription',
         {
-          defaultMessage: 'A detailed log of recent changes to your automated curation.',
+          defaultMessage:
+            'A detailed log of recent changes to curations powered by adaptive relevance.',
         }
       )}
       hasBorder

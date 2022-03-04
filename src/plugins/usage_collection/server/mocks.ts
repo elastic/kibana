@@ -8,6 +8,7 @@
 
 import {
   elasticsearchServiceMock,
+  executionContextServiceMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
@@ -23,6 +24,7 @@ export { Collector };
 export const createUsageCollectionSetupMock = () => {
   const collectorSet = new CollectorSet({
     logger: loggingSystemMock.createLogger(),
+    executionContext: executionContextServiceMock.createSetupContract(),
     maximumWaitTimeForAllCollectorsInS: 1,
   });
   const { createUsageCounter, getUsageCounterByType } =
@@ -31,7 +33,6 @@ export const createUsageCollectionSetupMock = () => {
   const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
     createUsageCounter,
     getUsageCounterByType,
-    areAllCollectorsReady: jest.fn().mockImplementation(collectorSet.areAllCollectorsReady),
     bulkFetch: jest.fn().mockImplementation(collectorSet.bulkFetch),
     getCollectorByType: jest.fn().mockImplementation(collectorSet.getCollectorByType),
     toApiFieldNames: jest.fn().mockImplementation(collectorSet.toApiFieldNames),
@@ -41,7 +42,6 @@ export const createUsageCollectionSetupMock = () => {
     registerCollector: jest.fn().mockImplementation(collectorSet.registerCollector),
   };
 
-  usageCollectionSetupMock.areAllCollectorsReady.mockResolvedValue(true);
   return usageCollectionSetupMock;
 };
 

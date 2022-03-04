@@ -24,7 +24,7 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 const RESTRICT_FIELDS = KBN_FIELD_TYPES.NUMBER;
@@ -119,7 +119,11 @@ const StandardDeviationAggUi = (props) => {
             restrict={RESTRICT_FIELDS}
             indexPattern={indexPattern}
             value={model.field}
-            onChange={handleSelectChange('field')}
+            onChange={(value) =>
+              handleChange({
+                field: value?.[0],
+              })
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

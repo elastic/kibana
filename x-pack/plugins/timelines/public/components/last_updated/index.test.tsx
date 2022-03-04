@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { LastUpdatedAt } from './';
 
-jest.mock('@kbn/i18n/react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn();
   FormattedRelative.mockImplementation(() => '2 minutes ago');
 

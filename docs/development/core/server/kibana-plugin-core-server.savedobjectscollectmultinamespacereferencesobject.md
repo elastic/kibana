@@ -18,6 +18,6 @@ export interface SavedObjectsCollectMultiNamespaceReferencesObject
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesobject.id.md) | <code>string</code> |  |
-|  [type](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesobject.type.md) | <code>string</code> |  |
+|  [id](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesobject.id.md) | string |  |
+|  [type](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesobject.type.md) | string |  |
 

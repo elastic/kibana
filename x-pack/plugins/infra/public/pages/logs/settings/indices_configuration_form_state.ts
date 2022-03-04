@@ -33,12 +33,12 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
     validate: useMemo(
       () => async (logIndices) => {
         if (logIndices == null) {
-          return validateStringNotEmpty('log index pattern', '');
+          return validateStringNotEmpty('log data view', '');
         } else if (logIndexNameReferenceRT.is(logIndices)) {
           return validateStringNotEmpty('log indices', logIndices.indexName);
         } else {
           const emptyStringErrors = validateStringNotEmpty(
-            'log index pattern',
+            'log data view',
             logIndices.indexPatternId
           );
 

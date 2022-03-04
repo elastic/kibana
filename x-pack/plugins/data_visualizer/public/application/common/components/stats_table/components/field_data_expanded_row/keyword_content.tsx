@@ -13,6 +13,7 @@ import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 import { ChoroplethMap } from './choropleth_map';
+import { ErrorMessageContent } from './error_message';
 
 export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   const [EMSSuggestion, setEMSSuggestion] = useState<EMSTermJoinConfig | null | undefined>();
@@ -44,10 +45,13 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerKeywordContent'}>
       <DocumentStatsTable config={config} />
+      {config.stats?.error && fieldName !== undefined ? (
+        <ErrorMessageContent fieldName={fieldName} error={config.stats?.error} />
+      ) : null}
       <TopValues
         stats={stats}
         fieldFormat={fieldFormat}
-        barColor="secondary"
+        barColor="success"
         onAddFilter={onAddFilter}
       />
       {EMSSuggestion && stats && <ChoroplethMap stats={stats} suggestion={EMSSuggestion} />}

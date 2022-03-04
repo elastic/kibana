@@ -7,8 +7,7 @@
 
 import d3 from 'd3';
 import { useMemo } from 'react';
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
-import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiLightVars as euiThemeLight, euiDarkVars as euiThemeDark } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
 

@@ -12,9 +12,9 @@ import { MlContext } from './ml_context';
 export const useCurrentIndexPattern = () => {
   const context = useContext(MlContext);
 
-  if (context.currentIndexPattern === undefined) {
-    throw new Error('currentIndexPattern is undefined');
+  if (context.currentDataView === undefined) {
+    throw new Error('currentDataView is undefined');
   }
 
-  return context.currentIndexPattern;
+  return context.currentDataView;
 };

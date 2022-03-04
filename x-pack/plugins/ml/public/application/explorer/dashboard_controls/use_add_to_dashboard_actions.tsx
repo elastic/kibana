@@ -5,66 +5,50 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { useCallback } from 'react';
 import { DashboardItem } from './use_dashboards_table';
-import { SavedDashboardPanel } from '../../../../../../../src/plugins/dashboard/common/types';
 import { useMlKibana } from '../../contexts/kibana';
 import { useDashboardService } from '../../services/dashboard_service';
+import { DashboardConstants } from '../../../../../../../src/plugins/dashboard/public';
+import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  AnomalyChartsEmbeddableInput,
+  AnomalySwimlaneEmbeddableInput,
+} from '../../../embeddables';
 
-export const useAddToDashboardActions = ({
-  onClose,
-  getPanelsData,
-  selectedDashboards,
-}: {
-  onClose: (callback?: () => Promise<void>) => void;
-  getPanelsData: (
-    selectedDashboards: DashboardItem[]
-  ) => Promise<Array<Pick<SavedDashboardPanel, 'title' | 'type' | 'embeddableConfig'>>>;
-  selectedDashboards: DashboardItem[];
-}) => {
+export function useAddToDashboardActions<
+  T extends typeof ANOMALY_SWIMLANE_EMBEDDABLE_TYPE | typeof ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
+>(
+  type: T,
+  getEmbeddableInput: () => Partial<
+    T extends typeof ANOMALY_SWIMLANE_EMBEDDABLE_TYPE
+      ? AnomalySwimlaneEmbeddableInput
+      : AnomalyChartsEmbeddableInput
+  >
+) {
   const {
-    notifications: { toasts },
-    services: {
-      application: { navigateToUrl },
-    },
+    services: { embeddable },
   } = useMlKibana();
   const dashboardService = useDashboardService();
 
-  const addToDashboardCallback = useCallback(async () => {
-    const panelsData = await getPanelsData(selectedDashboards);
-    for (const selectedDashboard of selectedDashboards) {
-      try {
-        await dashboardService.attachPanels(
-          selectedDashboard.id,
-          selectedDashboard.attributes,
-          panelsData
-        );
-        toasts.success({
-          title: (
-            <FormattedMessage
-              id="xpack.ml.explorer.dashboardsTable.savedSuccessfullyTitle"
-              defaultMessage='Dashboard "{dashboardTitle}" updated successfully'
-              values={{ dashboardTitle: selectedDashboard.title }}
-            />
-          ),
-          toastLifeTimeMs: 3000,
-        });
-      } catch (e) {
-        toasts.danger({
-          body: e,
-        });
-      }
-    }
-  }, [selectedDashboards, getPanelsData]);
+  const addToDashboardAndEditCallback = useCallback(
+    async (selectedDashboard: DashboardItem) => {
+      const stateTransfer = embeddable.getStateTransfer();
+      const selectedDashboardId = selectedDashboard.id;
 
-  const addToDashboardAndEditCallback = useCallback(async () => {
-    onClose(async () => {
-      await addToDashboardCallback();
-      const selectedDashboardId = selectedDashboards[0].id;
-      await navigateToUrl(await dashboardService.getDashboardEditUrl(selectedDashboardId));
-    });
-  }, [addToDashboardCallback, selectedDashboards, navigateToUrl]);
+      const dashboardPath = await dashboardService.getDashboardEditUrl(selectedDashboardId);
 
-  return { addToDashboardCallback, addToDashboardAndEditCallback };
-};
+      await stateTransfer.navigateToWithEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, {
+        path: dashboardPath,
+        state: {
+          type,
+          input: getEmbeddableInput(),
+        },
+      });
+    },
+    [getEmbeddableInput]
+  );
+
+  return { addToDashboardAndEditCallback };
+}

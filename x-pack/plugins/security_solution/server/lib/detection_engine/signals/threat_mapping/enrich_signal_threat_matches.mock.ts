@@ -24,7 +24,6 @@ export const getSignalHitMock = (overrides: Partial<SignalSourceHit> = {}): Sign
   _source: {
     '@timestamp': '2020-11-20T15:35:28.373Z',
   },
-  _type: '_type',
   _score: 0,
   ...overrides,
 });

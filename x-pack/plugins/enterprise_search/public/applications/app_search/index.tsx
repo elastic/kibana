@@ -10,9 +10,11 @@ import { Route, Redirect, Switch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
+import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
+import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { AppLogic } from './app_logic';
 import { Credentials } from './components/credentials';
@@ -42,22 +44,33 @@ import {
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  const { errorConnecting } = useValues(HttpLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
+  const { enterpriseSearchVersion, kibanaVersion } = props;
+  const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
+
+  const showView = () => {
+    if (!config.host) {
+      return <AppSearchUnconfigured />;
+    } else if (incompatibleVersions) {
+      return (
+        <VersionMismatchPage
+          enterpriseSearchVersion={enterpriseSearchVersion}
+          kibanaVersion={kibanaVersion}
+        />
+      );
+    } else if (errorConnectingMessage) {
+      return <ErrorConnecting />;
+    }
+
+    return <AppSearchConfigured {...(props as Required<InitialAppData>)} />;
+  };
 
   return (
     <Switch>
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
-      <Route>
-        {!config.host ? (
-          <AppSearchUnconfigured />
-        ) : errorConnecting ? (
-          <ErrorConnecting />
-        ) : (
-          <AppSearchConfigured {...(props as Required<InitialAppData>)} />
-        )}
-      </Route>
+      <Route>{showView()}</Route>
     </Switch>
   );
 };

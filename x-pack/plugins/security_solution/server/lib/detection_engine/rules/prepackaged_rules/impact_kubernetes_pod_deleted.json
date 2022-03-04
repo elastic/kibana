@@ -1,0 +1,47 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies the deletion of Azure Kubernetes Pods. Adversaries may delete a Kubernetes pod to disrupt the normal behavior of the environment.",
+  "false_positives": [
+    "Pods may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Pods deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Kubernetes Pods Deleted",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/PODS/DELETE\" and \nevent.outcome:(Success or success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#microsoftkubernetes"
+  ],
+  "risk_score": 47,
+  "rule_id": "83a1931d-8136-46fc-b7b9-2db4f639e014",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Asset Visibility"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 3
+}

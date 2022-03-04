@@ -16,6 +16,7 @@ exports[`renderDataMappingPopover Should render OrdinalDataMappingPopover 1`] = 
       "PERCENTILES",
     ]
   }
+  supportsFieldMetaFromLocalData={true}
 />
 `;
 
@@ -90,7 +91,7 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
         isPointsOnly={true}
         label={
           <EuiTextColor
-            color="secondary"
+            color="success"
           >
             Other
           </EuiTextColor>

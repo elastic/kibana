@@ -13,5 +13,5 @@ get(): Promise<T | null>;
 ```
 <b>Returns:</b>
 
-`Promise<T | null>`
+Promise&lt;T \| null&gt;
 

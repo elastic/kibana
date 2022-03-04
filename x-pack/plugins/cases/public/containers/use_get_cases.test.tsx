@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseStatuses, SECURITY_SOLUTION_OWNER } from '../../common';
+import { CaseStatuses } from '../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,
@@ -16,33 +17,35 @@ import {
   UseGetCases,
 } from './use_get_cases';
 import { UpdateKey } from './types';
-import { allCases, basicCase } from './mock';
+import { allCases, basicCase, caseWithAlerts, caseWithAlertsSyncOff } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useGetCases', () => {
   const abortCtrl = new AbortController();
+  const addSuccess = jest.fn();
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
+
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
+    const { result } = renderHook<string, UseGetCases>(() => useGetCases(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
 
-      await waitForNextUpdate();
+    await act(async () => {
       expect(result.current).toEqual({
         data: initialData,
         dispatchUpdateCaseProperty: result.current.dispatchUpdateCaseProperty,
         filterOptions: DEFAULT_FILTER_OPTIONS,
         isError: false,
-        loading: [],
+        loading: ['cases'],
         queryParams: DEFAULT_QUERY_PARAMS,
         refetchCases: result.current.refetchCases,
         selectedCases: [],
@@ -60,9 +63,8 @@ describe('useGetCases', () => {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
-      await waitForNextUpdate();
       expect(spyOnGetCases).toBeCalledWith({
-        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
@@ -74,7 +76,6 @@ describe('useGetCases', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
         data: allCases,
@@ -106,7 +107,6 @@ describe('useGetCases', () => {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
-      await waitForNextUpdate();
       result.current.dispatchUpdateCaseProperty(updateCase);
       expect(result.current.loading).toEqual(['caseUpdate']);
       expect(spyOnPatchCase).toBeCalledWith(
@@ -116,6 +116,50 @@ describe('useGetCases', () => {
         abortCtrl.signal
       );
     });
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: `Updated "${basicCase.title}"`,
+    });
+  });
+
+  it('shows a success toast notifying of synced alerts when sync is on', async () => {
+    await act(async () => {
+      const updateCase = {
+        updateKey: 'status' as UpdateKey,
+        updateValue: 'open',
+        caseId: caseWithAlerts.id,
+        refetchCasesStatus: jest.fn(),
+        version: '99999',
+      };
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitForNextUpdate();
+      result.current.dispatchUpdateCaseProperty(updateCase);
+    });
+    expect(addSuccess).toHaveBeenCalledWith({
+      text: 'Updated the statuses of attached alerts.',
+      title: 'Updated "Another horrible breach!!"',
+    });
+  });
+
+  it('shows a success toast without notifying of synced alerts when sync is off', async () => {
+    await act(async () => {
+      const updateCase = {
+        updateKey: 'status' as UpdateKey,
+        updateValue: 'open',
+        caseId: caseWithAlertsSyncOff.id,
+        refetchCasesStatus: jest.fn(),
+        version: '99999',
+      };
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitForNextUpdate();
+      result.current.dispatchUpdateCaseProperty(updateCase);
+    });
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: 'Updated "Another horrible breach!!"',
+    });
   });
 
   it('refetch cases', async () => {
@@ -124,7 +168,6 @@ describe('useGetCases', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.refetchCases();
       expect(spyOnGetCases).toHaveBeenCalledTimes(2);
@@ -136,7 +179,6 @@ describe('useGetCases', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.refetchCases();
 
@@ -154,7 +196,6 @@ describe('useGetCases', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
@@ -180,13 +221,13 @@ describe('useGetCases', () => {
         search: 'new',
         tags: ['new'],
         status: CaseStatuses.closed,
+        owner: [SECURITY_SOLUTION_OWNER],
       };
 
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
-      await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.setFilters(newFilters);
       await waitForNextUpdate();
@@ -215,12 +256,11 @@ describe('useGetCases', () => {
       });
 
       await waitForNextUpdate();
-      await waitForNextUpdate();
       result.current.setQueryParams(newQueryParams);
       await waitForNextUpdate();
 
       expect(spyOnGetCases.mock.calls[1][0]).toEqual({
-        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS },
         queryParams: {
           ...DEFAULT_QUERY_PARAMS,
           ...newQueryParams,
@@ -236,7 +276,6 @@ describe('useGetCases', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.setSelectedCases(selectedCases);
       expect(result.current.selectedCases).toEqual(selectedCases);

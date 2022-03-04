@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
@@ -24,7 +24,6 @@ import { getHttpEdges } from './helpers';
 import { buildHttpQuery } from './query.http_network.dsl';
 
 export const networkHttp: SecuritySolutionFactory<NetworkQueries.http> = {
-  // @ts-expect-error dns_name_query_count is not conpatible with @elastic/elasticsearch
   buildDsl: (options: NetworkHttpRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);

@@ -62,8 +62,8 @@ export function ExpandedSeriesRow(seriesProps: Props) {
       <EuiFormRow label={FILTERS_LABEL} fullWidth>
         <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
       </EuiFormRow>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={2}>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
           <EuiFormRow label={BREAKDOWN_BY_LABEL}>
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem style={{ minWidth: 200 }}>
@@ -74,7 +74,7 @@ export function ExpandedSeriesRow(seriesProps: Props) {
           </EuiFormRow>
         </EuiFlexItem>
         {(hasOperationType || (columnType === 'operation' && !hasPercentileBreakdown)) && (
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem>
             <EuiFormRow label={OPERATION_LABEL}>
               <OperationTypeSelect
                 {...seriesProps}

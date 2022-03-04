@@ -22,15 +22,13 @@ import {
 } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 
-import { DOCS_PREFIX } from '../../routes';
+import { SECURITY_DOCS_URL } from '../../routes';
 import { AppSearchPageTemplate } from '../layout';
 
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING } from './constants';
 import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
 import { User } from './user';
-
-const ROLES_DOCS_LINK = `${DOCS_PREFIX}/security-and-users.html`;
 
 export const RoleMappings: React.FC = () => {
   const {
@@ -44,7 +42,6 @@ export const RoleMappings: React.FC = () => {
   const {
     roleMappings,
     singleUserRoleMappings,
-    multipleAuthProvidersConfig,
     dataLoading,
     roleMappingFlyoutOpen,
     singleUserRoleMappingFlyoutOpen,
@@ -60,7 +57,7 @@ export const RoleMappings: React.FC = () => {
   const rolesEmptyState = (
     <RolesEmptyPrompt
       productName={APP_SEARCH_PLUGIN.NAME}
-      docsLink={ROLES_DOCS_LINK}
+      docsLink={SECURITY_DOCS_URL}
       onEnable={enableRoleBasedAccess}
     />
   );
@@ -69,7 +66,7 @@ export const RoleMappings: React.FC = () => {
     <section>
       <RoleMappingsHeading
         productName={APP_SEARCH_PLUGIN.NAME}
-        docsLink={ROLES_DOCS_LINK}
+        docsLink={SECURITY_DOCS_URL}
         onClick={() => initializeRoleMapping()}
       />
       <RoleMappingsTable
@@ -77,7 +74,6 @@ export const RoleMappings: React.FC = () => {
         accessItemKey="engines"
         accessHeader={ROLE_MAPPINGS_ENGINE_ACCESS_HEADING}
         initializeRoleMapping={initializeRoleMapping}
-        shouldShowAuthProvider={multipleAuthProvidersConfig}
         handleDeleteMapping={handleDeleteMapping}
       />
     </section>

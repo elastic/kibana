@@ -44,6 +44,7 @@ import { CreateRulesSchema } from '../../../../../../common/detection_engine/sch
 import { stepDefineDefaultValue } from '../../../../components/rules/step_define_rule';
 import { stepAboutDefaultValue } from '../../../../components/rules/step_about_rule/default_value';
 import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_actions';
+import { FieldValueThreshold } from '../../../../components/rules/threshold_input';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
@@ -266,7 +267,6 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         ...(ruleType === 'query' &&
           ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
       };
-
   return {
     ...baseFields,
     ...typeFields,
@@ -402,6 +402,9 @@ export const formatPreviewRule = ({
   ruleType,
   threatMapping,
   timeFrame,
+  threshold,
+  machineLearningJobId,
+  anomalyThreshold,
 }: {
   index: string[];
   threatIndex: string[];
@@ -410,6 +413,9 @@ export const formatPreviewRule = ({
   ruleType: Type;
   threatMapping: ThreatMapping;
   timeFrame: Unit;
+  threshold: FieldValueThreshold;
+  machineLearningJobId: string[];
+  anomalyThreshold: number;
 }): CreateRulesSchema => {
   const defineStepData = {
     ...stepDefineDefaultValue,
@@ -419,6 +425,9 @@ export const formatPreviewRule = ({
     threatIndex,
     threatQueryBar: threatQuery,
     threatMapping,
+    threshold,
+    machineLearningJobId,
+    anomalyThreshold,
   };
   const aboutStepData = {
     ...stepAboutDefaultValue,
@@ -426,8 +435,8 @@ export const formatPreviewRule = ({
     description: 'Preview Rule',
   };
   const scheduleStepData = {
-    from: `now-${timeFrame === 'w' ? '604830' : timeFrame === 'd' ? '86420' : '3610'}s`,
-    interval: `30s`,
+    from: `now-${timeFrame === 'M' ? '25h' : timeFrame === 'd' ? '65m' : '6m'}`,
+    interval: `${timeFrame === 'M' ? '1d' : timeFrame === 'd' ? '1h' : '5m'}`,
   };
   return {
     ...formatRule<CreateRulesSchema>(

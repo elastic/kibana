@@ -5,33 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectMigrationFn } from 'kibana/server';
 
-import type { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
-import type {
-  Agent,
-  AgentPolicy,
-  PackagePolicy,
-  EnrollmentAPIKey,
-  Settings,
-  AgentAction,
-} from '../../types';
-
-export const migrateAgentToV7100: SavedObjectMigrationFn<
-  Exclude<Agent, 'policy_id' | 'policy_revision'> & {
-    config_id?: string;
-    config_revision?: number | null;
-  },
-  Agent
-> = (agentDoc) => {
-  agentDoc.attributes.policy_id = agentDoc.attributes.config_id;
-  delete agentDoc.attributes.config_id;
-
-  agentDoc.attributes.policy_revision = agentDoc.attributes.config_revision;
-  delete agentDoc.attributes.config_revision;
-
-  return agentDoc;
-};
+import type { AgentPolicy, PackagePolicy, Settings } from '../../types';
 
 export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
   Exclude<AgentPolicy, 'package_policies'> & {
@@ -44,18 +20,6 @@ export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
   delete agentPolicyDoc.attributes.package_configs;
 
   return agentPolicyDoc;
-};
-
-export const migrateEnrollmentApiKeysToV7100: SavedObjectMigrationFn<
-  Exclude<EnrollmentAPIKey, 'policy_id'> & {
-    config_id?: string;
-  },
-  EnrollmentAPIKey
-> = (enrollmentApiKeyDoc) => {
-  enrollmentApiKeyDoc.attributes.policy_id = enrollmentApiKeyDoc.attributes.config_id;
-  delete enrollmentApiKeyDoc.attributes.config_id;
-
-  return enrollmentApiKeyDoc;
 };
 
 export const migratePackagePolicyToV7100: SavedObjectMigrationFn<
@@ -83,46 +47,4 @@ export const migrateSettingsToV7100: SavedObjectMigrationFn<
   delete settingsDoc.attributes.kibana_url;
 
   return settingsDoc;
-};
-
-export const migrateAgentActionToV7100 = (
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
-): SavedObjectMigrationFn<AgentAction, AgentAction> => {
-  return encryptedSavedObjects.createMigration({
-    isMigrationNeededPredicate: (
-      agentActionDoc
-    ): agentActionDoc is SavedObjectUnsanitizedDoc<AgentAction> => {
-      // @ts-expect-error
-      return agentActionDoc.attributes.type === 'CONFIG_CHANGE';
-    },
-    migration: (agentActionDoc) => {
-      let agentActionData;
-      try {
-        agentActionData = agentActionDoc.attributes.data
-          ? JSON.parse(agentActionDoc.attributes.data)
-          : undefined;
-      } catch (e) {
-        // Silently swallow JSON parsing error
-      }
-      if (agentActionData && agentActionData.config) {
-        const {
-          attributes: { data, ...restOfAttributes },
-        } = agentActionDoc;
-        const { config, ...restOfData } = agentActionData;
-        return {
-          ...agentActionDoc,
-          attributes: {
-            ...restOfAttributes,
-            type: 'POLICY_CHANGE',
-            data: JSON.stringify({
-              ...restOfData,
-              policy: config,
-            }),
-          },
-        };
-      } else {
-        return agentActionDoc;
-      }
-    },
-  });
 };

@@ -7,7 +7,10 @@
 
 import { isEmpty } from 'lodash/fp';
 
-export const parseQueryFilterToKQL = (filter: string, fields: Readonly<string[]>): string => {
+export const parseQueryFilterToKQL = (
+  filter: string | undefined,
+  fields: Readonly<string[]>
+): string => {
   if (!filter) return '';
   const kuery = fields
     .map(
@@ -28,19 +31,17 @@ const getPolicyQuery = (policyId: string): string => {
   return `exception-list-agnostic.attributes.tags:"policy:${policyId}"`;
 };
 
-export const parsePoliciesToKQL = (includedPolicies: string, excludedPolicies: string): string => {
+export const parsePoliciesToKQL = (
+  includedPolicies: string[],
+  excludedPolicies: string[] = []
+): string => {
   if (isEmpty(includedPolicies) && isEmpty(excludedPolicies)) return '';
 
-  const parsedIncludedPolicies = includedPolicies ? includedPolicies.split(',') : undefined;
-  const parsedExcludedPolicies = excludedPolicies ? excludedPolicies.split(',') : undefined;
+  const includedPoliciesKuery = includedPolicies.map(getPolicyQuery).join(' OR ');
 
-  const includedPoliciesKuery = parsedIncludedPolicies
-    ? parsedIncludedPolicies.map(getPolicyQuery).join(' OR ')
-    : '';
-
-  const excludedPoliciesKuery = parsedExcludedPolicies
-    ? parsedExcludedPolicies.map((policyId) => `not ${getPolicyQuery(policyId)}`).join(' AND ')
-    : '';
+  const excludedPoliciesKuery = excludedPolicies
+    .map((policyId) => `not ${getPolicyQuery(policyId)}`)
+    .join(' AND ');
 
   const kuery = [];
 
@@ -48,4 +49,29 @@ export const parsePoliciesToKQL = (includedPolicies: string, excludedPolicies: s
   if (excludedPoliciesKuery) kuery.push(excludedPoliciesKuery);
 
   return `(${kuery.join(' AND ')})`;
+};
+
+/**
+ * Takes a list of policies (string[]) and an existing kuery
+ * (string) and returns an unified KQL with and AND
+ * The policy list can also contain "unassigned" and "global".
+ * @param policies string[] a list of policies ids.
+ * @param excludedPolicies string[] a list of policies ids to exclude.
+ * @param kuery string an existing KQL.
+ */
+export const parsePoliciesAndFilterToKql = ({
+  policies = [],
+  excludedPolicies = [],
+  kuery,
+}: {
+  policies?: string[];
+  excludedPolicies?: string[];
+  kuery?: string;
+}): string | undefined => {
+  if (policies?.length === 0 && excludedPolicies?.length === 0) {
+    return kuery ? kuery : undefined;
+  }
+
+  const policiesKQL = parsePoliciesToKQL(policies, excludedPolicies);
+  return `(${policiesKQL})${kuery ? ` AND (${kuery})` : ''}`;
 };

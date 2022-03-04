@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
 import { IScopedClusterClient } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
 import { AnalysisConfig, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelMemoryEstimationResult {
@@ -89,6 +88,7 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
       new Set<string>()
     );
 
+    // @ts-expect-error influencers is optional
     const normalizedInfluencers: estypes.Field[] = Array.isArray(influencers)
       ? influencers
       : [influencers];
@@ -152,7 +152,7 @@ export function calculateModelMemoryLimitProvider(
     allowMMLGreaterThanMax = false,
     datafeedConfig?: Datafeed
   ): Promise<ModelMemoryEstimationResult> {
-    const { body: info } = await mlClient.info<MlInfoResponse>();
+    const info = await mlClient.info();
     const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
     const effectiveMaxModelMemoryLimit =
       info.limits.effective_max_model_memory_limit?.toUpperCase();
@@ -167,7 +167,7 @@ export function calculateModelMemoryLimitProvider(
       datafeedConfig
     );
 
-    const { body } = await mlClient.estimateModelMemory<ModelMemoryEstimateResponse>({
+    const body = await mlClient.estimateModelMemory({
       body: {
         analysis_config: analysisConfig,
         overall_cardinality: overallCardinality,
