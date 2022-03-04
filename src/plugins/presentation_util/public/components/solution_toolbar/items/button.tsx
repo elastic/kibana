@@ -12,6 +12,7 @@ import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/butt
 
 import './button.scss';
 
+/** @deprecated Use `SolutionToolbarButton` from `src/plugins/shared_ux/public`. */
 export interface Props
   extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType' | 'iconSide' | 'className'> {
   label: string;
@@ -19,6 +20,7 @@ export interface Props
   isDarkModeEnabled?: boolean;
 }
 
+/** @deprecated Use `SolutionToolbarButton` from `src/plugins/shared_ux/public`. */
 export const SolutionToolbarButton = ({ label, primary, className, ...rest }: Props) => (
   <EuiButton
     {...rest}
