@@ -52,6 +52,7 @@ Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
+  fullWidthContent?: React.ReactNode;
   growLeftSplit?: boolean;
   headerFilters?: string | React.ReactNode;
   height?: number;
@@ -73,6 +74,7 @@ export interface HeaderSectionProps extends HeaderProps {
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   border,
   children,
+  fullWidthContent,
   growLeftSplit = true,
   headerFilters,
   height,
@@ -108,8 +110,13 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
       className={classNames}
       $hideSubtitle={hideSubtitle}
     >
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-        <EuiFlexItem>
+      <EuiFlexGroup
+        alignItems={stackHeader ? undefined : 'flexStart'}
+        direction={stackHeader ? 'column' : 'row'}
+        gutterSize="xs"
+        responsive={false}
+      >
+        <EuiFlexItem grow={growLeftSplit}>
           <EuiFlexGroup
             alignItems={stackHeader ? undefined : 'center'}
             direction={stackHeader ? 'column' : 'row'}
@@ -190,6 +197,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {fullWidthContent != null && fullWidthContent}
     </Header>
   );
 };

@@ -130,6 +130,27 @@ export const USER_UNAUTHENTICATED_MSG_BODY = i18n.translate(
   }
 );
 
+export const VIEW_RISK_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.viewRiskLabel',
+  {
+    defaultMessage: 'Risk',
+  }
+);
+
+export const VIEW_COUNT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.viewCountLabel',
+  {
+    defaultMessage: 'Count',
+  }
+);
+
+export const VIEW_TREND_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.viewTrendLabel',
+  {
+    defaultMessage: 'Trend',
+  }
+);
+
 export const ML_RULES_DISABLED_MESSAGE = i18n.translate(
   'xpack.securitySolution.detectionEngine.mlRulesDisabledMessageTitle',
   {

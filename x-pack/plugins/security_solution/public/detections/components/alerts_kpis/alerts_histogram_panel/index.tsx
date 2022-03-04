@@ -48,6 +48,7 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { ChartOptionsFlexItem } from '../../../pages/detection_engine/chart_context_menu';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -62,21 +63,26 @@ const ViewAlertsFlexItem = styled(EuiFlexItem)`
 
 interface AlertsHistogramPanelProps {
   chartHeight?: number;
+  chartOptionsContextMenu?: React.ReactNode;
   combinedQueries?: string;
-  defaultStackByOption?: AlertsStackByField;
+  defaultStackByOption?: string;
   filters?: Filter[];
   headerChildren?: React.ReactNode;
+  onFieldSelected?: (field: string) => void;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
   paddingSize?: 's' | 'm' | 'l' | 'none';
+  panelHeight?: number;
   titleSize?: EuiTitleSize;
   query?: Query;
   legendPosition?: Position;
   signalIndexName: string | null;
+  showCountsInLegend?: boolean;
   showLegend?: boolean;
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
   showStackBy?: boolean;
+  stackByWidth?: number;
   timelineId?: string;
   title?: string;
   updateDateRange: UpdateDateRange;
@@ -88,19 +94,24 @@ const NO_LEGEND_DATA: LegendItem[] = [];
 export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
   ({
     chartHeight,
+    chartOptionsContextMenu,
     combinedQueries,
     defaultStackByOption = DEFAULT_STACK_BY_FIELD,
     filters,
     headerChildren,
+    onFieldSelected,
     onlyField,
     paddingSize = 'm',
+    panelHeight = PANEL_HEIGHT,
     query,
     legendPosition = 'right',
     signalIndexName,
+    showCountsInLegend = false,
     showLegend = true,
     showLinkToAlerts = false,
     showTotalAlertsCount = false,
     showStackBy = true,
+    stackByWidth,
     timelineId,
     title = i18n.HISTOGRAM_HEADER,
     updateDateRange,
@@ -118,6 +129,19 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
       onlyField == null ? defaultStackByOption : onlyField
     );
+    const onSelect = useCallback(
+      (field: string) => {
+        setSelectedStackByOption(field);
+        if (onFieldSelected != null) {
+          onFieldSelected(field);
+        }
+      },
+      [onFieldSelected]
+    );
+
+    useEffect(() => {
+      setSelectedStackByOption(onlyField == null ? defaultStackByOption : onlyField);
+    }, [defaultStackByOption, onlyField]);
 
     const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_HISTOGRAM_ID);
     const [querySkip, setQuerySkip] = useState(!toggleStatus);
@@ -183,6 +207,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         showLegend && alertsData?.aggregations?.alertsByGrouping?.buckets != null
           ? alertsData.aggregations.alertsByGrouping.buckets.map((bucket, i) => ({
               color: i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
+              count: showCountsInLegend ? bucket.doc_count : undefined,
               dataProviderId: escapeDataProviderId(
                 `draggable-legend-item-${uuid.v4()}-${selectedStackByOption}-${bucket.key}`
               ),
@@ -194,6 +219,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       [
         alertsData?.aggregations?.alertsByGrouping.buckets,
         selectedStackByOption,
+        showCountsInLegend,
         showLegend,
         timelineId,
       ]
@@ -289,7 +315,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     return (
       <InspectButtonContainer show={!isInitialLoading && toggleStatus}>
         <KpiPanel
-          height={PANEL_HEIGHT}
+          height={panelHeight}
           hasBorder
           paddingSize={paddingSize}
           data-test-subj="alerts-histogram-panel"
@@ -311,12 +337,17 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                   <>
                     <StackByComboBox
                       selected={selectedStackByOption}
-                      onSelect={setSelectedStackByOption}
+                      onSelect={onSelect}
+                      width={stackByWidth}
                     />
                   </>
                 )}
                 {headerChildren != null && headerChildren}
               </EuiFlexItem>
+              {chartOptionsContextMenu != null && (
+                <ChartOptionsFlexItem grow={false}>{chartOptionsContextMenu}</ChartOptionsFlexItem>
+              )}
+
               {linkButton}
             </EuiFlexGroup>
           </HeaderSection>
@@ -333,6 +364,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 legendPosition={legendPosition}
                 loading={isLoadingAlerts}
                 to={to}
+                showCountsInLegend={showCountsInLegend}
                 showLegend={showLegend}
                 updateDateRange={updateDateRange}
               />

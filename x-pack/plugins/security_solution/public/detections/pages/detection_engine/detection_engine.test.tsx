@@ -93,6 +93,10 @@ jest.mock('../../../common/lib/kibana', () => {
             },
           },
         },
+        storage: {
+          get: jest.fn(),
+          set: jest.fn(),
+        },
       },
     }),
     useToasts: jest.fn().mockReturnValue({

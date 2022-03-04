@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { waitFor, act } from '@testing-library/react';
-
 import { mount } from 'enzyme';
-import { TestProviders } from '../../../../common/mock';
 
 import { AlertsCountPanel } from '.';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
+import { TestProviders } from '../../../../common/mock';
 
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('react-router-dom', () => {
@@ -20,12 +20,32 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
+const defaultUseQueryAlertsReturn = {
+  loading: false,
+  data: {},
+  setQuery: () => {},
+  response: '',
+  request: '',
+  refetch: () => {},
+};
+const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
+jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
+  return {
+    useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
+  };
+});
+
 describe('AlertsCountPanel', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',
+    stackByField0: DEFAULT_STACK_BY_FIELD,
+    stackByField1: DEFAULT_STACK_BY_FIELD1,
+    setStackByField0: jest.fn(),
+    setStackByField1: jest.fn(),
   };
   const mockSetToggle = jest.fn();
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });

@@ -8,7 +8,7 @@
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
 export const ALERT_COUNT_TABLE_FIRST_ROW_COUNT =
-  '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(2) .euiTableCellContent__text';
+  '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(3) .euiTableCellContent__text';
 
 export const ALERT_CHECKBOX = '[data-test-subj~="select-event"].euiCheckbox__input';
 
@@ -51,7 +51,7 @@ export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAler
 
 export const LOADING_ALERTS_PANEL = '[data-test-subj="loading-alerts-panel"]';
 
-export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-detection-rules"]';
+export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="navigation-rules"]';
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 

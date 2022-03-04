@@ -7,83 +7,94 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiProgress, EuiInMemoryTable } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
-import numeral from '@elastic/numeral';
+
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
-import * as i18n from './translations';
-import { DefaultDraggable } from '../../../../common/components/draggables';
-import type { GenericBuckets } from '../../../../../common/search_strategy';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { AlertsCountAggregation } from './types';
+import {
+  getMaxRiskSubAggregations,
+  getUpToMaxBuckets,
+} from '../../../../common/components/alerts_treemap/component/helpers';
+import { getFlattenedBuckets } from '../../../../common/components/alerts_treemap/flatten/get_flattened_buckets';
+import type {
+  FlattenedBucket,
+  RawBucket,
+} from '../../../../common/components/alerts_treemap/types';
+import {
+  getMultiGroupAlertsCountTableColumns,
+  getSingleGroupByAlertsCountTableColumns,
+} from './columns';
+import { DEFAULT_STACK_BY_FIELD0_SIZE } from './helpers';
 
 interface AlertsCountProps {
   loading: boolean;
-  data: AlertSearchResponse<unknown, AlertsCountAggregation> | null;
-  selectedStackByOption: string;
+  data: AlertSearchResponse<unknown, AlertsCountAggregation>;
+  stackByField0: string;
+  stackByField1: string | undefined;
 }
 
 const Wrapper = styled.div`
   margin-top: -${({ theme }) => theme.eui.euiSizeS};
 `;
 
-const getAlertsCountTableColumns = (
-  selectedStackByOption: string,
-  defaultNumberFormat: string
-): Array<EuiBasicTableColumn<GenericBuckets>> => {
-  return [
-    {
-      field: 'key',
-      name: selectedStackByOption,
-      truncateText: false,
-      render: function DraggableStackOptionField(value: string) {
-        return (
-          <DefaultDraggable
-            isDraggable={false}
-            field={selectedStackByOption}
-            hideTopN={true}
-            id={`alert-count-draggable-${selectedStackByOption}-${value}`}
-            value={value}
-            tooltipContent={null}
-          />
-        );
-      },
-    },
-    {
-      field: 'doc_count',
-      name: i18n.COUNT_TABLE_COLUMN_TITLE,
-      sortable: true,
-      textOnly: true,
-      dataType: 'number',
-      render: (item: string) => numeral(item).format(defaultNumberFormat),
-    },
-  ];
-};
+export const AlertsCount = memo<AlertsCountProps>(
+  ({ data, loading, stackByField0, stackByField1 }) => {
+    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-export const AlertsCount = memo<AlertsCountProps>(({ loading, selectedStackByOption, data }) => {
-  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const listItems: GenericBuckets[] = data?.aggregations?.alertsByGroupingCount?.buckets ?? [];
-  const tableColumns = useMemo(
-    () => getAlertsCountTableColumns(selectedStackByOption, defaultNumberFormat),
-    [selectedStackByOption, defaultNumberFormat]
-  );
+    const tableColumns = useMemo(
+      () =>
+        isEmpty(stackByField1?.trim())
+          ? getSingleGroupByAlertsCountTableColumns({
+              defaultNumberFormat,
+              stackByField0,
+            })
+          : getMultiGroupAlertsCountTableColumns({
+              defaultNumberFormat,
+              stackByField0,
+              stackByField1,
+            }),
+      [defaultNumberFormat, stackByField0, stackByField1]
+    );
 
-  return (
-    <>
-      {loading && <EuiProgress size="xs" position="absolute" color="accent" />}
+    const buckets: RawBucket[] = useMemo(
+      () =>
+        getUpToMaxBuckets({
+          buckets: data.aggregations?.stackByField0?.buckets,
+          maxItems: DEFAULT_STACK_BY_FIELD0_SIZE,
+        }),
+      [data.aggregations?.stackByField0?.buckets]
+    );
 
+    const maxRiskSubAggregations = useMemo(() => getMaxRiskSubAggregations(buckets), [buckets]);
+
+    const items: FlattenedBucket[] = useMemo(
+      () =>
+        isEmpty(stackByField1?.trim())
+          ? buckets
+          : getFlattenedBuckets({
+              buckets,
+              maxRiskSubAggregations,
+              stackByField0,
+            }),
+      [buckets, maxRiskSubAggregations, stackByField0, stackByField1]
+    );
+
+    return (
       <Wrapper data-test-subj="alertsCountTable" className="eui-yScroll">
         <EuiInMemoryTable
           isSelectable={false}
           columns={tableColumns}
-          items={listItems}
+          items={items}
           loading={loading}
           sorting={true}
         />
       </Wrapper>
-    </>
-  );
-});
+    );
+  }
+);
 
 AlertsCount.displayName = 'AlertsCount';

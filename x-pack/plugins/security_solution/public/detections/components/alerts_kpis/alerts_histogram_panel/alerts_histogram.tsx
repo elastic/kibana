@@ -21,6 +21,7 @@ import { EMPTY_VALUE_LABEL } from '../../../../common/components/charts/translat
 import type { HistogramData } from './types';
 
 const DEFAULT_CHART_HEIGHT = 174;
+const LEGEND_WITH_COUNTS_WIDTH = 300; // px
 
 interface AlertsHistogramProps {
   chartHeight?: number;
@@ -28,6 +29,7 @@ interface AlertsHistogramProps {
   legendItems: LegendItem[];
   legendPosition?: Position;
   loading: boolean;
+  showCountsInLegend?: boolean;
   showLegend?: boolean;
   to: string;
   data: HistogramData[];
@@ -41,6 +43,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
     legendItems,
     legendPosition = Position.Right,
     loading,
+    showCountsInLegend = false,
     showLegend,
     to,
     updateDateRange,
@@ -98,7 +101,12 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {legendItems.length > 0 && (
-              <DraggableLegend legendItems={legendItems} height={chartHeight} />
+              <DraggableLegend
+                legendItems={legendItems}
+                height={chartHeight}
+                showCountsInLegend={showCountsInLegend}
+                width={showCountsInLegend ? LEGEND_WITH_COUNTS_WIDTH : undefined}
+              />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

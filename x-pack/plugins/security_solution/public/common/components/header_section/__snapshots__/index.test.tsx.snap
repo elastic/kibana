@@ -7,7 +7,8 @@ exports[`HeaderSection it renders 1`] = `
   data-test-subj="header-section"
 >
   <EuiFlexGroup
-    direction="column"
+    alignItems="flexStart"
+    direction="row"
     gutterSize="xs"
     responsive={false}
   >

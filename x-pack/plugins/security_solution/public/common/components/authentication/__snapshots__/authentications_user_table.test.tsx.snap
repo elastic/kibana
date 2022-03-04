@@ -65,7 +65,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
     data-test-subj="header-section"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionColumn"
+      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <div
         class="euiFlexItem"

@@ -12,16 +12,18 @@ import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT } from './config';
 import { useStackByFields } from './hooks';
 import * as i18n from './translations';
 
+const DEFAULT_WIDTH = 400;
+
 export const KpiPanel = styled(EuiPanel)<{ height?: number; $toggleStatus: boolean }>`
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
-    ${({ $toggleStatus }) =>
+    ${({ height, $toggleStatus }) =>
       $toggleStatus &&
       `
-    height: ${PANEL_HEIGHT}px;
+      height: ${height != null ? height : PANEL_HEIGHT}px;
   `}
   }
   ${({ $toggleStatus }) =>
@@ -31,15 +33,23 @@ export const KpiPanel = styled(EuiPanel)<{ height?: number; $toggleStatus: boole
   `}
 `;
 interface StackedBySelectProps {
+  prepend?: string;
   selected: string;
   onSelect: (selected: string) => void;
+  width?: number;
 }
 
-export const StackByComboBoxWrapper = styled.div`
+export const StackByComboBoxWrapper = styled.div<{ width: number }>`
   max-width: 400px;
+  width: ${({ width }) => width}px;
 `;
 
-export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSelect }) => {
+export const StackByComboBox: React.FC<StackedBySelectProps> = ({
+  onSelect,
+  prepend = i18n.STACK_BY_LABEL,
+  selected,
+  width = DEFAULT_WIDTH,
+}) => {
   const onChange = useCallback(
     (options) => {
       if (options && options.length > 0) {
@@ -58,11 +68,11 @@ export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSe
     return { asPlainText: true };
   }, []);
   return (
-    <StackByComboBoxWrapper>
+    <StackByComboBoxWrapper width={width}>
       <EuiComboBox
         aria-label={i18n.STACK_BY_ARIA_LABEL}
         placeholder={i18n.STACK_BY_PLACEHOLDER}
-        prepend={i18n.STACK_BY_LABEL}
+        prepend={prepend}
         singleSelection={singleSelection}
         isClearable={false}
         sortMatchesBy="startsWith"
