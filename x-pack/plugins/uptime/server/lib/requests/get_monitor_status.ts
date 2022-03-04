@@ -7,7 +7,6 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PromiseType } from 'utility-types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
@@ -187,7 +186,7 @@ const executeQueryParams = async ({
   return { afterKeyRes, monitors };
 };
 
-type QueryResponse = PromiseType<ReturnType<typeof executeQueryParams>>;
+type QueryResponse = Awaited<ReturnType<typeof executeQueryParams>>;
 
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PromiseType } from 'utility-types';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { CertResult, GetCertsParams, Ping } from '../../../common/runtime_types';
 import {
@@ -22,7 +21,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
   return processCertsResult(result);
 };
 
-export type CertificatesResults = PromiseType<ReturnType<typeof getCertsResults>>;
+export type CertificatesResults = Awaited<ReturnType<typeof getCertsResults>>;
 
 const getCertsResults = async (
   requestParams: GetCertsParams & { uptimeEsClient: UptimeESClient }
