@@ -444,20 +444,20 @@ export class SessionIndex {
    * Trigger a removal of any outdated session values.
    */
   async cleanUp() {
-    this.options.logger.debug(`Running cleanup routine.`);
+    const { auditLogger, elasticsearchClient, logger } = this.options;
+    logger.debug(`Running cleanup routine.`);
 
+    let error: Error | undefined;
     try {
       for await (const sessionValues of this.getSessionValuesInBatches()) {
         const operations: Array<Required<Pick<BulkOperationContainer, 'delete'>>> = [];
         sessionValues.forEach(({ _id, _source }) => {
           const { usernameHash, provider } = _source!;
-          this.options.auditLogger.log(
-            sessionCleanupEvent({ sessionId: _id, usernameHash, provider })
-          );
+          auditLogger.log(sessionCleanupEvent({ sessionId: _id, usernameHash, provider }));
           operations.push({ delete: { _id } });
         });
         if (operations.length > 0) {
-          const bulkResponse = await this.options.elasticsearchClient.bulk(
+          const bulkResponse = await elasticsearchClient.bulk(
             {
               index: this.indexName,
               operations,
@@ -471,24 +471,27 @@ export class SessionIndex {
               0
             );
             if (errorCount < bulkResponse.items.length) {
-              this.options.logger.warn(
+              logger.warn(
                 `Failed to clean up ${errorCount} of ${bulkResponse.items.length} invalid or expired sessions. The remaining sessions were cleaned up successfully.`
               );
             } else {
-              this.options.logger.error(
+              logger.error(
                 `Failed to clean up ${bulkResponse.items.length} invalid or expired sessions.`
               );
             }
           } else {
-            this.options.logger.debug(
-              `Cleaned up ${bulkResponse.items.length} invalid or expired sessions.`
-            );
+            logger.debug(`Cleaned up ${bulkResponse.items.length} invalid or expired sessions.`);
           }
         }
       }
     } catch (err) {
-      this.options.logger.error(`Failed to clean up sessions: ${err.message}`);
-      throw err;
+      logger.error(`Failed to clean up sessions: ${err.message}`);
+      error = err;
+    }
+
+    if (error) {
+      // If we couldn't fetch or delete sessions, throw an error so the task will be retried.
+      throw error;
     }
   }
 
