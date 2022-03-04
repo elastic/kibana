@@ -88,7 +88,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
 
   return editMode ? (
     <>
-      <Title title={title} />
+      <Title title={title} releasePhase={releasePhase} />
       <EuiModal onClose={() => setEditMode(false)}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
