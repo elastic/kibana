@@ -8,7 +8,13 @@
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
 import type { KibanaExecutionContext } from 'kibana/public';
 import { FONTS_API_PATH } from '../common/constants';
-import { getHttp, getTilemap, getEMSSettings, getMapsEmsStart } from './kibana_services';
+import {
+  getHttp,
+  getTilemap,
+  getEMSSettings,
+  getMapsEmsStart,
+  getExecutionContext,
+} from './kibana_services';
 import { getLicenseId } from './licensed_features';
 import { makeExecutionContext } from '../common/execution_context';
 
@@ -67,9 +73,21 @@ export function isRetina(): boolean {
   return window.devicePixelRatio === 2;
 }
 
-export function makePublicExecutionContext(
-  id: string,
-  description?: string
-): KibanaExecutionContext {
-  return makeExecutionContext(id, window.location.pathname, description);
+export function makePublicExecutionContext(description: string): KibanaExecutionContext {
+  const topLevelContext = getExecutionContext().get();
+  const context = makeExecutionContext({
+    url: window.location.pathname,
+    description,
+  });
+
+  // Distinguish between running in maps app vs. embedded
+  return topLevelContext.name !== undefined && topLevelContext.name !== context.name
+    ? {
+        ...topLevelContext,
+        child: context,
+      }
+    : {
+        ...topLevelContext,
+        ...context,
+      };
 }
