@@ -6,9 +6,9 @@
  */
 
 import React, { createContext, useState, useMemo, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { parse } from 'query-string';
-import { ObservabilityPublicPluginsStart } from '..';
+import { fromQuery, ObservabilityPublicPluginsStart, toQuery } from '..';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { getAbsoluteTime } from '../utils/date';
 
@@ -31,9 +31,30 @@ export interface DatePickerContextValue {
 export const DatePickerContext = createContext({} as DatePickerContextValue);
 
 export function DatePickerContextProvider({ children }: { children: React.ReactElement }) {
-  const { data } = useKibana<ObservabilityPublicPluginsStart>().services;
+  const location = useLocation();
+  const history = useHistory();
+
+  const updateUrl = useCallback(
+    (nextQuery: {
+      rangeFrom?: string;
+      rangeTo?: string;
+      refreshPaused?: boolean;
+      refreshInterval?: number;
+    }) => {
+      history.push({
+        ...location,
+        search: fromQuery({
+          ...toQuery(location.search),
+          ...nextQuery,
+        }),
+      });
+    },
+    [history, location]
+  );
 
   const [lastUpdated, setLastUpdated] = useState(Date.now());
+
+  const { data } = useKibana<ObservabilityPublicPluginsStart>().services;
 
   const defaultTimeRange = data.query.timefilter.timefilter.getTimeDefaults();
   const sharedTimeRange = data.query.timefilter.timefilter.getTime();
@@ -45,7 +66,7 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
     rangeTo = sharedTimeRange.to ?? defaultTimeRange.to,
     refreshInterval = sharedRefreshInterval.value || defaultRefreshInterval.value || 10000, // we want to override a default of 0
     refreshPaused = sharedRefreshInterval.pause ?? defaultRefreshInterval.pause,
-  } = parse(useLocation().search, {
+  } = parse(location.search, {
     sort: false,
   });
 
@@ -69,16 +90,19 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
   const updateTimeRange = useCallback(
     ({ start, end }: { start: string; end: string }) => {
       data.query.timefilter.timefilter.setTime({ from: start, to: end });
+      updateUrl({ rangeFrom: start, rangeTo: end });
       setLastUpdated(Date.now());
     },
-    [data.query.timefilter.timefilter]
+    [data.query.timefilter.timefilter, updateUrl]
   );
 
   const updateRefreshInterval = useCallback(
     ({ interval, isPaused }) => {
+      updateUrl({ refreshInterval: interval, refreshPaused: isPaused });
       data.query.timefilter.timefilter.setRefreshInterval({ value: interval, pause: isPaused });
+      setLastUpdated(Date.now());
     },
-    [data.query.timefilter.timefilter]
+    [data.query.timefilter.timefilter, updateUrl]
   );
 
   return (
