@@ -1,0 +1,22 @@
+name: Assign to Infra Monitoring UI (beta) project
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  assign_to_project:
+    runs-on: ubuntu-latest
+    name: Assign issue or PR to project based on label
+    steps:
+      - name: Assign to project
+        uses: elastic/github-actions/project-assigner@v2.1.1
+        id: project_assigner_infra_monitoring
+        with:
+          issue-mappings: |
+            [
+              {"label": "Team:Infra Monitoring UI", "projectNumber": 664, "projectScope": "org"},
+              {"label": "Feature:Stack Monitoring", "projectNumber": 664, "projectScope": "org"},
+              {"label": "Feature:Logs UI", "projectNumber": 664, "projectScope": "org"},
+              {"label": "Feature:Metrics UI", "projectNumber": 664, "projectScope": "org"},
+            ]
+          ghToken: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
