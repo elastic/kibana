@@ -55,7 +55,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   private readonly versionMajor: number;
 
   // TODO move away from chunking and feed this data one by one to processors
-  async *stream(...eventSources: Array<EntityIterable<TFields>>) : AsyncGenerator<ApmFields, any, any> {
+  *stream(...eventSources: Array<EntityIterable<TFields>>) : Generator<ApmFields, any, any> {
     const maxBufferSize = this.options.maxBufferSize ?? StreamProcessor.defaultFlushInterval;
     const maxSourceEvents = this.options.maxSourceEvents;
     let localBuffer = [];
@@ -137,9 +137,9 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     map: (d: ApmFields) => TDocument,
     ...eventSources: Array<EntityIterable<TFields>>
   ): Generator<TDocument> {
-    //for (const apmFields of this.stream(...eventSources)) {
-      //yield map(apmFields);
-    //}
+    for (const apmFields of this.stream(...eventSources)) {
+      yield map(apmFields);
+    }
   }
   async *streamToDocumentAsync<TDocument>(
     map: (d: ApmFields) => TDocument,
@@ -150,7 +150,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     }
   }
   streamToArray(...eventSources: Array<EntityIterable<TFields>>) {
-    //return Array.from<ApmFields>(this.stream(...eventSources));
+    return Array.from<ApmFields>(this.stream(...eventSources));
   }
 
   private static enrich(document: ApmFields, version: string, versionMajor:number): ApmFields {

@@ -141,10 +141,7 @@ export class ApmSynthtraceEsClient {
       concurrency: options?.concurrency ?? 10,
       refresh: false,
       refreshOnCompletion: false,
-      //flushInterval: 1000,
-      //flushBytes: 5000000,
       flushBytes: 500000,
-      // flushInterval: options?.flushInterval ?? StreamProcessor.defaultFlushInterval,
       // TODO https://github.com/elastic/elasticsearch-js/issues/1610
       // having to map here is awkward, it'd be better to map just before serialization.
       datasource: sp.streamToDocumentAsync(StreamProcessor.toDocument, dataStream),

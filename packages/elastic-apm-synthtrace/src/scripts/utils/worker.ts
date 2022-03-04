@@ -65,8 +65,7 @@ async function setup() {
   };
   streamProcessor = new StreamProcessor({
     version: version,
-    // processors: StreamProcessor.apmProcessors,
-    processors: [],
+    processors: StreamProcessor.apmProcessors,
     maxSourceEvents: runOptions.maxDocs,
     logger: l,
     processedCallback: (processedDocuments) => {

@@ -60,7 +60,7 @@ function options(y: Argv) {
       description: 'Generate and index data continuously',
       boolean: true,
     })
-    .option('--dryRun', {
+    .option('dryRun', {
       description: 'Enumerates the stream without sending events to Elasticsearch ',
       boolean: true,
     })

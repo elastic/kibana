@@ -44,9 +44,9 @@ export class ApmSynthtraceKibanaClient {
   async discoverLocalKibana() {
     return await fetch("http://localhost:5601", { method: "HEAD", follow: 1, redirect: "manual"})
       .then((res) => {
-        console.log(Array.from(res.headers.keys()));
-        console.log(Array.from(res.headers.values()));
-        return res.headers.get('location');
+        const kibanaUrl = res.headers.get('location');
+        this.logger.info(`Discovered local kibana running at: ${kibanaUrl}`);
+        return kibanaUrl;
       })
   }
 
@@ -54,7 +54,7 @@ export class ApmSynthtraceKibanaClient {
     const response = await fetch(
       kibanaUrl + '/api/fleet/epm/packages/apm/' + version,
       {
-        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        method: 'POST',
         headers: {
           Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
           Accept: 'application/json',
