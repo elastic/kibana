@@ -118,7 +118,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const input = await find.activeElement();
       await input.type(`bytes > 6000`);
-      await input.focus();
+      // focus something else to dismiss formula's tooltip
+      await testSubjects.click('indexPattern-label-edit');
 
       await PageObjects.lens.closeDimensionEditor();
 
