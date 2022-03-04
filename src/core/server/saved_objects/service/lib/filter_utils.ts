@@ -67,20 +67,14 @@ export const validateConvertFilterToKueryNode = (
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
         const itemType = allowedTypes.filter((t) => t === item.type);
         if (itemType.length === 1) {
+          const kueryToAdd = esKuery.nodeTypes.function.buildNode('and', [
+            esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
+            existingKueryNode,
+          ]);
           if (path.length > 0) {
-            set(
-              filterKueryNode,
-              path,
-              esKuery.nodeTypes.function.buildNode('and', [
-                esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
-                existingKueryNode,
-              ])
-            );
+            set(filterKueryNode, path, kueryToAdd);
           } else {
-            filterKueryNode = esKuery.nodeTypes.function.buildNode('and', [
-              esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
-              filterKueryNode,
-            ]);
+            filterKueryNode = kueryToAdd;
           }
         }
       } else {

@@ -193,13 +193,13 @@ describe('Filter Utils', () => {
       ).toEqual(esKuery.fromKueryExpression('alert.params.foo:bar'));
     });
 
-    test('Assemble filter with just "_id"', () => {
+    test('Assemble filter with just "_id" and one type', () => {
       expect(
         validateConvertFilterToKueryNode(['foo'], 'foo._id: 0123456789', mockMappings)
       ).toEqual(esKuery.fromKueryExpression('type: foo and _id: 0123456789'));
     });
 
-    test('Assemble filter with "_id" and more', () => {
+    test('Assemble filter with "_id" and one type and more', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo'],
@@ -209,6 +209,20 @@ describe('Filter Utils', () => {
       ).toEqual(
         esKuery.fromKueryExpression(
           '(type: foo and _id: 0123456789) and ((type: foo and updated_at: 5678654567) or foo.bytes > 1000)'
+        )
+      );
+    });
+
+    test('Assemble filter with "_id" and multi type and more', () => {
+      expect(
+        validateConvertFilterToKueryNode(
+          ['foo', 'bar'],
+          'foo._id: 0123456789 and bar._id: 9876543210',
+          mockMappings
+        )
+      ).toEqual(
+        esKuery.fromKueryExpression(
+          '(type: foo and _id: 0123456789) and (type: bar and _id: 9876543210)'
         )
       );
     });
