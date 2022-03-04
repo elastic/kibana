@@ -151,10 +151,9 @@ export interface Router<TRoutes extends RouteMap> {
   ): TOptional extends true
     ? TypeOf<TRoutes, T1> | TypeOf<TRoutes, T2> | TypeOf<TRoutes, T3> | undefined
     : TypeOf<TRoutes, T1> | TypeOf<TRoutes, T2> | TypeOf<TRoutes, T3>;
-  link<TPath extends PathsOf<TRoutes>, TOptional extends boolean>(path: TPath): string;
   link<TPath extends PathsOf<TRoutes>, TOptional extends boolean>(
     path: TPath,
-    arg: TypeOf<TRoutes, TPath, false> | TOptional
+    arg?: TypeOf<TRoutes, TPath, false> | TOptional
   ): string;
   link<TPath extends PathsOf<TRoutes>, TOptional extends boolean>(
     path: TPath,
