@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(
         ['global_discover_read', 'global_visualize_read', 'test_logstash_reader'],
-        false
+        { skipBrowserRefresh: true }
       );
     });
 
