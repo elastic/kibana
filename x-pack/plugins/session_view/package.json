@@ -1,0 +1,11 @@
+{
+  "author": "Elastic",
+  "name": "session_view",
+  "version": "8.0.0",
+  "private": true,
+  "license": "Elastic-License",
+  "scripts": {
+    "test:jest": "node ../../scripts/jest",
+    "test:coverage": "node ../../scripts/jest --coverage"
+  }
+}
