@@ -6,6 +6,8 @@
  */
 
 export { ArtifactListPage } from './artifact_list_page';
-export type { ArtifactListPageProps } from './artifact_list_page';
 export * from './types';
-export { ArtifactListPageLabels, artifactListPageLabels } from './translations';
+export { artifactListPageLabels } from './translations';
+
+export type { ArtifactListPageProps } from './artifact_list_page';
+export type { ArtifactListPageLabels } from './translations';
