@@ -21,7 +21,7 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
@@ -58,11 +58,11 @@ export function APMSection({ bucketSize }: Props) {
   const chartTheme = useChartTheme();
   const history = useHistory();
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const { data, status } = useFetcher(
     () => {
-      if (bucketSize) {
+      if (bucketSize && absoluteStart && absoluteEnd) {
         return getDataHandler('apm')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
@@ -70,9 +70,8 @@ export function APMSection({ bucketSize }: Props) {
         });
       }
     },
-    // Absolute times shouldn't be used here, since it would refetch on every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, forceUpdate]
+    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate]
   );
 
   if (!hasDataMap.apm?.hasData) {
