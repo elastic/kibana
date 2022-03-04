@@ -39,7 +39,7 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
 });
 
 describe('Policy details artifacts list', () => {
-  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
@@ -54,6 +54,9 @@ describe('Policy details artifacts list', () => {
     ({ history } = mockedContext);
     getNewInstance = () => new EventFiltersApiClient(mockedContext.coreStart.http);
     handleOnDeleteActionCallbackMock = jest.fn();
+    getEndpointPrivilegesInitialStateMock({
+      canCreateArtifactsByPolicy: true,
+    });
     render = async (externalPrivileges = true) => {
       await act(async () => {
         renderResult = mockedContext.render(
@@ -164,5 +167,20 @@ describe('Policy details artifacts list', () => {
     );
 
     expect(renderResult.queryByTestId('remove-from-policy-action')).toBeNull();
+  });
+
+  describe('without external privileges', () => {
+    it('should not display the delete action, do show the full details', async () => {
+      mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+        getFoundExceptionListItemSchemaMock(1)
+      );
+      await render(false);
+      // click the actions button
+      userEvent.click(
+        await renderResult.findByTestId('artifacts-collapsed-list-card-header-actions-button')
+      );
+      expect(renderResult.queryByTestId('remove-from-policy-action')).toBeFalsy();
+      expect(renderResult.queryByTestId('view-full-details-action')).toBeTruthy();
+    });
   });
 });

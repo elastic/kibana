@@ -27,7 +27,7 @@ import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from '../../tabs/event_filters_t
 import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
 
-let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
 let mockedContext: AppContextTestRender;
 let renderResult: ReturnType<AppContextTestRender['render']>;
 let policyItem: ImmutableObject<PolicyData>;
@@ -44,7 +44,11 @@ describe('Policy artifacts layout', () => {
     policyItem = generator.generatePolicyPackagePolicy();
     getNewInstance = () => new EventFiltersApiClient(mockedContext.coreStart.http);
     ({ history } = mockedContext);
-    render = async () => {
+
+    getEndpointPrivilegesInitialStateMock({
+      canCreateArtifactsByPolicy: true,
+    });
+    render = async (externalPrivileges = true) => {
       await act(async () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsLayout
@@ -54,6 +58,7 @@ describe('Policy artifacts layout', () => {
             searcheableFields={[...EVENT_FILTERS_SEARCHABLE_FIELDS]}
             getArtifactPath={getEventFiltersListPath}
             getPolicyArtifactsPath={getPolicyEventFiltersPath}
+            externalPrivileges={externalPrivileges}
           />
         );
         await waitFor(mockedApi.responseProvider.eventFiltersList);
@@ -130,7 +135,7 @@ describe('Policy artifacts layout', () => {
 
     await render();
     mockedContext.history.push(getPolicyDetailsArtifactsListPath(policyItem.id));
-    expect(renderResult.queryByTestId('assign-event-filter-button')).toBeNull();
+    expect(renderResult.queryByTestId('artifacts-assign-button')).toBeNull();
   });
 
   it('should hide the `Assign artifacts to policy` button license is downgraded to gold or below', async () => {
@@ -161,5 +166,15 @@ describe('Policy artifacts layout', () => {
     );
 
     expect(renderResult.queryByTestId('artifacts-assign-flyout')).toBeNull();
+  });
+
+  describe('Without external privileges', () => {
+    it('should not display the assign policies button', async () => {
+      mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+        getFoundExceptionListItemSchemaMock(5)
+      );
+      await render(false);
+      expect(renderResult.queryByTestId('artifacts-assign-button')).toBeNull();
+    });
   });
 });
