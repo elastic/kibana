@@ -13,7 +13,6 @@ import apm, { Span, Transaction } from 'elastic-apm-node';
 import { setTimeout } from 'timers/promises';
 import playwright, { ChromiumBrowser, Page, BrowserContext } from 'playwright';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
-import { getUserActionProfile } from '../tests/user_action_profiles';
 
 type StorageState = Awaited<ReturnType<BrowserContext['storageState']>>;
 
@@ -31,8 +30,8 @@ type Steps = Array<{ name: string; fn: StepFn }>;
 
 export class PerformanceTestingService extends FtrService {
   private readonly config = this.ctx.getService('config');
-  // private readonly es = this.ctx.getService('es');
   private readonly lifecycle = this.ctx.getService('lifecycle');
+  private readonly userActions = this.ctx.getService('userActions');
   private browser: ChromiumBrowser | undefined;
   private storageState: StorageState | undefined;
   private currentSpanStack: Array<Span | null> = [];
@@ -112,7 +111,7 @@ export class PerformanceTestingService extends FtrService {
     }
 
     await this.withSpan('initial login', undefined, async () => {
-      const { INPUT_DELAYS } = getUserActionProfile();
+      const { INPUT_DELAYS } = this.userActions.getDelays();
 
       const kibanaUrl = Url.format({
         protocol: this.config.get('servers.kibana.protocol'),

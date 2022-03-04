@@ -7,6 +7,7 @@
 
 import { services as functionalServices } from '../../functional/services';
 import { PerformanceTestingService } from './performance';
+import { UserActionsService } from './user_actions';
 
 export const services = {
   es: functionalServices.es,
@@ -14,4 +15,5 @@ export const services = {
   esArchiver: functionalServices.esArchiver,
   retry: functionalServices.retry,
   performance: PerformanceTestingService,
+  userActions: UserActionsService,
 };
