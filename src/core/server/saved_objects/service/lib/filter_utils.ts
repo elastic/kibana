@@ -16,7 +16,7 @@ type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
 
-const addAttributesInMappingIndex = (indexMapping: IndexMapping) => {
+const addPropertiesInMappingIndex = (indexMapping: IndexMapping) => {
   if (!Object.keys(indexMapping.properties).includes('_id')) {
     indexMapping.properties = {
       _id: { type: 'keyword' },
@@ -31,7 +31,7 @@ export const validateConvertFilterToKueryNode = (
   indexMapping: IndexMapping
 ): KueryNode | undefined => {
   if (filter && indexMapping) {
-    addAttributesInMappingIndex(indexMapping);
+    addPropertiesInMappingIndex(indexMapping);
     let filterKueryNode =
       typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : cloneDeep(filter);
 
