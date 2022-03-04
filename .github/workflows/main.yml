@@ -1,4 +1,4 @@
-name: Add to Infra Monitoring UI Project
+name: Add issues to Infra Monitoring UI project
 on:
   issues:
     types: [labeled]
@@ -15,7 +15,9 @@ jobs:
           config: |
             [
               {"label": "Team:Infra Monitoring UI", "projectNumber": 664},
-              {"label": "Feature:Stack Monitoring", "projectNumber": 664}
+              {"label": "Feature:Stack Monitoring", "projectNumber": 664},
+              {"label": "Feature:Logs UI", "projectNumber": 664},
+              {"label": "Feature:Metrics UI", "projectNumber": 664},
             ]
         env:
           GRAPHQL_API_BASE: 'https://api.github.com'
