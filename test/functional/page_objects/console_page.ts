@@ -85,8 +85,8 @@ export class ConsolePageObject extends FtrService {
 
   public async promptAutocomplete() {
     const textArea = await this.testSubjects.find('console-textarea');
-    // There should be autocomplete for this on all license levels
-    await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
+    await textArea.clickMouseButton();
+    await textArea.type('b');
     await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
   }
 
