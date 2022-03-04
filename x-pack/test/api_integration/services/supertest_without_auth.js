@@ -8,13 +8,12 @@
 import { format as formatUrl } from 'url';
 
 import supertest from 'supertest';
-import type { FtrProviderContext } from '../ftr_provider_context';
 
 /**
  * supertest provider that doesn't include user credentials into base URL that is passed
  * to the supertest. It's used to test API behaviour for not yet authenticated user.
  */
-export function SupertestWithoutAuthProvider({ getService }: FtrProviderContext) {
+export function SupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
   const kibanaServerConfig = config.get('servers.kibana');
 
