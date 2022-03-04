@@ -2411,6 +2411,12 @@ components:
             enum:
               - metrics
               - logs
+        data_output_id:
+          type: string
+          nullable: true
+        monitoring_output_id:
+          type: string
+          nullable: true
       required:
         - name
         - namespace
@@ -2509,6 +2515,10 @@ components:
               type: string
               format: date-time
             updated_by:
+              type: string
+            data_output_id:
+              type: string
+            monitoring_output_id:
               type: string
             revision:
               type: number
