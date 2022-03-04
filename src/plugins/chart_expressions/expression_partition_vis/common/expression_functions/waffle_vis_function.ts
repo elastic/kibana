@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
+import { validateOptions } from '../../../../charts/common';
 import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -55,7 +57,9 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     },
     legendPosition: {
       types: ['string'],
+      default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
     },
     truncateLegend: {
       types: ['boolean'],
@@ -102,6 +106,9 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     if (args.splitRow) {
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
+
+    validateOptions(args.legendDisplay, LegendDisplay, errors.invalidLegendDisplayError);
+    validateOptions(args.legendPosition, Position, errors.invalidLegendPositionError);
 
     const buckets = args.bucket ? [args.bucket] : [];
     const visConfig: PartitionVisParams = {

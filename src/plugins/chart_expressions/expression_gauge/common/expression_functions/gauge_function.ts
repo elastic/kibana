@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
+import { validateOptions } from '../../../../charts/common';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -65,16 +66,6 @@ const strings = {
     i18n.translate('expressionGauge.logDatatable.goal', {
       defaultMessage: 'Goal',
     }),
-};
-
-const validateOptions = (
-  value: string,
-  availableOptions: Record<string, string>,
-  getErrorMessage: () => string
-) => {
-  if (!Object.values(availableOptions).includes(value)) {
-    throw new Error(getErrorMessage());
-  }
 };
 
 export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
