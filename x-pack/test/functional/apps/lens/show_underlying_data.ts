@@ -118,8 +118,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const input = await find.activeElement();
       await input.type(`bytes > 6000`);
-      // focus something else to dismiss formula's tooltip
-      await testSubjects.click('indexPattern-label-edit');
+      // the tooltip seems to be there as long as the focus is in the query string
+      await input.pressKeys(browser.keys.RIGHT);
 
       await PageObjects.lens.closeDimensionEditor();
 
