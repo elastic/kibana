@@ -22,7 +22,8 @@ import { useConfirmModal } from '../../hooks/use_confirm_modal';
 
 import {
   validateName,
-  validateHosts,
+  validateESHosts,
+  validateLogstashHosts,
   validateYamlConfig,
   validateCATrustedFingerPrint,
   validateSSLCertificate,
@@ -66,14 +67,14 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
     output?.hosts ?? [],
-    validateHosts,
+    validateESHosts,
     isPreconfigured
   );
   // Logstash inputs
   const logstashHostsInput = useComboInput(
     'logstashHostsComboxBox',
     output?.hosts ?? [],
-    validateHosts,
+    validateLogstashHosts,
     isPreconfigured
   );
   const sslCertificateAuthoritiesInput = useComboInput(

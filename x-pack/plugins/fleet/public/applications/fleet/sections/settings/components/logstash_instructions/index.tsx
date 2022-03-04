@@ -9,13 +9,16 @@ import React, { useState, useMemo } from 'react';
 
 import { EuiCallOut, EuiButton, EuiSpacer, EuiLink, EuiCodeBlock } from '@elastic/eui';
 import type { EuiCallOutProps } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { useStartServices } from '../../../../hooks';
 
 import { getLogstashPipeline, LOGSTASH_CONFIG_PIPELINES } from './helpers';
 import { useLogstashApiKey } from './hooks';
 
 export const LogstashInstructions = () => {
+  const { docLinks } = useStartServices();
+
   return (
     <CollapsibleCallout
       iconType="iInCircle"
@@ -33,7 +36,7 @@ export const LogstashInstructions = () => {
           {documentationLink}."
           values={{
             documentationLink: (
-              <EuiLink external={true} href="TODO">
+              <EuiLink external={true} href={docLinks.links.fleet.guide}>
                 <FormattedMessage
                   id="xpack.fleet.settings.logstashInstructions.documentationLink"
                   defaultMessage="documentation"
@@ -81,6 +84,7 @@ const CollapsibleCallout: React.FunctionComponent<EuiCallOutProps> = ({ children
 };
 
 const LogstashInstructionSteps = () => {
+  const { docLinks } = useStartServices();
   const logstashApiKey = useLogstashApiKey();
 
   const steps = useMemo(
@@ -149,7 +153,7 @@ const LogstashInstructionSteps = () => {
               defaultMessage="Replace the parts between the brackets with your generated SSL certificate file paths. View {documentationLink} to generate the certificates."
               values={{
                 documentationLink: (
-                  <EuiLink external={true} href="TODO">
+                  <EuiLink external={true} href={docLinks.links.fleet.guide}>
                     <FormattedMessage
                       id="xpack.fleet.settings.logstashInstructions.ourDocumentationLink"
                       defaultMessage="our documentation"
@@ -159,10 +163,10 @@ const LogstashInstructionSteps = () => {
               }}
             />
             <EuiSpacer size="m" />
-            <EuiButton href="TODO" target="_blank">
+            <EuiButton href={docLinks.links.fleet.guide} target="_blank">
               <FormattedMessage
                 id="xpack.fleet.settings.logstashInstructions.viewDocumentationButtonLabel"
-                defaultMessage="View Documenation"
+                defaultMessage="View documentaion"
               />
             </EuiButton>
             <EuiSpacer size="m" />
@@ -181,7 +185,7 @@ const LogstashInstructionSteps = () => {
         ),
       },
     ],
-    [logstashApiKey]
+    [logstashApiKey, docLinks]
   );
 
   return (
