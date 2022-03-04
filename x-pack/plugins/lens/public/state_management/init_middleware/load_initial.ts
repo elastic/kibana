@@ -113,6 +113,8 @@ export function loadInitial(
           initEmpty({
             newState: {
               ...emptyState,
+              activeDatasourceId:
+                initialContext && 'sql' in initialContext ? 'essql' : emptyState.activeDatasourceId,
               searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
               datasourceStates: Object.entries(result).reduce(
                 (state, [datasourceId, datasourceState]) => ({

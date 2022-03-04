@@ -32,11 +32,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
+import { FieldButton } from '@kbn/react-field';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { IndexPattern, EsDSLPrivateState, IndexPatternField, IndexPatternRef } from './types';
 import { esRawResponse } from '../../../../../src/plugins/data/common';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { FieldButton } from '@kbn/react-field/field_button';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { LensFieldIcon } from '../indexpattern_datasource/lens_field_icon';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';

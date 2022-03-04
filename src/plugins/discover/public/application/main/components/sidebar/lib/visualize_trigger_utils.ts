@@ -43,17 +43,18 @@ async function getCompatibleActions(
 }
 
 export function triggerVisualizeActions(
-  field: DataViewField,
+  field: DataViewField | undefined,
   indexPatternId: string | undefined,
-  contextualFields: string[]
+  contextualFields: string[],
+  sql?: string
 ) {
-  if (!indexPatternId) return;
-  const trigger = getTriggerConstant(field.type);
+  const trigger = getTriggerConstant(field?.type);
   const triggerOptions = {
     indexPatternId,
-    fieldName: field.name,
+    fieldName: field?.name,
     contextualFields,
     originatingApp: APP_ID,
+    sql,
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }

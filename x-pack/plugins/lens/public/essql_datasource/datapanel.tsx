@@ -34,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
 import { ExpressionsStart } from 'src/plugins/expressions/public';
-import { FieldButton } from '@kbn/react-field/field_button';
+import { FieldButton } from '@kbn/react-field';
 import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
 import { buildExpressionFunction } from '../../../../../src/plugins/expressions/public';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';

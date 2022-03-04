@@ -82,7 +82,7 @@ export function getIndexPatternsIds({
 
   const uniqueFilterableIndexPatternIds = uniq(
     references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-  );
+  ).filter(Boolean);
 
   return uniqueFilterableIndexPatternIds;
 }

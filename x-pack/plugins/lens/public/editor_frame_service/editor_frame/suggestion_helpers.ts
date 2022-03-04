@@ -93,12 +93,15 @@ export function getSuggestions({
           visualizeTriggerFieldContext.layers
         );
       } else {
+
         // used for navigating from Discover to Lens
-        dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
-          datasourceState,
-          visualizeTriggerFieldContext.indexPatternId,
-          visualizeTriggerFieldContext.fieldName
-        );
+        dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField
+          ? datasource.getDatasourceSuggestionsForVisualizeField(
+              datasourceState,
+              visualizeTriggerFieldContext.indexPatternId,
+              visualizeTriggerFieldContext.fieldName
+            )
+          : [];
       }
     } else if (field) {
       dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(

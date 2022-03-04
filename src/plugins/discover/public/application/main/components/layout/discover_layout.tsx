@@ -51,6 +51,7 @@ import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { DataViewType, DataView } from '../../../../../../data_views/common';
+import { triggerVisualizeActions } from '../sidebar/lib/visualize_trigger_utils';
 
 /**
  * Local storage key for sidebar persistence state
@@ -361,6 +362,17 @@ export function DiscoverLayout({
                         hideChart={state.hideChart}
                         interval={state.interval}
                       />
+                    </EuiFlexItem>
+                  )}
+                  {state.sqlMode && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={() => {
+                          triggerVisualizeActions(undefined, undefined, [], state.sqlQuery);
+                        }}
+                      >
+                        Visualize
+                      </EuiButton>
                     </EuiFlexItem>
                   )}
                   <EuiHorizontalRule margin="none" />

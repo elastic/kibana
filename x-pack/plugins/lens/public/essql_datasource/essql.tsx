@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { EuiButton, EuiSelect } from '@elastic/eui';
 import { ExpressionsStart } from 'src/plugins/expressions/public';
+import { buildExpressionFunction } from '../../../../../src/plugins/expressions/public';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -59,6 +60,75 @@ export function getEsSQLDatasource({
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
 }) {
+  const getSuggestionsForState = (state) => {
+    return Object.entries(state.layers).map(([id, layer]) => {
+      const reducedState: EsSQLPrivateState = {
+        ...state,
+        cachedFieldList: {
+          [id]: state.cachedFieldList[id],
+        },
+        layers: {
+          [id]: state.layers[id],
+        },
+      };
+      return !state.autoMap
+        ? {
+            state: reducedState,
+            table: {
+              changeType: 'unchanged',
+              isMultiRow: !state.cachedFieldList[id].singleRow,
+              layerId: id,
+              columns: layer.columns.map((column) => {
+                const field = state.cachedFieldList[id].fields.find(
+                  (f) => f.name === column.fieldName
+                )!;
+                const operation = {
+                  dataType: field?.meta.type as DataType,
+                  label: field?.name,
+                  isBucketed: false,
+                  noBucketInfo: true,
+                };
+                return {
+                  columnId: column.columnId,
+                  operation,
+                };
+              }),
+            },
+            keptLayerIds: [id],
+          }
+        : {
+            state: {
+              ...reducedState,
+              layers: {
+                [id]: {
+                  ...state.layers[id],
+                  columns: state.cachedFieldList[id].fields.map((f) => ({
+                    columnId: f.name,
+                    fieldName: f.name,
+                  })),
+                },
+              },
+            },
+            table: {
+              changeType: 'unchanged',
+              isMultiRow: !state.cachedFieldList[id].singleRow,
+              layerId: id,
+              columns: state.cachedFieldList[id].fields.map((f) => {
+                return {
+                  columnId: f.name,
+                  operation: {
+                    dataType: f.meta.type,
+                    label: f.name,
+                    isBucketed: false,
+                    noBucketInfo: true,
+                  },
+                };
+              }),
+            },
+            keptLayerIds: [id],
+          };
+    });
+  };
   // Not stateful. State is persisted to the frame
   const essqlDatasource: Datasource<EsSQLPrivateState, EsSQLPersistedState> = {
     id: 'essql',
@@ -72,13 +142,36 @@ export function getEsSQLDatasource({
     hideFilterBar: (state) => {
       return Object.values(state.layers).some((layer) => layer.hideFilterBar);
     },
-    async initialize(state?: EsSQLPersistedState) {
+    async initialize(state?: EsSQLPersistedState, references, context) {
       const initState = state || { layers: {} };
       const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(data.dataViews);
       const cachedFieldList: Record<
         string,
         { fields: Array<{ name: string; type: string }>; singleRow: boolean }
       > = {};
+      if (context && 'sql' in context) {
+        const ast = {
+          type: 'expression',
+          chain: [
+            buildExpressionFunction<any>('essql', {
+              query: context.sql,
+            }).toAst(),
+          ],
+        };
+        const response = await expressions.run(ast, null).toPromise();
+        // @ts-expect-error this is hacky, should probably run expression instead
+        const { rows, columns } = response.result;
+        // todo hack some logic in for dates
+        cachedFieldList['123'] = {
+          fields: columns,
+          singleRow: rows.length === 1,
+        };
+        initState.layers['123'] = {
+          hideFilterBar: true,
+          query: context.sql,
+          columns: columns.map((c) => ({ columnId: c.id, fieldName: c.id }))
+        };
+      }
       return {
         ...initState,
         cachedFieldList,
@@ -269,7 +362,7 @@ export function getEsSQLDatasource({
           {
             props.state.indexPatternRefs.find(
               (r) => r.id === props.state.layers[props.layerId].index
-            )!.title
+            )?.title
           }
         </span>,
         domElement
@@ -358,75 +451,8 @@ export function getEsSQLDatasource({
     getDatasourceSuggestionsForField(state, draggedField) {
       return [];
     },
-    getDatasourceSuggestionsFromCurrentState: (state) => {
-      return Object.entries(state.layers).map(([id, layer]) => {
-        const reducedState: EsSQLPrivateState = {
-          ...state,
-          cachedFieldList: {
-            [id]: state.cachedFieldList[id],
-          },
-          layers: {
-            [id]: state.layers[id],
-          },
-        };
-        return !state.autoMap
-          ? {
-              state: reducedState,
-              table: {
-                changeType: 'unchanged',
-                isMultiRow: !state.cachedFieldList[id].singleRow,
-                layerId: id,
-                columns: layer.columns.map((column) => {
-                  const field = state.cachedFieldList[id].fields.find(
-                    (f) => f.name === column.fieldName
-                  )!;
-                  const operation = {
-                    dataType: field?.meta.type as DataType,
-                    label: field?.name,
-                    isBucketed: false,
-                    noBucketInfo: true,
-                  };
-                  return {
-                    columnId: column.columnId,
-                    operation,
-                  };
-                }),
-              },
-              keptLayerIds: [id],
-            }
-          : {
-              state: {
-                ...reducedState,
-                layers: {
-                  [id]: {
-                    ...state.layers[id],
-                    columns: state.cachedFieldList[id].fields.map((f) => ({
-                      columnId: f.name,
-                      fieldName: f.name,
-                    })),
-                  },
-                },
-              },
-              table: {
-                changeType: 'unchanged',
-                isMultiRow: !state.cachedFieldList[id].singleRow,
-                layerId: id,
-                columns: state.cachedFieldList[id].fields.map((f) => {
-                  return {
-                    columnId: f.name,
-                    operation: {
-                      dataType: f.meta.type,
-                      label: f.name,
-                      isBucketed: false,
-                      noBucketInfo: true,
-                    },
-                  };
-                }),
-              },
-              keptLayerIds: [id],
-            };
-      });
-    },
+    getDatasourceSuggestionsForVisualizeField: getSuggestionsForState,
+    getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
   };
 
   return essqlDatasource;

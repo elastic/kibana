@@ -115,6 +115,7 @@ export class CanvasPlugin
       srcPlugin.start(coreStart, startPlugins);
 
       const { pluginServices } = await import('./services');
+      const { pluginServiceRegistry } = await import('./services/kibana');
       pluginServices.setRegistry(
         pluginServiceRegistry.start({
           coreStart,
