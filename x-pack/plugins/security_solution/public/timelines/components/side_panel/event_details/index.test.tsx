@@ -24,7 +24,7 @@ import {
   mockRuntimeMappings,
 } from '../../../../common/containers/source/mock';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { mockCasesContext } from '../../../../common/mock/mock_cases_context';
+import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
 
 const ecsData: Ecs = {
   _id: '1',
