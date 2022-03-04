@@ -12,7 +12,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '../../../../expressions';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import { ExpressionValueVisDimension, PersistedState } from '../../../../visualizations/public';
 import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -61,6 +61,7 @@ export type GaugeInput = Datatable;
 export interface GaugeExpressionProps {
   data: Datatable;
   args: GaugeArguments;
+  uiState: PersistedState;
 }
 
 export interface GaugeRender {

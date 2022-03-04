@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { PersistedState } from '../../../../visualizations/public';
 import { ThemeServiceStart } from '../../../../../core/public';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
@@ -40,6 +41,7 @@ export const gaugeRenderer: (
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
+            uiState={handlers.uiState as PersistedState}
           />
         </div>
       </KibanaThemeProvider>,
