@@ -92,7 +92,8 @@ import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
-import type { Embeddable, LensEmbeddableInput } from './embeddable';
+import type { LensEmbeddableInput } from './embeddable';
+import { Embeddable } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import {
   EmbeddableComponentProps,
@@ -450,7 +451,11 @@ export class LensPlugin {
         id: 'VIEW_UNDERLYING_DATA',
         getDisplayName: () => 'Open in Discover',
         isCompatible: async (context: { embeddable: IEmbeddable }) => {
-          return context.embeddable.type === DOC_TYPE;
+          let isCompatible = false;
+          if (context.embeddable instanceof Embeddable) {
+            isCompatible = await context.embeddable.getCanViewUnderlyingData();
+          }
+          return isCompatible;
         },
         execute: async (context: { embeddable: Embeddable }) => {
           const args = await context.embeddable.getViewUnderlyingDataArgs();

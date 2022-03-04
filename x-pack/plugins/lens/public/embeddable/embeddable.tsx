@@ -21,7 +21,7 @@ import {
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
 import { RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
@@ -231,12 +231,12 @@ export class Embeddable
     );
   }
 
-  private externalSearchContext: {
+  private externalSearchContext?: {
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
     searchSessionId?: string;
-  } = {};
+  };
 
   private activeDataInfo: {
     activeData?: TableInspectorAdapter;
@@ -246,9 +246,10 @@ export class Embeddable
 
   private indexPatterns: IndexPattern[] = [];
 
-  private viewUnderlyingDataArgs$ = new BehaviorSubject<ViewUnderlyingDataArgs | undefined>(
-    undefined
-  );
+  private viewUnderlyingDataArgs?: ViewUnderlyingDataArgs;
+
+  private waitVUDArgsLoaded: Promise<boolean>;
+  private markVUDArgsLoaded: (loaded: boolean) => void;
 
   constructor(
     private deps: LensEmbeddableDeps,
@@ -262,6 +263,21 @@ export class Embeddable
       },
       parent
     );
+
+    const _vudSubscription = new Subject<boolean>();
+
+    this.markVUDArgsLoaded = (loaded: boolean) => {
+      _vudSubscription.next(loaded);
+      _vudSubscription.complete();
+    };
+
+    this.waitVUDArgsLoaded = new Promise<boolean>((resolve) => {
+      const subscription = _vudSubscription.subscribe((loaded) => {
+        resolve(loaded);
+        subscription.unsubscribe();
+      });
+    });
+
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput)
@@ -448,10 +464,10 @@ export class Embeddable
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
     if (
-      !isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
-      !isEqual(containerState.query, this.externalSearchContext.query) ||
-      !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
-      this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
+      !isEqual(containerState.timeRange, this.externalSearchContext?.timeRange) ||
+      !isEqual(containerState.query, this.externalSearchContext?.query) ||
+      !isEqual(cleanedFilters, this.externalSearchContext?.filters) ||
+      this.externalSearchContext?.searchSessionId !== containerState.searchSessionId ||
       this.embeddableTitle !== this.getTitle()
     ) {
       this.externalSearchContext = {
@@ -680,6 +696,13 @@ export class Embeddable
   }
 
   private async updateViewUnderlyingDataArgs() {
+    if (!this.activeDataInfo.activeData || !this.externalSearchContext) {
+      // This function is called both when activeData and externalSearchContext are loaded
+      // because we're not sure which one will load first. But, both must be loaded before
+      // we actually run this.
+      return;
+    }
+
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
     if (activeDatasourceId) {
       this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
@@ -703,21 +726,28 @@ export class Embeddable
       timeRange: this.externalSearchContext.timeRange!,
     });
 
-    if (viewUnderlyingDataArgs) {
-      this.viewUnderlyingDataArgs$.next(viewUnderlyingDataArgs);
+    const loaded = typeof viewUnderlyingDataArgs !== 'undefined';
+
+    if (loaded) {
+      this.viewUnderlyingDataArgs = viewUnderlyingDataArgs;
     }
+
+    this.markVUDArgsLoaded(loaded);
   }
 
   /**
    * Returns the necessary arguments to view the underlying data in discover.
    */
-  public getViewUnderlyingDataArgs() {
-    return new Promise<ViewUnderlyingDataArgs>((resolve) => {
-      const subscription = this.viewUnderlyingDataArgs$.subscribe((val) => {
-        resolve(val);
-        subscription.unsubscribe();
-      });
-    });
+  public async getViewUnderlyingDataArgs() {
+    const loaded = await this.waitVUDArgsLoaded;
+    if (loaded) {
+      return this.viewUnderlyingDataArgs;
+    }
+  }
+
+  public getCanViewUnderlyingData() {
+    // if loading the underlying data args fails
+    return this.waitVUDArgsLoaded;
   }
 
   async initializeOutput() {
