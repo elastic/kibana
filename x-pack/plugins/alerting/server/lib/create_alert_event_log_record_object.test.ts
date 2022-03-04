@@ -20,9 +20,6 @@ describe('createAlertEventLogRecordObject', () => {
     recoveryActionGroup: RecoveredActionGroup,
     executor: jest.fn(),
     producer: 'alerts',
-    config: {
-      maxExecutableActions: 1000,
-    },
   };
 
   test('created alert event "execute-start"', async () => {

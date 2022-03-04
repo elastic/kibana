@@ -326,9 +326,6 @@ describe('find()', () => {
       isExportable: true,
       async executor() {},
       producer: 'myApp',
-      config: {
-        maxExecutableActions: 1000,
-      },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -343,9 +340,6 @@ describe('find()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
-      },
-      config: {
-        maxExecutableActions: 1000,
       },
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
@@ -526,9 +520,6 @@ describe('find()', () => {
       isExportable: true,
       async executor() {},
       producer: 'myApp',
-      config: {
-        maxExecutableActions: 1000,
-      },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -543,9 +534,6 @@ describe('find()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
-      },
-      config: {
-        maxExecutableActions: 1000,
       },
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({

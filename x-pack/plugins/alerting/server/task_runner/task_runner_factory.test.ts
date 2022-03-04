@@ -44,9 +44,6 @@ const ruleType: UntypedNormalizedRuleType = {
   },
   executor: jest.fn(),
   producer: 'alerts',
-  config: {
-    maxExecutableActions: 1000,
-  },
 };
 let fakeTimer: sinon.SinonFakeTimers;
 

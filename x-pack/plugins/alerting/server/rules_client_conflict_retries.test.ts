@@ -356,9 +356,6 @@ beforeEach(() => {
     recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'alerts',
-    config: {
-      maxExecutableActions: 1000,
-    },
   }));
 
   ruleTypeRegistry.get.mockReturnValue({
@@ -371,9 +368,6 @@ beforeEach(() => {
     recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'alerts',
-    config: {
-      maxExecutableActions: 1000,
-    },
   });
 
   rulesClient = new RulesClient(rulesClientParams);

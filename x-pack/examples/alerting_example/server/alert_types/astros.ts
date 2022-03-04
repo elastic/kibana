@@ -79,7 +79,4 @@ export const alertType: RuleType<
     };
   },
   producer: ALERTING_EXAMPLE_APP_ID,
-  config: {
-    maxExecutableActions: 1000,
-  },
 };

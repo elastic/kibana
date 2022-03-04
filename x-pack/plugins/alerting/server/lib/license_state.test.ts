@@ -72,7 +72,6 @@ describe('getLicenseCheckForRuleType', () => {
     minimumLicenseRequired: 'gold',
     isExportable: true,
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-    config: { maxExecutableActions: 1000 },
   };
 
   beforeEach(() => {
@@ -208,7 +207,6 @@ describe('ensureLicenseForRuleType()', () => {
     minimumLicenseRequired: 'gold',
     isExportable: true,
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-    config: { maxExecutableActions: 1000 },
   };
 
   beforeEach(() => {
