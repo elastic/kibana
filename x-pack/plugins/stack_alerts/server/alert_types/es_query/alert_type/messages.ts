@@ -18,9 +18,9 @@ export function getInvalidComparatorError(comparator: string) {
 
 export function getContextConditionsDescription(comparator: string, threshold: number[]) {
   return i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
-    defaultMessage: 'Number of matching documents is {comparator} {threshold}',
+    defaultMessage: 'Number of matching documents is {thresholdComparator} {threshold}',
     values: {
-      comparator: getHumanReadableComparator(comparator),
+      thresholdComparator: getHumanReadableComparator(comparator),
       threshold: threshold.join(' and '),
     },
   });
