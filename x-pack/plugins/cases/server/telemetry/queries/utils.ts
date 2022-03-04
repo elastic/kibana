@@ -91,29 +91,12 @@ export const getReferencesAggregationQuery = ({
   },
 });
 
-export const getConnectorsCardinalityAggregationQuery = () => ({
-  references: {
-    nested: {
-      path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
-    },
-    aggregations: {
-      connectors: {
-        filter: {
-          term: {
-            [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: 'action',
-          },
-        },
-        aggregations: {
-          uniqueConnectors: {
-            cardinality: {
-              field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
-            },
-          },
-        },
-      },
-    },
-  },
-});
+export const getConnectorsCardinalityAggregationQuery = () =>
+  getReferencesAggregationQuery({
+    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+    referenceType: 'action',
+    agg: 'cardinality',
+  });
 
 export const getCountsFromBuckets = (buckets: Buckets['buckets']) => ({
   daily: buckets?.[2]?.doc_count ?? 0,

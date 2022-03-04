@@ -7,7 +7,7 @@
 
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter } from '../../client/utils';
-import { CasesTelemetry, CollectTelemetryDataParams } from '../types';
+import { CasesTelemetry, CollectTelemetryDataParams, MaxBucketOnCaseAggregation } from '../types';
 import { getMaxBucketOnCaseAggregationQuery } from './utils';
 
 export const getPushedTelemetryData = async ({
@@ -20,12 +20,7 @@ export const getPushedTelemetryData = async ({
     type: CASE_USER_ACTION_SAVED_OBJECT,
   });
 
-  const res = await savedObjectsClient.find<
-    unknown,
-    {
-      references: { cases: { max: { value: number } } };
-    }
-  >({
+  const res = await savedObjectsClient.find<unknown, MaxBucketOnCaseAggregation>({
     page: 0,
     perPage: 0,
     filter: pushFilter,

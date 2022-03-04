@@ -10,16 +10,17 @@ import { KueryNode } from '@kbn/es-query';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter } from '../../client/utils';
-import { CasesTelemetry, CollectTelemetryDataParams, MaxBucketOnCaseAggregation } from '../types';
+import {
+  CasesTelemetry,
+  CollectTelemetryDataParams,
+  MaxBucketOnCaseAggregation,
+  ReferencesAggregation,
+} from '../types';
 import {
   getConnectorsCardinalityAggregationQuery,
   getMaxBucketOnCaseAggregationQuery,
   getOnlyConnectorsFilter,
 } from './utils';
-
-interface UniqueConnectorsAggregation {
-  references: { connectors: { uniqueConnectors: { value: number } } };
-}
 
 export const getConnectorsTelemetryData = async ({
   savedObjectsClient,
@@ -52,7 +53,7 @@ export const getConnectorsTelemetryData = async ({
       type: CASE_USER_ACTION_SAVED_OBJECT,
     });
 
-    const res = await getData<UniqueConnectorsAggregation>({
+    const res = await getData<ReferencesAggregation>({
       filter: connectorFilter,
       aggs: getConnectorsCardinalityAggregationQuery(),
     });
@@ -69,7 +70,7 @@ export const getConnectorsTelemetryData = async ({
   ] as const;
 
   const all = await Promise.all([
-    getData<UniqueConnectorsAggregation>({ aggs: getConnectorsCardinalityAggregationQuery() }),
+    getData<ReferencesAggregation>({ aggs: getConnectorsCardinalityAggregationQuery() }),
     getData<MaxBucketOnCaseAggregation>({
       filter: getOnlyConnectorsFilter(),
       aggs: getMaxBucketOnCaseAggregationQuery(CASE_USER_ACTION_SAVED_OBJECT),
@@ -78,19 +79,19 @@ export const getConnectorsTelemetryData = async ({
   ]);
 
   const connectorData = all.slice(2) as Array<
-    SavedObjectsFindResponse<unknown, UniqueConnectorsAggregation>
+    SavedObjectsFindResponse<unknown, ReferencesAggregation>
   >;
 
   const data = connectorData.reduce(
     (acc, res, currentIndex) => ({
       ...acc,
       [connectorTypes[currentIndex]]:
-        res.aggregations?.references?.connectors?.uniqueConnectors?.value ?? 0,
+        res.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
     }),
     {} as Record<typeof connectorTypes[number], number>
   );
 
-  const allAttached = all[0].aggregations?.references?.connectors?.uniqueConnectors?.value ?? 0;
+  const allAttached = all[0].aggregations?.references?.referenceType?.referenceAgg?.value ?? 0;
   const maxAttachedToACase = all[1].aggregations?.references?.cases?.max?.value ?? 0;
 
   return {
