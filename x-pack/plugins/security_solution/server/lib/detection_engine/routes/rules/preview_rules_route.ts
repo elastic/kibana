@@ -200,6 +200,7 @@ export const previewRulesRoute = async (
                 }),
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
+                uiSettingsClient: context.core.uiSettings.client,
                 searchSourceClient,
               },
               spaceId,

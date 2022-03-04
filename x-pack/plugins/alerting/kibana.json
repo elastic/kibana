@@ -3,8 +3,8 @@
   "server": true,
   "ui": true,
   "owner": {
-    "name": "Kibana Alerting",
-    "githubTeam": "kibana-alerting-services"
+    "name": "Response Ops",
+    "githubTeam": "response-ops"
   },
   "version": "8.0.0",
   "kibanaVersion": "kibana",

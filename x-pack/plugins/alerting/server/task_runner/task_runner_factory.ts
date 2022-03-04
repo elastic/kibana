@@ -15,6 +15,7 @@ import type {
   ExecutionContextStart,
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
+  UiSettingsServiceStart,
 } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
@@ -37,6 +38,7 @@ export interface TaskRunnerContext {
   logger: Logger;
   data: DataPluginStart;
   savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
   actionsPlugin: ActionsPluginStartContract;

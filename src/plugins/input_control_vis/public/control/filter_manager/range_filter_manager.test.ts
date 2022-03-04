@@ -9,11 +9,8 @@
 import expect from '@kbn/expect';
 
 import { RangeFilterManager } from './range_filter_manager';
-import {
-  IndexPattern,
-  FilterManager as QueryFilterManager,
-  IndexPatternsContract,
-} from '../../../../data/public';
+import { FilterManager as QueryFilterManager, DataViewsContract } from '../../../../data/public';
+import { DataView } from '../../../../data_views/public';
 import { RangeFilter, RangeFilterMeta } from '@kbn/es-query';
 
 describe('RangeFilterManager', function () {
@@ -24,7 +21,7 @@ describe('RangeFilterManager', function () {
     const fieldMock = {
       name: 'field1',
     };
-    const indexPatternMock: IndexPattern = {
+    const indexPatternMock: DataView = {
       id: indexPatternId,
       fields: {
         getByName: (name: any) => {
@@ -34,10 +31,10 @@ describe('RangeFilterManager', function () {
           return fields[name];
         },
       },
-    } as IndexPattern;
+    } as DataView;
     const indexPatternsServiceMock = {
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
-    } as unknown as jest.Mocked<IndexPatternsContract>;
+    } as unknown as jest.Mocked<DataViewsContract>;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: RangeFilterManager;
     beforeEach(async () => {
@@ -70,7 +67,7 @@ describe('RangeFilterManager', function () {
         id: string,
         fieldName: string,
         indexPatternId: string,
-        indexPatternsService: IndexPatternsContract,
+        indexPatternsService: DataViewsContract,
         queryFilter: QueryFilterManager
       ) {
         super(id, fieldName, indexPatternId, indexPatternsService, queryFilter);
@@ -86,7 +83,7 @@ describe('RangeFilterManager', function () {
       }
     }
 
-    const indexPatternsServiceMock = {} as IndexPatternsContract;
+    const indexPatternsServiceMock = {} as DataViewsContract;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: MockFindFiltersRangeFilterManager;
     beforeEach(() => {
