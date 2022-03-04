@@ -60,6 +60,7 @@ filegroup(
       "//packages/kbn-test-subj-selector:build",
       "//packages/kbn-timelion-grammar:build",
       "//packages/kbn-tinymath:build",
+      "//packages/kbn-type-summarizer:build",
       "//packages/kbn-typed-react-router-config:build",
       "//packages/kbn-ui-framework:build",
       "//packages/kbn-ui-shared-deps-npm:build",
@@ -74,6 +75,7 @@ filegroup(
   name = "build_pkg_types",
   srcs = [
       "//packages/elastic-datemath:build_types",
+      "//packages/kbn-type-summarizer:build_types",
   ],
 )
 
