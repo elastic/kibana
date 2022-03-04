@@ -7,3 +7,4 @@
  */
 
 export { SolutionToolbarButton } from './solution_toolbar/button/primary';
+export { QuickButtonGroup } from './solution_toolbar/quick_group_buttons/quick_group';

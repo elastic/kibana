@@ -61,7 +61,7 @@ export const NoDataViewsPage = withSuspense(LazyNoDataViewsPage);
  * `withSuspense` HOC to load this component.
  */
 export const LazyQuickButtonGroup = React.lazy(() =>
-  import('./toolbar/solution_toolbar/quick_group_buttons').then(({ QuickButtonGroup }) => ({
+  import('./toolbar/index').then(({ QuickButtonGroup }) => ({
     default: QuickButtonGroup,
   }))
 );
