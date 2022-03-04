@@ -8,8 +8,13 @@
 import { get } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { ISavedObjectsRepository } from 'kibana/server';
-import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../../../common/constants';
 import { Buckets, MaxBucketOnCaseAggregation } from '../types';
+import { buildFilter } from '../../client/utils';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
@@ -46,6 +51,38 @@ export const getMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => (
           max: {
             max_bucket: {
               buckets_path: 'ids._count',
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+export const getReferencesAggregationQuery = ({
+  savedObjectType,
+  referenceType,
+  agg = 'terms',
+}: {
+  savedObjectType: string;
+  referenceType: string;
+  agg?: string;
+}) => ({
+  references: {
+    nested: {
+      path: `${savedObjectType}.references`,
+    },
+    aggregations: {
+      referenceType: {
+        filter: {
+          term: {
+            [`${savedObjectType}.references.type`]: referenceType,
+          },
+        },
+        aggregations: {
+          referenceAgg: {
+            [agg]: {
+              field: `${savedObjectType}.references.id`,
             },
           },
         },
@@ -144,3 +181,19 @@ export const getAggregationsBuckets = ({
     }),
     {}
   );
+
+export const getOnlyAlertsCommentsFilter = () =>
+  buildFilter({
+    filters: ['alert'],
+    field: 'type',
+    operator: 'or',
+    type: CASE_COMMENT_SAVED_OBJECT,
+  });
+
+export const getOnlyConnectorsFilter = () =>
+  buildFilter({
+    filters: ['connector'],
+    field: 'type',
+    operator: 'or',
+    type: CASE_USER_ACTION_SAVED_OBJECT,
+  });

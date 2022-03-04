@@ -14,6 +14,7 @@ import { CasesTelemetry, CollectTelemetryDataParams, MaxBucketOnCaseAggregation 
 import {
   getConnectorsCardinalityAggregationQuery,
   getMaxBucketOnCaseAggregationQuery,
+  getOnlyConnectorsFilter,
 } from './utils';
 
 interface UniqueConnectorsAggregation {
@@ -67,17 +68,10 @@ export const getConnectorsTelemetryData = async ({
     '.swimlane',
   ] as const;
 
-  const onlyConnectorsFilter = buildFilter({
-    filters: ['connector'],
-    field: 'type',
-    operator: 'or',
-    type: CASE_USER_ACTION_SAVED_OBJECT,
-  });
-
   const all = await Promise.all([
     getData<UniqueConnectorsAggregation>({ aggs: getConnectorsCardinalityAggregationQuery() }),
     getData<MaxBucketOnCaseAggregation>({
-      filter: onlyConnectorsFilter,
+      filter: getOnlyConnectorsFilter(),
       aggs: getMaxBucketOnCaseAggregationQuery(CASE_USER_ACTION_SAVED_OBJECT),
     }),
     ...connectorTypes.map((connectorType) => getConnectorData(connectorType)),

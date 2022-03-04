@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
-import { CollectTelemetryDataParams, Buckets, CasesTelemetry, Cardinality } from '../types';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../../../common/constants';
+import {
+  CollectTelemetryDataParams,
+  Buckets,
+  CasesTelemetry,
+  Cardinality,
+  ReferencesAggregation,
+} from '../types';
 import {
   findValueInBuckets,
   getAggregationsBuckets,
   getCountsAggregationQuery,
   getCountsFromBuckets,
+  getOnlyAlertsCommentsFilter,
+  getOnlyConnectorsFilter,
+  getReferencesAggregationQuery,
 } from './utils';
 
 export const getCasesTelemetryData = async ({
@@ -77,7 +90,7 @@ export const getCasesTelemetryData = async ({
     unknown,
     Record<typeof owners[number], { counts: Buckets }> & {
       participants: Cardinality;
-    }
+    } & ReferencesAggregation
   >({
     page: 0,
     perPage: 0,
@@ -88,6 +101,39 @@ export const getCasesTelemetryData = async ({
           field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_by.username`,
         },
       },
+      ...getReferencesAggregationQuery({
+        savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+        referenceType: 'cases',
+        agg: 'cardinality',
+      }),
+    },
+  });
+
+  const totalAlertsRes = await savedObjectsClient.find<unknown, ReferencesAggregation>({
+    page: 0,
+    perPage: 0,
+    type: CASE_COMMENT_SAVED_OBJECT,
+    filter: getOnlyAlertsCommentsFilter(),
+    aggs: {
+      ...getReferencesAggregationQuery({
+        savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+        referenceType: 'cases',
+        agg: 'cardinality',
+      }),
+    },
+  });
+
+  const totalConnectorsRes = await savedObjectsClient.find<unknown, ReferencesAggregation>({
+    page: 0,
+    perPage: 0,
+    type: CASE_USER_ACTION_SAVED_OBJECT,
+    filter: getOnlyConnectorsFilter(),
+    aggs: {
+      ...getReferencesAggregationQuery({
+        savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+        referenceType: 'cases',
+        agg: 'cardinality',
+      }),
     },
   });
 
@@ -118,6 +164,10 @@ export const getCasesTelemetryData = async ({
       totalUsers: casesRes.aggregations?.users?.value ?? 0,
       totalParticipants: commentsRes.aggregations?.participants?.value ?? 0,
       totalTags: casesRes.aggregations?.tags?.value ?? 0,
+      totalWithAlerts:
+        totalAlertsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
+      totalWithConnectors:
+        totalConnectorsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
     },
     sec: {
       total: findValueInBuckets(aggregationsBuckets.totalsByOwner, 'securitySolution'),

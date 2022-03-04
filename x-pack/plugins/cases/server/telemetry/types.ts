@@ -22,6 +22,11 @@ export interface Cardinality {
 export interface MaxBucketOnCaseAggregation {
   references: { cases: { max: { value: number } } };
 }
+
+export interface ReferencesAggregation {
+  references: { referenceType: { referenceAgg: { value: number } } };
+}
+
 export interface CollectTelemetryDataParams {
   savedObjectsClient: ISavedObjectsRepository;
 }
@@ -52,6 +57,8 @@ export interface CasesTelemetry {
       totalUsers: number;
       totalParticipants: number;
       totalTags: number;
+      totalWithAlerts: number;
+      totalWithConnectors: number;
     };
     sec: Count;
     obs: Count;

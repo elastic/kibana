@@ -32,6 +32,8 @@ export const casesSchema: CasesTelemetrySchema = {
       totalUsers: long,
       totalParticipants: long,
       totalTags: long,
+      totalWithAlerts: long,
+      totalWithConnectors: long,
     },
     sec: countSchema,
     obs: countSchema,
