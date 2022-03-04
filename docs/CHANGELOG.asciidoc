@@ -243,7 +243,8 @@ Querying & Filtering::
 Improves the version field type {kibana-pull}123739[#123739]
 
 Security::
-Removes the audit space {kibana-pull}124145[#124145]
+* Audit logs now include records for individual saved objects when an entire space is deleted {kibana-pull}124145[#124145]
+* User login audit events now include the session ID for better correlation, and single sign-on flows no longer result in an extra `user_logout` event {kibana-pull}124299[#124299]
 
 [float]
 [[fixes-v8.1.0]]
@@ -274,7 +275,7 @@ Fleet::
 * Trimmed whitespace from package policy names {kibana-pull}125400[#125400]
 
 Lens & Visualizations::
-* Extracted and injected references for by value in *Visualize Library* {kibana-pull}126499[#126499]
+* Fixes some dashboard visualizations that could show "Could not located index pattern" errors when copied from one space to another {kibana-pull}126499[#126499]
 * Rarity is not allowed in some cases in *Lens* {kibana-pull}125523[#125523]
 * Fixes formatting logic for terms in *Lens* {kibana-pull}125408[#125408]
 * Fixes focus on submitting filter popover in *Lens* {kibana-pull}125247[#125247]
@@ -388,7 +389,7 @@ Platform::
 * `columns`. Fixes Bugs caused by using name instead of ID {kibana-pull}118470[#118470]
 
 Security::
-Adds session ID to user login audit event {kibana-pull}124299[#124299]
+User login audit events now include the session ID for better correlation, and single sign-on flows no longer result in an extra `user_logout` event {kibana-pull}124299[#124299]
 
 /////
 [[release-notes-8.0.1]]
