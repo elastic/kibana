@@ -107,6 +107,18 @@ describe('parseClientOptions', () => {
       });
     });
 
+    describe('`maxSockets` option', () => {
+      it('`maxSockets` is taken into account when specified', () => {
+        const options = parseClientOptions(createConfig({ maxSockets: 1024 }), false);
+        expect(options.agent).toHaveProperty('maxSockets', 1024);
+      });
+
+      it('`maxSockets` has a default value of Infinity if not specified', () => {
+        const options = parseClientOptions(createConfig({}), false);
+        expect(options.agent).toHaveProperty('maxSockets', Infinity);
+      });
+    });
+
     describe('`compression` option', () => {
       it('`compression` is true', () => {
         const options = parseClientOptions(createConfig({ compression: true }), false);
