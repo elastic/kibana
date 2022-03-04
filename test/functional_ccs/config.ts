@@ -30,7 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           indices: [
             {
               names: ['*'],
-              privileges: ['read', 'read_cross_cluster'],
+              privileges: ['read', 'view_index_metadata', 'read_cross_cluster'],
             },
           ],
         },
