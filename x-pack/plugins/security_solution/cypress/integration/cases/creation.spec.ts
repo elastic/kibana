@@ -50,7 +50,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL } from '../../urls/navigation';
 
-describe('Cases', () => {
+// Flaky: https://github.com/elastic/kibana/issues/69847
+describe.skip('Cases', () => {
   beforeEach(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
