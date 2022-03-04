@@ -175,18 +175,18 @@ async function retryImportOnConflictError(
   importCall: () => ReturnType<SavedObjectsImporterContract['import']>,
   {
     logger,
-    maxAttempts = 5,
+    maxAttempts = 50,
     _attempt = 0,
   }: { logger?: Logger; _attempt?: number; maxAttempts?: number } = {}
 ): ReturnType<SavedObjectsImporterContract['import']> {
   const result = await importCall();
-  const errors = result.errors ?? [];
 
+  const errors = result.errors ?? [];
   if (_attempt < maxAttempts && errors.length && errors.every(isImportConflictError)) {
     const retryCount = _attempt + 1;
-    const retryDelaySec = Math.min(Math.pow(2, retryCount), 64); // @dover's patented retry, 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
+    const retryDelaySec = 1 + Math.floor(Math.random() * 3); // 1s + 0-3s of jitter
 
-    logger?.warn(
+    logger?.debug(
       `Retrying import operation after [${retryDelaySec}s] due to conflict errors: ${JSON.stringify(
         errors
       )}`

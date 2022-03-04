@@ -70,27 +70,21 @@ describe('installKibanaSavedObjects', () => {
 
     expect(mockImporter.import).toHaveBeenCalledTimes(2);
   });
-  it('should give up after 5 retries on conflict errors', async () => {
+
+  it('should give up after 50 retries on conflict errors', async () => {
     const asset = createAsset({ attributes: { hello: 'world' } });
     const conflictResponse = createImportResponse([createImportError(asset, 'conflict')]);
-    const successResponse = createImportResponse([], [createImportSuccess(asset)]);
 
-    mockImporter.import
-      .mockResolvedValueOnce(conflictResponse)
-      .mockResolvedValueOnce(conflictResponse)
-      .mockResolvedValueOnce(conflictResponse)
-      .mockResolvedValueOnce(conflictResponse)
-      .mockResolvedValueOnce(conflictResponse)
-      .mockResolvedValueOnce(conflictResponse)
-      .mockResolvedValueOnce(successResponse);
+    mockImporter.import.mockImplementation(() => Promise.resolve(conflictResponse));
 
-    expect(
+    await expect(
       installKibanaSavedObjects({
         savedObjectsImporter: mockImporter,
         logger: mockLogger,
         kibanaAssets: [asset],
       })
     ).rejects.toEqual(expect.any(Error));
+    expect(mockImporter.import).toHaveBeenCalledTimes(51);
   });
   it('should not retry errors that arent conflict errors', async () => {
     const asset = createAsset({ attributes: { hello: 'world' } });
