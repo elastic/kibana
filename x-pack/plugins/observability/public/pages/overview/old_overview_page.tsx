@@ -32,6 +32,7 @@ import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alert
 import { SectionContainer } from '../../components/app/section';
 import { ObservabilityAppServices } from '../../application/types';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -57,7 +58,8 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { core, ObservabilityPageTemplate } = usePluginContext();
 
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, refreshInterval, refreshPaused } =
+    useDatePickerContext();
 
   const relativeTime = { start: relativeStart, end: relativeEnd };
   const absoluteTime = { start: absoluteStart, end: absoluteEnd };
@@ -104,8 +106,6 @@ export function OverviewPage({ routeParams }: Props) {
     basePath: core.http.basePath,
     docsLink: core.docLinks.links.observability.guide,
   });
-
-  const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
   return (
     <ObservabilityPageTemplate
