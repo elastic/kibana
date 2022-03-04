@@ -16,13 +16,23 @@ type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
 
+const addAttributesInMappingIndex = (indexMapping: IndexMapping) => {
+  if (!Object.keys(indexMapping.properties).includes('_id')) {
+    indexMapping.properties = {
+      _id: { type: 'keyword' },
+      ...indexMapping.properties,
+    };
+  }
+};
+
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
   filter: string | KueryNode,
   indexMapping: IndexMapping
 ): KueryNode | undefined => {
   if (filter && indexMapping) {
-    const filterKueryNode =
+    addAttributesInMappingIndex(indexMapping);
+    let filterKueryNode =
       typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : cloneDeep(filter);
 
     const validationFilterKuery = validateFilterKueryNode({
@@ -57,14 +67,21 @@ export const validateConvertFilterToKueryNode = (
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
         const itemType = allowedTypes.filter((t) => t === item.type);
         if (itemType.length === 1) {
-          set(
-            filterKueryNode,
-            path,
-            esKuery.nodeTypes.function.buildNode('and', [
+          if (path.length > 0) {
+            set(
+              filterKueryNode,
+              path,
+              esKuery.nodeTypes.function.buildNode('and', [
+                esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
+                existingKueryNode,
+              ])
+            );
+          } else {
+            filterKueryNode = esKuery.nodeTypes.function.buildNode('and', [
               esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
-              existingKueryNode,
-            ])
-          );
+              filterKueryNode,
+            ]);
+          }
         }
       } else {
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.replace(

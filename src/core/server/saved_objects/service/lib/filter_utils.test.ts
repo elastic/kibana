@@ -193,6 +193,38 @@ describe('Filter Utils', () => {
       ).toEqual(esKuery.fromKueryExpression('alert.params.foo:bar'));
     });
 
+    test('Assemble filter with just "_id"', () => {
+      expect(
+        validateConvertFilterToKueryNode(['foo'], 'foo._id: 0123456789', mockMappings)
+      ).toEqual(esKuery.fromKueryExpression('type: foo and _id: 0123456789'));
+    });
+
+    test('Assemble filter with "_id" and more', () => {
+      expect(
+        validateConvertFilterToKueryNode(
+          ['foo'],
+          'foo._id: 0123456789 and (foo.updated_at: 5678654567 or foo.attributes.bytes > 1000)',
+          mockMappings
+        )
+      ).toEqual(
+        esKuery.fromKueryExpression(
+          '(type: foo and _id: 0123456789) and ((type: foo and updated_at: 5678654567) or foo.bytes > 1000)'
+        )
+      );
+    });
+
+    test('Lets make sure that we are throwing an exception if we are using _id when it does not belong', () => {
+      expect(() => {
+        validateConvertFilterToKueryNode(
+          ['foo'],
+          'foo.attributes._id: 0123456789 and (foo.updated_at: 5678654567 or foo.attributes.bytes > 1000)',
+          mockMappings
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"This key 'foo.attributes._id' does NOT exist in foo saved object index patterns: Bad Request"`
+      );
+    });
+
     test('Lets make sure that we are throwing an exception if we get an error', () => {
       expect(() => {
         validateConvertFilterToKueryNode(
