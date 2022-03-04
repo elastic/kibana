@@ -17,12 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/95707
   describe.skip('Security Solution', () => {
     before(async () => {
-      await security.testUser.setRoles(['superuser'], false);
+      await security.testUser.setRoles(['superuser'], { skipBrowserRefresh: true });
       await common.navigateToApp('security');
     });
 
     after(async () => {
-      await security.testUser.restoreDefaults(false);
+      await security.testUser.restoreDefaults({ skipBrowserRefresh: true });
     });
 
     describe('Detections', () => {

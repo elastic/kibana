@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / cases/client
+[Cases Client API Interface](../README.md) / cases/client
 
 # Module: cases/client
 
@@ -6,4 +6,4 @@
 
 ### Interfaces
 
-- [CasesSubClient](../interfaces/cases_client.casessubclient.md)
+- [CasesSubClient](../interfaces/cases_client.CasesSubClient.md)

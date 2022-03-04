@@ -89,7 +89,9 @@ const TopNComponent: React.FC<Props> = ({
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const { selectedPatterns } = useSourcererDataView(getSourcererScopeName({ timelineId, view }));
+  const { selectedPatterns, runtimeMappings } = useSourcererDataView(
+    getSourcererScopeName({ timelineId, view })
+  );
 
   useEffect(() => {
     setView(defaultView);
@@ -134,6 +136,7 @@ const TopNComponent: React.FC<Props> = ({
             headerChildren={headerChildren}
             indexPattern={indexPattern}
             indexNames={selectedPatterns}
+            runtimeMappings={runtimeMappings}
             onlyField={field}
             paddingSize={paddingSize}
             query={query}
@@ -156,6 +159,7 @@ const TopNComponent: React.FC<Props> = ({
             showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             timelineId={timelineId}
+            runtimeMappings={runtimeMappings}
           />
         )}
       </TopNContent>

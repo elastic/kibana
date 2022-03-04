@@ -101,7 +101,7 @@ export function registerDeprecationLoggingRoutes({
         response
       ) => {
         try {
-          const { body: indexExists } = await client.asCurrentUser.indices.exists({
+          const indexExists = await client.asCurrentUser.indices.exists({
             index: DEPRECATION_LOGS_INDEX,
           });
 
@@ -111,7 +111,7 @@ export function registerDeprecationLoggingRoutes({
 
           const now = moment().toISOString();
 
-          const { body } = await client.asCurrentUser.count({
+          const body = await client.asCurrentUser.count({
             index: DEPRECATION_LOGS_INDEX,
             body: {
               query: {

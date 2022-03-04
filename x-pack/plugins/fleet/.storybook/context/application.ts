@@ -27,7 +27,12 @@ export const getApplication = () => {
       management: {},
       navLinks: {},
       fleet: {
-        write: true,
+        read: true,
+        all: true,
+      },
+      fleetv2: {
+        read: true,
+        all: true,
       },
     },
     applications$: of(applications),

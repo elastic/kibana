@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ThresholdVisualization } from './visualization';
 import { DataPublicPluginStart } from 'src/plugins/data/public/types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';

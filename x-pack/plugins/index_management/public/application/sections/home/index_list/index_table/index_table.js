@@ -285,7 +285,7 @@ export class IndexTable extends Component {
           {renderBadges(index, filterChanged, appServices.extensionsService)}
         </Fragment>
       );
-    } else if (fieldName === 'data_stream') {
+    } else if (fieldName === 'data_stream' && value) {
       return (
         <EuiLink
           data-test-subj="dataStreamLink"

@@ -21,9 +21,15 @@ import {
   tap,
 } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, ThemeServiceSetup, ToastsSetup } from 'kibana/public';
+import {
+  CoreSetup,
+  CoreStart,
+  IHttpFetchError,
+  ThemeServiceSetup,
+  ToastsSetup,
+} from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '../../../../bfetch/public';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -55,6 +61,7 @@ import { SearchAbortController } from './search_abort_controller';
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
   http: CoreSetup['http'];
+  executionContext: CoreSetup['executionContext'];
   uiSettings: CoreSetup['uiSettings'];
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
@@ -67,8 +74,9 @@ const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
 
 export class SearchInterceptor {
-  private uiSettingsSub: Subscription;
+  private uiSettingsSubs: Subscription[] = [];
   private searchTimeout: number;
+  private bFetchDisabled: boolean;
   private readonly responseCache: SearchResponseCache = new SearchResponseCache(
     MAX_CACHE_ITEMS,
     MAX_CACHE_SIZE_MB
@@ -106,17 +114,21 @@ export class SearchInterceptor {
     });
 
     this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
+    this.bFetchDisabled = deps.uiSettings.get(DISABLE_BFETCH);
 
-    this.uiSettingsSub = deps.uiSettings
-      .get$(UI_SETTINGS.SEARCH_TIMEOUT)
-      .subscribe((timeout: number) => {
+    this.uiSettingsSubs.push(
+      deps.uiSettings.get$(UI_SETTINGS.SEARCH_TIMEOUT).subscribe((timeout: number) => {
         this.searchTimeout = timeout;
-      });
+      }),
+      deps.uiSettings.get$(DISABLE_BFETCH).subscribe((bFetchDisabled: boolean) => {
+        this.bFetchDisabled = bFetchDisabled;
+      })
+    );
   }
 
   public stop() {
     this.responseCache.clear();
-    this.uiSettingsSub.unsubscribe();
+    this.uiSettingsSubs.forEach((s) => s.unsubscribe());
   }
 
   /*
@@ -266,13 +278,38 @@ export class SearchInterceptor {
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
-    return this.batchedFetch(
-      {
-        request,
-        options: this.getSerializableOptions(options),
-      },
-      abortSignal
-    );
+
+    if (this.bFetchDisabled) {
+      const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
+      return this.deps.http
+        .post(`/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`, {
+          signal: abortSignal,
+          context: executionContext,
+          body: JSON.stringify({
+            ...request,
+            ...searchOptions,
+          }),
+        })
+        .catch((e: IHttpFetchError<KibanaServerError>) => {
+          if (e?.body) {
+            throw e.body;
+          } else {
+            throw e;
+          }
+        }) as Promise<IKibanaSearchResponse>;
+    } else {
+      const { executionContext, ...rest } = options || {};
+      return this.batchedFetch(
+        {
+          request,
+          options: this.getSerializableOptions({
+            ...rest,
+            executionContext: this.deps.executionContext.withGlobalContext(executionContext),
+          }),
+        },
+        abortSignal
+      );
+    }
   }
 
   /**
@@ -319,9 +356,12 @@ export class SearchInterceptor {
    */
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
     const searchOptions = {
-      strategy: ENHANCED_ES_SEARCH_STRATEGY,
       ...options,
     };
+    if (!searchOptions.strategy) {
+      searchOptions.strategy = ENHANCED_ES_SEARCH_STRATEGY;
+    }
+
     const { sessionId, abortSignal } = searchOptions;
 
     return this.createRequestHash$(request, searchOptions).pipe(

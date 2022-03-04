@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { EuiDataGridSorting } from '@elastic/eui';
-
-import { multiColumnSortFactory } from './common';
+import { MultiColumnSorter, multiColumnSortFactory } from './common';
 
 describe('Data Frame Analytics: Data Grid Common', () => {
   test('multiColumnSortFactory()', () => {
@@ -18,7 +16,7 @@ describe('Data Frame Analytics: Data Grid Common', () => {
       { s: 'b', n: 4 },
     ];
 
-    const sortingColumns1: EuiDataGridSorting['columns'] = [{ id: 's', direction: 'desc' }];
+    const sortingColumns1: MultiColumnSorter[] = [{ id: 's', direction: 'desc', type: 'number' }];
     const multiColumnSort1 = multiColumnSortFactory(sortingColumns1);
     data.sort(multiColumnSort1);
 
@@ -29,9 +27,9 @@ describe('Data Frame Analytics: Data Grid Common', () => {
       { s: 'a', n: 2 },
     ]);
 
-    const sortingColumns2: EuiDataGridSorting['columns'] = [
-      { id: 's', direction: 'asc' },
-      { id: 'n', direction: 'desc' },
+    const sortingColumns2: MultiColumnSorter[] = [
+      { id: 's', direction: 'asc', type: 'number' },
+      { id: 'n', direction: 'desc', type: 'number' },
     ];
     const multiColumnSort2 = multiColumnSortFactory(sortingColumns2);
     data.sort(multiColumnSort2);
@@ -43,9 +41,9 @@ describe('Data Frame Analytics: Data Grid Common', () => {
       { s: 'b', n: 3 },
     ]);
 
-    const sortingColumns3: EuiDataGridSorting['columns'] = [
-      { id: 'n', direction: 'desc' },
-      { id: 's', direction: 'desc' },
+    const sortingColumns3: MultiColumnSorter[] = [
+      { id: 'n', direction: 'desc', type: 'number' },
+      { id: 's', direction: 'desc', type: 'number' },
     ];
     const multiColumnSort3 = multiColumnSortFactory(sortingColumns3);
     data.sort(multiColumnSort3);

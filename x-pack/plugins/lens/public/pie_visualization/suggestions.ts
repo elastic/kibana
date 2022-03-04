@@ -8,11 +8,17 @@
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SuggestionRequest, TableSuggestionColumn, VisualizationSuggestion } from '../types';
-import { layerTypes } from '../../common';
-import type { PieVisualizationState } from '../../common/expressions';
+import {
+  CategoryDisplay,
+  layerTypes,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+  PieVisualizationState,
+} from '../../common';
+import type { PieChartType } from '../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { isPartitionShape } from './render_helpers';
-import { PieChartTypes } from '../../common/expressions/pie_chart/types';
 
 function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');
@@ -43,14 +49,19 @@ function getNewShape(
   let newShape: PieVisualizationState['shape'] | undefined;
 
   if (groups.length !== 1 && !subVisualizationId) {
-    newShape = 'pie';
+    newShape = PieChartTypes.PIE;
   }
 
-  return newShape ?? 'donut';
+  return newShape ?? PieChartTypes.DONUT;
 }
 
-function hasCustomSuggestionsExists(shape: PieChartTypes | string | undefined) {
-  return shape ? ['treemap', 'waffle', 'mosaic'].includes(shape) : false;
+function hasCustomSuggestionsExists(shape: PieChartType | string | undefined) {
+  const shapes: Array<PieChartType | string> = [
+    PieChartTypes.TREEMAP,
+    PieChartTypes.WAFFLE,
+    PieChartTypes.MOSAIC,
+  ];
+  return shape ? shapes.includes(shape) : false;
 }
 
 const maximumGroupLength = Math.max(
@@ -70,7 +81,15 @@ export function suggestions({
     return [];
   }
 
-  const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
+  const [groups, metrics] = partition(
+    // filter out all metrics which are not number based
+    table.columns.filter((col) => col.operation.isBucketed || col.operation.dataType === 'number'),
+    (col) => col.operation.isBucketed
+  );
+
+  if (groups.length === 0 && metrics.length === 0) {
+    return [];
+  }
 
   if (metrics.length > 1 || groups.length > maximumGroupLength) {
     return [];
@@ -116,9 +135,9 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                numberDisplay: 'percent',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.PERCENT,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
               },
@@ -137,13 +156,18 @@ export function suggestions({
       ...baseSuggestion,
       title: i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: 'As {chartName}',
-        values: { chartName: PartitionChartsMeta[newShape === 'pie' ? 'donut' : 'pie'].label },
+        values: {
+          chartName:
+            PartitionChartsMeta[
+              newShape === PieChartTypes.PIE ? PieChartTypes.DONUT : PieChartTypes.PIE
+            ].label,
+        },
         description: 'chartName is already translated',
       }),
       score: 0.1,
       state: {
         ...baseSuggestion.state,
-        shape: newShape === 'pie' ? 'donut' : 'pie',
+        shape: newShape === PieChartTypes.PIE ? PieChartTypes.DONUT : PieChartTypes.PIE,
       },
       hide: true,
     });
@@ -159,9 +183,9 @@ export function suggestions({
       }),
       // Use a higher score when currently active, to prevent chart type switching
       // on the user unintentionally
-      score: state?.shape === 'treemap' ? 0.7 : 0.5,
+      score: state?.shape === PieChartTypes.TREEMAP ? 0.7 : 0.5,
       state: {
-        shape: 'treemap',
+        shape: PieChartTypes.TREEMAP,
         palette: mainPalette || state?.palette,
         layers: [
           state?.layers[0]
@@ -171,8 +195,8 @@ export function suggestions({
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
                 categoryDisplay:
-                  state.layers[0].categoryDisplay === 'inside'
-                    ? 'default'
+                  state.layers[0].categoryDisplay === CategoryDisplay.INSIDE
+                    ? CategoryDisplay.DEFAULT
                     : state.layers[0].categoryDisplay,
                 layerType: layerTypes.DATA,
               }
@@ -180,9 +204,9 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                numberDisplay: 'percent',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.PERCENT,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
               },
@@ -194,21 +218,21 @@ export function suggestions({
         table.changeType === 'reduced' ||
         !state ||
         hasIntervalScale(groups) ||
-        (state && state.shape === 'treemap'),
+        (state && state.shape === PieChartTypes.TREEMAP),
     });
   }
 
   if (
     groups.length <= PartitionChartsMeta.mosaic.maxBuckets &&
-    (!subVisualizationId || subVisualizationId === 'mosaic')
+    (!subVisualizationId || subVisualizationId === PieChartTypes.MOSAIC)
   ) {
     results.push({
       title: i18n.translate('xpack.lens.pie.mosaicSuggestionLabel', {
         defaultMessage: 'As Mosaic',
       }),
-      score: state?.shape === 'mosaic' ? 0.7 : 0.5,
+      score: state?.shape === PieChartTypes.MOSAIC ? 0.7 : 0.5,
       state: {
-        shape: 'mosaic',
+        shape: PieChartTypes.MOSAIC,
         palette: mainPalette || state?.palette,
         layers: [
           state?.layers[0]
@@ -217,16 +241,16 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                categoryDisplay: 'default',
+                categoryDisplay: CategoryDisplay.DEFAULT,
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                numberDisplay: 'percent',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.PERCENT,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
               },
@@ -239,15 +263,15 @@ export function suggestions({
 
   if (
     groups.length <= PartitionChartsMeta.waffle.maxBuckets &&
-    (!subVisualizationId || subVisualizationId === 'waffle')
+    (!subVisualizationId || subVisualizationId === PieChartTypes.WAFFLE)
   ) {
     results.push({
       title: i18n.translate('xpack.lens.pie.waffleSuggestionLabel', {
         defaultMessage: 'As Waffle',
       }),
-      score: state?.shape === 'waffle' ? 0.7 : 0.5,
+      score: state?.shape === PieChartTypes.WAFFLE ? 0.7 : 0.5,
       state: {
-        shape: 'waffle',
+        shape: PieChartTypes.WAFFLE,
         palette: mainPalette || state?.palette,
         layers: [
           state?.layers[0]
@@ -256,16 +280,16 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                categoryDisplay: 'default',
+                categoryDisplay: CategoryDisplay.DEFAULT,
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                numberDisplay: 'percent',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.PERCENT,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
               },

@@ -5,7 +5,6 @@
   "private": true,
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "main": "./target_node",
-  "types": "./target_types",
   "kibana": {
     "devOnly": true
   }

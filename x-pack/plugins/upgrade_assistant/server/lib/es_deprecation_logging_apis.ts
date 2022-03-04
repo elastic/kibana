@@ -12,7 +12,7 @@ import { DeprecationLoggingStatus } from '../../common/types';
 export async function getDeprecationLoggingStatus(
   dataClient: IScopedClusterClient
 ): Promise<DeprecationLoggingStatus> {
-  const { body: response } = await dataClient.asCurrentUser.cluster.getSettings({
+  const response = await dataClient.asCurrentUser.cluster.getSettings({
     include_defaults: true,
   });
 
@@ -26,7 +26,7 @@ export async function setDeprecationLogging(
   dataClient: IScopedClusterClient,
   isEnabled: boolean
 ): Promise<DeprecationLoggingStatus> {
-  const { body: response } = await dataClient.asCurrentUser.cluster.putSettings({
+  const response = await dataClient.asCurrentUser.cluster.putSettings({
     body: {
       persistent: {
         'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',

@@ -17,6 +17,7 @@ export interface ModelSnapshotsResponse {
   count: number;
   model_snapshots: ModelSnapshot[];
 }
+
 export interface RevertModelSnapshotResponse {
   model: ModelSnapshot;
 }
@@ -53,15 +54,13 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
     }
 
     // ensure the snapshot exists
-    const { body: snapshot } = await mlClient.getModelSnapshots<ModelSnapshotsResponse>({
+    const snapshot = await mlClient.getModelSnapshots({
       job_id: jobId,
       snapshot_id: snapshotId,
     });
 
     // apply the snapshot revert
-    const {
-      body: { model },
-    } = await mlClient.revertModelSnapshot<RevertModelSnapshotResponse>({
+    const { model } = await mlClient.revertModelSnapshot({
       job_id: jobId,
       snapshot_id: snapshotId,
       body: {
@@ -94,7 +93,11 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
         await cm.newCalendar(calendar);
       }
 
-      forceStartDatafeeds([datafeedId], +snapshot.model_snapshots[0].latest_record_time_stamp, end);
+      forceStartDatafeeds(
+        [datafeedId],
+        +snapshot.model_snapshots[0].latest_record_time_stamp!,
+        end
+      );
     }
 
     return { success: true };

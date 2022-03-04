@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, SavedObject, Logger } from 'src/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { AlertInstance } from '../../../../../alerting/server';
+import { Alert } from '../../../../../alerting/server';
 import { RuleParams } from '../schemas/rule_schemas';
 import { deconflictSignalsAndResults, getNotificationResultsLink } from '../notifications/utils';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
@@ -26,7 +26,7 @@ interface ScheduleThrottledNotificationActionsOptions {
   outputIndex: RuleParams['outputIndex'];
   ruleId: RuleParams['ruleId'];
   esClient: ElasticsearchClient;
-  alertInstance: AlertInstance;
+  alertInstance: Alert;
   notificationRuleParams: NotificationRuleTypeParams;
   signals: unknown[];
   logger: Logger;

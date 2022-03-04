@@ -42,11 +42,7 @@ export default function (providerContext: FtrProviderContext) {
         .send({})
         .expect(200);
 
-      expect(body).to.eql({
-        packages: [],
-        policies: [],
-        nonFatalErrors: [],
-      });
+      expect(body.nonFatalErrors).to.eql([]);
     });
   });
 }

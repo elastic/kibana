@@ -74,7 +74,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
             (value) => !isEmpty(value)
           ),
         };
-        const actionResponse = await esClient.index<{}, {}>({
+        const actionResponse = await esClient.index({
           index: '.fleet-actions',
           body: action,
         });

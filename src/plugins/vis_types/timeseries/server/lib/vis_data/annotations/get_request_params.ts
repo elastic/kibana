@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { i18n } from '@kbn/i18n';
 import type { Annotation, Panel } from '../../../../common/types';
 import { buildAnnotationRequest } from './build_request_body';
 import type {
@@ -13,7 +13,7 @@ import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import type { SearchStrategy, SearchCapabilities } from '../../search_strategies';
+import type { SearchStrategy, SearchCapabilities, EsSearchRequest } from '../../search_strategies';
 
 export type AnnotationServices = VisTypeTimeseriesRequestServices & {
   capabilities: SearchCapabilities;
@@ -31,8 +31,9 @@ export async function getAnnotationRequestParams(
     capabilities,
     uiSettings,
     cachedIndexPatternFetcher,
+    buildSeriesMetaParams,
   }: AnnotationServices
-) {
+): Promise<EsSearchRequest> {
   const annotationIndex = await cachedIndexPatternFetcher(annotation.index_pattern);
 
   const request = await buildAnnotationRequest({
@@ -43,6 +44,7 @@ export async function getAnnotationRequestParams(
     annotationIndex,
     capabilities,
     uiSettings,
+    getMetaParams: () => buildSeriesMetaParams(annotationIndex, Boolean(panel.use_kibana_indexes)),
   });
 
   return {
@@ -51,6 +53,15 @@ export async function getAnnotationRequestParams(
       ...request,
       runtime_mappings: annotationIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
       timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
+    },
+    trackingEsSearchMeta: {
+      requestId: annotation.id,
+      requestLabel: i18n.translate('visTypeTimeseries.annotationRequest.label', {
+        defaultMessage: 'Annotation: {id}',
+        values: {
+          id: annotation.id,
+        },
+      }),
     },
   };
 }

@@ -8,7 +8,7 @@ import semverParse from 'semver/functions/parse';
 
 export const POLICY_ELASTIC_AGENT_ON_CLOUD = 'policy-elastic-agent-on-cloud';
 
-export const SUPPORTED_APM_PACKAGE_VERSION = '8.0.0-dev4'; // TODO update to just '8.0.0' once published
+export const SUPPORTED_APM_PACKAGE_VERSION = '8.1.0';
 
 export function isPrereleaseVersion(version: string) {
   return semverParse(version)?.prerelease?.length ?? 0 > 0;

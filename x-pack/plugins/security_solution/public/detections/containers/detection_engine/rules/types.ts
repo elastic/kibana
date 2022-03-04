@@ -30,8 +30,10 @@ import {
   timestamp_override,
   threshold,
   BulkAction,
+  BulkActionEditPayload,
   ruleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
+
 import {
   CreateRulesSchema,
   PatchRulesSchema,
@@ -141,7 +143,6 @@ export const RuleSchema = t.intersection([
     exceptions_list: listArray,
     uuid: t.string,
     version: t.number,
-    // TODO: https://github.com/elastic/kibana/pull/121644 clean up
     execution_summary: ruleExecutionSummary,
   }),
 ]);
@@ -230,21 +231,46 @@ export interface DuplicateRulesProps {
 
 export interface BulkActionProps<Action extends BulkAction> {
   action: Action;
-  query: string;
+  query?: string;
+  ids?: string[];
+  edit?: BulkActionEditPayload[];
+}
+
+export interface BulkActionSummary {
+  failed: number;
+  succeeded: number;
+  total: number;
 }
 
 export interface BulkActionResult {
-  success: boolean;
-  rules_count: number;
+  updated: Rule[];
+  created: Rule[];
+  deleted: Rule[];
 }
 
-export type BulkActionResponse<Action extends BulkAction> = {
-  [BulkAction.delete]: BulkActionResult;
-  [BulkAction.disable]: BulkActionResult;
-  [BulkAction.enable]: BulkActionResult;
-  [BulkAction.duplicate]: BulkActionResult;
+export interface BulkActionAggregatedError {
+  message: string;
+  status_code: number;
+  rules: Array<{ id: string; name?: string }>;
+}
+
+export interface BulkActionResponse {
+  success?: boolean;
+  rules_count?: number;
+  attributes: {
+    summary: BulkActionSummary;
+    results: BulkActionResult;
+    errors?: BulkActionAggregatedError[];
+  };
+}
+
+export type BulkActionResponseMap<Action extends BulkAction> = {
+  [BulkAction.delete]: BulkActionResponse;
+  [BulkAction.disable]: BulkActionResponse;
+  [BulkAction.enable]: BulkActionResponse;
+  [BulkAction.duplicate]: BulkActionResponse;
   [BulkAction.export]: Blob;
-  [BulkAction.edit]: BulkActionResult;
+  [BulkAction.edit]: BulkActionResponse;
 }[Action];
 
 export interface BasicFetchProps {

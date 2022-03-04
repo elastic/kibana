@@ -123,7 +123,7 @@ describe('When on the host isolation exceptions page', () => {
         await waitForApiCall();
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
         expect(renderResult.getByTestId('hostIsolationExceptions-totalCount').textContent).toBe(
-          'Showing 1 exception'
+          'Showing 1 host isolation exception'
         );
         expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();
       });
@@ -170,9 +170,10 @@ describe('When on the host isolation exceptions page', () => {
         await waitFor(() =>
           expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
             http: mockedContext.coreStart.http,
-            filter: undefined,
+            filter:
+              '(exception-list-agnostic.attributes.item_id:(*this*does*not*exists*) OR exception-list-agnostic.attributes.name:(*this*does*not*exists*) OR exception-list-agnostic.attributes.description:(*this*does*not*exists*) OR exception-list-agnostic.attributes.entries.value:(*this*does*not*exists*))',
             page: 1,
-            perPage: 1,
+            perPage: 10,
           })
         );
 
@@ -206,9 +207,9 @@ describe('When on the host isolation exceptions page', () => {
         await waitFor(() =>
           expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
             http: mockedContext.coreStart.http,
-            filter: undefined,
+            filter: `((exception-list-agnostic.attributes.tags:"policy:${firstPolicy.id}"))`,
             page: 1,
-            perPage: 1,
+            perPage: 10,
           })
         );
 

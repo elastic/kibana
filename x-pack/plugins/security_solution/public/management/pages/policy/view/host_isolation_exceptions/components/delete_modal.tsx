@@ -17,10 +17,12 @@ import { updateOneHostIsolationExceptionItem } from '../../../../host_isolation_
 
 export const PolicyHostIsolationExceptionsDeleteModal = ({
   policyId,
+  policyName,
   exception,
   onCancel,
 }: {
   policyId: string;
+  policyName: string;
   exception: ExceptionListItemSchema;
   onCancel: () => void;
 }) => {
@@ -51,8 +53,9 @@ export const PolicyHostIsolationExceptionsDeleteModal = ({
       text: i18n.translate(
         'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeDialog.successToastText',
         {
-          defaultMessage: '"{exception}" has been removed from policy',
-          values: { exception: exception.name },
+          defaultMessage:
+            '"{hostIsolationExceptionName}" has been removed from {policyName} policy',
+          values: { hostIsolationExceptionName: exception.name, policyName },
         }
       ),
     });

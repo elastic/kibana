@@ -20,6 +20,7 @@ target
 *.iml
 *.log
 types.eslint.config.js
+__tmp__
 
 # Ignore example plugin builds
 /examples/*/build
@@ -66,6 +67,7 @@ npm-debug.log*
 .ci/bash_standard_lib.sh
 .gradle
 .vagrant
+.envrc
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
@@ -93,3 +95,4 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
+

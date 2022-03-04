@@ -27,6 +27,7 @@ import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './plugins_status';
 import { getOverallStatusChanges } from './log_overall_status';
+import { getPluginsStatusChanges, getServiceLevelChangeMessage } from './log_plugins_status';
 
 interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
@@ -164,6 +165,12 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
     getOverallStatusChanges(this.overall$, this.stop$).subscribe((message) => {
       this.logger.info(message);
+    });
+
+    getPluginsStatusChanges(this.pluginsStatus.getAll$(), this.stop$).subscribe((statusChanges) => {
+      statusChanges.forEach((statusChange) => {
+        this.logger.info(getServiceLevelChangeMessage(statusChange));
+      });
     });
   }
 

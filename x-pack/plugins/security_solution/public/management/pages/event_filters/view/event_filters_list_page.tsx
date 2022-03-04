@@ -121,6 +121,7 @@ export const EventFiltersListPage = memo(() => {
 
   // load the list of policies
   const policiesRequest = useGetEndpointSpecificPolicies({
+    perPage: 1000,
     onError: (err) => {
       toasts.addDanger(getLoadPoliciesError(err));
     },
@@ -230,6 +231,8 @@ export const EventFiltersListPage = memo(() => {
             children: DELETE_EVENT_FILTER_ACTION_LABEL,
           },
         ],
+        hideDescription: !eventFilter.description,
+        hideComments: !eventFilter.comments.length,
       };
     }
 

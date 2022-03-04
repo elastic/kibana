@@ -159,6 +159,36 @@ describe('format_column', () => {
           params: {
             pattern: '0,0.00000',
           },
+          pattern: '0,0.00000',
+        },
+      });
+    });
+
+    it('should support multi-fields formatters', async () => {
+      datatable.columns[0].meta.params = {
+        id: 'previousWrapper',
+        params: { id: 'myMultiFieldFormatter', paramsPerField: [{ id: 'number' }] },
+      };
+      const result = await fn(datatable, {
+        columnId: 'test',
+        format: 'number',
+        decimals: 5,
+        parentFormat: JSON.stringify({ id: 'wrapper', params: { wrapperParam: 123 } }),
+      });
+      expect(result.columns[0].meta.params).toEqual({
+        id: 'wrapper',
+        params: {
+          wrapperParam: 123,
+          id: 'number',
+          paramsPerField: [
+            {
+              id: 'number',
+              params: {
+                pattern: '0,0.00000',
+              },
+              pattern: '0,0.00000',
+            },
+          ],
         },
       });
     });

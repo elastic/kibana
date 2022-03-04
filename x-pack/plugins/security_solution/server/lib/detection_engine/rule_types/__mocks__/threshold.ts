@@ -77,7 +77,6 @@ export const mockThresholdResults = {
   },
 };
 
-// TODO: https://github.com/elastic/kibana/pull/121644 clean up
 export const sampleThresholdAlert = {
   _id: 'b3ad77a4-65bd-4c4e-89cf-13c46f54bc4d',
   _index: 'some-index',

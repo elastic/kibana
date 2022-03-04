@@ -21,11 +21,9 @@ import type {
   PreconfiguredOutput,
   PackagePolicy,
 } from '../../common';
-import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
-import {
-  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_LATEST_KEYWORD,
-} from '../constants';
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
+import { normalizeHostsForAgents } from '../../common';
+import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
@@ -34,10 +32,9 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { preconfigurePackageInputs, packagePolicyService } from './package_policy';
+import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
 
 interface PreconfigurationResult {
@@ -60,6 +57,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
         existingOutput.hosts?.map(normalizeHostsForAgents),
         preconfiguredOutput.hosts.map(normalizeHostsForAgents)
       )) ||
+    (preconfiguredOutput.ssl && !isEqual(preconfiguredOutput.ssl, existingOutput.ssl)) ||
     existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
     existingOutput.ca_trusted_fingerprint !== preconfiguredOutput.ca_trusted_fingerprint ||
     existingOutput.config_yaml !== preconfiguredOutput.config_yaml
@@ -172,19 +170,22 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     );
   }
 
+  const packagesToInstall = packages.map((pkg) =>
+    pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
+  );
+
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
     savedObjectsClient: soClient,
     esClient,
-    packagesToInstall: packages.map((pkg) =>
-      pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
-    ),
+    packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
     spaceId,
   });
 
   const fulfilledPackages = [];
   const rejectedPackages: PreconfigurationError[] = [];
+
   for (let i = 0; i < preconfiguredPackages.length; i++) {
     const packageResult = preconfiguredPackages[i];
     if ('error' in packageResult) {
@@ -334,7 +335,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       const packagePoliciesToAdd = installedPackagePolicies.filter((installablePackagePolicy) => {
         return !(agentPolicyWithPackagePolicies?.package_policies as PackagePolicy[]).some(
-          (packagePolicy) => packagePolicy.name === installablePackagePolicy.name
+          (packagePolicy) =>
+            (packagePolicy.id !== undefined && packagePolicy.id === installablePackagePolicy.id) ||
+            packagePolicy.name === installablePackagePolicy.name
         );
       });
 
@@ -344,7 +347,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         policy!,
         packagePoliciesToAdd!,
         defaultOutput,
-        !created
+        true
       );
 
       // Add the is_managed flag after configuring package policies to avoid errors
@@ -353,18 +356,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       }
     }
   }
-
-  // Handle automatic package policy upgrades for managed packages and package with
-  // the `keep_policies_up_to_date` setting enabled
-  const allPackagePolicyIds = await packagePolicyService.listIds(soClient, {
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-  });
-  const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
-    soClient,
-    esClient,
-    allPackagePolicyIds.items
-  );
 
   return {
     policies: fulfilledPolicies.map((p) =>
@@ -381,8 +372,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             }),
           }
     ),
-    packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
-    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
+    packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
+    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
   };
 }
 

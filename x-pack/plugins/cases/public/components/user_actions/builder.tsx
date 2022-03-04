@@ -9,6 +9,7 @@ import { createCommentUserActionBuilder } from './comment/comment';
 import { createConnectorUserActionBuilder } from './connector';
 import { createDescriptionUserActionBuilder } from './description';
 import { createPushedUserActionBuilder } from './pushed';
+import { createSettingsUserActionBuilder } from './settings';
 import { createStatusUserActionBuilder } from './status';
 import { createTagsUserActionBuilder } from './tags';
 import { createTitleUserActionBuilder } from './title';
@@ -22,4 +23,5 @@ export const builderMap: UserActionBuilderMap = {
   pushed: createPushedUserActionBuilder,
   comment: createCommentUserActionBuilder,
   description: createDescriptionUserActionBuilder,
+  settings: createSettingsUserActionBuilder,
 };

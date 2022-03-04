@@ -28,7 +28,7 @@ function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id:
 }
 
 async function fetchDocs(esClient: ElasticsearchClient, index: string) {
-  const { body } = await esClient.search<any>({
+  const body = await esClient.search<any>({
     index,
     body: {
       query: {

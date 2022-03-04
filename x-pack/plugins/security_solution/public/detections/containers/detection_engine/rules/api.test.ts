@@ -669,11 +669,8 @@ describe('Detections Rules API', () => {
     });
   });
 
-  // TODO: https://github.com/elastic/kibana/pull/121644 clean up
   describe('fetchRuleExecutionEvents', () => {
-    const responseMock = {
-      dummy: 'response',
-    };
+    const responseMock = { events: [] };
 
     beforeEach(() => {
       fetchMock.mockClear();

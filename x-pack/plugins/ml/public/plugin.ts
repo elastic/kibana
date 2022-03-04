@@ -50,6 +50,7 @@ import type {
   FieldFormatsStart,
 } from '../../../../src/plugins/field_formats/public';
 import type { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
+import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -62,6 +63,7 @@ export interface MlStartDependencies {
   dataVisualizer: DataVisualizerPluginStart;
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
+  charts: ChartsPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -109,7 +111,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         return renderApp(
           coreStart,
           {
+            charts: pluginsStart.charts,
             data: pluginsStart.data,
+            dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
@@ -124,7 +128,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dataVisualizer: pluginsStart.dataVisualizer,
             usageCollection: pluginsSetup.usageCollection,
             fieldFormats: pluginsStart.fieldFormats,
-            dashboard: pluginsStart.dashboard,
           },
           params
         );
@@ -173,8 +176,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       if (pluginsSetup.maps) {
         // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
-        const canGetJobs = capabilities.ml?.canGetJobs === true || false;
-        await registerMapExtension(pluginsSetup.maps, core, canGetJobs);
+        const canGetJobs = capabilities.ml?.canGetJobs === true;
+        const canCreateJobs = capabilities.ml?.canCreateJob === true;
+        await registerMapExtension(pluginsSetup.maps, core, { canGetJobs, canCreateJobs });
       }
 
       if (mlEnabled) {

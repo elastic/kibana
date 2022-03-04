@@ -51,7 +51,7 @@ const MODEL_MANAGEMENT_DEEP_LINK: AppDeepLink = {
     {
       id: 'mlNodesOverviewDeepLink',
       title: i18n.translate('xpack.ml.deepLink.nodesOverview', {
-        defaultMessage: 'Nodes Overview',
+        defaultMessage: 'Nodes',
       }),
       path: `/${ML_PAGES.TRAINED_MODELS_NODES}`,
     },

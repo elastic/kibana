@@ -262,6 +262,7 @@ export class JobCreator {
     this._initModelPlotConfig();
     this._job_config.model_plot_config!.enabled = enable;
   }
+
   public get modelPlot() {
     return (
       this._job_config.model_plot_config !== undefined &&
@@ -737,7 +738,7 @@ export class JobCreator {
           ({
             id,
             name: id,
-            type: runtimeField.type,
+            type: Array.isArray(runtimeField) ? runtimeField[0].type : runtimeField.type,
             aggregatable: true,
             aggs: [],
             runtimeField,

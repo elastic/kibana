@@ -111,6 +111,7 @@ test('executes the task by calling the executor with proper parameters, using gi
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
@@ -131,6 +132,7 @@ test('executes the task by calling the executor with proper parameters, using gi
     isEphemeral: false,
     params: { baz: true },
     relatedSavedObjects: [],
+    executionId: '123abc',
     request: expect.objectContaining({
       headers: {
         // base64 encoded "123:abc"
@@ -163,6 +165,7 @@ test('executes the task by calling the executor with proper parameters, using st
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -188,6 +191,7 @@ test('executes the task by calling the executor with proper parameters, using st
     actionId: '9',
     isEphemeral: false,
     params: { baz: true },
+    executionId: '123abc',
     relatedSavedObjects: [],
     request: expect.objectContaining({
       headers: {
@@ -221,6 +225,7 @@ test('cleans up action_task_params object', async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -244,6 +249,7 @@ test('task runner should implement CancellableTask cancel method with logging wa
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -281,6 +287,7 @@ test('runs successfully when cleanup fails and logs the error', async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -312,6 +319,7 @@ test('throws an error with suggested retry logic when return status is error', a
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -353,6 +361,7 @@ test('uses API key when provided', async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -370,6 +379,7 @@ test('uses API key when provided', async () => {
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
+    executionId: '123abc',
     relatedSavedObjects: [],
     request: expect.objectContaining({
       headers: {
@@ -403,6 +413,7 @@ test('uses relatedSavedObjects merged with references when provided', async () =
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
       relatedSavedObjects: [{ id: 'related_some-type_0', type: 'some-type' }],
     },
@@ -426,6 +437,7 @@ test('uses relatedSavedObjects merged with references when provided', async () =
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
+    executionId: '123abc',
     relatedSavedObjects: [
       {
         id: 'some-id',
@@ -458,6 +470,7 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
       relatedSavedObjects: [{ id: 'abc', type: 'some-type', namespace: 'yo' }],
     },
@@ -476,6 +489,7 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
+    executionId: '123abc',
     relatedSavedObjects: [
       {
         id: 'abc',
@@ -509,6 +523,7 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
       relatedSavedObjects: [{ Xid: 'related_some-type_0', type: 'some-type' }],
     },
@@ -537,6 +552,7 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    executionId: '123abc',
     relatedSavedObjects: [],
     taskInfo: {
       scheduled: new Date(),
@@ -558,6 +574,7 @@ test(`doesn't use API key when not provided`, async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
     },
     references: [
       {
@@ -574,6 +591,7 @@ test(`doesn't use API key when not provided`, async () => {
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
+    executionId: '123abc',
     relatedSavedObjects: [],
     request: expect.objectContaining({
       headers: {},
@@ -608,6 +626,7 @@ test(`throws an error when license doesn't support the action type`, async () =>
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -646,6 +665,7 @@ test(`treats errors as errors if the task is retryable`, async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -693,6 +713,7 @@ test(`treats errors as successes if the task is not retryable`, async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -737,6 +758,7 @@ test('treats errors as errors if the error is thrown instead of returned', async
     attributes: {
       actionId: '2',
       params: { baz: true },
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [

@@ -13,16 +13,15 @@ export async function invalidateAgentKey({
   context: ApmPluginRequestHandlerContext;
   id: string;
 }) {
-  const {
-    body: { invalidated_api_keys: invalidatedAgentKeys },
-  } = await context.core.elasticsearch.client.asCurrentUser.security.invalidateApiKey(
-    {
-      body: {
-        ids: [id],
-        owner: true,
-      },
-    }
-  );
+  const { invalidated_api_keys: invalidatedAgentKeys } =
+    await context.core.elasticsearch.client.asCurrentUser.security.invalidateApiKey(
+      {
+        body: {
+          ids: [id],
+          owner: true,
+        },
+      }
+    );
 
   return {
     invalidatedAgentKeys,

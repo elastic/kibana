@@ -21,7 +21,7 @@ import { findListItems } from '../../utils/saved_visualize_utils';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import { SavedObjectsFindOptionsReference } from '../../../../../core/public';
-import { useKibana, TableListView } from '../../../../kibana_react/public';
+import { useKibana, TableListView, useExecutionContext } from '../../../../kibana_react/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
@@ -31,6 +31,7 @@ export const VisualizeListing = () => {
   const {
     services: {
       application,
+      executionContext,
       chrome,
       history,
       toastNotifications,
@@ -48,6 +49,11 @@ export const VisualizeListing = () => {
   const { pathname } = useLocation();
   const closeNewVisModal = useRef(() => {});
   const listingLimit = savedObjectsPublic.settings.getListingLimit();
+
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'list',
+  });
 
   useEffect(() => {
     if (pathname === '/new') {

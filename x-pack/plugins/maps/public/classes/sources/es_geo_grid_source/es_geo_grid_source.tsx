@@ -8,7 +8,6 @@
 import React, { ReactElement } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import rison from 'rison-node';
 import { Feature } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
@@ -26,6 +25,7 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
+import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -41,9 +41,10 @@ import {
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../src/plugins/data/common';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { makePublicExecutionContext } from '../../../util';
 
 type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
 
@@ -210,7 +211,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
-    indexPattern: IndexPattern;
+    indexPattern: DataView;
     precision: number;
     layerName: string;
     registerCancelCallback: (callback: () => void) => void;
@@ -287,6 +288,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
           }
         ),
         searchSessionId,
+        executionContext: makePublicExecutionContext('es_geo_grid_source:cluster_composite'),
       });
 
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
@@ -303,16 +305,35 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return features;
   }
 
-  _addNonCompositeAggsToSearchSource(
-    searchSource: ISearchSource,
-    indexPattern: IndexPattern,
-    precision: number,
-    bufferedExtent?: MapExtent
-  ) {
+  async _nonCompositeAggRequest({
+    searchSource,
+    searchSessionId,
+    indexPattern,
+    precision,
+    layerName,
+    registerCancelCallback,
+    bufferedExtent,
+    tooManyBuckets,
+  }: {
+    searchSource: ISearchSource;
+    searchSessionId?: string;
+    indexPattern: DataView;
+    precision: number;
+    layerName: string;
+    registerCancelCallback: (callback: () => void) => void;
+    bufferedExtent: MapExtent;
+    tooManyBuckets: boolean;
+  }): Promise<Feature[]> {
+    const valueAggsDsl = tooManyBuckets
+      ? this.getValueAggsDsl(indexPattern, (metric) => {
+          // filter out sub-bucket generating metrics if there is the potential for tooManyBucket
+          return metric.getBucketCount() === 0;
+        })
+      : this.getValueAggsDsl(indexPattern);
     searchSource.setField('aggs', {
       [GEOTILE_GRID_AGG_NAME]: {
         geotile_grid: {
-          bounds: bufferedExtent ? makeESBbox(bufferedExtent) : null,
+          bounds: makeESBbox(bufferedExtent),
           field: this._descriptor.geoField,
           precision,
           size: DEFAULT_MAX_BUCKETS_LIMIT,
@@ -324,32 +345,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
               field: this._descriptor.geoField,
             },
           },
-          ...this.getValueAggsDsl(indexPattern),
+          ...valueAggsDsl,
         },
       },
     });
-  }
-
-  // Do not use composite aggregation when there are no terms sub-aggregations
-  // see https://github.com/elastic/kibana/pull/57875#issuecomment-590515482 for explanation on using separate code paths
-  async _nonCompositeAggRequest({
-    searchSource,
-    searchSessionId,
-    indexPattern,
-    precision,
-    layerName,
-    registerCancelCallback,
-    bufferedExtent,
-  }: {
-    searchSource: ISearchSource;
-    searchSessionId?: string;
-    indexPattern: IndexPattern;
-    precision: number;
-    layerName: string;
-    registerCancelCallback: (callback: () => void) => void;
-    bufferedExtent?: MapExtent;
-  }): Promise<Feature[]> {
-    this._addNonCompositeAggsToSearchSource(searchSource, indexPattern, precision, bufferedExtent);
 
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
@@ -360,9 +359,20 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         defaultMessage: 'Elasticsearch geo grid aggregation request',
       }),
       searchSessionId,
+      executionContext: makePublicExecutionContext('es_geo_grid_source:cluster'),
     });
 
     return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
+  }
+
+  async _isGeoShape() {
+    try {
+      const geoField = await this._getGeoField();
+      return geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+    } catch (error) {
+      // ignore _getGeoField exeception, error will surface in legend from loading data.
+      return false;
+    }
   }
 
   async getGeoJsonWithMeta(
@@ -371,7 +381,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
-    const indexPattern: IndexPattern = await this.getIndexPattern();
+    if (!searchFilters.buffer) {
+      throw new Error('Cannot get GeoJson without searchFilter.buffer');
+    }
+
+    const indexPattern: DataView = await this.getIndexPattern();
     const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('trackTotalHits', false);
 
@@ -380,33 +394,39 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       bucketsPerGrid += metricField.getBucketCount();
     });
 
-    let features: Feature[];
-    if (searchFilters.buffer) {
-      features =
-        bucketsPerGrid === 1
-          ? await this._nonCompositeAggRequest({
-              searchSource,
-              searchSessionId: searchFilters.searchSessionId,
-              indexPattern,
-              precision: searchFilters.geogridPrecision || 0,
-              layerName,
-              registerCancelCallback,
-              bufferedExtent: searchFilters.buffer,
-            })
-          : await this._compositeAggRequest({
-              searchSource,
-              searchSessionId: searchFilters.searchSessionId,
-              indexPattern,
-              precision: searchFilters.geogridPrecision || 0,
-              layerName,
-              registerCancelCallback,
-              bucketsPerGrid,
-              isRequestStillActive,
-              bufferedExtent: searchFilters.buffer,
-            });
-    } else {
-      throw new Error('Cannot get GeoJson without searchFilter.buffer');
-    }
+    // Sub-bucketing geotile_grid may result in bucket overflow for higher grid resolutions
+    // In those cases, use composite aggregation
+    // see https://github.com/elastic/kibana/pull/57875#issuecomment-590515482 for explanation on using separate code paths
+    const tooManyBuckets =
+      this._descriptor.resolution !== GRID_RESOLUTION.COARSE && bucketsPerGrid > 1;
+
+    // geotile_grid with geo_shape does not support composite aggregation
+    // https://github.com/elastic/elasticsearch/issues/60626
+    const supportsCompositeAgg = !(await this._isGeoShape());
+
+    const features: Feature[] =
+      supportsCompositeAgg && tooManyBuckets
+        ? await this._compositeAggRequest({
+            searchSource,
+            searchSessionId: searchFilters.searchSessionId,
+            indexPattern,
+            precision: searchFilters.geogridPrecision || 0,
+            layerName,
+            registerCancelCallback,
+            bucketsPerGrid,
+            isRequestStillActive,
+            bufferedExtent: searchFilters.buffer,
+          })
+        : await this._nonCompositeAggRequest({
+            searchSource,
+            searchSessionId: searchFilters.searchSessionId,
+            indexPattern,
+            precision: searchFilters.geogridPrecision || 0,
+            layerName,
+            registerCancelCallback,
+            bufferedExtent: searchFilters.buffer,
+            tooManyBuckets,
+          });
 
     return {
       data: {
@@ -427,9 +447,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', this.getValueAggsDsl(indexPattern));
-    const dsl = searchSource.getSearchRequestBody();
-
-    const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
@@ -442,7 +459,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
-&requestBody=${risonDsl}\
+&requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &requestType=${requestType}\
 &token=${refreshToken}`;
   }
@@ -470,10 +487,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
-    const geoField = await this._getGeoField();
-    return geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
-      ? [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE]
-      : [];
+    return (await this._isGeoShape()) ? [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE] : [];
   }
 }
 

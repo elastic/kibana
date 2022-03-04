@@ -199,7 +199,9 @@ export default function ({ getService }) {
           'primary',
           'replica',
           'documents',
+          'documents_deleted',
           'size',
+          'primary_size',
           'isFrozen',
           'aliases',
           // Cloud disables CCR, so wouldn't expect follower indices.
@@ -217,11 +219,12 @@ export default function ({ getService }) {
     });
 
     describe('reload', function () {
-      // FLAKY: https://github.com/elastic/kibana/issues/90565
-      describe.skip('(not on Cloud)', function () {
+      describe('(not on Cloud)', function () {
         this.tags(['skipCloud']);
 
         it('should list all the indices with the expected properties and data enrichers', async function () {
+          // create an index to assert against, otherwise the test is flaky
+          await createIndex('reload-test-index');
           const { body } = await reload().expect(200);
           const expectedKeys = [
             'health',
@@ -232,7 +235,9 @@ export default function ({ getService }) {
             'primary',
             'replica',
             'documents',
+            'documents_deleted',
             'size',
+            'primary_size',
             'isFrozen',
             'aliases',
             // Cloud disables CCR, so wouldn't expect follower indices.
@@ -243,7 +248,9 @@ export default function ({ getService }) {
           // We need to sort the keys before comparing then, because race conditions
           // can cause enrichers to register in non-deterministic order.
           const sortedExpectedKeys = expectedKeys.sort();
-          const sortedReceivedKeys = Object.keys(body[0]).sort();
+
+          const indexCreated = body.find((index) => index.name === 'reload-test-index');
+          const sortedReceivedKeys = Object.keys(indexCreated).sort();
           expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
           expect(body.length > 1).to.be(true); // to contrast it with the next test
         });

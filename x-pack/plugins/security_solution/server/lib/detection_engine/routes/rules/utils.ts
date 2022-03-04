@@ -22,7 +22,6 @@ import { RuleAlertType, isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedAlert } from '../../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 import { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
@@ -93,21 +92,11 @@ export const transformTags = (tags: string[]): string[] => {
   return tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
 
-// Transforms the data but will remove any null or undefined it encounters and not include
-// those on the export
-export const transformAlertToRule = (
-  rule: SanitizedAlert<RuleParams>,
-  ruleExecutionSummary?: RuleExecutionSummary | null,
-  legacyRuleActions?: LegacyRulesActionsSavedObject | null
-): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
-};
-
 export const transformAlertsToRules = (
   rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
 ): Array<Partial<RulesSchema>> => {
-  return rules.map((rule) => transformAlertToRule(rule, null, legacyRuleActions[rule.id]));
+  return rules.map((rule) => internalRuleToAPIResponse(rule, null, legacyRuleActions[rule.id]));
 };
 
 export const transformFindAlerts = (
@@ -138,7 +127,7 @@ export const transform = (
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
   if (isAlertType(isRuleRegistryEnabled ?? false, rule)) {
-    return transformAlertToRule(rule, ruleExecutionSummary, legacyRuleActions);
+    return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
   }
 
   return null;

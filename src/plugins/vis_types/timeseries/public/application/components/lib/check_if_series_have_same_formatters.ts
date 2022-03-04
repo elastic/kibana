@@ -18,24 +18,26 @@ export const checkIfSeriesHaveSameFormatters = (
   const uniqFormatters = new Set();
 
   seriesModel.forEach((seriesGroup) => {
-    if (seriesGroup.formatter === DATA_FORMATTERS.DEFAULT) {
-      const activeMetric = seriesGroup.metrics[seriesGroup.metrics.length - 1];
-      const aggMeta = aggs.find((agg) => agg.id === activeMetric.type);
+    if (!seriesGroup.separate_axis) {
+      if (seriesGroup.formatter === DATA_FORMATTERS.DEFAULT) {
+        const activeMetric = seriesGroup.metrics[seriesGroup.metrics.length - 1];
+        const aggMeta = aggs.find((agg) => agg.id === activeMetric.type);
 
-      if (
-        activeMetric.field &&
-        aggMeta?.meta.isFieldRequired &&
-        fieldFormatMap?.[activeMetric.field]
-      ) {
-        return uniqFormatters.add(JSON.stringify(fieldFormatMap[activeMetric.field]));
+        if (
+          activeMetric.field &&
+          aggMeta?.meta.isFieldRequired &&
+          fieldFormatMap?.[activeMetric.field]
+        ) {
+          return uniqFormatters.add(JSON.stringify(fieldFormatMap[activeMetric.field]));
+        }
       }
+      uniqFormatters.add(
+        JSON.stringify({
+          // requirement: in the case of using TSVB formatters, we do not need to check the value_template, just formatter!
+          formatter: seriesGroup.formatter,
+        })
+      );
     }
-    uniqFormatters.add(
-      JSON.stringify({
-        // requirement: in the case of using TSVB formatters, we do not need to check the value_template, just formatter!
-        formatter: seriesGroup.formatter,
-      })
-    );
   });
 
   return uniqFormatters.size === 1;

@@ -84,12 +84,13 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           .filter((f) => f.runtimeField)
           .reduce((acc, f) => {
             if (!f.runtimeField) return acc;
+            // @ts-expect-error The MappingRuntimeField from @elastic/elasticsearch does not expose the "composite" runtime type yet
             acc[f.name] = f.runtimeField;
             return acc;
           }, {} as Record<string, estypes.MappingRuntimeField>);
 
         const search = async (aggs: Record<string, estypes.AggregationsAggregationContainer>) => {
-          const { body: result } = await requestClient.search({
+          const result = await requestClient.search({
             index: indexPattern.title,
             track_total_hits: true,
             body: {

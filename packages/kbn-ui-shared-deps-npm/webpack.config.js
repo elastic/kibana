@@ -129,30 +129,12 @@ module.exports = (_, argv) => {
           test: /\.css$/,
           use: [MiniCssExtractPlugin.loader, 'css-loader'],
         },
-        {
-          test: /[\\\/]@elastic[\\\/]eui[\\\/].*\.js$/,
-          use: [
-            {
-              loader: 'babel-loader',
-              options: {
-                plugins: [
-                  [
-                    require.resolve('babel-plugin-transform-react-remove-prop-types'),
-                    {
-                      mode: 'remove',
-                      removeImport: true,
-                    },
-                  ],
-                ],
-              },
-            },
-          ],
-        },
       ],
     },
 
     resolve: {
       alias: {
+        '@elastic/eui$': '@elastic/eui/optimize/es',
         moment: MOMENT_SRC,
         // NOTE: Used to include react profiling on bundles
         // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
@@ -179,8 +161,8 @@ module.exports = (_, argv) => {
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [
-          'kbn-ui-shared-deps-npm.{v7,v8}.{dark,light}.{dll.js,dll.js.map}',
-          'kbn-ui-shared-deps-npm.{v7,v8}.{dark,light}-manifest.json',
+          'kbn-ui-shared-deps-npm.v8.{dark,light}.{dll.js,dll.js.map}',
+          'kbn-ui-shared-deps-npm.v8.{dark,light}-manifest.json',
         ],
       }),
       new MiniCssExtractPlugin({

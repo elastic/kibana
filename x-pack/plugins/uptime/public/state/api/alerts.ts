@@ -10,13 +10,14 @@ import { apiService } from './utils';
 import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
-import { ActionType, AsApiContract } from '../../../../triggers_actions_ui/public';
+import type { ActionType, AsApiContract, Rule } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
-import { Alert, AlertTypeParams } from '../../../../alerting/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
 import { populateAlertActions, RuleAction } from './alert_actions';
 import { Ping } from '../../../common/runtime_types/ping';
+import { DefaultEmail } from '../../../common/runtime_types';
 
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
 
@@ -44,10 +45,11 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
 export interface NewAlertParams extends AlertTypeParams {
   selectedMonitor: Ping;
   defaultActions: ActionConnector[];
+  defaultEmail?: DefaultEmail;
 }
 
 type NewMonitorStatusAlert = Omit<
-  Alert<AtomicStatusCheckParams>,
+  Rule<AtomicStatusCheckParams>,
   | 'id'
   | 'createdBy'
   | 'updatedBy'
@@ -58,12 +60,12 @@ type NewMonitorStatusAlert = Omit<
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'executionStatus'
-  | 'alertTypeId'
+  | 'ruleTypeId'
   | 'notifyWhen'
   | 'actions'
 > & {
-  rule_type_id: Alert<AtomicStatusCheckParams>['alertTypeId'];
-  notify_when: Alert<AtomicStatusCheckParams>['notifyWhen'];
+  rule_type_id: Rule<AtomicStatusCheckParams>['ruleTypeId'];
+  notify_when: Rule<AtomicStatusCheckParams>['notifyWhen'];
   actions: RuleAction[];
 };
 
@@ -71,10 +73,12 @@ export const createAlert = async ({
   defaultActions,
   monitorId,
   selectedMonitor,
-}: NewAlertParams): Promise<Alert> => {
+  defaultEmail,
+}: NewAlertParams): Promise<Rule> => {
   const actions: RuleAction[] = populateAlertActions({
     defaultActions,
     selectedMonitor,
+    defaultEmail,
   });
 
   const data: NewMonitorStatusAlert = {
@@ -118,7 +122,7 @@ export const fetchMonitorAlertRecords = async (): Promise<AlertsResult> => {
 
 export const fetchAlertRecords = async ({
   monitorId,
-}: MonitorIdParam): Promise<Alert<NewAlertParams>> => {
+}: MonitorIdParam): Promise<Rule<NewAlertParams>> => {
   const data = {
     page: 1,
     per_page: 500,
@@ -127,11 +131,16 @@ export const fetchAlertRecords = async ({
     sort_field: 'name.keyword',
     sort_order: 'asc',
   };
-  const alerts = await apiService.get<{ data: Array<Alert<NewAlertParams>> }>(
-    API_URLS.RULES_FIND,
-    data
-  );
-  return alerts.data.find((alert) => alert.params.monitorId === monitorId) as Alert<NewAlertParams>;
+  const rawRules = await apiService.get<{
+    data: Array<Rule<NewAlertParams> & { rule_type_id: string }>;
+  }>(API_URLS.RULES_FIND, data);
+  const monitorRule = rawRules.data.find(
+    (rule) => rule.params.monitorId === monitorId
+  ) as Rule<NewAlertParams> & { rule_type_id: string };
+  return {
+    ...monitorRule,
+    ruleTypeId: monitorRule.rule_type_id,
+  };
 };
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {

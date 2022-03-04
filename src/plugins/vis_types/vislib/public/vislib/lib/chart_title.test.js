@@ -12,7 +12,7 @@ import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '@kbn/test/jest';
+} from '@kbn/test-jest-helpers';
 
 import { ChartTitle } from './chart_title';
 import { VisConfig } from './vis_config';

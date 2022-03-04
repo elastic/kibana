@@ -239,6 +239,7 @@ describe('#userLoginEvent', () => {
         authenticationResult: AuthenticationResult.succeeded(mockAuthenticatedUser()),
         authenticationProvider: 'basic1',
         authenticationType: 'basic',
+        sessionId: '123',
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -255,6 +256,7 @@ describe('#userLoginEvent', () => {
           "authentication_realm": "native1",
           "authentication_type": "basic",
           "lookup_realm": "native1",
+          "session_id": "123",
           "space_id": undefined,
         },
         "message": "User [user] has logged in using basic provider [name=basic1]",
@@ -293,6 +295,7 @@ describe('#userLoginEvent', () => {
           "authentication_realm": undefined,
           "authentication_type": "basic",
           "lookup_realm": undefined,
+          "session_id": undefined,
           "space_id": undefined,
         },
         "message": "Failed attempt to login using basic provider [name=basic1]",

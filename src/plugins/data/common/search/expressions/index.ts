@@ -42,4 +42,6 @@ export * from './kibana_filter';
 export * from './filters_to_ast';
 export * from './timerange';
 export * from './es_raw_response';
+export * from './eql_raw_response';
 export * from './esdsl';
+export * from './eql';

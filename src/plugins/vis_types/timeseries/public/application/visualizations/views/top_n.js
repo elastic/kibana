@@ -74,10 +74,10 @@ export class TopN extends Component {
     return {};
   };
 
-  static calcInnerBarDivStyles = (item, width, isPositive) => {
+  static calcInnerBarDivStyles = (item, widthWithUnit, isPositive) => {
     return {
       backgroundColor: item.color,
-      width: width + '%',
+      width: widthWithUnit,
       float: isPositive ? 'left' : 'right',
     };
   };
@@ -97,8 +97,7 @@ export class TopN extends Component {
       const renderMode = TopN.getRenderMode(min, max);
       const key = `${item.id || item.label}`;
       const lastValue = getLastValue(item.data);
-      // if result is empty, all bar need to be colored.
-      const lastValueFormatted = isEmptyValue(lastValue) ? 1 : lastValue;
+      const lastValueFormatted = isEmptyValue(lastValue) ? 0 : lastValue;
       const formatter = item.tickFormatter || this.props.tickFormatter;
       const isPositiveValue = lastValueFormatted >= 0;
 
@@ -106,6 +105,7 @@ export class TopN extends Component {
       // if both are 0, the division returns NaN causing unexpected behavior.
       // For this it defaults to 0
       const width = 100 * (Math.abs(lastValueFormatted) / intervalLength) || 0;
+      const widthWithUnit = isEmptyValue(lastValue) ? '1px' : `${width}%`;
       const label = item.labelFormatted ? labelDateFormatter(item.labelFormatted) : item.label;
       const styles = reactcss(
         {
@@ -114,7 +114,7 @@ export class TopN extends Component {
               ...TopN.calcInnerBarStyles(renderMode, isPositiveValue),
             },
             innerBarValue: {
-              ...TopN.calcInnerBarDivStyles(item, width, isPositiveValue),
+              ...TopN.calcInnerBarDivStyles(item, widthWithUnit, isPositiveValue),
             },
             label: {
               maxWidth: this.state.labelMaxWidth,
@@ -154,7 +154,7 @@ export class TopN extends Component {
 
     const intervalSettings = this.props.series.reduce(
       (acc, series, index) => {
-        const value = getLastValue(series.data) ?? 1;
+        const value = getLastValue(series.data) ?? 0;
 
         return {
           min: !index || value < acc.min ? value : acc.min,

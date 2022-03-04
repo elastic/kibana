@@ -85,24 +85,17 @@ describe('query_percentiles', () => {
       };
 
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              hits: { total: { value: totalDocs } },
-              aggregations: {
-                transaction_duration_percentiles: {
-                  values: percentilesValues,
-                },
+            hits: { total: { value: totalDocs } },
+            aggregations: {
+              transaction_duration_percentiles: {
+                values: percentilesValues,
               },
-            } as unknown as estypes.SearchResponse,
-          };
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
-
       const esClientMock = {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;

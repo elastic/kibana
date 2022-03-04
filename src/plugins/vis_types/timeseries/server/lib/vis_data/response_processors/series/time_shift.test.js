@@ -128,4 +128,9 @@ describe('timeShift(resp, panel, series)', () => {
       [dateAfterDST + 1000 * 60 * 60 * 24, 2],
     ]);
   });
+
+  test('processor is sync to avoid timezone setting leakage', () => {
+    const result = timeShift(resp, panel, series, {})((results) => results)([]);
+    expect(Array.isArray(result)).toBe(true);
+  });
 });

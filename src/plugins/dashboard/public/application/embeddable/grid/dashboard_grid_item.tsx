@@ -20,6 +20,7 @@ type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style'
 
 interface Props extends PanelProps, DivProps {
   id: DashboardPanelState['explicitInput']['id'];
+  index?: number;
   type: DashboardPanelState['type'];
   container: DashboardContainer;
   focusedPanelId?: string;
@@ -35,6 +36,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       expandedPanelId,
       focusedPanelId,
       id,
+      index,
       PanelComponent,
       type,
       isRenderable = true,
@@ -72,6 +74,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
               // This key is used to force rerendering on embeddable type change while the id remains the same
               key={type}
               embeddableId={id}
+              index={index}
               {...{ container, PanelComponent }}
             />
             {children}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
 
 import React from 'react';
 import { RemoteClusterEdit } from '../../../public/application/sections';

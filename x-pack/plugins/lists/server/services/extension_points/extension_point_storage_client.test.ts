@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { CreateExceptionListItemOptions } from '../exception_lists/exception_list_client_types';
 import { getCreateExceptionListItemOptionsMock } from '../exception_lists/exception_list_client.mock';
@@ -138,9 +138,7 @@ describe('When using the ExtensionPointStorageClient', () => {
         if (extensionPointsMock.type === 'exceptionsListPreCreateItem') {
           expect(extensionPointsMock.callback).toHaveBeenCalledWith(
             expect.objectContaining({
-              context: {
-                request: expect.any(Object),
-              },
+              context: callbackContext,
             })
           );
         }

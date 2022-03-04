@@ -76,7 +76,10 @@ export const createRuleTypeMocks = (
     search: elasticsearchServiceMock.createScopedClusterClient(),
     savedObjectsClient: mockSavedObjectsClient,
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
+    alertFactory: {
+      create: jest.fn(() => ({ scheduleActions })),
+      done: jest.fn().mockResolvedValue({}),
+    },
     findAlerts: jest.fn(), // TODO: does this stay?
     alertWithPersistence: jest.fn(),
     logger: loggerMock,

@@ -186,6 +186,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
+  public stop() {
+    this.telemetrySender?.stop();
+  }
+
   private getTelemetryServicePublicApis(): TelemetryServicePublicApis {
     const telemetryService = this.telemetryService!;
     return {

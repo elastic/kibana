@@ -100,6 +100,56 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('alert details invalid alerts', () => {
+      let caseId: string;
+
+      before(async () => {
+        caseId = await createCaseWithAlerts();
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/hosts_users');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/hosts_users');
+        await deleteAllCaseItems(es);
+      });
+
+      it('ignores failures from alerts that the index does not exist', async () => {
+        const theCase = await createCase(supertest, getPostCaseRequest());
+
+        // add an alert that has an index and id do not exist
+        await createComment({ supertest, caseId: theCase.id, params: postCommentAlertReq });
+
+        const metrics = await getCaseMetrics({
+          supertest,
+          caseId: theCase.id,
+          features: ['alerts.users', 'alerts.hosts'],
+        });
+
+        expect(metrics.alerts?.hosts).to.eql({
+          total: 0,
+          values: [],
+        });
+        expect(metrics.alerts?.users).to.eql({
+          total: 0,
+          values: [],
+        });
+      });
+
+      it('returns the accurate metrics for the alerts that have valid indices', async () => {
+        await createComment({ supertest, caseId, params: postCommentAlertReq });
+
+        const metrics = await getCaseMetrics({
+          supertest,
+          caseId,
+          features: ['alerts.users', 'alerts.hosts', 'alerts.count'],
+        });
+
+        expect(metrics.alerts?.hosts?.total).to.be(3);
+        expect(metrics.alerts?.users?.total).to.be(4);
+        expect(metrics.alerts?.count).to.be(7);
+      });
+    });
+
     describe('alert count', () => {
       afterEach(async () => {
         await deleteAllCaseItems(es);

@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RECORDS_FIELD } from '../constants';
+
 export const sampleAttribute = {
-  description: 'undefined',
+  description: '',
   references: [
     {
       id: 'apm-*',
@@ -88,7 +90,7 @@ export const sampleAttribute = {
                 label: 'Part of count() / overall_sum(count())',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
               'y-axis-column-layer0X1': {
                 customLabel: true,
@@ -102,7 +104,7 @@ export const sampleAttribute = {
                 label: 'Part of count() / overall_sum(count())',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
               'y-axis-column-layer0X2': {
                 customLabel: true,

@@ -9,7 +9,7 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { ValueExpression } from './value';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 describe('value expression', () => {
   it('renders description and value', () => {

@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
 import {
-  CommentsResponse,
   CommentType,
   AttributesTypeUser,
   AttributesTypeAlerts,
@@ -23,15 +22,10 @@ import {
   postCaseReq,
   postCommentUserReq,
   postCommentAlertReq,
-  postCollectionReq,
-  postCommentGenAlertReq,
   getPostCaseRequest,
 } from '../../../../common/lib/mock';
 import {
-  createCaseAction,
-  createSubCase,
   deleteAllCaseItems,
-  deleteCaseAction,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
@@ -93,7 +87,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(comment).to.eql({
           type: postCommentUserReq.type,
           comment: postCommentUserReq.comment,
-          associationType: 'case',
           created_by: defaultUser,
           pushed_at: null,
           pushed_by: null,
@@ -122,7 +115,6 @@ export default ({ getService }: FtrProviderContext): void => {
           alertId: postCommentAlertReq.alertId,
           index: postCommentAlertReq.index,
           rule: postCommentAlertReq.rule,
-          associationType: 'case',
           created_by: defaultUser,
           pushed_at: null,
           pushed_by: null,
@@ -158,7 +150,6 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           case_id: postedCase.id,
           comment_id: patchedCase.comments![0].id,
-          sub_case_id: '',
           owner: 'securitySolutionFixture',
         });
       });
@@ -308,36 +299,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
-
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-      it.skip('400s when adding an alert to a collection case', async () => {
-        const postedCase = await createCase(supertest, postCollectionReq);
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentAlertReq,
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('400s when adding a generated alert to an individual case', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentGenAlertReq)
-          .expect(400);
-      });
-
-      it('should return a 400 when passing the subCaseId', async () => {
-        const { body } = await supertest
-          .post(`${CASES_URL}/case-id/comments?subCaseId=value`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(400);
-        expect(body.message).to.contain('subCaseId');
-      });
     });
 
     describe('alerts', () => {
@@ -461,13 +422,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alert format', () => {
-      type AlertComment = CommentType.alert | CommentType.generatedAlert;
+      type AlertComment = CommentType.alert;
 
       for (const [alertId, index, type] of [
         ['1', ['index1', 'index2'], CommentType.alert],
         [['1', '2'], 'index', CommentType.alert],
-        ['1', ['index1', 'index2'], CommentType.generatedAlert],
-        [['1', '2'], 'index', CommentType.generatedAlert],
       ]) {
         it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
@@ -499,39 +458,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
-    });
-
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    describe.skip('sub case comments', () => {
-      let actionID: string;
-      before(async () => {
-        actionID = await createCaseAction(supertest);
-      });
-      after(async () => {
-        await deleteCaseAction(supertest, actionID);
-      });
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
-      });
-
-      it('posts a new comment for a sub case', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        // create another sub case just to make sure we get the right comments
-        await createSubCase({ supertest, actionID });
-        await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(200);
-
-        const { body: subCaseComments }: { body: CommentsResponse } = await supertest
-          .get(`${CASES_URL}/${caseInfo.id}/comments/_find?subCaseId=${caseInfo.subCases![0].id}`)
-          .send()
-          .expect(200);
-        expect(subCaseComments.total).to.be(2);
-        expect(subCaseComments.comments[0].type).to.be(CommentType.generatedAlert);
-        expect(subCaseComments.comments[1].type).to.be(CommentType.user);
-      });
     });
 
     describe('rbac', () => {

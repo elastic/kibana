@@ -26,7 +26,6 @@ import {
   TopHitsResultsKeys,
 } from '../../../common/types/alerts';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
-import { MlJobsResponse } from '../../../common/types/job_service';
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { isDefined } from '../../../common/types/guards';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
@@ -375,9 +374,7 @@ export function alertingServiceProvider(
     ];
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
-    const jobsResponse = (
-      await mlClient.getJobs<MlJobsResponse>({ job_id: jobAndGroupIds.join(',') })
-    ).body.jobs;
+    const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
@@ -454,7 +451,7 @@ export function alertingServiceProvider(
         : getResultTypeAggRequest(params.resultType, params.severity),
     };
 
-    const response = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         // @ts-expect-error
         body: requestBody,
@@ -462,7 +459,7 @@ export function alertingServiceProvider(
       jobIds
     );
 
-    const result = response.body.aggregations;
+    const result = body.aggregations;
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
@@ -512,9 +509,7 @@ export function alertingServiceProvider(
     ];
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
-    const jobsResponse = (
-      await mlClient.getJobs<MlJobsResponse>({ job_id: jobAndGroupIds.join(',') })
-    ).body.jobs;
+    const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
@@ -595,7 +590,7 @@ export function alertingServiceProvider(
       },
     };
 
-    const response = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         // @ts-expect-error
         body: requestBody,
@@ -603,7 +598,7 @@ export function alertingServiceProvider(
       jobIds
     );
 
-    const result = response.body.aggregations as {
+    const result = body.aggregations as {
       alerts_over_time: {
         buckets: Array<
           {

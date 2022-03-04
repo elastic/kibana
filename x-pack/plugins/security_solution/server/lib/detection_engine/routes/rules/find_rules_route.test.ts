@@ -36,7 +36,7 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
-    clients.ruleExecutionLogClient.getExecutionSummariesBulk.mockResolvedValue(
+    clients.ruleExecutionLog.getExecutionSummariesBulk.mockResolvedValue(
       getRuleExecutionSummaries()
     );
 

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { InspectorPanel } from './inspector_panel';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';

@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-import { isFunction, get } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { MonitoringConfig } from '../server/config';
 
-type Config = Partial<MonitoringConfig> & {
-  get?: (key: string) => any;
-};
-
-export function getConfigCcs(config: Config): boolean {
-  let ccsEnabled = false;
-  // TODO: NP
-  // This function is called with both NP config and LP config
-  if (isFunction(config.get)) {
-    ccsEnabled = config.get('monitoring.ui.ccs.enabled');
-  } else {
-    ccsEnabled = get(config, 'ui.ccs.enabled');
-  }
-  return ccsEnabled;
+export function getConfigCcs(config: MonitoringConfig): boolean {
+  // TODO: (Mat) this function can probably be removed in favor of direct config access where it's used.
+  return config.ui.ccs.enabled;
 }
 /**
  * Prefix all comma separated index patterns within the original {@code indexPattern}.
@@ -35,7 +23,7 @@ export function getConfigCcs(config: Config): boolean {
  * @param  {String} ccs The optional cluster-prefix to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(config: Config, indexPattern: string, ccs?: string) {
+export function prefixIndexPattern(config: MonitoringConfig, indexPattern: string, ccs?: string) {
   const ccsEnabled = getConfigCcs(config);
   if (!ccsEnabled || !ccs) {
     return indexPattern;

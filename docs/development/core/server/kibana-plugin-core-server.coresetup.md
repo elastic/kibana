@@ -19,6 +19,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 |  [capabilities](./kibana-plugin-core-server.coresetup.capabilities.md) | CapabilitiesSetup | [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
 |  [context](./kibana-plugin-core-server.coresetup.context.md) | ContextSetup | [ContextSetup](./kibana-plugin-core-server.contextsetup.md) |
 |  [deprecations](./kibana-plugin-core-server.coresetup.deprecations.md) | DeprecationsServiceSetup | [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md) |
+|  [docLinks](./kibana-plugin-core-server.coresetup.doclinks.md) | DocLinksServiceSetup | [DocLinksServiceSetup](./kibana-plugin-core-server.doclinksservicesetup.md) |
 |  [elasticsearch](./kibana-plugin-core-server.coresetup.elasticsearch.md) | ElasticsearchServiceSetup | [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |
 |  [executionContext](./kibana-plugin-core-server.coresetup.executioncontext.md) | ExecutionContextSetup | [ExecutionContextSetup](./kibana-plugin-core-server.executioncontextsetup.md) |
 |  [getStartServices](./kibana-plugin-core-server.coresetup.getstartservices.md) | StartServicesAccessor&lt;TPluginsStart, TStart&gt; | [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) |
