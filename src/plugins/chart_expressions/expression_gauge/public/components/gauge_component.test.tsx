@@ -79,6 +79,16 @@ const createData = (
   };
 };
 
+const mockState = new Map();
+const uiState = {
+  get: jest
+    .fn()
+    .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
+  set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
+  emit: jest.fn(),
+  setSilent: jest.fn(),
+} as any;
+
 describe('GaugeComponent', function () {
   let wrapperProps: GaugeRenderProps;
 
@@ -89,6 +99,7 @@ describe('GaugeComponent', function () {
       args,
       formatFactory: formatService.deserialize,
       paletteService: await paletteThemeService.getPalettes(),
+      uiState,
     };
   });
 
