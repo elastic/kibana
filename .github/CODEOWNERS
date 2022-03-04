@@ -417,7 +417,7 @@ x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
-x-pack/plugins/session_view @elastic/adaptive-workload-protection
+x-pack/plugins/session_view @elastic/awp-platform
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
