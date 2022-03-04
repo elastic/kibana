@@ -184,15 +184,15 @@ async function retryImportOnConflictError(
   const errors = result.errors ?? [];
   if (_attempt < maxAttempts && errors.length && errors.every(isImportConflictError)) {
     const retryCount = _attempt + 1;
-    const retryDelaySec = 1 + Math.floor(Math.random() * 3); // 1s + 0-3s of jitter
+    const retryDelayMs = 1000 + Math.floor(Math.random() * 3000); // 1s + 0-3s of jitter
 
     logger?.debug(
-      `Retrying import operation after [${retryDelaySec}s] due to conflict errors: ${JSON.stringify(
-        errors
-      )}`
+      `Retrying import operation after [${
+        retryDelayMs * 1000
+      }s] due to conflict errors: ${JSON.stringify(errors)}`
     );
 
-    await setTimeout(retryDelaySec * 1000);
+    await setTimeout(retryDelayMs);
     return retryImportOnConflictError(importCall, { logger, _attempt: retryCount });
   }
 
