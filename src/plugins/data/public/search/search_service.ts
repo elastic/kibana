@@ -89,7 +89,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
-    { http, getStartServices, notifications, uiSettings, theme }: CoreSetup,
+    { http, getStartServices, notifications, uiSettings, executionContext, theme }: CoreSetup,
     { bfetch, expressions, usageCollection, nowProvider }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
@@ -108,6 +108,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.searchInterceptor = new SearchInterceptor({
       bfetch,
       toasts: notifications.toasts,
+      executionContext,
       http,
       uiSettings,
       startServices: getStartServices(),
