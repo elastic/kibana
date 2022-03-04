@@ -45,11 +45,11 @@ export const useUpdateAlertsStatus = (
           body: JSON.stringify({ status, query }),
         });
       } else {
-        const { body } = await http.post<{ body: estypes.UpdateByQueryResponse }>(
+        const response = await http.post<estypes.UpdateByQueryResponse>(
           RAC_ALERTS_BULK_UPDATE_URL,
           { body: JSON.stringify({ index, status, query }) }
         );
-        return body;
+        return response;
       }
     },
   };
