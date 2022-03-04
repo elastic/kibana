@@ -38,6 +38,10 @@ function useServicesFetcher() {
     query: { rangeFrom, rangeTo, environment, kuery },
   } = useAnyOfApmParams('/services/{serviceName}', '/services');
 
+  const {
+    query: { serviceGroup },
+  } = useAnyOfApmParams('/services');
+
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { offset } = getTimeRangeComparison({
@@ -57,6 +61,7 @@ function useServicesFetcher() {
               kuery,
               start,
               end,
+              serviceGroup,
             },
           },
         }).then((mainStatisticsData) => {
@@ -67,7 +72,7 @@ function useServicesFetcher() {
         });
       }
     },
-    [environment, kuery, start, end]
+    [environment, kuery, start, end, serviceGroup]
   );
 
   const { mainStatisticsData, requestId } = data;

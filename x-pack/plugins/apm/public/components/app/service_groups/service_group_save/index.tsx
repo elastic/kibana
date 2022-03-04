@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export { apmIndices } from './apm_indices';
-export { apmTelemetry } from './apm_telemetry';
-export { apmServerSettings } from './apm_server_settings';
-export { apmServiceGroups } from './apm_service_groups';
+export { ServiceGroupSaveButton } from './save_button';

@@ -17,6 +17,8 @@ import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
+import { enableServiceGroups } from '../../../../../observability/public';
+import { ServiceGroupSaveButton } from '../../app/service_groups';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings'];
@@ -29,18 +31,21 @@ const bypassNoDataScreenPaths = ['/settings'];
  *
  *  Optionally:
  *   - EnvironmentFilter
+ *   - ServiceGroupSaveButton
  */
 export function ApmMainTemplate({
   pageTitle,
   pageHeader,
   children,
   environmentFilter = true,
+  showServiceGroupSaveButton = false,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
   environmentFilter?: boolean;
+  showServiceGroupSaveButton?: boolean;
 } & KibanaPageTemplateProps) {
   const location = useLocation();
 
@@ -79,7 +84,16 @@ export function ApmMainTemplate({
       fleetApmPoliciesStatus === FETCH_STATUS.LOADING,
   });
 
-  const rightSideItems = environmentFilter ? [<ApmEnvironmentFilter />] : [];
+  const {
+    services: { uiSettings },
+  } = useKibana<ApmPluginStartDeps>();
+  const isServiceGroupsEnabled = uiSettings?.get<boolean>(enableServiceGroups);
+  const renderServiceGroupSaveButton =
+    showServiceGroupSaveButton && isServiceGroupsEnabled;
+  const rightSideItems = [
+    ...(renderServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
+    ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
+  ];
 
   const pageTemplate = (
     <ObservabilityPageTemplate

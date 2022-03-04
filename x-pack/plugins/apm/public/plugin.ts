@@ -54,6 +54,7 @@ import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/la
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { SecurityPluginStart } from '../../security/public';
 import { SpacesPluginStart } from '../../spaces/public';
+import { enableServiceGroups } from '../../observability/public';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -118,6 +119,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
+    const serviceGroupsEnabled = core.uiSettings.get<boolean>(
+      enableServiceGroups,
+      false
+    );
+
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
@@ -129,7 +135,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 label: 'APM',
                 sortKey: 400,
                 entries: [
-                  { label: servicesTitle, app: 'apm', path: '/services' },
+                  {
+                    label: servicesTitle,
+                    app: 'apm',
+                    path: serviceGroupsEnabled
+                      ? '/service-groups'
+                      : '/services',
+                  },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
                   {
                     label: dependenciesTitle,
@@ -149,7 +161,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                       }
                     },
                   },
-                  { label: serviceMapTitle, app: 'apm', path: '/service-map' },
+                  ...(serviceGroupsEnabled
+                    ? []
+                    : [
+                        {
+                          label: serviceMapTitle,
+                          app: 'apm',
+                          path: '/service-map',
+                        },
+                      ]),
                 ],
               },
             ];
@@ -230,7 +250,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: [
-        { id: 'services', title: servicesTitle, path: '/services' },
+        {
+          id: 'services',
+          title: servicesTitle,
+          path: serviceGroupsEnabled ? '/service-groups' : '/services',
+        },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         { id: 'backends', title: dependenciesTitle, path: '/backends' },

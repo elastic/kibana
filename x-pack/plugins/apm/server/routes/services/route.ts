@@ -52,11 +52,17 @@ import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ScopedAnnotationsClient } from '../../../../observability/server';
 import { Annotation } from './../../../../observability/common/annotations';
 import { ConnectionStatsItemWithImpact } from './../../../common/connections';
+import { getServiceGroup } from '../service_groups/get_service_group';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.partial({ serviceGroup: t.string }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<{
@@ -97,16 +103,28 @@ const servicesRoute = createApmServerRoute({
       }
     >;
   }> {
-    const setup = await setupRequest(resources);
-    const { params, logger } = resources;
-    const { environment, kuery, start, end } = params.query;
+    const { context, params, logger } = resources;
+    const {
+      environment,
+      kuery,
+      start,
+      end,
+      serviceGroup: serviceGroupId,
+    } = params.query;
+    const savedObjectsClient = context.core.savedObjects.client;
+
+    const [setup, serviceGroup] = await Promise.all([
+      setupRequest(resources),
+      serviceGroupId
+        ? getServiceGroup({ savedObjectsClient, serviceGroupId })
+        : Promise.resolve(null),
+    ]);
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
       start,
       end,
     });
-
     return getServices({
       environment,
       kuery,
@@ -115,6 +133,7 @@ const servicesRoute = createApmServerRoute({
       logger,
       start,
       end,
+      serviceGroup,
     });
   },
 });

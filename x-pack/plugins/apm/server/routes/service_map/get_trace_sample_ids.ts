@@ -23,13 +23,13 @@ import { Setup } from '../../lib/helpers/setup_request';
 const MAX_TRACES_TO_INSPECT = 1000;
 
 export async function getTraceSampleIds({
-  serviceName,
+  serviceNames,
   environment,
   setup,
   start,
   end,
 }: {
-  serviceName?: string;
+  serviceNames?: string[];
   environment: string;
   setup: Setup;
   start: number;
@@ -45,8 +45,12 @@ export async function getTraceSampleIds({
 
   let events: ProcessorEvent[];
 
-  if (serviceName) {
-    query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
+  const hasServiceNamesFilter = (serviceNames?.length ?? 0) > 0;
+
+  if (hasServiceNamesFilter) {
+    query.bool.filter.push({
+      terms: { [SERVICE_NAME]: serviceNames as string[] },
+    });
     events = [ProcessorEvent.span, ProcessorEvent.transaction];
   } else {
     events = [ProcessorEvent.span];
@@ -59,10 +63,10 @@ export async function getTraceSampleIds({
 
   query.bool.filter.push(...environmentQuery(environment));
 
-  const fingerprintBucketSize = serviceName
+  const fingerprintBucketSize = hasServiceNamesFilter
     ? config.serviceMapFingerprintBucketSize
     : config.serviceMapFingerprintGlobalBucketSize;
-  const traceIdBucketSize = serviceName
+  const traceIdBucketSize = hasServiceNamesFilter
     ? config.serviceMapTraceIdBucketSize
     : config.serviceMapTraceIdGlobalBucketSize;
   const samplerShardSize = traceIdBucketSize * 10;

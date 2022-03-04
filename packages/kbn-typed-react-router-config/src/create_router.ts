@@ -148,6 +148,13 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
   };
 
   const link = (path: string, ...args: any[]) => {
+    let optional: boolean = false;
+
+    if (typeof args[args.length - 1] === 'boolean') {
+      optional = args[args.length - 1];
+      args.pop();
+    }
+
     const params: { path?: Record<string, any>; query?: Record<string, any> } | undefined = args[0];
 
     const paramsWithBuiltInDefaults = merge({ path: {}, query: {} }, params);
@@ -162,24 +169,26 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
 
     const matchedRoutes = getRoutesToMatch(path);
 
-    const validationType = mergeRt(
-      ...(compact(
-        matchedRoutes.map((match) => {
-          return match.params;
-        })
-      ) as [any, any])
-    );
-
     const paramsWithRouteDefaults = merge(
       {},
       ...matchedRoutes.map((route) => route.defaults ?? {}),
       paramsWithBuiltInDefaults
     );
 
-    const validation = validationType.decode(paramsWithRouteDefaults);
+    if (!optional) {
+      const validationType = mergeRt(
+        ...(compact(
+          matchedRoutes.map((match) => {
+            return match.params;
+          })
+        ) as [any, any])
+      );
 
-    if (isLeft(validation)) {
-      throw new Error(PathReporter.report(validation).join('\n'));
+      const validation = validationType.decode(paramsWithRouteDefaults);
+
+      if (isLeft(validation)) {
+        throw new Error(PathReporter.report(validation).join('\n'));
+      }
     }
 
     return qs.stringifyUrl(
@@ -192,7 +201,7 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
   };
 
   return {
-    link: (path, ...args) => {
+    link: (path: string, ...args: any[]) => {
       return link(path, ...args);
     },
     getParams: (...args: any[]) => {

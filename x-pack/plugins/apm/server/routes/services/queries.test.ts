@@ -59,6 +59,7 @@ describe('services queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
+        serviceGroup: null,
       })
     );
 

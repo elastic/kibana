@@ -15,6 +15,8 @@ import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
+import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
+import { ServiceGroup } from '../../../../common/service_groups';
 
 export async function getServicesFromErrorAndMetricDocuments({
   environment,
@@ -23,6 +25,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   kuery,
   start,
   end,
+  serviceGroup,
 }: {
   setup: Setup;
   environment: string;
@@ -30,6 +33,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   kuery: string;
   start: number;
   end: number;
+  serviceGroup: ServiceGroup | null;
 }) {
   const { apmEventClient } = setup;
 
@@ -47,6 +51,7 @@ export async function getServicesFromErrorAndMetricDocuments({
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
+              ...serviceGroupQuery(serviceGroup),
             ],
           },
         },
