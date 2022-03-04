@@ -48,8 +48,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.setIndexPatternField('log*');
         const a = await this.testSubjects.find('saveIndexPatternButton');
         console.log('***', a);
+        console.log('before timeout');
         await new Promise((e) => setTimeout(() => e(''), 5000));
+        console.log('after timeout');
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
+        console.log('after click');
 
         console.log('THIS IS A COMMENT FROM THE TEST CODE');
         // sometimes the initial click fails.
