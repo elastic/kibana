@@ -53,13 +53,15 @@ describe('WelcomeService', () => {
       expect(welcomeService.renderTelemetryNotice()).toEqual('rendered text');
     });
 
-    test('it should use the last registered renderer', () => {
+    test('it should fail to register a 2nd renderer and still use the first registered renderer', () => {
       const renderer = jest.fn().mockReturnValue('rendered text');
       const renderer2 = jest.fn().mockReturnValue('other text');
       welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer);
-      welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer2);
+      expect(() => welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer2)).toThrowError(
+        'Only one renderTelemetryNotice handler can be registered'
+      );
 
-      expect(welcomeService.renderTelemetryNotice()).toEqual('other text');
+      expect(welcomeService.renderTelemetryNotice()).toEqual('rendered text');
     });
   });
 });

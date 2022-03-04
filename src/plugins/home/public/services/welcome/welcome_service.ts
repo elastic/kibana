@@ -30,6 +30,9 @@ export class WelcomeService {
         this.onRenderedHandlers.push(onRendered);
       },
       registerTelemetryNoticeRenderer: (renderTelemetryNotice) => {
+        if (this.renderTelemetryNoticeHandler) {
+          throw new Error('Only one renderTelemetryNotice handler can be registered');
+        }
         this.renderTelemetryNoticeHandler = renderTelemetryNotice;
       },
     };
