@@ -495,7 +495,7 @@ export class TaskRunner<
         logger: this.logger,
         ruleLabel,
         triggeredActions,
-        maxExecutableActions: ruleType.config.maxExecutableActions,
+        maxExecutableActions: ruleType.config!.maxExecutableActions,
       });
 
       const alertsWithExecutableActions = Object.entries(alertsWithScheduledActions).filter(
@@ -533,7 +533,7 @@ export class TaskRunner<
               alert,
               executionHandler,
               triggeredActions,
-              ruleType.config.maxExecutableActions
+              ruleType.config!.maxExecutableActions
             )
         )
       );
