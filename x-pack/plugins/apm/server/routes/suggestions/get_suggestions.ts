@@ -6,7 +6,6 @@
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../../observability/server';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 
@@ -44,7 +43,15 @@ export async function getSuggestions({
       string,
       ...(start &&
         end && {
-          index_filter: rangeQuery(start, end)[0],
+          index_filter: {
+            range: {
+              ['@timestamp']: {
+                gte: start,
+                lte: end,
+                format: 'epoch_millis',
+              },
+            },
+          },
         }),
     },
   });

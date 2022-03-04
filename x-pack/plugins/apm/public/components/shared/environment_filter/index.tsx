@@ -11,7 +11,7 @@ import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentLabel,
 } from '../../../../common/environment_filter_values';
 import {
   SERVICE_ENVIRONMENT,

@@ -61,6 +61,9 @@ export async function getSuggestionsWithTerm({
   });
 
   return {
-    terms: response.aggregations.items.buckets.map((bucket) => bucket.key),
+    terms:
+      response.aggregations?.items.buckets.map(
+        (bucket) => bucket.key as string
+      ) ?? [],
   };
 }

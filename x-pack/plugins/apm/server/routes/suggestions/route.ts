@@ -22,7 +22,7 @@ const suggestionsRoute = createApmServerRoute({
         field: t.string,
         string: t.string,
       }),
-      rangeRt,
+      t.partial(rangeRt.props),
     ]),
   }),
   options: { tags: ['access:apm'] },
