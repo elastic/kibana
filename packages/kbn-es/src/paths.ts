@@ -19,6 +19,7 @@ export const BASE_PATH = Path.resolve(tempDir, 'kbn-es');
 
 export const GRADLE_BIN = maybeUseBat('./gradlew');
 export const ES_BIN = maybeUseBat('bin/elasticsearch');
+export const ES_PLUGIN_BIN = maybeUseBat('bin/elasticsearch-plugin');
 export const ES_CONFIG = 'config/elasticsearch.yml';
 
 export const ES_KEYSTORE_BIN = maybeUseBat('./bin/elasticsearch-keystore');

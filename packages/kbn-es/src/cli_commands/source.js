@@ -27,6 +27,8 @@ exports.help = (defaults = {}) => {
       --password        Sets password for elastic user [default: ${password}]
       --password.[user] Sets password for native realm user [default: ${password}]
       --ssl             Sets up SSL on Elasticsearch
+      --plugins         Comma seperated list of Elasticsearch plugins to install
+      --secureFiles     Comma seperated list of secure_setting_name=/path pairs
       -E                Additional key=value settings to pass to Elasticsearch
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
@@ -61,6 +63,14 @@ exports.run = async (defaults = {}) => {
 
   if (options.dataArchive) {
     await cluster.extractDataDirectory(installPath, options.dataArchive);
+  }
+  if  (options.plugins) {
+    await cluster.installPlugins(installPath, options.plugins, options);
+  }
+  if  (options.secureFiles) {
+    const pairs = options.secureFiles.split(',').map(kv=> kv.split('=').map(v=>v.trim()));
+    console.log(pairs);
+    await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
   }
 
   await cluster.run(installPath, {
