@@ -118,6 +118,34 @@ export const filterNetworkExternalAlertData: Filter[] = [
   },
 ];
 
+export const getIndexFilters = (selectedPatterns: string[]) =>
+  selectedPatterns.length >= 1
+    ? [
+        {
+          meta: {
+            index: '62d8e968-7ce3-4062-98b8-64b0e0bbff59',
+            type: 'phrases',
+            key: '_index',
+            params: selectedPatterns,
+            alias: null,
+            negate: false,
+            disabled: false,
+          },
+          query: {
+            bool: {
+              should: selectedPatterns.map((selectedPattern) => ({
+                match_phrase: { _index: selectedPattern },
+              })),
+              minimum_should_match: 1,
+            },
+          },
+          $state: {
+            store: 'appState',
+          },
+        },
+      ]
+    : [];
+
 export const addToCase = async (
   http: HttpSetup,
   theCase: Case,

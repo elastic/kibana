@@ -17,6 +17,7 @@ import {
   getHostDetailsPageFilter,
   filterNetworkExternalAlertData,
   filterHostExternalAlertData,
+  getIndexFilters,
 } from './utils';
 
 export const useLensAttributes = ({
@@ -28,7 +29,7 @@ export const useLensAttributes = ({
   getLensAttributes?: GetLensAttributes;
   stackByField?: string;
 }): LensAttributes | null => {
-  const { dataViewId } = useSourcererDataView();
+  const { selectedPatterns, dataViewId } = useSourcererDataView();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -40,29 +41,27 @@ export const useLensAttributes = ({
   const location = useLocation();
   const tabsFilters = useMemo(() => {
     if (location.pathname.includes(SecurityPageName.hosts) && tabName === 'externalAlerts') {
-      return filters.length > 0
-        ? [...filters, ...filterHostExternalAlertData]
-        : filterHostExternalAlertData;
+      return filterHostExternalAlertData;
     }
 
     if (
       location.pathname.includes(SecurityPageName.network) &&
       tabName === NetworkRouteType.alerts
     ) {
-      return filters.length > 0
-        ? [...filters, ...filterNetworkExternalAlertData]
-        : filterNetworkExternalAlertData;
+      return filterNetworkExternalAlertData;
     }
 
-    return filters;
-  }, [tabName, location.pathname, filters]);
+    return [];
+  }, [tabName, location.pathname]);
 
   const pageFilters = useMemo(() => {
     if (location.pathname.includes(SecurityPageName.hosts) && detailName != null) {
-      return [...filters, ...getHostDetailsPageFilter(detailName)];
+      return getHostDetailsPageFilter(detailName);
     }
-    return filters;
-  }, [location.pathname, detailName, filters]);
+    return [];
+  }, [location.pathname, detailName]);
+
+  const indexFilters = useMemo(() => getIndexFilters(selectedPatterns), [selectedPatterns]);
 
   const lensAttrsWithInjectedData = useMemo(() => {
     if (lensAttributes == null && (getLensAttributes == null || stackByField == null)) {
@@ -71,12 +70,19 @@ export const useLensAttributes = ({
     const attrs: LensAttributes =
       lensAttributes ??
       ((getLensAttributes && stackByField && getLensAttributes(stackByField)) as LensAttributes);
+
     return {
       ...attrs,
       state: {
         ...attrs.state,
         query,
-        filters: [...attrs.state.filters, ...pageFilters, ...tabsFilters],
+        filters: [
+          ...attrs.state.filters,
+          ...filters,
+          ...pageFilters,
+          ...tabsFilters,
+          ...indexFilters,
+        ],
       },
       references: attrs.references.map((ref: { id: string; name: string; type: string }) => ({
         ...ref,
@@ -88,8 +94,10 @@ export const useLensAttributes = ({
     getLensAttributes,
     stackByField,
     query,
+    filters,
     pageFilters,
     tabsFilters,
+    indexFilters,
     dataViewId,
   ]);
 
