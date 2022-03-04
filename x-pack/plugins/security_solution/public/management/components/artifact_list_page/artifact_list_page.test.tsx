@@ -14,8 +14,14 @@ import { artifactListPageLabels } from './translations';
 import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ArtifactFormComponentProps } from './types';
-import { HttpFetchError } from 'kibana/public';
+import type { HttpFetchError, HttpFetchOptionsWithPath } from 'kibana/public';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../common/endpoint/service/artifacts';
+import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../common/components/user_privileges/endpoint/mocks';
+
+jest.mock('../../../common/components/user_privileges');
+const useUserPrivileges = _useUserPrivileges as jest.Mock;
 
 describe('When using the ArtifactListPage component', () => {
   let render: (
@@ -59,7 +65,7 @@ describe('When using the ArtifactListPage component', () => {
     ({ history, coreStart } = mockedContext);
     mockedApi = trustedAppsAllHttpMocks(coreStart.http);
 
-    const apiClient = TrustedAppsApiClient.getInstance(coreStart.http);
+    const apiClient = new TrustedAppsApiClient(coreStart.http);
     const labels = { ...artifactListPageLabels };
 
     FormComponentMock = jest.fn((({ mode, error, disabled }: ArtifactFormComponentProps) => {
@@ -90,6 +96,10 @@ describe('When using the ArtifactListPage component', () => {
         />
       ));
     };
+  });
+
+  afterEach(() => {
+    useUserPrivileges.mockClear();
   });
 
   it('should display a loader while determining which view to show', async () => {
@@ -462,13 +472,79 @@ describe('When using the ArtifactListPage component', () => {
         });
       });
 
-      it.todo(
-        'should show expired license warning when unsupported features are being used (downgrade scenario)'
-      );
+      it('should provide Form component with the item for edit', async () => {
+        const { getByTestId } = await renderAndWaitForFlyout();
 
-      it.todo('should provide Form component with the item for edit');
+        await act(async () => {
+          await waitFor(() => {
+            expect(getByTestId('formMock')).toBeTruthy();
+          });
+        });
 
-      it.todo('should show error toast and close flyout if item for edit does not exist');
+        expect(getLastFormComponentProps().item).toEqual({
+          ...mockedApi.responseProvider.trustedApp({
+            query: { item_id: '123' },
+          } as unknown as HttpFetchOptionsWithPath),
+          created_at: expect.any(String),
+        });
+      });
+
+      it('should show error toast and close flyout if item for edit does not exist', async () => {
+        mockedApi.responseProvider.trustedApp.mockImplementation(() => {
+          throw new Error('does not exist');
+        });
+
+        await renderAndWaitForFlyout();
+
+        await act(async () => {
+          await waitFor(() => {
+            expect(mockedApi.responseProvider.trustedApp).toHaveBeenCalled();
+          });
+        });
+
+        expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+          'Failed to retrieve item for edit. Reason: does not exist'
+        );
+      });
+
+      it('should not show the expired license callout', async () => {
+        const { queryByTestId, getByTestId } = await renderAndWaitForFlyout();
+
+        await act(async () => {
+          await waitFor(() => {
+            expect(getByTestId('formMock')).toBeTruthy();
+          });
+        });
+
+        expect(queryByTestId('testPage-flyout-expiredLicenseCallout')).not.toBeTruthy();
+      });
+
+      it('should show expired license warning when unsupported features are being used (downgrade scenario)', async () => {
+        // make the API return a policy specific item
+        const _generateResponse = mockedApi.responseProvider.trustedApp.getMockImplementation()!;
+        mockedApi.responseProvider.trustedApp.mockImplementation((params) => {
+          return {
+            ..._generateResponse(params),
+            tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}${123}`],
+          };
+        });
+
+        useUserPrivileges.mockReturnValue({
+          endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+            canCreateArtifactsByPolicy: false,
+          }),
+        });
+
+        const { getByTestId } = await renderAndWaitForFlyout();
+
+        await act(async () => {
+          await waitFor(() => {
+            expect(getByTestId('formMock')).toBeTruthy();
+          });
+        });
+
+        expect(getByTestId('testPage-flyout-expiredLicenseCallout')).toBeTruthy();
+      });
     });
   });
 

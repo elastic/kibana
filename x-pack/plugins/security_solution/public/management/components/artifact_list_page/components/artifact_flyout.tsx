@@ -306,7 +306,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     useEffect(() => {
       if (isEditFlow && !hasItemDataForEdit && !error && isInitializing && !isLoadingItemForEdit) {
         fetchItemForEdit().then(({ data: editItemData }) => {
-          if (editItemData) {
+          if (editItemData && isMounted) {
             setFormState(createFormInitialState(apiClient.listId, editItemData));
           }
         });
@@ -319,6 +319,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
       isInitializing,
       isLoadingItemForEdit,
       hasItemDataForEdit,
+      isMounted,
     ]);
 
     // If we got an error while trying ot retrieve the item for edit, then show a toast message
