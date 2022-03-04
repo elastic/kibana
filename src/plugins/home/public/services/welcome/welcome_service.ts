@@ -24,7 +24,7 @@ export class WelcomeService {
   private readonly onRenderedHandlers: Array<() => void> = [];
   private renderTelemetryNoticeHandler?: WelcomeRenderTelemetryNotice;
 
-  public setup(): WelcomeServiceSetup {
+  public setup = (): WelcomeServiceSetup => {
     return {
       registerOnRendered: (onRendered) => {
         this.onRenderedHandlers.push(onRendered);
@@ -33,17 +33,17 @@ export class WelcomeService {
         this.renderTelemetryNoticeHandler = renderTelemetryNotice;
       },
     };
-  }
+  };
 
-  public onRendered() {
+  public onRendered = () => {
     this.onRenderedHandlers.forEach((onRendered) => onRendered());
-  }
+  };
 
-  public renderTelemetryNotice() {
+  public renderTelemetryNotice = () => {
     if (this.renderTelemetryNoticeHandler) {
       return this.renderTelemetryNoticeHandler();
     } else {
       return null;
     }
-  }
+  };
 }

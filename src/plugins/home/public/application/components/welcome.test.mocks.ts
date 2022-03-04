@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import './welcome.test.mocks';
-import { Welcome } from './welcome';
+import { welcomeServiceMock } from '../../services/welcome/welcome_service.mocks';
 
-test('should render a Welcome screen', () => {
-  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} />);
-
-  expect(component).toMatchSnapshot();
-});
+jest.doMock('../kibana_services', () => ({
+  getServices: () => ({
+    addBasePath: (path: string) => `root${path}`,
+    trackUiMetric: () => {},
+    welcomeService: welcomeServiceMock.create(),
+  }),
+}));
