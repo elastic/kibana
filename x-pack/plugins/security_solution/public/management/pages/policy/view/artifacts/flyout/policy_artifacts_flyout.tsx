@@ -39,7 +39,7 @@ interface PolicyArtifactsFlyoutProps {
   labels: typeof POLICY_ARTIFACT_FLYOUT_LABELS;
 }
 
-const MAX_ALLOWED_RESULTS = 100;
+export const MAX_ALLOWED_RESULTS = 100;
 
 export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
   ({ policyItem, apiClient, searcheableFields, onClose, labels }) => {
