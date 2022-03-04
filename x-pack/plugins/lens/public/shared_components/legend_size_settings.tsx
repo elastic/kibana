@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { TooltipWrapper } from './tooltip_wrapper';
+
+export enum LegendSizes {
+  AUTO = '0',
+  SMALL = '50',
+  MEDIUM = '100',
+  LARGE = '150',
+  EXTRA_LARGE = '200',
+}
 
 interface LegendSizeSettingsProps {
   legendSize: number | undefined;
@@ -25,31 +25,41 @@ interface LegendSizeSettingsProps {
   isDisabled: boolean;
 }
 
-const MIN_SIZE_VALUE = 1;
-const DEFAULT_SIZE_VALUE = 100;
-
-const WIDTH_LABEL = i18n.translate('xpack.lens.shared.legendSizeSetting.labelWidth', {
-  defaultMessage: 'width',
-});
-
-const HEIGHT_LABEL = i18n.translate('xpack.lens.shared.legendSizeSetting.labelHeight', {
-  defaultMessage: 'height',
-});
-
-const VERTICAL_TOOLTIP_LABEL = i18n.translate(
-  'xpack.lens.shared.legendSizeSetting.tooltipLabelTVertical',
+const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
   {
-    defaultMessage:
-      'Vertical legends have minimum of 30% and maximum of 70% of the visualization container width.',
-  }
-);
-
-const HORIZONTAL_TOOLTIP_LABEL = i18n.translate(
-  'xpack.lens.shared.legendSizeSetting.tooltipLabelHorizontal',
+    value: LegendSizes.AUTO,
+    inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.auto', {
+      defaultMessage: 'auto',
+    }),
+  },
   {
-    defaultMessage: 'Horizontal legends have maximum of 70% of the visualization height.',
-  }
-);
+    value: LegendSizes.SMALL,
+    inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.small', {
+      defaultMessage: 'small',
+    }),
+  },
+  {
+    value: LegendSizes.MEDIUM,
+    inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.medium', {
+      defaultMessage: 'medium',
+    }),
+  },
+  {
+    value: LegendSizes.LARGE,
+    inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.large', {
+      defaultMessage: 'large',
+    }),
+  },
+  {
+    value: LegendSizes.EXTRA_LARGE,
+    inputDisplay: i18n.translate(
+      'xpack.lens.shared.legendSizeSetting.legendSizeOptions.extraLarge',
+      {
+        defaultMessage: 'extra large',
+      }
+    ),
+  },
+];
 
 export const LegendSizeSettings = ({
   legendSize,
@@ -57,102 +67,48 @@ export const LegendSizeSettings = ({
   isVerticalLegend,
   isDisabled,
 }: LegendSizeSettingsProps) => {
-  const sizeProperty = isVerticalLegend ? WIDTH_LABEL : HEIGHT_LABEL;
-  const autoSizeLabel = i18n.translate('xpack.lens.shared.legendSizeSetting.switch', {
-    defaultMessage: 'Auto {sizeProperty}',
-    values: { sizeProperty },
-  });
+  useEffect(() => {
+    if (legendSize && !isVerticalLegend) {
+      onLegendSizeChange(undefined);
+    }
+  }, [isVerticalLegend, legendSize, onLegendSizeChange]);
 
-  const [inputValue, setInputValue] = useState(legendSize ?? DEFAULT_SIZE_VALUE);
-  const [isAutoSizeEnabled, setIsAutoSizeEnabled] = useState(!legendSize);
-
-  const handleAutoSizeChange = useCallback(() => {
-    const shouldUseAutoSize = !isAutoSizeEnabled;
-    setIsAutoSizeEnabled(shouldUseAutoSize);
-    onLegendSizeChange(shouldUseAutoSize ? undefined : inputValue);
-  }, [onLegendSizeChange, inputValue, isAutoSizeEnabled]);
-
-  const handleLegendSizeChange = useCallback(
-    (e) => {
-      const value = Math.max(Number(e.target.value), MIN_SIZE_VALUE);
-      setInputValue(value);
-      onLegendSizeChange(value);
-    },
+  const onLegendSizeOptionChange = useCallback(
+    (option) => onLegendSizeChange(Number(option) || undefined),
     [onLegendSizeChange]
   );
 
   return (
-    <>
-      <EuiFormRow display="columnCompressedSwitch" label={autoSizeLabel}>
-        <TooltipWrapper
-          tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-            defaultMessage: 'Requires legend to be shown',
-          })}
-          condition={isDisabled}
-          position="top"
-          delay="regular"
-          display="block"
-        >
-          <EuiSwitch
-            compressed
-            showLabel={false}
-            disabled={isDisabled}
-            label={autoSizeLabel}
-            checked={isAutoSizeEnabled}
-            onChange={handleAutoSizeChange}
-          />
-        </TooltipWrapper>
-      </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        label={
-          <EuiFlexGroup gutterSize="xs" alignItems="baseline" responsive={false}>
-            <EuiFlexItem>
-              <FormattedMessage
-                id="xpack.lens.shared.legendSizeSetting.label"
-                defaultMessage="Legend {sizeProperty}"
-                values={{ sizeProperty }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type="questionInCircle"
-                size="s"
-                content={isVerticalLegend ? VERTICAL_TOOLTIP_LABEL : HORIZONTAL_TOOLTIP_LABEL}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+    <EuiFormRow
+      display="columnCompressed"
+      label={i18n.translate('xpack.lens.shared.legendSizeSetting.label', {
+        defaultMessage: 'Legend width',
+      })}
+      fullWidth
+    >
+      <TooltipWrapper
+        tooltipContent={
+          isDisabled
+            ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
+                defaultMessage: 'Requires legend to be shown',
+              })
+            : i18n.translate('xpack.lens.legendSizeSetting.legendVertical', {
+                defaultMessage: 'Requires legend to be right or left aligned',
+              })
         }
+        condition={isDisabled || !isVerticalLegend}
+        position="top"
+        delay="regular"
+        display="block"
       >
-        <TooltipWrapper
-          tooltipContent={
-            isDisabled
-              ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                  defaultMessage: 'Requires legend to be shown',
-                })
-              : i18n.translate('xpack.lens.legendSizeSetting.legendAutoSize', {
-                  defaultMessage: 'Requires legend auto {sizeProperty} to be disabled',
-                  values: { sizeProperty },
-                })
-          }
-          condition={isAutoSizeEnabled || isDisabled}
-          position="top"
-          delay="regular"
-          display="block"
-        >
-          <EuiFieldNumber
-            min={MIN_SIZE_VALUE}
-            step={1}
-            compressed
-            disabled={isAutoSizeEnabled || isDisabled}
-            value={legendSize ?? inputValue}
-            onChange={handleLegendSizeChange}
-            append={i18n.translate('xpack.lens.shared.legendSizeSetting.fieldAppend', {
-              defaultMessage: 'px',
-            })}
-          />
-        </TooltipWrapper>
-      </EuiFormRow>
-    </>
+        <EuiSuperSelect
+          compressed
+          valueOfSelected={legendSize?.toString() ?? LegendSizes.AUTO}
+          options={legendSizeOptions}
+          onChange={onLegendSizeOptionChange}
+          disabled={isDisabled || !isVerticalLegend}
+        />
+      </TooltipWrapper>
+    </EuiFormRow>
   );
 };

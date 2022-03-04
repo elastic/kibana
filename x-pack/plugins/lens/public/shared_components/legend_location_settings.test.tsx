@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { LegendLocationSettings, LegendLocationSettingsProps } from './legend_location_settings';
 
 describe('Legend Location Settings', () => {
@@ -102,17 +102,6 @@ describe('Legend Location Settings', () => {
       .find('[data-test-subj="lens-legend-inside-alignment-btn"]')
       .simulate('change', 'xy_location_alignment_top_left');
     expect(newProps.onAlignmentChange).toHaveBeenCalled();
-  });
-
-  it('should have default the columns input to 1 when no value is given', () => {
-    const newProps = {
-      ...props,
-      location: 'inside',
-    } as LegendLocationSettingsProps;
-    const component = mount(<LegendLocationSettings {...newProps} />);
-    expect(
-      component.find('[data-test-subj="lens-legend-location-columns-input"]').at(0).prop('value')
-    ).toEqual(1);
   });
 
   it('should disable the components when is Disabled is true', () => {
