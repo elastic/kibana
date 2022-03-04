@@ -142,6 +142,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             testSubj: 'mlMainTab dataFrameAnalytics',
           },
           {
+            id: 'data_frame_analytics_job_results',
+            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsJobResultsText', {
+              defaultMessage: 'Job Results',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataFrameAnalyticsResults',
+          },
+          {
             id: 'data_frame_analytics_job_map',
             pathId: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
             name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsMapText', {

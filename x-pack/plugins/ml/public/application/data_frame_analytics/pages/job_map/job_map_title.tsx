@@ -18,13 +18,13 @@ export const JobMapTitle: FC<{ analyticsId?: string; modelId?: string }> = ({
       {analyticsId ? (
         <FormattedMessage
           id="xpack.ml.dataframe.analyticsMap.analyticsIdTitle"
-          defaultMessage="Map for analytics ID {analyticsId}"
+          defaultMessage="Analytics ID {analyticsId}"
           values={{ analyticsId }}
         />
       ) : (
         <FormattedMessage
           id="xpack.ml.dataframe.analyticsMap.modelIdTitle"
-          defaultMessage="Map for trained model ID {modelId}"
+          defaultMessage="Trained model ID {modelId}"
           values={{ modelId }}
         />
       )}

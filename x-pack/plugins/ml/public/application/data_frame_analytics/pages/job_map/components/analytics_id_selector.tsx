@@ -83,8 +83,10 @@ const modelColumns = [
   },
 ];
 
-export function AnalyticsIdSelector({ setAnalyticsId }: any) {
-  const [selected, setSelected] = useState<{ model_id?: string; job_id?: string } | undefined>();
+export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: any) {
+  const [selected, setSelected] = useState<
+    { model_id?: string; job_id?: string; analysis_type?: string } | undefined
+  >();
   const [analyticsJobs, setAnalyticsJobs] = useState<any[]>([]);
   const [trainedModels, setTrainedModels] = useState<any[]>([]);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState<boolean>(true);
@@ -138,7 +140,9 @@ export function AnalyticsIdSelector({ setAnalyticsId }: any) {
   // Fetch analytics jobs and models on flyout open
   useEffect(() => {
     fetchAnalyticsJobs();
-    fetchAnalyticsModels();
+    if (jobsOnly === false) {
+      fetchAnalyticsModels();
+    }
   }, []);
 
   const applySelection: any = useCallback(() => {
@@ -157,9 +161,14 @@ export function AnalyticsIdSelector({ setAnalyticsId }: any) {
       return selected === undefined || selectedId === item.id || selectedId === item.model_id;
     },
     onSelectionChange: (selectedItem: any) => {
+      const item = selectedItem[0];
+      const config = item?.analysis || item?.inference_config;
+      const analysisType = item ? Object.keys(config)[0] : undefined;
+
       setSelected({
-        model_id: selectedItem[0]?.model_id,
-        job_id: selectedItem[0]?.id,
+        model_id: item?.model_id,
+        job_id: item?.id,
+        analysis_type: analysisType,
       });
     },
   };
@@ -183,7 +192,10 @@ export function AnalyticsIdSelector({ setAnalyticsId }: any) {
         />
       ),
     },
-    {
+  ];
+
+  if (jobsOnly === false) {
+    tabs.push({
       id: 'Models',
       name: i18n.translate('xpack.ml.analyticsSelector.modelsTab', {
         defaultMessage: 'Models',
@@ -200,8 +212,8 @@ export function AnalyticsIdSelector({ setAnalyticsId }: any) {
           isSelectable={true}
         />
       ),
-    },
-  ];
+    });
+  }
 
   return isFlyoutVisible ? (
     <EuiFlyout

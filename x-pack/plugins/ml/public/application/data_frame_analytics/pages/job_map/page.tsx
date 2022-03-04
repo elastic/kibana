@@ -36,8 +36,7 @@ export const Page: FC = () => {
       <MlPageHeader>
         <FormattedMessage
           id="xpack.ml.dataframe.analyticsMap.title"
-          defaultMessage="Map for Analytics ID {id}"
-          values={{ id: mapJobId || mapModelId }}
+          defaultMessage="Map for Analytics"
         />
       </MlPageHeader>
 

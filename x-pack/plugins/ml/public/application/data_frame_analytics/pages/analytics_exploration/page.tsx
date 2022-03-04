@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { OutlierExploration } from './components/outlier_exploration';
 import { RegressionExploration } from './components/regression_exploration';
@@ -16,29 +18,59 @@ import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_fr
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
+import { AnalyticsIdSelector } from '../job_map/components/analytics_id_selector';
 
 export const Page: FC<{
   jobId: string;
   analysisType: DataFrameAnalysisConfigType;
 }> = ({ jobId, analysisType }) => {
+  const [analyticsId, setAnalyticsId] =
+    useState<{ model_id?: string; job_id?: string; analysis_type?: string }>();
   const {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
+  const jobIdToUse = jobId || analyticsId?.job_id;
+  const analysisTypeToUse = analysisType || analyticsId?.analysis_type;
+
   return (
     <>
-      <div data-test-subj="mlPageDataFrameAnalyticsExploration">
-        <MlPageHeader>{jobId}</MlPageHeader>
-        {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
-          <OutlierExploration jobId={jobId} />
-        )}
-        {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-          <RegressionExploration jobId={jobId} />
-        )}
-        {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-          <ClassificationExploration jobId={jobId} />
-        )}
-      </div>
+      <MlPageHeader>
+        <FormattedMessage
+          id="xpack.ml.dataframe.analyticsExploration.title"
+          defaultMessage="Explore results for Analytics ID {id}"
+          values={{ id: jobIdToUse }}
+        />
+      </MlPageHeader>
+      {jobIdToUse && analysisTypeToUse ? (
+        <div data-test-subj="mlPageDataFrameAnalyticsExploration">
+          {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
+            <OutlierExploration jobId={jobIdToUse} />
+          )}
+          {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.REGRESSION && (
+            <RegressionExploration jobId={jobIdToUse} />
+          )}
+          {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
+            <ClassificationExploration jobId={jobIdToUse} />
+          )}
+        </div>
+      ) : (
+        <>
+          <AnalyticsIdSelector setAnalyticsId={setAnalyticsId} jobsOnly={true} />
+          <EuiEmptyPrompt
+            iconType="alert"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsMap.noJobSelectedLabel"
+                  defaultMessage="No Analytics ID selected"
+                />
+              </h2>
+            }
+            data-test-subj="mlNoAnalyticsFound"
+          />
+        </>
+      )}
       <HelpMenu docLink={helpLink} />
     </>
   );
