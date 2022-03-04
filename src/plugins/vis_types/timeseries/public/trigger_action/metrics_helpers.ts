@@ -91,7 +91,7 @@ export const getParentPipelineSeries = (
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
   const [fieldId, meta] = currentMetric?.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
-  if (!subFunctionMetric) {
+  if (!subFunctionMetric || subFunctionMetric.type === 'static') {
     return null;
   }
   const pipelineAgg = getPipelineAgg(subFunctionMetric);
@@ -184,7 +184,7 @@ export const getSiblingPipelineSeriesFormula = (
   metrics: Metric[]
 ) => {
   const subFunctionMetric = metrics.find((metric) => metric.id === currentMetric.field);
-  if (!subFunctionMetric) {
+  if (!subFunctionMetric || subFunctionMetric.type === 'static') {
     return null;
   }
   const pipelineAggMap = SUPPORTED_METRICS[subFunctionMetric.type];
@@ -310,6 +310,9 @@ export const getFormulaEquivalent = (
     }
     case 'filter_ratio': {
       return getFilterRatioFormula(currentMetric);
+    }
+    case 'static': {
+      return `${currentMetric.value}`;
     }
     default: {
       return `${aggregation}(${currentMetric.field})`;

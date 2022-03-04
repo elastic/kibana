@@ -38,12 +38,14 @@ export const triggerTSVBtoLensConfiguration = async (
   }
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
   let seriesNum = 0;
+  model.series.forEach((series) => {
+    if (!series.hidden) seriesNum++;
+  });
 
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
     const layer = model.series[layerIdx];
     if (layer.hidden) continue;
-    seriesNum++;
 
     const { indexPatternId, timeField } = await getDataSourceInfo(
       model.index_pattern,
@@ -65,13 +67,8 @@ export const triggerTSVBtoLensConfiguration = async (
       chartType = layerChartType !== 'line' ? `${layerChartType}_percentage_stacked` : 'line';
     }
 
-    // Lens support reference lines only when at least one layer data exists
-    if (seriesNum === 1 && layer.metrics[layer.metrics.length - 1].type === 'static') {
-      return null;
-    }
-
     // handle multiple metrics
-    let metricsArray = getSeries(layer.metrics);
+    let metricsArray = getSeries(layer.metrics, seriesNum);
     if (!metricsArray) {
       return null;
     }
