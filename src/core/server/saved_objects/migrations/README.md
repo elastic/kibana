@@ -137,9 +137,9 @@ is left out of the description for brevity.
 
 Check that replica allocation is enabled from cluster settings (`cluster.routing.allocation.enabled`). Migrations will fail when replica allocation is disabled during the bulk index operation that waits for all active shards. Migrations wait for all active shards to ensure that saved objects are replicated to protect against data loss.
 
-The Elasticsearch documentation mentions switching off replica allocation when restoring a cluster and this is a setting that might be overlooked when a restore is done. Migrations will always fail when replica allocation is disabled and migrations fail early to avoid adding a write block to the old index before running into a failure later.
+The Elasticsearch documentation mentions switching off replica allocation when restoring a cluster and this is a setting that might be overlooked when a restore is done. Migrations will fail early if replica allocation is incorrectly set to avoid adding a write block to the old index before running into a failure later.
 
-If replica allocation is enabled, the migration continues to fetch the saved object indices:
+If replica allocation is set to 'all', the migration continues to fetch the saved object indices:
 
 `fetchIndices`
 
@@ -148,13 +148,7 @@ and determine whether we’re migrating from a legacy index or a v1 migrations
 index.
 
 ### New control state
-1. If `.kibana` and the version specific aliases both exists and are pointing
-to the same index. This version's migration has already been completed. Since
-the same version could have plugins enabled at any time that would introduce
-new transforms or mappings.
-  →  `OUTDATED_DOCUMENTS_SEARCH`
-
-2. Two conditions have to be met before migrations begin:
+1. Two conditions have to be met before migrations begin:
     1. If replica allocation is set as a persistent or transient setting to "perimaries", "new_primaries" or "none" fail the migration. Without replica allocation enabled or not set to 'all', the migration will timeout when waiting for index yellow status before bulk indexing. The check only considers persistent and transient settings and does not take static configuration in `elasticsearch.yml` into account. If `cluster.routing.allocation.enable` is configured in `elaticsearch.yml` and not set to the default of 'all', the migration will timeout. Static settings can only be returned from the `nodes/info` API.
       → `FATAL`
   
@@ -162,6 +156,12 @@ new transforms or mappings.
     Kibana .e.g. a 7.11.0 instance found the `.kibana` alias pointing to
     `.kibana_7.12.0_001` fail the migration
       → `FATAL`
+
+2. If `.kibana` and the version specific aliases both exists and are pointing
+to the same index. This version's migration has already been completed. Since
+the same version could have plugins enabled at any time that would introduce
+new transforms or mappings.
+  →  `OUTDATED_DOCUMENTS_SEARCH`
 
 3. If the `.kibana` alias exists we’re migrating from either a v1 or v2 index
 and the migration source index is the index the `.kibana` alias points to.

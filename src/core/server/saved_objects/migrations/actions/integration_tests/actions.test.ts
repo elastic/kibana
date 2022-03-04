@@ -167,7 +167,7 @@ describe('migration actions', () => {
               Object {
                 "_tag": "Left",
                 "left": Object {
-                  "type": "cluster_routing_allocation_disabled",
+                  "type": "unsupported_cluster_routing_allocation",
                 },
               }
             `);
@@ -187,7 +187,7 @@ describe('migration actions', () => {
               Object {
                 "_tag": "Left",
                 "left": Object {
-                  "type": "cluster_routing_allocation_disabled",
+                  "type": "unsupported_cluster_routing_allocation",
                 },
               }
             `);
@@ -207,7 +207,7 @@ describe('migration actions', () => {
               Object {
                 "_tag": "Left",
                 "left": Object {
-                  "type": "cluster_routing_allocation_disabled",
+                  "type": "unsupported_cluster_routing_allocation",
                 },
               }
             `);
