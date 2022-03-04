@@ -8,12 +8,8 @@
 import sinon from 'sinon';
 import _ from 'lodash';
 import { FeatureCollection } from 'geojson';
-import { ESTermSourceDescriptor } from '../../../../../common/descriptor_types';
-import {
-  AGG_TYPE,
-  FEATURE_VISIBLE_PROPERTY_NAME,
-  SOURCE_TYPES,
-} from '../../../../../common/constants';
+import { TableSourceDescriptor } from '../../../../../common/descriptor_types';
+import { FEATURE_VISIBLE_PROPERTY_NAME, SOURCE_TYPES } from '../../../../../common/constants';
 import { performInnerJoins } from './perform_inner_joins';
 import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorSource } from '../../../sources/vector_source';
@@ -67,7 +63,7 @@ const joinDescriptor = {
     ],
     term: 'rightKey',
     type: SOURCE_TYPES.TABLE_SOURCE,
-  } as ESTermSourceDescriptor,
+  } as TableSourceDescriptor,
 };
 const mockVectorSource = {
   getInspectorAdapters: () => {
@@ -81,7 +77,7 @@ const mockVectorSource = {
       getLabel: () => {
         return LEFT_FIELD;
       },
-    } as IField;
+    } as unknown as IField;
   },
 } as unknown as IVectorSource;
 const innerJoin = new InnerJoin(joinDescriptor, mockVectorSource);
