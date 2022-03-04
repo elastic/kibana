@@ -13,6 +13,9 @@ const ACTIVE_ALERTS_CELL_COUNT = 78;
 const RECOVERED_ALERTS_CELL_COUNT = 150;
 const TOTAL_ALERTS_CELL_COUNT = 200;
 
+const DISABLED_ALERTS_CHECKBOX = 6;
+const ENABLED_ALERTS_CHECKBOX = 4;
+
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
@@ -23,6 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
     const observability = getService('observability');
+    const security = getService('security');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -215,20 +219,71 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('Actions Button', () => {
-        before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-          await observability.alerts.common.navigateToTimeWithData();
-        });
-
-        after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-        });
-
         it('Opens rule details page when click on "View Rule Details"', async () => {
           const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
           await actionsButton.click();
           await observability.alerts.common.viewRuleDetailsButtonClick();
           expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
+        });
+      });
+
+      /*
+       * ATTENTION FUTURE DEVELOPER
+       *
+       * These tests should only be valid for 7.17.x
+       * You can run this test if you go to this file:
+       * x-pack/plugins/observability/public/pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid.tsx
+       * and at line 397 and change showCheckboxes to true
+       *
+       */
+      describe.skip('Bulk Actions', () => {
+        before(async () => {
+          await security.testUser.setRoles(['global_alerts_logs_all_else_read']);
+          await observability.alerts.common.submitQuery('kibana.alert.status: "active"');
+        });
+        after(async () => {
+          await observability.alerts.common.submitQuery('');
+          await security.testUser.restoreDefaults();
+        });
+
+        it('Only logs alert should be enable for bulk actions', async () => {
+          const disabledCheckBoxes =
+            await observability.alerts.common.getAllDisabledCheckBoxInTable();
+          const enabledCheckBoxes =
+            await observability.alerts.common.getAllEnabledCheckBoxInTable();
+
+          expect(disabledCheckBoxes.length).to.eql(DISABLED_ALERTS_CHECKBOX);
+          expect(enabledCheckBoxes.length).to.eql(ENABLED_ALERTS_CHECKBOX);
+        });
+
+        it('validate formatting of the bulk actions button', async () => {
+          const selectAll = await testSubjects.find('select-all-events');
+          await selectAll.click();
+          const bulkActionsButton = await testSubjects.find('selectedShowBulkActionsButton');
+          expect(await bulkActionsButton.getVisibleText()).to.be('Selected 4 alerts');
+          await selectAll.click();
+        });
+
+        it('validate functionality of the bulk actions button', async () => {
+          const selectAll = await testSubjects.find('select-all-events');
+          await selectAll.click();
+
+          const bulkActionsButton = await testSubjects.find('selectedShowBulkActionsButton');
+          await bulkActionsButton.click();
+
+          const bulkActionsAcknowledgedAlertStatusButton = await testSubjects.find(
+            'acknowledged-alert-status'
+          );
+          await bulkActionsAcknowledgedAlertStatusButton.click();
+          await observability.alerts.common.submitQuery(
+            'kibana.alert.workflow_status : "acknowledged"'
+          );
+
+          await retry.try(async () => {
+            const enabledCheckBoxes =
+              await observability.alerts.common.getAllEnabledCheckBoxInTable();
+            expect(enabledCheckBoxes.length).to.eql(1);
+          });
         });
       });
     });
