@@ -7,7 +7,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { IndexPattern, Query } from '../../../../data/common';
+import { IndexPattern, KBN_FIELD_TYPES, Query } from '../../../../data/common';
 import { Panel } from './panel_model';
 
 export type { Metric, Series, Panel, MetricType } from './panel_model';
@@ -28,7 +28,7 @@ export interface FetchedIndexPattern {
 
 export interface SanitizedFieldType {
   name: string;
-  type: string;
+  type: KBN_FIELD_TYPES;
   label?: string;
 }
 

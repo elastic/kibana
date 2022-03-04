@@ -23,6 +23,7 @@ import { urlForwardingPluginMock } from '../../../plugins/url_forwarding/public/
 import { navigationPluginMock } from '../../../plugins/navigation/public/mocks';
 import { presentationUtilPluginMock } from '../../../plugins/presentation_util/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '../../saved_objects_tagging_oss/public/mocks';
+import { screenshotModePluginMock } from '../../screenshot_mode/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -68,6 +69,7 @@ const createInstance = async () => {
       navigation: navigationPluginMock.createStartContract(),
       presentationUtil: presentationUtilPluginMock.createStartContract(coreMock.createStart()),
       urlForwarding: urlForwardingPluginMock.createStartContract(),
+      screenshotMode: screenshotModePluginMock.createStartContract(),
     });
 
   return {

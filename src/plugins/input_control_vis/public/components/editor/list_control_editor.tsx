@@ -14,7 +14,8 @@ import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IndexPattern, IndexPatternField, IndexPatternSelectProps } from '../../../../data/public';
+import { IndexPatternSelectProps } from '../../../../data/public';
+import { DataView, DataViewField } from '../../../../data_views/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 interface ListControlEditorState {
@@ -25,7 +26,7 @@ interface ListControlEditorState {
 }
 
 interface ListControlEditorProps {
-  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<DataView>;
   controlIndex: number;
   controlParams: ControlParams;
   handleFieldNameChange: (fieldName: string) => void;
@@ -40,7 +41,7 @@ interface ListControlEditorProps {
   deps: InputControlVisDependencies;
 }
 
-function filterField(field: IndexPatternField) {
+function filterField(field: DataViewField) {
   return (
     Boolean(field.aggregatable) &&
     ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
@@ -104,7 +105,7 @@ export class ListControlEditor extends PureComponent<
       return;
     }
 
-    let indexPattern: IndexPattern;
+    let indexPattern: DataView;
     try {
       indexPattern = await this.props.getIndexPattern(this.props.controlParams.indexPattern);
     } catch (err) {
@@ -116,7 +117,7 @@ export class ListControlEditor extends PureComponent<
       return;
     }
 
-    const field = (indexPattern.fields as IndexPatternField[]).find(
+    const field = (indexPattern.fields as DataViewField[]).find(
       ({ name }) => name === this.props.controlParams.fieldName
     );
     if (!field) {
