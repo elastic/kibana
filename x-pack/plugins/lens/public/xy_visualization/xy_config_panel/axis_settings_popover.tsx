@@ -32,6 +32,7 @@ import { EuiIconAxisRight } from '../../assets/axis_right';
 import { EuiIconAxisTop } from '../../assets/axis_top';
 import { ToolbarButtonProps } from '../../../../../../src/plugins/kibana_react/public';
 import { validateExtent } from '../axes_configuration';
+import './axis_settings_popover.scss';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
@@ -261,6 +262,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       groupPosition={config.groupPosition}
       isDisabled={isDisabled}
       buttonDataTestSubj={config.buttonDataTestSubj}
+      panelClassName="lnsVisToolbarAxis__popover"
     >
       <AxisTitleSettings
         axis={axis}

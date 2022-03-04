@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-type LabelMode = 'auto' | 'custom' | 'none';
+export type LabelMode = 'auto' | 'custom' | 'none';
 
-interface Label {
+export interface Label {
   mode: LabelMode;
   label: string;
 }
