@@ -17,20 +17,23 @@ import {
   EuiLink,
   EuiFieldNumber,
   EuiFieldText,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { dataTypes } from '../../../../../../common';
-import type { NewAgentPolicy, AgentPolicy } from '../../../types';
-import { useStartServices } from '../../../hooks';
+import { dataTypes } from '../../../../../../../common';
+import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
+import { useStartServices } from '../../../../hooks';
 
-import { AgentPolicyPackageBadge } from '../../../components';
+import { AgentPolicyPackageBadge } from '../../../../components';
 
-import { policyHasFleetServer } from '../../agents/services/has_fleet_server';
+import { policyHasFleetServer } from '../../../agents/services/has_fleet_server';
 
-import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
-import type { ValidationResults } from './agent_policy_validation';
+import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
+import type { ValidationResults } from '../agent_policy_validation';
+
+import { useOutputOptions, DEFAULT_OUTPUT_VALUE } from './hooks';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -49,6 +52,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
 }) => {
   const { docLinks } = useStartServices();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
+  const {
+    dataOutputOptions,
+    monitoringOutputOptions,
+    isLoading: isLoadingOptions,
+  } = useOutputOptions();
 
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
@@ -272,6 +280,82 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             }}
             isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
             onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.dataOutputLabel"
+              defaultMessage="Output for integrations"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.dataOutputDescription"
+            defaultMessage="Select which output to use for data from integrations."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.data_output_id && validation.data_output_id
+              ? validation.data_output_id
+              : null
+          }
+          isInvalid={Boolean(touchedFields.data_output_id && validation.data_output_id)}
+        >
+          <EuiSuperSelect
+            valueOfSelected={agentPolicy.data_output_id || DEFAULT_OUTPUT_VALUE}
+            fullWidth
+            isLoading={isLoadingOptions}
+            onChange={(e) => {
+              updateAgentPolicy({
+                data_output_id: e !== DEFAULT_OUTPUT_VALUE ? e : null,
+              });
+            }}
+            options={dataOutputOptions}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.monitoringOutputLabel"
+              defaultMessage="Output for agent monitoring"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.monitoringOutputDescription"
+            defaultMessage="Select which output to use for the agents own monitoring data."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.monitoring_output_id && validation.monitoring_output_id
+              ? validation.monitoring_output_id
+              : null
+          }
+          isInvalid={Boolean(touchedFields.monitoring_output_id && validation.monitoring_output_id)}
+        >
+          <EuiSuperSelect
+            valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_OUTPUT_VALUE}
+            fullWidth
+            isLoading={isLoadingOptions}
+            onChange={(e) => {
+              updateAgentPolicy({
+                monitoring_output_id: e !== DEFAULT_OUTPUT_VALUE ? e : null,
+              });
+            }}
+            options={monitoringOutputOptions}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

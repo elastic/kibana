@@ -17,6 +17,7 @@ import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useKibana } from '../../../common/lib/kibana';
+import { mockCasesContract } from '../../../../../cases/public/mocks';
 
 jest.mock('../user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
@@ -82,6 +83,7 @@ describe('take action dropdown', () => {
         services: {
           ...mockStartServicesMock,
           timelines: { ...mockTimelines },
+          cases: mockCasesContract(),
           application: {
             capabilities: { siem: { crud_alerts: true, read_alerts: true } },
           },
