@@ -7,53 +7,35 @@
 
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
-import {
-  getPolicyEventFiltersPath,
-  getEventFiltersListPath,
-  getTrustedAppsListPath,
-  getHostIsolationExceptionsListPath,
-  getPolicyDetailsArtifactsListPath,
-  getPolicyHostIsolationExceptionsPath,
-} from '../../../../../common/routing';
 import { APP_UI_ID } from '../../../../../../../common/constants';
+import { EventFiltersPageLocation } from '../../../../event_filters/types';
+import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
+import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
 
 export const useGetLinkTo = (
   policyId: string,
   policyName: string,
-  listId: string,
+  getPolicyArtifactsPath: (policyId: string) => string,
+  getArtifactPath: (
+    location?:
+      | Partial<EventFiltersPageLocation>
+      | Partial<TrustedAppsListPageLocation>
+      | Partial<HostIsolationExceptionsPageLocation>
+  ) => string,
   location?: Partial<{ show: 'create' }>
 ) => {
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
-    let path = '';
-    if (listId === ENDPOINT_TRUSTED_APPS_LIST_ID) {
-      path = getTrustedAppsListPath(location);
-    } else if (listId === ENDPOINT_EVENT_FILTERS_LIST_ID) {
-      path = getEventFiltersListPath(location);
-    } else {
-      path = getHostIsolationExceptionsListPath(location);
-    }
+    const path = getArtifactPath(location);
     return {
       toRoutePath: path,
       toRouteUrl: getAppUrl({ path }),
     };
-  }, [getAppUrl, listId, location]);
+  }, [getAppUrl, getArtifactPath, location]);
 
-  const policyArtifactsPath = useMemo(() => {
-    if (listId === ENDPOINT_TRUSTED_APPS_LIST_ID) {
-      return getPolicyDetailsArtifactsListPath(policyId);
-    } else if (listId === ENDPOINT_EVENT_FILTERS_LIST_ID) {
-      return getPolicyEventFiltersPath(policyId);
-    } else {
-      return getPolicyHostIsolationExceptionsPath(policyId);
-    }
-  }, [listId, policyId]);
+  const policyArtifactsPath = getPolicyArtifactsPath(policyId);
 
   const policyArtifactRouteState = useMemo(() => {
     return {

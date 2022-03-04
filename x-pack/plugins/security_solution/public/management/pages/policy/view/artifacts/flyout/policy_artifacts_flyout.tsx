@@ -71,14 +71,14 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
     } = useListArtifact(apiClient, searcheableFields, {
       perPage: MAX_ALLOWED_RESULTS,
       filter: currentFilter,
-      excludedPolicies: [policyItem.id, 'global'],
+      excludedPolicies: [policyItem.id, 'all'],
     });
 
     const { data: allNotAssigned, isLoading: isLoadingAllNotAssigned } = useListArtifact(
       apiClient,
       searcheableFields,
       {
-        excludedPolicies: [policyItem.id, 'global'],
+        excludedPolicies: [policyItem.id, 'all'],
       }
     );
 

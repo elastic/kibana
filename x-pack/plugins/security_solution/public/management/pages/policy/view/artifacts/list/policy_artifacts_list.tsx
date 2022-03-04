@@ -30,12 +30,21 @@ import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { useListArtifact } from '../../../../../hooks/artifacts';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
+import { EventFiltersPageLocation } from '../../../../event_filters/types';
+import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
+import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
 
 interface PolicyArtifactsListProps {
   policy: ImmutableObject<PolicyData>;
   apiClient: ExceptionsListApiClient;
   searcheableFields: string[];
-  artifactPathFn: (location: object) => string;
+  getArtifactPath: (
+    location?:
+      | Partial<EventFiltersPageLocation>
+      | Partial<TrustedAppsListPageLocation>
+      | Partial<HostIsolationExceptionsPageLocation>
+  ) => string;
+  getPolicyArtifactsPath: (policyId: string) => string;
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
   externalPrivileges?: boolean;
@@ -46,7 +55,8 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     policy,
     apiClient,
     searcheableFields,
-    artifactPathFn,
+    getArtifactPath,
+    getPolicyArtifactsPath,
     labels,
     onDeleteActionCallback,
     externalPrivileges = true,
@@ -58,7 +68,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     const { urlParams } = useUrlParams();
     const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
 
-    const { state } = useGetLinkTo(policy.id, policy.name, apiClient.listId);
+    const { state } = useGetLinkTo(policy.id, policy.name, getPolicyArtifactsPath, getArtifactPath);
 
     const {
       data: artifacts,
@@ -68,7 +78,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       page: Number(urlParams.page_index) + 1 || undefined,
       perPage: Number(urlParams.page_size) || undefined,
       filter: urlParams.filter as string,
-      policies: [policy.id, 'global'],
+      policies: [policy.id, 'all'],
     });
 
     const pagination: Pagination = {
@@ -111,7 +121,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
 
     const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
     const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (artifact) => {
-      const viewUrlPath = artifactPathFn({
+      const viewUrlPath = getArtifactPath({
         filter: (artifact as ExceptionListItemSchema).item_id,
       });
       const fullDetailsAction = {

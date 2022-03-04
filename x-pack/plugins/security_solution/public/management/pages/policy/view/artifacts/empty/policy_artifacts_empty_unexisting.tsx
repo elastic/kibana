@@ -9,19 +9,34 @@ import React, { memo } from 'react';
 import { EuiEmptyPrompt, EuiButton, EuiPageTemplate } from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
+import { EventFiltersPageLocation } from '../../../../event_filters/types';
+import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
+import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
 
 interface CommonProps {
   policyId: string;
   policyName: string;
-  listId: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS;
+  getPolicyArtifactsPath: (policyId: string) => string;
+  getArtifactPath: (
+    location?:
+      | Partial<EventFiltersPageLocation>
+      | Partial<TrustedAppsListPageLocation>
+      | Partial<HostIsolationExceptionsPageLocation>
+  ) => string;
 }
 
 export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
-  ({ policyId, policyName, listId, labels }) => {
-    const { onClickHandler, toRouteUrl } = useGetLinkTo(policyId, policyName, listId, {
-      show: 'create',
-    });
+  ({ policyId, policyName, labels, getPolicyArtifactsPath, getArtifactPath }) => {
+    const { onClickHandler, toRouteUrl } = useGetLinkTo(
+      policyId,
+      policyName,
+      getPolicyArtifactsPath,
+      getArtifactPath,
+      {
+        show: 'create',
+      }
+    );
     return (
       <EuiPageTemplate template="centeredContent">
         <EuiEmptyPrompt

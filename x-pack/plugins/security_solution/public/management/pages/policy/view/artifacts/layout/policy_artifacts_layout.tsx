@@ -6,10 +6,6 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EuiTitle,
@@ -21,45 +17,58 @@ import {
   EuiButton,
   EuiPageContent,
 } from '@elastic/eui';
-import { useAppUrl, useHttp } from '../../../../../../common/lib/kibana';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { ManagementPageLoader } from '../../../../../components/management_page_loader';
 import { useUrlParams } from '../../../../../components/hooks/use_url_params';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import {
-  getEventFiltersListPath,
-  getHostIsolationExceptionsListPath,
-  getTrustedAppsListPath,
-} from '../../../../../common/routing';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
-import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
-import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
-import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../host_isolation_exceptions/constants';
 import { useListArtifact } from '../../../../../hooks/artifacts';
-import { TrustedAppsApiClient } from '../../../../trusted_apps/service/trusted_apps_api_client';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
-import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { PolicyArtifactsEmptyUnassigned, PolicyArtifactsEmptyUnexisting } from '../empty';
 import { PolicyArtifactsList } from '../list';
 import { PolicyArtifactsFlyout } from '../flyout';
 import { PolicyArtifactsPageLabels, policyArtifactsPageLabels } from '../translations';
 import { PolicyArtifactsDeleteModal } from '../delete_modal';
+import { EventFiltersPageLocation } from '../../../../event_filters/types';
+import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
+import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
 
 interface PolicyArtifactsLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
-  listId: string;
   /** A list of labels for the given policy artifact page. Not all have to be defined, only those that should override the defaults */
   labels: PolicyArtifactsPageLabels;
+  getExceptionsListApiClient: () => ExceptionsListApiClient;
+  searcheableFields: string[];
+  getArtifactPath: (
+    location?:
+      | Partial<EventFiltersPageLocation>
+      | Partial<TrustedAppsListPageLocation>
+      | Partial<HostIsolationExceptionsPageLocation>
+  ) => string;
+  getPolicyArtifactsPath: (policyId: string) => string;
   /** A boolean to check extra privileges for restricted actions, true when it's allowed, false when not */
   externalPrivileges?: boolean;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
-  ({ policyItem, listId, labels: _labels = {}, externalPrivileges = true }) => {
-    const http = useHttp();
+  ({
+    policyItem,
+    labels: _labels = {},
+    getExceptionsListApiClient,
+    searcheableFields,
+    getArtifactPath,
+    getPolicyArtifactsPath,
+    externalPrivileges = true,
+  }) => {
+    const exceptionsListApiClient = useMemo(
+      () => getExceptionsListApiClient(),
+      [getExceptionsListApiClient]
+    );
     const { getAppUrl } = useAppUrl();
-    const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(listId);
+    const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(
+      exceptionsListApiClient.listId
+    );
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const { urlParams } = useUrlParams();
     const [exceptionItemToDelete, setExceptionItemToDelete] = useState<
@@ -73,37 +82,11 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
       };
     }, [_labels]);
 
-    const [exceptionsListApiClient, searcheableFields, getArtifactPath] = useMemo((): [
-      ExceptionsListApiClient,
-      Readonly<string[]>,
-      () => string
-    ] => {
-      if (listId === ENDPOINT_TRUSTED_APPS_LIST_ID) {
-        return [
-          TrustedAppsApiClient.getInstance(http),
-          TRUSTED_APPS_SEARCHABLE_FIELDS,
-          getTrustedAppsListPath,
-        ];
-      } else if (listId === ENDPOINT_EVENT_FILTERS_LIST_ID) {
-        return [
-          EventFiltersApiClient.getInstance(http),
-          EVENT_FILTERS_SEARCHABLE_FIELDS,
-          getEventFiltersListPath,
-        ];
-      } else {
-        return [
-          HostIsolationExceptionsApiClient.getInstance(http),
-          HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS,
-          getHostIsolationExceptionsListPath,
-        ];
-      }
-    }, [http, listId]);
-
     const { data: allAssigned, isLoading: isLoadingAllAssigned } = useListArtifact(
       exceptionsListApiClient,
       [...searcheableFields],
       {
-        policies: policyItem ? [policyItem.id, 'global'] : [],
+        policies: policyItem ? [policyItem.id, 'all'] : [],
       }
     );
 
@@ -186,15 +169,18 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             <PolicyArtifactsEmptyUnassigned
               policyId={policyItem.id}
               policyName={policyItem.name}
-              listId={listId}
+              listId={exceptionsListApiClient.listId}
               labels={labels}
+              getPolicyArtifactsPath={getPolicyArtifactsPath}
+              getArtifactPath={getArtifactPath}
             />
           ) : (
             <PolicyArtifactsEmptyUnexisting
               policyId={policyItem.id}
               policyName={policyItem.name}
-              listId={listId}
               labels={labels}
+              getPolicyArtifactsPath={getPolicyArtifactsPath}
+              getArtifactPath={getArtifactPath}
             />
           )}
         </>
@@ -250,10 +236,11 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             policy={policyItem}
             apiClient={exceptionsListApiClient}
             searcheableFields={[...searcheableFields]}
-            artifactPathFn={getArtifactPath}
             labels={labels}
             onDeleteActionCallback={handleOnDeleteActionCallback}
             externalPrivileges={externalPrivileges}
+            getPolicyArtifactsPath={getPolicyArtifactsPath}
+            getArtifactPath={getArtifactPath}
           />
         </EuiPageContent>
       </div>
