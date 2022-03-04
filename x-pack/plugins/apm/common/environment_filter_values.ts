@@ -33,13 +33,6 @@ export function getEnvironmentLabel(environment: string) {
   return environment;
 }
 
-// #TODO Once we replace the select dropdown we can remove it
-// EuiSelect >  EuiSelectOption accepts text attribute
-export const ENVIRONMENT_ALL_SELECT_OPTION = {
-  value: ENVIRONMENT_ALL_VALUE,
-  label: getEnvironmentLabel(ENVIRONMENT_ALL_VALUE),
-};
-
 export const ENVIRONMENT_ALL = {
   value: ENVIRONMENT_ALL_VALUE,
   label: getEnvironmentLabel(ENVIRONMENT_ALL_VALUE),

@@ -20,6 +20,7 @@ interface SuggestionsSelecttWithTermProps {
   start?: string;
   end?: string;
   onChange: (value?: string) => void;
+  isClearable?: boolean;
   placeholder: string;
   prepend?: string;
 }
@@ -34,6 +35,7 @@ export function SuggestionsSelectWithTerm({
   start,
   end,
   onChange,
+  isClearable,
   placeholder,
   prepend,
 }: SuggestionsSelecttWithTermProps) {
@@ -108,8 +110,8 @@ export function SuggestionsSelectWithTerm({
   return (
     <EuiComboBox
       async={true}
-      compressed={true}
       customOptionText={customOptionText}
+      isClearable={isClearable}
       isLoading={status === FETCH_STATUS.LOADING}
       onChange={handleChange}
       onCreateOption={handleCreateOption}

@@ -69,6 +69,7 @@ export function EnvironmentFilter({
 
   return (
     <SuggestionsSelect
+      isClearable={false}
       allOption={ENVIRONMENT_ALL}
       placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
         defaultMessage: 'Select environment',
@@ -104,6 +105,7 @@ export function ServiceEnvironmentFilter({
 
   return (
     <SuggestionsSelectWithTerm
+      isClearable={false}
       allOption={ENVIRONMENT_ALL}
       placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
         defaultMessage: 'Select environment',
