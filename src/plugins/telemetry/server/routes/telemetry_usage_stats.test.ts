@@ -9,6 +9,7 @@
 import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import type { RequestHandlerContext, IRouter } from 'src/core/server';
+import { securityMock } from '../../../../../x-pack/plugins/security/server/mocks';
 import { telemetryCollectionManagerPluginMock } from '../../../telemetry_collection_manager/server/mocks';
 
 async function runRequest(
@@ -98,17 +99,12 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     });
 
     it('returns 403 when the user does not have enough permissions to request unencrypted telemetry', async () => {
-      const getSecurityMock = jest.fn().mockReturnValue({
-        authz: {
-          actions: {
-            api: {
-              get: jest.fn(),
-            },
-          },
-          checkPrivilegesWithRequest: () => ({
-            globally: () => ({ hasAllRequested: false }),
-          }),
-        },
+      const getSecurityMock = jest.fn().mockImplementation(() => {
+        const securityStartMock = securityMock.createStart();
+        securityStartMock.authz.checkPrivilegesWithRequest.mockReturnValue({
+          globally: () => ({ hasAllRequested: false }),
+        });
+        return securityStartMock;
       });
       registerTelemetryUsageStatsRoutes(
         mockRouter,
@@ -123,18 +119,34 @@ describe('registerTelemetryUsageStatsRoutes', () => {
       expect(mockResponse.forbidden).toBeCalled();
     });
 
+    it('returns 200 when the user has enough permissions to request unencrypted telemetry', async () => {
+      const getSecurityMock = jest.fn().mockImplementation(() => {
+        const securityStartMock = securityMock.createStart();
+        securityStartMock.authz.checkPrivilegesWithRequest.mockReturnValue({
+          globally: () => ({ hasAllRequested: true }),
+        });
+        return securityStartMock;
+      });
+      registerTelemetryUsageStatsRoutes(
+        mockRouter,
+        telemetryCollectionManager,
+        true,
+        getSecurityMock
+      );
+      const { mockResponse } = await runRequest(mockRouter, {
+        refreshCache: false,
+        unencrypted: true,
+      });
+      expect(mockResponse.ok).toBeCalled();
+    });
+
     it('returns 200 when the user does not have enough permissions to request unencrypted telemetry but it requests encrypted', async () => {
-      const getSecurityMock = jest.fn().mockReturnValue({
-        authz: {
-          actions: {
-            api: {
-              get: jest.fn(),
-            },
-          },
-          checkPrivilegesWithRequest: () => ({
-            globally: () => ({ hasAllRequested: false }),
-          }),
-        },
+      const getSecurityMock = jest.fn().mockImplementation(() => {
+        const securityStartMock = securityMock.createStart();
+        securityStartMock.authz.checkPrivilegesWithRequest.mockReturnValue({
+          globally: () => ({ hasAllRequested: false }),
+        });
+        return securityStartMock;
       });
       registerTelemetryUsageStatsRoutes(
         mockRouter,
