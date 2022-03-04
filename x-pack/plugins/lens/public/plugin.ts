@@ -20,7 +20,6 @@ import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
   EmbeddableStart,
-  IEmbeddable,
 } from '../../../../src/plugins/embeddable/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { SpacesPluginStart } from '../../spaces/public';
@@ -72,15 +71,9 @@ import {
   UiActionsStart,
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
-  createAction,
 } from '../../../../src/plugins/ui_actions/public';
 import { VISUALIZE_EDITOR_TRIGGER } from '../../../../src/plugins/visualizations/public';
-import {
-  APP_ID,
-  DOC_TYPE,
-  getEditPath,
-  NOT_INTERNATIONALIZED_PRODUCT_NAME,
-} from '../common/constants';
+import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
 import type {
   Visualization,
@@ -89,11 +82,11 @@ import type {
   LensTopNavMenuEntryGenerator,
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
+import { viewUnderlyingDataAction } from './trigger_actions/view_underlying_data_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
 import type { LensEmbeddableInput } from './embeddable';
-import { Embeddable } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import {
   EmbeddableComponentProps,
@@ -446,24 +439,7 @@ export class LensPlugin {
 
     startDependencies.uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      createAction<{ embeddable: IEmbeddable }>({
-        type: 'VIEW_UNDERLYING_DATA',
-        id: 'VIEW_UNDERLYING_DATA',
-        getDisplayName: () => 'Open in Discover',
-        isCompatible: async (context: { embeddable: IEmbeddable }) => {
-          let isCompatible = false;
-          if (context.embeddable instanceof Embeddable) {
-            isCompatible = await context.embeddable.getCanViewUnderlyingData();
-          }
-          return isCompatible;
-        },
-        execute: async (context: { embeddable: Embeddable }) => {
-          const args = await context.embeddable.getViewUnderlyingDataArgs();
-          startDependencies.discover?.locator?.navigate({
-            ...args,
-          });
-        },
-      })
+      viewUnderlyingDataAction(startDependencies.discover!)
     );
 
     return {
