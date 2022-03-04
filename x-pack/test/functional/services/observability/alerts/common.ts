@@ -27,6 +27,7 @@ export function ObservabilityAlertsCommonProvider({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
   const pageObjects = getPageObjects(['common']);

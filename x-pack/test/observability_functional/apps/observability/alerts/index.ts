@@ -219,15 +219,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Actions Button', () => {
-        it('Opens rule details page when click on "View Rule Details"', async () => {
-          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
-          await actionsButton.click();
-          await observability.alerts.common.viewRuleDetailsButtonClick();
-          expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
-        });
-      });
-
       /*
        * ATTENTION FUTURE DEVELOPER
        *
