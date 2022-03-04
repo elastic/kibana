@@ -357,6 +357,27 @@ export default function ({
   }) {
     const context = term.context!;
 
+    if (context?.endpoint && term.value) {
+      const { data_autocomplete_rules: autocompleteRules } = context.endpoint;
+      if (autocompleteRules && autocompleteRules[term.value]) {
+        const lines = editor
+          .getLines(context.requestStartRow!, editor.getCurrentPosition().lineNumber)
+          .join('\n');
+        const match = (autocompleteRules[term.value].__one_of ?? []).find(
+          (rule: { __condition?: { lines_regex: string | RegExp } }) => {
+            if (rule.__condition && rule.__condition.lines_regex) {
+              return new RegExp(rule.__condition.lines_regex, 'm').test(lines);
+            }
+            return false;
+          }
+        );
+
+        if (match && match.__template) {
+          term.template = match.__template;
+        }
+      }
+    }
+
     // make sure we get up to date replacement info.
     addReplacementInfoToContext(context, editor.getCurrentPosition(), term.insertValue);
 
