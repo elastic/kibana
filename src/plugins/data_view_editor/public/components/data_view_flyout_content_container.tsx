@@ -24,8 +24,10 @@ const IndexPatternFlyoutContentContainer = ({
   } = useKibana<DataViewEditorContext>();
 
   const onSaveClick = async (dataViewSpec: DataViewSpec) => {
+    console.log('*** save has been clicked');
     try {
       const indexPattern = await dataViews.createAndSave(dataViewSpec);
+      console.log('*** save success');
 
       const message = i18n.translate('indexPatternEditor.saved', {
         defaultMessage: "Saved '{indexPatternTitle}'",
@@ -34,6 +36,7 @@ const IndexPatternFlyoutContentContainer = ({
       notifications.toasts.addSuccess(message);
       await onSave(indexPattern);
     } catch (e) {
+      console.log('*** save failed');
       const title = i18n.translate('indexPatternEditor.dataView.unableSaveLabel', {
         defaultMessage: 'Failed to save data view.',
       });
