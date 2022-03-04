@@ -290,7 +290,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               loading={isLoading}
               pagination={uiPagination}
               contentClassName="card-container"
-              data-test-subj={getTestId('cardContent')}
+              data-test-subj={getTestId('list')}
             />
           </>
         )}

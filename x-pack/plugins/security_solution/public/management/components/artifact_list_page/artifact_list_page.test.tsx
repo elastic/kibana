@@ -11,7 +11,7 @@ import { trustedAppsAllHttpMocks } from '../../pages/mocks';
 import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
 import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/trusted_apps_api_client';
 import { artifactListPageLabels } from './translations';
-import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { act, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ArtifactFormComponentProps } from './types';
 import type { HttpFetchOptionsWithPath } from 'kibana/public';
@@ -555,15 +555,105 @@ describe('When using the ArtifactListPage component', () => {
   });
 
   describe('and data exists', () => {
-    // FIXME:PT with data
+    let renderWithListData: () => Promise<ReturnType<typeof render>>;
 
-    it.todo('should show list loading indicator while results are retrieved');
+    const getFirstCard = async ({
+      showActions = false,
+    }: Partial<{ showActions: boolean }> = {}): Promise<HTMLElement> => {
+      const cards = await renderResult.findAllByTestId('testPage-card');
 
-    it.todo(`should show cards with results`);
+      if (cards.length === 0) {
+        throw new Error('No cards found!');
+      }
 
-    it.todo('should show card actions');
+      const card = cards[0];
 
-    it.todo('should persist pagination changes to the URL');
+      if (showActions) {
+        await act(async () => {
+          userEvent.click(within(card).getByTestId('testPage-card-header-actions-button'));
+
+          await waitFor(() => {
+            expect(renderResult.getByTestId('testPage-card-header-actions-contextMenuPanel'));
+          });
+        });
+      }
+
+      return card;
+    };
+
+    beforeEach(async () => {
+      renderWithListData = async () => {
+        render();
+
+        await act(async () => {
+          await waitFor(() => {
+            expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+          });
+        });
+
+        return renderResult;
+      };
+    });
+
+    it('should show list data loading indicator while list results are retrieved (and after list was checked to see if it has data)', async () => {
+      // add a delay to the list results, but not to the API call
+      // that is used to determine if the list contains data
+      mockedApi.responseProvider.trustedAppsList.mockDelay.mockImplementation(async (options) => {
+        const query = options.query as { page?: number; per_page?: number };
+        if (query.page === 1 && query.per_page === 1) {
+          return;
+        }
+
+        return new Promise((r) => setTimeout(r, 50));
+      });
+
+      const { getByTestId } = await renderWithListData();
+
+      expect(getByTestId('testPage-list-loader')).toBeTruthy();
+    });
+
+    it(`should show cards with results`, async () => {
+      const { findAllByTestId, getByTestId } = await renderWithListData();
+
+      await expect(findAllByTestId('testPage-card')).resolves.toHaveLength(10);
+      expect(getByTestId('testPage-showCount').textContent).toBe('Showing 20 artifacts');
+    });
+
+    it('should show card actions', async () => {
+      const { getByTestId } = await renderWithListData();
+      await getFirstCard({ showActions: true });
+
+      expect(getByTestId('testPage-card-cardEditAction')).toBeTruthy();
+      expect(getByTestId('testPage-card-cardDeleteAction')).toBeTruthy();
+    });
+
+    it('should persist pagination `page` changes to the URL', async () => {
+      const { getByTestId } = await renderWithListData();
+      act(() => {
+        userEvent.click(getByTestId('pagination-button-1'));
+      });
+
+      await waitFor(() => {
+        expect(history.location.search).toMatch(/page=2/);
+      });
+    });
+
+    it('should persist pagination `page size` changes to the URL', async () => {
+      const { getByTestId } = await renderWithListData();
+      act(() => {
+        userEvent.click(getByTestId('tablePaginationPopoverButton'));
+      });
+      await act(async () => {
+        await waitFor(() => {
+          expect(getByTestId('tablePagination-20-rows'));
+        });
+        userEvent.click(getByTestId('tablePagination-20-rows'));
+      });
+
+      await waitFor(() => {
+        expect(history.location.search).toMatch(/pageSize=20/);
+      });
+    });
 
     describe('and interacting with card actions', () => {
       it.todo('should display the Edit flyout');
