@@ -154,6 +154,8 @@ export const PolicyList = memo(() => {
         name: i18n.translate('xpack.securitySolution.policy.list.endpoints', {
           defaultMessage: 'Endpoints',
         }),
+        dataType: 'number',
+        width: '8%',
         render: (policy: PolicyData) => {
           return (
             <PolicyEndpointListLink
