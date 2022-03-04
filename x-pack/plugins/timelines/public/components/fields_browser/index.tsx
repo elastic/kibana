@@ -28,10 +28,7 @@ export const FieldBrowserWrappedComponent = (props: FieldBrowserWrappedComponent
   return (
     <Provider store={store}>
       <I18nProvider>
-        <StatefulFieldsBrowser
-          data-test-ref="steph-loves-this-fields-browser"
-          {...fieldsBrowseProps}
-        />
+        <StatefulFieldsBrowser {...fieldsBrowseProps} />
       </I18nProvider>
     </Provider>
   );
