@@ -306,6 +306,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Select sorting method for {display}',
         values: { display },
       }),
+    'euiComboBox.listboxAriaLabel': i18n.translate('core.euiComboBox.listboxAriaLabel', {
+      defaultMessage: 'Choose from the following options',
+    }),
     'euiComboBoxOptionsList.allOptionsSelected': i18n.translate(
       'core.euiComboBoxOptionsList.allOptionsSelected',
       {
@@ -1193,6 +1196,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { innerText, description },
         description: 'Displayed in a cell in the header of the table to describe the field',
       }),
+    'euiTablePagination.allRows': i18n.translate('core.euiTablePagination.allRows', {
+      defaultMessage: 'Showing all rows',
+      description: 'Displayed in a button that toggles a table pagination menu',
+    }),
     'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
       defaultMessage: 'Rows per page',
       description: 'Displayed in a button that toggles a table pagination menu',
@@ -1203,6 +1210,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Displayed in a button that toggles the number of visible rows',
         values: { rowsPerPage },
       }),
+    'euiTablePagination.rowsPerPageOptionShowAllRows': i18n.translate(
+      'core.euiTablePagination.rowsPerPageOptionShowAllRows',
+      {
+        defaultMessage: 'Show all rows',
+        description: 'Displayed in a button that toggles the number of visible rows',
+      }
+    ),
     'euiTableSortMobile.sorting': i18n.translate('core.euiTableSortMobile.sorting', {
       defaultMessage: 'Sorting',
       description: 'Displayed in a button that toggles a table sorting menu',
