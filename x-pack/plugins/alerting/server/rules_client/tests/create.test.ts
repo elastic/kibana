@@ -1979,6 +1979,7 @@ describe('create()', () => {
           status: 'pending',
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           error: null,
+          warning: null,
         },
         monitoring: {
           execution: {
