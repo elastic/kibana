@@ -13,7 +13,7 @@ export default function ({ loadTestFile, getService }) {
       await browser.setWindowSize(1600, 1000);
     });
 
-    this.tags('ciGroup10');
+    this.tags('ciGroup111');
     loadTestFile(require.resolve('./waffle_map'));
     loadTestFile(require.resolve('./saved_views'));
   });

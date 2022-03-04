@@ -60,7 +60,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
     });
 
     describe('', function () {
-      this.tags(['ciGroup4', 'skipFirefox']);
+      this.tags(['ciGroup57', 'skipFirefox']);
 
       loadTestFile(require.resolve('./colors'));
       loadTestFile(require.resolve('./chart_data'));

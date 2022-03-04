@@ -25,7 +25,7 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.unload('x-pack/test/functional/es_archives/canvas/default');
     });
 
-    this.tags('ciGroup10');
+    this.tags('ciGroup110');
     loadTestFile(require.resolve('./fullscreen'));
   });
 }

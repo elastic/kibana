@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security app - OIDC interactions', function () {
-    this.tags('ciGroup13');
+    this.tags('ciGroup136');
 
     loadTestFile(require.resolve('./url_capture'));
   });

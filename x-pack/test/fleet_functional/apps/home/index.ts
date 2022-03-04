@@ -11,7 +11,7 @@ export default function (providerContext: FtrProviderContext) {
   const { loadTestFile } = providerContext;
 
   describe('home onboarding', function () {
-    this.tags('ciGroup7');
+    this.tags('ciGroup92');
     loadTestFile(require.resolve('./welcome'));
   });
 }

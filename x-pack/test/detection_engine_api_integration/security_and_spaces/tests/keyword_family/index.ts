@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection keyword family data types', function () {
     describe('', function () {
-      this.tags('ciGroup11');
+      this.tags('ciGroup115');
 
       loadTestFile(require.resolve('./keyword'));
       loadTestFile(require.resolve('./const_keyword'));

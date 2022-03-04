@@ -12,7 +12,7 @@ import { stackManagementSchema } from '../../../../../src/plugins/kibana_usage_c
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/119038
   describe.skip('Stack Management', function () {
-    this.tags('ciGroup1');
+    this.tags('ciGroup36');
     const { common } = getPageObjects(['common']);
     const browser = getService('browser');
 

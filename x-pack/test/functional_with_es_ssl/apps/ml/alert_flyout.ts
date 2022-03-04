@@ -68,7 +68,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   let testJobId = '';
 
   describe('anomaly detection alert', function () {
-    this.tags('ciGroup13');
+    this.tags('ciGroup130');
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');

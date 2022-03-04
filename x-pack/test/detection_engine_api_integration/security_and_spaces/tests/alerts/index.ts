@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection engine signals/alerts compatibility', function () {
     describe('', function () {
-      this.tags('ciGroup11');
+      this.tags('ciGroup114');
 
       loadTestFile(require.resolve('./alerts_compatibility'));
     });

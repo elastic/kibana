@@ -15,7 +15,7 @@ import {
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('timeline security and spaces enabled: basic', function () {
     // Fastest ciGroup for the moment.
-    this.tags('ciGroup5');
+    this.tags('ciGroup72');
 
     before(async () => {
       await createSpacesAndUsers(getService);

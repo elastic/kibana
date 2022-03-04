@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Index Lifecycle Management app', function () {
-    this.tags('ciGroup7');
+    this.tags('ciGroup91');
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./home_page'));
   });

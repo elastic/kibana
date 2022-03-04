@@ -7,7 +7,7 @@
 
 export default function ({ loadTestFile }) {
   describe('telemetry feature', function () {
-    this.tags('ciGroup1');
+    this.tags('ciGroup35');
     loadTestFile(require.resolve('./_telemetry'));
   });
 }

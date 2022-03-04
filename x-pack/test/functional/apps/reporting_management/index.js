@@ -7,7 +7,7 @@
 
 export default ({ loadTestFile }) => {
   describe('reporting management app', function () {
-    this.tags('ciGroup7');
+    this.tags('ciGroup97');
     loadTestFile(require.resolve('./report_listing'));
   });
 };

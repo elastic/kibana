@@ -14,7 +14,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       const reportingAPI = getService('reportingAPI');
       await reportingAPI.logTaskManagerHealth();
     });
-    this.tags('ciGroup13');
+    this.tags('ciGroup134');
     loadTestFile(require.resolve('./job_apis_csv'));
   });
 }

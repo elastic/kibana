@@ -12,7 +12,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('lens search sessions', function () {
-    this.tags('ciGroup3');
+    this.tags('ciGroup53');
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
