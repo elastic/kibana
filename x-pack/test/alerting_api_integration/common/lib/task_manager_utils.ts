@@ -41,6 +41,13 @@ export class TaskManagerUtils {
                   },
                 },
               ],
+              must_not: [
+                {
+                  term: {
+                    'task.type': 'sampleTask',
+                  },
+                },
+              ],
             },
           },
         },
