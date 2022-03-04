@@ -69,7 +69,6 @@ describe('Policy details artifacts flyout', () => {
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
   let policy: PolicyData;
   let onCloseMock: jest.Mock;
-  let getNewInstance: () => EventFiltersApiClient;
 
   beforeEach(() => {
     const endpointGenerator = new EndpointDocGenerator('seed');
@@ -77,14 +76,13 @@ describe('Policy details artifacts flyout', () => {
     mockedContext = createAppRootMockRenderer();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     onCloseMock = jest.fn();
-    getNewInstance = () => new EventFiltersApiClient(mockedContext.coreStart.http);
     render = async () => {
       await act(async () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsFlyout
             policyItem={policy}
             labels={POLICY_ARTIFACT_FLYOUT_LABELS}
-            apiClient={getNewInstance()}
+            apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
             onClose={onCloseMock}
             searcheableFields={[...SEARCHABLE_FIELDS]}
           />

@@ -35,7 +35,6 @@ let policyItem: ImmutableObject<PolicyData>;
 const generator = new EndpointDocGenerator();
 let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
 let history: AppContextTestRender['history'];
-let getNewInstance: () => EventFiltersApiClient;
 
 const eventFiltersLabels = {
   ...POLICY_ARTIFACT_EVENT_FILTERS_LABELS,
@@ -54,7 +53,6 @@ describe('Policy artifacts layout', () => {
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     mockedApi.responseProvider.eventFiltersList.mockClear();
     policyItem = generator.generatePolicyPackagePolicy();
-    getNewInstance = () => new EventFiltersApiClient(mockedContext.coreStart.http);
     ({ history } = mockedContext);
 
     getEndpointPrivilegesInitialStateMock({
@@ -66,7 +64,9 @@ describe('Policy artifacts layout', () => {
           <PolicyArtifactsLayout
             policyItem={policyItem}
             labels={eventFiltersLabels}
-            getExceptionsListApiClient={getNewInstance}
+            getExceptionsListApiClient={() =>
+              EventFiltersApiClient.getInstance(mockedContext.coreStart.http)
+            }
             searcheableFields={[...EVENT_FILTERS_SEARCHABLE_FIELDS]}
             getArtifactPath={getEventFiltersListPath}
             getPolicyArtifactsPath={getPolicyEventFiltersPath}

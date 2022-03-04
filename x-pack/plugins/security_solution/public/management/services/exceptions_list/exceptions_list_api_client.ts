@@ -92,7 +92,10 @@ export class ExceptionsListApiClient {
     listId: string,
     listDefinition: CreateExceptionListSchema
   ): ExceptionsListApiClient {
-    if (!ExceptionsListApiClient.instance.has(listId)) {
+    if (
+      !ExceptionsListApiClient.instance.has(listId) ||
+      ExceptionsListApiClient.instance.get(listId)?.http !== http
+    ) {
       ExceptionsListApiClient.instance.set(
         listId,
         new ExceptionsListApiClient(http, listId, listDefinition)

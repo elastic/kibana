@@ -45,14 +45,12 @@ describe('Policy details artifacts list', () => {
   let mockedContext: AppContextTestRender;
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
   let policy: PolicyData;
-  let getNewInstance: () => EventFiltersApiClient;
   let handleOnDeleteActionCallbackMock: jest.Mock;
   beforeEach(() => {
     policy = endpointGenerator.generatePolicyPackagePolicy();
     mockedContext = createAppRootMockRenderer();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     ({ history } = mockedContext);
-    getNewInstance = () => new EventFiltersApiClient(mockedContext.coreStart.http);
     handleOnDeleteActionCallbackMock = jest.fn();
     getEndpointPrivilegesInitialStateMock({
       canCreateArtifactsByPolicy: true,
@@ -62,7 +60,7 @@ describe('Policy details artifacts list', () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsList
             policy={policy}
-            apiClient={getNewInstance()}
+            apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
             searcheableFields={[...SEARCHABLE_FIELDS]}
             labels={POLICY_ARTIFACT_LIST_LABELS}
             onDeleteActionCallback={handleOnDeleteActionCallbackMock}

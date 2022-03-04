@@ -28,21 +28,20 @@ describe('Policy details artifacts delete modal', () => {
   let exception: ExceptionListItemSchema;
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
   let onCancelMock: () => jest.Mock;
-  let getNewInstance: () => EventFiltersApiClient;
+
   beforeEach(() => {
     policyId = uuid.v4();
     mockedContext = createAppRootMockRenderer();
     exception = getExceptionListItemSchemaMock();
     onCancelMock = jest.fn();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
-    getNewInstance = () => new EventFiltersApiClient(mockedContext.coreStart.http);
     render = async () => {
       await act(async () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsDeleteModal
             policyId={policyId}
             policyName="fakeName"
-            apiClient={getNewInstance()}
+            apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
             exception={exception}
             onCancel={onCancelMock}
             labels={POLICY_ARTIFACT_DELETE_MODAL_LABELS}
