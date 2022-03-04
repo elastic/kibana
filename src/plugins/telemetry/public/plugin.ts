@@ -84,7 +84,7 @@ export interface TelemetryPluginStart {
 
 interface TelemetryPluginSetupDependencies {
   screenshotMode: ScreenshotModePluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 /**
@@ -138,15 +138,17 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     this.telemetrySender = new TelemetrySender(this.telemetryService);
 
-    home.welcomeScreen.registerOnRendered(() => {
-      if (this.telemetryService?.userCanChangeSettings) {
-        this.telemetryNotifications?.setOptedInNoticeSeen();
-      }
-    });
+    if (home) {
+      home.welcomeScreen.registerOnRendered(() => {
+        if (this.telemetryService?.userCanChangeSettings) {
+          this.telemetryNotifications?.setOptedInNoticeSeen();
+        }
+      });
 
-    home.welcomeScreen.registerTelemetryNoticeRenderer(() =>
-      renderWelcomeTelemetryNotice(this.telemetryService!, http.basePath.prepend)
-    );
+      home.welcomeScreen.registerTelemetryNoticeRenderer(() =>
+        renderWelcomeTelemetryNotice(this.telemetryService!, http.basePath.prepend)
+      );
+    }
 
     return {
       telemetryService: this.getTelemetryServicePublicApis(),

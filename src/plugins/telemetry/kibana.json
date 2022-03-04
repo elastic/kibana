@@ -7,8 +7,8 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["home", "telemetryCollectionManager", "usageCollection", "screenshotMode"],
-  "optionalPlugins": ["security"],
+  "requiredPlugins": ["telemetryCollectionManager", "usageCollection", "screenshotMode"],
+  "optionalPlugins": ["home", "security"],
   "extraPublicDirs": ["common/constants"],
   "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }
