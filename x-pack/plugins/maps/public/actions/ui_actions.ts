@@ -24,6 +24,8 @@ export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
 export const SET_DRAW_MODE = 'SET_DRAW_MODE';
+export const SET_DELETED_FEATURES = 'UPDATE_DELETED_FEATURES';
+export const REMOVE_DELETED_FEATURES = 'REMOVE_DELETED_FEATURES';
 
 export function exitFullScreen() {
   return {
@@ -121,5 +123,18 @@ export function closeTimeslider() {
       isTimesliderOpen: false,
     });
     dispatch(setQuery({ clearTimeslice: true }));
+  };
+}
+
+export function setDeletedFeatures(layerId: string) {
+  return {
+    type: SET_DELETED_FEATURES,
+    layerId,
+  };
+}
+
+export function removeDeletedFeatures() {
+  return {
+    type: REMOVE_DELETED_FEATURES,
   };
 }

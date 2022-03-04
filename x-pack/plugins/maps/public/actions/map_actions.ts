@@ -64,9 +64,10 @@ import { DrawState, MapCenterAndZoom, MapExtent, Timeslice } from '../../common/
 import { INITIAL_LOCATION } from '../../common/constants';
 import { updateTooltipStateForLayer } from './tooltip_actions';
 import { isVectorLayer, IVectorLayer } from '../classes/layers/vector_layer';
-import { SET_DRAW_MODE } from './ui_actions';
+import { SET_DRAW_MODE, setDeletedFeatures, removeDeletedFeatures } from './ui_actions';
 import { expandToTileBoundaries } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
+import { getDeletedFeatureIds } from '../selectors/ui_selectors';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -322,6 +323,10 @@ export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
         drawShape: shapeToDraw,
       },
     });
+
+    if (shapeToDraw !== DRAW_SHAPE.DELETE) {
+      dispatch(removeDeletedFeatures());
+    }
   };
 }
 
@@ -391,6 +396,10 @@ export function deleteFeatureFromIndex(featureId: string) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
+    if (getDeletedFeatureIds(getState()).includes(featureId)) {
+      return;
+    }
+
     const editState = getEditState(getState());
     const layerId = editState ? editState.layerId : undefined;
     if (!layerId) {
@@ -400,9 +409,11 @@ export function deleteFeatureFromIndex(featureId: string) {
     if (!layer || !isVectorLayer(layer)) {
       return;
     }
+
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
       await (layer as IVectorLayer).deleteFeature(featureId);
+      dispatch(setDeletedFeatures(featureId));
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
       getToasts().addError(e, {

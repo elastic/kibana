@@ -61,11 +61,11 @@ export class DrawControl extends Component<Props> {
     this.props.onDraw(event, this._mbDrawControl);
   };
 
-  _onClick = _.debounce((event: MapMouseEvent) => {
+  _onClick = (event: MapMouseEvent) => {
     if (this.props.onClick) {
       this.props.onClick(event, this._mbDrawControl);
     }
-  }, 200);
+  };
 
   // debounce with zero timeout needed to allow mapbox-draw finish logic to complete
   // before _removeDrawControl is called
