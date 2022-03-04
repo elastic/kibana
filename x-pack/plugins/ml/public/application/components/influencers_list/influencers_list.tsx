@@ -18,7 +18,7 @@ import { abbreviateWholeNumber } from '../../formatters/abbreviate_whole_number'
 import { getSeverity, getFormattedSeverityScore } from '../../../../common/util/anomaly_utils';
 import { EntityCell, EntityCellFilter } from '../entity_cell';
 
-interface InfluencerValueData {
+export interface InfluencerValueData {
   influencerFieldValue: string;
   maxAnomalyScore: number;
   sumAnomalyScore: number;

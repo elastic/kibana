@@ -101,7 +101,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
   const anomalyExplorerContext = useAnomalyExplorerContextValue(explorerUrlStateService);
 
-  // const [globalState] = useUrlState('_g');
+  const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
@@ -123,13 +123,13 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   // with `moment` since it can contain custom strings such as `now-15m`.
   // So when globalState's `time` changes, we update the timefilter and use
   // `timefilter.getBounds()` to update `bounds` in this component's state.
-  // useEffect(() => {
-  //   if (globalState?.time !== undefined) {
-  //     if (globalState.time.mode === 'invalid') {
-  //       setInValidTimeRangeError(true);
-  //     }
-  //   }
-  // }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      if (globalState.time.mode === 'invalid') {
+        setInValidTimeRangeError(true);
+      }
+    }
+  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
@@ -232,6 +232,11 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells$()
   );
 
+  const swimLaneSeverity = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity$(),
+    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity()
+  );
+
   const influencersFilterQuery = useObservable(
     anomalyExplorerContext.anomalyExplorerCommonStateService.getInfluencerFilterQuery$()
   );
@@ -282,7 +287,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }, [JSON.stringify(explorerAppState), JSON.stringify(explorerUrlState), selectedCells]);
 
   const overallSwimlaneData = useObservable(
-    anomalyExplorerContext.anomalyTimelineStateService.getOverallSwimLaneData$()
+    anomalyExplorerContext.anomalyTimelineStateService.getOverallSwimLaneData$(),
+    null
   );
 
   if (
@@ -320,6 +326,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
               selectedJobsRunning,
               timeBuckets,
               timefilter,
+              selectedCells,
+              swimLaneSeverity,
             }}
           />
         )}

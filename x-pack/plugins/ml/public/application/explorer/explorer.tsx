@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-/*
- * React component for rendering Explorer dashboard swimlanes.
- */
-
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
   htmlIdGenerator,
   EuiCallOut,
@@ -30,8 +24,8 @@ import {
   EuiAccordion,
   EuiBadge,
 } from '@elastic/eui';
-
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
+// @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { ExplorerNoJobsSelected, ExplorerNoResultsFound } from './components';
 import { InfluencersList } from '../components/influencers_list';
@@ -52,20 +46,19 @@ import {
   getQueryPattern,
   escapeParens,
   escapeDoubleQuotes,
+  OverallSwimlaneData,
+  AppStateSelectedCells,
 } from './explorer_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
-
-import { FILTER_ACTION } from './explorer_constants';
-
+import { FILTER_ACTION, FilterAction } from './explorer_constants';
 // Explorer Charts
+// @ts-ignore
 import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
-
 // Anomalies Table
+// @ts-ignore
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-
 // Anomalies Map
 import { AnomaliesMap } from './anomalies_map';
-
 import { getToastNotifications } from '../util/dependency_cache';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -73,8 +66,25 @@ import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import { isDefined } from '../../../common/types/guards';
 import { MlPageHeader } from '../components/page_header';
+import type { DataView } from '../../../../../../src/plugins/data_views/common';
+import type { JobSelectorProps } from '../components/job_selector/job_selector';
+import type { ExplorerState } from './reducers';
+import type { MlKibanaReactContextValue } from '../contexts/kibana';
+import type { TimefilterContract } from '../../../../../../src/plugins/data/public';
+import type { TimeBuckets } from '../util/time_buckets';
 
-const ExplorerPage = ({
+interface ExplorerPageProps {
+  jobSelectorProps: JobSelectorProps;
+  noInfluencersConfigured?: boolean;
+  influencers?: ExplorerState['influencers'];
+  filterActive?: boolean;
+  filterPlaceHolder?: string;
+  indexPattern?: DataView;
+  queryString?: string;
+  updateLanguage?: (language: string) => void;
+}
+
+const ExplorerPage: FC<ExplorerPageProps> = ({
   children,
   jobSelectorProps,
   noInfluencersConfigured,
@@ -100,10 +110,13 @@ const ExplorerPage = ({
       <EuiPageHeaderSection style={{ width: '100%' }}>
         <JobSelector {...jobSelectorProps} />
 
-        {noInfluencersConfigured === false && influencers !== undefined ? (
+        {noInfluencersConfigured === false &&
+        influencers !== undefined &&
+        indexPattern &&
+        updateLanguage ? (
           <>
             <ExplorerQueryBar
-              filterActive={filterActive}
+              filterActive={!!filterActive}
               filterPlaceHolder={filterPlaceHolder}
               indexPattern={indexPattern}
               queryString={queryString}
@@ -119,16 +132,24 @@ const ExplorerPage = ({
   </>
 );
 
-export class ExplorerUI extends React.Component {
-  static propTypes = {
-    explorerState: PropTypes.object.isRequired,
-    setSelectedCells: PropTypes.func.isRequired,
-    severity: PropTypes.number.isRequired,
-    showCharts: PropTypes.bool.isRequired,
-    selectedJobsRunning: PropTypes.bool.isRequired,
-    overallSwimlaneData: PropTypes.object.isRequired,
-  };
+interface ExplorerUIProps {
+  kibana: MlKibanaReactContextValue;
+  explorerState: ExplorerState;
+  severity: number;
+  showCharts: boolean;
+  selectedJobsRunning: boolean;
+  overallSwimlaneData: OverallSwimlaneData | null;
+  invalidTimeRangeError?: boolean;
+  stoppedPartitions?: string[];
+  // TODO Remove
+  timefilter: TimefilterContract;
+  // TODO Remove
+  timeBuckets: TimeBuckets;
+  selectedCells: AppStateSelectedCells | undefined;
+  swimLaneSeverity?: number;
+}
 
+export class ExplorerUI extends React.Component<ExplorerUIProps> {
   state = { language: DEFAULT_QUERY_LANG };
   htmlIdGen = htmlIdGenerator();
 
@@ -150,7 +171,7 @@ export class ExplorerUI extends React.Component {
 
   // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
   // and will cause a syntax error when called with getKqlQueryValues
-  applyFilter = (fieldName, fieldValue, action) => {
+  applyFilter = (fieldName: string, fieldValue: string, action: FilterAction) => {
     const { filterActive, indexPattern, queryString } = this.props.explorerState;
     let newQueryString = '';
     const operator = 'and ';
@@ -203,7 +224,7 @@ export class ExplorerUI extends React.Component {
     }
   };
 
-  updateLanguage = (language) => this.setState({ language });
+  updateLanguage = (language: string) => this.setState({ language });
 
   render() {
     const { share, charts: chartsService } = this.props.kibana.services;
@@ -217,6 +238,8 @@ export class ExplorerUI extends React.Component {
       selectedJobsRunning,
       timefilter,
       timeBuckets,
+      selectedCells,
+      swimLaneSeverity,
     } = this.props;
 
     const {
@@ -229,19 +252,17 @@ export class ExplorerUI extends React.Component {
       loading,
       noInfluencersConfigured,
       queryString,
-      selectedCells,
       selectedJobs,
       tableData,
-      swimLaneSeverity,
     } = this.props.explorerState;
 
-    const overallSwimlaneData = this.props.overallSwimlaneData || {};
+    const overallSwimlaneData = this.props.overallSwimlaneData;
 
     const { annotationsData, totalCount: allAnnotationsCnt, error: annotationsError } = annotations;
 
     const annotationsCnt = Array.isArray(annotationsData) ? annotationsData.length : 0;
     const badge =
-      allAnnotationsCnt > annotationsCnt ? (
+      (allAnnotationsCnt ?? 0) > annotationsCnt ? (
         <EuiBadge color={'hollow'}>
           <FormattedMessage
             id="xpack.ml.explorer.annotationsOutOfTotalCountTitle"
@@ -261,12 +282,13 @@ export class ExplorerUI extends React.Component {
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
-    };
+    } as JobSelectorProps;
 
     const noJobsSelected = selectedJobs === null || selectedJobs.length === 0;
-    const hasResults = overallSwimlaneData.points && overallSwimlaneData.points.length > 0;
+    const hasResults: boolean =
+      !!overallSwimlaneData?.points && overallSwimlaneData.points.length > 0;
     const hasResultsWithAnomalies =
-      (hasResults && overallSwimlaneData.points.some((v) => v.value > 0)) ||
+      (hasResults && overallSwimlaneData!.points.some((v) => v.value > 0)) ||
       tableData.anomalies?.length > 0;
 
     const hasActiveFilter = isDefined(swimLaneSeverity);
@@ -365,10 +387,7 @@ export class ExplorerUI extends React.Component {
               />
             )}
 
-            <AnomalyTimeline
-              explorerState={this.props.explorerState}
-              setSelectedCells={this.props.setSelectedCells}
-            />
+            <AnomalyTimeline explorerState={this.props.explorerState} />
 
             <EuiSpacer size="m" />
 
@@ -458,7 +477,7 @@ export class ExplorerUI extends React.Component {
 
                   <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
                     <AnomalyContextMenu
-                      selectedJobs={selectedJobs}
+                      selectedJobs={selectedJobs!}
                       selectedCells={selectedCells}
                       bounds={bounds}
                       interval={

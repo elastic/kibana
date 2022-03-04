@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-/*
- * React component for rendering EuiEmptyPrompt when no results were found.
- */
-
-import React from 'react';
+import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const ExplorerNoResultsFound = ({ hasResults, selectedJobsRunning }) => {
+export interface ExplorerNoResultsFoundProps {
+  hasResults: boolean;
+  selectedJobsRunning: boolean;
+}
+
+/*
+ * React component for rendering EuiEmptyPrompt when no results were found.
+ */
+export const ExplorerNoResultsFound: FC<ExplorerNoResultsFoundProps> = ({
+  hasResults,
+  selectedJobsRunning,
+}) => {
   const resultsHaveNoAnomalies = hasResults === true;
   const noResults = hasResults === false;
   return (

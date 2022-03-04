@@ -128,4 +128,5 @@ export interface GetAnnotationsResponse {
 export interface AnnotationsTable {
   annotationsData: Annotations;
   error?: string;
+  totalCount?: number;
 }

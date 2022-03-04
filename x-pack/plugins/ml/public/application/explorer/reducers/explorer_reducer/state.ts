@@ -6,16 +6,16 @@
  */
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
-import { Dictionary } from '../../../../../common/types/common';
-
 import {
   getDefaultChartsData,
   ExplorerChartsData,
 } from '../../explorer_charts/explorer_charts_container_service';
 import { AnomaliesTableData, ExplorerJob } from '../../explorer_utils';
 import { AnnotationsTable } from '../../../../../common/types/annotations';
-import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
-import { TimeBucketsInterval } from '../../../util/time_buckets';
+import type { InfluencersFilterQuery } from '../../../../../common/types/es_client';
+import type { TimeBucketsInterval } from '../../../util/time_buckets';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import type { InfluencerValueData } from '../../../components/influencers_list/influencers_list';
 
 export interface ExplorerState {
   overallAnnotations: AnnotationsTable;
@@ -25,10 +25,10 @@ export interface ExplorerState {
   fieldFormatsLoading: boolean;
   filterActive: boolean;
   filteredFields: any[];
-  filterPlaceHolder: any;
-  indexPattern: { title: string; fields: any[] };
+  filterPlaceHolder: string | undefined;
+  indexPattern: DataView;
   influencersFilterQuery?: InfluencersFilterQuery;
-  influencers: Dictionary<any>;
+  influencers: Record<string, InfluencerValueData[]>;
   isAndOperator: boolean;
   loading: boolean;
   maskAll: boolean;
@@ -46,7 +46,7 @@ export interface ExplorerState {
 }
 
 function getDefaultIndexPattern() {
-  return { title: ML_RESULTS_INDEX_PATTERN, fields: [] };
+  return { title: ML_RESULTS_INDEX_PATTERN, fields: [] } as unknown as DataView;
 }
 
 export function getExplorerDefaultState(): ExplorerState {

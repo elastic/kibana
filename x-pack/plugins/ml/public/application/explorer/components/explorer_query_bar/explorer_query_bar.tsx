@@ -10,7 +10,7 @@ import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { Query, QueryStringInput } from '../../../../../../../../src/plugins/data/public';
-import { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
 import { explorerService } from '../../explorer_dashboard_service';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
@@ -88,7 +88,7 @@ function getInitSearchInputState({
 
 interface ExplorerQueryBarProps {
   filterActive: boolean;
-  filterPlaceHolder: string;
+  filterPlaceHolder?: string;
   indexPattern: DataView;
   queryString?: string;
   updateLanguage: (language: string) => void;

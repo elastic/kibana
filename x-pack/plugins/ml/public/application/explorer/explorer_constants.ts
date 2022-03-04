@@ -36,7 +36,9 @@ export const EXPLORER_ACTION = {
 export const FILTER_ACTION = {
   ADD: '+',
   REMOVE: '-',
-};
+} as const;
+
+export type FilterAction = typeof FILTER_ACTION[keyof typeof FILTER_ACTION];
 
 export const SWIMLANE_TYPE = {
   OVERALL: 'overall',
