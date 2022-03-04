@@ -63,3 +63,16 @@ export const logViewRT = rt.exact(
   ])
 );
 export type LogView = rt.TypeOf<typeof logViewRT>;
+
+export const logViewIndexStatusRT = rt.keyof({
+  available: null,
+  empty: null,
+  missing: null,
+  unknown: null,
+});
+export type LogViewIndexStatus = rt.TypeOf<typeof logViewIndexStatusRT>;
+
+export const logViewStatusRT = rt.strict({
+  index: logViewIndexStatusRT,
+});
+export type LogViewStatus = rt.TypeOf<typeof logViewStatusRT>;

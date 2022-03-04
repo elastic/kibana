@@ -8,9 +8,7 @@
 import createContainer from 'constate';
 import { useCallback, useMemo, useState } from 'react';
 import type { HttpHandler } from 'src/core/public';
-import { LogSourceStatus } from '../../common/http_api/log_sources';
-import { LogView, LogViewAttributes, ResolvedLogView } from '../../common/log_views';
-import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
+import { LogView, LogViewAttributes, LogViewStatus, ResolvedLogView } from '../../common/log_views';
 import type { ILogViewsClient } from '../services/log_views';
 import { isRejectedPromiseState, useTrackedPromise } from '../utils/use_tracked_promise';
 
@@ -27,13 +25,13 @@ export const useLogView = ({
 
   const [resolvedLogView, setResolvedLogView] = useState<ResolvedLogView | undefined>(undefined);
 
-  const [sourceStatus, setSourceStatus] = useState<LogSourceStatus | undefined>(undefined);
+  const [logViewStatus, setLogViewStatus] = useState<LogViewStatus | undefined>(undefined);
 
   const [loadLogViewRequest, loadLogView] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: async () => {
-        return await logViews.getLogView(logViewId);
+      createPromise: async (logViewId_) => {
+        return await logViews.getLogView(logViewId_);
       },
       onResolve: setLogView,
     },
@@ -54,8 +52,8 @@ export const useLogView = ({
   const [updateLogViewRequest, updateLogView] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: async (logViewAttributes: Partial<LogViewAttributes>) => {
-        return await logViews.putLogView(logViewId, logViewAttributes);
+      createPromise: async (logViewId_: string, logViewAttributes: Partial<LogViewAttributes>) => {
+        return await logViews.putLogView(logViewId_, logViewAttributes);
       },
       onResolve: setLogView,
     },
@@ -65,10 +63,10 @@ export const useLogView = ({
   const [loadLogViewStatusRequest, loadLogViewStatus] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: async () => {
-        return await callFetchLogSourceStatusAPI(logViewId, fetch);
+      createPromise: async (resolvedLogViewToCheck) => {
+        return await logViews.getResolvedLogViewStatus(resolvedLogViewToCheck);
       },
-      onResolve: ({ data }) => setSourceStatus(data),
+      onResolve: setLogViewStatus,
     },
     [logViewId, fetch]
   );
@@ -109,64 +107,60 @@ export const useLogView = ({
   const hasFailedLoading = latestLoadSourceFailures.length > 0;
 
   const load = useCallback(async () => {
-    const loadedLogView = await loadLogView();
+    const loadedLogView = await loadLogView(logViewId);
     const resolvedLoadedLogView = await resolveLogView(loadedLogView.attributes);
-    const loadedLogViewStatus = await loadLogViewStatus();
+    const resolvedLogViewStatus = await loadLogViewStatus(resolvedLoadedLogView);
 
-    return [loadedLogView, resolvedLoadedLogView, loadedLogViewStatus];
-  }, [loadLogView, loadLogViewStatus, resolveLogView]);
+    return [loadedLogView, resolvedLoadedLogView, resolvedLogViewStatus];
+  }, [logViewId, loadLogView, loadLogViewStatus, resolveLogView]);
 
-  // const updateSource = useCallback(
-  //   async (patchedProperties: LogSourceConfigurationPropertiesPatch) => {
-  //     const updatedSourceConfiguration = await updateLogView(patchedProperties);
-  //     const resolveSourceConfigurationPromise = resolveLogView(
-  //       updatedSourceConfiguration.configuration
-  //     );
-  //     const loadSourceStatusPromise = loadLogViewStatus();
+  const update = useCallback(
+    async (logViewAttributes: Partial<LogViewAttributes>) => {
+      const updatedLogView = await updateLogView(logViewId, logViewAttributes);
+      const resolvedUpdatedLogView = await resolveLogView(updatedLogView.attributes);
+      const resolvedLogViewStatus = await loadLogViewStatus(resolvedUpdatedLogView);
 
-  //     return await Promise.all([
-  //       updatedSourceConfiguration,
-  //       resolveSourceConfigurationPromise,
-  //       loadSourceStatusPromise,
-  //     ]);
-  //   },
-  //   [loadLogViewStatus, resolveLogView, updateLogView]
-  // );
+      return [updatedLogView, resolvedUpdatedLogView, resolvedLogViewStatus];
+    },
+    [logViewId, loadLogViewStatus, resolveLogView, updateLogView]
+  );
 
-  // const initialize = useCallback(async () => {
-  //   if (!isUninitialized) {
-  //     return;
-  //   }
+  const initialize = useCallback(async () => {
+    if (!isUninitialized) {
+      return;
+    }
 
-  //   return await load();
-  // }, [isUninitialized, load]);
+    return await load();
+  }, [isUninitialized, load]);
 
-  // return {
-  //   sourceId: logViewId,
-  //   initialize,
-  //   isUninitialized,
-  //   derivedIndexPattern: derivedDataView,
-  //   // Failure states
-  //   hasFailedLoading,
-  //   hasFailedLoadingSource,
-  //   hasFailedLoadingSourceStatus,
-  //   hasFailedResolvingSource,
-  //   latestLoadSourceFailures,
-  //   // Loading states
-  //   isLoading,
-  //   isLoadingSourceConfiguration: isLoadingLogView,
-  //   isLoadingSourceStatus: isLoadingLogViewStatus,
-  //   isResolvingSourceConfiguration: isResolvingLogView,
-  //   // Source status (denotes the state of the indices, e.g. missing)
-  //   sourceStatus,
-  //   loadSourceStatus: loadLogViewStatus,
-  //   // Source configuration (represents the raw attributes of the source configuration)
-  //   loadSource: load,
-  //   sourceConfiguration,
-  //   updateSource,
-  //   // Resolved source configuration (represents a fully resolved state, you would use this for the vast majority of "read" scenarios)
-  //   resolvedSourceConfiguration,
-  // };
+  return {
+    logViewId,
+    isUninitialized,
+    derivedDataView,
+
+    // Failure states
+    hasFailedLoading,
+    hasFailedLoadingSource,
+    hasFailedLoadingSourceStatus,
+    hasFailedResolvingSource,
+    latestLoadSourceFailures,
+
+    // Loading states
+    isLoading,
+    isLoadingLogView,
+    isLoadingLogViewStatus,
+    isResolvingLogView,
+
+    // data
+    logView,
+    resolvedLogView,
+    logViewStatus,
+
+    // actions
+    initialize,
+    load,
+    update,
+  };
 };
 
 export const [LogViewProvider, useLogViewContext] = createContainer(useLogView);

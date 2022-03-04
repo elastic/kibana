@@ -14,8 +14,8 @@ export class LogViewsService {
 
   public setup(): LogViewsServiceSetup {}
 
-  public start({ dataViews, http }: LogViewsServiceStartDeps): LogViewsServiceStart {
-    const client = new LogViewsClient(dataViews, http, this.config);
+  public start({ dataViews, http, search }: LogViewsServiceStartDeps): LogViewsServiceStart {
+    const client = new LogViewsClient(dataViews, http, search.search, this.config);
 
     return {
       client,

@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from 'src/core/public';
+import { ISearchGeneric } from 'src/plugins/data/public';
 import { DataViewsContract } from 'src/plugins/data_views/public';
 import {
   getLogViewResponsePayloadRT,
@@ -17,6 +18,7 @@ import {
   LogView,
   LogViewAttributes,
   LogViewsStaticConfig,
+  LogViewStatus,
   PutLogViewError,
   ResolvedLogView,
   resolveLogView,
@@ -28,6 +30,7 @@ export class LogViewsClient implements ILogViewsClient {
   constructor(
     private readonly dataViews: DataViewsContract,
     private readonly http: HttpStart,
+    private readonly search: ISearchGeneric,
     private readonly config: LogViewsStaticConfig
   ) {}
 
@@ -49,6 +52,13 @@ export class LogViewsClient implements ILogViewsClient {
     const logView = await this.getLogView(logViewId);
     const resolvedLogView = await this.resolveLogView(logView.attributes);
     return resolvedLogView;
+  }
+
+  public async getResolvedLogViewStatus(resolvedLogView: ResolvedLogView): Promise<LogViewStatus> {
+    // TODO: add actual implementation
+    return {
+      index: 'unknown',
+    };
   }
 
   public async putLogView(

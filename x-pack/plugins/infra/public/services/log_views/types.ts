@@ -6,8 +6,14 @@
  */
 
 import { HttpStart } from 'src/core/public';
+import { ISearchStart } from 'src/plugins/data/public';
 import { DataViewsContract } from 'src/plugins/data_views/public';
-import { LogView, LogViewAttributes, ResolvedLogView } from '../../../common/log_views';
+import {
+  LogView,
+  LogViewAttributes,
+  LogViewStatus,
+  ResolvedLogView,
+} from '../../../common/log_views';
 
 export type LogViewsServiceSetup = void;
 
@@ -18,10 +24,12 @@ export interface LogViewsServiceStart {
 export interface LogViewsServiceStartDeps {
   dataViews: DataViewsContract;
   http: HttpStart;
+  search: ISearchStart;
 }
 
 export interface ILogViewsClient {
   getLogView(logViewId: string): Promise<LogView>;
+  getResolvedLogViewStatus(resolvedLogView: ResolvedLogView): Promise<LogViewStatus>;
   getResolvedLogView(logViewId: string): Promise<ResolvedLogView>;
   putLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): Promise<LogView>;
   resolveLogView(logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;

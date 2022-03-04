@@ -220,6 +220,7 @@ export class Plugin implements InfraClientPluginClass {
     const logViews = this.logViews.start({
       http: core.http,
       dataViews: plugins.dataViews,
+      search: plugins.data.search,
     });
 
     return {
