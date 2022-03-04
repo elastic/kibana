@@ -50,9 +50,11 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
           className="mapsCustomIconForm__thumbnail"
           describedByIds={Array []}
           display="rowCompressed"
+          error=""
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
+          isInvalid={false}
           label="SVG icon"
           labelType="label"
         >
@@ -62,7 +64,9 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
             compressed={false}
             display="large"
             initialPromptText="Select or drag and drop an SVG icon"
+            isInvalid={false}
             onChange={[Function]}
+            required={true}
           />
         </EuiFormRow>
         <EuiText
@@ -179,6 +183,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
         />
         <IconPreview
           cutoff={0.3}
+          isSvgInvalid={false}
           radius={0.15}
           svg="<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>"
         />
@@ -204,6 +209,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
         <EuiButton
           data-test-subj="mapsCustomIconForm-submit"
           fill={true}
+          isDisabled={false}
           onClick={[Function]}
         >
           Save
@@ -272,9 +278,11 @@ exports[`should render an empty custom icon modal 1`] = `
           className="mapsCustomIconForm__thumbnail"
           describedByIds={Array []}
           display="rowCompressed"
+          error=""
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
+          isInvalid={false}
           label="SVG icon"
           labelType="label"
         >
@@ -284,7 +292,9 @@ exports[`should render an empty custom icon modal 1`] = `
             compressed={false}
             display="large"
             initialPromptText="Select or drag and drop an SVG icon"
+            isInvalid={false}
             onChange={[Function]}
+            required={true}
           />
         </EuiFormRow>
         <EuiText
@@ -401,6 +411,7 @@ exports[`should render an empty custom icon modal 1`] = `
         />
         <IconPreview
           cutoff={0.25}
+          isSvgInvalid={true}
           radius={0.25}
           svg=""
         />
@@ -426,6 +437,7 @@ exports[`should render an empty custom icon modal 1`] = `
         <EuiButton
           data-test-subj="mapsCustomIconForm-submit"
           fill={true}
+          isDisabled={true}
           onClick={[Function]}
         >
           Save
