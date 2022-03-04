@@ -79,6 +79,7 @@ cluster.
 * The deprecation API is disabled.
 * SQL support is disabled.
 * Aggregations provided by the analytics plugin are no longer usable.
+* All searchable snapshots indices are unassigned and cannot be searched.
 
 [discrete]
 [[expiration-watcher]]
