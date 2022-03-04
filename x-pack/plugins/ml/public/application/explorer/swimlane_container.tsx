@@ -45,11 +45,7 @@ import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { useUiSettings } from '../contexts/kibana';
-import {
-  Y_AXIS_LABEL_WIDTH,
-  Y_AXIS_LABEL_PADDING,
-  X_AXIS_RIGHT_OVERFLOW,
-} from './swimlane_annotation_container';
+import { Y_AXIS_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './swimlane_annotation_container';
 import { useCurrentEuiTheme } from '../components/color_range_legend';
 
 declare global {
@@ -314,8 +310,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           visible: showTimeline,
           textColor: euiTheme.euiTextSubduedColor,
           fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
-          // Required to calculate where the swimlane ends
-          width: X_AXIS_RIGHT_OVERFLOW * 2,
         },
         brushMask: {
           visible: showBrush,
