@@ -160,7 +160,7 @@
     "index": ".kibana_task_manager_1",
     "source": {
       "migrationVersion": {
-        "task": "8.2.0"
+        "task": "7.16.0"
       },
       "references": [
       ],
@@ -191,7 +191,7 @@
     "index": ".kibana_task_manager_1",
     "source": {
       "migrationVersion": {
-        "task": "8.2.0"
+        "task": "7.16.0"
       },
       "references": [
       ],
