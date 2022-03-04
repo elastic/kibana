@@ -13,8 +13,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiDataGrid,
+  EuiDataGridProps,
   EuiDataGridCellValueElementProps,
-  EuiDataGridPopoverContents,
+  EuiDataGridCellPopoverElementProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -114,7 +115,8 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   const [columns, setColumns] = useState<ConfusionMatrixColumn[]>([]);
   const [columnsData, setColumnsData] = useState<ConfusionMatrixColumnData[]>([]);
   const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
-  const [popoverContents, setPopoverContents] = useState<EuiDataGridPopoverContents>({});
+  const [renderCellPopover, setRenderCellPopover] =
+    useState<EuiDataGridProps['renderCellPopover']>();
   const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
@@ -151,25 +153,20 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
       setVisibleColumns(() => derivedColumns.map(({ id }: { id: string }) => id));
       setColumns(derivedColumns);
       setColumnsData(columnData);
-      setPopoverContents({
-        numeric: ({
-          cellContentsElement,
-          children,
-        }: {
-          cellContentsElement: any;
-          children: any;
-        }) => {
-          const rowIndex = children?.props?.rowIndex;
-          const colId = children?.props?.columnId;
+      setRenderCellPopover((props: EuiDataGridCellPopoverElementProps) => {
+        const { rowIndex, columnId, schema, cellContentsElement, DefaultCellPopover } = props;
+        if (schema === 'numeric') {
           const gridItem = columnData[rowIndex];
 
-          if (gridItem !== undefined && colId !== ACTUAL_CLASS_ID) {
-            const count = gridItem.predicted_classes_count[colId];
+          if (gridItem !== undefined && columnId !== ACTUAL_CLASS_ID) {
+            const count = gridItem.predicted_classes_count[columnId];
             return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
           }
 
           return cellContentsElement.textContent;
-        },
+        } else {
+          return <DefaultCellPopover {...props} />;
+        }
       });
     }
   }, [confusionMatrixData]);
@@ -344,6 +341,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                               columnVisibility={{ visibleColumns, setVisibleColumns }}
                               rowCount={rowCount}
                               renderCellValue={renderCellValue}
+                              renderCellPopover={renderCellPopover}
                               inMemory={{ level: 'sorting' }}
                               toolbarVisibility={{
                                 showColumnSelector: true,
@@ -351,7 +349,6 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                                 showFullScreenSelector: false,
                                 showSortSelector: false,
                               }}
-                              popoverContents={popoverContents}
                               gridStyle={{
                                 border: 'all',
                                 fontSize: 's',
