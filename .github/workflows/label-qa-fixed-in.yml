@@ -76,12 +76,12 @@ jobs:
         id: add_labels_to_closed_issue
         with:
           query: |
-            mutation add_label($issueid:String!, $labelids:[String!]!) {
+            mutation add_label($issueid: ID!, $labelids:[ID!]!) {
               addLabelsToLabelable(input: {labelableId: $issueid, labelIds: $labelids}) {
                 clientMutationId
               }
             }
           issueid: ${{ matrix.issueNodeId }}
-          labelids: ${{ needs.fetch_issues_to_label.outputs.label_ids }}
+          labelids: ${{ fromJSON(needs.fetch_issues_to_label.outputs.label_ids) }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

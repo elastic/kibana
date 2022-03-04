@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { Logger, ICustomClusterClient, ElasticsearchClientConfig } from 'kibana/server';
-// @ts-ignore
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
 import { monitoringEndpointDisableWatches } from './monitoring_endpoint_disable_watches';
 import { MonitoringElasticsearchConfig } from '../config';

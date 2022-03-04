@@ -250,7 +250,8 @@ describe('dateHistogram(req, panel, series)', () => {
 
       expect(doc.aggs.test.meta).toMatchInlineSnapshot(`
         Object {
-          "index": undefined,
+          "dataViewId": undefined,
+          "indexPatternString": undefined,
           "intervalString": "900000ms",
           "panelId": "panelId",
           "seriesId": "test",
