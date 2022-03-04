@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }) {
           'antimeridian_points_reader',
           'antimeridian_shapes_reader',
         ],
-        false
+        { skipBrowserRefresh: true }
       );
       await PageObjects.maps.loadSavedMap('document example');
     });
