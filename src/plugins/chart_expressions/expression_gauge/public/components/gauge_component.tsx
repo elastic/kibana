@@ -214,22 +214,34 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     } = args;
 
     const getColor = useCallback(
-      (value, paletteConfig: PaletteOutput<CustomPaletteState>, bands: number[]) => {
+      (
+        value,
+        paletteConfig: PaletteOutput<CustomPaletteState>,
+        bands: number[],
+        percentageMode?: boolean
+      ) => {
         const { rangeMin, rangeMax, range }: CustomPaletteState = paletteConfig.params!;
         const minRealValue = bands[0];
         const maxRealValue = bands[bands.length - 1];
-
         let min = rangeMin;
         let max = rangeMax;
+
+        let stops = paletteConfig.params?.stops ?? [];
+
+        if (percentageMode) {
+          stops = bands.map((v) => v * 100);
+        }
+
         if (range === 'percent') {
           const minMax = { min: minRealValue, max: maxRealValue };
 
           min = calculateRealRangeValueMin(min, minMax);
           max = calculateRealRangeValueMax(max, minMax);
         }
+
         return paletteService
           .get(paletteConfig?.name ?? 'custom')
-          .getColorForValue?.(value, paletteConfig.params, { min, max });
+          .getColorForValue?.(value, { ...paletteConfig.params, stops }, { min, max });
       },
       [paletteService]
     );
@@ -393,7 +405,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
                   }
 
                   return args.palette
-                    ? getColor(value, args.palette, bands) ?? TRANSPARENT
+                    ? getColor(value, args.palette, bands, args.percentageMode) ?? TRANSPARENT
                     : TRANSPARENT;
                 }
               : () => TRANSPARENT
