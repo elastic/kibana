@@ -11,8 +11,6 @@ You can also send cases to third party systems by configuring external connector
 [[setup-cases]]
 === Configure access to cases
 
-//See https://www.elastic.co/guide/en/observability/current/grant-cases-access.html and https://www.elastic.co/guide/en/security/master/case-permissions.html
-
 To access cases in *{stack-manage-app}*, you must have the appropriate {kib}
 privileges:
 
@@ -25,7 +23,8 @@ a|
 * `All` for the *Cases* feature under *Management*.
 * `All` for the *Actions and Connectors* feature under *Management*.
 
-NOTE: Roles without `All` *Actions and Connectors* feature privileges cannot create, add, delete, or modify case connectors.
+NOTE: Roles without `All` *Actions and Connectors* feature privileges cannot
+create, add, delete, or modify case connectors.
 
 | Give view-only access for cases | `Read` for the *Cases* feature under *Management*.
 
@@ -46,14 +45,14 @@ Open a new case to keep track of issues and share their details with colleagues.
 . Give the case a name, add any relevant tags and a description.
 +
 TIP: In the `Description` area, you can use
-https://www.markdownguide.org/cheat-sheet[Markdown] syntax and insert a
-timeline link (click the icon in the top right corner of the area).
+https://www.markdownguide.org/cheat-sheet[Markdown] syntax to create formatted
+text.
 
-. For *External incident management system*, select a connector. If you’ve
+. For *External incident management system*, select a connector. If you've
 previously added one, that connector displays as the default selection.
 Otherwise, the default setting is `No connector selected`.
 
-. After you’ve completed all of the required fields, click *Create case*.
+. After you've completed all of the required fields, click *Create case*.
 [discrete]
 
 [discrete]
