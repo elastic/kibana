@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  getException,
-  getExceptionList,
-  expectedExportedExceptionList,
-} from '../../objects/exception';
+import { ROLES } from '../../../common/test';
+import { getExceptionList, expectedExportedExceptionList } from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
 
 import { RULE_STATUS } from '../../screens/create_new_rule';
@@ -38,6 +35,7 @@ import {
   clearSearchSelection,
 } from '../../tasks/exceptions_table';
 import {
+  EXCEPTIONS_TABLE_DELETE_BTN,
   EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../screens/exceptions';
@@ -142,5 +140,24 @@ describe('Exceptions Table', () => {
     deleteExceptionListWithRuleReference();
 
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
+  });
+});
+
+describe('Exceptions Table - read only', () => {
+  before(() => {
+    // First we login as a privileged user to create exception list
+    cleanKibana();
+    loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL, ROLES.platform_engineer);
+    createExceptionList(getExceptionList(), getExceptionList().list_id);
+
+    // Then we login as read-only user to test.
+    loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
+    waitForExceptionsTableToBeLoaded();
+
+    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
+  });
+
+  it('Delete icon is not shown', () => {
+    cy.get(EXCEPTIONS_TABLE_DELETE_BTN).should('not.exist');
   });
 });
