@@ -51,7 +51,7 @@ describe('AlertsFlyout', () => {
       />
     );
 
-    expect(flyout.getByTitle('1630588125729')).toBeInTheDocument();
+    expect(flyout.getByTitle('Sep 2, 2021 @ 09:08:45.729')).toBeInTheDocument();
     expect(flyout.getByText('Sep 2, 2021 @ 09:08:45.729')).toBeInTheDocument();
   });
 });

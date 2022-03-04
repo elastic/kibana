@@ -92,7 +92,7 @@ export function AlertsFlyout({
     {
       title: translations.alertsFlyout.lastUpdatedLabel,
       description: (
-        <span title={moment(alertData.fields[TIMESTAMP]).valueOf().toString()}>{moment(alertData.fields[TIMESTAMP]).format(dateFormat)}</span>
+        <span title={moment(alertData.fields[TIMESTAMP]).format(dateFormat)}>{moment(alertData.fields[TIMESTAMP]).format(dateFormat)}</span>
       ),
     },
     {
