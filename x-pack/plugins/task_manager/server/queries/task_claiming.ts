@@ -121,7 +121,7 @@ export class TaskClaiming {
   private logger: Logger;
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
   private readonly taskMaxAttempts: Record<string, number>;
-  private readonly excludedTaskTypes: string[];
+  public readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
 
   /**
