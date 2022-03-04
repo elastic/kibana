@@ -8,9 +8,7 @@
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
 import { services as commonServices } from '../../common/services';
 
-// @ts-ignore not ts yet
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
-// @ts-ignore not ts yet
 import { SupertestWithoutAuthProvider } from './supertest_without_auth';
 
 import { UsageAPIProvider } from './usage_api';
