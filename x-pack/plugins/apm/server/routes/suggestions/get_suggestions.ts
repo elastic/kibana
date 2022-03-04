@@ -10,19 +10,19 @@ import { getProcessorEventForTransactions } from '../../lib/helpers/transactions
 import { Setup } from '../../lib/helpers/setup_request';
 
 export async function getSuggestions({
-  field,
+  fieldName,
+  fieldValue,
   searchAggregatedTransactions,
   setup,
   size,
-  string,
   start,
   end,
 }: {
-  field: string;
+  fieldName: string;
+  fieldValue: string;
   searchAggregatedTransactions: boolean;
   setup: Setup;
   size: number;
-  string: string;
   start?: number;
   end?: number;
 }) {
@@ -38,9 +38,9 @@ export async function getSuggestions({
     },
     body: {
       case_insensitive: true,
-      field,
+      field: fieldName,
       size,
-      string,
+      string: fieldValue,
       ...(start &&
         end && {
           index_filter: {

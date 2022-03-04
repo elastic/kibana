@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { maxSuggestions } from '../../../../observability/common';
 import { getSuggestions } from '../suggestions/get_suggestions';
-import { getSuggestionsWithTerm } from '../suggestions/get_suggestions_with_term';
+import { getSuggestionsByServiceName } from '../suggestions/get_suggestions_by_service_name';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -19,8 +19,8 @@ const suggestionsRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([
       t.type({
-        field: t.string,
-        string: t.string,
+        fieldName: t.string,
+        fieldValue: t.string,
       }),
       t.partial(rangeRt.props),
     ]),
@@ -29,7 +29,7 @@ const suggestionsRoute = createApmServerRoute({
   handler: async (resources): Promise<{ terms: string[] }> => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
-    const { field, string, start, end } = params.query;
+    const { fieldName, fieldValue, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
@@ -40,11 +40,11 @@ const suggestionsRoute = createApmServerRoute({
     );
 
     const suggestions = await getSuggestions({
-      field,
+      fieldName,
+      fieldValue,
       searchAggregatedTransactions,
       setup,
       size,
-      string,
       start,
       end,
     });
@@ -54,36 +54,33 @@ const suggestionsRoute = createApmServerRoute({
 });
 
 const suggestionsWithTermsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/suggestions_with_terms',
+  endpoint: 'GET /internal/apm/suggestions_by_service_name',
   params: t.type({
     query: t.intersection([
       t.type({
-        field: t.string,
-        string: t.string,
-        termField: t.string,
-        termValue: t.string,
+        fieldName: t.string,
+        fieldValue: t.string,
+        serviceName: t.string,
       }),
-      rangeRt,
+      t.partial(rangeRt.props),
     ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ terms: string[] }> => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
-    const { field, string, termField, termValue, start, end } = params.query;
+    const { fieldName, fieldValue, serviceName, start, end } = params.query;
 
     const size = await context.core.uiSettings.client.get<number>(
       maxSuggestions
     );
 
-    const filter = [{ term: { [termField]: termValue } }];
-
-    const suggestions = await getSuggestionsWithTerm({
-      field,
-      filter,
+    const suggestions = await getSuggestionsByServiceName({
+      fieldName,
+      fieldValue,
+      serviceName,
       setup,
       size,
-      string,
       start,
       end,
     });

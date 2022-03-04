@@ -10,13 +10,12 @@ import { debounce } from 'lodash';
 import React, { useCallback, useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
-interface SuggestionsSelecttWithTermProps {
+interface ServiceEnvironmentSuggestionsSelectProps {
   allOption?: EuiComboBoxOptionOption<string>;
   customOptionText?: string;
   defaultValue?: string;
-  field: string;
-  termField: string;
-  termValue: string;
+  fieldName: string;
+  serviceName: string;
   start?: string;
   end?: string;
   onChange: (value?: string) => void;
@@ -25,20 +24,19 @@ interface SuggestionsSelecttWithTermProps {
   prepend?: string;
 }
 
-export function SuggestionsSelectWithTerm({
+export function ServiceEnvironmentSuggestionsSelect({
   allOption,
   customOptionText,
   defaultValue,
-  field,
-  termField,
-  termValue,
+  fieldName,
+  serviceName,
   start,
   end,
   onChange,
   isClearable,
   placeholder,
   prepend,
-}: SuggestionsSelecttWithTermProps) {
+}: ServiceEnvironmentSuggestionsSelectProps) {
   const allowAll = !!allOption;
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
@@ -56,20 +54,19 @@ export function SuggestionsSelectWithTerm({
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/suggestions_with_terms', {
+      return callApmApi('GET /internal/apm/suggestions_by_service_name', {
         params: {
           query: {
-            field,
-            string: searchValue,
+            fieldName,
+            fieldValue: searchValue,
+            serviceName,
             start,
             end,
-            termField,
-            termValue,
           },
         },
       });
     },
-    [field, searchValue],
+    [fieldName, searchValue],
     { preservePreviousData: false }
   );
 

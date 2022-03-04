@@ -13,15 +13,12 @@ import {
   ENVIRONMENT_ALL,
   getEnvironmentLabel,
 } from '../../../../common/environment_filter_values';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { Environment } from '../../../../common/environment_rt';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { SuggestionsSelect } from '../suggestions_select';
-import { SuggestionsSelectWithTerm } from '../suggestions_select/suggestions_select_with_term';
+import { ServiceEnvironmentSuggestionsSelect } from '../service_environment_suggestions_select';
 
 function updateEnvironmentUrl(
   history: History,
@@ -48,7 +45,7 @@ export function ApmEnvironmentFilter() {
       start={start}
       end={end}
       environment={environment}
-      termValue={serviceName}
+      serviceName={serviceName}
     />
   ) : (
     <EnvironmentFilter start={start} end={end} environment={environment} />
@@ -81,7 +78,7 @@ export function EnvironmentFilter({
         updateEnvironmentUrl(history, location, changeValue as string)
       }
       defaultValue={getEnvironmentLabel(environment)}
-      field={SERVICE_ENVIRONMENT}
+      fieldName={SERVICE_ENVIRONMENT}
       start={start}
       end={end}
       data-test-subj="environmentFilter"
@@ -93,18 +90,18 @@ export function ServiceEnvironmentFilter({
   environment,
   start,
   end,
-  termValue,
+  serviceName,
 }: {
   environment: Environment;
   start?: string;
   end?: string;
-  termValue: string;
+  serviceName: string;
 }) {
   const history = useHistory();
   const location = useLocation();
 
   return (
-    <SuggestionsSelectWithTerm
+    <ServiceEnvironmentSuggestionsSelect
       isClearable={false}
       allOption={ENVIRONMENT_ALL}
       placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
@@ -117,9 +114,8 @@ export function ServiceEnvironmentFilter({
         updateEnvironmentUrl(history, location, changeValue as string)
       }
       defaultValue={getEnvironmentLabel(environment)}
-      field={SERVICE_ENVIRONMENT}
-      termField={SERVICE_NAME}
-      termValue={termValue}
+      fieldName={SERVICE_ENVIRONMENT}
+      serviceName={serviceName}
       start={start}
       end={end}
       data-test-subj="environmentFilter"

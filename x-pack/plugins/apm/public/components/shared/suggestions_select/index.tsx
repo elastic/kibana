@@ -14,7 +14,7 @@ interface SuggestionsSelectProps {
   allOption?: EuiComboBoxOptionOption<string>;
   customOptionText?: string;
   defaultValue?: string;
-  field: string;
+  fieldName: string;
   start?: string;
   end?: string;
   onChange: (value?: string) => void;
@@ -29,7 +29,7 @@ export function SuggestionsSelect({
   allOption,
   customOptionText,
   defaultValue,
-  field,
+  fieldName,
   start,
   end,
   onChange,
@@ -54,11 +54,11 @@ export function SuggestionsSelect({
     (callApmApi) => {
       return callApmApi('GET /internal/apm/suggestions', {
         params: {
-          query: { field, string: searchValue, start, end },
+          query: { fieldName, fieldValue: searchValue, start, end },
         },
       });
     },
-    [field, searchValue],
+    [fieldName, searchValue],
     { preservePreviousData: false }
   );
 
