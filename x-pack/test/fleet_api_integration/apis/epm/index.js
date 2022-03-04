@@ -29,6 +29,5 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./package_install_complete'));
     loadTestFile(require.resolve('./install_error_rollback'));
     loadTestFile(require.resolve('./final_pipeline'));
-    loadTestFile(require.resolve('./validate_bundled_packages'));
   });
 }
