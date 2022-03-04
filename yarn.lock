@@ -4047,6 +4047,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/type-summarizer@link:bazel-bin/packages/kbn-type-summarizer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/typed-react-router-config@link:bazel-bin/packages/kbn-typed-react-router-config":
   version "0.0.0"
   uid ""
