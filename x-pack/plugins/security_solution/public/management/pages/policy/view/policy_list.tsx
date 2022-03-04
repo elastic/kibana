@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiToolTip,
   CriteriaWithPagination,
-  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +28,7 @@ import {
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
 import { PackagePolicy } from '../../../../../../fleet/common';
+import { PolicyEndpointListLink } from '../../../components/policy_endpoint_list_link';
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -156,9 +156,13 @@ export const PolicyList = memo(() => {
         }),
         render: (policy: PolicyData) => {
           return (
-            <EuiLink className="eui-textTruncate" data-test-subj="policyEndpointCountLink">
+            <PolicyEndpointListLink
+              className="eui-textTruncate"
+              data-test-subj="policyEndpointCountLink"
+              policyId={policy.id}
+            >
               {policyIdToEndpointCount.get(policy.id)}
-            </EuiLink>
+            </PolicyEndpointListLink>
           );
         },
       },
