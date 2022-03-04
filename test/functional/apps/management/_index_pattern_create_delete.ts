@@ -46,8 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can resolve errors and submit', async function () {
         await PageObjects.settings.setIndexPatternField('log*');
-        const a = await this.testSubjects.find('saveIndexPatternButton');
-        console.log('***', a);
+        const a = await testSubjects.find('saveIndexPatternButton');
+        console.log('***', a.getAttribute('class'));
         console.log('before timeout');
         await new Promise((e) => setTimeout(() => e(''), 5000));
         console.log('after timeout');

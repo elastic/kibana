@@ -86,6 +86,7 @@ const createMatchesIndicesValidator = ({
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
 
     if (matchedIndicesResult.exactMatchedIndices.length === 0) {
+      console.log('mustMatchError');
       return mustMatchError;
     }
 
@@ -117,6 +118,7 @@ const createMatchesIndicesValidator = ({
         }),
       };
     }
+    console.log('no validation error');
   },
 });
 
