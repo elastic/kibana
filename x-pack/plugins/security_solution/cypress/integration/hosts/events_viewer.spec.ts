@@ -88,11 +88,11 @@ describe('Events Viewer', () => {
   context('Events viewer fields behaviour', () => {
     before(() => {
       cleanKibana();
+      loginAndWaitForPage(HOSTS_URL);
+      openEvents();
     });
 
     beforeEach(() => {
-      loginAndWaitForPage(HOSTS_URL);
-      openEvents();
       openEventsViewerFieldsBrowser();
     });
 

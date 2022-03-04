@@ -342,10 +342,7 @@ export const removeColumn = (columnName: string) => {
 };
 
 export const resetFields = () => {
-  cy.clock();
   cy.get(RESET_FIELDS).click({ force: true });
-  cy.wait(0);
-  cy.tick(1000);
 };
 
 export const selectCase = (caseId: string) => {

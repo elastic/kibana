@@ -62,6 +62,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   /** Invoked when the field browser should be hidden */
   const onHide = useCallback(() => {
     setFilterInput('');
+    setAppliedFilterInput('');
     setFilteredBrowserFields(null);
     setIsSearching(false);
     setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
