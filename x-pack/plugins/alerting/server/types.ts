@@ -40,6 +40,7 @@ import {
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
+  AlertExecutionStatusWarningReasons,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
@@ -131,6 +132,11 @@ export type ExecutorType<
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
   validate: (object: unknown) => Params;
 }
+
+export interface RuleTypeConfig {
+  maxExecutableActions: number;
+}
+
 export interface RuleType<
   Params extends AlertTypeParams = never,
   ExtractedParams extends AlertTypeParams = never,
@@ -175,6 +181,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  config: RuleTypeConfig;
 }
 export type UntypedRuleType = RuleType<
   AlertTypeParams,
@@ -204,6 +211,10 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   lastDuration?: number;
   error: null | {
     reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning: null | {
+    reason: AlertExecutionStatusWarningReasons;
     message: string;
   };
 }

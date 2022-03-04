@@ -6,7 +6,13 @@
  */
 
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { AlertAction, AlertExecutionStatusErrorReasons, RuleExecutionState } from '../types';
+import {
+  ActionsCompletion,
+  AlertAction,
+  AlertExecutionStatusErrorReasons,
+  AlertExecutionStatusWarningReasons,
+  RuleExecutionState,
+} from '../types';
 import {
   executionStatusFromState,
   executionStatusFromError,
@@ -14,6 +20,7 @@ import {
   ruleExecutionStatusFromRaw,
 } from './rule_execution_status';
 import { ErrorWithReason } from './error_with_reason';
+import { translations } from '../constants/translations';
 
 const MockLogger = loggingSystemMock.create().get();
 const metrics = { numSearches: 1, esSearchDurationMs: 10, totalSearchDurationMs: 20 };
@@ -36,6 +43,7 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         alertInstances: {},
         triggeredActions: [],
+        alertExecutionResults: [],
         metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
@@ -49,6 +57,7 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         alertInstances: { a: {} },
         triggeredActions: [],
+        alertExecutionResults: [],
         metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
@@ -62,6 +71,7 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         triggeredActions: [{ group: '1' } as AlertAction],
         alertInstances: { a: {} },
+        alertExecutionResults: [],
         metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
@@ -69,6 +79,26 @@ describe('RuleExecutionStatus', () => {
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
       expect(status.metrics).toBe(metrics);
+    });
+
+    test('task state with warning', () => {
+      const status = executionStatusFromState({
+        triggeredActions: [{ group: '1' } as AlertAction],
+        alertInstances: { a: {} },
+        alertExecutionResults: [
+          { completion: ActionsCompletion.PARTIAL },
+          { completion: ActionsCompletion.ALL },
+          { completion: ActionsCompletion.ALL },
+        ],
+        metrics,
+      });
+      checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.warning).toEqual({
+        message: translations.taskRunner.warning.maxExecutableActions,
+        reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      });
+      expect(status.status).toBe('warning');
+      expect(status.error).toBe(undefined);
     });
   });
 
@@ -111,6 +141,7 @@ describe('RuleExecutionStatus', () => {
           "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
           "status": "ok",
+          "warning": null,
         }
       `);
     });
@@ -126,6 +157,7 @@ describe('RuleExecutionStatus', () => {
           "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
           "status": "ok",
+          "warning": null,
         }
       `);
     });
@@ -138,6 +170,7 @@ describe('RuleExecutionStatus', () => {
         "lastDuration": 1234,
         "lastExecutionDate": "2020-09-03T16:26:58.000Z",
         "status": "ok",
+        "warning": null,
       }
     `);
     });
@@ -151,6 +184,7 @@ describe('RuleExecutionStatus', () => {
         "lastDuration": 0,
         "lastExecutionDate": "2020-09-03T16:26:58.000Z",
         "status": "ok",
+        "warning": null,
       }
     `);
     });

@@ -140,6 +140,9 @@ describe('update()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       async executor() {},
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     });
   });
 
@@ -692,6 +695,9 @@ describe('update()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
+      config: {
+        maxExecutableActions: 1000,
+      },
     }));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1204,6 +1210,9 @@ describe('update()', () => {
       },
       async executor() {},
       producer: 'alerts',
+      config: {
+        maxExecutableActions: 1000,
+      },
     });
     await expect(
       rulesClient.update({
@@ -1523,6 +1532,9 @@ describe('update()', () => {
         recoveryActionGroup: RecoveredActionGroup,
         async executor() {},
         producer: 'alerts',
+        config: {
+          maxExecutableActions: 1000,
+        },
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: alertId,

@@ -8,6 +8,11 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { validateDurationSchema } from './lib';
 
+const ruleTypeConfig = schema.object({
+  id: schema.string(),
+  maxExecutableActions: schema.maybe(schema.number()),
+});
+
 export const DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT = 10;
 export const configSchema = schema.object({
   healthCheck: schema.object({
@@ -23,6 +28,10 @@ export const configSchema = schema.object({
   defaultRuleTaskTimeout: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   minimumScheduleInterval: schema.string({ validate: validateDurationSchema, defaultValue: '1m' }),
+  rules: schema.object({
+    default: schema.object({ maxExecutableActions: schema.number({ defaultValue: 100000 }) }),
+    ruleTypes: schema.maybe(schema.arrayOf(ruleTypeConfig)),
+  }),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;

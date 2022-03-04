@@ -15,6 +15,7 @@ import { RulesList, percentileFields } from './rules_list';
 import { RuleTypeModel, ValidationResult, Percentiles } from '../../../../types';
 import {
   AlertExecutionStatusErrorReasons,
+  AlertExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
   parseDuration,
 } from '../../../../../../alerting/common';
@@ -331,6 +332,32 @@ describe('rules_list component with items', () => {
         },
       },
     },
+    {
+      id: '6',
+      name: 'test rule warning',
+      tags: [],
+      enabled: true,
+      ruleTypeId: 'test_rule_type',
+      schedule: { interval: '5d' },
+      actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
+      params: { name: 'test rule type name' },
+      scheduledTaskId: null,
+      createdBy: null,
+      updatedBy: null,
+      apiKeyOwner: null,
+      throttle: '1m',
+      muteAll: false,
+      mutedInstanceIds: [],
+      executionStatus: {
+        status: 'warning',
+        lastDuration: 500,
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        warning: {
+          reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          message: 'test',
+        },
+      },
+    },
   ];
 
   async function setup(editable: boolean = true) {
@@ -471,6 +498,7 @@ describe('rules_list component with items', () => {
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-unknown"]').length).toEqual(0);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').length).toEqual(2);
+    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-warning"]').length).toEqual(1);
     expect(wrapper.find('[data-test-subj="ruleStatus-error-tooltip"]').length).toEqual(2);
     expect(
       wrapper.find('EuiButtonEmpty[data-test-subj="ruleStatus-error-license-fix"]').length

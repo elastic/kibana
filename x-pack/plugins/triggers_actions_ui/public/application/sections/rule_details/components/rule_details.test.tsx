@@ -23,6 +23,7 @@ import {
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
+  AlertExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -114,6 +115,28 @@ describe('rule_details', () => {
       ).containsMatchingElement(
         <EuiText size="s" color="danger" data-test-subj="ruleErrorMessageText">
           {'test'}
+        </EuiText>
+      )
+    ).toBeTruthy();
+  });
+
+  it('renders the rule warning banner with warning message, when rule status is a warning', () => {
+    const rule = mockRule({
+      executionStatus: {
+        status: 'warning',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        warning: {
+          reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          message: 'warning message',
+        },
+      },
+    });
+    expect(
+      shallow(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+      ).containsMatchingElement(
+        <EuiText size="s" color="warning" data-test-subj="ruleWarningMessageText">
+          {'warning message'}
         </EuiText>
       )
     ).toBeTruthy();

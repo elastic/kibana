@@ -218,6 +218,9 @@ describe('resolve()', () => {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
       },
+      config: {
+        maxExecutableActions: 1000,
+      },
     }));
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
@@ -347,6 +350,9 @@ describe('resolve()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
+      },
+      config: {
+        maxExecutableActions: 1000,
       },
     }));
     const rulesClient = new RulesClient(rulesClientParams);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import apm from 'elastic-apm-node';
-import { pickBy, mapValues, without, cloneDeep, concat, set, omit } from 'lodash';
+import { pickBy, mapValues, without, cloneDeep, set, omit, concat } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import uuid from 'uuid';
@@ -39,6 +39,7 @@ import {
   AlertAction,
   RuleExecutionState,
   RuleExecutionRunResult,
+  AlertExecutionResult,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { getExecutionSuccessRatio, getExecutionDurationPercentiles } from '../lib/monitoring';
@@ -270,7 +271,9 @@ export class TaskRunner<
   async executeAlert(
     alertId: string,
     alert: CreatedAlert<InstanceState, InstanceContext>,
-    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>
+    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
+    triggeredActions: AlertAction[],
+    maxExecutableActions: number
   ) {
     const {
       actionGroup,
@@ -280,7 +283,15 @@ export class TaskRunner<
     } = alert.getScheduledActionOptions()!;
     alert.updateLastScheduledActions(actionGroup, actionSubgroup);
     alert.unscheduleActions();
-    return executionHandler({ actionGroup, actionSubgroup, context, state, alertId });
+    return executionHandler({
+      actionGroup,
+      actionSubgroup,
+      context,
+      state,
+      alertId,
+      triggeredActions,
+      maxExecutableActions,
+    });
   }
 
   async executeAlerts(
@@ -466,11 +477,13 @@ export class TaskRunner<
       });
     }
 
-    let triggeredActions: AlertAction[] = [];
+    const triggeredActions: AlertAction[] = [];
+    let alertExecutionResults: AlertExecutionResult[] = [];
+
     if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
-      const scheduledActionsForRecoveredAlerts = await scheduleActionsForRecoveredAlerts<
+      const actionsForRecoveredAlertsStatuses = await scheduleActionsForRecoveredAlerts<
         InstanceState,
         InstanceContext,
         RecoveryActionGroupId
@@ -481,11 +494,11 @@ export class TaskRunner<
         mutedAlertIdsSet,
         logger: this.logger,
         ruleLabel,
+        triggeredActions,
+        maxExecutableActions: ruleType.config.maxExecutableActions,
       });
 
-      triggeredActions = concat(triggeredActions, scheduledActionsForRecoveredAlerts);
-
-      const alertsToExecute = Object.entries(alertsWithScheduledActions).filter(
+      const alertsWithExecutableActions = Object.entries(alertsWithScheduledActions).filter(
         ([alertName, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) => {
           const throttled = alert.isThrottled(throttle);
           const muted = mutedAlertIdsSet.has(alertName);
@@ -512,14 +525,23 @@ export class TaskRunner<
         }
       );
 
-      const allTriggeredActions = await Promise.all(
-        alertsToExecute.map(
+      const actionsForActiveAlertsStatuses = await Promise.all(
+        alertsWithExecutableActions.map(
           ([alertId, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) =>
-            this.executeAlert(alertId, alert, executionHandler)
+            this.executeAlert(
+              alertId,
+              alert,
+              executionHandler,
+              triggeredActions,
+              ruleType.config.maxExecutableActions
+            )
         )
       );
 
-      triggeredActions = concat(triggeredActions, ...allTriggeredActions);
+      alertExecutionResults = concat(
+        actionsForRecoveredAlertsStatuses,
+        actionsForActiveAlertsStatuses
+      );
     } else {
       if (muteAll) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is muted.`);
@@ -540,6 +562,7 @@ export class TaskRunner<
     return {
       metrics: searchMetrics,
       triggeredActions,
+      alertExecutionResults,
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
         Record<string, CreatedAlert<InstanceState, InstanceContext>>,
@@ -641,7 +664,7 @@ export class TaskRunner<
       ),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have
-        // cahnged during the task execution
+        // changed during the task execution
         (await rulesClient.get({ id: ruleId })).schedule
       ),
     };
@@ -711,6 +734,7 @@ export class TaskRunner<
         return getDefaultRuleMonitoring();
       }) ?? getDefaultRuleMonitoring();
 
+    // active or ok set
     const executionStatus = map<RuleExecutionState, ElasticsearchError, AlertExecutionStatus>(
       state,
       (ruleExecutionState) => executionStatusFromState(ruleExecutionState),
@@ -759,6 +783,10 @@ export class TaskRunner<
       }
       monitoringHistory.success = false;
     } else {
+      if (executionStatus.warning) {
+        set(event, 'event.reason', executionStatus.warning?.reason || 'unknown');
+        set(event, 'message', event?.message || executionStatus.warning.message);
+      }
       set(
         event,
         'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
@@ -809,7 +837,7 @@ export class TaskRunner<
       executionState: RuleExecutionState
     ): RuleTaskState => {
       return {
-        ...omit(executionState, ['triggeredActions', 'metrics']),
+        ...omit(executionState, ['triggeredActions', 'metrics', 'alertExecutionResults']),
         previousStartedAt: startedAt,
       };
     };
@@ -1112,7 +1140,7 @@ async function scheduleActionsForRecoveredAlerts<
     InstanceContext,
     RecoveryActionGroupId
   >
-): Promise<AlertAction[]> {
+): Promise<AlertExecutionResult[]> {
   const {
     logger,
     recoveryActionGroup,
@@ -1120,9 +1148,13 @@ async function scheduleActionsForRecoveredAlerts<
     executionHandler,
     mutedAlertIdsSet,
     ruleLabel,
+    triggeredActions,
+    maxExecutableActions,
   } = params;
   const recoveredIds = Object.keys(recoveredAlerts);
-  let triggeredActions: AlertAction[] = [];
+
+  const results: AlertExecutionResult[] = [];
+
   for (const id of recoveredIds) {
     if (mutedAlertIdsSet.has(id)) {
       logger.debug(
@@ -1132,17 +1164,20 @@ async function scheduleActionsForRecoveredAlerts<
       const alert = recoveredAlerts[id];
       alert.updateLastScheduledActions(recoveryActionGroup.id);
       alert.unscheduleActions();
-      const triggeredActionsForRecoveredAlert = await executionHandler({
+      const executionHandlerResult = await executionHandler({
         actionGroup: recoveryActionGroup.id,
         context: alert.getContext(),
         state: {},
         alertId: id,
+        triggeredActions,
+        maxExecutableActions,
       });
       alert.scheduleActions(recoveryActionGroup.id);
-      triggeredActions = concat(triggeredActions, triggeredActionsForRecoveredAlert);
+      results.push(executionHandlerResult);
     }
   }
-  return triggeredActions;
+
+  return results;
 }
 
 function logActiveAndRecoveredAlerts<

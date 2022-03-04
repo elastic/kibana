@@ -4,73 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
-import {
-  asSavedObjectExecutionSource,
-  PluginStartContract as ActionsPluginStartContract,
-} from '../../../actions/server';
-import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { asSavedObjectExecutionSource } from '../../../actions/server';
+import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import {
-  AlertAction,
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  RawRule,
 } from '../types';
-import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
+
+import { AlertExecutionResult, ActionsCompletion } from '../../common';
+
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
-
-export interface CreateExecutionHandlerOptions<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> {
-  ruleId: string;
-  ruleName: string;
-  executionId: string;
-  tags?: string[];
-  actionsPlugin: ActionsPluginStartContract;
-  actions: AlertAction[];
-  spaceId: string;
-  apiKey: RawRule['apiKey'];
-  kibanaBaseUrl: string | undefined;
-  ruleType: NormalizedRuleType<
-    Params,
-    ExtractedParams,
-    State,
-    InstanceState,
-    InstanceContext,
-    ActionGroupIds,
-    RecoveryActionGroupId
-  >;
-  logger: Logger;
-  eventLogger: IEventLogger;
-  request: KibanaRequest;
-  ruleParams: AlertTypeParams;
-  supportsEphemeralTasks: boolean;
-  maxEphemeralActionsPerRule: number;
-}
-
-interface ExecutionHandlerOptions<ActionGroupIds extends string> {
-  actionGroup: ActionGroupIds;
-  actionSubgroup?: string;
-  alertId: string;
-  context: AlertInstanceContext;
-  state: AlertInstanceState;
-}
+import { CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
   options: ExecutionHandlerOptions<ActionGroupIds>
-) => Promise<AlertAction[]>;
+) => Promise<AlertExecutionResult>;
 
 export function createExecutionHandler<
   Params extends AlertTypeParams,
@@ -114,12 +69,13 @@ export function createExecutionHandler<
     actionSubgroup,
     context,
     state,
+    triggeredActions,
+    maxExecutableActions,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
-    const triggeredActions: AlertAction[] = [];
     if (!ruleTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
-      return triggeredActions;
+      return { completion: ActionsCompletion.NONE };
     }
     const actions = ruleActions
       .filter(({ group }) => group === actionGroup)
@@ -163,6 +119,9 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
+      if (triggeredActions.length >= maxExecutableActions) {
+        return { completion: ActionsCompletion.PARTIAL };
+      }
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
       ) {
@@ -244,6 +203,7 @@ export function createExecutionHandler<
 
       eventLogger.logEvent(event);
     }
-    return triggeredActions;
+
+    return { completion: ActionsCompletion.ALL };
   };
 }
