@@ -24,6 +24,7 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
       query: rule.customQuery,
       language: 'kuery',
       enabled: false,
+      exceptions_list: rule.exceptionLists ?? [],
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
