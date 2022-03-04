@@ -123,16 +123,38 @@ export function getEuiGridColumns(
   indexPattern: DataView,
   showTimeCol: boolean,
   defaultColumns: boolean,
-  isSortEnabled: boolean
+  isSortEnabled: boolean,
+  sqlMode: boolean,
+  sql: any
 ) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
-  if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
+  if (
+    !sqlMode &&
+    showTimeCol &&
+    indexPattern.timeFieldName &&
+    !columns.find((col) => col === timeFieldName)
+  ) {
     const usedColumns = [indexPattern.timeFieldName, ...columns];
     return usedColumns.map((column) =>
       buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
     );
+  }
+
+  if (columns.length === 1 && columns[0] === '_source' && sql) {
+    return sql.columns
+      .map((c) => {
+        const column = c.name;
+        return buildEuiGridColumn(
+          column,
+          getColWidth(column),
+          indexPattern,
+          defaultColumns,
+          isSortEnabled
+        );
+      })
+      .slice(0, 30);
   }
 
   return columns.map((column) =>

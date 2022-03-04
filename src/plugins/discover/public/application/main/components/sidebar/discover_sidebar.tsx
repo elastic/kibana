@@ -107,6 +107,9 @@ export function DiscoverSidebarComponent({
   editField,
   viewMode,
   createNewDataView,
+  state,
+  setState,
+  table,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -120,10 +123,10 @@ export function DiscoverSidebarComponent({
 
   useEffect(() => {
     if (documents) {
-      const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
+      const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts, state.sqlMode, table);
       setFields(newFields);
     }
-  }, [selectedIndexPattern, fieldCounts, documents]);
+  }, [selectedIndexPattern, fieldCounts, documents, state.sqlMode, table]);
 
   const scrollDimensions = useResizeObserver(scrollContainer);
 
@@ -303,6 +306,8 @@ export function DiscoverSidebarComponent({
               editField={editField}
               useNewFieldsApi={useNewFieldsApi}
               createNewDataView={createNewDataView}
+              state={state}
+              setState={setState}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -341,6 +346,8 @@ export function DiscoverSidebarComponent({
                 useNewFieldsApi={useNewFieldsApi}
                 editField={editField}
                 createNewDataView={createNewDataView}
+                state={state}
+                setState={setState}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

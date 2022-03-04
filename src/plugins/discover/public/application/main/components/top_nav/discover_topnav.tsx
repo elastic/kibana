@@ -25,6 +25,7 @@ export type DiscoverTopNavProps = Pick<
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   stateContainer: GetStateReturn;
   resetSavedSearch: () => void;
+  hideQuery?: boolean;
 };
 
 export const DiscoverTopNav = ({
@@ -38,6 +39,7 @@ export const DiscoverTopNav = ({
   navigateTo,
   savedSearch,
   resetSavedSearch,
+  hideQuery,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const showDatePicker = useMemo(
@@ -110,9 +112,9 @@ export const DiscoverTopNav = ({
       setMenuMountPoint={setMenuMountPoint}
       savedQueryId={savedQuery}
       screenTitle={savedSearch.title}
-      showDatePicker={showDatePicker}
-      showSaveQuery={!!services.capabilities.discover.saveQuery}
-      showSearchBar={true}
+      showDatePicker={!hideQuery && showDatePicker}
+      showSaveQuery={!hideQuery && !!services.capabilities.discover.saveQuery}
+      showSearchBar={!hideQuery && true}
       useDefaultBehaviors={true}
     />
   );

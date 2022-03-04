@@ -34,7 +34,8 @@ export const getRenderCellValueFn =
     rowsFlattened: Array<Record<string, unknown>>,
     useNewFieldsApi: boolean,
     fieldsToShow: string[],
-    maxDocFieldsDisplayed: number
+    maxDocFieldsDisplayed: number,
+    sqlMode: boolean
   ) =>
   ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
     const { uiSettings, fieldFormats } = useDiscoverServices();
@@ -92,6 +93,10 @@ export const getRenderCellValueFn =
         useTopLevelObjectColumns,
         fieldFormats,
       });
+    }
+
+    if (field?.type === '_source' && sqlMode) {
+      return <span>{JSON.stringify(rowFlattened)}</span>;
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {

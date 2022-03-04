@@ -85,6 +85,8 @@ export interface AppState {
    * Document explorer row height option
    */
   rowHeight?: number;
+  sqlMode?: boolean;
+  sqlQuery?: string;
 }
 
 interface GetStateParams {

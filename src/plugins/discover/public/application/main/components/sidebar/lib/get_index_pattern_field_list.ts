@@ -12,13 +12,23 @@ import { isNestedFieldParent } from '../../../utils/nested_fields';
 
 export function getIndexPatternFieldList(
   indexPattern?: DataView,
-  fieldCounts?: Record<string, number>
+  fieldCounts?: Record<string, number>,
+  sqlMode: boolean,
+  table: any
 ) {
   if (!indexPattern || !fieldCounts) return [];
 
   const fieldNamesInDocs = Object.keys(fieldCounts);
   const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
   const unknownFields: DataViewField[] = [];
+
+  if (sqlMode && table) {
+    return table.columns.map((c) => ({
+      displayName: c.name,
+      name: c.name,
+      type: c.type,
+    }));
+  }
 
   difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
     if (isNestedFieldParent(unknownFieldName, indexPattern)) {

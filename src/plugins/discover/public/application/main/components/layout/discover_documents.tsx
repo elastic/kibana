@@ -12,6 +12,7 @@ import {
   EuiText,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
+  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
@@ -67,7 +68,11 @@ function DiscoverDocumentsComponent({
   const documentState: DataDocumentsMsg = useDataState(documents$);
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
 
-  const rows = useMemo(() => documentState.result || [], [documentState.result]);
+  const rows = useMemo(
+    () =>
+      state.sqlMode && documentState.sql ? documentState.sql.rows : documentState.result || [],
+    [documentState.result, documentState.sql, state.sqlMode]
+  );
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities,
@@ -110,6 +115,18 @@ function DiscoverDocumentsComponent({
     () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
     [uiSettings, indexPattern.timeFieldName]
   );
+
+  if (state.sqlMode && documentState.sqlError) {
+    return (
+      <div className="dscDocuments__loading">
+        <EuiCallOut title="SQL ERROR" color="danger" iconType="alert">
+          <p>
+            <pre>{JSON.stringify(documentState.sqlError, null, 2)}</pre>
+          </p>
+        </EuiCallOut>
+      </div>
+    );
+  }
 
   if (
     (!documentState.result || documentState.result.length === 0) &&
@@ -157,6 +174,8 @@ function DiscoverDocumentsComponent({
       {!isLegacy && (
         <div className="dscDiscoverGrid">
           <DataGridMemoized
+            sqlMode={state.sqlMode}
+            sql={documentState.sql}
             ariaLabelledBy="documentsAriaLabel"
             columns={columns}
             expandedDoc={expandedDoc}

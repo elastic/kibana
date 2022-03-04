@@ -97,6 +97,8 @@ export function useDiscoverState({
     services,
     stateContainer,
     useNewFieldsApi,
+    state,
+    setState,
   });
 
   /**

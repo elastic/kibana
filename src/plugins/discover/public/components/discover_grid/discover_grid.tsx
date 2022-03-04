@@ -197,6 +197,8 @@ export const DiscoverGrid = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
+  sqlMode,
+  sql,
 }: DiscoverGridProps) => {
   const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -289,16 +291,19 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         indexPattern,
         displayedRows,
-        displayedRows
+        sqlMode
+          ? displayedRows
+          : displayedRows
           ? displayedRows.map((hit) =>
               flattenHit(hit, indexPattern, { includeIgnoredValues: true })
             )
           : [],
         useNewFieldsApi,
         fieldsToShow,
-        services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)
+        services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
+        sqlMode
       ),
-    [indexPattern, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
+    [indexPattern, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings, sqlMode]
   );
 
   /**
@@ -315,9 +320,20 @@ export const DiscoverGrid = ({
         indexPattern,
         showTimeCol,
         defaultColumns,
-        isSortEnabled
+        isSortEnabled,
+        sqlMode,
+        sql
       ),
-    [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns, isSortEnabled]
+    [
+      displayedColumns,
+      indexPattern,
+      showTimeCol,
+      settings,
+      defaultColumns,
+      isSortEnabled,
+      sqlMode,
+      sql,
+    ]
   );
 
   const hideTimeColumn = useMemo(
@@ -327,12 +343,24 @@ export const DiscoverGrid = ({
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
-      visibleColumns: getVisibleColumns(displayedColumns, indexPattern, showTimeCol) as string[],
+      visibleColumns: getVisibleColumns(
+        sqlMode ? euiGridColumns.map((c) => c.id) : displayedColumns,
+        indexPattern,
+        showTimeCol
+      ) as string[],
       setVisibleColumns: (newColumns: string[]) => {
         onSetColumns(newColumns, hideTimeColumn);
       },
     }),
-    [displayedColumns, indexPattern, showTimeCol, hideTimeColumn, onSetColumns]
+    [
+      displayedColumns,
+      indexPattern,
+      showTimeCol,
+      hideTimeColumn,
+      onSetColumns,
+      sqlMode,
+      euiGridColumns,
+    ]
   );
   const sorting = useMemo(() => {
     if (isSortEnabled) {

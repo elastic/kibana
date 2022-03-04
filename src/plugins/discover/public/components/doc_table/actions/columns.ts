@@ -67,7 +67,7 @@ export function getStateColumnActions({
   indexPattern,
   indexPatterns,
   useNewFieldsApi,
-  setAppState,
+  setAppState: _setAppState,
   state,
 }: {
   capabilities: Capabilities;
@@ -78,6 +78,8 @@ export function getStateColumnActions({
   setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
   state: DiscoverState | ContextState;
 }) {
+  const setAppState = (a) =>
+    _setAppState({ ...a, sqlMode: state.sqlMode, sqlQuery: state.sqlQuery });
   function onAddColumn(columnName: string) {
     popularizeField(indexPattern, columnName, indexPatterns, capabilities);
     const columns = addColumn(state.columns || [], columnName, useNewFieldsApi);

@@ -59,7 +59,15 @@ export function fetchAll(
   reset = false,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
+  const {
+    initialFetchStatus,
+    appStateContainer,
+    services,
+    useNewFieldsApi,
+    data,
+    sqlMode,
+    sqlQuery,
+  } = fetchDeps;
 
   /**
    * Method to create a an error handler that will forward the received error
@@ -129,8 +137,47 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
 
-    documents
-      .then((docs) => {
+    Promise.all([
+      documents,
+      (function () {
+        if (!sqlMode) {
+          return undefined;
+        }
+        return data.search
+          .search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(
+            { query: sqlQuery, filter: [] },
+            {
+              strategy: 'essql',
+            }
+          )
+          .toPromise()
+          .then((resp: EssqlSearchStrategyResponse) => {
+            return {
+              type: 'datatable',
+              meta: {
+                type: 'essql',
+              },
+              ...resp,
+            };
+          })
+          .catch((e) => {
+            let message = `Unexpected error from Elasticsearch: ${e.message}`;
+            if (e.err) {
+              const { type, reason } = e.err.attributes;
+              if (type === 'parsing_exception') {
+                message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
+              } else {
+                message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+              }
+            }
+
+            // Re-write the error message before surfacing it up
+            e.message = message;
+            return e;
+          });
+      })(),
+    ])
+      .then(([docs, sql]) => {
         // If the total hits (or chart) query is still loading, emit a partial
         // hit count that's at least our retrieved document count
         if (dataSubjects.totalHits$.getValue().fetchStatus === FetchStatus.LOADING) {
@@ -140,9 +187,13 @@ export function fetchAll(
           });
         }
 
+        const sqlError = sql && 'message' in sql ? sql : undefined;
+
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,
           result: docs,
+          sql: !sqlError && sql,
+          sqlError,
         });
 
         checkHitCount(docs.length);

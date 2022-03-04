@@ -123,6 +123,16 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
               defaultMessage: 'Create new data view',
             })}
           </EuiContextMenuItem>,
+          <EuiHorizontalRule style={{ margin: '0px' }} />,
+          <EuiContextMenuItem
+            key="sql"
+            data-test-subj="dataview-create-new"
+            onClick={() => {
+              props.setState({ ...props.state, sqlMode: true, columns: ['_source'] });
+            }}
+          >
+            SQL
+          </EuiContextMenuItem>,
         ]}
       />
     </EuiPopover>

@@ -56,6 +56,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     resetSavedSearch,
     searchSource,
     state,
+    setState,
     stateContainer,
   } = useDiscoverState({
     services,
@@ -108,6 +109,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       savedSearchRefetch$={refetch$}
       searchSource={searchSource}
       state={state}
+      setState={setState}
       stateContainer={stateContainer}
     />
   );

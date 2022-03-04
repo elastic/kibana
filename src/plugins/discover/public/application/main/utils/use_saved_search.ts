@@ -67,6 +67,7 @@ export interface DataMainMsg extends DataMsg {
 
 export interface DataDocumentsMsg extends DataMsg {
   result?: ElasticSearchHit[];
+  sql?: any;
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
@@ -96,6 +97,8 @@ export const useSavedSearch = ({
   services,
   stateContainer,
   useNewFieldsApi,
+  state,
+  setState,
 }: {
   initialFetchStatus: FetchStatus;
   savedSearch: SavedSearch;
@@ -193,6 +196,8 @@ export const useSavedSearch = ({
         searchSessionId: searchSessionManager.getNextSearchSessionId(),
         services,
         useNewFieldsApi,
+        sqlMode: state.sqlMode,
+        sqlQuery: state.sqlQuery,
       });
 
       // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
@@ -224,6 +229,9 @@ export const useSavedSearch = ({
     stateContainer.appStateContainer,
     timefilter,
     useNewFieldsApi,
+    setState,
+    state.sqlMode,
+    state.sqlQuery,
   ]);
 
   const reset = useCallback(

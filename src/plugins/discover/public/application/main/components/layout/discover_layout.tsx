@@ -17,10 +17,12 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiSpacer,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
+import { CodeEditor } from '../../../../../../kibana_react/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -75,6 +77,7 @@ export function DiscoverLayout({
   savedSearch,
   searchSource,
   state,
+  setState,
   stateContainer,
 }: DiscoverLayoutProps) {
   const {
@@ -226,8 +229,40 @@ export function DiscoverLayout({
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
+        hideQuery={state.sqlMode}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
+        {state.sqlMode && (
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
+              <div style={{ height: 250, width: '100%' }}>
+                <CodeEditor
+                  mode="sql"
+                  theme="github"
+                  value={state.sqlQuery}
+                  width="100%"
+                  height="250px"
+                  onChange={(val) => {
+                    setState({ ...state, sqlQuery: val });
+                  }}
+                />
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="row" alignItems="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => {
+                      savedSearchRefetch$.next();
+                    }}
+                  >
+                    Apply
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
         <SavedSearchURLConflictCallout
           savedSearch={savedSearch}
           spaces={spaces}
@@ -248,6 +283,7 @@ export function DiscoverLayout({
               onChangeIndexPattern={onChangeIndexPattern}
               selectedIndexPattern={indexPattern}
               state={state}
+              setState={setState}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
@@ -311,20 +347,22 @@ export function DiscoverLayout({
                   gutterSize="none"
                   responsive={false}
                 >
-                  <EuiFlexItem grow={false}>
-                    <DiscoverChartMemoized
-                      resetSavedSearch={resetSavedSearch}
-                      savedSearch={savedSearch}
-                      savedSearchDataChart$={charts$}
-                      savedSearchDataTotalHits$={totalHits$}
-                      stateContainer={stateContainer}
-                      indexPattern={indexPattern}
-                      viewMode={viewMode}
-                      setDiscoverViewMode={setDiscoverViewMode}
-                      hideChart={state.hideChart}
-                      interval={state.interval}
-                    />
-                  </EuiFlexItem>
+                  {!state.sqlMode && (
+                    <EuiFlexItem grow={false}>
+                      <DiscoverChartMemoized
+                        resetSavedSearch={resetSavedSearch}
+                        savedSearch={savedSearch}
+                        savedSearchDataChart$={charts$}
+                        savedSearchDataTotalHits$={totalHits$}
+                        stateContainer={stateContainer}
+                        indexPattern={indexPattern}
+                        viewMode={viewMode}
+                        setDiscoverViewMode={setDiscoverViewMode}
+                        hideChart={state.hideChart}
+                        interval={state.interval}
+                      />
+                    </EuiFlexItem>
+                  )}
                   <EuiHorizontalRule margin="none" />
                   {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
                     <DiscoverDocuments

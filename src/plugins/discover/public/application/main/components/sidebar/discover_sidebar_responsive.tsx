@@ -281,6 +281,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           <DiscoverSidebar
             {...props}
             documents={documentState.result}
+            table={documentState.sql}
             fieldFilter={fieldFilter}
             fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
@@ -309,6 +310,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <DiscoverIndexPatternManagement
+                  state={props.state}
+                  setState={props.setState}
                   selectedIndexPattern={selectedIndexPattern}
                   editField={editField}
                   useNewFieldsApi={useNewFieldsApi}
