@@ -14,7 +14,7 @@ import { artifactListPageLabels } from './translations';
 import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ArtifactFormComponentProps } from './types';
-import type { HttpFetchError, HttpFetchOptionsWithPath } from 'kibana/public';
+import type { HttpFetchOptionsWithPath } from 'kibana/public';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../common/endpoint/service/artifacts';
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
@@ -234,6 +234,7 @@ describe('When using the ArtifactListPage component', () => {
       beforeEach(async () => {
         const _renderAndWaitForFlyout = renderAndWaitForFlyout;
 
+        // Override renderAndWaitForFlyout to also set the form data as "valid"
         renderAndWaitForFlyout = async (...props) => {
           await _renderAndWaitForFlyout(...props);
 
@@ -325,34 +326,33 @@ describe('When using the ArtifactListPage component', () => {
         });
       });
 
-      // FIXME:PT revisit these tests. having hard time making them work
-      describe.skip('and submit fails', () => {
+      describe('and submit fails', () => {
         beforeEach(async () => {
-          await renderAndWaitForFlyout();
+          const _renderAndWaitForFlyout = renderAndWaitForFlyout;
 
-          mockedApi.responseProvider.trustedAppCreate.mockImplementation(() => {
-            // eslint-disable-next-line no-throw-literal
-            throw new Error('oh oh. no good!') as HttpFetchError;
-          });
+          renderAndWaitForFlyout = async (...args) => {
+            mockedApi.responseProvider.trustedAppCreate.mockImplementation(() => {
+              throw new Error('oh oh. no good!');
+            });
 
-          act(() => {
-            userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-          });
+            await _renderAndWaitForFlyout(...args);
+
+            act(() => {
+              userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+            });
+
+            await act(async () => {
+              await waitFor(() =>
+                expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled()
+              );
+            });
+
+            return renderResult;
+          };
         });
 
         it('should re-enable `Cancel` and `Submit` buttons', async () => {
-          await act(async () => {
-            await waitFor(
-              () => expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled(),
-              { timeout: 3000 }
-            );
-          });
-
-          await act(async () => {
-            await waitFor(() => {
-              expect(renderResult.getByTestId('formError')).toBeTruthy();
-            });
-          });
+          await renderAndWaitForFlyout();
 
           const cancelButtonDisabledState = (
             renderResult.getByTestId('testPage-flyout-cancelButton') as HTMLButtonElement
@@ -367,7 +367,13 @@ describe('When using the ArtifactListPage component', () => {
           expect(submitButtonDisabledState).toBe(false);
         });
 
-        it.todo('should pass error along to the Form component and reset disabled back to `false`');
+        it('should pass error along to the Form component and reset disabled back to `false`', async () => {
+          await renderAndWaitForFlyout();
+          const lastFormProps = getLastFormComponentProps();
+
+          expect(lastFormProps.error).toBeInstanceOf(Error);
+          expect(lastFormProps.disabled).toBe(false);
+        });
       });
 
       describe('and a custom Submit handler is used', () => {
