@@ -248,7 +248,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     const overrideColor = useCallback(
       (value: number, bands: number[], formatter: FieldFormat) => {
-        const overrideColors = uiState.get('vis.colors') ?? {};
+        const overrideColors = uiState?.get('vis.colors') ?? {};
         const valueIndex = bands.findIndex((band, index, allBands) => {
           if (index === allBands.length - 1) {
             return false;
