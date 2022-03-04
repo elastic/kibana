@@ -21,7 +21,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
         await testSubjects.click('xpack.uptime.toggleTlsAlertFlyout');
       }
       // ensure the flyout has opened
-      await testSubjects.exists('alertNameInput');
+      await testSubjects.exists('ruleNameInput');
     },
     async openMonitorStatusAlertType(alertType: string) {
       await testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`);
@@ -34,7 +34,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       }
     },
     async setAlertName(name: string) {
-      await testSubjects.setValue('alertNameInput', name);
+      await testSubjects.setValue('ruleNameInput', name);
     },
     async setAlertInterval(value: string) {
       await testSubjects.setValue('intervalInput', value);
@@ -104,11 +104,11 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('uptimeAlertAddFilter.monitor.type');
       await testSubjects.click('uptimeCreateStatusAlert.filter_scheme');
     },
-    async clickSaveAlertButton() {
-      await testSubjects.click('saveAlertButton');
+    async clickSaveRuleButton() {
+      await testSubjects.click('saveRuleButton');
     },
     async clickSaveAlertsConfirmButton() {
-      await testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton', 20000);
+      await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton', 20000);
     },
   };
 }

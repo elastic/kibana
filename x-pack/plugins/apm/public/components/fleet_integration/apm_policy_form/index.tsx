@@ -131,7 +131,7 @@ export function APMPolicyForm({
               }
             ),
             settings: tailSamplingSettings,
-            isBeta: true,
+            isBeta: false,
             isPlatinumLicence: true,
           },
         ]

@@ -65,6 +65,7 @@ const options = {
   debug: { desc: 'Run in debug mode.' },
   quiet: { desc: 'Only log errors.' },
   silent: { desc: 'Log nothing.' },
+  'dry-run': { desc: 'Report tests without executing them.' },
 };
 
 export function displayHelp() {
@@ -135,6 +136,11 @@ export function processOptions(userOptions, defaultConfigPaths) {
 
   userOptions.assertNoneExcluded = !!userOptions['assert-none-excluded'];
   delete userOptions['assert-none-excluded'];
+
+  if (userOptions['dry-run']) {
+    userOptions.dryRun = userOptions['dry-run'];
+    delete userOptions['dry-run'];
+  }
 
   function createLogger() {
     return new ToolingLog({
