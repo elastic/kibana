@@ -39,14 +39,25 @@ export class WelcomeService {
   };
 
   public onRendered = () => {
-    this.onRenderedHandlers.forEach((onRendered) => onRendered());
+    this.onRenderedHandlers.forEach((onRendered) => {
+      try {
+        onRendered();
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
+    });
   };
 
   public renderTelemetryNotice = () => {
     if (this.renderTelemetryNoticeHandler) {
-      return this.renderTelemetryNoticeHandler();
-    } else {
-      return null;
+      try {
+        return this.renderTelemetryNoticeHandler();
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
     }
+    return null;
   };
 }

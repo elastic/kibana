@@ -25,6 +25,16 @@ describe('WelcomeService', () => {
       expect(onRendered).toHaveBeenCalledTimes(1);
     });
 
+    test('it should handle onRendered errors', () => {
+      const onRendered = jest.fn().mockImplementation(() => {
+        throw new Error('Something went terribly wrong');
+      });
+      welcomeServiceSetup.registerOnRendered(onRendered);
+
+      expect(() => welcomeService.onRendered()).not.toThrow();
+      expect(onRendered).toHaveBeenCalledTimes(1);
+    });
+
     test('it should allow registering multiple onRendered listeners', () => {
       const onRendered = jest.fn();
       const onRendered2 = jest.fn();
@@ -62,6 +72,15 @@ describe('WelcomeService', () => {
       );
 
       expect(welcomeService.renderTelemetryNotice()).toEqual('rendered text');
+    });
+
+    test('it should handle errors in the renderer', () => {
+      const renderer = jest.fn().mockImplementation(() => {
+        throw new Error('Something went terribly wrong');
+      });
+      welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer);
+
+      expect(welcomeService.renderTelemetryNotice()).toEqual(null);
     });
   });
 });
