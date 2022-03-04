@@ -34,9 +34,8 @@ export function opbeans({ from, to }: { from: number; to: number }) {
         .duration(1000)
         .success()
         .errors(
-          opbeansJava
-            .error('[MockError] Foo', `Exception`)
-            .timestamp(timestamp))
+          opbeansJava.error('[MockError] Foo', `Exception`).timestamp(timestamp)
+        )
         .children(
           opbeansJava
             .span('SELECT * FROM product', 'db', 'postgresql')
