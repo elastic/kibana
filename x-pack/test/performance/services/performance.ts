@@ -9,7 +9,7 @@
 
 import Url from 'url';
 import { inspect } from 'util';
-import apm, { Outcome, Span, Transaction } from 'elastic-apm-node';
+import apm, { Span, Transaction } from 'elastic-apm-node';
 import { setTimeout } from 'timers/promises';
 import playwright, { ChromiumBrowser, Page, BrowserContext } from 'playwright';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
