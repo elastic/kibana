@@ -10,28 +10,14 @@ import { ITelemetryEventsSender } from '../sender';
 import { ITelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense } from '../types';
 import { TaskExecutionPeriod } from '../task';
+import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
+import { batchTelemetryRecords } from '../helpers';
 
-/**
- * ~~ Detection Rule Alerts Telemetry
- *
- *   - [ ] Collect alert telemetry from Elastic pre-built rule alerts
- *   - [ ] Filter out custom rule alerts
- *   - [ ] Filter out Endpoint rules
- *   - [ ] Run through filter list
- *
- * Rule Types:
- *
- *   - query
- *   - eql
- *   - machine_learning
- *   - threshold
- *   - threat_match
- */
 export function createTelemetryDetectionRuleAlertsTaskConfig(maxTelemetryBatch: number) {
   return {
     type: 'security:telemetry-detection-rule-alerts',
-    title: 'Security Solution - Prebuilt Detection Rule Alerts Telemetry',
-    interval: '3h',
+    title: 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry',
+    interval: '1m',
     timeout: '10m',
     version: '1.0.0',
     runTask: async (
@@ -41,27 +27,45 @@ export function createTelemetryDetectionRuleAlertsTaskConfig(maxTelemetryBatch: 
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
-        receiver.fetchClusterInfo(),
-        receiver.fetchLicenseInfo(),
-      ]);
+      try {
+        const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
+          receiver.fetchClusterInfo(),
+          receiver.fetchLicenseInfo(),
+        ]);
 
-      const clusterInfo =
-        clusterInfoPromise.status === 'fulfilled'
-          ? clusterInfoPromise.value
-          : ({} as ESClusterInfo);
-      const licenseInfo =
-        licenseInfoPromise.status === 'fulfilled'
-          ? licenseInfoPromise.value
-          : ({} as ESLicense | undefined);
+        const clusterInfo =
+          clusterInfoPromise.status === 'fulfilled'
+            ? clusterInfoPromise.value
+            : ({} as ESClusterInfo);
+        const licenseInfo =
+          licenseInfoPromise.status === 'fulfilled'
+            ? licenseInfoPromise.value
+            : ({} as ESLicense | undefined);
 
-      // Alerts Telemetry: Detection Rules
-      logger.info(
-        `drule alerts task. Cluster UUID: ${clusterInfo.cluster_uuid}; Cluster Info: ${clusterInfo.cluster_name}`
-      );
-      logger.info(`drule alerts task. License Info: ${licenseInfo?.uid}`);
+        // Prebuilt Alerts Telemetry: Detection Rules
+        logger.debug(
+          `Cluster: ${clusterInfo.cluster_uuid} / ${clusterInfo.cluster_name} / License Info: ${licenseInfo?.uid}`
+        );
 
-      return 1;
+        const telemetryEvents = await receiver.fetchPrebuiltRuleAlerts();
+        if (telemetryEvents.length === 0) {
+          logger.debug('no prebuilt rule alerts retrieved');
+          return 0;
+        }
+
+        // TODO:@pjhampton - run telemetry events though new filterlist
+
+        logger.debug(`sending ${telemetryEvents.length} elastic prebuilt alerts`);
+        const batches = batchTelemetryRecords(telemetryEvents, maxTelemetryBatch);
+        for (const batch of batches) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
+        }
+
+        return telemetryEvents.length;
+      } catch (err) {
+        logger.warn('could not complete prebuilt alerts telemetry task');
+        return 0;
+      }
     },
   };
 }

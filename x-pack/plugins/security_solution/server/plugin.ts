@@ -49,6 +49,7 @@ import {
   SERVER_APP_ID,
   LEGACY_NOTIFICATIONS_ID,
   DEFAULT_ALERTS_INDEX,
+  DEFAULT_SIGNALS_INDEX,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
@@ -452,6 +453,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.kibanaIndex!,
+      DEFAULT_SIGNALS_INDEX,
       this.endpointAppContextService,
       exceptionListClient
     );

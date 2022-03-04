@@ -17,6 +17,7 @@ import {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -50,6 +51,7 @@ export interface ITelemetryReceiver {
   start(
     core?: CoreStart,
     kibanaIndex?: string,
+    signalsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient
   ): Promise<void>;
@@ -124,6 +126,8 @@ export interface ITelemetryReceiver {
     status: string;
     type: string;
   };
+
+  fetchPrebuiltRuleAlerts(): Promise<TelemetryEvent[]>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -134,8 +138,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
   private kibanaIndex?: string;
+  private signalsIndex?: string;
   private clusterInfo?: ESClusterInfo;
-  private readonly max_records = 10_000;
+  private readonly maxRecords = 10_000 as const;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -144,10 +149,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async start(
     core?: CoreStart,
     kibanaIndex?: string,
+    signalsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient
   ) {
     this.kibanaIndex = kibanaIndex;
+    this.signalsIndex = signalsIndex;
     this.agentClient = endpointContextService?.getAgentService()?.asInternalUser;
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
     this.esClient = core?.elasticsearch.client.asInternalUser;
@@ -167,7 +174,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     return this.agentClient?.listAgents({
-      perPage: this.max_records,
+      perPage: this.maxRecords,
       showInactive: true,
       sortField: 'enrolled_at',
       sortOrder: 'desc',
@@ -198,7 +205,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         aggs: {
           policy_responses: {
             terms: {
-              size: this.max_records,
+              size: this.maxRecords,
               field: 'agent.id',
             },
             aggs: {
@@ -246,7 +253,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           endpoint_agents: {
             terms: {
               field: 'agent.id',
-              size: this.max_records,
+              size: this.maxRecords,
             },
             aggs: {
               latest_metrics: {
@@ -334,7 +341,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       data: results?.data.map(trustedApplicationToTelemetryEntry),
       total: results?.total ?? 0,
       page: results?.page ?? 1,
-      per_page: results?.per_page ?? this.max_records,
+      per_page: results?.per_page ?? this.maxRecords,
     };
   }
 
@@ -349,7 +356,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const results = await this.exceptionListClient.findExceptionListItem({
       listId,
       page: 1,
-      perPage: this.max_records,
+      perPage: this.maxRecords,
       filter: undefined,
       namespaceType: 'agnostic',
       sortField: 'name',
@@ -360,7 +367,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       data: results?.data.map(exceptionListItemToTelemetryEntry) ?? [],
       total: results?.total ?? 0,
       page: results?.page ?? 1,
-      per_page: results?.per_page ?? this.max_records,
+      per_page: results?.per_page ?? this.maxRecords,
     };
   }
 
@@ -377,7 +384,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.kibanaIndex}*`,
       ignore_unavailable: true,
-      size: this.max_records,
+      size: this.maxRecords,
       body: {
         query: {
           bool: {
@@ -427,7 +434,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const results = await this.exceptionListClient?.findExceptionListsItem({
       listId: [listId],
       filter: [],
-      perPage: this.max_records,
+      perPage: this.maxRecords,
       page: 1,
       sortField: 'exception-list.created_at',
       sortOrder: 'desc',
@@ -438,8 +445,117 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       data: results?.data.map((r) => ruleExceptionListItemToTelemetryEvent(r, ruleVersion)) ?? [],
       total: results?.total ?? 0,
       page: results?.page ?? 1,
-      per_page: results?.per_page ?? this.max_records,
+      per_page: results?.per_page ?? this.maxRecords,
     };
+  }
+
+  /**
+   * Fetch an overview of detection rule alerts over the last 3 hours.
+   * Filters out custom rules and endpoint rules.
+   * @returns total of alerts by rules
+   */
+  public async fetchPrebuiltRuleAlerts() {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve detection rule alerts');
+    }
+
+    const queryBatchSize = 250;
+
+    // default is from looking at Kibana saved objects and online documentation
+    const keepAlive = '5m';
+    let sliceId = 0;
+
+    // create and assign an initial point in time
+    let pitId: OpenPointInTimeResponse['id'] = (
+      await this.esClient.openPointInTime({
+        index: `${this.signalsIndex}*`,
+        keep_alive: keepAlive,
+      })
+    ).id;
+
+    let buckets: TelemetryEvent[] = [];
+    let fetchMore = true;
+    while (fetchMore) {
+      const query = {
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          'kibana.alert.rule.parameters.immutable': 'true',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      bool: {
+                        should: [
+                          {
+                            match_phrase: {
+                              'event.module': 'endpoint',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-48h',
+                      lte: 'now',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+        slice: {
+          id: sliceId,
+          max: queryBatchSize,
+        },
+        track_total_hits: false,
+        pit: { id: pitId },
+        size: queryBatchSize,
+      };
+      this.logger.info(`Getting alerts with point in time (PIT) query: ${JSON.stringify(query)}`);
+
+      const response = await this.esClient.search<TelemetryEvent>(query, { meta: true });
+      this.logger.info(`Got hits: (${response.body.hits.hits.length})`);
+
+      const telemetryEvents: TelemetryEvent[] = response.body.hits.hits.flatMap((h) =>
+        h._source != null ? [h._source] : []
+      );
+
+      buckets = [...buckets, ...telemetryEvents];
+      fetchMore = telemetryEvents.length !== 0;
+
+      this.logger.debug(`New Pit id: ${response.body.pit_id}`);
+      if (response.body.pit_id != null) {
+        pitId = response.body.pit_id;
+        sliceId += 1;
+      }
+    }
+
+    try {
+      await this.esClient.closePointInTime({ id: pitId });
+    } catch (error) {
+      // Don't fail due to a bad point in time closure. We have seen failures in e2e tests during nominal operations.
+      this.logger.warn(
+        `Error trying to close point in time: "${pitId}", it will expire within "${keepAlive}". Error is: "${error}"`
+      );
+    }
+
+    return buckets;
   }
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {
