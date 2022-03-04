@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiPageContent,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
@@ -136,9 +137,14 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
       );
 
       return (
-        <>
-          {labels.layoutAboutMessage(allAssigned?.total || 0)} {link}
-        </>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.artifacts.list.about"
+          defaultMessage={labels.layoutAboutMessage}
+          values={{
+            count: allAssigned?.total || 0,
+            link,
+          }}
+        />
       );
     }, [getAppUrl, getArtifactPath, labels, allAssigned?.total]);
 

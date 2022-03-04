@@ -161,12 +161,6 @@ export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS = Object.freeze({
       defaultMessage: 'view all host isolation exceptions',
     }
   ),
-  layoutAboutMessage: (count: number): string =>
-    i18n.translate('xpack.securitySolution.endpoint.policy.hostIsolationException.layout.about', {
-      defaultMessage:
-        'There {count, plural, one {is} other {are}} {count} host isolation {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to',
-      values: {
-        count,
-      },
-    }),
+  layoutAboutMessage:
+    'There {count, plural, one {is} other {are}} {count} host isolation {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}',
 });

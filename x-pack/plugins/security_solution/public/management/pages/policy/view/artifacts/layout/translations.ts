@@ -23,12 +23,6 @@ export const POLICY_ARTIFACT_LAYOUT_LABELS = Object.freeze({
       defaultMessage: 'view all artifacts',
     }
   ),
-  layoutAboutMessage: (count: number): string =>
-    i18n.translate('xpack.securitySolution.endpoint.policy.artifacts.layout.about', {
-      defaultMessage:
-        'There {count, plural, one {is} other {are}} {count} {count, plural, =1 {artifact} other {artifacts}} associated with this policy. Click here to',
-      values: {
-        count,
-      },
-    }),
+  layoutAboutMessage:
+    'There {count, plural, one {is} other {are}} {count} {count, plural, =1 {artifact} other {artifacts}} associated with this policy. Click here to {link}',
 });
