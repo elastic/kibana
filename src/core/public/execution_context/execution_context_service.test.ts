@@ -43,7 +43,7 @@ describe('ExecutionContextService', () => {
     });
   });
 
-  it('sets context and adds curr url and appid when getting it', () => {
+  it('sets context and adds current url and appid when getting it', () => {
     execContext.set({
       type: 'ghf',
       description: 'first set',
@@ -78,15 +78,13 @@ describe('ExecutionContextService', () => {
 
   it('context observable fires the context each time it changes', () => {
     const sub = jest.fn();
-    execContext.context$.subscribe(sub);
-
-    // sub gets called immediately with the current value as it's a behavior subject
-    sub.mockReset();
 
     execContext.set({
       type: 'ghf',
       description: 'first set',
     });
+
+    execContext.context$.subscribe(sub);
 
     expect(sub).toHaveBeenCalledWith({
       name: 'app1',
@@ -112,13 +110,13 @@ describe('ExecutionContextService', () => {
 
   it('context observable doesnt fires if the context did not change', () => {
     const sub = jest.fn();
-    execContext.context$.subscribe(sub);
-    sub.mockReset();
 
     execContext.set({
       type: 'ghf',
       description: 'first set',
     });
+
+    execContext.context$.subscribe(sub);
 
     execContext.set({
       type: 'ghf',
@@ -134,15 +132,14 @@ describe('ExecutionContextService', () => {
     expect(sub).toHaveBeenCalledTimes(1);
   });
 
-  it('context is cleared and observable is triggered', () => {
+  it('clear resets context and triggers context observable', () => {
     const sub = jest.fn();
-    execContext.context$.subscribe(sub);
-    sub.mockReset();
 
     execContext.set({
       type: 'ghf',
       description: 'first set',
     });
+    execContext.context$.subscribe(sub);
 
     execContext.clear();
     expect(sub).toHaveBeenCalledWith({
