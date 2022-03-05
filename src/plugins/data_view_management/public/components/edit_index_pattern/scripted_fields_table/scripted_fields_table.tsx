@@ -21,7 +21,6 @@ import { DataView, DataViewsPublicPluginStart } from '../../../../../../plugins/
 interface ScriptedFieldsTableProps {
   indexPattern: DataView;
   fieldFilter?: string;
-  scriptedFieldLanguageFilter: string[];
   helpers: {
     redirectToRoute: Function;
     getRouteHref?: Function;
@@ -80,22 +79,14 @@ export class ScriptedFieldsTable extends Component<
 
   getFilteredItems = () => {
     const { fields } = this.state;
-    const { fieldFilter, scriptedFieldLanguageFilter, userEditPermission } = this.props;
+    const { fieldFilter, userEditPermission } = this.props;
 
-    let languageFilteredFields = fields;
-
-    if (scriptedFieldLanguageFilter.length) {
-      languageFilteredFields = fields.filter((field) =>
-        scriptedFieldLanguageFilter.includes(field.lang)
-      );
-    }
-
-    let filteredFields = languageFilteredFields;
+    let filteredFields = fields;
 
     if (fieldFilter) {
       const normalizedFieldFilter = fieldFilter.toLowerCase();
 
-      filteredFields = languageFilteredFields.filter((field) =>
+      filteredFields = fields.filter((field) =>
         field.name.toLowerCase().includes(normalizedFieldFilter)
       );
     }

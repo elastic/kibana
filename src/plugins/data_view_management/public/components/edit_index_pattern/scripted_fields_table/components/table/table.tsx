@@ -47,19 +47,6 @@ export class Table extends PureComponent<TableProps> {
         width: '38%',
       },
       {
-        field: 'lang',
-        name: i18n.translate('indexPatternManagement.editIndexPattern.scripted.table.langHeader', {
-          defaultMessage: 'Lang',
-        }),
-        description: i18n.translate(
-          'indexPatternManagement.editIndexPattern.scripted.table.langDescription',
-          { defaultMessage: 'Language used for the field' }
-        ),
-        dataType: 'string',
-        sortable: true,
-        'data-test-subj': 'scriptedFieldLang',
-      },
-      {
         field: 'script',
         name: i18n.translate(
           'indexPatternManagement.editIndexPattern.scripted.table.scriptHeader',

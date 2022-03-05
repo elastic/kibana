@@ -69,7 +69,6 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
-        scriptedFieldLanguageFilter={[]}
       />
     );
 
@@ -89,7 +88,6 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
-        scriptedFieldLanguageFilter={[]}
       />
     );
 
@@ -122,7 +120,6 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
-        scriptedFieldLanguageFilter={[]}
       />
     );
 
@@ -149,7 +146,6 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
-        scriptedFieldLanguageFilter={[]}
       />
     );
 
@@ -171,7 +167,6 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
-        scriptedFieldLanguageFilter={[]}
       />
     );
 
@@ -200,7 +195,6 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
-        scriptedFieldLanguageFilter={[]}
       />
     );
 

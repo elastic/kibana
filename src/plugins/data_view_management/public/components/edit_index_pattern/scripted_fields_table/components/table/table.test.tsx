@@ -58,7 +58,7 @@ describe('Table', () => {
       />
     );
 
-    const formatTableCell = shallow(component.prop('columns')[3].render('Elastic'));
+    const formatTableCell = shallow(component.prop('columns')[2].render('Elastic'));
     expect(formatTableCell).toMatchSnapshot();
   });
 
@@ -75,7 +75,7 @@ describe('Table', () => {
     );
 
     // Click the delete button
-    component.prop('columns')[4].actions[0].onClick();
+    component.prop('columns')[3].actions[0].onClick();
     expect(editField).toBeCalled();
   });
 
@@ -92,7 +92,7 @@ describe('Table', () => {
     );
 
     // Click the delete button
-    component.prop('columns')[4].actions[1].onClick();
+    component.prop('columns')[3].actions[1].onClick();
     expect(deleteField).toBeCalled();
   });
 
@@ -105,8 +105,8 @@ describe('Table', () => {
         deleteField={() => {}}
       />
     );
-    const editAvailable = component.prop('columns')[4].actions[0].available(items[1]);
-    const deleteAvailable = component.prop('columns')[4].actions[1].available(items[1]);
+    const editAvailable = component.prop('columns')[3].actions[0].available(items[1]);
+    const deleteAvailable = component.prop('columns')[3].actions[1].available(items[1]);
     expect(editAvailable).toBeFalsy();
     expect(deleteAvailable).toBeFalsy();
   });

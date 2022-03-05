@@ -13,14 +13,6 @@ exports[`Table should render normally 1`] = `
         "width": "38%",
       },
       Object {
-        "data-test-subj": "scriptedFieldLang",
-        "dataType": "string",
-        "description": "Language used for the field",
-        "field": "lang",
-        "name": "Lang",
-        "sortable": true,
-      },
-      Object {
         "dataType": "string",
         "description": "Script for the field",
         "field": "script",

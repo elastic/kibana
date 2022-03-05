@@ -82,20 +82,6 @@ const schemaAriaLabel = i18n.translate(
   }
 );
 
-const scriptedFieldFilterLabel = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.scriptedFieldFilter',
-  {
-    defaultMessage: 'All languages',
-  }
-);
-
-const scriptedFieldAriaLabel = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.scriptedFieldFilterAria',
-  {
-    defaultMessage: 'Filter scripted field languages',
-  }
-);
-
 const schemaOptionRuntime = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.runtime',
   {
@@ -138,9 +124,6 @@ export function Tabs({
   const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
   });
-  const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string[]>([]);
-  const [isScriptedFieldFilterOpen, setIsScriptedFieldFilterOpen] = useState(false);
-  const [scriptedFieldLanguages, setScriptedFieldLanguages] = useState<FilterItems[]>([]);
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string[]>([]);
   const [isIndexedFilterOpen, setIsIndexedFilterOpen] = useState(false);
   const [indexedFieldTypes, setIndexedFieldTypes] = useState<FilterItems[]>([]);
@@ -203,7 +186,6 @@ export function Tabs({
     });
 
     setIndexedFieldTypes(convertToEuiFilterOptions(tempIndexedFieldTypes));
-    setScriptedFieldLanguages(convertToEuiFilterOptions(tempScriptedFieldLanguages));
   }, [indexPattern]);
 
   const closeFieldEditor = useCallback(() => {
@@ -355,56 +337,6 @@ export function Tabs({
               )}
             </>
           )}
-          {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiFilterGroup>
-                <EuiPopover
-                  anchorPosition="downCenter"
-                  data-test-subj="scriptedFieldLanguageFilterDropdown-popover"
-                  button={
-                    <EuiFilterButton
-                      aria-label={scriptedFieldAriaLabel}
-                      data-test-subj="scriptedFieldLanguageFilterDropdown"
-                      iconType="arrowDown"
-                      onClick={() => setIsScriptedFieldFilterOpen(!isScriptedFieldFilterOpen)}
-                      isSelected={isScriptedFieldFilterOpen}
-                      numFilters={scriptedFieldLanguages.length}
-                      hasActiveFilters={
-                        !!scriptedFieldLanguages.find((item) => item.checked === 'on')
-                      }
-                      numActiveFilters={
-                        scriptedFieldLanguages.filter((item) => item.checked === 'on').length
-                      }
-                    >
-                      {scriptedFieldFilterLabel}
-                    </EuiFilterButton>
-                  }
-                  isOpen={isScriptedFieldFilterOpen}
-                  closePopover={() => setIsScriptedFieldFilterOpen(false)}
-                >
-                  {scriptedFieldLanguages.map((item, index) => (
-                    <EuiFilterSelectItem
-                      checked={item.checked}
-                      key={item.value}
-                      onClick={() => {
-                        setScriptedFieldLanguageFilter(
-                          item.checked
-                            ? scriptedFieldLanguageFilter.filter((f) => f !== item.value)
-                            : [...scriptedFieldLanguageFilter, item.value]
-                        );
-                        updateFilterItem(scriptedFieldLanguages, index, setScriptedFieldLanguages);
-                      }}
-                      data-test-subj={`scriptedFieldLanguageFilterDropdown-option-${item.value}${
-                        item.checked ? '-checked' : ''
-                      }`}
-                    >
-                      {item.name}
-                    </EuiFilterSelectItem>
-                  ))}
-                </EuiPopover>
-              </EuiFilterGroup>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       );
     },
@@ -413,9 +345,6 @@ export function Tabs({
       indexedFieldTypeFilter,
       indexedFieldTypes,
       isIndexedFilterOpen,
-      scriptedFieldLanguageFilter,
-      scriptedFieldLanguages,
-      isScriptedFieldFilterOpen,
       schemaItems,
       schemaFieldTypeFilter,
       isSchemaFilterOpen,
@@ -465,7 +394,6 @@ export function Tabs({
                 indexPattern={indexPattern}
                 saveIndexPattern={saveIndexPattern}
                 fieldFilter={fieldFilter}
-                scriptedFieldLanguageFilter={scriptedFieldLanguageFilter}
                 helpers={{
                   redirectToRoute: (field: DataViewField) => {
                     history.push(getPath(field, indexPattern));
@@ -505,7 +433,6 @@ export function Tabs({
       indexedFieldTypeFilter,
       schemaFieldTypeFilter,
       refreshFilters,
-      scriptedFieldLanguageFilter,
       saveIndexPattern,
       openFieldEditor,
       DeleteRuntimeFieldProvider,

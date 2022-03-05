@@ -38,6 +38,12 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
           "name": "JustATest",
           "script": "z++",
         },
+        Object {
+          "isUserEditable": false,
+          "lang": "somethingElse",
+          "name": "Bad",
+          "script": "z++",
+        },
       ]
     }
   />

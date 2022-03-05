@@ -249,15 +249,6 @@ export class SettingsPageObject extends FtrService {
     );
   }
 
-  async getScriptedFieldLangs() {
-    const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > scriptedFieldLang');
-    return await Promise.all(
-      fieldNameCells.map(async (cell) => {
-        return (await cell.getVisibleText()).trim();
-      })
-    );
-  }
-
   async clearFieldTypeFilter(type: string) {
     await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
     await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
