@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
+import styled from 'styled-components';
 import { RecentTimelineHeader } from './header';
 import {
   OnOpenTimeline,
@@ -31,6 +32,15 @@ interface RecentTimelinesItemProps {
   onOpenTimeline: OnOpenTimeline;
   isLastItem: boolean;
 }
+
+const ClampText = styled.div`
+  /* Clamp text content to 3 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+`;
 
 const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
   ({ timeline, onOpenTimeline, isLastItem }) => {
@@ -55,7 +65,7 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
             <RecentTimelineCounts timeline={timeline} />
             {timeline.description && timeline.description.length && (
               <EuiText color="subdued" size="xs">
-                {timeline.description}
+                <ClampText>{timeline.description}</ClampText>
               </EuiText>
             )}
           </EuiFlexItem>

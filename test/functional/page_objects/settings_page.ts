@@ -301,7 +301,10 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setScriptedFieldLanguageFilter(language: string) {
-    await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+      return await this.find.byCssSelector('div.euiPopover__panel-isOpen');
+    });
     await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
     await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${language}`);
     await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${language}`);

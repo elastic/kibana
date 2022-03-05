@@ -9,7 +9,7 @@ import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { setState, initEmpty, LensStoreDeps } from '..';
-import { getPreloadedState } from '../lens_slice';
+import { disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
@@ -93,7 +93,8 @@ export function loadInitial(
     redirectCallback: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
     history?: History<unknown>;
-  }
+  },
+  autoApplyDisabled: boolean
 ) {
   const { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext } = storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
@@ -129,6 +130,9 @@ export function loadInitial(
             initialContext,
           })
         );
+        if (autoApplyDisabled) {
+          store.dispatch(disableAutoApply());
+        }
       })
       .catch((e: { message: string }) => {
         notifications.toasts.addDanger({
@@ -209,6 +213,10 @@ export function loadInitial(
                   isLoading: false,
                 })
               );
+
+              if (autoApplyDisabled) {
+                store.dispatch(disableAutoApply());
+              }
             })
             .catch((e: { message: string }) =>
               notifications.toasts.addDanger({
