@@ -48,10 +48,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.setIndexPatternField('log*');
 
         const a = await testSubjects.find('saveIndexPatternButton');
+
         await retry.try(async () => {
           expect(
             (
-              await find.displayedByCssSelector(
+              await find.allByCssSelector(
                 '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
               )
             ).length
