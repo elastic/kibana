@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
@@ -38,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
           body: { actions: [{ add: { index: 'blogs', alias: 'alias1' } }] },
         });
 
-        await PageObjects.settings.createIndexPattern('alias1', false);
+        await PageObjects.settings.createIndexPattern('alias1', null);
       });
 
       it('can delete an index pattern', async () => {

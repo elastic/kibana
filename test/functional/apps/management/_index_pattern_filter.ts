@@ -7,8 +7,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings']);
@@ -23,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     beforeEach(async function () {
-      await PageObjects.settings.createIndexPattern();
+      await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     afterEach(async function () {
