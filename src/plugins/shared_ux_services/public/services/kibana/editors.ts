@@ -7,17 +7,17 @@
  */
 
 import { KibanaPluginServiceFactory } from '../types';
-import { SharedUXPluginStartDeps } from '../../types';
-import { SharedUXDocLinksService } from '../doc_links';
+import { SharedUXEditorsService } from '../editors';
+import { SharedUXServicesPluginStartDeps } from '../../types';
 
-export type DocLinksServiceFactory = KibanaPluginServiceFactory<
-  SharedUXDocLinksService,
-  SharedUXPluginStartDeps
+export type EditorsServiceFactory = KibanaPluginServiceFactory<
+  SharedUXEditorsService,
+  SharedUXServicesPluginStartDeps
 >;
 
 /**
  * A factory function for creating a Kibana-based implementation of `SharedUXEditorsService`.
  */
-export const docLinksServiceFactory: DocLinksServiceFactory = ({ coreStart }) => ({
-  dataViewsDocsLink: coreStart.docLinks.links.indexPatterns?.introduction,
+export const editorsServiceFactory: EditorsServiceFactory = ({ startPlugins }) => ({
+  openDataViewEditor: startPlugins.dataViewEditor.openEditor,
 });

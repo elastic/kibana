@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { addDecorator } from '@storybook/react';
-import { servicesDecorator } from '../../shared_ux_services/.storybook/decorators';
-
-addDecorator(servicesDecorator);
+export const PLUGIN_NAME = 'sharedUXServices';

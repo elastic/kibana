@@ -8,7 +8,7 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
-import { docLinksServiceFactory } from '../../../services/storybook/doc_links';
+import { servicesFactory } from '../../../../../shared_ux_services/.storybook';
 
 import { NoDataViews as NoDataViewsComponent, Props } from './no_data_views.component';
 import { NoDataViews } from './no_data_views';
@@ -29,7 +29,7 @@ export const ConnectedComponent = () => {
   return (
     <NoDataViews
       onDataViewCreated={action('onDataViewCreated')}
-      dataViewsDocLink={docLinksServiceFactory().dataViewsDocsLink}
+      dataViewsDocLink={servicesFactory({}).docLinks.dataViewsDocsLink}
     />
   );
 };
@@ -46,7 +46,7 @@ PureComponent.argTypes = {
     defaultValue: true,
   },
   dataViewsDocLink: {
-    options: [docLinksServiceFactory().dataViewsDocsLink, undefined],
+    options: [servicesFactory({}).docLinks.dataViewsDocsLink, undefined],
     control: { type: 'radio' },
   },
 };

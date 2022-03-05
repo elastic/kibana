@@ -12,8 +12,12 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButton } from '@elastic/eui';
 
-import { ServicesProvider, SharedUXServices } from '../../../services';
-import { servicesFactory } from '../../../services/mocks';
+import {
+  SharedUXServices,
+  SharedUXServicesProvider,
+} from '../../../../../shared_ux_services/public';
+import { servicesFactory } from '../../../../../shared_ux_services/public/mocks';
+
 import { NoDataViews } from './no_data_views';
 
 describe('<NoDataViewsPageTest />', () => {
@@ -23,7 +27,7 @@ describe('<NoDataViewsPageTest />', () => {
   beforeEach(() => {
     services = servicesFactory();
     mount = (element: JSX.Element) =>
-      mountWithIntl(<ServicesProvider {...services}>{element}</ServicesProvider>);
+      mountWithIntl(<SharedUXServicesProvider {...services}>{element}</SharedUXServicesProvider>);
   });
 
   afterEach(() => {

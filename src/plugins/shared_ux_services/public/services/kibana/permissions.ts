@@ -7,12 +7,12 @@
  */
 
 import { KibanaPluginServiceFactory } from '../types';
-import { SharedUXPluginStartDeps } from '../../types';
+import { SharedUXServicesPluginStartDeps } from '../../types';
 import { SharedUXUserPermissionsService } from '../permissions';
 
 export type UserPermissionsServiceFactory = KibanaPluginServiceFactory<
   SharedUXUserPermissionsService,
-  SharedUXPluginStartDeps
+  SharedUXServicesPluginStartDeps
 >;
 
 /**

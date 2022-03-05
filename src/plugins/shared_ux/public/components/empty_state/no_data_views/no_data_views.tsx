@@ -8,9 +8,12 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import { DataView } from '../../../../../data_views/public';
-import { useEditors, usePermissions } from '../../../services';
-import type { SharedUXEditorsService } from '../../../services/editors';
+import {
+  usePermissions,
+  useEditors,
+  SharedUXEditorsService,
+  DataView,
+} from '../../../../../shared_ux_services/public';
 
 import { NoDataViews as NoDataViewsComponent } from './no_data_views.component';
 

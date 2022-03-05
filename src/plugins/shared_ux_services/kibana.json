@@ -1,14 +1,14 @@
 {
-  "id": "sharedUX",
+  "id": "sharedUXServices",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
     "name": "Shared UX",
     "githubTeam": "shared-ux"
   },
-  "description": "A plugin providing components and services for shared user experiences in Kibana.",
+  "description": "A plugin providing services for Shared UX components.",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["sharedUXServices"],
+  "requiredPlugins": ["dataViewEditor", "dataViews"],
   "optionalPlugins": []
 }

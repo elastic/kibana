@@ -11,7 +11,7 @@ import { useEuiTheme, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { ExitFullScreenButton as Component } from './exit_full_screen_button.component';
-import { usePlatformService } from '../../services';
+import { usePlatformService } from '../../../../shared_ux_services/public';
 
 /**
  * Props for the service-enabled Exit Full Screen button component.

@@ -8,10 +8,15 @@
 
 import React, { FC, createContext, useContext } from 'react';
 import { SharedUXPlatformService } from './platform';
-import { servicesFactory } from './stub';
 import { SharedUXUserPermissionsService } from './permissions';
 import { SharedUXEditorsService } from './editors';
 import { SharedUXDocLinksService } from './doc_links';
+import { servicesFactory } from './stub';
+
+export type { SharedUXPlatformService } from './platform';
+export type { SharedUXUserPermissionsService } from './permissions';
+export type { SharedUXEditorsService, DataView } from './editors';
+export type { SharedUXDocLinksService } from './doc_links';
 
 /**
  * A collection of services utilized by SharedUX.  This serves as a thin
@@ -39,24 +44,33 @@ const ServicesContext = createContext<SharedUXServices>(servicesFactory());
  * Within a plugin, you can use the `ServicesContext` provided by the SharedUX plugin start
  * lifeycle method.
  */
-export const ServicesProvider: FC<SharedUXServices> = ({ children, ...services }) => (
+export const SharedUXServicesProvider: FC<SharedUXServices> = ({ children, ...services }) => (
   <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>
 );
 
 /**
  * React hook for accessing the pre-wired `SharedUXServices`.
  */
-export function useServices() {
+export function useSharedUXServices() {
   return useContext(ServicesContext);
 }
 
 /**
  * React hook for accessing the pre-wired `SharedUXPlatformService`.
  */
-export const usePlatformService = () => useServices().platform;
+export const usePlatformService = () => useSharedUXServices().platform;
 
-export const usePermissions = () => useServices().permissions;
+/**
+ * React hook for accessing the pre-wired `SharedUXPermissionsService`.
+ */
+export const usePermissions = () => useSharedUXServices().permissions;
 
-export const useEditors = () => useServices().editors;
+/**
+ * React hook for accessing the pre-wired `SharedUXEditorsService`.
+ */
+export const useEditors = () => useSharedUXServices().editors;
 
-export const useDocLinks = () => useServices().docLinks;
+/**
+ * React hook for accessing the pre-wired `SharedUXDocLinksService`.
+ */
+export const useDocLinks = () => useSharedUXServices().docLinks;

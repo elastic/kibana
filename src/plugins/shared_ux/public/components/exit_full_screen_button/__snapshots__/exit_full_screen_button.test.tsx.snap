@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ExitFullScreenButton /> is rendered 1`] = `
-<ServicesProvider
+<SharedUXServicesProvider
   docLinks={
     Object {
       "dataViewsDocsLink": "dummy link",
@@ -120,5 +120,5 @@ exports[`<ExitFullScreenButton /> is rendered 1`] = `
       </div>
     </ExitFullScreenButton>
   </ExitFullScreenButton>
-</ServicesProvider>
+</SharedUXServicesProvider>
 `;

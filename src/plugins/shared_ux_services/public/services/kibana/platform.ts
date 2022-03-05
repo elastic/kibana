@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPluginStartDeps } from '../../types';
+import { SharedUXServicesPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../types';
 import { SharedUXPlatformService } from '../platform';
 
@@ -15,7 +15,7 @@ import { SharedUXPlatformService } from '../platform';
  */
 export type PlatformServiceFactory = KibanaPluginServiceFactory<
   SharedUXPlatformService,
-  SharedUXPluginStartDeps
+  SharedUXServicesPluginStartDeps
 >;
 
 /**

@@ -472,4 +472,5 @@ x-pack/plugins/session_view @elastic/awp-platform
 # Application Experience
 
 ## Shared UX
-/src/plugins/shared_ux @elastic/shared-ux
+/src/plugins/shared_ux/ @elastic/shared-ux
+/src/plugins/shared_ux_services/ @elastic/shared-ux

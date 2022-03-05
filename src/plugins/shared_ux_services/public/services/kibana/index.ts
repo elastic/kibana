@@ -7,7 +7,7 @@
  */
 
 import type { SharedUXServices } from '..';
-import type { SharedUXPluginStartDeps } from '../../types';
+import type { SharedUXServicesPluginStartDeps } from '../../types';
 import type { KibanaPluginServiceFactory } from '../types';
 import { platformServiceFactory } from './platform';
 import { userPermissionsServiceFactory } from './permissions';
@@ -19,7 +19,7 @@ import { docLinksServiceFactory } from './doc_links';
  */
 export const servicesFactory: KibanaPluginServiceFactory<
   SharedUXServices,
-  SharedUXPluginStartDeps
+  SharedUXServicesPluginStartDeps
 > = (params) => ({
   platform: platformServiceFactory(params),
   permissions: userPermissionsServiceFactory(params),

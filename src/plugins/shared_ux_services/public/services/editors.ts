@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { addDecorator } from '@storybook/react';
-import { servicesDecorator } from '../../shared_ux_services/.storybook/decorators';
+import { DataView } from '../../../data_views/common';
 
-addDecorator(servicesDecorator);
+export { DataView } from '../../../data_views/common';
+
+export interface DataViewEditorOptions {
+  onSave: (dataView: DataView) => void;
+}
+
+export interface SharedUXEditorsService {
+  openDataViewEditor: (options: DataViewEditorOptions) => () => void;
+}

@@ -5,6 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export interface SharedUXDocLinksService {
-  dataViewsDocsLink: string;
+
+import { PluginInitializerContext } from '../../../core/server';
+import { SharedUXServicesPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new SharedUXServicesPlugin(initializerContext);
 }
+
+export type { SharedUXServicesPluginSetup, SharedUXServicesPluginStart } from './types';

@@ -10,8 +10,9 @@ import React from 'react';
 import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 import { keys } from '@elastic/eui';
 
-import { ServicesProvider, SharedUXServices } from '../../services';
-import { servicesFactory } from '../../services/mocks';
+import { SharedUXServices, SharedUXServicesProvider } from '../../../../shared_ux_services/public';
+import { servicesFactory } from '../../../../shared_ux_services/public/mocks';
+
 import { ExitFullScreenButton } from './exit_full_screen_button';
 
 describe('<ExitFullScreenButton />', () => {
@@ -21,7 +22,7 @@ describe('<ExitFullScreenButton />', () => {
   beforeEach(() => {
     services = servicesFactory();
     mount = (element: JSX.Element) =>
-      enzymeMount(<ServicesProvider {...services}>{element}</ServicesProvider>);
+      enzymeMount(<SharedUXServicesProvider {...services}>{element}</SharedUXServicesProvider>);
   });
 
   afterEach(() => {

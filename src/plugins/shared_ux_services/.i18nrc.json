@@ -1,0 +1,9 @@
+{
+  "prefix": "sharedUXServices",
+  "paths": {
+    "sharedUXServices": "."
+  },
+  "translations": [
+    "translations/ja-JP.json"
+  ]
+}

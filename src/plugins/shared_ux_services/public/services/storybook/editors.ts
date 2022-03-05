@@ -8,7 +8,7 @@
 
 import { action } from '@storybook/addon-actions';
 import { PluginServiceFactory } from '../types';
-import { SharedUxDataViewEditorProps, SharedUXEditorsService } from '../editors';
+import { DataViewEditorOptions, SharedUXEditorsService } from '../editors';
 
 export type SharedUXEditorsServiceFactory = PluginServiceFactory<SharedUXEditorsService>;
 
@@ -17,6 +17,6 @@ export type SharedUXEditorsServiceFactory = PluginServiceFactory<SharedUXEditors
  */
 export const editorsServiceFactory: SharedUXEditorsServiceFactory = () => ({
   openDataViewEditor: action('openEditor') as SharedUXEditorsService['openDataViewEditor'] as (
-    options: SharedUxDataViewEditorProps
+    options: DataViewEditorOptions
   ) => () => void,
 });

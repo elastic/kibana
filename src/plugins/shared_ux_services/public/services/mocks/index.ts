@@ -5,16 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { docLinksServiceFactory } from './doc_links.mock';
-
-export type { MockPlatformServiceFactory } from './platform.mock';
-export { platformServiceFactory } from './platform.mock';
 
 import type { SharedUXServices } from '../.';
 import { PluginServiceFactory } from '../types';
+
+import { docLinksServiceFactory } from './doc_links.mock';
+import { editorsServiceFactory } from './editors.mock';
 import { platformServiceFactory } from './platform.mock';
 import { userPermissionsServiceFactory } from './permissions.mock';
-import { editorsServiceFactory } from './editors.mock';
+
+export type { MockDockLinksServiceFactory } from './doc_links.mock';
+export type { MockEditorsServiceFactory } from './editors.mock';
+export type { MockPlatformServiceFactory } from './platform.mock';
+export type { MockUserPermissionsServiceFactory } from './permissions.mock';
+
+export { docLinksServiceFactory } from './doc_links.mock';
+export { editorsServiceFactory } from './editors.mock';
+export { userPermissionsServiceFactory } from './permissions.mock';
+export { platformServiceFactory } from './platform.mock';
 
 /**
  * A factory function for creating a Jest-based implementation of `SharedUXServices`.

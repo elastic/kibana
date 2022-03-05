@@ -8,8 +8,10 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import { FC } from 'react';
-import { DataViewEditorStart } from 'src/plugins/data_view_editor/public';
+import {
+  SharedUXServicesPluginStart,
+  SharedUXServicesContext,
+} from '../../../shared_ux_services/public';
 
 /** @internal */
 export interface SharedUXPluginSetup {}
@@ -22,7 +24,7 @@ export interface SharedUXPluginStart {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Shared UX services.
    */
-  ServicesContext: FC<{}>;
+  ServicesContext: SharedUXServicesContext;
 }
 
 /** @internal */
@@ -30,5 +32,5 @@ export interface SharedUXPluginSetupDeps {}
 
 /** @internal */
 export interface SharedUXPluginStartDeps {
-  dataViewEditor: DataViewEditorStart;
+  sharedUXServices: SharedUXServicesPluginStart;
 }

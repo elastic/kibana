@@ -9,11 +9,11 @@
 import { PluginServiceFactory } from '../types';
 import { SharedUXDocLinksService } from '../doc_links';
 
-export type SharedUXDockLinksServiceFactory = PluginServiceFactory<SharedUXDocLinksService>;
+export type SharedUXDocLinksServiceFactory = PluginServiceFactory<SharedUXDocLinksService>;
 
 /**
  * A factory function for creating a Jest-based implementation of `SharedUXDocLinksService`.
  */
-export const docLinksServiceFactory: SharedUXDockLinksServiceFactory = () => ({
+export const docLinksServiceFactory: SharedUXDocLinksServiceFactory = () => ({
   dataViewsDocsLink: 'https://www.elastic.co/guide/en/kibana/master/data-views.html',
 });
