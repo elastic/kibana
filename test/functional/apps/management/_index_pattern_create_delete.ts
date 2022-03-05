@@ -75,8 +75,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let indexPatternId: string;
 
       before(function () {
-        // @ts-ignore
-        return PageObjects.settings.createIndexPattern().then((id) => (indexPatternId = id));
+        return PageObjects.settings
+          .createIndexPattern('logstash-*')
+          .then((id) => (indexPatternId = id));
       });
 
       it('should have index pattern in page header', async function () {

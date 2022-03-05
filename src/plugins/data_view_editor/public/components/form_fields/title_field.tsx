@@ -81,12 +81,10 @@ const createMatchesIndicesValidator = ({
   isRollup,
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ value }) => {
-    console.log('running validator');
     const { matchedIndicesResult, newRollupIndexName } = await refreshMatchedIndices(value);
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
 
     if (matchedIndicesResult.exactMatchedIndices.length === 0) {
-      console.log('mustMatchError');
       return mustMatchError;
     }
 
@@ -118,7 +116,6 @@ const createMatchesIndicesValidator = ({
         }),
       };
     }
-    console.log('no validation error');
   },
 });
 
