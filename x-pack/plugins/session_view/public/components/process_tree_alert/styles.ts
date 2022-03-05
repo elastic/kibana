@@ -13,25 +13,32 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, colors, border } = euiTheme;
+    const { size, colors, font } = euiTheme;
 
-    const container: CSSObject = {
-      marginTop: size.s,
-      marginRight: size.s,
-      color: colors.text,
-      padding: size.m,
-      borderStyle: 'solid',
-      borderColor: colors.lightShade,
-      borderWidth: border.width.thin,
-      borderRadius: border.radius.medium,
-      maxWidth: 800,
-      maxHeight: 378,
-      overflowY: 'auto',
-      backgroundColor: 'white',
+    const alert: CSSObject = {
+      fontFamily: font.family,
+      display: 'flex',
+      alignItems: 'center',
+      height: '20px',
+      padding: `${size.xs} 0`,
+      boxSizing: 'content-box',
+      '&:not(:last-child)': {
+        marginBottom: size.s,
+      },
+    };
+
+    const alertRowItem: CSSObject = {
+      '&:first-child': {
+        marginRight: size.m,
+      },
+      '&:not(:first-child)': {
+        marginRight: size.s,
+      },
     };
 
     return {
-      container,
+      alert,
+      alertRowItem,
     };
   }, [euiTheme]);
 
