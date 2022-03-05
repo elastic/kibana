@@ -161,7 +161,7 @@ exports.Cluster = class Cluster {
   async installPlugins(installPath, plugins, options) {
     let esJavaOpts = this.javaOptions(options);
     for (const plugin in plugins.split(',')) {
-      await execa(ES_PLUGIN_BIN, ['install', plugins.trim()], {
+      await execa(ES_PLUGIN_BIN, ['install', plugin.trim()], {
         cwd: installPath,
         env: {
           ...process.env,
