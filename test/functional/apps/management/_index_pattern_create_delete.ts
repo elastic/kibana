@@ -46,10 +46,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can resolve errors and submit', async function () {
         await PageObjects.settings.setIndexPatternField('log*');
+
         const a = await testSubjects.find('saveIndexPatternButton');
-        console.log('***', a.getAttribute('class'));
+        await retry.try(async () => {
+          expect(
+            (
+              await find.displayedByCssSelector(
+                '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
+              )
+            ).length
+          ).to.be(1);
+        });
+
+        console.log('***', await a.getAttribute('class'));
         console.log('before timeout');
-        await new Promise((e) => setTimeout(() => e(''), 5000));
+        await new Promise((e) => setTimeout(() => e(''), 1000));
         console.log('after timeout');
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
         console.log('after click');
