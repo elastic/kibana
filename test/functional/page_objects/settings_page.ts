@@ -164,6 +164,19 @@ export class SettingsPageObject extends FtrService {
     return await this.testSubjects.find('saveIndexPatternButton');
   }
 
+  async getSaveDataViewButtonActive() {
+    await this.retry.try(async () => {
+      expect(
+        (
+          await this.find.allByCssSelector(
+            '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
+          )
+        ).length
+      ).to.be(1);
+    });
+    return await this.testSubjects.find('saveIndexPatternButton');
+  }
+
   async getCreateButton() {
     return await this.find.displayedByCssSelector('[type="submit"]');
   }

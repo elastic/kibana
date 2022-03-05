@@ -46,31 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can resolve errors and submit', async function () {
         await PageObjects.settings.setIndexPatternField('log*');
-
-        const a = await testSubjects.find('saveIndexPatternButton');
-
-        await retry.try(async () => {
-          expect(
-            (
-              await find.allByCssSelector(
-                '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
-              )
-            ).length
-          ).to.be(1);
-        });
-
-        console.log('***', await a.getAttribute('class'));
-        console.log('before timeout');
-        await new Promise((e) => setTimeout(() => e(''), 1000));
-        console.log('after timeout');
-        await (await PageObjects.settings.getSaveIndexPatternButton()).click();
-        console.log('after click');
-
-        console.log('THIS IS A COMMENT FROM THE TEST CODE');
-        // sometimes the initial click fails.
-        if (await PageObjects.settings.getSaveIndexPatternButton()) {
-          await (await PageObjects.settings.getSaveIndexPatternButton()).click();
-        }
+        await (await PageObjects.settings.getSaveDataViewButtonActive()).click();
         await PageObjects.settings.removeIndexPattern();
       });
     });
@@ -99,7 +75,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let indexPatternId: string;
 
       before(function () {
-        return PageObjects.settings.createIndexPattern('').then((id) => (indexPatternId = id));
+        // @ts-ignore
+        return PageObjects.settings.createIndexPattern().then((id) => (indexPatternId = id));
       });
 
       it('should have index pattern in page header', async function () {
