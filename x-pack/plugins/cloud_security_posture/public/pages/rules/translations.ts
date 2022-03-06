@@ -51,6 +51,14 @@ export const ENABLED = i18n.translate('xpack.cloudSecurityPosture.rules.enabledC
   defaultMessage: 'Enabled',
 });
 
+export const DISABLE = i18n.translate('xpack.cloudSecurityPosture.rules.disableLabel', {
+  defaultMessage: 'Disable',
+});
+
+export const ENABLE = i18n.translate('xpack.cloudSecurityPosture.rules.enableLabel', {
+  defaultMessage: 'Enable',
+});
+
 export const MISSING_RULES = i18n.translate(
   'xpack.cloudSecurityPosture.rules.missingRulesMessage',
   { defaultMessage: 'Rules are missing' }

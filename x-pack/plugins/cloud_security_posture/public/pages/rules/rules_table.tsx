@@ -97,7 +97,8 @@ const createRuleEnabledSwitchRenderer =
   (value: any, rule: RuleSavedObject) =>
     (
       <EuiSwitch
-        label=""
+        showLabel={false}
+        label={value ? TEXT.DISABLE : TEXT.ENABLE}
         checked={value}
         onChange={() => toggleRule(rule)}
         data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.attributes.id)}
