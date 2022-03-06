@@ -242,6 +242,7 @@ export function Tabs({
   );
 
   const userEditPermission = dataViews.getCanSaveSync();
+  console.log('scriptedFieldLanguages', scriptedFieldLanguages);
   const getFilterSection = useCallback(
     (type: string) => {
       return (

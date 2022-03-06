@@ -7,8 +7,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const log = getService('log');
@@ -46,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
         scriptedPainlessFieldName,
         'painless',
         'number',
-        null,
+        {},
         '1',
         "doc['machine.ram'].value / (1024 * 1024 * 1024)"
       );
@@ -78,6 +79,7 @@ export default function ({ getService, getPageObjects }) {
           expect(lang).to.be('expression');
         }
       });
+      console.log('TEST - last check');
       await PageObjects.settings.clearScriptedFieldLanguageFilter('expression');
     });
   });
