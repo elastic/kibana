@@ -6,7 +6,6 @@
  */
 
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
-// import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
 import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsFindResponse,
@@ -17,7 +16,6 @@ import type {
 import {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
-  // PutPackagePolicyUpdateCallback,
 } from '../../../fleet/server';
 
 import { NewPackagePolicy } from '../../../fleet/common';
@@ -55,7 +53,6 @@ export const getPackagePolicyCreateCallback = (logger: Logger): PostPackagePolic
       await savedObjectsClient.find({ type: cspRuleTemplateSavedObjectType });
 
     if (existingRuleTemplates.total === 0) {
-      logger.debug('No csp rules templates were found');
       return newPackagePolicy;
     }
 
@@ -74,6 +71,9 @@ export const getPackagePolicyCreateCallback = (logger: Logger): PostPackagePolic
   };
 };
 
+/**
+ * Callback to handle deletion of PackagePolicies in Fleet
+ */
 export const getPackagePolicyDeleteCallback = (
   client: ISavedObjectsRepository
 ): PostPackagePolicyDeleteCallback => {
