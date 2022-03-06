@@ -19,9 +19,10 @@ import { APMIndices } from '../apm_indices';
 
 async function fetchLegacyAPMIndices(repository: ISavedObjectsRepository) {
   try {
-    const apmIndices = await repository.get<
-      Partial<ApmIndicesConfig & { isSpaceAware: boolean }>
-    >(APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE, APM_INDEX_SETTINGS_SAVED_OBJECT_ID);
+    const apmIndices = await repository.get<Partial<APMIndices>>(
+      APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
+      APM_INDEX_SETTINGS_SAVED_OBJECT_ID
+    );
     if (apmIndices.attributes.isSpaceAware) {
       // This has already been migrated to become space-aware
       return null;
@@ -59,8 +60,8 @@ export async function migrateLegacyAPMIndicesToSpaceAware({
       fields: ['name'], // to avoid fetching *all* fields
     });
 
-    const savedObjectAttributes: APMIndices = {
-      apmIndices: legacyAPMIndices.attributes,
+    const savedObjectAttributes = {
+      ...legacyAPMIndices.attributes,
       isSpaceAware: true,
     };
 

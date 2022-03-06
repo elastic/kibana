@@ -18,9 +18,6 @@ jobs:
               {"label": "Feature:Canvas", "projectNumber": 38, "columnName": "Inbox"},
               {"label": "Feature:Dashboard", "projectNumber": 68, "columnName": "Inbox"},
               {"label": "Feature:Drilldowns", "projectNumber": 68, "columnName": "Inbox"},
-              {"label": "Feature:Input Controls", "projectNumber": 72, "columnName": "Inbox"},
-              {"label": "Team:Security", "projectNumber": 320, "columnName": "Awaiting triage", "projectScope": "org"},
-              {"label": "Team:Operations", "projectNumber": 314, "columnName": "Triage", "projectScope": "org"},
-              {"label": "Team:Fleet", "projectNumber": 490, "columnName": "Inbox", "projectScope": "org"}
+              {"label": "Feature:Input Controls", "projectNumber": 72, "columnName": "Inbox"}
             ]
           ghToken: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}

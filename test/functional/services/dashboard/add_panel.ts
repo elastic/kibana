@@ -46,6 +46,11 @@ export class DashboardAddPanelService extends FtrService {
   async clickEditorMenuButton() {
     this.log.debug('DashboardAddPanel.clickEditorMenuButton');
     await this.testSubjects.click('dashboardEditorMenuButton');
+    await this.testSubjects.existOrFail('dashboardEditorContextMenu');
+  }
+
+  async expectEditorMenuClosed() {
+    await this.testSubjects.missingOrFail('dashboardEditorContextMenu');
   }
 
   async clickAggBasedVisualizations() {

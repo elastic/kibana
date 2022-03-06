@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { omitBy } from 'lodash';
+import { isEmpty, omitBy } from 'lodash';
 import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
 
@@ -22,11 +22,12 @@ import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
-import { ExecutionContextContainer } from '../execution_context';
+import { ExecutionContextContainer, ExecutionContextSetup } from '../execution_context';
 
 interface Params {
   basePath: IBasePath;
   kibanaVersion: string;
+  executionContext: ExecutionContextSetup;
 }
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
@@ -107,6 +108,7 @@ export class Fetch {
   };
 
   private createRequest(options: HttpFetchOptionsWithPath): Request {
+    const context = this.params.executionContext.withGlobalContext(options.context);
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
       query,
@@ -125,7 +127,7 @@ export class Fetch {
         'Content-Type': 'application/json',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
-        ...(options.context ? new ExecutionContextContainer(options.context).toHeader() : {}),
+        ...(!isEmpty(context) ? new ExecutionContextContainer(context).toHeader() : {}),
       }),
     };
 
