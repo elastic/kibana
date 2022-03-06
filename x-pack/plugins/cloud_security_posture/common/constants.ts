@@ -11,7 +11,7 @@ export const BENCHMARKS_ROUTE_PATH = '/api/csp/benchmarks';
 
 export const CSP_KUBEBEAT_INDEX_PATTERN = 'logs-cis_kubernetes_benchmark.findings*';
 export const AGENT_LOGS_INDEX_PATTERN = '.logs-cis_kubernetes_benchmark.metadata*';
-export const LATEST_FINDINGS_INDEX_PATTERN = '.csp-findings-latest';
+export const LATEST_FINDINGS_INDEX_PATTERN = 'cloud_security_posture-findings_latest';
 
 export const CSP_FINDINGS_INDEX_NAME = 'findings';
 export const CIS_KUBERNETES_PACKAGE_NAME = 'cis_kubernetes_benchmark';
