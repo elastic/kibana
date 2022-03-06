@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings']);
   const SCRIPTED_FIELD_NAME = 'myScriptedField';
 
-  const scriptResultToJson = (scriptResult) => {
+  const scriptResultToJson = (scriptResult: string) => {
     try {
       return JSON.parse(scriptResult);
     } catch (e) {
