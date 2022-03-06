@@ -47,7 +47,7 @@ describe('get latest cycle ids', () => {
               {
                 group_docs: {
                   hits: {
-                    hits: [{ fields: { 'run_id.keyword': ['randomId1'] } }],
+                    hits: [{ fields: { 'cycle_id.keyword': ['randomId1'] } }],
                   },
                 },
               },
@@ -70,21 +70,21 @@ describe('get latest cycle ids', () => {
               {
                 group_docs: {
                   hits: {
-                    hits: [{ fields: { 'run_id.keyword': ['randomId1'] } }],
+                    hits: [{ fields: { 'cycle_id.keyword': ['randomId1'] } }],
                   },
                 },
               },
               {
                 group_docs: {
                   hits: {
-                    hits: [{ fields: { 'run_id.keyword': ['randomId2'] } }],
+                    hits: [{ fields: { 'cycle_id.keyword': ['randomId2'] } }],
                   },
                 },
               },
               {
                 group_docs: {
                   hits: {
-                    hits: [{ fields: { 'run_id.keyword': ['randomId3'] } }],
+                    hits: [{ fields: { 'cycle_id.keyword': ['randomId3'] } }],
                   },
                 },
               },
