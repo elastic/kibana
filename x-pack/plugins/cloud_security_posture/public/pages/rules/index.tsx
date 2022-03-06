@@ -7,6 +7,7 @@
 import React from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { CspPageTemplate } from '../../components/page_template';
+import { RulesContainer } from './rules_container';
 
 // TODO:
 // - get selected integration
@@ -16,5 +17,9 @@ const pageHeader: EuiPageHeaderProps = {
 };
 
 export const Rules = () => {
-  return <CspPageTemplate pageHeader={pageHeader} />;
+  return (
+    <CspPageTemplate pageHeader={pageHeader}>
+      <RulesContainer />
+    </CspPageTemplate>
+  );
 };
