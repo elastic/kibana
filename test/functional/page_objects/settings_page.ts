@@ -550,7 +550,7 @@ export class SettingsPageObject extends FtrService {
     name: string,
     language: string,
     type: string,
-    format: Record<string, any>,
+    format: Record<string, any> | null,
     popularity: string,
     script: string
   ) {

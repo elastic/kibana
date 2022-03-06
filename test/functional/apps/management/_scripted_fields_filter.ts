@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         scriptedPainlessFieldName,
         'painless',
         'number',
-        {},
+        null,
         '1',
         "doc['machine.ram'].value / (1024 * 1024 * 1024)"
       );
