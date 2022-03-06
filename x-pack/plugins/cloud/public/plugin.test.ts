@@ -103,6 +103,8 @@ describe('Cloud Plugin', () => {
             version_patch_int: -1,
           }
         );
+
+        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({ org_id_str: 'cloudId' });
       });
 
       it('user hash includes org id', async () => {
@@ -147,7 +149,6 @@ describe('Cloud Plugin', () => {
         expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
           pageName: 'App1',
           app_id_str: 'App1',
-          org_id_str: 'cloudId',
         });
 
         // context clear
@@ -155,7 +156,6 @@ describe('Cloud Plugin', () => {
         expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
           pageName: 'App1',
           app_id_str: 'App1',
-          org_id_str: 'cloudId',
         });
 
         // different app
@@ -169,7 +169,6 @@ describe('Cloud Plugin', () => {
           app_id_str: 'App2',
           page_str: 'page2',
           ent_id_str: '123',
-          org_id_str: 'cloudId',
         });
 
         // Back to first app
@@ -184,7 +183,6 @@ describe('Cloud Plugin', () => {
           app_id_str: 'App1',
           page_str: 'page3',
           ent_id_str: '123',
-          org_id_str: 'cloudId',
         });
 
         expect(currentContext$.observers.length).toBe(1);

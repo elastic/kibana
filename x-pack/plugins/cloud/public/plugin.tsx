@@ -259,6 +259,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       packageInfo: this.initializerContext.env.packageInfo,
     });
 
+    fullStory.setUserVars({
+      org_id_str: esOrgId,
+    });
+
     // Very defensive try/catch to avoid any UnhandledPromiseRejections
     try {
       // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
@@ -283,7 +287,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
                     app_id_str: name ?? 'unknown',
                     page_str: page,
                     ent_id_str: id,
-                    org_id_str: esOrgId,
                   },
                   isUndefined
                 )
