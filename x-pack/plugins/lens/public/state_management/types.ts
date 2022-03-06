@@ -33,6 +33,9 @@ export interface PreviewState {
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;
   stagedPreview?: PreviewState;
+  autoApplyDisabled?: boolean;
+  applyChangesCounter?: number;
+  changesApplied?: boolean;
   isFullscreenDatasource?: boolean;
 }
 export interface LensAppState extends EditorFrameState {
