@@ -95,7 +95,7 @@ describe('Cloud Plugin', () => {
         });
 
         expect(fullStoryApiMock.identify).toHaveBeenCalledWith(
-          '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
+          '5ef112cfdae3dea57097bc276e275b2816e73ef2a398dc0ffaf5b6b4e3af2041',
           {
             version_str: 'version',
             version_major_int: -1,
@@ -103,6 +103,28 @@ describe('Cloud Plugin', () => {
             version_patch_int: -1,
           }
         );
+      });
+
+      it('user hash includes org id', async () => {
+        await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg1' },
+          currentUserProps: {
+            username: '1234',
+          },
+        });
+
+        const hashId1 = fullStoryApiMock.identify.mock.calls[0][0];
+
+        await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg2' },
+          currentUserProps: {
+            username: '1234',
+          },
+        });
+
+        const hashId2 = fullStoryApiMock.identify.mock.calls[1][0];
+
+        expect(hashId1).not.toEqual(hashId2);
       });
 
       it('calls FS.setVars everytime an app changes', async () => {
@@ -125,6 +147,7 @@ describe('Cloud Plugin', () => {
         expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
           pageName: 'App1',
           app_id_str: 'App1',
+          org_id_str: 'cloudId',
         });
 
         // context clear
@@ -132,6 +155,7 @@ describe('Cloud Plugin', () => {
         expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
           pageName: 'App1',
           app_id_str: 'App1',
+          org_id_str: 'cloudId',
         });
 
         // different app
@@ -145,6 +169,7 @@ describe('Cloud Plugin', () => {
           app_id_str: 'App2',
           page_str: 'page2',
           ent_id_str: '123',
+          org_id_str: 'cloudId',
         });
 
         // Back to first app
@@ -159,6 +184,7 @@ describe('Cloud Plugin', () => {
           app_id_str: 'App1',
           page_str: 'page3',
           ent_id_str: '123',
+          org_id_str: 'cloudId',
         });
 
         expect(currentContext$.observers.length).toBe(1);

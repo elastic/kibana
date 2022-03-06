@@ -86,6 +86,7 @@ export interface CloudSetup {
 interface SetupFullstoryDeps extends CloudSetupDependencies {
   executionContextPromise?: Promise<ExecutionContextStart>;
   basePath: IBasePath;
+  esOrgId?: string;
 }
 
 interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
@@ -108,10 +109,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       return coreStart.executionContext;
     });
 
-    this.setupFullstory({ basePath: core.http.basePath, security, executionContextPromise }).catch(
-      (e) =>
-        // eslint-disable-next-line no-console
-        console.debug(`Error setting up FullStory: ${e.toString()}`)
+    this.setupFullstory({
+      basePath: core.http.basePath,
+      security,
+      executionContextPromise,
+      esOrgId: this.config.id,
+    }).catch((e) =>
+      // eslint-disable-next-line no-console
+      console.debug(`Error setting up FullStory: ${e.toString()}`)
     );
 
     const {
@@ -229,9 +234,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     basePath,
     security,
     executionContextPromise,
+    esOrgId,
   }: SetupFullstoryDeps) {
-    const { enabled, org_id: orgId } = this.config.full_story;
-    if (!enabled || !orgId) {
+    const { enabled, org_id: fsOrgId } = this.config.full_story;
+    if (!enabled || !fsOrgId) {
       return; // do not load any fullstory code in the browser if not enabled
     }
 
@@ -249,7 +255,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     const { fullStory, sha256 } = initializeFullStory({
       basePath,
-      orgId,
+      orgId: fsOrgId,
       packageInfo: this.initializerContext.env.packageInfo,
     });
 
@@ -258,8 +264,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
       // across domains work
       if (userId) {
-        // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
-        const hashedId = sha256(userId.toString());
+        // Join the cloud org id and the user to create a truly unique user id.
+        // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
+        const hashedId = sha256(esOrgId ? `${esOrgId}:${userId}` : `${userId}`);
+
         executionContextPromise
           ?.then(async (executionContext) => {
             this.appSubscription = executionContext.context$.subscribe((context) => {
@@ -275,6 +283,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
                     app_id_str: name ?? 'unknown',
                     page_str: page,
                     ent_id_str: id,
+                    org_id_str: esOrgId,
                   },
                   isUndefined
                 )
