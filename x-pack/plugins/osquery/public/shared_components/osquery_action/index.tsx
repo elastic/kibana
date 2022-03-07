@@ -8,6 +8,7 @@
 import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
+import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
 import { LiveQuery } from '../../live_queries';
@@ -32,8 +33,10 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
         titleSize="xs"
         body={
           <p>
-            An Elastic Agent is not installed on this host. To run queries, install Elastic Agent on
-            the host, and then add the Osquery Manager integration to the agent policy in Fleet.
+            {i18n.translate('xpack.osquery.action.empty', {
+              defaultMessage:
+                'An Elastic Agent is not installed on this host. To run queries, install Elastic Agent on the host, and then add the Osquery Manager integration to the agent policy in Fleet.',
+            })}
           </p>
         }
       />

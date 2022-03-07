@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { OsqueryEventDetailsFooter } from '../../osquery/footer';
 import { EventDetailsFooter } from '../event_details/footer';
 import { ACTIVE_PANEL } from '../event_details';
@@ -41,13 +41,17 @@ const EventDetailsFlyoutFooterComponent: React.FC<IProps> = ({
   timelineId,
   setActivePanel,
 }) => {
-  const handlePanelChange = (panelType: ACTIVE_PANEL | null) => {
-    if (activePanel === ACTIVE_PANEL.OSQUERY && panelType === null) {
-      showAlertDetails();
-    } else {
-      setActivePanel(panelType);
-    }
-  };
+  const handlePanelChange = useCallback(
+    (panelType: ACTIVE_PANEL | null) => {
+      if (activePanel === ACTIVE_PANEL.OSQUERY && panelType === null) {
+        showAlertDetails();
+      } else {
+        setActivePanel(panelType);
+      }
+    },
+    [activePanel, setActivePanel, showAlertDetails]
+  );
+
   switch (activePanel) {
     case ACTIVE_PANEL.OSQUERY:
       return (
