@@ -17,6 +17,8 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
 const ACTIVE_ALERTS_CELL_COUNT = 48;
 const RECOVERED_ALERTS_CELL_COUNT = 24;
 const TOTAL_ALERTS_CELL_COUNT = 72;
+const DISABLED_ALERTS_CHECKBOX = 6;
+const ENABLED_ALERTS_CHECKBOX = 2;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -28,6 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
     const observability = getService('observability');
+    const security = getService('security');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -212,6 +215,64 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await retry.try(async () => {
             const cells = await observability.alerts.common.getTableCells();
             expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
+          });
+        });
+      });
+
+      /*
+       * ATTENTION FUTURE DEVELOPER
+       *
+       * These tests should only be valid for 7.17.x
+       * You can run this test if you go to this file:
+       * x-pack/plugins/observability/public/pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid.tsx
+       * and at line 397 and change showCheckboxes to true
+       *
+       */
+      describe('Bulk Actions', () => {
+        before(async () => {
+          await security.testUser.setRoles(['global_alerts_logs_all_else_read'], true);
+          await observability.alerts.common.setWorkflowStatusFilter('open');
+        });
+        after(async () => {
+          await observability.alerts.common.submitQuery('');
+          await security.testUser.restoreDefaults();
+        });
+
+        it('Only logs alert should be enable for bulk actions', async () => {
+          const disabledCheckBoxes =
+            await observability.alerts.common.getAllDisabledCheckBoxInTable();
+          const enabledCheckBoxes =
+            await observability.alerts.common.getAllEnabledCheckBoxInTable();
+
+          expect(disabledCheckBoxes.length).to.eql(DISABLED_ALERTS_CHECKBOX);
+          expect(enabledCheckBoxes.length).to.eql(ENABLED_ALERTS_CHECKBOX);
+        });
+
+        it('validate formatting of the bulk actions button', async () => {
+          const selectAll = await testSubjects.find('select-all-events');
+          await selectAll.click();
+          const bulkActionsButton = await testSubjects.find('selectedShowBulkActionsButton');
+          expect(await bulkActionsButton.getVisibleText()).to.be('Selected 2 alerts');
+          await selectAll.click();
+        });
+
+        it('validate functionality of the bulk actions button', async () => {
+          const selectAll = await testSubjects.find('select-all-events');
+          await selectAll.click();
+
+          const bulkActionsButton = await testSubjects.find('selectedShowBulkActionsButton');
+          await bulkActionsButton.click();
+
+          const bulkActionsAcknowledgedAlertStatusButton = await testSubjects.find(
+            'acknowledged-alert-status'
+          );
+          await bulkActionsAcknowledgedAlertStatusButton.click();
+          await observability.alerts.common.setWorkflowStatusFilter('acknowledged');
+
+          await retry.try(async () => {
+            const enabledCheckBoxes =
+              await observability.alerts.common.getAllEnabledCheckBoxInTable();
+            expect(enabledCheckBoxes.length).to.eql(3);
           });
         });
       });
