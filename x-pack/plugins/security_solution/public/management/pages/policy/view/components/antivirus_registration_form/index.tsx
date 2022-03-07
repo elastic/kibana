@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
-import { OperatingSystem } from '../../../../../../../common/endpoint/types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { isAntivirusRegistrationEnabled } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { ConfigForm } from '../config_form';
