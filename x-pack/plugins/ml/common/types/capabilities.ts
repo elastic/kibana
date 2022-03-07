@@ -7,7 +7,11 @@
 
 import { KibanaRequest } from 'kibana/server';
 import { PLUGIN_ID } from '../constants/app';
-import { ML_JOB_SAVED_OBJECT_TYPE } from './saved_objects';
+import {
+  ML_JOB_SAVED_OBJECT_TYPE,
+  ML_MODULE_SAVED_OBJECT_TYPE,
+  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
@@ -101,6 +105,8 @@ export function getPluginPrivileges() {
     'search',
     'visualization',
     ML_JOB_SAVED_OBJECT_TYPE,
+    ML_MODULE_SAVED_OBJECT_TYPE,
+    ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
   ];
   const privilege = {
     app: [PLUGIN_ID, 'kibana'],
