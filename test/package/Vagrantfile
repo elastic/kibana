@@ -2,6 +2,9 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder '../../target/', '/packages'
 
   config.vm.define "deb" do |deb|
+    deb.vm.provider :virtualbox do |vb|
+      vb.memory = 2048
+    end
     deb.vm.box = 'elastic/debian-9-x86_64'
     deb.vm.provision "ansible" do |ansible|
       ansible.playbook = "deb.yml"
@@ -10,6 +13,9 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "rpm" do |rpm|
+    rpm.vm.provider :virtualbox do |vb|
+      vb.memory = 2048
+    end
     rpm.vm.box = 'elastic/centos-7-x86_64'
     rpm.vm.provision "ansible" do |ansible|
       ansible.playbook = "rpm.yml"
@@ -18,6 +24,9 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "docker" do |docker|
+    docker.vm.provider :virtualbox do |vb|
+      vb.memory = 2048
+    end
     docker.vm.box = 'elastic/ubuntu-18.04-x86_64'
     docker.vm.provision "ansible" do |ansible|
       ansible.playbook = "docker.yml"

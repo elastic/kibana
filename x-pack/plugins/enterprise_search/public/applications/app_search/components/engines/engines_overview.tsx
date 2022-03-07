@@ -21,6 +21,7 @@ import { DataPanel } from '../data_panel';
 import { AppSearchPageTemplate } from '../layout';
 
 import { EmptyState, EmptyMetaEnginesState } from './components';
+import { AuditLogsModal } from './components/audit_logs_modal/audit_logs_modal';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
@@ -144,6 +145,7 @@ export const EnginesOverview: React.FC = () => {
           data-test-subj="metaEnginesLicenseCTA"
         />
       )}
+      <AuditLogsModal />
     </AppSearchPageTemplate>
   );
 };
