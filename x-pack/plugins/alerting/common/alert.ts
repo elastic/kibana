@@ -46,16 +46,6 @@ export enum AlertExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
 }
 
-export enum ActionsCompletion {
-  ALL = 'all',
-  PARTIAL = 'partial',
-  NONE = 'none',
-}
-
-export interface AlertExecutionResult {
-  completion: ActionsCompletion;
-}
-
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   numberOfTriggeredActions?: number;

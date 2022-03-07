@@ -92,8 +92,7 @@ export interface ScheduleActionsForRecoveredAlertsParams<
   executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
-  triggeredActions: AlertAction[];
-  maxExecutableActions: number;
+  alertExecutionStore: AlertExecutionStore;
 }
 
 export interface LogActiveAndRecoveredAlertsParams<
@@ -152,6 +151,20 @@ export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   alertId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
-  triggeredActions: AlertAction[];
+  alertExecutionStore: AlertExecutionStore;
+}
+
+export enum ActionsCompletion {
+  COMPLETE = 'complete',
+  PARTIAL = 'partial',
+}
+
+export interface AlertExecutionResult {
+  completion: ActionsCompletion;
+}
+
+export interface AlertExecutionStore {
+  total: number;
   maxExecutableActions: number;
+  completion: ActionsCompletion;
 }

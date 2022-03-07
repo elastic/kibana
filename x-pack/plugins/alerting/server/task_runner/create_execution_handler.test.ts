@@ -6,11 +6,11 @@
  */
 
 import { createExecutionHandler } from './create_execution_handler';
-import { CreateExecutionHandlerOptions } from './types';
+import { ActionsCompletion, AlertExecutionStore, CreateExecutionHandlerOptions } from './types';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import {
-  actionsMock,
   actionsClientMock,
+  actionsMock,
   renderActionParameterTemplatesDefault,
 } from '../../../actions/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
@@ -19,12 +19,11 @@ import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
+  AlertAction,
+  AlertInstanceContext,
+  AlertInstanceState,
   AlertTypeParams,
   AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  AlertAction,
-  ActionsCompletion,
 } from '../types';
 
 jest.mock('./inject_action_params', () => ({
@@ -108,8 +107,7 @@ const createExecutionHandlerParams: jest.Mocked<
   supportsEphemeralTasks: false,
   maxEphemeralActionsPerRule: 10,
 };
-
-const maxExecutableActions = 1000;
+let alertExecutionStore: AlertExecutionStore;
 
 describe('Create Execution Handler', () => {
   beforeEach(() => {
@@ -125,20 +123,23 @@ describe('Create Execution Handler', () => {
     mockActionsPlugin.renderActionParameterTemplates.mockImplementation(
       renderActionParameterTemplatesDefault
     );
+    alertExecutionStore = {
+      total: 0,
+      maxExecutableActions: 1000,
+      completion: ActionsCompletion.COMPLETE,
+    };
   });
 
   test('enqueues execution per selected action', async () => {
-    const triggeredActions: AlertAction[] = [];
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    const result = await executionHandler({
+    await executionHandler({
       actionGroup: 'default',
       state: {},
       context: {},
       alertId: '2',
-      triggeredActions,
-      maxExecutableActions,
+      alertExecutionStore,
     });
-    expect(triggeredActions).toHaveLength(1);
+    expect(alertExecutionStore.total).toBe(1);
     expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(
       createExecutionHandlerParams.request
     );
@@ -240,9 +241,7 @@ describe('Create Execution Handler', () => {
       },
     });
 
-    expect(result).toEqual({
-      completion: ActionsCompletion.ALL,
-    });
+    expect(alertExecutionStore.completion).toBe(ActionsCompletion.COMPLETE);
   });
 
   test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
@@ -250,7 +249,6 @@ describe('Create Execution Handler', () => {
     mockActionsPlugin.isActionExecutable.mockReturnValueOnce(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
-    const triggeredActions: AlertAction[] = [];
     const executionHandler = createExecutionHandler({
       ...createExecutionHandlerParams,
       actions: [
@@ -272,10 +270,9 @@ describe('Create Execution Handler', () => {
       state: {},
       context: {},
       alertId: '2',
-      triggeredActions,
-      maxExecutableActions,
+      alertExecutionStore,
     });
-    expect(triggeredActions).toHaveLength(1);
+    expect(alertExecutionStore.total).toBe(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
       id: '2',
@@ -329,8 +326,7 @@ describe('Create Execution Handler', () => {
       state: {},
       context: {},
       alertId: '2',
-      triggeredActions,
-      maxExecutableActions,
+      alertExecutionStore,
     });
     expect(triggeredActions).toHaveLength(0);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
@@ -345,8 +341,7 @@ describe('Create Execution Handler', () => {
       state: {},
       context: {},
       alertId: '2',
-      triggeredActions,
-      maxExecutableActions,
+      alertExecutionStore,
     });
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   });
@@ -359,25 +354,22 @@ describe('Create Execution Handler', () => {
       state: {},
       context: {},
       alertId: '2',
-      triggeredActions,
-      maxExecutableActions,
+      alertExecutionStore,
     });
     expect(triggeredActions).toEqual([]);
     expect(actionsClient.enqueueExecution).not.toHaveBeenCalled();
   });
 
   test('context attribute gets parameterized', async () => {
-    const triggeredActions: AlertAction[] = [];
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
     await executionHandler({
       actionGroup: 'default',
       context: { value: 'context-val' },
       state: {},
       alertId: '2',
-      triggeredActions,
-      maxExecutableActions,
+      alertExecutionStore,
     });
-    expect(triggeredActions).toHaveLength(1);
+    expect(alertExecutionStore.total).toBe(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
@@ -413,15 +405,13 @@ describe('Create Execution Handler', () => {
   });
 
   test('state attribute gets parameterized', async () => {
-    const triggeredActions: AlertAction[] = [];
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
     await executionHandler({
       actionGroup: 'default',
       context: {},
       state: { value: 'state-val' },
       alertId: '2',
-      triggeredActions,
-      maxExecutableActions,
+      alertExecutionStore,
     });
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -458,29 +448,25 @@ describe('Create Execution Handler', () => {
   });
 
   test(`logs an error when action group isn't part of actionGroups available for the ruleType`, async () => {
-    const triggeredActions: AlertAction[] = [];
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    const result = await executionHandler({
+    await executionHandler({
       // we have to trick the compiler as this is an invalid type and this test checks whether we
       // enforce this at runtime as well as compile time
       actionGroup: 'invalid-group' as 'default' | 'other-group',
       context: {},
       state: {},
       alertId: '2',
-      triggeredActions,
-      maxExecutableActions,
+      alertExecutionStore,
     });
     expect(createExecutionHandlerParams.logger.error).toHaveBeenCalledWith(
       'Invalid action group "invalid-group" for rule "test".'
     );
-    expect(result).toEqual({
-      completion: ActionsCompletion.NONE,
-    });
+
+    expect(alertExecutionStore.total).toBe(0);
+    expect(alertExecutionStore.completion).toBe(ActionsCompletion.PARTIAL);
   });
 
   test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions', async () => {
-    const triggeredActions: AlertAction[] = [];
-
     const executionHandler = createExecutionHandler({
       ...createExecutionHandlerParams,
       actions: [
@@ -508,19 +494,22 @@ describe('Create Execution Handler', () => {
       ],
     });
 
-    const result = await executionHandler({
+    alertExecutionStore = {
+      total: 0,
+      maxExecutableActions: 2,
+      completion: ActionsCompletion.COMPLETE,
+    };
+
+    await executionHandler({
       actionGroup: 'default',
       context: {},
       state: { value: 'state-val' },
       alertId: '2',
-      triggeredActions,
-      maxExecutableActions: 2,
+      alertExecutionStore,
     });
 
-    expect(triggeredActions).toHaveLength(2);
-    expect(result).toEqual({
-      completion: ActionsCompletion.PARTIAL,
-    });
+    expect(alertExecutionStore.total).toBe(2);
+    expect(alertExecutionStore.completion).toBe(ActionsCompletion.PARTIAL);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
   });
 });

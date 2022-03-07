@@ -5,57 +5,57 @@
  * 2.0.
  */
 import apm from 'elastic-apm-node';
-import { pickBy, mapValues, without, cloneDeep, set, omit, concat } from 'lodash';
+import { cloneDeep, mapValues, omit, pickBy, set, without } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import uuid from 'uuid';
 import { addSpaceIdToPath } from '../../../spaces/server';
-import { Logger, KibanaRequest } from '../../../../../src/core/server';
+import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert as CreatedAlert, createAlertFactory } from '../alert';
 import {
-  validateRuleTypeParams,
-  executionStatusFromState,
-  executionStatusFromError,
-  ruleExecutionStatusToRaw,
-  ErrorWithReason,
+  createWrappedScopedClusterClientFactory,
   ElasticsearchError,
+  ErrorWithReason,
+  executionStatusFromError,
+  executionStatusFromState,
+  getRecoveredAlerts,
+  ruleExecutionStatusToRaw,
+  validateRuleTypeParams,
 } from '../lib';
 import {
-  RawRule,
-  IntervalSchedule,
-  RawAlertInstance,
-  RuleTaskState,
   Alert,
-  SanitizedAlert,
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
-  RuleTypeRegistry,
+  IntervalSchedule,
+  RawAlertInstance,
+  RawRule,
+  RawRuleExecutionStatus,
+  RuleExecutionRunResult,
+  RuleExecutionState,
   RuleMonitoring,
   RuleMonitoringHistory,
-  RawRuleExecutionStatus,
-  AlertAction,
-  RuleExecutionState,
-  RuleExecutionRunResult,
-  AlertExecutionResult,
+  RuleTaskState,
+  RuleTypeRegistry,
+  SanitizedAlert,
 } from '../types';
-import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
-import { getExecutionSuccessRatio, getExecutionDurationPercentiles } from '../lib/monitoring';
+import { asErr, asOk, map, promiseResult, resolveErr, Resultable } from '../lib/result_type';
+import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
+  AlertInstanceContext,
+  AlertInstanceState,
   AlertTypeParams,
   AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  WithoutReservedActionGroups,
-  parseDuration,
   MONITORING_HISTORY_LIMIT,
+  parseDuration,
+  WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -64,9 +64,9 @@ import {
   Event,
 } from '../lib/create_alert_event_log_record_object';
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
-import { createWrappedScopedClusterClientFactory } from '../lib';
-import { getRecoveredAlerts } from '../lib';
 import {
+  ActionsCompletion,
+  AlertExecutionStore,
   GenerateNewAndRecoveredAlertEventsParams,
   LogActiveAndRecoveredAlertsParams,
   RuleTaskInstance,
@@ -272,8 +272,7 @@ export class TaskRunner<
     alertId: string,
     alert: CreatedAlert<InstanceState, InstanceContext>,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
-    triggeredActions: AlertAction[],
-    maxExecutableActions: number
+    alertExecutionStore: AlertExecutionStore
   ) {
     const {
       actionGroup,
@@ -289,8 +288,7 @@ export class TaskRunner<
       context,
       state,
       alertId,
-      triggeredActions,
-      maxExecutableActions,
+      alertExecutionStore,
     });
   }
 
@@ -477,13 +475,16 @@ export class TaskRunner<
       });
     }
 
-    const triggeredActions: AlertAction[] = [];
-    let alertExecutionResults: AlertExecutionResult[] = [];
+    const alertExecutionStore: AlertExecutionStore = {
+      total: 0,
+      completion: ActionsCompletion.COMPLETE,
+      maxExecutableActions: ruleType.config!.maxExecutableActions,
+    };
 
     if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
-      const actionsForRecoveredAlertsStatuses = await scheduleActionsForRecoveredAlerts<
+      await scheduleActionsForRecoveredAlerts<
         InstanceState,
         InstanceContext,
         RecoveryActionGroupId
@@ -494,8 +495,7 @@ export class TaskRunner<
         mutedAlertIdsSet,
         logger: this.logger,
         ruleLabel,
-        triggeredActions,
-        maxExecutableActions: ruleType.config!.maxExecutableActions,
+        alertExecutionStore,
       });
 
       const alertsWithExecutableActions = Object.entries(alertsWithScheduledActions).filter(
@@ -525,22 +525,11 @@ export class TaskRunner<
         }
       );
 
-      const actionsForActiveAlertsStatuses = await Promise.all(
+      await Promise.all(
         alertsWithExecutableActions.map(
           ([alertId, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) =>
-            this.executeAlert(
-              alertId,
-              alert,
-              executionHandler,
-              triggeredActions,
-              ruleType.config!.maxExecutableActions
-            )
+            this.executeAlert(alertId, alert, executionHandler, alertExecutionStore)
         )
-      );
-
-      alertExecutionResults = concat(
-        actionsForRecoveredAlertsStatuses,
-        actionsForActiveAlertsStatuses
       );
     } else {
       if (muteAll) {
@@ -561,8 +550,7 @@ export class TaskRunner<
 
     return {
       metrics: searchMetrics,
-      triggeredActions,
-      alertExecutionResults,
+      alertExecutionStore,
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
         Record<string, CreatedAlert<InstanceState, InstanceContext>>,
@@ -837,7 +825,7 @@ export class TaskRunner<
       executionState: RuleExecutionState
     ): RuleTaskState => {
       return {
-        ...omit(executionState, ['triggeredActions', 'metrics', 'alertExecutionResults']),
+        ...omit(executionState, ['alertExecutionStore', 'metrics']),
         previousStartedAt: startedAt,
       };
     };
@@ -1140,7 +1128,7 @@ async function scheduleActionsForRecoveredAlerts<
     InstanceContext,
     RecoveryActionGroupId
   >
-): Promise<AlertExecutionResult[]> {
+): Promise<void> {
   const {
     logger,
     recoveryActionGroup,
@@ -1148,12 +1136,9 @@ async function scheduleActionsForRecoveredAlerts<
     executionHandler,
     mutedAlertIdsSet,
     ruleLabel,
-    triggeredActions,
-    maxExecutableActions,
+    alertExecutionStore,
   } = params;
   const recoveredIds = Object.keys(recoveredAlerts);
-
-  const results: AlertExecutionResult[] = [];
 
   for (const id of recoveredIds) {
     if (mutedAlertIdsSet.has(id)) {
@@ -1164,20 +1149,16 @@ async function scheduleActionsForRecoveredAlerts<
       const alert = recoveredAlerts[id];
       alert.updateLastScheduledActions(recoveryActionGroup.id);
       alert.unscheduleActions();
-      const executionHandlerResult = await executionHandler({
+      await executionHandler({
         actionGroup: recoveryActionGroup.id,
         context: alert.getContext(),
         state: {},
         alertId: id,
-        triggeredActions,
-        maxExecutableActions,
+        alertExecutionStore,
       });
       alert.scheduleActions(recoveryActionGroup.id);
-      results.push(executionHandlerResult);
     }
   }
-
-  return results;
 }
 
 function logActiveAndRecoveredAlerts<

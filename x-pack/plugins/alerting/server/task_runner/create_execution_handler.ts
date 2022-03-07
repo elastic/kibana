@@ -10,22 +10,20 @@ import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import {
+  AlertInstanceContext,
+  AlertInstanceState,
   AlertTypeParams,
   AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
 } from '../types';
-
-import { AlertExecutionResult, ActionsCompletion } from '../../common';
 
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
-import { CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
+import { ActionsCompletion, CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
   options: ExecutionHandlerOptions<ActionGroupIds>
-) => Promise<AlertExecutionResult>;
+) => Promise<void>;
 
 export function createExecutionHandler<
   Params extends AlertTypeParams,
@@ -69,13 +67,13 @@ export function createExecutionHandler<
     actionSubgroup,
     context,
     state,
-    triggeredActions,
-    maxExecutableActions,
+    alertExecutionStore,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!ruleTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
-      return { completion: ActionsCompletion.NONE };
+      alertExecutionStore.completion = ActionsCompletion.PARTIAL;
+      return;
     }
     const actions = ruleActions
       .filter(({ group }) => group === actionGroup)
@@ -119,8 +117,9 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (triggeredActions.length >= maxExecutableActions) {
-        return { completion: ActionsCompletion.PARTIAL };
+      if (alertExecutionStore.total >= alertExecutionStore.maxExecutableActions) {
+        alertExecutionStore.completion = ActionsCompletion.PARTIAL;
+        break;
       }
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
@@ -164,11 +163,11 @@ export function createExecutionHandler<
             await actionsClient.enqueueExecution(enqueueOptions);
           }
         } finally {
-          triggeredActions.push(action);
+          alertExecutionStore.total++;
         }
       } else {
         await actionsClient.enqueueExecution(enqueueOptions);
-        triggeredActions.push(action);
+        alertExecutionStore.total++;
       }
 
       const event = createAlertEventLogRecordObject({
@@ -203,7 +202,5 @@ export function createExecutionHandler<
 
       eventLogger.logEvent(event);
     }
-
-    return { completion: ActionsCompletion.ALL };
   };
 }

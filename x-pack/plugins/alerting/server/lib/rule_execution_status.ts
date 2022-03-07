@@ -15,16 +15,15 @@ import {
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { AlertExecutionStatuses, ActionsCompletion } from '../../common';
+import { AlertExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
+import { ActionsCompletion } from '../task_runner/types';
 
 export function executionStatusFromState(state: RuleExecutionState): AlertExecutionStatus {
   const alertIds = Object.keys(state.alertInstances ?? {});
 
   const hasIncompleteAlertExecution =
-    state.alertExecutionResults?.some((executionResult) => {
-      return executionResult.completion === ActionsCompletion.PARTIAL;
-    }) || false;
+    state.alertExecutionStore.completion === ActionsCompletion.PARTIAL;
 
   let status: AlertExecutionStatuses =
     alertIds.length === 0 ? AlertExecutionStatusValues[0] : AlertExecutionStatusValues[1];
@@ -35,7 +34,7 @@ export function executionStatusFromState(state: RuleExecutionState): AlertExecut
 
   return {
     metrics: state.metrics,
-    numberOfTriggeredActions: state.triggeredActions?.length ?? 0,
+    numberOfTriggeredActions: state.alertExecutionStore.total,
     lastExecutionDate: new Date(),
     status,
     ...(hasIncompleteAlertExecution && {
