@@ -33,12 +33,12 @@ export const ProtectionSwitch = React.memo(
     osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
     additionalOnSwitchChange?: ({
       value,
-      os,
       policyConfigData,
+      protectionOsList,
     }: {
       value: boolean;
-      os: string;
       policyConfigData: UIPolicyConfig;
+      protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
     }) => {};
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
@@ -70,13 +70,6 @@ export const ProtectionSwitch = React.memo(
                     event.target.checked;
                 }
               }
-              if (additionalOnSwitchChange) {
-                additionalOnSwitchChange({
-                  value: event.target.checked,
-                  os,
-                  policyConfigData: newPayload,
-                });
-              }
             }
           } else {
             for (const os of osList) {
@@ -98,14 +91,14 @@ export const ProtectionSwitch = React.memo(
                     event.target.checked;
                 }
               }
-              if (additionalOnSwitchChange) {
-                additionalOnSwitchChange({
-                  value: event.target.checked,
-                  os,
-                  policyConfigData: newPayload,
-                });
-              }
             }
+          }
+          if (additionalOnSwitchChange) {
+            additionalOnSwitchChange({
+              value: event.target.checked,
+              policyConfigData: newPayload,
+              protectionOsList: osList,
+            });
           }
           dispatch({
             type: 'userChangedPolicyConfig',
