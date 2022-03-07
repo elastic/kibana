@@ -121,7 +121,7 @@ describe('Execute Report Task', () => {
     expect(store.setReportFailed).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        output: expect.objectContaining({ error_code: 'kibana_shutting_down_error' }),
+        output: expect.objectContaining({ error_code: new KibanaShuttingDownError().code }),
       })
     );
   });
