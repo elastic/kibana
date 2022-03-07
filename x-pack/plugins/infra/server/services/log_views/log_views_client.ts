@@ -18,7 +18,7 @@ import {
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { InfraSource, InfraSources } from '../../lib/sources';
+import type { InfraSource, IInfraSources } from '../../lib/sources';
 import {
   extractLogViewSavedObjectReferences,
   logViewSavedObjectName,
@@ -39,7 +39,7 @@ export class LogViewsClient implements ILogViewsClient {
     private readonly logger: Logger,
     private readonly dataViews: DataViewsService,
     private readonly savedObjectsClient: SavedObjectsClientContract,
-    private readonly infraSources: InfraSources,
+    private readonly infraSources: IInfraSources,
     private readonly internalLogViews: Map<string, LogView>,
     private readonly config: LogViewsStaticConfig
   ) {}
