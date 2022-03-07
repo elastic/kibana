@@ -252,6 +252,8 @@ describe('update()', () => {
         tags: ['foo'],
         params: {
           bar: true,
+          risk_score: 40,
+          severity: 'low',
         },
         throttle: null,
         notifyWhen: 'onActiveAlert',
@@ -362,6 +364,10 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": true,
+        "mapped_params": Object {
+          "risk_score": 40,
+          "severity": "20-low",
+        },
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
         },
@@ -369,6 +375,8 @@ describe('update()', () => {
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
+          "risk_score": 40,
+          "severity": "low",
         },
         "schedule": Object {
           "interval": "1m",

@@ -854,3 +854,45 @@
      }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:66560b6f-5ca4-41e2-a1a1-dcfd7117e124",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "Test mapped params migration",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+            "type": "eql",
+            "risk_score": 90,
+            "severity": "critical"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
