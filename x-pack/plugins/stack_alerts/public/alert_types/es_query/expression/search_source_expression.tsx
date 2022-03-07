@@ -12,7 +12,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiExpression,
-  EuiText,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
   EuiCallOut,
@@ -119,6 +118,17 @@ export const SearchSourceExpression = ({
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
+      <EuiCallOut
+        size="s"
+        title={
+          <FormattedMessage
+            id="xpack.stackAlerts.searchThreshold.ui.notEditable"
+            defaultMessage="The data view, query, and filter are initialized in Discover cannot be edited subsequently."
+          />
+        }
+        iconType="questionInCircle"
+      />
+      <EuiSpacer size="s" />
       <EuiExpression
         className="dscExpressionParam"
         description={'Data view'}
@@ -141,12 +151,7 @@ export const SearchSourceExpression = ({
         isActive={true}
         display="columns"
       />
-      <EuiText size="xs">
-        <FormattedMessage
-          id="xpack.stackAlerts.searchThreshold.ui.notEditable"
-          defaultMessage="The data view, query, and filter are initialized in Discover cannot be edited subsequently."
-        />
-      </EuiText>
+
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
         <h5>
