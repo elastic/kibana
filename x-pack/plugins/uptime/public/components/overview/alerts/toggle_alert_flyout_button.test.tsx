@@ -7,8 +7,6 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
-import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import {
   render,
   forNearestButton,

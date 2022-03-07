@@ -7,8 +7,6 @@
 
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
-// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
-import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ActionMenuContent } from './action_menu_content';
 
