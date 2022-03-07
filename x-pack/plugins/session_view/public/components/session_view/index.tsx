@@ -15,7 +15,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
-import { Process, ProcessEvent } from '../../../common/types/process_tree';
+import { Process, ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { useStyles } from './styles';
@@ -26,19 +26,30 @@ interface SessionViewDeps {
   sessionEntityId: string;
   height?: number;
   jumpToEvent?: ProcessEvent;
+  jumpToAlert?: ProcessEventAlert | null;
 }
 
 /**
  * The main wrapper component for the session view.
  */
-export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionViewDeps) => {
+export const SessionView = ({
+  sessionEntityId,
+  height,
+  jumpToEvent,
+  jumpToAlert = null,
+}: SessionViewDeps) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
+  const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(jumpToAlert);
 
   const styles = useStyles({ height });
 
   const onProcessSelected = useCallback((process: Process) => {
     setSelectedProcess(process);
+  }, []);
+
+  const onAlertSelected = useCallback((alert: ProcessEventAlert | null) => {
+    setSelectedAlert(alert);
   }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -162,6 +173,8 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                     selectedProcess={selectedProcess}
                     onProcessSelected={onProcessSelected}
                     jumpToEvent={jumpToEvent}
+                    onAlertSelected={onAlertSelected}
+                    selectedAlert={selectedAlert}
                     isFetching={isFetching}
                     hasPreviousPage={hasPreviousPage}
                     hasNextPage={hasNextPage}

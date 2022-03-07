@@ -9,7 +9,12 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ProcessTreeNode } from '../process_tree_node';
 import { useProcessTree } from './hooks';
-import { Process, ProcessEventsPage, ProcessEvent } from '../../../common/types/process_tree';
+import {
+  Process,
+  ProcessEventsPage,
+  ProcessEvent,
+  ProcessEventAlert,
+} from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 
@@ -34,6 +39,8 @@ interface ProcessTreeDeps {
   // currently selected process
   selectedProcess?: Process | null;
   onProcessSelected: (process: Process) => void;
+  selectedAlert: ProcessEventAlert | null;
+  onAlertSelected: (alert: ProcessEventAlert | null) => void;
   setSearchResults?: (results: Process[]) => void;
 }
 
@@ -49,6 +56,8 @@ export const ProcessTree = ({
   searchQuery,
   selectedProcess,
   onProcessSelected,
+  selectedAlert,
+  onAlertSelected,
   setSearchResults,
 }: ProcessTreeDeps) => {
   const styles = useStyles();
@@ -162,6 +171,8 @@ export const ProcessTree = ({
           isSessionLeader
           process={sessionLeader}
           onProcessSelected={onProcessSelected}
+          selectedAlert={selectedAlert}
+          onAlertSelected={onAlertSelected}
         />
       )}
       <div

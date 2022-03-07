@@ -19,7 +19,7 @@ export const useStyles = () => {
       marginTop: size.s,
       marginRight: size.s,
       color: colors.text,
-      padding: size.m,
+      padding: `${size.s} 0`,
       borderStyle: 'solid',
       borderColor: colors.lightShade,
       borderWidth: border.width.thin,

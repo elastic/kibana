@@ -7,14 +7,20 @@
 
 import React from 'react';
 import { useStyles } from './styles';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { ProcessTreeAlert } from '../process_tree_alert';
 
 interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
+  selectedAlert: ProcessEventAlert | null;
+  onAlertSelected: (alert: ProcessEventAlert | null) => void;
 }
 
-export function ProcessTreeAlerts({ alerts }: ProcessTreeAlertsDeps) {
+export function ProcessTreeAlerts({
+  alerts,
+  selectedAlert,
+  onAlertSelected,
+}: ProcessTreeAlertsDeps) {
   const styles = useStyles();
 
   if (alerts.length === 0) {
@@ -24,7 +30,11 @@ export function ProcessTreeAlerts({ alerts }: ProcessTreeAlertsDeps) {
   return (
     <div css={styles.container} data-test-subj="sessionView:sessionViewAlertDetails">
       {alerts.map((alert: ProcessEvent) => (
-        <ProcessTreeAlert alert={alert} />
+        <ProcessTreeAlert
+          alert={alert}
+          isSelected={!!selectedAlert?.uuid && alert.kibana?.alert.uuid === selectedAlert?.uuid}
+          onAlertSelected={onAlertSelected}
+        />
       ))}
     </div>
   );

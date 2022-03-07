@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
@@ -20,10 +20,22 @@ export const useStyles = () => {
       display: 'flex',
       alignItems: 'center',
       height: '20px',
-      padding: `${size.xs} 0`,
+      padding: `${size.xs} ${size.base}`,
       boxSizing: 'content-box',
+      cursor: 'pointer',
       '&:not(:last-child)': {
         marginBottom: size.s,
+      },
+      '&:hover': {
+        background: `${transparentize(colors.primary, 0.04)}`,
+      },
+    };
+
+    const selectedAlert: CSSObject = {
+      ...alert,
+      background: `${transparentize(colors.danger, 0.04)}`,
+      '&:hover': {
+        background: `${transparentize(colors.danger, 0.12)}`,
       },
     };
 
@@ -36,9 +48,19 @@ export const useStyles = () => {
       },
     };
 
+    const alertStatus: CSSObject = {
+      ...alertRowItem,
+      textTransform: 'capitalize',
+      '&, span': {
+        cursor: 'pointer !important',
+      },
+    };
+
     return {
       alert,
       alertRowItem,
+      alertStatus,
+      selectedAlert,
     };
   }, [euiTheme]);
 

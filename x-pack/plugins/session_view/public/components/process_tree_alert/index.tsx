@@ -6,46 +6,44 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiIcon,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiButtonIcon,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { CoreStart } from '../../../../../../src/core/public';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import { EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
+import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 
-export const ProcessTreeAlert = ({ alert }: { alert: ProcessEvent }) => {
-  const { http } = useKibana<CoreStart>().services;
+interface ProcessTreeAlertDeps {
+  alert: ProcessEvent;
+  isSelected: boolean;
+  onAlertSelected: (alert: ProcessEventAlert | null) => void;
+}
+
+export const ProcessTreeAlert = ({ alert, isSelected, onAlertSelected }: ProcessTreeAlertDeps) => {
   const styles = useStyles();
 
   if (!alert.kibana) {
     return null;
   }
 
-  const { uuid, rule, original_event: event, workflow_status: status } = alert.kibana.alert;
-  const { name, query, severity } = rule;
+  const { uuid, rule, workflow_status: status } = alert.kibana.alert;
+  const { name } = rule;
+
+  const handleClick = () => {
+    onAlertSelected(alert.kibana?.alert ?? null);
+  };
 
   return (
     <EuiText
       key={uuid}
       size="s"
-      css={styles.alert}
+      css={isSelected ? styles.selectedAlert : styles.alert}
       data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}`}
+      onClick={handleClick}
     >
       <EuiButtonIcon iconType="expand" aria-label="expand" css={styles.alertRowItem} />
       <EuiIcon type="alert" css={styles.alertRowItem} />
       <EuiText size="s" css={styles.alertRowItem}>
         {name}
       </EuiText>
-      <EuiBadge color="warning" css={styles.alertRowItem}>
+      <EuiBadge color="warning" css={styles.alertStatus}>
         {status}
       </EuiBadge>
     </EuiText>
