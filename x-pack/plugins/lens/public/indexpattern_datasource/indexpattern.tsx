@@ -143,7 +143,7 @@ export function getIndexPatternDatasource({
   const handleChangeIndexPattern = (
     id: string,
     state: IndexPatternPrivateState,
-    setState: StateSetter<IndexPatternPrivateState>
+    setState: StateSetter<IndexPatternPrivateState, { applyImmediately?: boolean }>
   ) => {
     changeIndexPattern({
       id,

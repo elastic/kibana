@@ -19,7 +19,7 @@ jobs:
       github.event.pull_request.merged_at &&
       contains(github.event.pull_request.labels.*.name, 'Team:Fleet')
     outputs:
-      matrix: ${{ steps.issues_to_label.outputs.value }}
+      issue_ids: ${{ steps.issues_to_label.outputs.value }}
       label_ids: ${{ steps.label_ids.outputs.value }}
     steps:
       - uses: octokit/graphql-action@v2.x
@@ -66,22 +66,28 @@ jobs:
   label_issues:
     needs: fetch_issues_to_label
     runs-on: ubuntu-latest
-    # For each issue closed by the PR run this job
+
+    # For each issue closed by the PR x each label to apply, run this job
+    if: |
+      fromJSON(needs.fetch_issues_to_label.outputs.issue_ids).length > 0 &&
+      fromJSON(needs.fetch_issues_to_label.outputs.label_ids).length > 0
     strategy:
       matrix:
-        issueNodeId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.matrix) }}
-    name: Label issue ${{ matrix.issueNodeId }}
+        issueId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.issue_ids) }}
+        labelId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.label_ids) }}
+
+    name: Label issue ${{ matrix.issueId }} with ${{ matrix.labelId }}
     steps:
       - uses: octokit/graphql-action@v2.x
         id: add_labels_to_closed_issue
         with:
           query: |
-            mutation add_label($issueid: ID!, $labelids:[ID!]!) {
-              addLabelsToLabelable(input: {labelableId: $issueid, labelIds: $labelids}) {
+            mutation add_label($issueid: ID!, $labelid:ID!) {
+              addLabelsToLabelable(input: {labelableId: $issueid, labelIds: [$labelid]}) {
                 clientMutationId
               }
             }
-          issueid: ${{ matrix.issueNodeId }}
-          labelids: ${{ fromJSON(needs.fetch_issues_to_label.outputs.label_ids) }}
+          issueid: ${{ matrix.issueId }}
+          labelid: ${{ matrix.labelId }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
