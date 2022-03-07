@@ -22,7 +22,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
   /**
    * Y axis labels width + padding
    */
-  const xOffset = 185;
+  const xOffset = 170;
 
   /**
    * Get coordinates relative to the left top corner of the canvas

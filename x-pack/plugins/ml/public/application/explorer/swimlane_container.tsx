@@ -67,6 +67,7 @@ const RESIZE_THROTTLE_TIME_MS = 500;
 const BORDER_WIDTH = 1;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
+const X_AXIS_HEIGHT = 24;
 
 export const SWIM_LANE_LABEL_WIDTH = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
 
@@ -243,7 +244,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return isLoading
       ? containerHeightRef.current
       : // TODO update when elastic charts X label will be fixed
-        rowsCount * (CELL_HEIGHT + BORDER_WIDTH * 2) + (showLegend ? LEGEND_HEIGHT : 0);
+        rowsCount * (CELL_HEIGHT + BORDER_WIDTH * 2) +
+          (showLegend ? LEGEND_HEIGHT : 0) +
+          (showTimeline ? X_AXIS_HEIGHT : 0);
   }, [isLoading, rowsCount]);
 
   useEffect(() => {
