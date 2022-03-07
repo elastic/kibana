@@ -244,6 +244,18 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     );
     const sourceIsScripted = isScriptedField(currentColumn.sourceField, indexPattern);
 
+    if (sourceIsScripted && !currentColumn.params.useTopHit) {
+      // actively set this so that other places in the code know that we're using top-hit
+      updateLayer(
+        updateColumnParam({
+          layer,
+          columnId,
+          paramName: 'useTopHit',
+          value: true,
+        })
+      );
+    }
+
     return (
       <>
         <EuiFormRow
@@ -307,7 +319,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
             label={i18n.translate('xpack.lens.indexPattern.lastValue.useTopHit', {
               defaultMessage: 'Show array values',
             })}
-            checked={currentColumn.params.useTopHit || sourceIsScripted}
+            checked={Boolean(currentColumn.params.useTopHit)}
             // TODO - add disabled tooltip
             disabled={sourceIsScripted}
             onChange={() => {
