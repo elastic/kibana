@@ -10,7 +10,6 @@ import { PolicyDetailsState } from '../../../types';
 import { AppAction } from '../../../../../../common/store/actions';
 import { policySettingsReducer } from './policy_settings_reducer';
 import { initialPolicyDetailsState } from './initial_policy_details_state';
-import { policyTrustedAppsReducer } from './trusted_apps_reducer';
 
 export * from './initial_policy_details_state';
 
@@ -18,7 +17,7 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
   state = initialPolicyDetailsState(),
   action
 ) => {
-  return [policySettingsReducer, policyTrustedAppsReducer].reduce(
+  return [policySettingsReducer].reduce(
     (updatedState, runReducer) => runReducer(updatedState, action),
     state
   );
