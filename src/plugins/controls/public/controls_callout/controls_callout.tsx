@@ -13,15 +13,14 @@ import classNames from 'classnames';
 
 import { ControlGroupStrings } from '../control_group/control_group_strings';
 import { ControlsIllustration } from './controls_illustration';
-import { ControlGroupContainer } from '../control_group/embeddable/control_group_container';
 
 const CONTROLS_CALLOUT_STATE_KEY = 'dashboard:controlsCalloutDismissed';
 
 export interface CalloutProps {
-  controlEmbeddable?: ControlGroupContainer | undefined;
+  getCreateControlButton?: () => JSX.Element;
 }
 
-export const ControlsCallout = ({ controlEmbeddable }: CalloutProps) => {
+export const ControlsCallout = ({ getCreateControlButton }: CalloutProps) => {
   const [controlsCalloutDismissed, setControlsCalloutDismissed] = useLocalStorage(
     CONTROLS_CALLOUT_STATE_KEY,
     false
@@ -52,9 +51,11 @@ export const ControlsCallout = ({ controlEmbeddable }: CalloutProps) => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {controlEmbeddable?.getCreateControlButton('callout')}
-        </EuiFlexItem>
+        {getCreateControlButton ? (
+          <EuiFlexItem grow={false}>{getCreateControlButton()}</EuiFlexItem>
+        ) : (
+          <></>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="s" onClick={dismissControls}>
             {ControlGroupStrings.emptyState.getDismissButton()}

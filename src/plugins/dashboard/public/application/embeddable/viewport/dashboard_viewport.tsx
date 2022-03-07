@@ -111,7 +111,11 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
         {controlsEnabled ? (
           <>
             {isEditMode && panelCount !== 0 && controlGroup?.getPanelCount() === 0 ? (
-              <ControlsCallout controlEmbeddable={controlGroup} />
+              <ControlsCallout
+                getCreateControlButton={() => {
+                  return controlGroup?.getCreateControlButton('callout');
+                }}
+              />
             ) : null}
             <div className="dshDashboardViewport-controls" ref={this.controlsRoot} />
           </>
