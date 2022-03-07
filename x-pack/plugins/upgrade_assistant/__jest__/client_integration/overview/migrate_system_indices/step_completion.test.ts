@@ -13,19 +13,18 @@ import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../common/co
 
 describe('Overview - Migrate system indices - Step completion', () => {
   let testBed: OverviewTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  beforeEach(async () => {
+    mockEnvironment = setupEnvironment();
   });
 
   test(`It's complete when no upgrade is needed`, async () => {
-    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+    mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
       migration_status: 'NO_MIGRATION_NEEDED',
     });
 
     await act(async () => {
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
     });
 
     const { exists, component } = testBed;
@@ -36,12 +35,12 @@ describe('Overview - Migrate system indices - Step completion', () => {
   });
 
   test(`It's incomplete when migration is needed`, async () => {
-    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+    mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
       migration_status: 'MIGRATION_NEEDED',
     });
 
     await act(async () => {
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
     });
 
     const { exists, component } = testBed;
@@ -56,11 +55,11 @@ describe('Overview - Migrate system indices - Step completion', () => {
       jest.useFakeTimers();
 
       // First request should make the step be incomplete
-      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+      mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'IN_PROGRESS',
       });
 
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
     });
 
     afterEach(() => {
@@ -72,7 +71,7 @@ describe('Overview - Migrate system indices - Step completion', () => {
 
       expect(exists('migrateSystemIndicesStep-incomplete')).toBe(true);
 
-      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+      mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'NO_MIGRATION_NEEDED',
       });
 

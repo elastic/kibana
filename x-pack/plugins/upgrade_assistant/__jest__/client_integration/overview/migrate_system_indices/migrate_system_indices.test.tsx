@@ -12,25 +12,21 @@ import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Migrate system indices', () => {
   let testBed: OverviewTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
   beforeEach(async () => {
-    testBed = await setupOverviewPage();
+    mockEnvironment = setupEnvironment();
+    testBed = await setupOverviewPage(mockEnvironment.httpSetup);
     testBed.component.update();
-  });
-
-  afterAll(() => {
-    server.restore();
   });
 
   describe('Error state', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(undefined, {
+      mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(undefined, {
         statusCode: 400,
         message: 'error',
       });
 
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
     });
 
     test('Is rendered', () => {
@@ -44,7 +40,7 @@ describe('Overview - Migrate system indices', () => {
       const { exists, component, actions } = testBed;
       component.update();
 
-      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+      mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'NO_MIGRATION_NEEDED',
       });
 
@@ -55,11 +51,11 @@ describe('Overview - Migrate system indices', () => {
   });
 
   test('No migration needed', async () => {
-    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+    mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
       migration_status: 'NO_MIGRATION_NEEDED',
     });
 
-    testBed = await setupOverviewPage();
+    testBed = await setupOverviewPage(mockEnvironment.httpSetup);
 
     const { exists, component } = testBed;
 
@@ -71,11 +67,11 @@ describe('Overview - Migrate system indices', () => {
   });
 
   test('Migration in progress', async () => {
-    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+    mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
       migration_status: 'IN_PROGRESS',
     });
 
-    testBed = await setupOverviewPage();
+    testBed = await setupOverviewPage(mockEnvironment.httpSetup);
 
     const { exists, component, find } = testBed;
 
@@ -90,11 +86,11 @@ describe('Overview - Migrate system indices', () => {
 
   describe('Migration needed', () => {
     test('Initial state', async () => {
-      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+      mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'MIGRATION_NEEDED',
       });
 
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
 
       const { exists, component, find } = testBed;
 
@@ -108,15 +104,15 @@ describe('Overview - Migrate system indices', () => {
     });
 
     test('Handles errors when migrating', async () => {
-      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+      mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'MIGRATION_NEEDED',
       });
-      httpRequestsMockHelpers.setSystemIndicesMigrationResponse(undefined, {
+      mockEnvironment.httpRequestsMockHelpers.setSystemIndicesMigrationResponse(undefined, {
         statusCode: 400,
         message: 'error',
       });
 
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
 
       const { exists, component, find } = testBed;
 
@@ -134,7 +130,7 @@ describe('Overview - Migrate system indices', () => {
     });
 
     test('Handles errors from migration', async () => {
-      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+      mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'ERROR',
         features: [
           {
@@ -154,7 +150,7 @@ describe('Overview - Migrate system indices', () => {
         ],
       });
 
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
 
       const { exists } = testBed;
 

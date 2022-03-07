@@ -13,20 +13,18 @@ import { systemIndicesMigrationStatus } from './mocks';
 
 describe('Overview - Migrate system indices - Flyout', () => {
   let testBed: OverviewTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(systemIndicesMigrationStatus);
+    mockEnvironment = setupEnvironment();
+    mockEnvironment.httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(
+      systemIndicesMigrationStatus
+    );
 
     await act(async () => {
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
     });
 
     testBed.component.update();
-  });
-
-  afterAll(() => {
-    server.restore();
   });
 
   test('shows correct features in flyout table', async () => {

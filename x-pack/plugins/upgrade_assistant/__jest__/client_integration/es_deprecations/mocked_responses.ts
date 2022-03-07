@@ -26,7 +26,7 @@ export const MOCK_ML_DEPRECATION: EnrichedDeprecationInfo = {
   },
 };
 
-const MOCK_REINDEX_DEPRECATION: EnrichedDeprecationInfo = {
+export const MOCK_REINDEX_DEPRECATION: EnrichedDeprecationInfo = {
   isCritical: true,
   resolveDuringUpgrade: false,
   type: 'index_settings',

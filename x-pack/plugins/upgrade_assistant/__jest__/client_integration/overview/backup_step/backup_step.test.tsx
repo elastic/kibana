@@ -14,21 +14,14 @@ import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Backup Step', () => {
   let testBed: OverviewTestBed;
-  let server: ReturnType<typeof setupEnvironment>['server'];
-  let setServerAsync: ReturnType<typeof setupEnvironment>['setServerAsync'];
-  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-
-  beforeEach(() => {
-    ({ server, setServerAsync, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterEach(() => {
-    server.restore();
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  beforeEach(async () => {
+    mockEnvironment = setupEnvironment();
   });
 
   describe('On-prem', () => {
     beforeEach(async () => {
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
     });
 
     test('Shows link to Snapshot and Restore', () => {
@@ -45,7 +38,7 @@ describe('Overview - Backup Step', () => {
 
   describe('On Cloud', () => {
     const setupCloudOverviewPage = async () =>
-      setupOverviewPage({
+      setupOverviewPage(mockEnvironment.httpSetup, {
         plugins: {
           cloud: {
             isCloudEnabled: true,
@@ -57,12 +50,8 @@ describe('Overview - Backup Step', () => {
     describe('initial loading state', () => {
       beforeEach(async () => {
         // We don't want the request to load backup status to resolve immediately.
-        setServerAsync(true);
+        mockEnvironment.setDelayResponse(true);
         testBed = await setupCloudOverviewPage();
-      });
-
-      afterEach(() => {
-        setServerAsync(false);
       });
 
       test('is rendered', () => {
@@ -73,7 +62,7 @@ describe('Overview - Backup Step', () => {
 
     describe('error state', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
+        mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
           statusCode: 400,
           message: 'error',
         });
@@ -94,7 +83,7 @@ describe('Overview - Backup Step', () => {
       });
 
       test('loads on prem if missing found-snapshots repository', async () => {
-        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
+        mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
           statusCode: 404,
           message: `[${CLOUD_SNAPSHOT_REPOSITORY}] missing`,
         });
@@ -113,7 +102,7 @@ describe('Overview - Backup Step', () => {
     describe('success state', () => {
       describe('when data is backed up', () => {
         beforeEach(async () => {
-          httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
+          mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
             isBackedUp: true,
             lastBackupTime: '2021-08-25T19:59:59.863Z',
           });
@@ -136,7 +125,7 @@ describe('Overview - Backup Step', () => {
 
       describe(`when data isn't backed up`, () => {
         beforeEach(async () => {
-          httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
+          mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
             isBackedUp: false,
             lastBackupTime: undefined,
           });
@@ -162,7 +151,7 @@ describe('Overview - Backup Step', () => {
         jest.useFakeTimers();
 
         // First request will succeed.
-        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
+        mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
           isBackedUp: true,
           lastBackupTime: '2021-08-25T19:59:59.863Z',
         });
@@ -179,7 +168,7 @@ describe('Overview - Backup Step', () => {
         expect(exists('backupStep-complete')).toBe(true);
 
         // Second request will error.
-        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
+        mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
           statusCode: 400,
           message: 'error',
         });

@@ -9,28 +9,28 @@ import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 const DEPLOYMENT_URL = 'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63';
-const setupCloudOverviewPage = () => {
-  return setupOverviewPage({
-    plugins: {
-      cloud: {
-        isCloudEnabled: true,
-        deploymentUrl: DEPLOYMENT_URL,
-      },
-    },
-  });
-};
 
 describe('Overview - Upgrade Step', () => {
   let testBed: OverviewTestBed;
-  const { server, httpRequestsMockHelpers, setServerAsync } = setupEnvironment();
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  const setupCloudOverviewPage = () => {
+    return setupOverviewPage(mockEnvironment.httpSetup, {
+      plugins: {
+        cloud: {
+          isCloudEnabled: true,
+          deploymentUrl: DEPLOYMENT_URL,
+        },
+      },
+    });
+  };
 
-  afterAll(() => {
-    server.restore();
+  beforeEach(async () => {
+    mockEnvironment = setupEnvironment();
   });
 
   describe('On-prem', () => {
     test('Shows link to setup upgrade docs', async () => {
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
       const { exists } = testBed;
 
       expect(exists('upgradeSetupDocsLink')).toBe(true);
@@ -40,7 +40,7 @@ describe('Overview - Upgrade Step', () => {
 
   describe('On Cloud', () => {
     test('When ready for upgrade, shows upgrade CTA and link to docs', async () => {
-      httpRequestsMockHelpers.setGetUpgradeStatusResponse({
+      mockEnvironment.httpRequestsMockHelpers.setGetUpgradeStatusResponse({
         readyForUpgrade: true,
         details: 'Ready for upgrade',
       });
@@ -59,7 +59,7 @@ describe('Overview - Upgrade Step', () => {
     });
 
     test('When not ready for upgrade, the CTA button is disabled', async () => {
-      httpRequestsMockHelpers.setGetUpgradeStatusResponse({
+      mockEnvironment.httpRequestsMockHelpers.setGetUpgradeStatusResponse({
         readyForUpgrade: false,
         details: 'Resolve critical deprecations first',
       });
@@ -75,10 +75,10 @@ describe('Overview - Upgrade Step', () => {
     });
 
     test('An error callout is displayed, if status check failed', async () => {
-      httpRequestsMockHelpers.setGetUpgradeStatusResponse(
-        {},
-        { statusCode: 500, message: 'Status check failed' }
-      );
+      mockEnvironment.httpRequestsMockHelpers.setGetUpgradeStatusResponse(undefined, {
+        statusCode: 500,
+        message: 'Status check failed',
+      });
 
       testBed = await setupCloudOverviewPage();
       const { exists, component } = testBed;
@@ -90,7 +90,7 @@ describe('Overview - Upgrade Step', () => {
     });
 
     test('The CTA button displays loading indicator', async () => {
-      setServerAsync(true);
+      mockEnvironment.setDelayResponse(true);
       testBed = await setupCloudOverviewPage();
       const { exists, find } = testBed;
 

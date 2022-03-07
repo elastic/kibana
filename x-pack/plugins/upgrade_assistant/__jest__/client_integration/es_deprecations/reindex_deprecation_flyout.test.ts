@@ -10,7 +10,12 @@ import { act } from 'react-dom/test-utils';
 import { ReindexStatus, ReindexStep, ReindexStatusResponse } from '../../../common/types';
 import { setupEnvironment } from '../helpers';
 import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
-import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
+import {
+  esDeprecationsMockResponse,
+  MOCK_SNAPSHOT_ID,
+  MOCK_JOB_ID,
+  MOCK_REINDEX_DEPRECATION,
+} from './mocked_responses';
 
 const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
   indexName: 'foo',
@@ -21,7 +26,6 @@ const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
 // Note: The reindexing flyout UX is subject to change; more tests should be added here once functionality is built out
 describe('Reindex deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -29,30 +33,36 @@ describe('Reindex deprecation flyout', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
-    httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+    mockEnvironment = setupEnvironment();
+    mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
+      esDeprecationsMockResponse
+    );
+    mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
       snapshotId: MOCK_SNAPSHOT_ID,
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
-    httpRequestsMockHelpers.setReindexStatusResponse({
-      reindexOp: null,
-      warnings: [],
-      hasRequiredPrivileges: true,
-      meta: {
-        indexName: 'foo',
-        reindexName: 'reindexed-foo',
-        aliases: [],
-      },
-    });
+    mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse(
+      MOCK_REINDEX_DEPRECATION.index!,
+      {
+        reindexOp: null,
+        warnings: [],
+        hasRequiredPrivileges: true,
+        meta: {
+          indexName: 'foo',
+          reindexName: 'reindexed-foo',
+          aliases: [],
+        },
+      }
+    );
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
     });
 
     testBed.component.update();
@@ -71,15 +81,8 @@ describe('Reindex deprecation flyout', () => {
   });
 
   it('renders error callout when reindex fails', async () => {
-    httpRequestsMockHelpers.setReindexStatusResponse({
-      reindexOp: null,
-      warnings: [],
-      hasRequiredPrivileges: true,
-      meta: defaultReindexStatusMeta,
-    });
-
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
     });
 
     testBed.component.update();
@@ -88,10 +91,11 @@ describe('Reindex deprecation flyout', () => {
 
     await actions.table.clickDeprecationRowAt('reindex', 0);
 
-    httpRequestsMockHelpers.setStartReindexingResponse(undefined, {
-      statusCode: 404,
-      message: 'no such index [test]',
-    });
+    mockEnvironment.httpRequestsMockHelpers.setStartReindexingResponse(
+      MOCK_REINDEX_DEPRECATION.index!,
+      undefined,
+      { statusCode: 404, message: 'no such index [test]' }
+    );
 
     await actions.reindexDeprecationFlyout.clickReindexButton();
 
@@ -99,13 +103,14 @@ describe('Reindex deprecation flyout', () => {
   });
 
   it('renders error callout when fetch status fails', async () => {
-    httpRequestsMockHelpers.setReindexStatusResponse(undefined, {
-      statusCode: 404,
-      message: 'no such index [test]',
-    });
+    mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse(
+      MOCK_REINDEX_DEPRECATION.index!,
+      undefined,
+      { statusCode: 404, message: 'no such index [test]' }
+    );
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
     });
 
     testBed.component.update();
@@ -127,19 +132,24 @@ describe('Reindex deprecation flyout', () => {
     });
 
     it('has started but not yet reindexing documents', async () => {
-      httpRequestsMockHelpers.setReindexStatusResponse({
-        reindexOp: {
-          status: ReindexStatus.inProgress,
-          lastCompletedStep: ReindexStep.readonly,
-          reindexTaskPercComplete: null,
-        },
-        warnings: [],
-        hasRequiredPrivileges: true,
-        meta: defaultReindexStatusMeta,
-      });
+      mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse(
+        MOCK_REINDEX_DEPRECATION.index!,
+        {
+          reindexOp: {
+            status: ReindexStatus.inProgress,
+            lastCompletedStep: ReindexStep.readonly,
+            reindexTaskPercComplete: null,
+          },
+          warnings: [],
+          hasRequiredPrivileges: true,
+          meta: defaultReindexStatusMeta,
+        }
+      );
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, {
+          isReadOnlyMode: false,
+        });
       });
 
       testBed.component.update();
@@ -152,19 +162,24 @@ describe('Reindex deprecation flyout', () => {
     });
 
     it('has started reindexing documents', async () => {
-      httpRequestsMockHelpers.setReindexStatusResponse({
-        reindexOp: {
-          status: ReindexStatus.inProgress,
-          lastCompletedStep: ReindexStep.reindexStarted,
-          reindexTaskPercComplete: 0.25,
-        },
-        warnings: [],
-        hasRequiredPrivileges: true,
-        meta: defaultReindexStatusMeta,
-      });
+      mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse(
+        MOCK_REINDEX_DEPRECATION.index!,
+        {
+          reindexOp: {
+            status: ReindexStatus.inProgress,
+            lastCompletedStep: ReindexStep.reindexStarted,
+            reindexTaskPercComplete: 0.25,
+          },
+          warnings: [],
+          hasRequiredPrivileges: true,
+          meta: defaultReindexStatusMeta,
+        }
+      );
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, {
+          isReadOnlyMode: false,
+        });
       });
 
       testBed.component.update();
@@ -177,19 +192,24 @@ describe('Reindex deprecation flyout', () => {
     });
 
     it('has completed reindexing documents', async () => {
-      httpRequestsMockHelpers.setReindexStatusResponse({
-        reindexOp: {
-          status: ReindexStatus.inProgress,
-          lastCompletedStep: ReindexStep.reindexCompleted,
-          reindexTaskPercComplete: 1,
-        },
-        warnings: [],
-        hasRequiredPrivileges: true,
-        meta: defaultReindexStatusMeta,
-      });
+      mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse(
+        MOCK_REINDEX_DEPRECATION.index!,
+        {
+          reindexOp: {
+            status: ReindexStatus.inProgress,
+            lastCompletedStep: ReindexStep.reindexCompleted,
+            reindexTaskPercComplete: 1,
+          },
+          warnings: [],
+          hasRequiredPrivileges: true,
+          meta: defaultReindexStatusMeta,
+        }
+      );
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, {
+          isReadOnlyMode: false,
+        });
       });
 
       testBed.component.update();
@@ -202,19 +222,24 @@ describe('Reindex deprecation flyout', () => {
     });
 
     it('has completed', async () => {
-      httpRequestsMockHelpers.setReindexStatusResponse({
-        reindexOp: {
-          status: ReindexStatus.completed,
-          lastCompletedStep: ReindexStep.aliasCreated,
-          reindexTaskPercComplete: 1,
-        },
-        warnings: [],
-        hasRequiredPrivileges: true,
-        meta: defaultReindexStatusMeta,
-      });
+      mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse(
+        MOCK_REINDEX_DEPRECATION.index!,
+        {
+          reindexOp: {
+            status: ReindexStatus.completed,
+            lastCompletedStep: ReindexStep.aliasCreated,
+            reindexTaskPercComplete: 1,
+          },
+          warnings: [],
+          hasRequiredPrivileges: true,
+          meta: defaultReindexStatusMeta,
+        }
+      );
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, {
+          isReadOnlyMode: false,
+        });
       });
 
       const { actions, find, exists, component } = testBed;

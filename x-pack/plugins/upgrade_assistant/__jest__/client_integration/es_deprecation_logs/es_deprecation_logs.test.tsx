@@ -41,16 +41,14 @@ const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
 
 describe('ES deprecation logs', () => {
   let testBed: EsDeprecationLogsTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
-    testBed = await setupESDeprecationLogsPage();
+    mockEnvironment = setupEnvironment();
+    mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(
+      getLoggingResponse(true)
+    );
+    testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
     testBed.component.update();
-  });
-
-  afterAll(() => {
-    server.restore();
   });
 
   describe('Documentation link', () => {
@@ -65,25 +63,30 @@ describe('ES deprecation logs', () => {
     test('toggles deprecation logging', async () => {
       const { find, actions } = testBed;
 
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(false));
+      mockEnvironment.httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(
+        getLoggingResponse(false)
+      );
 
       expect(find('deprecationLoggingToggle').props()['aria-checked']).toBe(true);
 
       await actions.clickDeprecationToggle();
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({ isEnabled: false });
+      expect(mockEnvironment.httpSetup.put).toHaveBeenLastCalledWith(
+        `/api/upgrade_assistant/deprecation_logging`,
+        expect.objectContaining({ body: JSON.stringify({ isEnabled: false }) })
+      );
+
       expect(find('deprecationLoggingToggle').props()['aria-checked']).toBe(false);
     });
 
     test('shows callout when only loggerDeprecation is enabled', async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
         isDeprecationLogIndexingEnabled: false,
         isDeprecationLoggingEnabled: true,
       });
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
       });
 
       const { exists, component } = testBed;
@@ -102,7 +105,7 @@ describe('ES deprecation logs', () => {
 
       const { actions, exists } = testBed;
 
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(undefined, error);
+      mockEnvironment.httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(undefined, error);
 
       await actions.clickDeprecationToggle();
 
@@ -116,10 +119,10 @@ describe('ES deprecation logs', () => {
         message: 'Internal server error',
       };
 
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, error);
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
       });
 
       const { component, exists } = testBed;
@@ -130,13 +133,13 @@ describe('ES deprecation logs', () => {
     });
 
     test('It doesnt show external links and deprecations count when toggle is disabled', async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
         isDeprecationLogIndexingEnabled: false,
         isDeprecationLoggingEnabled: false,
       });
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
       });
 
       const { exists, component } = testBed;
@@ -151,12 +154,14 @@ describe('ES deprecation logs', () => {
 
   describe('Step 2 - Analyze logs', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(
+        getLoggingResponse(true)
+      );
     });
 
     test('Has a link to see logs in observability app', async () => {
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage({
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup, {
           http: {
             basePath: {
               prepend: (url: string) => url,
@@ -194,7 +199,7 @@ describe('ES deprecation logs', () => {
 
     test('Has a link to see logs in discover app', async () => {
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
       });
 
       const { exists, component, find } = testBed;
@@ -223,17 +228,19 @@ describe('ES deprecation logs', () => {
 
   describe('Step 3 - Resolve log issues', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
-      httpRequestsMockHelpers.setDeleteLogsCacheResponse('ok');
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(
+        getLoggingResponse(true)
+      );
+      mockEnvironment.httpRequestsMockHelpers.setDeleteLogsCacheResponse('ok');
     });
 
     test('With deprecation warnings', async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 10,
       });
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
       });
 
       const { find, exists, component } = testBed;
@@ -245,12 +252,12 @@ describe('ES deprecation logs', () => {
     });
 
     test('No deprecation issues', async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 0,
       });
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
       });
 
       const { find, exists, component } = testBed;
@@ -268,10 +275,10 @@ describe('ES deprecation logs', () => {
         message: 'Internal server error',
       };
 
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
       });
 
       const { exists, actions, component } = testBed;
@@ -280,7 +287,7 @@ describe('ES deprecation logs', () => {
 
       expect(exists('errorCallout')).toBe(true);
 
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 0,
       });
 
@@ -290,12 +297,12 @@ describe('ES deprecation logs', () => {
     });
 
     test('Allows user to reset last stored date', async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 10,
       });
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
       });
 
       const { exists, actions, component } = testBed;
@@ -305,7 +312,7 @@ describe('ES deprecation logs', () => {
       expect(exists('hasWarningsCallout')).toBe(true);
       expect(exists('resetLastStoredDate')).toBe(true);
 
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 0,
       });
 
@@ -321,13 +328,13 @@ describe('ES deprecation logs', () => {
         message: 'Internal server error',
       };
 
-      httpRequestsMockHelpers.setDeleteLogsCacheResponse(undefined, error);
+      mockEnvironment.httpRequestsMockHelpers.setDeleteLogsCacheResponse(undefined, error);
       // Initially we want to have the callout to have a warning state
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 10 });
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 10 });
 
       const addDanger = jest.fn();
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage({
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup, {
           services: {
             core: {
               notifications: {
@@ -344,7 +351,7 @@ describe('ES deprecation logs', () => {
 
       component.update();
 
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
 
       await actions.clickResetButton();
 
@@ -361,11 +368,11 @@ describe('ES deprecation logs', () => {
         jest.useFakeTimers();
 
         // First request should make the step be complete
-        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+        mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
           count: 0,
         });
 
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
       });
 
       afterEach(() => {
@@ -383,7 +390,10 @@ describe('ES deprecation logs', () => {
           error: 'Internal server error',
           message: 'Internal server error',
         };
-        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
+        mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(
+          undefined,
+          error
+        );
 
         // Resolve the polling timeout.
         await advanceTime(DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS);
@@ -396,12 +406,14 @@ describe('ES deprecation logs', () => {
 
   describe('Step 4 - API compatibility header', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
+      mockEnvironment.httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(
+        getLoggingResponse(true)
+      );
     });
 
     test('It shows copy with compatibility api header advice', async () => {
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup);
       });
 
       const { exists, component } = testBed;
@@ -425,7 +437,7 @@ describe('ES deprecation logs', () => {
 
     test(`doesn't show analyze and resolve logs if it doesn't have the right privileges`, async () => {
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage({
+        testBed = await setupESDeprecationLogsPage(mockEnvironment.httpSetup, {
           privileges: {
             hasAllPrivileges: false,
             missingPrivileges: {

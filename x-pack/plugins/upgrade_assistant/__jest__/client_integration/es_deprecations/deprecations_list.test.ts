@@ -20,21 +20,19 @@ import {
 
 describe('ES deprecations table', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
-
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
-    httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+    mockEnvironment = setupEnvironment();
+    mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
+      esDeprecationsMockResponse
+    );
+    mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
       snapshotId: MOCK_SNAPSHOT_ID,
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
-    httpRequestsMockHelpers.setReindexStatusResponse({
+    mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
       reindexOp: null,
       warnings: [],
       hasRequiredPrivileges: true,
@@ -44,10 +42,10 @@ describe('ES deprecations table', () => {
         aliases: [],
       },
     });
-    httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
+    mockEnvironment.httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
     });
 
     testBed.component.update();
@@ -66,7 +64,6 @@ describe('ES deprecations table', () => {
 
   it('refreshes deprecation data', async () => {
     const { actions } = testBed;
-    const totalRequests = server.requests.length;
 
     await actions.table.clickRefreshButton();
 
@@ -74,21 +71,24 @@ describe('ES deprecations table', () => {
     const reindexDeprecation = esDeprecationsMockResponse.deprecations[3];
 
     // Since upgradeStatusMockResponse includes ML and reindex actions (which require fetching status), there will be 4 requests made
-    expect(server.requests.length).toBe(totalRequests + 4);
-    expect(server.requests[server.requests.length - 4].url).toBe(
-      `${API_BASE_PATH}/es_deprecations`
+    expect(mockEnvironment.httpSetup.get).toHaveBeenCalledWith(
+      `${API_BASE_PATH}/es_deprecations`,
+      expect.anything()
     );
-    expect(server.requests[server.requests.length - 3].url).toBe(
+    expect(mockEnvironment.httpSetup.get).toHaveBeenCalledWith(
       `${API_BASE_PATH}/ml_snapshots/${(mlDeprecation.correctiveAction as MlAction).jobId}/${
         (mlDeprecation.correctiveAction as MlAction).snapshotId
-      }`
+      }`,
+      expect.anything()
     );
-    expect(server.requests[server.requests.length - 2].url).toBe(
-      `${API_BASE_PATH}/reindex/${reindexDeprecation.index}`
+    expect(mockEnvironment.httpSetup.get).toHaveBeenCalledWith(
+      `${API_BASE_PATH}/reindex/${reindexDeprecation.index}`,
+      expect.anything()
     );
 
-    expect(server.requests[server.requests.length - 1].url).toBe(
-      `${API_BASE_PATH}/ml_upgrade_mode`
+    expect(mockEnvironment.httpSetup.get).toHaveBeenCalledWith(
+      `${API_BASE_PATH}/ml_upgrade_mode`,
+      expect.anything()
     );
   });
 
@@ -108,10 +108,14 @@ describe('ES deprecations table', () => {
 
   describe('remote clusters callout', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadRemoteClustersResponse(['test_remote_cluster']);
+      mockEnvironment.httpRequestsMockHelpers.setLoadRemoteClustersResponse([
+        'test_remote_cluster',
+      ]);
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, {
+          isReadOnlyMode: false,
+        });
       });
 
       testBed.component.update();
@@ -206,10 +210,10 @@ describe('ES deprecations table', () => {
     const { deprecations } = esDeprecationsMockResponseWithManyDeprecations;
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
+      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
         esDeprecationsMockResponseWithManyDeprecations
       );
-      httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+      mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
         nodeId: 'my_node',
         snapshotId: MOCK_SNAPSHOT_ID,
         jobId: MOCK_JOB_ID,
@@ -217,7 +221,9 @@ describe('ES deprecations table', () => {
       });
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, {
+          isReadOnlyMode: false,
+        });
       });
 
       testBed.component.update();
@@ -296,10 +302,12 @@ describe('ES deprecations table', () => {
         deprecations: [],
       };
 
-      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(noDeprecationsResponse);
+      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(noDeprecationsResponse);
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, {
+          isReadOnlyMode: false,
+        });
       });
 
       testBed.component.update();
