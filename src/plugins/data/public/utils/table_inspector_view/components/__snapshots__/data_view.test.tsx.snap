@@ -911,7 +911,6 @@ exports[`Inspector Data View component should render single table without select
           onChange={[Function]}
           pagination={
             Object {
-              "hidePerPageOptions": undefined,
               "pageIndex": 0,
               "pageSize": 20,
               "pageSizeOptions": Array [
@@ -919,6 +918,7 @@ exports[`Inspector Data View component should render single table without select
                 20,
                 50,
               ],
+              "showPerPageOptions": undefined,
               "totalItemCount": 1,
             }
           }
@@ -1254,7 +1254,6 @@ exports[`Inspector Data View component should render single table without select
                 onPageSizeChange={[Function]}
                 pagination={
                   Object {
-                    "hidePerPageOptions": undefined,
                     "pageIndex": 0,
                     "pageSize": 20,
                     "pageSizeOptions": Array [
@@ -1262,6 +1261,7 @@ exports[`Inspector Data View component should render single table without select
                       20,
                       50,
                     ],
+                    "showPerPageOptions": undefined,
                     "totalItemCount": 1,
                   }
                 }
@@ -1296,9 +1296,10 @@ exports[`Inspector Data View component should render single table without select
                       gutterSize="s"
                       justifyContent="spaceBetween"
                       responsive={false}
+                      wrap={true}
                     >
                       <div
-                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow eui-xScroll"
+                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
                       >
                         <EuiFlexItem
                           grow={false}
@@ -1317,12 +1318,14 @@ exports[`Inspector Data View component should render single table without select
                                   onClick={[Function]}
                                   size="xs"
                                 >
-                                  <EuiI18n
-                                    default="Rows per page"
-                                    token="euiTablePagination.rowsPerPage"
-                                  />
-                                  : 
-                                  20
+                                  <React.Fragment>
+                                    <EuiI18n
+                                      default="Rows per page"
+                                      token="euiTablePagination.rowsPerPage"
+                                    />
+                                    : 
+                                    20
+                                  </React.Fragment>
                                 </EuiButtonEmpty>
                               }
                               closePopover={[Function]}
@@ -2493,7 +2496,6 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
           onChange={[Function]}
           pagination={
             Object {
-              "hidePerPageOptions": undefined,
               "pageIndex": 0,
               "pageSize": 20,
               "pageSizeOptions": Array [
@@ -2501,6 +2503,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                 20,
                 50,
               ],
+              "showPerPageOptions": undefined,
               "totalItemCount": 1,
             }
           }
@@ -2837,7 +2840,6 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                 onPageSizeChange={[Function]}
                 pagination={
                   Object {
-                    "hidePerPageOptions": undefined,
                     "pageIndex": 0,
                     "pageSize": 20,
                     "pageSizeOptions": Array [
@@ -2845,6 +2847,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                       20,
                       50,
                     ],
+                    "showPerPageOptions": undefined,
                     "totalItemCount": 1,
                   }
                 }
@@ -2879,9 +2882,10 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                       gutterSize="s"
                       justifyContent="spaceBetween"
                       responsive={false}
+                      wrap={true}
                     >
                       <div
-                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow eui-xScroll"
+                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
                       >
                         <EuiFlexItem
                           grow={false}
@@ -2900,12 +2904,14 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                   onClick={[Function]}
                                   size="xs"
                                 >
-                                  <EuiI18n
-                                    default="Rows per page"
-                                    token="euiTablePagination.rowsPerPage"
-                                  />
-                                  : 
-                                  20
+                                  <React.Fragment>
+                                    <EuiI18n
+                                      default="Rows per page"
+                                      token="euiTablePagination.rowsPerPage"
+                                    />
+                                    : 
+                                    20
+                                  </React.Fragment>
                                 </EuiButtonEmpty>
                               }
                               closePopover={[Function]}
