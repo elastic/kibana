@@ -106,7 +106,7 @@ describe('getLayerMetaInfo', () => {
   it('should basically work collecting fields and filters in the visualization', () => {
     const mockDatasource = createMockDatasource('testDatasource');
     const updatedPublicAPI: DatasourcePublicAPI = {
-      datasourceId: 'testDatasource',
+      datasourceId: 'indexpattern',
       getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
@@ -138,6 +138,32 @@ describe('getLayerMetaInfo', () => {
       ],
       lucene: [],
     });
+  });
+
+  it('should return an error if datasource is not supported', () => {
+    const mockDatasource = createMockDatasource('testDatasource');
+    const updatedPublicAPI: DatasourcePublicAPI = {
+      datasourceId: 'unsupportedDatasource',
+      getOperationForColumnId: jest.fn(),
+      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
+      getVisualDefaults: jest.fn(),
+      getSourceId: jest.fn(),
+      getFilters: jest.fn(() => ({
+        kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
+        lucene: [],
+      })),
+    };
+    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    const { error, meta } = getLayerMetaInfo(
+      mockDatasource,
+      {}, // the publicAPI has been mocked, so no need for a state here
+      {
+        datatable1: { type: 'datatable', columns: [], rows: [] },
+      },
+      capabilities
+    );
+    expect(error).toBe('Underlying data does not support the current datasource');
+    expect(meta).toBeUndefined();
   });
 });
 describe('combineQueryAndFilters', () => {
