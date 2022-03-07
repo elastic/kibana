@@ -49,17 +49,17 @@ export const ControlsCallout = ({ getCreateControlButton }: CalloutProps) => {
                 <p>{ControlGroupStrings.emptyState.getCallToAction()}</p>
               </EuiText>
             </EuiFlexItem>
+            {getCreateControlButton ? (
+              <EuiFlexItem grow={false}>{getCreateControlButton()}</EuiFlexItem>
+            ) : (
+              <></>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="s" onClick={dismissControls}>
+                {ControlGroupStrings.emptyState.getDismissButton()}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        {getCreateControlButton ? (
-          <EuiFlexItem grow={false}>{getCreateControlButton()}</EuiFlexItem>
-        ) : (
-          <></>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" onClick={dismissControls}>
-            {ControlGroupStrings.emptyState.getDismissButton()}
-          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
