@@ -65,11 +65,11 @@ exports.run = async (defaults = {}) => {
   if (options.dataArchive) {
     await cluster.extractDataDirectory(installPath, options.dataArchive);
   }
-  if  (options.plugins) {
+  if (options.plugins) {
     await cluster.installPlugins(installPath, options.plugins, options);
   }
-  if  (options.secureFiles) {
-    const pairs = options.secureFiles.split(',').map(kv=> kv.split('=').map(v=>v.trim()));
+  if (options.secureFiles) {
+    const pairs = options.secureFiles.split(',').map((kv) => kv.split('=').map((v) => v.trim()));
     console.log(pairs);
     await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
   }

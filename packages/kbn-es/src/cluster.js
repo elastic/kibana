@@ -166,7 +166,7 @@ exports.Cluster = class Cluster {
         env: {
           JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
           ES_JAVA_OPTS: esJavaOpts.trim(),
-        }
+        },
       });
     }
   }
