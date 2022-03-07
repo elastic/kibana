@@ -7,12 +7,12 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, ReactNode, Suspense } from 'react';
-import { CasesContextProps } from '../components/cases_context';
+import { CasesContextProps } from '../../components/cases_context';
 
 export type GetCasesContextProps = CasesContextProps;
 
 const CasesProviderLazy: React.FC<{ value: GetCasesContextProps }> = lazy(
-  () => import('../components/cases_context')
+  () => import('../../components/cases_context')
 );
 
 const CasesProviderLazyWrapper = ({

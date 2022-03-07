@@ -16,17 +16,18 @@ import {
   canUseCases,
   getCreateCaseFlyoutLazyNoProvider,
   getAllCasesSelectorModalNoProviderLazy,
-} from './methods';
+  getRuleIdFromEvent,
+  getCasesContextLazy,
+  createClientAPI,
+} from './client';
 import { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { getCasesContextLazy } from './methods/get_cases_context';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
-import { getRuleIdFromEvent } from './methods/get_rule_id_from_event';
 
 /**
  * @public
@@ -89,21 +90,24 @@ export class CasesUiPlugin
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
     return {
-      canUseCases: canUseCases(core.application.capabilities),
-      getCases: getCasesLazy,
-      getCasesContext: getCasesContextLazy,
-      getRecentCases: getRecentCasesLazy,
-      getCreateCaseFlyout: getCreateCaseFlyoutLazy,
-      getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
-      // Temporal methods to remove timelines and cases deep integration
-      // https://github.com/elastic/kibana/issues/123183
-      getCreateCaseFlyoutNoProvider: getCreateCaseFlyoutLazyNoProvider,
-      getAllCasesSelectorModalNoProvider: getAllCasesSelectorModalNoProviderLazy,
+      api: createClientAPI({ http: core.http }),
+      ui: {
+        getCases: getCasesLazy,
+        getCasesContext: getCasesContextLazy,
+        getRecentCases: getRecentCasesLazy,
+        getCreateCaseFlyout: getCreateCaseFlyoutLazy,
+        getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
+        // Temporal methods to remove timelines and cases deep integration
+        // https://github.com/elastic/kibana/issues/123183
+        getCreateCaseFlyoutNoProvider: getCreateCaseFlyoutLazyNoProvider,
+        getAllCasesSelectorModalNoProvider: getAllCasesSelectorModalNoProviderLazy,
+      },
       hooks: {
         getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
         getUseCasesAddToExistingCaseModal: useCasesAddToExistingCaseModal,
       },
       helpers: {
+        canUseCases: canUseCases(core.application.capabilities),
         getRuleIdFromEvent,
       },
     };

@@ -10,11 +10,11 @@ import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import {
   getAllCasesSelectorModalNoProviderLazy,
   getCreateCaseFlyoutLazyNoProvider,
-} from '../../methods';
+} from '../../client';
 import { getInitialCasesContextState } from './cases_context_reducer';
 import { CasesGlobalComponents } from './cases_global_components';
 
-jest.mock('../../methods');
+jest.mock('../../client');
 
 const getCreateCaseFlyoutLazyNoProviderMock = getCreateCaseFlyoutLazyNoProvider as jest.Mock;
 const getAllCasesSelectorModalNoProviderLazyMock =

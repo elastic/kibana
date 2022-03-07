@@ -9,7 +9,7 @@ import React from 'react';
 import {
   getAllCasesSelectorModalNoProviderLazy,
   getCreateCaseFlyoutLazyNoProvider,
-} from '../../methods';
+} from '../../client';
 import { CasesContextState } from './cases_context_reducer';
 
 export const CasesGlobalComponents = React.memo(({ state }: { state: CasesContextState }) => {

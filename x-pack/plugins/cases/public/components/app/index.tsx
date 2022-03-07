@@ -9,7 +9,7 @@ import React from 'react';
 import { APP_OWNER } from '../../../common/constants';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 
-import { getCasesLazy } from '../../methods';
+import { getCasesLazy } from '../../client';
 import { Wrapper } from '../wrappers';
 import { CasesRoutesProps } from './types';
 
