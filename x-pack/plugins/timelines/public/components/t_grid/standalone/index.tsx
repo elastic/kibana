@@ -49,7 +49,7 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
 `;
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const STANDALONE_ID = 'standalone-t-grid';
+export const STANDALONE_ID = 'standalone-t-grid';
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
 
 const TitleText = styled.span`

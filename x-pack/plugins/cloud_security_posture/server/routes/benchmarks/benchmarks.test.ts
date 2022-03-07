@@ -76,6 +76,18 @@ describe('benchmarks API', () => {
       });
     });
 
+    it('expect to find benchmark_name', async () => {
+      const validatedQuery = benchmarksInputSchema.validate({
+        benchmark_name: 'my_cis_benchmark',
+      });
+
+      expect(validatedQuery).toMatchObject({
+        page: 1,
+        per_page: DEFAULT_BENCHMARKS_PER_PAGE,
+        benchmark_name: 'my_cis_benchmark',
+      });
+    });
+
     it('should throw when page field is not a positive integer', async () => {
       expect(() => {
         benchmarksInputSchema.validate({ page: -2 });
@@ -123,6 +135,24 @@ describe('benchmarks API', () => {
           })
         );
       });
+    });
+
+    it('should format request by benchmark_name', async () => {
+      const mockAgentPolicyService = createPackagePolicyServiceMock();
+
+      await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+        page: 1,
+        per_page: 100,
+        benchmark_name: 'my_cis_benchmark',
+      });
+
+      expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
+        expect.objectContaining({
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *my_cis_benchmark*`,
+          page: 1,
+          perPage: 100,
+        })
+      );
     });
 
     describe('test getAgentPolicies', () => {

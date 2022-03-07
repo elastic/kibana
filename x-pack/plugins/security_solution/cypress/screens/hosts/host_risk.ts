@@ -24,3 +24,14 @@ export const HOST_BY_RISK_TABLE_FILTER = '[data-test-subj="host-risk-filter-butt
 
 export const HOST_BY_RISK_TABLE_FILTER_CRITICAL =
   '[data-test-subj="host-risk-filter-item-Critical"]';
+
+export const HOST_BY_RISK_TABLE_PERPAGE_BUTTON =
+  '[data-test-subj="loadingMoreSizeRowPopover"] button';
+
+export const HOST_BY_RISK_TABLE_PERPAGE_OPTIONS =
+  '[data-test-subj="loadingMorePickSizeRow"] button';
+
+export const HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON =
+  '[data-test-subj="numberedPagination"] [data-test-subj="pagination-button-next"]';
+
+export const HOST_BY_RISK_TABLE_HOSTNAME_CELL = '[data-test-subj="render-content-host.name"]';
