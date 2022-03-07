@@ -259,10 +259,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       packageInfo: this.initializerContext.env.packageInfo,
     });
 
-    fullStory.setUserVars({
-      org_id_str: esOrgId,
-    });
-
     // Very defensive try/catch to avoid any UnhandledPromiseRejections
     try {
       // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
@@ -311,6 +307,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
           version_major_int: parsedVer[0] ?? -1,
           version_minor_int: parsedVer[1] ?? -1,
           version_patch_int: parsedVer[2] ?? -1,
+          org_id_str: esOrgId,
         });
       }
     } catch (e) {

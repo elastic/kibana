@@ -101,10 +101,10 @@ describe('Cloud Plugin', () => {
             version_major_int: -1,
             version_minor_int: -1,
             version_patch_int: -1,
+            org_id_str: 'cloudId',
           }
         );
 
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({ org_id_str: 'cloudId' });
       });
 
       it('user hash includes org id', async () => {
