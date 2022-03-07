@@ -98,19 +98,30 @@ export const FieldsPane = React.memo<Props>(
       [filteredBrowserFields]
     );
 
+    const fieldItems = useMemo(() => {
+      return getFieldItems({
+        category: filteredBrowserFields[selectedCategoryId],
+        columnHeaders,
+        highlight: searchInput,
+        timelineId,
+        toggleColumn,
+      });
+    }, [
+      columnHeaders,
+      filteredBrowserFields,
+      searchInput,
+      selectedCategoryId,
+      timelineId,
+      toggleColumn,
+    ]);
+
     if (filteredBrowserFieldsExists) {
       return (
         <Category
           categoryId={selectedCategoryId}
           data-test-subj="category"
           filteredBrowserFields={filteredBrowserFields}
-          fieldItems={getFieldItems({
-            category: filteredBrowserFields[selectedCategoryId],
-            columnHeaders,
-            highlight: searchInput,
-            timelineId,
-            toggleColumn,
-          })}
+          fieldItems={fieldItems}
           width={width}
           onCategorySelected={onCategorySelected}
           onUpdateColumns={onUpdateColumns}

@@ -34,17 +34,24 @@ export const addsHostGeoContinentNameToTimeline = () => {
 };
 
 export const clearFieldsBrowser = () => {
+  cy.clock();
   cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{selectall}{backspace}');
+  cy.wait(0);
+  cy.tick(1000);
 };
 
 export const closeFieldsBrowser = () => {
   cy.get(CLOSE_BTN).click({ force: true });
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.exist');
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT)
-    .type(fieldName)
-    .should('not.have.class', 'euiFieldSearch-isLoading');
+  cy.clock();
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type(fieldName, { delay: 50 });
+  cy.wait(0);
+  cy.tick(1000);
+  // the text filter is debounced by 250 ms, wait 1s for changes to be applied
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.have.class', 'euiFieldSearch-isLoading');
 };
 
 export const removesMessageField = () => {

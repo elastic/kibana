@@ -268,3 +268,11 @@ export const CASE_SUCCESS_SYNC_TEXT = i18n.translate('xpack.cases.actions.caseSu
 export const VIEW_CASE = i18n.translate('xpack.cases.actions.viewCase', {
   defaultMessage: 'View Case',
 });
+
+export const APP_TITLE = i18n.translate('xpack.cases.common.appTitle', {
+  defaultMessage: 'Cases',
+});
+
+export const APP_DESC = i18n.translate('xpack.cases.common.appDescription', {
+  defaultMessage: 'Open and track issues, push information to third party systems.',
+});
