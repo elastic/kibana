@@ -37,9 +37,6 @@ export type MockedElasticSearchServiceSetup = jest.Mocked<
 };
 
 export interface MockedElasticSearchServiceStart {
-  legacy: {
-    config$: BehaviorSubject<ElasticsearchConfig>;
-  };
   client: ClusterClientMock;
   createClient: jest.MockedFunction<
     (name: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
@@ -71,9 +68,6 @@ const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
     client: elasticsearchClientMock.createClusterClient(),
     createClient: jest.fn(),
-    legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
-    },
   };
 
   startContract.createClient.mockImplementation(() =>
