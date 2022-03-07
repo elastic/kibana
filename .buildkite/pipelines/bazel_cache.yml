@@ -1,5 +1,7 @@
 steps:
   - label: ':pipeline: Create pipeline with priority'
+    agents:
+      queue: kibana-default
     concurrency_group: bazel_macos
     concurrency: 1
     concurrency_method: eager
