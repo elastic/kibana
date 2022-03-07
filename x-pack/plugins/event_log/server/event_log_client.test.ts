@@ -127,8 +127,12 @@ describe('EventLogStart', () => {
         findOptions: {
           page: 1,
           per_page: 10,
-          sort_field: '@timestamp',
-          sort_order: 'asc',
+          sort: [
+            {
+              sort_field: '@timestamp',
+              sort_order: 'asc',
+            },
+          ],
         },
         legacyIds: ['legacy-id'],
       });
@@ -214,8 +218,12 @@ describe('EventLogStart', () => {
         findOptions: {
           page: 1,
           per_page: 10,
-          sort_field: '@timestamp',
-          sort_order: 'asc',
+          sort: [
+            {
+              sort_field: '@timestamp',
+              sort_order: 'asc',
+            },
+          ],
           start,
           end,
         },

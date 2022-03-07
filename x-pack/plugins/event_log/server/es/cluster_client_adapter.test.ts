@@ -11,7 +11,7 @@ import {
   IClusterClientAdapter,
   EVENT_BUFFER_LENGTH,
 } from './cluster_client_adapter';
-import { findOptionsSchema } from '../event_log_client';
+import { queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { times } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
@@ -567,7 +567,7 @@ describe('createIndex', () => {
 });
 
 describe('queryEventsBySavedObject', () => {
-  const DEFAULT_OPTIONS = findOptionsSchema.validate({});
+  const DEFAULT_OPTIONS = queryOptionsSchema.validate({});
 
   test('should call cluster with proper arguments with non-default namespace', async () => {
     clusterClient.search.mockResponse({
@@ -916,7 +916,7 @@ describe('queryEventsBySavedObject', () => {
       namespace: 'namespace',
       type: 'saved-object-type',
       ids: ['saved-object-id'],
-      findOptions: { ...DEFAULT_OPTIONS, sort_field: 'event.end', sort_order: 'desc' },
+      findOptions: { ...DEFAULT_OPTIONS, sort: [{ sort_field: 'event.end', sort_order: 'desc' }] },
     });
 
     const [query] = clusterClient.search.mock.calls[0];

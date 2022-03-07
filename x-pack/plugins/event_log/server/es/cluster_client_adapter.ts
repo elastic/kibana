@@ -47,7 +47,7 @@ interface QueryOptionsEventsBySavedObjectFilter {
   namespace: string | undefined;
   type: string;
   ids: string[];
-  findOptions: FindOptionsType | AggregateOptionsType;
+  findOptions: FindOptionsType;
   legacyIds?: string[];
 }
 
@@ -330,8 +330,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     queryOptions: QueryOptionsEventsBySavedObjectFilter
   ): Promise<QueryEventsBySavedObjectResult> {
     const { index, type, ids, findOptions } = queryOptions;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { page, per_page: perPage, sort_field, sort_order } = findOptions;
+    const { page, per_page: perPage, sort } = findOptions;
 
     const esClient = await this.elasticsearchClientPromise;
 
@@ -340,7 +339,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     const body: estypes.SearchRequest['body'] = {
       size: perPage,
       from: (page - 1) * perPage,
-      sort: [{ [sort_field]: { order: sort_order } }],
+      sort: (sort ?? []).map((s) => ({ [s.sort_field]: { order: s.sort_order } })),
       query,
     };
 
@@ -371,15 +370,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
   }> {
     const { index, type, ids, findOptions } = queryOptions;
-    const {
-      page,
-      per_page: perPage,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      sort_field,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      sort_order,
-      aggs,
-    } = findOptions as AggregateOptionsType;
+    const { page, per_page: perPage, sort, aggs } = findOptions as AggregateOptionsType;
 
     const esClient = await this.elasticsearchClientPromise;
 

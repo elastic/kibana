@@ -28,43 +28,41 @@ const optionalDateFieldSchema = schema.maybe(
   })
 );
 
-export const findOptionsSchema = schema.object({
+const sortFieldSchema = schema.object({
+  sort_field: schema.oneOf([
+    schema.literal('@timestamp'),
+    schema.literal('event.start'),
+    schema.literal('event.end'),
+    schema.literal('event.provider'),
+    schema.literal('event.duration'),
+    schema.literal('event.action'),
+    schema.literal('message'),
+  ]),
+  sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+});
+
+const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
+  defaultValue: [{ sort_field: '@timestamp', sort_order: 'asc' }],
+});
+
+export const queryOptionsSchema = schema.object({
   per_page: schema.number({ defaultValue: 10, min: 0 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
   start: optionalDateFieldSchema,
   end: optionalDateFieldSchema,
-  sort_field: schema.oneOf(
-    [
-      schema.literal('@timestamp'),
-      schema.literal('event.start'),
-      schema.literal('event.end'),
-      schema.literal('event.provider'),
-      schema.literal('event.duration'),
-      schema.literal('event.action'),
-      schema.literal('message'),
-    ],
-    {
-      defaultValue: '@timestamp',
-    }
-  ),
-  sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-    defaultValue: 'asc',
-  }),
+  sort: sortFieldsSchema,
   filter: schema.maybe(schema.string()),
 });
 // page & perPage are required, other fields are optional
 // using schema.maybe allows us to set undefined, but not to make the field optional
 export type FindOptionsType = Pick<
-  TypeOf<typeof findOptionsSchema>,
-  'page' | 'per_page' | 'sort_field' | 'sort_order' | 'filter'
+  TypeOf<typeof queryOptionsSchema>,
+  'page' | 'per_page' | 'sort' | 'filter'
 > &
-  Partial<TypeOf<typeof findOptionsSchema>>;
+  Partial<TypeOf<typeof queryOptionsSchema>>;
 
-export type AggregateOptionsType = Pick<
-  TypeOf<typeof findOptionsSchema>,
-  'start' | 'end' | 'sort_field' | 'sort_order' | 'filter'
-> &
-  Partial<TypeOf<typeof findOptionsSchema>> & {
+export type AggregateOptionsType = Pick<TypeOf<typeof queryOptionsSchema>, 'sort' | 'filter'> &
+  Partial<TypeOf<typeof queryOptionsSchema>> & {
     aggs: Record<string, estypes.AggregationsAggregationContainer>;
   };
 
@@ -95,7 +93,7 @@ export class EventLogClient implements IEventLogClient {
     options?: Partial<FindOptionsType>,
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult> {
-    const findOptions = findOptionsSchema.validate(options ?? {});
+    const findOptions = queryOptionsSchema.validate(options ?? {});
 
     const space = await this.spacesService?.getActiveSpace(this.request);
     const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
@@ -119,7 +117,7 @@ export class EventLogClient implements IEventLogClient {
     options?: Partial<AggregateOptionsType>,
     legacyIds?: string[]
   ) {
-    // const aggregateOptions = findOptionsSchema.validate(options ?? {});
+    // const aggregateOptions = queryOptionsSchema.validate(options ?? {});
 
     const space = await this.spacesService?.getActiveSpace(this.request);
     const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
