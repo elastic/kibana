@@ -11,7 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Enumeration of Privileged Local Groups Membership",
-  "note": "## Config\n\nThis will require Windows security event 4799 by enabling audit success for the windows Account Management category and\nthe Security Group Management subcategory.\n",
+  "note": "## Config\n\nThis will require Windows security event 4799 by enabling audit success for the Windows Account Management category and\nthe Security Group Management subcategory.\n",
   "query": "iam where event.action == \"user-member-enumerated\" and\n\n /* noisy and usual legit processes excluded */\n not winlog.event_data.CallerProcessName:\n              (\"?:\\\\Windows\\\\System32\\\\VSSVC.exe\",\n               \"?:\\\\Windows\\\\System32\\\\SearchIndexer.exe\",\n               \"?:\\\\Windows\\\\System32\\\\CompatTelRunner.exe\",\n               \"?:\\\\Windows\\\\System32\\\\oobe\\\\msoobe.exe\",\n               \"?:\\\\Windows\\\\System32\\\\net1.exe\",\n               \"?:\\\\Windows\\\\System32\\\\svchost.exe\",\n               \"?:\\\\Windows\\\\System32\\\\Netplwiz.exe\",\n               \"?:\\\\Windows\\\\System32\\\\msiexec.exe\",\n               \"?:\\\\Windows\\\\System32\\\\CloudExperienceHostBroker.exe\",\n               \"?:\\\\Windows\\\\System32\\\\wbem\\\\WmiPrvSE.exe\",\n               \"?:\\\\Windows\\\\System32\\\\SrTasks.exe\",\n               \"?:\\\\Windows\\\\System32\\\\lsass.exe\",\n               \"?:\\\\Windows\\\\System32\\\\diskshadow.exe\",\n               \"?:\\\\Windows\\\\System32\\\\dfsrs.exe\",\n               \"?:\\\\Program Files\\\\*.exe\",\n               \"?:\\\\Program Files (x86)\\\\*.exe\") and\n  /* privileged local groups */\n (group.name:(\"admin*\",\"RemoteDesktopUsers\") or\n  winlog.event_data.TargetSid:(\"S-1-5-32-544\",\"S-1-5-32-555\"))\n",
   "risk_score": 43,
   "rule_id": "291a0de9-937a-4189-94c0-3e847c8b13e4",
@@ -49,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

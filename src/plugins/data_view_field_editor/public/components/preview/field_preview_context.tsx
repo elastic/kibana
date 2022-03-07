@@ -16,6 +16,7 @@ import React, {
   useRef,
   FunctionComponent,
 } from 'react';
+import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -45,8 +46,10 @@ const defaultParams: Params = {
   format: null,
 };
 
-export const defaultValueFormatter = (value: unknown) =>
-  `<span>${typeof value === 'object' ? JSON.stringify(value) : value ?? '-'}</span>`;
+export const defaultValueFormatter = (value: unknown) => {
+  const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+  return renderToString(<>{content}</>);
+};
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const previewCount = useRef(0);

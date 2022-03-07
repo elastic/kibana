@@ -7,7 +7,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 import { MetricSelect } from './metric_select';
@@ -43,8 +43,15 @@ const shouldShowHint = ({ model_type: type, window, period }) =>
 
 export const MovingAverageAgg = (props) => {
   const { siblings, fields, indexPattern } = props;
+  const [model, setModel] = useState({ ...DEFAULTS, ...props.model });
+  const onModelChange = useCallback(
+    (newModel) => {
+      props.onChange(newModel);
+      setModel(newModel);
+    },
+    [props]
+  );
 
-  const model = { ...DEFAULTS, ...props.model };
   const modelOptions = [
     {
       label: i18n.translate('visTypeTimeseries.movingAverage.modelOptions.simpleLabel', {
@@ -81,7 +88,7 @@ export const MovingAverageAgg = (props) => {
     },
   ];
 
-  const handleChange = createChangeHandler(props.onChange, model);
+  const handleChange = createChangeHandler(onModelChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleNumberChange = createNumberHandler(handleChange);
 
@@ -188,15 +195,12 @@ export const MovingAverageAgg = (props) => {
               })
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              Should it be text or number?
-            */}
-            <input
+            <EuiFieldNumber
               className="tvbAgg__input"
-              type="text"
-              onChange={handleNumberChange('window')}
+              onChange={handleNumberChange('window', { isClearable: true })}
               value={model.window}
+              min={1}
+              isInvalid={!model.window}
             />
           </EuiFormRow>
         </EuiFlexItem>

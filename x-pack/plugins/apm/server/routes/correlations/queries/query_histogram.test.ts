@@ -79,20 +79,14 @@ describe('query_histogram', () => {
       ];
 
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              aggregations: {
-                transaction_duration_histogram: {
-                  buckets: histogramBucket,
-                },
+            aggregations: {
+              transaction_duration_histogram: {
+                buckets: histogramBucket,
               },
-            } as unknown as estypes.SearchResponse,
-          };
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

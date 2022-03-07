@@ -37,9 +37,7 @@ describe('get_list_item_by_values', () => {
     const data = getSearchListItemMock();
     data.hits.hits = [];
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const listItem = await getListItemByValues({
       esClient,
       listId: LIST_ID,
@@ -54,9 +52,7 @@ describe('get_list_item_by_values', () => {
   test('Returns transformed list item if the data exists within ES', async () => {
     const data = getSearchListItemMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const listItem = await getListItemByValues({
       esClient,
       listId: LIST_ID,

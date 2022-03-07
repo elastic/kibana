@@ -182,7 +182,7 @@ export function MachineLearningStackManagementJobsProvider(
     async isSpaceSelectionRowSelected(spaceId: string): Promise<boolean> {
       const state = await testSubjects.getAttribute(
         `sts-space-selector-row-${spaceId}`,
-        'aria-selected',
+        'data-test-selected',
         1000
       );
       return state === 'true';

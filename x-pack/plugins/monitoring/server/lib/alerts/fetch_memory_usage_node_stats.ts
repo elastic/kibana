@@ -41,7 +41,7 @@ export async function fetchMemoryUsageNodeStats(
                 cluster_uuid: clustersIds,
               },
             },
-            createDatasetFilter('node_stats', 'elasticsearch.node_stats'),
+            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {
@@ -107,7 +107,7 @@ export async function fetchMemoryUsageNodeStats(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const stats: AlertMemoryUsageNodeStats[] = [];
   // @ts-expect-error declare type for aggregations explicitly
   const { buckets: clusterBuckets } = response.aggregations?.clusters;

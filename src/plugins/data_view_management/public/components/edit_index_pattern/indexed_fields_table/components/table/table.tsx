@@ -33,6 +33,9 @@ import { toMountPoint } from '../../../../../../../kibana_react/public';
 import { DataView } from '../../../../../../../data_views/public';
 import { IndexedFieldItem } from '../../types';
 
+export const showDelete = (field: IndexedFieldItem) =>
+  !field.isMapped && field.isUserEditable && field.runtimeField?.type !== 'composite';
+
 // localized labels
 const additionalInfoAriaLabel = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.table.additionalInfoAriaLabel',
@@ -454,7 +457,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
             onClick: (field) => deleteField(field.name),
             type: 'icon',
             'data-test-subj': 'deleteField',
-            available: (field) => !field.isMapped && field.isUserEditable,
+            available: showDelete,
           },
         ],
         width: '40px',

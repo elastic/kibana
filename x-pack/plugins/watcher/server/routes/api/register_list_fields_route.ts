@@ -23,7 +23,7 @@ function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {
       allow_no_indices: true,
       ignore_unavailable: true,
     },
-    { ignore: [404] }
+    { ignore: [404], meta: true }
   );
 }
 

@@ -110,8 +110,7 @@ export class TelemetryEventsSender {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
-    const { body } = await this.esClient.info();
-    return body;
+    return await this.esClient.info();
   }
 
   public async sendEvents(

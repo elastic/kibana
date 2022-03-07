@@ -7,7 +7,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { METRIC_TYPE } from '@kbn/analytics';
 
 const applicationUsageReportSchema = schema.object({
   minutesOnScreen: schema.number(),
@@ -34,11 +33,7 @@ export const reportSchema = schema.object({
       schema.string(),
       schema.object({
         key: schema.string(),
-        type: schema.oneOf([
-          schema.literal<METRIC_TYPE>(METRIC_TYPE.CLICK),
-          schema.literal<METRIC_TYPE>(METRIC_TYPE.LOADED),
-          schema.literal<METRIC_TYPE>(METRIC_TYPE.COUNT),
-        ]),
+        type: schema.string(),
         appName: schema.string(),
         eventName: schema.string(),
         total: schema.number(),

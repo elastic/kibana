@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Logger } from 'src/core/server';
@@ -118,9 +117,9 @@ export const eqlExecutor = async ({
     );
 
     // TODO: fix this later
-    const { body: response } = (await services.scopedClusterClient.asCurrentUser.transport.request(
+    const response = (await services.scopedClusterClient.asCurrentUser.transport.request(
       request
-    )) as TransportResult<EqlSignalSearchResponse>;
+    )) as EqlSignalSearchResponse;
 
     const eqlSignalSearchEnd = performance.now();
     const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);

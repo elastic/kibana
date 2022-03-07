@@ -400,7 +400,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsComboboxHelpText',
   {
     defaultMessage:
-      'Add one or more custom identifying tags for selected rules. Press enter after each tag to begin a new one.',
+      'Add one or more tags for selected rules from the dropdown. You can also enter custom identifying tags and press Enter to begin a new one.',
   }
 );
 
@@ -408,7 +408,7 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteTagsComboboxHelpText',
   {
     defaultMessage:
-      'Delete one or more custom identifying tags for selected rules. Press enter after each tag to begin a new one.',
+      'Delete one or more tags for selected rules from the dropdown. You can also enter custom identifying tags and press Enter to begin a new one.',
   }
 );
 
@@ -454,18 +454,18 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_ACTIVATE_SELECTED_ERROR = (totalRules: number) =>
+export const BATCH_ACTION_ENABLE_SELECTED_ERROR = (totalRules: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedErrorTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.enableSelectedErrorTitle',
     {
       values: { totalRules },
       defaultMessage: 'Error enabling {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
 
-export const BATCH_ACTION_DEACTIVATE_SELECTED_ERROR = (totalRules: number) =>
+export const BATCH_ACTION_DISABLE_SELECTED_ERROR = (totalRules: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deactivateSelectedErrorTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.disableSelectedErrorTitle',
     {
       values: { totalRules },
       defaultMessage: 'Error disabling {totalRules, plural, =1 {rule} other {rules}}',

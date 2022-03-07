@@ -71,6 +71,6 @@ export const getSignalsIndicesInRange = async ({
     },
   });
 
-  const aggs = response.body.aggregations as IndexesResponse['aggregations'];
+  const aggs = response.aggregations as IndexesResponse['aggregations'];
   return aggs.indexes.buckets.map((bucket) => bucket.key);
 };

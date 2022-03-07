@@ -49,9 +49,7 @@ describe('BasicAuthenticationProvider', () => {
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-        securityMock.createApiResponse({ body: user })
-      );
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(
@@ -159,9 +157,7 @@ describe('BasicAuthenticationProvider', () => {
       const authorization = generateAuthorizationHeader('user', 'password');
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-        securityMock.createApiResponse({ body: user })
-      );
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, { authorization })).resolves.toEqual(

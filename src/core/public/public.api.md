@@ -8,7 +8,9 @@
 
 import { Action } from 'history';
 import Boom from '@hapi/boom';
+import type { ButtonColor } from '@elastic/eui';
 import { ByteSizeValue } from '@kbn/config-schema';
+import type { Client } from '@elastic/elasticsearch';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
@@ -24,7 +26,6 @@ import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -44,9 +45,6 @@ import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { TransitionPromptHook } from 'history';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { TransportRequestParams } from '@elastic/elasticsearch';
-import type { TransportResult } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -119,7 +117,11 @@ export enum AppLeaveActionType {
 // @public
 export interface AppLeaveConfirmAction {
     // (undocumented)
+    buttonColor?: ButtonColor;
+    // (undocumented)
     callback?: () => void;
+    // (undocumented)
+    confirmButtonText?: string;
     // (undocumented)
     text: string;
     // (undocumented)
@@ -399,6 +401,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     application: ApplicationSetup;
     // (undocumented)
+    executionContext: ExecutionContextSetup;
+    // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
@@ -426,6 +430,8 @@ export interface CoreStart {
     deprecations: DeprecationsServiceStart;
     // (undocumented)
     docLinks: DocLinksStart;
+    // (undocumented)
+    executionContext: ExecutionContextStart;
     // (undocumented)
     fatalErrors: FatalErrorsStart;
     // (undocumented)
@@ -459,6 +465,7 @@ export class CoreSystem {
     // (undocumented)
     start(): Promise<{
         application: InternalApplicationStart;
+        executionContext: ExecutionContextSetup;
     } | undefined>;
     // (undocumented)
     stop(): void;
@@ -508,6 +515,20 @@ export interface ErrorToastOptions extends ToastOptions {
     title: string;
     toastMessage?: string;
 }
+
+// @public
+export interface ExecutionContextSetup {
+    clear(): void;
+    context$: Observable<KibanaExecutionContext>;
+    get(): KibanaExecutionContext;
+    // Warning: (ae-forgotten-export) The symbol "Labels" needs to be exported by the entry point index.d.ts
+    getAsLabels(): Labels_2;
+    set(c$: KibanaExecutionContext): void;
+    withGlobalContext(context?: KibanaExecutionContext): KibanaExecutionContext;
+}
+
+// @public
+export type ExecutionContextStart = ExecutionContextSetup;
 
 // @public
 export interface FatalErrorInfo {
@@ -749,12 +770,13 @@ export interface IUiSettingsClient {
 
 // @public
 export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
-    readonly description: string;
+    readonly type?: string;
+    readonly name?: string;
+    readonly page?: string;
+    readonly id?: string;
+    readonly description?: string;
     readonly url?: string;
-    parent?: KibanaExecutionContext;
+    child?: KibanaExecutionContext;
 };
 
 // @public
@@ -1106,7 +1128,7 @@ export class SavedObjectsClient {
     }>) => Promise<{
         resolved_objects: ResolvedSimpleSavedObject<T>[];
     }>;
-    bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<T>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
@@ -1520,6 +1542,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:173:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:183:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

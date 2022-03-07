@@ -68,8 +68,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await dashboardExpect.docTableFieldCount(0);
       } else {
-        const initialRows = await dataGrid.getDocTableRows();
-        expect(initialRows.length).to.above(10);
+        const docCount = await dataGrid.getDocCount();
+        expect(docCount).to.above(10);
 
         // Set to time range with no data
         await PageObjects.timePicker.setAbsoluteRange(

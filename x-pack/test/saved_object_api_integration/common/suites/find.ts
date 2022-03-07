@@ -8,7 +8,11 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import querystring from 'querystring';
-import { SAVED_OBJECT_TEST_CASES, CONFLICT_TEST_CASES } from '../lib/saved_object_test_cases';
+import {
+  SAVED_OBJECT_TEST_CASES,
+  CONFLICT_TEST_CASES,
+  OTHER_TEST_CASES,
+} from '../lib/saved_object_test_cases';
 import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
 import {
   getUrlPrefix,
@@ -44,6 +48,7 @@ export interface FindTestCase {
 const TEST_CASES = [
   ...Object.values(SAVED_OBJECT_TEST_CASES),
   ...Object.values(CONFLICT_TEST_CASES),
+  ...Object.values(OTHER_TEST_CASES),
 ];
 
 export const getTestCases = (

@@ -48,7 +48,7 @@ export class AlertService {
         aggregations: builtAggs,
       });
 
-      return res.body.aggregations;
+      return res.aggregations;
     } catch (error) {
       const aggregationNames = aggregationBuilders.map((agg) => agg.getName());
 

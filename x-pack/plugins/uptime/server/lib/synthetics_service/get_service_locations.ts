@@ -8,15 +8,15 @@
 import axios from 'axios';
 import {
   ManifestLocation,
-  ServiceLocations,
+  Locations,
   ServiceLocationsApiResponse,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../adapters/framework';
 
 export async function getServiceLocations(server: UptimeServerSetup) {
-  const locations: ServiceLocations = [];
+  const locations: Locations = [];
 
-  if (!server.config.service!.manifestUrl!) {
+  if (!server.config.service?.manifestUrl) {
     return { locations };
   }
 
@@ -31,6 +31,7 @@ export async function getServiceLocations(server: UptimeServerSetup) {
         label: location.geo.name,
         geo: location.geo.location,
         url: location.url,
+        isServiceManaged: true,
       });
     });
 

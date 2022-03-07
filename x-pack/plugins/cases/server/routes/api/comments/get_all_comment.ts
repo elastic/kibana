@@ -7,35 +7,36 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
-export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
-  router.get(
-    {
-      path: CASE_COMMENTS_URL,
-      validate: {
-        params: schema.object({
-          case_id: schema.string(),
+/**
+ * @deprecated since version 8.1.0
+ */
+export const getAllCommentsRoute = createCasesRoute({
+  method: 'get',
+  path: CASE_COMMENTS_URL,
+  params: {
+    params: schema.object({
+      case_id: schema.string(),
+    }),
+  },
+  options: { deprecated: true },
+  handler: async ({ context, request, response, logger, kibanaVersion }) => {
+    try {
+      const client = await context.cases.getCasesClient();
+
+      return response.ok({
+        body: await client.attachments.getAll({
+          caseID: request.params.case_id,
         }),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const client = await context.cases.getCasesClient();
-
-        return response.ok({
-          body: await client.attachments.getAll({
-            caseID: request.params.case_id,
-          }),
-        });
-      } catch (error) {
-        logger.error(
-          `Failed to get all comments in route case id: ${request.params.case_id}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to get all comments in route case id: ${request.params.case_id}: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});

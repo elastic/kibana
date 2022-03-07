@@ -24,7 +24,7 @@ import {
   NETWORK,
   TIMELINES,
   MANAGE,
-  UEBA,
+  USERS,
   HOST_ISOLATION_EXCEPTIONS,
   EVENT_FILTERS,
   BLOCKLIST,
@@ -45,11 +45,11 @@ import {
   POLICIES_PATH,
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
-  UEBA_PATH,
   BLOCKLIST_PATH,
   CASES_FEATURE_ID,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   SERVER_APP_ID,
+  USERS_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -244,21 +244,20 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           },
         ],
       },
+      {
+        id: SecurityPageName.users,
+        title: USERS,
+        path: USERS_PATH,
+        navLinkStatus: AppNavLinkStatus.visible,
+        experimentalKey: 'usersEnabled',
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.users', {
+            defaultMessage: 'Users',
+          }),
+        ],
+        order: 9004,
+      },
     ],
-  },
-  {
-    id: SecurityPageName.ueba,
-    title: UEBA,
-    path: UEBA_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
-    features: [FEATURE.general],
-    experimentalKey: 'uebaEnabled',
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.ueba', {
-        defaultMessage: 'Users & Entities',
-      }),
-    ],
-    order: 9004,
   },
   {
     id: SecurityPageName.investigate,

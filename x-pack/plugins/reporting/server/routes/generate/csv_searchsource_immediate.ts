@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { KibanaRequest } from 'src/core/server';
-import { ReportingCore } from '../../';
+import type { KibanaRequest, Logger } from 'kibana/server';
+import type { ReportingCore } from '../../';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
-import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
-import { LevelLogger as Logger, PassThroughStream } from '../../lib';
-import { BaseParams } from '../../types';
+import type { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
+import { PassThroughStream } from '../../lib';
+import type { BaseParams } from '../../types';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
 
@@ -64,7 +64,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     authorizedUserPreRouting(
       reporting,
       async (user, context, req: CsvFromSavedObjectRequest, res) => {
-        const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE]);
+        const logger = parentLogger.get(CSV_SEARCHSOURCE_IMMEDIATE_TYPE);
         const runTaskFn = runTaskFnFactory(reporting, logger);
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
         const stream = new PassThroughStream();
@@ -81,14 +81,17 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         try {
           eventLog.logExecutionStart();
           const taskPromise = runTaskFn(null, req.body, context, stream, req)
-            .then(() => {
+            .then((output) => {
               logger.info(`Job output size: ${stream.bytesWritten} bytes.`);
 
               if (!stream.bytesWritten) {
                 logger.warn('CSV Job Execution created empty content result');
               }
 
-              eventLog.logExecutionComplete({ byteSize: stream.bytesWritten });
+              eventLog.logExecutionComplete({
+                ...(output.metrics ?? {}),
+                byteSize: stream.bytesWritten,
+              });
             })
             .finally(() => stream.end());
 

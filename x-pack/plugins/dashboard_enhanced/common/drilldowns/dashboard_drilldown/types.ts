@@ -10,4 +10,5 @@ export type DrilldownConfig = {
   dashboardId?: string;
   useCurrentFilters: boolean;
   useCurrentDateRange: boolean;
+  openInNewTab: boolean;
 };

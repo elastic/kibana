@@ -23,9 +23,9 @@ describe('annotation_service', () => {
 
   beforeEach(() => {
     const callAs = {
-      delete: jest.fn(() => Promise.resolve({ body: acknowledgedResponseMock })),
-      index: jest.fn(() => Promise.resolve({ body: acknowledgedResponseMock })),
-      search: jest.fn(() => Promise.resolve({ body: getAnnotationsResponseMock })),
+      delete: jest.fn(() => Promise.resolve(acknowledgedResponseMock)),
+      index: jest.fn(() => Promise.resolve(acknowledgedResponseMock)),
+      search: jest.fn(() => Promise.resolve(getAnnotationsResponseMock)),
     };
 
     mlClusterClientSpy = {
@@ -41,7 +41,7 @@ describe('annotation_service', () => {
 
       const annotationMockId = 'mockId';
       const deleteParamsMock: DeleteParams = {
-        index: '.ml-annotations-6',
+        index: '.ml-annotations-000001',
         id: annotationMockId,
         refresh: 'wait_for',
       };
@@ -84,7 +84,7 @@ describe('annotation_service', () => {
 
       const mlClusterClientSpyError: any = {
         asInternalUser: {
-          search: jest.fn(() => Promise.resolve({ body: mockEsError })),
+          search: jest.fn(() => Promise.resolve(mockEsError)),
         },
       };
 
