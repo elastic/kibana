@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiBasicTable, EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,10 +16,13 @@ import { AppLogic } from '../../../../app_logic';
 import { UNIVERSAL_LANGUAGE } from '../../../../constants';
 import { EngineDetails } from '../../../engine/types';
 
-import { renderEngineLink } from './engine_link_helpers';
+import { AuditLogsModalLogic } from '../audit_logs_modal/audit_logs_modal_logic';
+
+import { renderEngineLink, renderLastChangeLink } from './engine_link_helpers';
 import {
   ACTIONS_COLUMN,
   CREATED_AT_COLUMN,
+  LAST_UPDATED_COLUMN,
   DOCUMENT_COUNT_COLUMN,
   FIELD_COUNT_COLUMN,
   NAME_COLUMN,
@@ -46,12 +49,22 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
     myRole: { canManageEngines },
   } = useValues(AppLogic);
 
+  const { showModal: showAuditLogModal } = useActions(AuditLogsModalLogic);
+
   const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
       ...NAME_COLUMN,
       render: (name: string) => renderEngineLink(name),
     },
     CREATED_AT_COLUMN,
+    {
+      ...LAST_UPDATED_COLUMN,
+      render: (dateString: string, engineDetails) => {
+        return renderLastChangeLink(dateString, () => {
+          showAuditLogModal(engineDetails.name);
+        });
+      },
+    },
     LANGUAGE_COLUMN,
     DOCUMENT_COUNT_COLUMN,
     FIELD_COUNT_COLUMN,
