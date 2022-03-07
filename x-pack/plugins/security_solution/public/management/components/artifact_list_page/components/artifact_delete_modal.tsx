@@ -139,6 +139,7 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
             color="danger"
             onClick={onConfirm}
             isLoading={isDeleting}
+            isDisabled={isDeleting}
             data-test-subj={getTestId('submitButton')}
           >
             {labels.deleteModalSubmitButtonTitle}

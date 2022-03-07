@@ -656,20 +656,116 @@ describe('When using the ArtifactListPage component', () => {
     });
 
     describe('and interacting with card actions', () => {
-      it.todo('should display the Edit flyout');
+      const clickCardAction = async (action: 'edit' | 'delete') => {
+        await getFirstCard({ showActions: true });
+        act(() => {
+          switch (action) {
+            case 'delete':
+              userEvent.click(renderResult.getByTestId('testPage-card-cardDeleteAction'));
+              break;
 
-      it.todo('should display the Delete modal');
+            case 'edit':
+              userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'));
+              break;
+          }
+        });
+      };
+
+      it('should display the Edit flyout when edit action is clicked', async () => {
+        const { getByTestId } = await renderWithListData();
+        await clickCardAction('edit');
+
+        expect(getByTestId('testPage-flyout')).toBeTruthy();
+      });
+
+      it('should display the Delete modal when delete action is clicked', async () => {
+        const { getByTestId } = await renderWithListData();
+        await clickCardAction('delete');
+
+        expect(getByTestId('testPage-deleteModal')).toBeTruthy();
+      });
 
       describe('and interacting with the deletion modal', () => {
-        it.todo('should show Cancel and Delete buttons enabled');
+        let cancelButton: HTMLButtonElement;
+        let submitButton: HTMLButtonElement;
 
-        it.todo('should close modal if Cancel/Close buttons are clicked');
+        beforeEach(async () => {
+          await renderWithListData();
+          await clickCardAction('delete');
 
-        it.todo('should prevent modal from being closed while deletion is in flight');
+          cancelButton = renderResult.getByTestId(
+            'testPage-deleteModal-cancelButton'
+          ) as HTMLButtonElement;
+          submitButton = renderResult.getByTestId(
+            'testPage-deleteModal-submitButton'
+          ) as HTMLButtonElement;
+        });
 
-        it.todo('should show success toast if deleted successfully');
+        it('should show Cancel and Delete buttons enabled', async () => {
+          expect(cancelButton.disabled).toBe(false);
+          expect(submitButton.disabled).toBe(false);
+        });
 
-        it.todo('should show error toast if deletion failed');
+        it('should close modal if Cancel/Close buttons are clicked', async () => {
+          userEvent.click(cancelButton);
+
+          expect(renderResult.queryByTestId('testPage-deleteModal')).toBeNull();
+        });
+
+        it('should prevent modal from being closed while deletion is in flight', async () => {
+          const deferred = getDeferred();
+          mockedApi.responseProvider.trustedAppDelete.mockDelay.mockReturnValue(deferred.promise);
+
+          act(() => {
+            userEvent.click(submitButton);
+          });
+
+          await waitFor(() => {
+            expect(cancelButton.disabled).toBe(true);
+            expect(submitButton.disabled).toBe(true);
+          });
+
+          deferred.resolve(); // cleanup
+        });
+
+        it('should show success toast if deleted successfully', async () => {
+          act(() => {
+            userEvent.click(submitButton);
+          });
+
+          await act(async () => {
+            await waitFor(() => {
+              expect(mockedApi.responseProvider.trustedAppDelete).toHaveBeenCalled();
+            });
+          });
+
+          expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+            expect.stringMatching(/ has been removed$/)
+          );
+        });
+
+        it('should show error toast if deletion failed', async () => {
+          mockedApi.responseProvider.trustedAppDelete.mockImplementation(() => {
+            throw new Error('oh oh');
+          });
+
+          act(() => {
+            userEvent.click(submitButton);
+          });
+
+          await act(async () => {
+            await waitFor(() => {
+              expect(mockedApi.responseProvider.trustedAppDelete).toHaveBeenCalled();
+            });
+          });
+
+          expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+            expect.stringMatching(/^Unable to remove .*\. Reason: oh oh/)
+          );
+          expect(renderResult.getByTestId('testPage-deleteModal')).toBeTruthy();
+          expect(cancelButton.disabled).toBe(true);
+          expect(submitButton.disabled).toBe(true);
+        });
       });
     });
 

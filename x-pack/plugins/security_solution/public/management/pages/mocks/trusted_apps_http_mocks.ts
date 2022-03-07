@@ -18,6 +18,7 @@ import {
   UpdateExceptionListItemSchema,
   ReadExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  DeleteExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -128,7 +129,7 @@ export type TrustedAppsGetOneHttpMocksInterface = ResponseProvidersInterface<{
   trustedApp: (options: HttpFetchOptionsWithPath) => ExceptionListItemSchema;
 }>;
 /**
- * HTTP mock for retrieving list of Trusted Apps
+ * HTTP mock for retrieving one Trusted Apps
  */
 export const trustedAppsGetOneHttpMocks =
   httpHandlerMockFactory<TrustedAppsGetOneHttpMocksInterface>([
@@ -144,6 +145,35 @@ export const trustedAppsGetOneHttpMocks =
         });
 
         exceptionItem.item_id = apiQueryParams.item_id ?? exceptionItem.item_id;
+        exceptionItem.namespace_type =
+          apiQueryParams.namespace_type ?? exceptionItem.namespace_type;
+
+        return exceptionItem;
+      },
+    },
+  ]);
+
+export type TrustedAppsDeleteOneHttpMocksInterface = ResponseProvidersInterface<{
+  trustedAppDelete: (options: HttpFetchOptionsWithPath) => ExceptionListItemSchema;
+}>;
+/**
+ * HTTP mock for deleting one Trusted Apps
+ */
+export const trustedAppsDeleteOneHttpMocks =
+  httpHandlerMockFactory<TrustedAppsDeleteOneHttpMocksInterface>([
+    {
+      id: 'trustedAppDelete',
+      path: EXCEPTION_LIST_ITEM_URL,
+      method: 'delete',
+      handler: ({ query }): ExceptionListItemSchema => {
+        const apiQueryParams = query as DeleteExceptionListItemSchema;
+        const exceptionItem = new ExceptionsListItemGenerator('seed').generate({
+          os_types: ['windows'],
+          tags: [GLOBAL_ARTIFACT_TAG],
+        });
+
+        exceptionItem.item_id = apiQueryParams.item_id ?? exceptionItem.item_id;
+        exceptionItem.id = apiQueryParams.id ?? exceptionItem.id;
         exceptionItem.namespace_type =
           apiQueryParams.namespace_type ?? exceptionItem.namespace_type;
 
@@ -204,6 +234,7 @@ export type TrustedAppsAllHttpMocksInterface = FleetGetEndpointPackagePolicyList
   TrustedAppsGetListHttpMocksInterface &
   TrustedAppsGetOneHttpMocksInterface &
   TrustedAppPutHttpMocksInterface &
+  TrustedAppsDeleteOneHttpMocksInterface &
   TrustedAppPostHttpMocksInterface &
   TrustedAppsPostCreateListHttpMockInterface;
 /** Use this HTTP mock when wanting to mock the API calls done by the Trusted Apps Http service */
@@ -213,6 +244,7 @@ export const trustedAppsAllHttpMocks = composeHttpHandlerMocks<TrustedAppsAllHtt
   trustedAppPutHttpMocks,
   trustedAppPostHttpMocks,
   trustedAppsPostCreateListHttpMock,
+  trustedAppsDeleteOneHttpMocks,
   fleetGetEndpointPackagePolicyListHttpMock,
   fleetGetAgentPolicyListHttpMock,
 ]);

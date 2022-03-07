@@ -28,7 +28,7 @@ export const ARTIFACT_DELETE_ACTION_LABELS = Object.freeze({
    */
   deleteActionFailure: (itemName: string, errorMessage: string): string =>
     i18n.translate('xpack.securitySolution.artifactListPage.deleteActionFailure', {
-      defaultMessage: 'Unable to remove "{itemName}" . Reason: {errorMessage}',
+      defaultMessage: 'Unable to remove "{itemName}". Reason: {errorMessage}',
       values: { itemName, errorMessage },
     }),
 
