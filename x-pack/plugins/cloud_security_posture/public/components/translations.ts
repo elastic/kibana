@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 
 export const CRITICAL = i18n.translate('xpack.csp.critical', {
@@ -41,16 +40,17 @@ export const CSP_EVALUATION_BADGE_PASSED = i18n.translate(
   }
 );
 
-export const ERROR_LOADING_DATA = i18n.translate('xpack.csp.pageTemplate.loadErrorMessage', {
+export const ERROR_LOADING_DATA = {
+  id: 'xpack.csp.pageTemplate.loadErrorMessage',
   defaultMessage: "We couldn't fetch your cloud security posture data",
-});
+};
 
 export const NO_DATA_CONFIG_TITLE = i18n.translate('xpack.csp.pageTemplate.noDataConfigTitle', {
   defaultMessage: 'Understand your cloud security posture',
 });
 
 export const NO_DATA_CONFIG_SOLUTION_NAME = i18n.translate(
-  'xpack.csp.pageTemplate.noDataConfig.solutionName',
+  'xpack.csp.pageTemplate.noDataConfig.solutionNameLabel',
   {
     defaultMessage: 'Cloud Security Posture',
   }

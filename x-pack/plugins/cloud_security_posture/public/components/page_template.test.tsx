@@ -99,7 +99,7 @@ describe('<CspPageTemplate />', () => {
 
     expect(screen.getByText(children)).toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
-    expect(screen.queryByText(ERROR_LOADING_DATA)).not.toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA.defaultMessage)).not.toBeInTheDocument();
     BLANK_PAGE_GRAPHIC_TEXTS.forEach((blankPageGraphicText) =>
       expect(screen.queryByText(blankPageGraphicText)).not.toBeInTheDocument()
     );
@@ -115,7 +115,7 @@ describe('<CspPageTemplate />', () => {
 
     expect(screen.getByText(LOADING)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
-    expect(screen.queryByText(ERROR_LOADING_DATA)).not.toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA.defaultMessage)).not.toBeInTheDocument();
     BLANK_PAGE_GRAPHIC_TEXTS.forEach((blankPageGraphicText) =>
       expect(screen.queryByText(blankPageGraphicText)).not.toBeInTheDocument()
     );
@@ -129,7 +129,7 @@ describe('<CspPageTemplate />', () => {
     const children = chance.sentence();
     renderCspPageTemplate({ children });
 
-    expect(screen.getByText(ERROR_LOADING_DATA)).toBeInTheDocument();
+    expect(screen.getByText(ERROR_LOADING_DATA.defaultMessage)).toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     BLANK_PAGE_GRAPHIC_TEXTS.forEach((blankPageGraphicText) =>
@@ -149,7 +149,7 @@ describe('<CspPageTemplate />', () => {
     renderCspPageTemplate({ children });
 
     BLANK_PAGE_GRAPHIC_TEXTS.forEach((text) => expect(screen.getByText(text)).toBeInTheDocument());
-    expect(screen.queryByText(ERROR_LOADING_DATA)).not.toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA.defaultMessage)).not.toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
   });

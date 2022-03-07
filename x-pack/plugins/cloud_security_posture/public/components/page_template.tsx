@@ -7,6 +7,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiErrorBoundary, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   KibanaPageTemplate,
   type KibanaPageTemplateProps,
@@ -48,7 +49,6 @@ const DEFAULT_PROPS: KibanaPageTemplateProps = {
     items: getSideNavItems(allNavigationItems),
   },
   restrictWidth: false,
-  template: 'default',
 };
 
 const NO_DATA_CONFIG: KibanaPageTemplateProps['noDataConfig'] = {
@@ -75,8 +75,18 @@ export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({ children, .
     noDataConfig = NO_DATA_CONFIG;
   }
 
+  let template: KibanaPageTemplateProps['template'] = 'default';
+  if (kubeBeatQuery.status === 'error' || kubeBeatQuery.status === 'loading') {
+    template = 'centeredContent';
+  }
+
   return (
-    <KibanaPageTemplate {...DEFAULT_PROPS} {...props} noDataConfig={noDataConfig}>
+    <KibanaPageTemplate
+      {...DEFAULT_PROPS}
+      {...props}
+      template={template}
+      noDataConfig={noDataConfig}
+    >
       <EuiErrorBoundary>
         {kubeBeatQuery.status === 'loading' && <CspLoadingState>{LOADING}</CspLoadingState>}
         {kubeBeatQuery.status === 'error' && (
@@ -85,7 +95,9 @@ export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({ children, .
             iconType="alert"
             title={
               <EuiTitle>
-                <h2>{ERROR_LOADING_DATA}</h2>
+                <h2>
+                  <FormattedMessage {...ERROR_LOADING_DATA} />
+                </h2>
               </EuiTitle>
             }
           />
