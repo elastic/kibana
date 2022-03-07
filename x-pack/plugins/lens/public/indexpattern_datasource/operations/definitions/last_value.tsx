@@ -23,6 +23,7 @@ import {
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { isScriptedField } from './terms';
 
 function ofName(name: string, timeShift: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -197,7 +198,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   },
   filterable: true,
   shiftable: true,
-  toEsAggsFn: (column, columnId) => {
+  toEsAggsFn: (column, columnId, indexPattern) => {
     const initialArgs = {
       id: columnId,
       enabled: true,
@@ -209,8 +210,9 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       // time shift is added to wrapping aggFilteredMetric if filter is set
       timeShift: column.filter ? undefined : column.timeShift,
     } as const;
+
     return (
-      column.params.useTopHit
+      column.params.useTopHit || isScriptedField(column.sourceField, indexPattern)
         ? buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
             ...initialArgs,
             aggregate: 'concat',
@@ -240,6 +242,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       currentColumn.params.sortField,
       indexPattern
     );
+    const sourceIsScripted = isScriptedField(currentColumn.sourceField, indexPattern);
+
     return (
       <>
         <EuiFormRow
@@ -303,7 +307,9 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
             label={i18n.translate('xpack.lens.indexPattern.lastValue.useTopHit', {
               defaultMessage: 'Show array values',
             })}
-            checked={Boolean(currentColumn.params.useTopHit)}
+            checked={currentColumn.params.useTopHit || sourceIsScripted}
+            // TODO - add disabled tooltip
+            disabled={sourceIsScripted}
             onChange={() => {
               updateLayer(
                 updateColumnParam({

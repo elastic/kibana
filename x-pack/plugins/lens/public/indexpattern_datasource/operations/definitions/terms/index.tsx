@@ -89,6 +89,8 @@ function isScriptedField(fieldName: string | IndexPatternField, indexPattern?: I
   return fieldName.scripted;
 }
 
+export { isScriptedField };
+
 // It is not always possible to know if there's a numeric field, so just ignore it for now
 function getParentFormatter(params: Partial<TermsIndexPatternColumn['params']>) {
   return { id: params.secondaryFields?.length ? 'multi_terms' : 'terms' };
