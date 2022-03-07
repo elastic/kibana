@@ -7,14 +7,15 @@
 
 import expect from '@kbn/expect';
 import apmClusterFixture from './fixtures/cluster';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('overview mb', function () {
     // Archive contains non-cgroup data which collides with the in-cgroup APM server present by default on cloud deployments
     this.tags(['skipCloud']);
+    const { setup, tearDown } = getLifecycleMethods(getService);
 
     const archive = 'x-pack/test/functional/es_archives/monitoring/apm_mb';
     const timeRange = {
@@ -23,11 +24,11 @@ export default function ({ getService }) {
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should summarize apm cluster with metrics', async () => {

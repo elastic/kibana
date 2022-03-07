@@ -7,12 +7,13 @@
 
 import expect from '@kbn/expect';
 import apmInstanceFixture from './fixtures/instance';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('instance detail mb', () => {
+    const { setup, tearDown } = getLifecycleMethods(getService);
     const archive = 'x-pack/test/functional/es_archives/monitoring/apm_mb';
     const timeRange = {
       min: '2018-08-31T12:59:49.104Z',
@@ -20,11 +21,11 @@ export default function ({ getService }) {
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should get apm instance data', async () => {
