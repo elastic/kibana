@@ -29,6 +29,7 @@ import {
 import type { Logger } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { ConfigType } from '../../../config';
+import { errors } from '../../../../common';
 import { getChromiumDisconnectedError } from '../';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
@@ -162,7 +163,7 @@ export class HeadlessChromiumDriverFactory {
           },
         });
       } catch (err) {
-        observer.error(new Error(`Error spawning Chromium browser! ${err}`));
+        observer.error(new errors.FailedToSpawnBrowserError(err.message));
         return;
       }
 
