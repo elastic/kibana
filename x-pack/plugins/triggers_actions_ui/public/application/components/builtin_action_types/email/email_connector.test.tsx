@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EmailActionConnector } from '../types';
 import EmailActionConnectorFields from './email_connector';
 import * as hooks from './use_email_config';

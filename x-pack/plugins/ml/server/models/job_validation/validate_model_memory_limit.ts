@@ -11,7 +11,6 @@ import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
 import { ALLOWED_DATA_UNITS } from '../../../common/constants/validation';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
 
 // The minimum value the backend expects is 1MByte
@@ -54,7 +53,7 @@ export async function validateModelMemoryLimit(
 
   // retrieve the max_model_memory_limit value from the server
   // this will be unset unless the user has set this on their cluster
-  const { body } = await mlClient.info<MlInfoResponse>();
+  const body = await mlClient.info();
   const maxModelMemoryLimit = body.limits.max_model_memory_limit?.toUpperCase();
   const effectiveMaxModelMemoryLimit = body.limits.effective_max_model_memory_limit?.toUpperCase();
 

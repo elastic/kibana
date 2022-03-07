@@ -9,6 +9,8 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
@@ -55,19 +57,26 @@ module.exports = {
         rootDirectory: '.',
       },
     ],
+    [
+      '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+      {
+        testGroupType: 'Jest Unit Tests',
+      },
+    ],
   ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/polyfills.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/polyfills.jsdom.js',
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/enzyme.js',
   ],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/setup_test.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.eui.js',
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/react_testing_library.js',
   ],
 
@@ -121,4 +130,6 @@ module.exports = {
 
   // A custom resolver to preserve symlinks by default
   resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
+
+  watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 };

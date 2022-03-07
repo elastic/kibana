@@ -11,6 +11,8 @@ action are predefined, including the connector name and ID.
 - Appear in all spaces because they are not saved objects.
 - Cannot be edited or deleted.
 
+NOTE: Preconfigured connectors cannot be used with cases. 
+
 [float]
 [[preconfigured-connector-example]]
 ==== Preconfigured connectors example

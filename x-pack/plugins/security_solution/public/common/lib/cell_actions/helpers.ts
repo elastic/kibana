@@ -12,6 +12,7 @@ import {
   REFERENCE_URL_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
 import { IP_FIELD_TYPE } from '../../../network/components/ip';
@@ -67,9 +68,21 @@ export const COLUMNS_WITH_LINKS = [
 export const getLinkColumnDefinition = (
   columnIdToFind: string,
   fieldType?: string,
-  linkField?: string
+  linkField?: string,
+  usersEnabled?: boolean
 ) => {
-  return COLUMNS_WITH_LINKS.find((column) => {
+  // TOOD move user name field to COLUMNS_WITH_LINKS when experiment is finished
+  return (
+    usersEnabled
+      ? [
+          ...COLUMNS_WITH_LINKS,
+          {
+            columnId: USER_NAME_FIELD_NAME,
+            label: i18n.VIEW_USER_SUMMARY,
+          },
+        ]
+      : COLUMNS_WITH_LINKS
+  ).find((column) => {
     if (column.columnId === columnIdToFind) {
       return true;
     } else if (

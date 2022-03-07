@@ -297,7 +297,9 @@ describe('http service', () => {
       const router = createRouter('/new-platform');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         try {
-          const result = await elasticsearch.client.asScoped(req).asInternalUser.ping();
+          const result = await elasticsearch.client
+            .asScoped(req)
+            .asInternalUser.ping({}, { meta: true });
           return res.ok({
             body: result,
           });

@@ -74,7 +74,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('View sample document')).not.toBeNull();
+    expect(queryByText('View transaction in Discover')).not.toBeNull();
   });
 
   it('always renders the trace logs link', async () => {
@@ -375,8 +375,12 @@ describe('TransactionActionMenu component', () => {
       const getFilterKeyValue = (key: string) => {
         return {
           [(component.getAllByText(key)[0] as HTMLOptionElement).text]: (
-            component.getAllByTestId(`${key}.value`)[0] as HTMLInputElement
-          ).value,
+            component
+              .getByTestId(`${key}.value`)
+              .querySelector(
+                '[data-test-subj="comboBoxInput"] span'
+              ) as HTMLSpanElement
+          ).textContent,
         };
       };
       expect(getFilterKeyValue('service.name')).toEqual({

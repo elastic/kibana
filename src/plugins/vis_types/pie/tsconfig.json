@@ -21,6 +21,6 @@
       { "path": "../../usage_collection/tsconfig.json" },
       { "path": "../../vis_default_editor/tsconfig.json" },
       { "path": "../../field_formats/tsconfig.json" },
-      { "path": "../../chart_expressions/expression_pie/tsconfig.json" }
+      { "path": "../../chart_expressions/expression_partition_vis/tsconfig.json" }
     ]
   }

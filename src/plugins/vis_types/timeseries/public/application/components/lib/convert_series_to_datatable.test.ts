@@ -201,14 +201,35 @@ describe('convert series to datatables', () => {
 
       expect(tables.series1.rows.length).toEqual(8);
       const expected1 = series[0].data.map((d) => {
-        d.push(parseInt(series[0].label, 10));
+        d.push(parseInt([series[0].label].flat()[0], 10));
         return d;
       });
       const expected2 = series[1].data.map((d) => {
-        d.push(parseInt(series[1].label, 10));
+        d.push(parseInt([series[1].label].flat()[0], 10));
         return d;
       });
       expect(tables.series1.rows).toEqual([...expected1, ...expected2]);
+    });
+
+    test('for series aggregation split by terms, no column is added', async () => {
+      const updatedModel = {
+        ...model,
+        series: [
+          {
+            ...model.series[0],
+            metrics: [
+              {
+                field: 'test2',
+                id: 'series1',
+                function: 'sum',
+                type: 'series_agg',
+              },
+            ],
+          },
+        ],
+      } as TimeseriesVisParams;
+      const tables = await convertSeriesToDataTable(updatedModel, series, indexPattern);
+      expect(tables.series1.columns.length).toEqual(2);
     });
   });
 });

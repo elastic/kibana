@@ -361,6 +361,7 @@ export interface MultiAggBucket {
   }>;
   docCount: number;
   maxTimestamp: string;
+  minTimestamp: string;
 }
 
 export interface ThresholdQueryBucket extends TermAggregationBucket {

@@ -23,17 +23,20 @@
     "alerting",
     "cases",
     "data",
+    "dataViews",
     "features",
     "inspector",
     "ruleRegistry",
     "timelines",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "inspector"
   ],
   "ui": true,
   "server": true,
   "requiredBundles": [
     "data",
     "dataViews",
+    "embeddable",
     "kibanaReact",
     "kibanaUtils",
     "lens"

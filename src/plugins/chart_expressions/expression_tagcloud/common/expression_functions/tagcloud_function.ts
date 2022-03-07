@@ -7,10 +7,11 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
+import { prepareLogTable, Dimension } from '../../../../visualizations/common/utils';
+import { validateOptions } from '../../../../charts/common';
 import { TagCloudRendererParams } from '../types';
 import { ExpressionTagcloudFunction } from '../types';
-import { EXPRESSION_NAME } from '../constants';
+import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
 
 const strings = {
   help: i18n.translate('expressionTagcloud.functions.tagcloudHelpText', {
@@ -40,6 +41,9 @@ const strings = {
     }),
     bucket: i18n.translate('expressionTagcloud.functions.tagcloud.args.bucketHelpText', {
       defaultMessage: 'bucket dimension configuration',
+    }),
+    ariaLabel: i18n.translate('expressionTagcloud.functions.tagcloud.args.ariaLabelHelpText', {
+      defaultMessage: 'Specifies the aria label of the tagcloud',
     }),
   },
   dimension: {
@@ -71,6 +75,16 @@ export const errors = {
         },
       })
     ),
+  invalidScaleOptionError: () =>
+    i18n.translate('expressionTagcloud.functions.tagcloud.invalidScaleOptionError', {
+      defaultMessage: `Invalid scale option is specified. Supported scale options: {scaleOptions}`,
+      values: { scaleOptions: Object.values(ScaleOptions).join(', ') },
+    }),
+  invalidOrientationError: () =>
+    i18n.translate('expressionTagcloud.functions.tagcloud.invalidOrientationError', {
+      defaultMessage: `Invalid orientation of words is specified. Supported scale orientation: {orientation}`,
+      values: { orientation: Object.values(Orientation).join(', ') },
+    }),
 };
 
 export const tagcloudFunction: ExpressionTagcloudFunction = () => {
@@ -84,14 +98,14 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
     args: {
       scale: {
         types: ['string'],
-        default: 'linear',
-        options: ['linear', 'log', 'square root'],
+        default: ScaleOptions.LINEAR,
+        options: [ScaleOptions.LINEAR, ScaleOptions.LOG, ScaleOptions.SQUARE_ROOT],
         help: argHelp.scale,
       },
       orientation: {
         types: ['string'],
-        default: 'single',
-        options: ['single', 'right angled', 'multiple'],
+        default: Orientation.SINGLE,
+        options: [Orientation.SINGLE, Orientation.RIGHT_ANGLED, Orientation.MULTIPLE],
         help: argHelp.orientation,
       },
       minFontSize: {
@@ -123,8 +137,16 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         types: ['vis_dimension'],
         help: argHelp.bucket,
       },
+      ariaLabel: {
+        types: ['string'],
+        help: argHelp.ariaLabel,
+        required: false,
+      },
     },
     fn(input, args, handlers) {
+      validateOptions(args.scale, ScaleOptions, errors.invalidScaleOptionError);
+      validateOptions(args.orientation, Orientation, errors.invalidOrientationError);
+
       const visParams: TagCloudRendererParams = {
         scale: args.scale,
         orientation: args.orientation,
@@ -136,6 +158,10 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
           bucket: args.bucket,
         }),
         palette: args.palette,
+        ariaLabel:
+          args.ariaLabel ??
+          (handlers.variables?.embeddableTitle as string) ??
+          handlers.getExecutionContext?.()?.description,
       };
 
       if (handlers?.inspectorAdapters?.tables) {

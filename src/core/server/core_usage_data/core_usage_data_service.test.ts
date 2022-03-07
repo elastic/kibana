@@ -207,37 +207,37 @@ describe('CoreUsageDataService', () => {
         });
         service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
         const elasticsearch = elasticsearchServiceMock.createStart();
-        elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
-          body: [
-            {
-              name: '.kibana_task_manager_1',
-              'docs.count': '10',
-              'docs.deleted': '10',
-              'store.size': '1000',
-              'pri.store.size': '2000',
-            },
-          ],
+        elasticsearch.client.asInternalUser.cat.indices.mockResponseOnce([
+          {
+            name: '.kibana_task_manager_1',
+            'docs.count': '10',
+            'docs.deleted': '10',
+            'store.size': '1000',
+            'pri.store.size': '2000',
+          },
+        ] as any);
+        elasticsearch.client.asInternalUser.count.mockResponseOnce({
+          count: '15',
         } as any);
-        elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
-          body: [
-            {
-              name: '.kibana_1',
-              'docs.count': '20',
-              'docs.deleted': '20',
-              'store.size': '2000',
-              'pri.store.size': '4000',
-            },
-          ],
+        elasticsearch.client.asInternalUser.cat.indices.mockResponseOnce([
+          {
+            name: '.kibana_1',
+            'docs.count': '20',
+            'docs.deleted': '20',
+            'store.size': '2000',
+            'pri.store.size': '4000',
+          },
+        ] as any);
+        elasticsearch.client.asInternalUser.count.mockResponseOnce({
+          count: '10',
         } as any);
-        elasticsearch.client.asInternalUser.search.mockResolvedValueOnce({
-          body: {
-            hits: { total: { value: 6 } },
-            aggregations: {
-              aliases: {
-                buckets: {
-                  active: { doc_count: 1 },
-                  disabled: { doc_count: 2 },
-                },
+        elasticsearch.client.asInternalUser.search.mockResponseOnce({
+          hits: { total: { value: 6 } },
+          aggregations: {
+            aliases: {
+              buckets: {
+                active: { doc_count: 1 },
+                disabled: { doc_count: 2 },
               },
             },
           },
@@ -384,6 +384,7 @@ describe('CoreUsageDataService', () => {
                     "docsCount": 10,
                     "docsDeleted": 10,
                     "primaryStoreSizeBytes": 2000,
+                    "savedObjectsDocsCount": "15",
                     "storeSizeBytes": 1000,
                   },
                   Object {
@@ -391,6 +392,7 @@ describe('CoreUsageDataService', () => {
                     "docsCount": 20,
                     "docsDeleted": 20,
                     "primaryStoreSizeBytes": 4000,
+                    "savedObjectsDocsCount": "10",
                     "storeSizeBytes": 2000,
                   },
                 ],

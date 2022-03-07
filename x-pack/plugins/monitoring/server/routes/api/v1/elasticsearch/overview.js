@@ -35,14 +35,9 @@ export function esOverviewRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
+      const config = server.config;
       const clusterUuid = req.params.clusterUuid;
-      const filebeatIndexPattern = prefixIndexPattern(
-        config,
-        config.get('monitoring.ui.logs.index'),
-        '*',
-        true
-      );
+      const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
 
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
@@ -51,7 +46,8 @@ export function esOverviewRoute(server) {
         const [clusterStats, metrics, shardActivity, logs] = await Promise.all([
           getClusterStats(req, clusterUuid),
           getMetrics(req, 'elasticsearch', metricSet),
-          getLastRecovery(req, config.get('monitoring.ui.max_bucket_size')),
+          getLastRecovery(req, config.ui.max_bucket_size),
+          // TODO this call is missing some items from the signature of `getLogs`, will need to resolve during TS conversion
           getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
         ]);
         const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(req, clusterStats);

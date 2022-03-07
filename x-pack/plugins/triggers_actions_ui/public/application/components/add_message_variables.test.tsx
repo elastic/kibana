@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { AddMessageVariables } from './add_message_variables';
 
 describe('AddMessageVariables', () => {

@@ -94,13 +94,13 @@ const loadDashboardUrlState = ({
   if (!awaitingRemoval) {
     awaitingRemoval = true;
     kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
+      awaitingRemoval = false;
       if (nextUrl.includes(DASHBOARD_STATE_STORAGE_KEY)) {
         return replaceUrlHashQuery(nextUrl, (query) => {
           delete query[DASHBOARD_STATE_STORAGE_KEY];
           return query;
         });
       }
-      awaitingRemoval = false;
       return nextUrl;
     }, true);
   }

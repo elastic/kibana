@@ -14,7 +14,7 @@ import { UI_SETTINGS } from '../common/constants';
 import { configSchema } from '../config';
 
 const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel', {
-  defaultMessage: 'experimental',
+  defaultMessage: 'technical preview',
 });
 
 export function getUiSettings(

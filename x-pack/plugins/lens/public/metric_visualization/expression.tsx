@@ -9,6 +9,7 @@ import './expression.scss';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import classNames from 'classnames';
 import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type {
@@ -109,7 +110,7 @@ export function MetricChart({
   formatFactory,
   uiSettings,
 }: MetricChartProps & { formatFactory: FormatFactory; uiSettings: IUiSettingsClient }) {
-  const { metricTitle, accessor, mode, colorMode, palette } = args;
+  const { metricTitle, accessor, mode, colorMode, palette, titlePosition, textAlign, size } = args;
   const firstTable = Object.values(data.tables)[0];
 
   const getEmptyState = () => (
@@ -144,19 +145,27 @@ export function MetricChart({
 
   return (
     <VisualizationContainer className="lnsMetricExpression__container" style={color}>
-      <AutoScale key={value}>
-        <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value">
-          {value}
-        </div>
+      <AutoScale
+        key={value}
+        titlePosition={titlePosition}
+        textAlign={textAlign}
+        size={size}
+        minScale={mode === 'full' ? undefined : 0.05}
+      >
         {mode === 'full' && (
           <div
             data-test-subj="lns_metric_title"
-            className="lnsMetricExpression__title"
+            className={classNames('lnsMetricExpression__title', {
+              reverseOrder: ['bottom', 'right'].includes(titlePosition ?? ''),
+            })}
             style={colorMode === ColorMode.Background ? color : undefined}
           >
             {metricTitle}
           </div>
         )}
+        <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value">
+          {value}
+        </div>
       </AutoScale>
     </VisualizationContainer>
   );

@@ -30,10 +30,6 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     };
     parentFormat?: {
       id: string;
-      params?: {
-        id?: string;
-        template?: string;
-      };
     };
   };
 }

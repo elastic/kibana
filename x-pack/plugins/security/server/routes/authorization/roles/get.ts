@@ -22,7 +22,7 @@ export function defineGetRolesRoutes({ router, authz, getFeatures }: RouteDefini
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const [features, { body: elasticsearchRoles }] = await Promise.all([
+        const [features, elasticsearchRoles] = await Promise.all([
           getFeatures(),
           await context.core.elasticsearch.client.asCurrentUser.security.getRole({
             name: request.params.name,

@@ -24,6 +24,7 @@ import {
   SETTINGS_TAB,
   UPDATE_PACKAGE_BTN,
 } from '../screens/integrations';
+import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 
 describe('Add Integration - Real API', () => {
@@ -34,14 +35,13 @@ describe('Add Integration - Real API', () => {
   });
 
   it('should install integration without policy', () => {
-    cy.visit('/app/integrations/detail/tomcat-1.3.0/settings');
+    cy.visit('/app/integrations/detail/tomcat/settings');
 
     cy.get('.euiButton').contains('Install Apache Tomcat assets').click();
     cy.get('.euiCallOut').contains('This action will install 1 assets');
     cy.getBySel(CONFIRM_MODAL_BTN).click();
 
     cy.get('.euiLoadingSpinner').should('not.exist');
-    cy.getBySel('installedVersion').contains('1.3.0');
 
     cy.get('.euiButton').contains('Uninstall Apache Tomcat').click();
     cy.getBySel(CONFIRM_MODAL_BTN).click();
@@ -76,7 +76,7 @@ describe('Add Integration - Real API', () => {
 
       cy.visit(`/app/fleet/policies/${agentPolicyId}`);
       cy.intercept('GET', '/api/fleet/epm/packages?*').as('packages');
-      cy.getBySel('addPackagePolicyButton').click();
+      cy.getBySel(ADD_PACKAGE_POLICY_BTN).click();
       cy.wait('@packages');
       cy.get('.euiLoadingSpinner').should('not.exist');
       cy.get('input[placeholder="Search for integrations"]').type('Apache');

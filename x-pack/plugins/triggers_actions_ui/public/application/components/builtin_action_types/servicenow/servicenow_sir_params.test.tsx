@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ActionConnector } from '../../../../types';
 import { useGetChoices } from './use_get_choices';

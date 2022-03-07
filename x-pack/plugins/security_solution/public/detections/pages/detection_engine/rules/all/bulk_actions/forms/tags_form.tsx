@@ -75,7 +75,7 @@ interface TagsFormProps {
   editAction: TagsEditActions;
   rulesCount: number;
   onClose: () => void;
-  onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
+  onConfirm: (bulkActionEditPayload: BulkActionEditPayload) => void;
   tags: string[];
 }
 
@@ -109,8 +109,8 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm, tags }:
         path="tags"
         config={{ ...schema.tags, label: tagsLabel, helpText: tagsHelpText }}
         componentProps={{
-          idAria: 'detectionEngineBulkEditTags',
-          'data-test-subj': 'detectionEngineBulkEditTags',
+          idAria: 'bulkEditRulesTags',
+          'data-test-subj': 'bulkEditRulesTags',
           euiFieldProps: {
             fullWidth: true,
             placeholder: '',
@@ -123,14 +123,14 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm, tags }:
         <CommonUseField
           path="overwrite"
           componentProps={{
-            idAria: 'detectionEngineBulkEditOverwriteTags',
-            'data-test-subj': 'detectionEngineBulkEditOverwriteTags',
+            idAria: 'bulkEditRulesOverwriteTags',
+            'data-test-subj': 'bulkEditRulesOverwriteTags',
           }}
         />
       ) : null}
       {overwrite && (
         <EuiFormRow>
-          <EuiCallOut color="warning" size="s">
+          <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesTagsWarning">
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setTagsWarningCallout"
               defaultMessage="You’re about to overwrite tags for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to

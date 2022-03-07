@@ -5,14 +5,13 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Duplex } from 'stream';
+import { ByteSizeValue } from '@kbn/config-schema';
+import type { ElasticsearchClient, Logger } from 'kibana/server';
 import { defaults, get } from 'lodash';
 import Puid from 'puid';
-import { ByteSizeValue } from '@kbn/config-schema';
-import type { ElasticsearchClient } from 'src/core/server';
-import { ReportingCore } from '..';
-import { ReportSource } from '../../common/types';
-import { LevelLogger } from './level_logger';
+import { Duplex } from 'stream';
+import type { ReportingCore } from '../';
+import type { ReportSource } from '../../common/types';
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
@@ -87,7 +86,7 @@ export class ContentStream extends Duplex {
 
   constructor(
     private client: ElasticsearchClient,
-    private logger: LevelLogger,
+    private logger: Logger,
     private document: ContentStreamDocument,
     { encoding = 'base64' }: ContentStreamParameters = {}
   ) {
@@ -104,7 +103,7 @@ export class ContentStream extends Duplex {
   }
 
   private async getMaxContentSize() {
-    const { body } = await this.client.cluster.getSettings({ include_defaults: true });
+    const body = await this.client.cluster.getSettings({ include_defaults: true });
     const { persistent, transient, defaults: defaultSettings } = body;
     const settings = defaults({}, persistent, transient, defaultSettings);
     const maxContentSize = get(settings, 'http.max_content_length', '100mb');
@@ -146,7 +145,7 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Reading report contents.`);
 
     const response = await this.client.search<ReportSource>({ body, index });
-    const hits = response?.body.hits?.hits?.[0];
+    const hits = response?.hits?.hits?.[0];
 
     this.jobSize = hits?._source?.output?.size;
 
@@ -172,7 +171,7 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Reading chunk #${this.chunksRead}.`);
 
     const response = await this.client.search<ChunkSource>({ body, index });
-    const hits = response?.body.hits?.hits?.[0];
+    const hits = response?.hits?.hits?.[0];
 
     return hits?._source?.output.content;
   }
@@ -220,7 +219,7 @@ export class ContentStream extends Duplex {
   private async writeHead(content: string) {
     this.logger.debug(`Updating report contents.`);
 
-    const { body } = await this.client.update<ReportSource>({
+    const body = await this.client.update<ReportSource>({
       ...this.document,
       body: {
         doc: {
@@ -348,7 +347,7 @@ export async function getContentStream(
 
   return new ContentStream(
     client,
-    logger.clone(['content_stream', document.id]),
+    logger.get('content_stream').get(document.id),
     document,
     parameters
   );

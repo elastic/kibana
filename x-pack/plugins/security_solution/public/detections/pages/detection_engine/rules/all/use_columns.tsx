@@ -33,7 +33,7 @@ import { canEditRuleWithActions, getToolTipContent } from '../../../../../common
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
 import { Rule } from '../../../../containers/detection_engine/rules';
-import { useRulesTableContext } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
 import { PopoverTooltip } from './popover_tooltip';
 import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
@@ -196,7 +196,7 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
             {value}
           </EuiText>
         ),
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '85px',
       },
@@ -204,7 +204,7 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
         field: 'severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '12%',
       },

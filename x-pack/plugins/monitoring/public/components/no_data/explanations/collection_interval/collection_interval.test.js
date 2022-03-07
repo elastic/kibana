@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ExplainCollectionInterval } from './collection_interval';
 import { findTestSubject } from '@elastic/eui/lib/test';
 

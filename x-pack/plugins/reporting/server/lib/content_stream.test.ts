@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import type { Logger } from 'kibana/server';
 import { set } from 'lodash';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { createMockLevelLogger } from '../test_helpers';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { ContentStream } from './content_stream';
 
 describe('ContentStream', () => {
-  let client: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-  let logger: ReturnType<typeof createMockLevelLogger>;
+  let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let logger: Logger;
   let stream: ContentStream;
   let base64Stream: ContentStream;
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    logger = createMockLevelLogger();
+    logger = loggingSystemMock.createLogger();
     stream = new ContentStream(
       client,
       logger,
@@ -33,8 +33,8 @@ describe('ContentStream', () => {
       index: 'somewhere',
     });
 
-    client.search.mockResolvedValue(
-      set<any>({}, 'body.hits.hits.0._source', {
+    client.search.mockResponse(
+      set<any>({}, 'hits.hits.0._source', {
         jobtype: 'pdf',
         output: {
           content: 'some content',
@@ -65,7 +65,7 @@ describe('ContentStream', () => {
     });
 
     it('should be an empty stream on empty response', async () => {
-      client.search.mockResolvedValueOnce({ body: {} } as any);
+      client.search.mockResponseOnce({} as any);
       const onData = jest.fn();
 
       stream.on('data', onData);
@@ -84,10 +84,10 @@ describe('ContentStream', () => {
     });
 
     it('should decode base64 encoded content', async () => {
-      client.search.mockResolvedValueOnce(
+      client.search.mockResponseOnce(
         set<any>(
           {},
-          'body.hits.hits.0._source.output.content',
+          'hits.hits.0._source.output.content',
           Buffer.from('encoded content').toString('base64')
         )
       );
@@ -97,8 +97,8 @@ describe('ContentStream', () => {
     });
 
     it('should compound content from multiple chunks', async () => {
-      client.search.mockResolvedValueOnce(
-        set<any>({}, 'body.hits.hits.0._source', {
+      client.search.mockResponseOnce(
+        set<any>({}, 'hits.hits.0._source', {
           jobtype: 'pdf',
           output: {
             content: '12',
@@ -106,12 +106,8 @@ describe('ContentStream', () => {
           },
         })
       );
-      client.search.mockResolvedValueOnce(
-        set<any>({}, 'body.hits.hits.0._source.output.content', '34')
-      );
-      client.search.mockResolvedValueOnce(
-        set<any>({}, 'body.hits.hits.0._source.output.content', '56')
-      );
+      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.output.content', '34'));
+      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.output.content', '56'));
       let data = '';
       for await (const chunk of stream) {
         data += chunk;
@@ -139,8 +135,8 @@ describe('ContentStream', () => {
     });
 
     it('should stop reading on empty chunk', async () => {
-      client.search.mockResolvedValueOnce(
-        set<any>({}, 'body.hits.hits.0._source', {
+      client.search.mockResponseOnce(
+        set<any>({}, 'hits.hits.0._source', {
           jobtype: 'pdf',
           output: {
             content: '12',
@@ -148,12 +144,8 @@ describe('ContentStream', () => {
           },
         })
       );
-      client.search.mockResolvedValueOnce(
-        set<any>({}, 'body.hits.hits.0._source.output.content', '34')
-      );
-      client.search.mockResolvedValueOnce(
-        set<any>({}, 'body.hits.hits.0._source.output.content', '')
-      );
+      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.output.content', '34'));
+      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.output.content', ''));
       let data = '';
       for await (const chunk of stream) {
         data += chunk;
@@ -164,18 +156,16 @@ describe('ContentStream', () => {
     });
 
     it('should read until chunks are present when there is no size', async () => {
-      client.search.mockResolvedValueOnce(
-        set<any>({}, 'body.hits.hits.0._source', {
+      client.search.mockResponseOnce(
+        set<any>({}, 'hits.hits.0._source', {
           jobtype: 'pdf',
           output: {
             content: '12',
           },
         })
       );
-      client.search.mockResolvedValueOnce(
-        set<any>({}, 'body.hits.hits.0._source.output.content', '34')
-      );
-      client.search.mockResolvedValueOnce({ body: {} } as any);
+      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.output.content', '34'));
+      client.search.mockResponseOnce({} as any);
       let data = '';
       for await (const chunk of stream) {
         data += chunk;
@@ -186,8 +176,8 @@ describe('ContentStream', () => {
     });
 
     it('should decode every chunk separately', async () => {
-      client.search.mockResolvedValueOnce(
-        set<any>({}, 'body.hits.hits.0._source', {
+      client.search.mockResponseOnce(
+        set<any>({}, 'hits.hits.0._source', {
           jobtype: 'pdf',
           output: {
             content: Buffer.from('12').toString('base64'),
@@ -195,19 +185,11 @@ describe('ContentStream', () => {
           },
         })
       );
-      client.search.mockResolvedValueOnce(
-        set<any>(
-          {},
-          'body.hits.hits.0._source.output.content',
-          Buffer.from('34').toString('base64')
-        )
+      client.search.mockResponseOnce(
+        set<any>({}, 'hits.hits.0._source.output.content', Buffer.from('34').toString('base64'))
       );
-      client.search.mockResolvedValueOnce(
-        set<any>(
-          {},
-          'body.hits.hits.0._source.output.content',
-          Buffer.from('56').toString('base64')
-        )
+      client.search.mockResponseOnce(
+        set<any>({}, 'hits.hits.0._source.output.content', Buffer.from('56').toString('base64'))
       );
       let data = '';
       for await (const chunk of base64Stream) {
@@ -259,11 +241,9 @@ describe('ContentStream', () => {
     });
 
     it('should update _seq_no and _primary_term from the response', async () => {
-      client.update.mockResolvedValueOnce({
-        body: {
-          _primary_term: 1,
-          _seq_no: 10,
-        },
+      client.update.mockResponseOnce({
+        _primary_term: 1,
+        _seq_no: 10,
       } as any);
 
       stream.end('something');
@@ -300,8 +280,8 @@ describe('ContentStream', () => {
     });
 
     it('should split raw data into chunks', async () => {
-      client.cluster.getSettings.mockResolvedValueOnce(
-        set<any>({}, 'body.defaults.http.max_content_length', 1028)
+      client.cluster.getSettings.mockResponseOnce(
+        set<any>({}, 'defaults.http.max_content_length', 1028)
       );
       stream.end('123456');
       await new Promise((resolve) => stream.once('finish', resolve));
@@ -342,8 +322,8 @@ describe('ContentStream', () => {
     });
 
     it('should encode every chunk separately', async () => {
-      client.cluster.getSettings.mockResolvedValueOnce(
-        set<any>({}, 'body.defaults.http.max_content_length', 1028)
+      client.cluster.getSettings.mockResponseOnce(
+        set<any>({}, 'defaults.http.max_content_length', 1028)
       );
       base64Stream.end('12345678');
       await new Promise((resolve) => base64Stream.once('finish', resolve));

@@ -12,7 +12,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
 import realHits from '../../../../__fixtures__/real_hits.js';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
 import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';

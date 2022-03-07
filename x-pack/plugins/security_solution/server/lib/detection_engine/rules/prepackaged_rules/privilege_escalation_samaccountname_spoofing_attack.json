@@ -1,0 +1,75 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a suspicious computer account name rename event, which may indicate an attempt to exploit CVE-2021-42278 to elevate privileges from a standard domain user to a user with domain admin privileges. CVE-2021-42278 is a security vulnerability that allows potential attackers to impersonate a domain controller via samAccountName attribute spoofing.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential Privileged Escalation via SamAccountName Spoofing",
+  "query": "iam where event.action == \"renamed-user-account\" and\n  /* machine account name renamed to user like account name */\n  winlog.event_data.OldTargetUserName : \"*$\" and not winlog.event_data.NewTargetUserName : \"*$\"\n",
+  "references": [
+    "https://support.microsoft.com/en-us/topic/kb5008102-active-directory-security-accounts-manager-hardening-changes-cve-2021-42278-5975b463-4c95-45e1-831a-d120004e258e",
+    "https://cloudbrothers.info/en/exploit-kerberos-samaccountname-spoofing/",
+    "https://github.com/cube0x0/noPac",
+    "https://twitter.com/exploitph/status/1469157138928914432",
+    "https://exploit.ph/cve-2021-42287-cve-2021-42278-weaponisation.html"
+  ],
+  "risk_score": 73,
+  "rule_id": "bdcf646b-08d4-492c-870a-6c04e3700034",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/",
+          "subtechnique": [
+            {
+              "id": "T1078.002",
+              "name": "Domain Accounts",
+              "reference": "https://attack.mitre.org/techniques/T1078/002/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

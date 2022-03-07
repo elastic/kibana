@@ -57,6 +57,7 @@ interface TimelionVisComponentProps {
   seriesList: Sheet;
   onBrushEvent: (rangeFilterParams: RangeFilterParams) => void;
   renderComplete: IInterpreterRenderHandlers['done'];
+  ariaLabel?: string;
 }
 
 const DefaultYAxis = () => (
@@ -98,6 +99,7 @@ export const TimelionVisComponent = ({
   seriesList,
   renderComplete,
   onBrushEvent,
+  ariaLabel,
 }: TimelionVisComponentProps) => {
   const kibana = useKibana<TimelionVisDependencies>();
   const chartRef = useRef<Chart>(null);
@@ -206,6 +208,8 @@ export const TimelionVisComponent = ({
             type: TooltipType.VerticalCursor,
           }}
           externalPointerEvents={{ tooltip: { visible: false } }}
+          ariaLabel={ariaLabel}
+          ariaUseDefaultSummary={!ariaLabel}
         />
 
         <Axis

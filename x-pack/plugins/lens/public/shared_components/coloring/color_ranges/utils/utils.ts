@@ -27,10 +27,17 @@ export const isLastItem = (accessor: ColorRangeAccessor) => accessor === 'end';
 export const sortColorRanges = (colorRanges: ColorRange[]) => {
   const lastRange = colorRanges[colorRanges.length - 1];
 
-  return [...colorRanges, { start: lastRange.end, color: lastRange.color }]
+  // we should add last end as new start because we should include it on sorting
+  return [...colorRanges, { start: lastRange.end, color: lastRange.color, end: undefined }]
     .sort(({ start: startA }, { start: startB }) => Number(startA) - Number(startB))
     .reduce((sortedColorRange, newColorRange, i, array) => {
-      const color = i === array.length - 2 ? array[i + 1].color : newColorRange.color;
+      // we should pick correct color for the last range.
+      // If after sorting we don't change last value we should just take color in array order
+      // In another case we should get the next one.
+      let color = newColorRange.color;
+      if (i === array.length - 2 && array[i + 1].start !== lastRange.end) {
+        color = array[i + 1].color;
+      }
       if (i !== array.length - 1) {
         sortedColorRange.push({
           color,

@@ -11,6 +11,7 @@ import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type {
   BasePath,
   IClusterClient,
+  Logger,
   PackageInfo,
   PluginInitializerContext,
   SavedObjectsClientContract,
@@ -21,7 +22,6 @@ import type {
 import type { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
-import type { IEventLogService } from '../../event_log/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
 import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
@@ -33,21 +33,20 @@ import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { durationToNumber } from '../common/schema_utils';
 import type { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
-import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
+import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import type { ReportingPluginRouter, ScreenshotOptions } from './types';
 
 export interface ReportingInternalSetup {
-  eventLog: IEventLogService;
   basePath: Pick<BasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
-  logger: LevelLogger;
+  logger: Logger;
   status: StatusServiceSetup;
 }
 
@@ -59,7 +58,7 @@ export interface ReportingInternalStart {
   data: DataPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
-  logger: LevelLogger;
+  logger: Logger;
   screenshotting: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
@@ -83,7 +82,7 @@ export class ReportingCore {
 
   public getContract: () => ReportingSetup;
 
-  constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
+  constructor(private logger: Logger, context: PluginInitializerContext<ReportingConfigType>) {
     this.packageInfo = context.env.packageInfo;
     const syncConfig = context.config.get<ReportingConfigType>();
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
@@ -390,7 +389,7 @@ export class ReportingCore {
   }
 
   public getEventLogger(report: IReport, task?: { id: string }) {
-    const ReportingEventLogger = reportingEventLoggerFactory(this.pluginSetupDeps!.eventLog);
+    const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
     return new ReportingEventLogger(report, task);
   }
 }

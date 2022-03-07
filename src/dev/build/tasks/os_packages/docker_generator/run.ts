@@ -76,6 +76,7 @@ export async function runDockerGenerator(
 
   const dockerPush = config.getDockerPush();
   const dockerTagQualifier = config.getDockerTagQualfiier();
+  const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
 
   const scope: TemplateContext = {
     artifactPrefix,
@@ -100,6 +101,7 @@ export async function runDockerGenerator(
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
+    publicArtifactSubdomain,
   };
 
   type HostArchitectureToDocker = Record<string, string>;

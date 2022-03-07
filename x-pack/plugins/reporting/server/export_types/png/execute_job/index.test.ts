@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
 import * as Rx from 'rxjs';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { Writable } from 'stream';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common/cancellation_token';
-import { cryptoFactory, LevelLogger } from '../../../lib';
+import { cryptoFactory } from '../../../lib';
 import {
   createMockConfig,
   createMockConfigSchema,
@@ -29,14 +30,7 @@ const cancellationToken = {
   on: jest.fn(),
 } as unknown as CancellationToken;
 
-const mockLoggerFactory = {
-  get: jest.fn().mockImplementation(() => ({
-    error: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-  })),
-};
-const getMockLogger = () => new LevelLogger(mockLoggerFactory);
+const getMockLogger = () => loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'abcabcsecuresecret';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -87,10 +81,7 @@ test(`passes browserTimezone to generatePng`, async () => {
     expect.objectContaining({
       urls: ['localhost:80undefined/app/kibana#/something'],
       browserTimezone: 'UTC',
-      conditionalHeaders: expect.objectContaining({
-        conditions: expect.any(Object),
-        headers: {},
-      }),
+      headers: {},
     })
   );
 });

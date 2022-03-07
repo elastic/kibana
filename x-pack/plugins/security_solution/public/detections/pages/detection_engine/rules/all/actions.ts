@@ -33,7 +33,7 @@ import {
   performBulkAction,
   Rule,
 } from '../../../../containers/detection_engine/rules';
-import { RulesTableActions } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { RulesTableActions } from './rules_table/rules_table_context';
 import { transformOutput } from '../../../../containers/detection_engine/rules/transforms';
 import * as i18n from '../translations';
 import { bucketRulesResponse, getExportedRulesCounts } from './helpers';
@@ -135,14 +135,14 @@ export const enableRulesAction = async (
   ids: string[],
   enabled: boolean,
   dispatchToaster: Dispatch<ActionToaster>,
-  setLoadingRules: RulesTableActions['setLoadingRules']
+  setLoadingRules?: RulesTableActions['setLoadingRules']
 ) => {
   const errorTitle = enabled
-    ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(ids.length)
-    : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(ids.length);
+    ? i18n.BATCH_ACTION_ENABLE_SELECTED_ERROR(ids.length)
+    : i18n.BATCH_ACTION_DISABLE_SELECTED_ERROR(ids.length);
 
   try {
-    setLoadingRules({ ids, action: enabled ? 'enable' : 'disable' });
+    setLoadingRules?.({ ids, action: enabled ? 'enable' : 'disable' });
 
     const response = await enableRules({ ids, enabled });
     const { rules, errors } = bucketRulesResponse(response);
@@ -167,10 +167,12 @@ export const enableRulesAction = async (
         enabled ? TELEMETRY_EVENT.CUSTOM_RULE_ENABLED : TELEMETRY_EVENT.CUSTOM_RULE_DISABLED
       );
     }
+
+    return rules;
   } catch (e) {
     displayErrorToast(errorTitle, [e.message], dispatchToaster);
   } finally {
-    setLoadingRules({ ids: [], action: null });
+    setLoadingRules?.({ ids: [], action: null });
   }
 };
 
@@ -207,7 +209,7 @@ const executeRulesBulkAction = async ({
     } else {
       const response = await performBulkAction({ ...search, action, edit: payload?.edit });
 
-      onSuccess?.({ rulesCount: response.rules_count });
+      onSuccess?.({ rulesCount: response.attributes.summary.succeeded });
     }
   } catch (e) {
     if (onError) {

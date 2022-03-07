@@ -52,6 +52,7 @@ interface SampledTopAggs
   extends estypes.AggregationsTermsAggregateBase<TopValueBucket> {
   buckets: TopValueBucket[];
 }
+
 export const fetchKeywordFieldStats = async (
   esClient: ElasticsearchClient,
   params: FieldStatsCommonRequestParams,
@@ -63,10 +64,9 @@ export const fetchKeywordFieldStats = async (
     field.fieldName,
     termFilters
   );
-  const { body } = await esClient.search<
-    unknown,
-    { sampled_top: SampledTopAggs }
-  >(request);
+  const body = await esClient.search<unknown, { sampled_top: SampledTopAggs }>(
+    request
+  );
   const aggregations = body.aggregations;
   const topValues = aggregations?.sampled_top?.buckets ?? [];
 

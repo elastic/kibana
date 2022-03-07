@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data/common';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
@@ -28,7 +28,7 @@ interface Props {
 }
 
 interface State {
-  indexPattern: IndexPattern | null;
+  indexPattern: DataView | null;
   geoField: string;
   splitField: string;
   sortField: string;
@@ -42,7 +42,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     sortField: '',
   };
 
-  _onIndexPatternSelect = (indexPattern: IndexPattern) => {
+  _onIndexPatternSelect = (indexPattern: DataView) => {
     const pointFields = getGeoPointFields(indexPattern.fields);
     this.setState(
       {

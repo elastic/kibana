@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from 'src/core/public/mocks';
 import { homePluginMock } from 'src/plugins/home/public/mocks';
 import { securityMock } from '../../security/public/mocks';

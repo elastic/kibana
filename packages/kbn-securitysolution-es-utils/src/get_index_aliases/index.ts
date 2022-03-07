@@ -8,16 +8,6 @@
 
 import type { ElasticsearchClient } from '../elasticsearch_client';
 
-interface AliasesResponse {
-  [indexName: string]: {
-    aliases: {
-      [aliasName: string]: {
-        is_write_index: boolean;
-      };
-    };
-  };
-}
-
 interface IndexAlias {
   alias: string;
   index: string;
@@ -39,7 +29,7 @@ export const getIndexAliases = async ({
   esClient: ElasticsearchClient;
   alias: string;
 }): Promise<IndexAlias[]> => {
-  const response = await esClient.indices.getAlias<AliasesResponse>(
+  const response = await esClient.indices.getAlias(
     {
       name: alias,
     },

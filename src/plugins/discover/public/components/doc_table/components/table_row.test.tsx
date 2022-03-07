@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
+import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
 import { setDocViewsRegistry } from '../../../kibana_services';
 import { createFilterManagerMock } from '../../../../../data/public/query/filter_manager/filter_manager.mock';

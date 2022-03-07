@@ -26,15 +26,6 @@ export interface CasesContextFeatures {
 
 export type CasesFeatures = Partial<CasesContextFeatures>;
 
-export interface CasesContextValue {
-  owner: string[];
-  appId: string;
-  appTitle: string;
-  userCanCrud: boolean;
-  basePath: string;
-  features: CasesContextFeatures;
-}
-
 export interface CasesUiConfigType {
   markdownPlugins: {
     lens: boolean;
@@ -194,7 +185,7 @@ export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
   name?: string[];
-  false_positives: string[];
+  false_positives?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];
@@ -253,3 +244,5 @@ export interface Ecs {
 }
 
 export type CaseActionConnector = ActionConnector;
+
+export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];

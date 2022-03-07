@@ -10,7 +10,18 @@
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
  * This way plugins can do targeted imports to reduce the final code bundle
  */
-import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS, TIMESTAMP } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
+  ALERT_STATUS,
+  ALERT_UUID,
+  TIMESTAMP,
+  ALERT_START,
+} from '@kbn/rule-data-utils';
 
 import {
   EuiButtonIcon,
@@ -53,6 +64,10 @@ import { LazyAlertsFlyout } from '../../../..';
 import { parseAlert } from '../../components/parse_alert';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { translations, paths } from '../../../../config';
+import { addDisplayNames } from './add_display_names';
+import { CaseAttachments, CasesUiStart } from '../../../../../../cases/public';
+import { CommentType } from '../../../../../../cases/common';
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
@@ -60,7 +75,7 @@ interface AlertsTableTGridProps {
   indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
-  kuery: string;
+  kuery?: string;
   setRefetch: (ref: () => void) => void;
 }
 
@@ -134,9 +149,9 @@ function ObservabilityActions({
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const [openActionsPopoverId, setActionsPopover] = useState(null);
   const {
-    timelines,
+    cases,
     application: {},
-  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
+  } = useKibana<CoreStart & { cases: CasesUiStart }>().services;
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -145,10 +160,6 @@ function ObservabilityActions({
 
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
-
-  const afterCaseSelection = useCallback(() => {
-    setActionsPopover(null);
-  }, []);
 
   const closeActionsPopover = useCallback(() => {
     setActionsPopover(null);
@@ -159,35 +170,59 @@ function ObservabilityActions({
   }, []);
 
   const casePermissions = useGetUserCasesPermissions();
-  const event = useMemo(() => {
-    return {
-      data,
-      _id: eventId,
-      ecs: ecsData,
-    };
-  }, [data, eventId, ecsData]);
-
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
+
+  const caseAttachments: CaseAttachments = useMemo(() => {
+    return ecsData?._id
+      ? [
+          {
+            alertId: ecsData?._id ?? '',
+            index: ecsData?._index ?? '',
+            owner: observabilityFeatureId,
+            type: CommentType.alert,
+            rule: cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
+          },
+        ]
+      : [];
+  }, [ecsData, cases.helpers, data]);
+
+  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
+    attachments: caseAttachments,
+  });
+
+  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({
+    attachments: caseAttachments,
+  });
+
+  const handleAddToNewCaseClick = useCallback(() => {
+    createCaseFlyout.open();
+    closeActionsPopover();
+  }, [createCaseFlyout, closeActionsPopover]);
+
+  const handleAddToExistingCaseClick = useCallback(() => {
+    selectCaseModal.open();
+    closeActionsPopover();
+  }, [closeActionsPopover, selectCaseModal]);
 
   const actionsMenuItems = useMemo(() => {
     return [
       ...(casePermissions?.crud
         ? [
-            timelines.getAddToExistingCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityFeatureId,
-              owner: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            }),
-            timelines.getAddToNewCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityFeatureId,
-              owner: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            }),
+            <EuiContextMenuItem
+              data-test-subj="add-to-existing-case-action"
+              onClick={handleAddToExistingCaseClick}
+              size="s"
+            >
+              {ADD_TO_EXISTING_CASE}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              data-test-subj="add-to-new-case-action"
+              onClick={handleAddToNewCaseClick}
+              size="s"
+            >
+              {ADD_TO_NEW_CASE}
+            </EuiContextMenuItem>,
           ]
         : []),
 
@@ -203,7 +238,7 @@ function ObservabilityActions({
           ]
         : []),
     ];
-  }, [afterCaseSelection, casePermissions, timelines, event, linkToRule]);
+  }, [casePermissions?.crud, handleAddToExistingCaseClick, handleAddToNewCaseClick, linkToRule]);
 
   const actionsToolTip =
     actionsMenuItems.length <= 0
@@ -361,7 +396,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       casesOwner: observabilityFeatureId,
       casePermissions,
       type,
-      columns: tGridState?.columns ?? columns,
+      columns: (tGridState?.columns ?? columns).map(addDisplayNames),
       deletedEventIds,
       disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       end: rangeTo,
@@ -373,7 +408,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       footerText: translations.alertsTable.footerTextLabel,
       onStateChange,
       query: {
-        query: kuery,
+        query: kuery ?? '',
         language: 'kuery',
       },
       renderCellValue: getRenderCellValue({ setFlyoutAlert }),
@@ -390,7 +425,18 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           sortDirection,
         },
       ],
-
+      queryFields: [
+        ALERT_DURATION,
+        ALERT_EVALUATION_THRESHOLD,
+        ALERT_EVALUATION_VALUE,
+        ALERT_REASON,
+        ALERT_RULE_CATEGORY,
+        ALERT_RULE_NAME,
+        ALERT_STATUS,
+        ALERT_UUID,
+        ALERT_START,
+        TIMESTAMP,
+      ],
       leadingControlColumns,
       trailingControlColumns,
       unit: (totalAlerts: number) => translations.alertsTable.showingAlertsTitle(totalAlerts),

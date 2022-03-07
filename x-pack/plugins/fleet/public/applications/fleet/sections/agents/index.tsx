@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Router, Route, Switch, useHistory } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { Loading, Error, AgentEnrollmentFlyout } from '../../components';
-import {
-  useConfig,
-  useFleetStatus,
-  useBreadcrumbs,
-  useAuthz,
-  useGetSettings,
-  useGetAgentPolicies,
-} from '../../hooks';
+import { useConfig, useFleetStatus, useBreadcrumbs, useAuthz, useGetSettings } from '../../hooks';
 import { DefaultLayout, WithoutHeaderLayout } from '../../layouts';
 
 import { AgentListPage } from './agent_list_page';
@@ -33,18 +26,6 @@ export const AgentsApp: React.FunctionComponent = () => {
   const history = useHistory();
   const { agents } = useConfig();
   const hasFleetAllPrivileges = useAuthz().fleet.all;
-
-  const agentPoliciesRequest = useGetAgentPolicies({
-    page: 1,
-    perPage: 1000,
-    full: true,
-  });
-
-  const agentPolicies = useMemo(
-    () => agentPoliciesRequest.data?.items || [],
-    [agentPoliciesRequest.data]
-  );
-
   const fleetStatus = useFleetStatus();
 
   const settings = useGetSettings();
@@ -104,7 +85,6 @@ export const AgentsApp: React.FunctionComponent = () => {
         <EuiPortal>
           <AgentEnrollmentFlyout
             defaultMode="standalone"
-            agentPolicies={agentPolicies}
             onClose={() => setIsEnrollmentFlyoutOpen(false)}
           />
         </EuiPortal>

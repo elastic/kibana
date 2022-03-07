@@ -13,7 +13,7 @@ jest.mock('../../services/field_format_service', () => ({
   },
 }));
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { ExplorerChartDistribution } from './explorer_chart_distribution';

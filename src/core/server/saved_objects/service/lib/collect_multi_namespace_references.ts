@@ -207,7 +207,7 @@ async function getObjectsAndReferences({
     }
     const bulkGetResponse = await client.mget(
       { body: { docs: makeBulkGetDocs(bulkGetObjects) } },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
     // exit early if we can't verify a 404 response is from Elasticsearch
     if (

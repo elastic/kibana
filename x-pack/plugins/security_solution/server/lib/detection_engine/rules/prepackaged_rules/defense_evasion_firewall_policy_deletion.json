@@ -2,9 +2,9 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies the deletion of a firewall policy in Azure. An adversary may delete a firewall policy in an attempt to evade defenses and/or to eliminate barriers in carrying out their initiative.",
+  "description": "Identifies the deletion of a firewall policy in Azure. An adversary may delete a firewall policy in an attempt to evade defenses and/or to eliminate barriers to their objective.",
   "false_positives": [
-    "Firewall policy deletions may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Firewall policy deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Firewall policy deletions may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Firewall policy deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-25m",
   "index": [
@@ -56,5 +56,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }
