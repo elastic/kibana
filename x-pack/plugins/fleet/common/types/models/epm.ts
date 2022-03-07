@@ -503,5 +503,4 @@ export type TemplateMap = Record<string, TemplateMapEntry>;
 export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
-  composedOfTemplates: TemplateMap;
 }

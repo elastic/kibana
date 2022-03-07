@@ -350,7 +350,7 @@ async function installDataStreamComponentTemplates(params: {
     })
   );
 
-  return { componentTemplateNames: Object.keys(componentTemplates), componentTemplates };
+  return { componentTemplateNames: Object.keys(componentTemplates) };
 }
 
 export async function ensureDefaultComponentTemplates(
@@ -470,7 +470,7 @@ export async function installTemplate({
     ilmPolicy: dataStream.ilm_policy,
   });
 
-  const { componentTemplateNames, componentTemplates } = await installDataStreamComponentTemplates({
+  const { componentTemplateNames } = await installDataStreamComponentTemplates({
     mappings,
     templateName,
     registryElasticsearch: dataStream.elasticsearch,
@@ -503,7 +503,6 @@ export async function installTemplate({
   return {
     templateName,
     indexTemplate: template,
-    composedOfTemplates: componentTemplates,
   };
 }
 

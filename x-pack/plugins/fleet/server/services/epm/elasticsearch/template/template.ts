@@ -13,14 +13,12 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
-  TemplateMap,
 } from '../../../../types';
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
 import {
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
-  MAPPINGS_TEMPLATE_SUFFIX,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -40,7 +38,6 @@ export interface CurrentDataStream {
   dataStreamName: string;
   replicated: boolean;
   indexTemplate: IndexTemplate;
-  composedOfTemplates: TemplateMap;
 }
 const DEFAULT_SCALING_FACTOR = 1000;
 const DEFAULT_IGNORE_ABOVE = 1024;
@@ -459,7 +456,7 @@ const getDataStreams = async (
   esClient: ElasticsearchClient,
   template: IndexTemplateEntry
 ): Promise<CurrentDataStream[] | undefined> => {
-  const { indexTemplate, composedOfTemplates } = template;
+  const { indexTemplate } = template;
 
   const body = await esClient.indices.getDataStream({
     name: indexTemplate.index_patterns.join(','),
@@ -471,15 +468,7 @@ const getDataStreams = async (
     dataStreamName: dataStream.name,
     replicated: dataStream.replicated,
     indexTemplate,
-    composedOfTemplates,
   }));
-};
-
-const getTemplateWithNameEndingIn = (composedOfTemplates: TemplateMap, suffix: string) => {
-  const mappingComponentTemplateName =
-    Object.keys(composedOfTemplates).find((templateName) => templateName.endsWith(suffix)) || '';
-
-  return composedOfTemplates[mappingComponentTemplateName];
 };
 
 const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
