@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -51,12 +52,13 @@ export function ServiceGroupTemplate({
   const history = useHistory();
 
   const {
-    query: { serviceGroup },
+    query: { serviceGroup: serviceGroupId },
   } = router.getParams('/services', '/service-map', history.location);
+
   const { data } = useFetcher((callApmApi) => {
-    if (serviceGroup) {
+    if (serviceGroupId) {
       return callApmApi('GET /internal/apm/service-group', {
-        params: { query: { serviceGroup } },
+        params: { query: { serviceGroup: serviceGroupId } },
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,6 +71,8 @@ export function ServiceGroupTemplate({
   const serviceGroupsLink = router.link('/service-groups', {
     query: { ...query, serviceGroup: '' },
   });
+
+  const loadingServiceGroupName = !!serviceGroupId && !serviceGroupName;
 
   const serviceGroupsPageTitle = (
     <EuiFlexGroup
@@ -87,11 +91,14 @@ export function ServiceGroupTemplate({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {serviceGroupName
-          ? serviceGroupName
-          : i18n.translate('xpack.apm.serviceGroup.allServices.title', {
-              defaultMessage: 'Services',
-            })}
+        {loadingServiceGroupName ? (
+          <EuiLoadingContent lines={2} style={{ width: 180, height: 40 }} />
+        ) : (
+          serviceGroupName ||
+          i18n.translate('xpack.apm.serviceGroup.allServices.title', {
+            defaultMessage: 'Services',
+          })
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
