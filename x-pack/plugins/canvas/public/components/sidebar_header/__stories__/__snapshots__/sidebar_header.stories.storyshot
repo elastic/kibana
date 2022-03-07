@@ -61,7 +61,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element to top layer"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -88,7 +87,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element up one layer"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -115,7 +113,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element down one layer"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -142,7 +139,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element to bottom layer"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}

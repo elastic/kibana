@@ -70,7 +70,6 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
             <button
               aria-label="Create image element"
               className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -104,7 +103,6 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               <button
                 aria-label="Download"
                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                disabled={false}
                 type="button"
               >
                 <span
@@ -136,7 +134,6 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               <button
                 aria-label="Copy id to clipboard"
                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                disabled={false}
                 type="button"
               >
                 <span
@@ -161,7 +158,6 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
             <button
               aria-label="Delete"
               className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -253,7 +249,6 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
             <button
               aria-label="Create image element"
               className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -287,7 +282,6 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               <button
                 aria-label="Download"
                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                disabled={false}
                 type="button"
               >
                 <span
@@ -319,7 +313,6 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               <button
                 aria-label="Copy id to clipboard"
                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                disabled={false}
                 type="button"
               >
                 <span
@@ -344,7 +337,6 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
             <button
               aria-label="Delete"
               className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
