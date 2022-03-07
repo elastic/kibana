@@ -24650,11 +24650,6 @@ react-is@^17.0.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.1.tgz#5b3531bd76a645a4c9fb6e693ed36419e3301339"
   integrity sha512-NAnt2iGDXohE5LI7uBnLnqvLQMtzhkiAOLXTmv+qnF9Ky7xAPcX8Up/xWIhxvLVGJvuLiNc4xQLtuqDRzb4fSA==
 
-react-lib-adler32@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/react-lib-adler32/-/react-lib-adler32-1.0.3.tgz#63df1aed274eabcc1c5067077ea281ec30888ba7"
-  integrity sha512-AqFqdt4cP0RPffHNjVHZ7tyIgnoSzNxgFhG8XKMXCtA1dZ72gTPO4iYFwWDKHqvE8sHS14rhltQTdbXU5G4BFA==
-
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
@@ -27804,13 +27799,6 @@ strong-log-transformer@^2.1.0:
     duplexer "^0.1.1"
     minimist "^1.2.0"
     through "^2.3.4"
-
-style-it@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/style-it/-/style-it-2.1.3.tgz#ab6b5e109a1e946d58639f8cd05aa52df7ef1ab1"
-  integrity sha512-QVpYgFoJXhxiuBEok05YTx0WB4AbGkIiMWuCEPLTjFf3tCeB15eqhqMOjJeIsXqZ8REvgsqVuL2u7eoYg0mXJw==
-  dependencies:
-    react-lib-adler32 "^1.0.3"
 
 style-loader@^1.1.3, style-loader@^1.3.0:
   version "1.3.0"
