@@ -81,10 +81,10 @@ describe('getRoleAbilities', () => {
       expect(myRole.canManageMetaEngines).toEqual(true);
     });
 
-    it('returns false when the user can manage any engines but the account does not have a platinum license', () => {
+    it('returns true when the user can manage any engines but the account does not have a platinum license', () => {
       const myRole = getRoleAbilities({ ...mockRole, ...canManageEngines }, false);
 
-      expect(myRole.canManageMetaEngines).toEqual(false);
+      expect(myRole.canManageMetaEngines).toEqual(true);
     });
 
     it('returns false when has a platinum license but the user cannot manage any engines', () => {
