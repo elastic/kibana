@@ -23,6 +23,7 @@ describe('getRoleAbilities', () => {
       // Has access
       canViewAccountCredentials: true,
       canManageEngines: true,
+      canManageMetaEngines: true,
       // Does not have access
       canViewMetaEngines: false,
       canViewEngineAnalytics: false,
@@ -35,7 +36,6 @@ describe('getRoleAbilities', () => {
       canViewMetaEngineSourceEngines: false,
       canViewSettings: false,
       canViewRoleMappings: false,
-      canManageMetaEngines: false,
       canManageLogSettings: false,
       canManageSettings: false,
       canManageEngineCrawler: false,
