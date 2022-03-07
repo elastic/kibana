@@ -28,7 +28,12 @@ interface Props {
   closeFlyout: () => void;
 }
 
-export const ViewApiRequest: React.FunctionComponent<Props> = ({ request, title, description, closeFlyout }) => {
+export const ViewApiRequest: React.FunctionComponent<Props> = ({
+  request,
+  title,
+  description,
+  closeFlyout,
+}) => {
   return (
     <EuiFlyout maxWidth={480} onClose={closeFlyout}>
       <EuiFlyoutHeader>
@@ -54,10 +59,7 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({ request, title,
           flush="left"
           data-test-subj="apiRequestFlyoutClose"
         >
-          <FormattedMessage
-            id="esUi.viewApiRequest.closeButtonLabel"
-            defaultMessage="Close"
-          />
+          <FormattedMessage id="esUi.viewApiRequest.closeButtonLabel" defaultMessage="Close" />
         </EuiButtonEmpty>
       </EuiFlyoutFooter>
     </EuiFlyout>

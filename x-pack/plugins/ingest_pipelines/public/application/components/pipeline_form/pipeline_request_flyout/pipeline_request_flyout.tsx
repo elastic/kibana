@@ -24,7 +24,7 @@ export const PipelineRequestFlyout: FunctionComponent<Props> = ({
 }) => {
   const form = useFormContext();
   const [formData, setFormData] = useState<Pipeline>({} as Pipeline);
-  const pipeline = {...formData, ...readProcessors()};
+  const pipeline = { ...formData, ...readProcessors() };
 
   useEffect(() => {
     const subscription = form.subscribe(async ({ isValid, validate, data }) => {
@@ -43,21 +43,19 @@ export const PipelineRequestFlyout: FunctionComponent<Props> = ({
 
   const title = name
     ? i18n.translate('xpack.ingestPipelines.requestFlyout.namedTitle', {
-      defaultMessage: "Request for '{name}'",
-      values: { name },
-    }) :
-    i18n.translate('xpack.ingestPipelines.requestFlyout.unnamedTitle', {
-      defaultMessage: 'Request',
-    });
+        defaultMessage: "Request for '{name}'",
+        values: { name },
+      })
+    : i18n.translate('xpack.ingestPipelines.requestFlyout.unnamedTitle', {
+        defaultMessage: 'Request',
+      });
 
   return (
     <ViewApiRequest
       title={title}
-      description={
-        i18n.translate('xpack.ingestPipelines.requestFlyout.descriptionText', {
-          defaultMessage: 'This Elasticsearch request will create or update the pipeline.',
-        })
-      }
+      description={i18n.translate('xpack.ingestPipelines.requestFlyout.descriptionText', {
+        defaultMessage: 'This Elasticsearch request will create or update the pipeline.',
+      })}
       request={request}
       closeFlyout={closeFlyout}
     />
