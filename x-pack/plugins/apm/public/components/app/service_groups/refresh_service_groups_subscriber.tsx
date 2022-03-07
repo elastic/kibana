@@ -8,24 +8,24 @@
 import React, { useEffect, useRef } from 'react';
 import { Subject, Subscription } from 'rxjs';
 
-const refreshServiceGroupsSubject = new Subject<any[]>();
+const refreshServiceGroupsSubject = new Subject();
 
-export function refreshServiceGroups(...args: any[]) {
-  refreshServiceGroupsSubject.next(args);
+export function refreshServiceGroups() {
+  refreshServiceGroupsSubject.next();
 }
 
 export function RefreshServiceGroupsSubscriber({
   onRefresh,
   children,
 }: {
-  onRefresh: (...args: any[]) => void;
+  onRefresh: () => void;
   children?: React.ReactNode;
 }) {
   const subscription = useRef<Subscription | null>(null);
   useEffect(() => {
     if (!subscription.current) {
-      subscription.current = refreshServiceGroupsSubject.subscribe(
-        (args: any[] = []) => onRefresh(...args)
+      subscription.current = refreshServiceGroupsSubject.subscribe(() =>
+        onRefresh()
       );
     }
     return () => {

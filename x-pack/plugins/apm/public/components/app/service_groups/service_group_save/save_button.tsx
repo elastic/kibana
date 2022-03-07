@@ -7,24 +7,17 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { SaveGroupModal } from './save_modal';
 
 export function ServiceGroupSaveButton() {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const router = useApmRouter();
-  const history = useHistory();
-  const params = router.getParams(
-    '/service-groups',
-    '/services',
-    '/service-map',
-    history.location,
-    true
-  );
-  const serviceGroup = params?.query?.serviceGroup;
+  const {
+    query: { serviceGroup },
+  } = useAnyOfApmParams('/service-groups', '/services', '/service-map');
+
   const isGroupEditMode = !!serviceGroup;
 
   const { data } = useFetcher((callApmApi) => {

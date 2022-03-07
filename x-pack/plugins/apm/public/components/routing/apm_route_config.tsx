@@ -91,11 +91,15 @@ const apmRoutes = {
           </Breadcrumb>
         ),
         params: t.partial({
-          query: t.partial({
-            serviceGroup: t.string,
-            rangeFrom: t.string,
-            rangeTo: t.string,
-          }),
+          query: t.intersection([
+            t.type({
+              rangeFrom: t.string,
+              rangeTo: t.string,
+            }),
+            t.partial({
+              serviceGroup: t.string,
+            }),
+          ]),
         }),
       },
       ...settings,

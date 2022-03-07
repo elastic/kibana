@@ -7,13 +7,12 @@
 import { EuiFlexGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { TypeOf } from '@kbn/typed-react-router-config';
 import { SavedServiceGroup } from '../../../../../common/service_groups';
 import { ServiceGroupsCard } from './service_group_card';
 import { SERVICE_GROUP_COLOR_DEFAULT } from '../../../../../common/service_groups';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { ApmRoutes } from '../../../routing/apm_route_config';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 interface Props {
   items: SavedServiceGroup[];
@@ -22,23 +21,20 @@ interface Props {
 
 export function ServiceGroupsListItems({ items }: Props) {
   const router = useApmRouter();
-  const history = useHistory();
-  const { query } = router.getParams('/*', history.location);
+  const { query } = useApmParams('/service-groups');
   return (
     <EuiFlexGrid gutterSize="m">
       {items.map((item) => (
         <ServiceGroupsCard
           serviceGroup={item}
-          href={router.link(
-            '/services',
-            {
-              query: { ...query, serviceGroup: item.id } as TypeOf<
-                ApmRoutes,
-                '/services'
-              >['query'],
+          href={router.link('/services', {
+            query: {
+              ...query,
+              serviceGroup: item.id,
+              environment: ENVIRONMENT_ALL.value,
+              kuery: '',
             },
-            true // skips runtime param validation
-          )}
+          })}
         />
       ))}
       <ServiceGroupsCard
@@ -56,16 +52,14 @@ export function ServiceGroupsListItems({ items }: Props) {
           color: SERVICE_GROUP_COLOR_DEFAULT,
         }}
         hideServiceCount
-        href={router.link(
-          '/services',
-          {
-            query: { ...query, serviceGroup: '' } as TypeOf<
-              ApmRoutes,
-              '/services'
-            >['query'],
+        href={router.link('/services', {
+          query: {
+            ...query,
+            serviceGroup: '',
+            environment: ENVIRONMENT_ALL.value,
+            kuery: '',
           },
-          true // skips runtime param validation
-        )}
+        })}
       />
     </EuiFlexGrid>
   );

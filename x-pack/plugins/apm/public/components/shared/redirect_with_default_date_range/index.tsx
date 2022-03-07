@@ -38,6 +38,7 @@ export function RedirectWithDefaultDateRange({
         route.path === '/service-map' ||
         route.path === '/backends' ||
         route.path === '/services/{serviceName}' ||
+        route.path === '/service-groups' ||
         location.pathname === '/' ||
         location.pathname === ''
       );

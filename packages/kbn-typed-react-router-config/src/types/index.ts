@@ -137,28 +137,14 @@ export interface Router<TRoutes extends RouteMap> {
     path3: T3,
     location: Location
   ): TypeOf<TRoutes, T1> | TypeOf<TRoutes, T2> | TypeOf<TRoutes, T3>;
-  getParams<
-    T1 extends PathsOf<TRoutes>,
-    T2 extends PathsOf<TRoutes>,
-    T3 extends PathsOf<TRoutes>,
-    TOptional extends boolean
-  >(
-    path1: T1,
-    path2: T2,
-    path3: T3,
+  getParams<TPath extends PathsOf<TRoutes>, TOptional extends boolean>(
+    path: TPath,
     location: Location,
     optional: TOptional
-  ): TOptional extends true
-    ? TypeOf<TRoutes, T1> | TypeOf<TRoutes, T2> | TypeOf<TRoutes, T3> | undefined
-    : TypeOf<TRoutes, T1> | TypeOf<TRoutes, T2> | TypeOf<TRoutes, T3>;
-  link<TPath extends PathsOf<TRoutes>, TOptional extends boolean>(
+  ): TOptional extends true ? TypeOf<TRoutes, TPath> | undefined : TypeOf<TRoutes, TPath>;
+  link<TPath extends PathsOf<TRoutes>>(
     path: TPath,
-    arg?: TypeOf<TRoutes, TPath, false> | TOptional
-  ): string;
-  link<TPath extends PathsOf<TRoutes>, TOptional extends boolean>(
-    path: TPath,
-    params: TypeOf<TRoutes, TPath, false>,
-    optional: TOptional
+    ...args: TypeAsArgs<TypeOf<TRoutes, TPath, false>>
   ): string;
   getRoutePath(route: Route): string;
   getRoutesToMatch(path: string): FlattenRoutesOf<TRoutes>;
