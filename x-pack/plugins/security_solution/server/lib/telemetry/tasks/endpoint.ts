@@ -199,7 +199,6 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
        */
       if (endpointData.endpointMetadata === undefined) {
         logger.debug(`no endpoint metadata to report`);
-        return 0;
       }
 
       const { body: endpointMetadataResponse } = endpointData.endpointMetadata as unknown as {
@@ -208,7 +207,6 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 
       if (endpointMetadataResponse.aggregations === undefined) {
         logger.debug(`no endpoint metadata to report`);
-        return 0;
       }
 
       const endpointMetadata =
