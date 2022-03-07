@@ -31,7 +31,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       }),
       value: 'MMM D, YYYY @ HH:mm:ss.SSS',
       description: i18n.translate('core.ui_settings.params.dateFormatText', {
-        defaultMessage: 'When displaying a pretty formatted date, use this {formatLink}',
+        defaultMessage: 'The {formatLink} for pretty formatted dates.',
         description:
           'Part of composite text: core.ui_settings.params.dateFormatText + ' +
           'core.ui_settings.params.dateFormat.optionsLinkText',
@@ -48,15 +48,11 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
     },
     'dateFormat:tz': {
       name: i18n.translate('core.ui_settings.params.dateFormat.timezoneTitle', {
-        defaultMessage: 'Timezone for date formatting',
+        defaultMessage: 'Time zone',
       }),
       value: 'Browser',
       description: i18n.translate('core.ui_settings.params.dateFormat.timezoneText', {
-        defaultMessage:
-          'Which timezone should be used. {defaultOption} will use the timezone detected by your browser.',
-        values: {
-          defaultOption: '"Browser"',
-        },
+        defaultMessage: 'The default time zone.',
       }),
       type: 'select',
       options: timezones,
@@ -115,7 +111,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       }),
       value: defaultWeekday,
       description: i18n.translate('core.ui_settings.params.dateFormat.dayOfWeekText', {
-        defaultMessage: 'What day should weeks start on?',
+        defaultMessage: 'The day that starts the week.',
       }),
       type: 'select',
       options: weekdays,
@@ -141,7 +137,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       }),
       value: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
       description: i18n.translate('core.ui_settings.params.dateNanosFormatText', {
-        defaultMessage: 'Used for the {dateNanosLink} datatype of Elasticsearch',
+        defaultMessage: 'The format for {dateNanosLink} data.',
         values: {
           dateNanosLink:
             '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/date_nanos.html" target="_blank" rel="noopener noreferrer">' +
