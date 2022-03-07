@@ -53,7 +53,7 @@ export const SourceIdentifier: React.FC<Props> = ({ id }) => (
         <EuiFieldText value={id} readOnly />
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiSpacer size="s" />
+    {/* <EuiSpacer size="s" />
     <EuiText size="s">
       <p>
         <FormattedMessage
@@ -68,6 +68,6 @@ export const SourceIdentifier: React.FC<Props> = ({ id }) => (
           }}
         />
       </p>
-    </EuiText>
+    </EuiText> */}
   </>
 );
