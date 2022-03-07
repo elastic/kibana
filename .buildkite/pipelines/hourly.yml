@@ -19,7 +19,7 @@ steps:
     label: 'Default CI Group'
     parallelism: 27
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 250
     key: default-cigroup
@@ -31,7 +31,7 @@ steps:
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     key: default-cigroup-docker
@@ -44,7 +44,7 @@ steps:
     label: 'OSS CI Group'
     parallelism: 11
     agents:
-      queue: ci-group-4d
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     key: oss-cigroup
@@ -98,7 +98,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/oss_firefox.sh
     label: 'OSS Firefox Tests'
     agents:
-      queue: ci-group-4d
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -130,7 +130,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/oss_misc.sh
     label: 'OSS Misc Functional Tests'
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     retry:
