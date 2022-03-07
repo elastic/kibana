@@ -804,9 +804,15 @@ describe('When using the ArtifactListPage component', () => {
       it('should persist policy filter to the URL params', async () => {
         const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
         const firstPolicyTestId = `policiesSelector-popover-items-${policyId}`;
+
+        await act(async () => {
+          expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();
+        });
+
         act(() => {
           userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
         });
+
         await act(async () => {
           await waitFor(() => {
             expect(renderResult.getByTestId(firstPolicyTestId)).toBeTruthy();

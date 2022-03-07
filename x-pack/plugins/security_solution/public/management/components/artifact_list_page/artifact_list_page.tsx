@@ -42,6 +42,7 @@ import { useToasts } from '../../../common/lib/kibana';
 import { useMemoizedRouteState } from '../../common/hooks';
 import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../back_to_external_app_button';
+import { useIsMounted } from '../hooks/use_is_mounted';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -82,6 +83,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const { state: routeState } = useLocation<ListPageRouteState | undefined>();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
+    const isMounted = useIsMounted();
     const isFlyoutOpened = useIsFlyoutOpened();
     const setUrlParams = useSetUrlParams();
     const {
@@ -196,9 +198,11 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     );
 
     const handleArtifactDeleteModalOnSuccess = useCallback(() => {
-      setSelectedItemForDelete(undefined);
-      refetchListData();
-    }, [refetchListData]);
+      if (isMounted) {
+        setSelectedItemForDelete(undefined);
+        refetchListData();
+      }
+    }, [isMounted, refetchListData]);
 
     const handleArtifactDeleteModalOnCancel = useCallback(() => {
       setSelectedItemForDelete(undefined);

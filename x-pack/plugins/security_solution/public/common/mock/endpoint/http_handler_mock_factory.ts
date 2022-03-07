@@ -136,19 +136,12 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
     let inflightApiCalls = 0;
     const { ignoreUnMockedApiRouteErrors = false } = options ?? {};
     const apiDoneListeners: Array<() => void> = [];
-    const markApiCallAsHandled = async (
-      apiOptions: HttpFetchOptionsWithPath,
-      delay?: RouteMock['delay']
-    ) => {
+    const markApiCallAsInFlight = () => {
       inflightApiCalls++;
-
+    };
+    const markApiCallAsHandled = async () => {
       // We always wait at least 1ms
       await new Promise((r) => setTimeout(r, 1));
-
-      // If a delay was defined, then await for that as well
-      if (delay) {
-        await delay(apiOptions);
-      }
 
       inflightApiCalls--;
 
@@ -217,9 +210,18 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
                 path: args[0],
               };
 
-          await markApiCallAsHandled(fetchOptions, thisRouteResponseProvider.mockDelay);
+          markApiCallAsInFlight();
 
-          return thisRouteResponseProvider(fetchOptions);
+          // If a delay was defined, then wait for that to complete
+          if (thisRouteResponseProvider.mockDelay) {
+            await thisRouteResponseProvider.mockDelay(fetchOptions);
+          }
+
+          try {
+            return thisRouteResponseProvider(fetchOptions);
+          } finally {
+            markApiCallAsHandled();
+          }
         } else if (priorMockedFunction) {
           return priorMockedFunction(...args);
         }
