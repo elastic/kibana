@@ -80,8 +80,6 @@ export const renderApp = ({
           value={{
             appMountParameters,
             config,
-            core,
-            plugins,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
           }}

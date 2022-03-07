@@ -25,6 +25,7 @@ export default {
       return (
         <KibanaContextProvider
           services={{
+            http: { basePath: { prepend: (_: string) => '' } },
             docLinks: { links: { query: {} } },
             storage: { get: () => {} },
             uiSettings: {
@@ -37,15 +38,7 @@ export default {
           }}
         >
           {' '}
-          <PluginContext.Provider
-            value={
-              {
-                core: {
-                  http: { basePath: { prepend: (_: string) => '' } },
-                },
-              } as unknown as PluginContextValue
-            }
-          >
+          <PluginContext.Provider value={{} as PluginContextValue}>
             <Story />
           </PluginContext.Provider>
         </KibanaContextProvider>

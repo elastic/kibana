@@ -51,6 +51,16 @@ const withCore = makeDecorator({
           subscribe: () => {},
         },
       },
+      data: {
+        query: {
+          timefilter: {
+            timefilter: {
+              setTime: () => {},
+              getTime: () => ({}),
+            },
+          },
+        },
+      },
       http: {
         basePath: {
           prepend: (link: string) => `http://localhost:5601${link}`,
@@ -82,19 +92,6 @@ const withCore = makeDecorator({
                   overviewNext: { enabled: false },
                 },
               },
-              core: options as CoreStart,
-              plugins: {
-                data: {
-                  query: {
-                    timefilter: {
-                      timefilter: {
-                        setTime: () => {},
-                        getTime: () => ({}),
-                      },
-                    },
-                  },
-                },
-              } as unknown as ObservabilityPublicPluginsStart,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
             }}

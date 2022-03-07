@@ -56,8 +56,6 @@ export const render = (component: React.ReactNode) => {
           value={{
             appMountParameters,
             config,
-            core,
-            plugins,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
           }}
