@@ -9,9 +9,18 @@
 import OriginalHandlebars from 'handlebars';
 // @ts-expect-error Could not find a declaration file for module
 import { resultIsAllowed } from 'handlebars/dist/cjs/handlebars/internal/proto-access';
+// @ts-expect-error Could not find a declaration file for module
+import AST from 'handlebars/dist/cjs/handlebars/compiler/ast';
+// @ts-expect-error Could not find a declaration file for module
+import { indexOf } from 'handlebars/dist/cjs/handlebars/utils';
+// @ts-expect-error Could not find a declaration file for module
+import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
 import get from 'lodash/get';
 
-export type ExtendedCompileOptions = Pick<CompileOptions, 'noEscape'>;
+export type ExtendedCompileOptions = Pick<
+  CompileOptions,
+  'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'noEscape'
+>;
 export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers'>;
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -48,6 +57,17 @@ Handlebars.compileAST = function (template: string, options?: ExtendedCompileOpt
     visitor.render(context, runtimeOptions);
 };
 
+interface Container {
+  helpers: { [name: string]: Handlebars.HelperDelegate };
+  strict: (obj: { [name: string]: any }, name: string, loc: hbs.AST.SourceLocation) => any;
+  lookupProperty: (parent: { [name: string]: any }, propertyName: string) => any;
+  lambda: (current: any, context: any) => any;
+  hooks: {
+    helperMissing?: Handlebars.HelperDelegate;
+    blockHelperMissing?: Handlebars.HelperDelegate;
+  };
+}
+
 class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private scopes: any[] = [];
   private output: any[] = [];
@@ -55,28 +75,9 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private compileOptions: ExtendedCompileOptions;
   private helpers: { [name: string]: Handlebars.HelperDelegate };
   private ast?: hbs.AST.Program;
-  private defaultHelperOptions: Handlebars.HelperOptions = {
-    // @ts-expect-error this function is lifted from the handlebars source and slightly modified (lib/handlebars/runtime.js)
-    lookupProperty(parent, propertyName) {
-      const result = parent[propertyName];
-      if (result == null) {
-        return result;
-      }
-      if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
-        return result;
-      }
-
-      if (resultIsAllowed(result, {}, propertyName)) {
-        return result;
-      }
-      return undefined;
-    },
-  };
-  private container: {
-    helpers: { [name: string]: Handlebars.HelperDelegate };
-  } = {
-    helpers: {},
-  };
+  private container: Container;
+  // @ts-expect-error
+  private defaultHelperOptions: Handlebars.HelperOptions = {};
 
   constructor(
     template: string,
@@ -87,14 +88,51 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.template = template;
     this.compileOptions = options;
     this.helpers = helpers;
+
+    const container: Container = (this.container = {
+      helpers: {},
+      strict(obj, name, loc) {
+        if (!obj || !(name in obj)) {
+          throw new Handlebars.Exception('"' + name + '" not defined in ' + obj, {
+            loc,
+          } as hbs.AST.Node);
+        }
+        return container.lookupProperty(obj, name);
+      },
+      // this function is lifted from the handlebars source and slightly modified (lib/handlebars/runtime.js)
+      lookupProperty(parent, propertyName) {
+        const result = parent[propertyName];
+        if (result == null) {
+          return result;
+        }
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return result;
+        }
+
+        if (resultIsAllowed(result, {}, propertyName)) {
+          return result;
+        }
+        return undefined;
+      },
+      // this function is lifted from the handlebars source and slightly modified (lib/handlebars/runtime.js)
+      lambda(current, context) {
+        return typeof current === 'function' ? current.call(context) : current;
+      },
+      hooks: {},
+    });
+
+    const keepHelperInHelpers = false;
+    moveHelperToHooks(container, 'helperMissing', keepHelperInHelpers);
+    moveHelperToHooks(container, 'blockHelperMissing', keepHelperInHelpers);
+
+    // @ts-expect-error
+    this.defaultHelperOptions.lookupProperty = container.lookupProperty;
   }
 
   render(context: any, options: ExtendedRuntimeOptions = {}): string {
     this.scopes = [context];
     this.output = [];
-    this.container = {
-      helpers: Object.assign({}, this.helpers, options.helpers),
-    };
+    this.container.helpers = Object.assign({}, this.helpers, options.helpers);
 
     if (!this.ast) {
       this.ast = Handlebars.parse(this.template); // TODO: can we get away with using parseWithoutProcessing instead?
@@ -112,27 +150,148 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   SubExpression(sexpr: hbs.AST.SubExpression) {
     transformLiteralToPath(sexpr);
 
-    const name = sexpr.path.parts[0];
-    const helper = this.container.helpers[name];
+    switch (this.classifySexpr(sexpr)) {
+      case 'simple':
+        this.simpleSexpr(sexpr);
+        break;
+      case 'helper':
+        this.helperSexpr(sexpr);
+        break;
+      default:
+        this.ambiguousSexpr(sexpr);
+    }
+  }
 
-    if (helper) {
-      const [context] = this.scopes;
-      const params = this.getParams(sexpr);
-      const result = helper.call(
-        context,
-        ...params,
-        Object.assign(
-          {
-            hash: getHash(sexpr),
-          },
-          this.defaultHelperOptions
-        )
-      );
-      this.output.push(result);
-      return;
+  // Liftet from lib/handlebars/compiler/compiler.js
+  private classifySexpr(sexpr: hbs.AST.SubExpression) {
+    const isSimple = AST.helpers.simpleId(sexpr.path);
+
+    // a mustache is an eligible helper if:
+    // * its id is simple (a single part, not `this` or `..`)
+    let isHelper = AST.helpers.helperExpression(sexpr);
+
+    // if a mustache is an eligible helper but not a definite
+    // helper, it is ambiguous, and will be resolved in a later
+    // pass or at runtime.
+    let isEligible = isHelper || isSimple;
+
+    // if ambiguous, we can possibly resolve the ambiguity now
+    // An eligible helper is one that does not have a complex path, i.e. `this.foo`, `../foo` etc.
+    if (isEligible && !isHelper) {
+      const name = sexpr.path.parts[0];
+      const options = this.compileOptions;
+      if (options.knownHelpers && options.knownHelpers[name]) {
+        isHelper = true;
+      } else if (options.knownHelpersOnly) {
+        isEligible = false;
+      }
     }
 
-    super.SubExpression(sexpr);
+    if (isHelper) {
+      return 'helper';
+    } else if (isEligible) {
+      return 'ambiguous';
+    } else {
+      return 'simple';
+    }
+  }
+
+  private simpleSexpr(sexpr: hbs.AST.SubExpression) {
+    const path = sexpr.path;
+    this.accept(path);
+  }
+
+  private helperSexpr(sexpr: hbs.AST.SubExpression) {
+    const path = sexpr.path;
+    const name = path.parts[0];
+
+    if (this.compileOptions.knownHelpers && this.compileOptions.knownHelpers[name]) {
+      this.invokeKnownHelper(sexpr, name);
+    } else if (this.compileOptions.knownHelpersOnly) {
+      // TODO: Ensure knownHelpers array is pre-populated with built in helpers
+      throw new Handlebars.Exception(
+        'You specified knownHelpersOnly, but used the unknown helper ' + name,
+        sexpr
+      );
+    } else {
+      this.invokeHelper(sexpr, path.original); // TODO: Shoul this be `name` instead of `path.original`?
+    }
+  }
+
+  // This operation is used when the helper is known to exist,
+  // so a `helperMissing` fallback is not required.
+  private invokeKnownHelper(sexpr: hbs.AST.SubExpression, name: string) {
+    const helper = this.container.lookupProperty(this.container.helpers, name);
+    const [context] = this.scopes;
+    const params = this.getParams(sexpr);
+    const result = helper.name.call(
+      context,
+      ...params,
+      Object.assign(
+        {
+          hash: getHash(sexpr),
+        },
+        this.defaultHelperOptions
+      )
+    );
+    this.output.push(result);
+  }
+
+  // Pops off the helper's parameters, invokes the helper,
+  // and pushes the helper's return value onto the stack.
+  //
+  // If the helper is not found, `helperMissing` is called.
+  private invokeHelper(sexpr: hbs.AST.SubExpression, name: string) {
+    const helper =
+      this.container.lookupProperty(this.container.helpers, name) ||
+      (this.compileOptions.strict ? undefined : this.container.hooks.helperMissing);
+
+    const [context] = this.scopes;
+    const params = this.getParams(sexpr);
+
+    const result = helper.call(
+      context,
+      ...params,
+      Object.assign(
+        {
+          hash: getHash(sexpr),
+        },
+        this.defaultHelperOptions
+      )
+    );
+
+    this.output.push(result);
+  }
+
+  private ambiguousSexpr(sexpr: hbs.AST.SubExpression) {
+    const path = sexpr.path;
+    const name = path.parts[0];
+
+    this.accept(path);
+    this.invokeAmbiguous(sexpr, name);
+  }
+
+  // This operation is used when an expression like `{{foo}}`
+  // is provided, but we don't know at compile-time whether it
+  // is a helper or a path.
+  //
+  // This operation emits more code than the other options,
+  // and can be avoided by passing the `knownHelpers` and
+  // `knownHelpersOnly` flags at compile-time.
+  private invokeAmbiguous(sexpr: hbs.AST.SubExpression, name: string) {
+    let helper = this.container.lookupProperty(this.container.helpers, name);
+
+    if (!helper) {
+      if (this.compileOptions.strict) {
+        helper = this.container.strict(sexpr, name, sexpr.loc);
+      } else {
+        helper = this.container.lookupProperty(sexpr, name) || this.container.hooks.helperMissing;
+      }
+    }
+
+    const result = typeof helper === 'function' ? helper() : helper;
+
+    this.output.push(result);
   }
 
   BlockStatement(block: hbs.AST.BlockStatement) {
