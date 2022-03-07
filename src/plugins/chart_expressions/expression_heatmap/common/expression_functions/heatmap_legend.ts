@@ -8,8 +8,17 @@
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
+import { validateOptions } from '../../../../charts/common';
 import { EXPRESSION_HEATMAP_LEGEND_NAME } from '../constants';
 import { HeatmapLegendConfig, HeatmapLegendConfigResult } from '../types';
+
+export const errors = {
+  invalidPositionError: () =>
+    i18n.translate('expressionHeatmap.functions.heatmap.errors.invalidPositionError', {
+      defaultMessage: `Invalid position is specified. Supported positions: {positions}`,
+      values: { positions: Object.values(Position).join(', ') },
+    }),
+};
 
 export const heatmapLegendConfig: ExpressionFunctionDefinition<
   typeof EXPRESSION_HEATMAP_LEGEND_NAME,
@@ -31,6 +40,7 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
     },
     position: {
       types: ['string'],
+      default: Position.Right,
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
       help: i18n.translate('expressionHeatmap.function.args.legend.position.help', {
         defaultMessage: 'Specifies the legend position.',
@@ -51,6 +61,7 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
     },
   },
   fn(input, args) {
+    validateOptions(args.position, Position, errors.invalidPositionError);
     return {
       type: EXPRESSION_HEATMAP_LEGEND_NAME,
       ...args,
