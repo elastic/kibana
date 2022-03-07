@@ -56,7 +56,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   handler: async ({
     request,
     savedObjectsClient,
-    server: { encryptedSavedObjects },
+    server: { encryptedSavedObjects, logger },
   }): Promise<any> => {
     const { perPage = 50, page, sortField, sortOrder, search } = request.query;
     // TODO: add query/filtering params
@@ -71,9 +71,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         type: syntheticsMonitorType,
         perPage,
         page,
-        sortField,
-        sortOrder,
-        filter: search ? `${syntheticsMonitorType}.attributes.name: ${search}` : '',
+        filter: search ? `${syntheticsMonitorType}.attributes.fields.name: ${search}` : '',
       });
       for (const monitor of encryptedMonitors) {
         const decryptedMonitor =
@@ -81,6 +79,10 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
             syntheticsMonitor.name,
             monitor.id
           );
+        decryptedMonitor.attributes = {
+          ...decryptedMonitor.attributes,
+          fields: JSON.parse(decryptedMonitor.attributes.fields),
+        };
         monitors.push(decryptedMonitor);
       }
       return {
@@ -89,6 +91,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         monitors,
       };
     } catch (e) {
+      console.warn('e', e);
       // todo, handle error for failed decryption or an error in general
       return {
         perPage,

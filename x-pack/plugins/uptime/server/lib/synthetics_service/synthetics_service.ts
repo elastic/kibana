@@ -37,7 +37,7 @@ import { SyntheticsMonitorSavedObject } from '../../../common/types';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
-const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
+const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '1m';
 
 export class SyntheticsService {
   private logger: Logger;
@@ -323,7 +323,7 @@ export class SyntheticsService {
     if (this.indexTemplateExists) {
       // without mapping, querying won't make sense
       hydrateSavedObjects({
-        monitors: findResult.saved_objects as unknown as SyntheticsMonitorSavedObject[],
+        monitors: monitors as unknown as SyntheticsMonitorSavedObject[],
         server: this.server,
       });
     }

@@ -64,7 +64,7 @@ export const MonitorManagementList = ({
 
   const { total } = list as MonitorManagementListState['list'];
   const monitors: SyntheticsMonitorWithId[] = useMemo(
-    () => list.monitors.map((monitor) => ({ ...monitor.attributes, id: monitor.id })),
+    () => list.monitors.map((monitor) => ({ ...monitor.attributes.fields, id: monitor.id })),
     [list.monitors]
   );
 

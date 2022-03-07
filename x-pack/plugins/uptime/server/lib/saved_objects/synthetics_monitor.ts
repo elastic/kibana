@@ -17,20 +17,8 @@ export const syntheticsMonitor: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      name: {
-        type: 'keyword',
-      },
-      id: {
-        type: 'keyword',
-      },
-      type: {
-        type: 'keyword',
-      },
-      urls: {
-        type: 'keyword',
-      },
-      tags: {
-        type: 'keyword',
+      fields: {
+        type: 'text',
       },
     },
   },

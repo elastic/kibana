@@ -30,9 +30,9 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 200; i++) {
       const mon = await savedObjectsClient.create<SyntheticsMonitor>(syntheticsMonitorType, {
-        ...monitor,
+        fields: JSON.stringify(monitor),
         revision: 1,
       });
       monitors.push(mon);
@@ -52,11 +52,15 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       },
     ]);
 
-    sendTelemetryEvents(
-      server.logger,
-      server.telemetry,
-      formatTelemetryEvent({ monitor: newMonitor, errors, kibanaVersion: server.kibanaVersion })
-    );
+    // sendTelemetryEvents(
+    //   server.logger,
+    //   server.telemetry,
+    //   formatTelemetryEvent({
+    //     monitor: { ...monitor, revision: 1 },
+    //     errors,
+    //     kibanaVersion: server.kibanaVersion,
+    //   })
+    // );
 
     if (errors) {
       return errors;
