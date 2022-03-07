@@ -31,7 +31,7 @@ import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
   useFieldBrowserOptions,
-  CreateFieldEditorActions,
+  FieldEditorActions,
 } from '../../../timelines/components/fields_browser';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
@@ -125,7 +125,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
     'tGridEventRenderedViewEnabled'
   );
-  const editorActionsRef = useRef<CreateFieldEditorActions>(null);
+  const editorActionsRef = useRef<FieldEditorActions>(null);
 
   useEffect(() => {
     if (createTimeline != null) {

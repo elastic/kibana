@@ -7,7 +7,7 @@
 
 import { IndexField } from '../../../../common/search_strategy/index_fields';
 import { getBrowserFields } from '.';
-import { useDataView } from './use_data_view';
+import { IndexFieldSearch, useDataView } from './use_data_view';
 import { mockBrowserFields, mocksSource } from './mock';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { createStore, State } from '../../store';
@@ -118,13 +118,13 @@ describe('source/index.tsx', () => {
       await act(async () => {
         const { rerender, waitForNextUpdate, result } = renderHook<
           string,
-          { indexFieldsSearch: (id: string) => Promise<void> }
+          { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
         });
         await waitForNextUpdate();
         rerender();
-        await result.current.indexFieldsSearch('neato');
+        await result.current.indexFieldsSearch({ dataViewId: 'neato' });
       });
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',

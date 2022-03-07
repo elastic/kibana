@@ -34,3 +34,29 @@ export const RUNTIME = i18n.translate('xpack.securitySolution.fieldBrowser.runti
 export const RUNTIME_FIELD = i18n.translate('xpack.securitySolution.fieldBrowser.runtimeTitle', {
   defaultMessage: 'Runtime Field',
 });
+
+export const ACTIONS = i18n.translate('xpack.securitySolution.fieldBrowser.actionsLabel', {
+  defaultMessage: 'Actions',
+});
+
+export const EDIT = i18n.translate('xpack.securitySolution.fieldBrowser.editButton', {
+  defaultMessage: 'Edit',
+});
+
+export const REMOVE = i18n.translate('xpack.securitySolution.fieldBrowser.removeButton', {
+  defaultMessage: 'Remove',
+});
+
+export const EDIT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.fieldBrowser.editButtonDescription',
+  {
+    defaultMessage: 'Edit runtime field',
+  }
+);
+
+export const REMOVE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.fieldBrowser.removeButtonDescription',
+  {
+    defaultMessage: 'Delete runtime field',
+  }
+);
