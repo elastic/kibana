@@ -8,6 +8,8 @@
 import { ReportingCore } from '../..';
 import { RunContext } from '../../../../task_manager/server';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { KibanaShuttingDownError } from '../../../common/errors';
+import type { SavedReport } from '../store';
 import { ReportingConfigType } from '../../config';
 import {
   createMockConfigSchema,
@@ -81,5 +83,46 @@ describe('Execute Report Task', () => {
         "type": "report:execute",
       }
     `);
+  });
+
+  it('throws during reporting if Kibana starts shutting down', async () => {
+    mockReporting.getExportTypesRegistry().register({
+      id: 'noop',
+      name: 'Noop',
+      createJobFnFactory: () => async () => new Promise(() => {}),
+      runTaskFnFactory: () => async () => new Promise(() => {}),
+      jobContentExtension: 'none',
+      jobType: 'noop',
+      validLicenses: [],
+    });
+    const store = await mockReporting.getStore();
+    store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
+    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    task._claimJob = jest.fn(() =>
+      Promise.resolve({ _id: 'test', jobtype: 'noop', status: 'pending' } as SavedReport)
+    );
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        params: { index: 'cool-reporting-index', id: 'noop', jobtype: 'noop', payload: {} },
+      },
+    } as unknown as RunContext);
+
+    const taskPromise = taskRunner.run();
+    setImmediate(() => {
+      mockReporting.pluginStop();
+    });
+    await taskPromise;
+
+    expect(store.setReportFailed).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        output: expect.objectContaining({ error_code: 'kibana_shutting_down_error' }),
+      })
+    );
   });
 });
