@@ -89,7 +89,7 @@ async function queryFlameGraph(
 
   const eventsIndex = await logExecutionLatency(
     logger,
-    'query to find DownsampledIndex',
+    'query to find downsampled index',
     async () => {
       const resp = await client.search({
         index: downsampledIndex + initialExp,
@@ -106,7 +106,6 @@ async function queryFlameGraph(
       return getSampledTraceEventsIndex(sampleSize, sampleCountFromInitialExp, initialExp);
     }
   );
-  logger.info('EventsIndex ' + eventsIndex.name);
 
   // Using filter_path is less readable and scrollSearch seems to be buggy - it
   // applies filter_path only to the first array of results, but not on the following arrays.
@@ -115,7 +114,7 @@ async function queryFlameGraph(
   // A max bucket size of 100000 needs a cluster level setting "search.max_buckets: 100000".
   const resEvents = await logExecutionLatency(
     logger,
-    'query to find DownsampledIndex',
+    'query to fetch events from ' + eventsIndex.name,
     async () => {
       return await client.search({
         index: eventsIndex.name,
@@ -164,14 +163,14 @@ async function queryFlameGraph(
     docCount += item.doc_count;
     bucketCount++;
   });
-  logger.info('query time registered by ES on events ' + resEvents.body.took + 'ms');
-  logger.info('events document count ' + docCount);
-  logger.info('total events count ' + totalCount);
-  logger.info('unique events ' + bucketCount);
+  logger.info('query time registered by ES: ' + resEvents.body.took + 'ms');
+  logger.info('events fetched: ' + docCount);
+  logger.info('total count: ' + totalCount);
+  logger.info('unique stacktraces: ' + bucketCount);
 
   const resStackTraces = await logExecutionLatency(
     logger,
-    'mget query for stacktraces',
+    'mget query for ' + bucketCount + ' stacktraces',
     async () => {
       return await client.mget({
         index: 'profiling-stacktraces',
@@ -196,7 +195,11 @@ async function queryFlameGraph(
       });
     }
   }
-  logger.info('unique stacktraces ' + stackTraces.size);
+  if (stackTraces.size < bucketCount) {
+    logger.info(
+      'failed to find ' + (bucketCount - stackTraces.size) + ' stacktraces (todo: find out why)'
+    );
+  }
 
   // Create the set of unique FrameIDs.
   const stackFrameDocIDs = new Set<string>();
@@ -205,11 +208,10 @@ async function queryFlameGraph(
       stackFrameDocIDs.add(frameID);
     }
   }
-  logger.info('unique frames ' + stackFrameDocIDs.size);
 
   const resStackFrames = await logExecutionLatency(
     logger,
-    'mget query for stackframes',
+    'mget query for ' + stackFrameDocIDs.size + ' stackframes',
     async () => {
       return await client.mget({
         index: 'profiling-stackframes',
@@ -241,11 +243,10 @@ async function queryFlameGraph(
       executableDocIDs.add(fileID);
     }
   }
-  logger.info('unique executable IDs ' + executableDocIDs.size);
 
   const resExecutables = await logExecutionLatency(
     logger,
-    'mget query for executables',
+    'mget query for ' + executableDocIDs.size + ' executables',
     async () => {
       return await client.mget<any>({
         index: 'profiling-executables',
