@@ -129,7 +129,7 @@ export function closeTimeslider() {
 export function pushDeletedFeatureId(featureId: string) {
   return {
     type: PUSH_DELETED_FEATURE_ID,
-    layerId: featureId,
+    featureId,
   };
 }
 

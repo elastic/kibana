@@ -89,7 +89,7 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
     case PUSH_DELETED_FEATURE_ID:
       return {
         ...state,
-        deletedFeatureIds: [...state.deletedFeatureIds, action.layerId],
+        deletedFeatureIds: [...state.deletedFeatureIds, action.featureId],
       };
     case CLEAR_DELETED_FEATURE_IDS:
       return {
