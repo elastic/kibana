@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
-import { OnlyEsQueryAlertParams } from './types';
+import { OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
 
 // alert type context provided to actions
 
@@ -35,7 +35,7 @@ export interface EsQueryAlertActionContext extends AlertInstanceContext {
 export function addMessages(
   alertInfo: AlertInfo,
   baseContext: EsQueryAlertActionContext,
-  params: OnlyEsQueryAlertParams
+  params: OnlyEsQueryAlertParams | OnlySearchSourceAlertParams
 ): ActionContext {
   const title = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle', {
     defaultMessage: `alert '{name}' matched query`,

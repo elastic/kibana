@@ -96,8 +96,8 @@ describe('Task Runner Cancel', () => {
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
-  const dataPlugin = dataPluginMock.createStartContract();
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
+  const dataPlugin = dataPluginMock.createStartContract();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;

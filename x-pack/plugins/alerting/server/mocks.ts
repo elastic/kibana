@@ -11,8 +11,8 @@ import { Alert, AlertFactoryDoneUtils } from './alert';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
-  httpServerMock,
   uiSettingsServiceMock,
+  httpServerMock,
 } from '../../../../src/core/server/mocks';
 import { dataPluginMock } from '../../../../src/plugins/data/server/mocks';
 import { AlertInstanceContext, AlertInstanceState } from './types';
