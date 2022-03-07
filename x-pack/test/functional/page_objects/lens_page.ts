@@ -1330,5 +1330,33 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     hasEmptySizeRatioButtonGroup() {
       return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
     },
+
+    getAutoApplyToggleExists() {
+      return testSubjects.exists('lensToggleAutoApply');
+    },
+
+    enableAutoApply() {
+      return testSubjects.setEuiSwitch('lensToggleAutoApply', 'check');
+    },
+
+    disableAutoApply() {
+      return testSubjects.setEuiSwitch('lensToggleAutoApply', 'uncheck');
+    },
+
+    getAutoApplyEnabled() {
+      return testSubjects.isEuiSwitchChecked('lensToggleAutoApply');
+    },
+
+    async applyChanges(throughSuggestions = false) {
+      const applyButtonSelector = throughSuggestions
+        ? 'lnsSuggestionApplyChanges'
+        : 'lensApplyChanges';
+      await testSubjects.waitForEnabled(applyButtonSelector);
+      await testSubjects.click(applyButtonSelector);
+    },
+
+    async getAreSuggestionsPromptingToApply() {
+      return testSubjects.exists('lnsSuggestionApplyChanges');
+    },
   });
 }

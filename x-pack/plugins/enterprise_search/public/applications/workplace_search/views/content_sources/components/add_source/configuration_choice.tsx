@@ -9,16 +9,11 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
-import {
-  WorkplaceSearchPageTemplate,
-  PersonalDashboardLayout,
-} from '../../../../components/layout';
-import { NAV } from '../../../../constants';
 import { getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
@@ -26,6 +21,7 @@ import { AddSourceHeader } from './add_source_header';
 
 interface ConfigurationIntroProps {
   sourceData: SourceDataItem;
+  goToInternalStep?: () => void;
 }
 
 export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
@@ -36,15 +32,18 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
     internalConnectorAvailable,
     customConnectorAvailable,
   },
+  goToInternalStep,
 }) => {
   const { isOrganization } = useValues(AppLogic);
-  const goToInternal = () =>
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(
-        `${getSourcesPath(getAddPath(serviceType), isOrganization)}/internal`,
-        isOrganization
-      )}/`
-    );
+  const goToInternal = goToInternalStep
+    ? goToInternalStep
+    : () =>
+        KibanaLogic.values.navigateToUrl(
+          `${getSourcesPath(
+            `${getSourcesPath(getAddPath(serviceType), isOrganization)}/internal`,
+            isOrganization
+          )}/`
+        );
   const goToExternal = () =>
     KibanaLogic.values.navigateToUrl(
       `${getSourcesPath(
@@ -59,12 +58,10 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
         isOrganization
       )}/`
     );
-  const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE]} pageViewTelemetry="add_source_choice">
+    <>
       <AddSourceHeader name={name} serviceType={serviceType} categories={[]} />
-      <EuiSpacer />
       <EuiFlexGroup
         justifyContent="flexStart"
         alignItems="flexStart"
@@ -231,6 +228,6 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </Layout>
+    </>
   );
 };

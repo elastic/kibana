@@ -15,7 +15,7 @@ import type { Client } from '@elastic/elasticsearch';
  */
 export type ElasticsearchClient = Omit<
   Client,
-  'connectionPool' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'
+  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
 >;
 
 /**

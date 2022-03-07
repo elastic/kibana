@@ -41,6 +41,7 @@ export enum AddSourceSteps {
   ConnectInstanceStep = 'Connect Instance',
   ConfigureOauthStep = 'Configure Oauth',
   ReauthenticateStep = 'Reauthenticate',
+  ChoiceStep = 'Choice',
 }
 
 export interface OauthParams {
