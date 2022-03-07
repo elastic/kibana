@@ -23,133 +23,7 @@ jest.mock('../epm/archive');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
-const mockInstalledPackages = new Map();
-const mockInstallPackageErrors = new Map<string, string>();
-
-jest.mock('./epm/packages/install', () => ({
-  async installPackage(args: InstallPackageParams): Promise<InstallResult | undefined> {
-    if (args.installSource === 'registry') {
-      const [pkgName, pkgVersion] = args.pkgkey.split('-');
-      const installError = mockInstallPackageErrors.get(pkgName);
-      if (installError) {
-        return {
-          error: new Error(installError),
-          installType: 'install',
-          installSource: 'registry',
-        };
-      }
-
-      const installedPackage = mockInstalledPackages.get(pkgName);
-      if (installedPackage) {
-        if (installedPackage.version === pkgVersion) return installedPackage;
-      }
-
-      const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
-      mockInstalledPackages.set(pkgName, packageInstallation);
-
-      return {
-        status: 'installed',
-        installType: 'install',
-        installSource: 'registry',
-      };
-    } else if (args.installSource === 'upload') {
-      const { archiveBuffer } = args;
-
-      // Treat the buffer value passed in tests as the package's name for simplicity
-      const pkgName = archiveBuffer.toString('utf8');
-
-      // Just install every bundled package at version '1.0.0'
-      const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
-      mockInstalledPackages.set(pkgName, packageInstallation);
-
-      return { status: 'installed', installType: 'install', installSource: 'upload' };
-    }
-  },
-  ensurePackagesCompletedInstall() {
-    return [];
-  },
-  isPackageVersionOrLaterInstalled({
-    soClient,
-    pkgName,
-    pkgVersion,
-  }: {
-    soClient: any;
-    pkgName: string;
-    pkgVersion: string;
-  }) {
-    const installedPackage = mockInstalledPackages.get(pkgName);
-
-    if (installedPackage) {
-      if (installedPackage.version === pkgVersion) {
-        return { package: installedPackage, installType: 'reinstall' };
-      }
-
-      // Importing semver methods throws an error in jest, so just use a rough check instead
-      if (installedPackage.version < pkgVersion) {
-        return false;
-      }
-      if (installedPackage.version > pkgVersion) {
-        return { package: installedPackage, installType: 'rollback' };
-      }
-    }
-
-    return false;
-  },
-  getInstallType: jest.fn(),
-  async updateInstallStatus(soClient: any, pkgName: string, status: string) {
-    const installedPackage = mockInstalledPackages.get(pkgName);
-
-    if (!installedPackage) {
-      return;
-    }
-
-    installedPackage.install_status = status;
-  },
-}));
-
-jest.mock('./epm/packages/get', () => ({
-  getPackageInfo({ pkgName }: { pkgName: string }) {
-    const installedPackage = mockInstalledPackages.get(pkgName);
-    if (!installedPackage) return { status: 'not_installed' };
-    return {
-      status: 'installed',
-      ...installedPackage,
-    };
-  },
-  getInstallation({ pkgName }: { pkgName: string }) {
-    return mockInstalledPackages.get(pkgName) ?? false;
-  },
-  getInstallationObject({ pkgName }: { pkgName: string }) {
-    return mockInstalledPackages.get(pkgName) ?? false;
-  },
-}));
-
-jest.mock('./epm/kibana/index_pattern/install');
-
-jest.mock('./package_policy', () => ({
-  ...jest.requireActual('./package_policy'),
-  packagePolicyService: {
-    getByIDs: jest.fn().mockReturnValue([]),
-    listIds: jest.fn().mockReturnValue({ items: [] }),
-    create: jest
-      .fn()
-      .mockImplementation((soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) => {
-        return {
-          id: 'mocked',
-          version: 'mocked',
-          ...newPackagePolicy,
-        };
-      }),
-    get(soClient: any, id: string) {
-      return {
-        id: 'mocked',
-        version: 'mocked',
-      };
-    },
-  },
-}));
-
-jest.mock('./app_context', () => ({
+jest.mock('../app_context', () => ({
   appContextService: {
     getLogger: () =>
       new Proxy(
@@ -225,6 +99,46 @@ describe('output preconfiguration', () => {
 
     expect(mockedOutputService.create).toBeCalled();
     expect(mockedOutputService.create.mock.calls[0][1].hosts).toEqual(['http://default-es:9200']);
+  });
+
+  it('should update output if non preconfigured output with the same id exists', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
+    mockedOutputService.bulkGet.mockResolvedValue([
+      {
+        id: 'existing-output-1',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Output 1',
+        // @ts-ignore
+        type: 'elasticsearch',
+        hosts: ['http://es.co:80'],
+        is_preconfigured: false,
+      },
+    ]);
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-output-1',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Output 1',
+        type: 'elasticsearch',
+        hosts: ['http://es.co:80'],
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).toBeCalled();
+    expect(mockedOutputService.update).toBeCalledWith(
+      expect.anything(),
+      'existing-output-1',
+      expect.objectContaining({
+        is_preconfigured: true,
+      }),
+      { fromPreconfiguration: true }
+    );
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
   });
 
   it('should update output if preconfigured output exists and changed', async () => {
@@ -305,63 +219,98 @@ describe('output preconfiguration', () => {
     });
   });
 
-  it('should not delete non deleted preconfigured output', async () => {
-    const soClient = savedObjectsClientMock.create();
-    mockedOutputService.list.mockResolvedValue({
-      items: [
-        { id: 'output1', is_preconfigured: true } as Output,
-        { id: 'output2', is_preconfigured: true } as Output,
-      ],
-      page: 1,
-      perPage: 10000,
-      total: 1,
+  describe('cleanPreconfiguredOutputs', () => {
+    it('should not delete non deleted preconfigured output', async () => {
+      const soClient = savedObjectsClientMock.create();
+      mockedOutputService.list.mockResolvedValue({
+        items: [
+          { id: 'output1', is_preconfigured: true } as Output,
+          { id: 'output2', is_preconfigured: true } as Output,
+        ],
+        page: 1,
+        perPage: 10000,
+        total: 1,
+      });
+      await cleanPreconfiguredOutputs(soClient, [
+        {
+          id: 'output1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:9201'],
+        },
+        {
+          id: 'output2',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Output 2',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:9201'],
+        },
+      ]);
+
+      expect(mockedOutputService.delete).not.toBeCalled();
     });
-    await cleanPreconfiguredOutputs(soClient, [
-      {
-        id: 'output1',
-        is_default: false,
-        is_default_monitoring: false,
-        name: 'Output 1',
-        type: 'elasticsearch',
-        hosts: ['http://es.co:9201'],
-      },
-      {
-        id: 'output2',
-        is_default: false,
-        is_default_monitoring: false,
-        name: 'Output 2',
-        type: 'elasticsearch',
-        hosts: ['http://es.co:9201'],
-      },
-    ]);
 
-    expect(mockedOutputService.delete).not.toBeCalled();
-  });
+    it('should delete deleted preconfigured output', async () => {
+      const soClient = savedObjectsClientMock.create();
+      mockedOutputService.list.mockResolvedValue({
+        items: [
+          { id: 'output1', is_preconfigured: true } as Output,
+          { id: 'output2', is_preconfigured: true } as Output,
+        ],
+        page: 1,
+        perPage: 10000,
+        total: 1,
+      });
+      await cleanPreconfiguredOutputs(soClient, [
+        {
+          id: 'output1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:9201'],
+        },
+      ]);
 
-  it('should delete deleted preconfigured output', async () => {
-    const soClient = savedObjectsClientMock.create();
-    mockedOutputService.list.mockResolvedValue({
-      items: [
-        { id: 'output1', is_preconfigured: true } as Output,
-        { id: 'output2', is_preconfigured: true } as Output,
-      ],
-      page: 1,
-      perPage: 10000,
-      total: 1,
+      expect(mockedOutputService.delete).toBeCalled();
+      expect(mockedOutputService.delete).toBeCalledTimes(1);
+      expect(mockedOutputService.delete.mock.calls[0][1]).toEqual('output2');
     });
-    await cleanPreconfiguredOutputs(soClient, [
-      {
-        id: 'output1',
-        is_default: false,
-        is_default_monitoring: false,
-        name: 'Output 1',
-        type: 'elasticsearch',
-        hosts: ['http://es.co:9201'],
-      },
-    ]);
 
-    expect(mockedOutputService.delete).toBeCalled();
-    expect(mockedOutputService.delete).toBeCalledTimes(1);
-    expect(mockedOutputService.delete.mock.calls[0][1]).toEqual('output2');
+    it('should update default deleted preconfigured output', async () => {
+      const soClient = savedObjectsClientMock.create();
+      mockedOutputService.list.mockResolvedValue({
+        items: [
+          { id: 'output1', is_preconfigured: true, is_default: true } as Output,
+          { id: 'output2', is_preconfigured: true, is_default_monitoring: true } as Output,
+        ],
+        page: 1,
+        perPage: 10000,
+        total: 1,
+      });
+      await cleanPreconfiguredOutputs(soClient, []);
+
+      expect(mockedOutputService.delete).not.toBeCalled();
+      expect(mockedOutputService.update).toBeCalledTimes(2);
+      expect(mockedOutputService.update).toBeCalledWith(
+        expect.anything(),
+        'output1',
+        expect.objectContaining({
+          is_preconfigured: false,
+        }),
+        { fromPreconfiguration: true }
+      );
+      expect(mockedOutputService.update).toBeCalledWith(
+        expect.anything(),
+        'output2',
+        expect.objectContaining({
+          is_preconfigured: false,
+        }),
+        { fromPreconfiguration: true }
+      );
+    });
   });
 });
