@@ -104,7 +104,6 @@ describe('Cloud Plugin', () => {
             org_id_str: 'cloudId',
           }
         );
-
       });
 
       it('user hash includes org id', async () => {
