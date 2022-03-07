@@ -21,7 +21,6 @@ export function getKibanaStats({
   getStatus,
 }: {
   config: {
-    allowAnonymous: boolean;
     kibanaIndex: string;
     kibanaVersion: string;
     uuid: string;

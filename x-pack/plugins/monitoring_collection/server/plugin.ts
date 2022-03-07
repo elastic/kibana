@@ -55,7 +55,6 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     registerDynamicRoute({
       router,
       config: {
-        allowAnonymous: core.status.isStatusPageAnonymous(),
         kibanaIndex,
         kibanaVersion: this.initializerContext.env.packageInfo.version,
         server: core.http.getServerInfo(),

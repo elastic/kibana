@@ -18,7 +18,6 @@ export function registerDynamicRoute({
 }: {
   router: IRouter;
   config: {
-    allowAnonymous: boolean;
     kibanaIndex: string;
     kibanaVersion: string;
     uuid: string;
@@ -37,7 +36,7 @@ export function registerDynamicRoute({
     {
       path: `/api/monitoring_collection/{type}`,
       options: {
-        authRequired: !config.allowAnonymous,
+        authRequired: true,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
       },
       validate: {
