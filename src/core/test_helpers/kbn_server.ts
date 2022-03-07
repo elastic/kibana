@@ -229,18 +229,12 @@ export function createTestServers({
     writeTo: process.stdout,
   });
 
-  log.indent(6);
-  log.info('starting elasticsearch');
-  log.indent(4);
-
   const es = createTestEsCluster(
     defaultsDeep({}, settings.es ?? {}, {
       log,
       license,
     })
   );
-
-  log.indent(-4);
 
   // Add time for KBN and adding users
   adjustTimeout(es.getStartTimeout() + 100000);

@@ -275,7 +275,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('dashboard no-access privileges', () => {
         before(async () => {
           await PageObjects.common.navigateToApp('visualize');
-          await security.testUser.setRoles(['test_logstash_reader', 'global_visualize_all'], true);
+          await security.testUser.setRoles(['test_logstash_reader', 'global_visualize_all']);
         });
 
         after(async () => {
@@ -317,10 +317,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('dashboard read-only privileges', () => {
         before(async () => {
-          await security.testUser.setRoles(
-            ['test_logstash_reader', 'global_visualize_all', 'global_dashboard_read'],
-            true
-          );
+          await security.testUser.setRoles([
+            'test_logstash_reader',
+            'global_visualize_all',
+            'global_dashboard_read',
+          ]);
         });
 
         after(async () => {
