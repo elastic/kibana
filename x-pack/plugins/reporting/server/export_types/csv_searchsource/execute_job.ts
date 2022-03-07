@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CSV_JOB_TYPE } from '../../../common/constants';
 import { getFieldFormats } from '../../services';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
@@ -19,7 +18,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
   const config = reporting.getConfig();
 
   return async function runTask(jobId, job, cancellationToken, stream) {
-    const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job', jobId]);
+    const logger = parentLogger.get(`execute-job:${jobId}`);
 
     const encryptionKey = config.get('encryptionKey');
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
