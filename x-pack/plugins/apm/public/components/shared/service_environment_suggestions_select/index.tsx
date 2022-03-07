@@ -66,7 +66,7 @@ export function ServiceEnvironmentSuggestionsSelect({
         },
       });
     },
-    [fieldName, searchValue],
+    [fieldName, searchValue, serviceName, start, end],
     { preservePreviousData: false }
   );
 

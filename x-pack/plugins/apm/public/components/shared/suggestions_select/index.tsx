@@ -58,7 +58,7 @@ export function SuggestionsSelect({
         },
       });
     },
-    [fieldName, searchValue],
+    [fieldName, searchValue, start, end],
     { preservePreviousData: false }
   );
 
