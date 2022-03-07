@@ -49,7 +49,7 @@ describe('ThreatIntelLinkPanel', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel {...mockProps} allIntegrationsInstalled={true} />
+            <ThreatIntelLinkPanel {...mockProps} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -64,7 +64,7 @@ describe('ThreatIntelLinkPanel', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel {...mockProps} allIntegrationsInstalled={false} />
+            <ThreatIntelLinkPanel {...mockProps} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -77,11 +77,7 @@ describe('ThreatIntelLinkPanel', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel
-              {...mockProps}
-              allTiDataSources={[]}
-              allIntegrationsInstalled={true}
-            />
+            <ThreatIntelLinkPanel {...mockProps} allTiDataSources={[]} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
