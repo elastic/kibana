@@ -1878,6 +1878,167 @@ describe('create()', () => {
     `);
   });
 
+  test('should create alerts with mapped_params', async () => {
+    const data = getMockData({
+      params: {
+        bar: true,
+        risk_score: 42,
+        severity: 'low',
+      },
+    });
+
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+        risk_score: 42,
+        severity: 'low',
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      mutedInstanceIds: [],
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '123',
+      type: 'alert',
+      attributes: createdAttributes,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+
+    const result = await rulesClient.create({ data });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        enabled: true,
+        name: 'abc',
+        tags: ['foo'],
+        alertTypeId: '123',
+        consumer: 'bar',
+        schedule: {
+          interval: '1m',
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        params: {
+          bar: true,
+          risk_score: 42,
+          severity: 'low',
+        },
+        actions: [
+          {
+            group: 'default',
+            params: {
+              foo: true,
+            },
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+          },
+        ],
+        apiKeyOwner: null,
+        apiKey: null,
+        legacyId: null,
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          error: null,
+        },
+        monitoring: {
+          execution: {
+            history: [],
+            calculated_metrics: {
+              success_ratio: 0,
+            },
+          },
+        },
+        mapped_params: {
+          risk_score: 42,
+          severity: '20-low',
+        },
+        meta: {
+          versionApiKeyLastmodified: 'v8.0.0',
+        },
+      },
+      {
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+        id: 'mock-saved-object-id',
+      }
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "consumer": "bar",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "createdBy": "elastic",
+        "enabled": true,
+        "id": "123",
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
+        "name": "abc",
+        "notifyWhen": null,
+        "params": Object {
+          "bar": true,
+          "risk_score": 42,
+          "severity": "low",
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": null,
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+        "updatedBy": "elastic",
+      }
+    `);
+  });
+
   test('should validate params', async () => {
     const data = getMockData();
     ruleTypeRegistry.get.mockReturnValue({
