@@ -49,10 +49,13 @@ export const AxisTitleSettings: React.FunctionComponent<AxisTitleSettingsProps> 
   isAxisTitleVisible,
   toggleAxisTitleVisibility,
 }) => {
-  const { inputValue: title, handleInputChange: onTitleChange } = useDebouncedValue<string>({
-    value: axisTitle || '',
-    onChange: updateTitleState,
-  });
+  const { inputValue: title, handleInputChange: onTitleChange } = useDebouncedValue<string>(
+    {
+      value: axisTitle || '',
+      onChange: updateTitleState,
+    },
+    { allowFalsyValue: true }
+  );
   return (
     <>
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
