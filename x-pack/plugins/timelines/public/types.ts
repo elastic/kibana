@@ -23,7 +23,6 @@ import type { TGridIntegratedProps } from './components/t_grid/integrated';
 import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { HoverActionsConfig } from './components/hover_actions/index';
-import type { AddToCaseActionProps } from './components/actions/timeline/cases/add_to_case_action';
 import { TimelineTabs } from '../common/types';
 export * from './store/t_grid';
 export interface TimelinesUIStart {
@@ -42,10 +41,6 @@ export interface TimelinesUIStart {
     props: UseDraggableKeyboardWrapperProps
   ) => UseDraggableKeyboardWrapper;
   setTGridEmbeddedStore: (store: Store) => void;
-  getAddToCaseAction: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
-  getAddToCasePopover: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
-  getAddToExistingCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
-  getAddToNewCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
 }
 
 export interface TimelinesStartPlugins {

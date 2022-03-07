@@ -117,11 +117,3 @@ export const setTimelineUpdatedAt =
 export const addProviderToTimeline = actionCreator<{ id: string; dataProvider: DataProvider }>(
   'ADD_PROVIDER_TO_TIMELINE'
 );
-
-export const setOpenAddToExistingCase = actionCreator<{ id: string; isOpen: boolean }>(
-  'SET_OPEN_ADD_TO_EXISTING_CASE'
-);
-
-export const setOpenAddToNewCase = actionCreator<{ id: string; isOpen: boolean }>(
-  'SET_OPEN_ADD_TO_NEW_CASE'
-);

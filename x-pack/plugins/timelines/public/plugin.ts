@@ -16,10 +16,6 @@ import {
   getLoadingPanelLazy,
   getTGridLazy,
   getFieldsBrowserLazy,
-  getAddToCaseLazy,
-  getAddToExistingCaseButtonLazy,
-  getAddToNewCaseButtonLazy,
-  getAddToCasePopoverLazy,
 } from './methods';
 import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
@@ -87,38 +83,6 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       setTGridEmbeddedStore: (store: Store) => {
         this.setStore(store);
-      },
-      getAddToCaseAction: (props) => {
-        return getAddToCaseLazy(props, {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          store: this._store!,
-          storage: this._storage,
-          setStore: this.setStore.bind(this),
-        });
-      },
-      getAddToCasePopover: (props) => {
-        return getAddToCasePopoverLazy(props, {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          store: this._store!,
-          storage: this._storage,
-          setStore: this.setStore.bind(this),
-        });
-      },
-      getAddToExistingCaseButton: (props) => {
-        return getAddToExistingCaseButtonLazy(props, {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          store: this._store!,
-          storage: this._storage,
-          setStore: this.setStore.bind(this),
-        });
-      },
-      getAddToNewCaseButton: (props) => {
-        return getAddToNewCaseButtonLazy(props, {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          store: this._store!,
-          storage: this._storage,
-          setStore: this.setStore.bind(this),
-        });
       },
     };
   }
