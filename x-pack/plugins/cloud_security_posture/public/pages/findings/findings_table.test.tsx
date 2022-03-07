@@ -46,7 +46,7 @@ const getFakeFindings = (): CspFinding & { id: string } => ({
     uid: chance.string(),
     mode: chance.string(),
   },
-  run_id: chance.string(),
+  cycle_id: chance.string(),
   host: {} as any,
   ecs: {} as any,
   '@timestamp': new Date().toISOString(),
