@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 import { mockBrowserFields, TestProviders } from '../../../../mock';
 
@@ -18,12 +17,8 @@ import { StatefulFieldsBrowserComponent } from '.';
 describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';
 
-  beforeEach(() => {
-    window.HTMLElement.prototype.scrollIntoView = jest.fn();
-  });
-
-  test('it renders the Fields button, which displays the fields browser on click', () => {
-    const wrapper = mount(
+  it('should render the Fields button, which displays the fields browser on click', () => {
+    const result = render(
       <TestProviders>
         <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
@@ -33,12 +28,12 @@ describe('StatefulFieldsBrowser', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="show-field-browser"]').exists()).toBe(true);
+    expect(result.getByTestId('show-field-browser')).toBeInTheDocument();
   });
 
   describe('toggleShow', () => {
-    test('it does NOT render the fields browser until the Fields button is clicked', () => {
-      const wrapper = mount(
+    it('should NOT render the fields browser until the Fields button is clicked', () => {
+      const result = render(
         <TestProviders>
           <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
@@ -48,11 +43,11 @@ describe('StatefulFieldsBrowser', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="fields-browser-container"]').exists()).toBe(false);
+      expect(result.queryByTestId('fields-browser-container')).toBeNull();
     });
 
-    test('it renders the fields browser when the Fields button is clicked', () => {
-      const wrapper = mount(
+    it('should render the fields browser when the Fields button is clicked', async () => {
+      const result = render(
         <TestProviders>
           <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
@@ -61,88 +56,101 @@ describe('StatefulFieldsBrowser', () => {
           />
         </TestProviders>
       );
-
-      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
-
-      expect(wrapper.find('[data-test-subj="fields-browser-container"]').exists()).toBe(true);
-    });
-  });
-
-  describe('updateSelectedCategoryId', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-    test('it updates the selectedCategoryId state, which makes the category bold, when the user clicks a category name in the left hand side of the field browser', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-            timelineId={timelineId}
-          />
-        </TestProviders>
-      );
-
-      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
-
-      wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first().simulate('click');
+      result.getByTestId('show-field-browser').click();
       await waitFor(() => {
-        wrapper.update();
-        expect(
-          wrapper
-            .find(`.field-browser-category-pane-auditd-${timelineId}`)
-            .find('[data-test-subj="categoryName"]')
-            .at(1)
-        ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
-      });
-    });
-
-    test('it updates the selectedCategoryId state according to most fields returned', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-            timelineId={timelineId}
-          />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
-        jest.runOnlyPendingTimers();
-        wrapper.update();
-
-        expect(
-          wrapper
-            .find(`.field-browser-category-pane-cloud-${timelineId}`)
-            .find('[data-test-subj="categoryName"]')
-            .at(1)
-        ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
-      });
-
-      await waitFor(() => {
-        wrapper
-          .find('[data-test-subj="field-search"]')
-          .last()
-          .simulate('change', { target: { value: 'cloud' } });
-
-        jest.runOnlyPendingTimers();
-        wrapper.update();
-        expect(
-          wrapper
-            .find(`.field-browser-category-pane-cloud-${timelineId}`)
-            .find('[data-test-subj="categoryName"]')
-            .at(1)
-        ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
+        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
       });
     });
   });
 
-  test('it renders the Fields Browser button as a settings gear when the isEventViewer prop is true', () => {
+  describe('updateSelectedCategoryIds', () => {
+    it('should add a selected category, which creates the category badge', async () => {
+      const result = render(
+        <TestProviders>
+          <StatefulFieldsBrowserComponent
+            browserFields={mockBrowserFields}
+            columnHeaders={[]}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      result.getByTestId('show-field-browser').click();
+      await waitFor(() => {
+        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
+      });
+
+      await act(async () => {
+        result.getByTestId('categories-filter-button').click();
+      });
+      await act(async () => {
+        result.getByTestId('categories-selector-option-base').click();
+      });
+
+      expect(result.getByTestId('category-badge-base')).toBeInTheDocument();
+    });
+
+    it('should remove a selected category, which deletes the category badge', async () => {
+      const result = render(
+        <TestProviders>
+          <StatefulFieldsBrowserComponent
+            browserFields={mockBrowserFields}
+            columnHeaders={[]}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      result.getByTestId('show-field-browser').click();
+      await waitFor(() => {
+        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
+      });
+
+      await act(async () => {
+        result.getByTestId('categories-filter-button').click();
+      });
+      await act(async () => {
+        result.getByTestId('categories-selector-option-base').click();
+      });
+      expect(result.getByTestId('category-badge-base')).toBeInTheDocument();
+
+      await act(async () => {
+        result.getByTestId('category-badge-unselect-base').click();
+      });
+      expect(result.queryByTestId('category-badge-base')).toBeNull();
+    });
+
+    it('should update the available categories according to the search input', async () => {
+      const result = render(
+        <TestProviders>
+          <StatefulFieldsBrowserComponent
+            browserFields={mockBrowserFields}
+            columnHeaders={[]}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      result.getByTestId('show-field-browser').click();
+      await waitFor(() => {
+        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
+      });
+
+      result.getByTestId('categories-filter-button').click();
+      expect(result.getByTestId('categories-selector-option-base')).toBeInTheDocument();
+
+      fireEvent.change(result.getByTestId('field-search'), { target: { value: 'client' } });
+      await waitFor(() => {
+        expect(result.queryByTestId('categories-selector-option-base')).toBeNull();
+      });
+      expect(result.queryByTestId('categories-selector-option-client')).toBeInTheDocument();
+    });
+  });
+
+  it('should render the Fields Browser button as a settings gear when the isEventViewer prop is true', () => {
     const isEventViewer = true;
 
-    const wrapper = mount(
+    const result = render(
       <TestProviders>
         <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
@@ -153,13 +161,13 @@ describe('StatefulFieldsBrowser', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(true);
+    expect(result.getByTestId('show-field-browser')).toBeInTheDocument();
   });
 
-  test('it renders the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
-    const isEventViewer = true;
+  it('should render the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
+    const isEventViewer = false;
 
-    const wrapper = mount(
+    const result = render(
       <TestProviders>
         <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
@@ -171,6 +179,6 @@ describe('StatefulFieldsBrowser', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(true);
+    expect(result.getByTestId('show-field-browser')).toBeInTheDocument();
   });
 });

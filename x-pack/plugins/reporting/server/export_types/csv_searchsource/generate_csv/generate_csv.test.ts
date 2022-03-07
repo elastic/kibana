@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
-import * as Rx from 'rxjs';
 import { errors as esErrors } from '@elastic/elasticsearch';
+import type { IScopedClusterClient, IUiSettingsClient, SearchResponse } from 'kibana/server';
 import { identity, range } from 'lodash';
-import { IScopedClusterClient, IUiSettingsClient, SearchResponse } from 'src/core/server';
+import * as Rx from 'rxjs';
 import {
   elasticsearchServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from 'src/core/server/mocks';
 import { ISearchStartSearchSource } from 'src/plugins/data/common';
-import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
+import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
+import { Writable } from 'stream';
 import { ReportingConfig } from '../../../';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import {
@@ -28,11 +29,7 @@ import {
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../../../../common/constants';
 import { UnknownError } from '../../../../common/errors';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockLevelLogger,
-} from '../../../test_helpers';
+import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { JobParamsCSV } from '../types';
 import { CsvGenerator } from './generate_csv';
 
@@ -125,7 +122,7 @@ beforeEach(async () => {
   });
 });
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
 it('formats an empty search result to CSV content', async () => {
   const generateCsv = new CsvGenerator(
