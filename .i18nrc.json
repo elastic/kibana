@@ -68,6 +68,7 @@
     "usageCollection": "src/plugins/usage_collection",
     "utils": "packages/kbn-securitysolution-utils/src",
     "visDefaultEditor": "src/plugins/vis_default_editor",
+    "visTypeGauge": "src/plugins/vis_types/gauge",
     "visTypeHeatmap": "src/plugins/vis_types/heatmap",
     "visTypeMarkdown": "src/plugins/vis_type_markdown",
     "visTypeMetric": "src/plugins/vis_types/metric",
