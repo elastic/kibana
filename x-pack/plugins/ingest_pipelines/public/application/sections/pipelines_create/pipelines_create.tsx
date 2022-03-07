@@ -85,7 +85,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={services.documentation.getPutPipelineApiUrl()}
+            href={services.documentation.getCreatePipelineUrl()}
             target="_blank"
             iconType="help"
             data-test-subj="documentationLink"

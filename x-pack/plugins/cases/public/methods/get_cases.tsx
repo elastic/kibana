@@ -12,7 +12,8 @@ import { CasesProvider, CasesContextProps } from '../components/cases_context';
 
 export type GetCasesProps = CasesProps & CasesContextProps;
 
-const CasesLazy: React.FC<CasesProps> = lazy(() => import('../components/app'));
+const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../components/app/routes'));
+
 export const getCasesLazy = ({
   owner,
   userCanCrud,
@@ -25,10 +26,11 @@ export const getCasesLazy = ({
   refreshRef,
   timelineIntegration,
   features,
+  releasePhase,
 }: GetCasesProps) => (
-  <CasesProvider value={{ owner, userCanCrud, basePath, features }}>
+  <CasesProvider value={{ owner, userCanCrud, basePath, features, releasePhase }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesLazy
+      <CasesRoutesLazy
         onComponentInitialized={onComponentInitialized}
         actionsNavigation={actionsNavigation}
         ruleDetailsNavigation={ruleDetailsNavigation}

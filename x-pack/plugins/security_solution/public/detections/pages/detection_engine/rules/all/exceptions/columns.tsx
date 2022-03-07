@@ -27,7 +27,8 @@ export const getAllExceptionListsColumns = (
   onExport: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
   onDelete: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
   formatUrl: FormatUrl,
-  navigateToUrl: (url: string) => Promise<void>
+  navigateToUrl: (url: string) => Promise<void>,
+  isKibanaReadOnly: boolean
 ): AllExceptionListsColumns[] => [
   {
     align: 'left',
@@ -155,7 +156,7 @@ export const getAllExceptionListsColumns = (
       },
       {
         render: ({ id, list_id: listId, namespace_type: namespaceType }: ExceptionListInfo) => {
-          return listId === 'endpoint_list' ? (
+          return listId === 'endpoint_list' || isKibanaReadOnly ? (
             <></>
           ) : (
             <EuiButtonIcon
