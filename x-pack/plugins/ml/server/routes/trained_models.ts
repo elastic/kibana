@@ -81,7 +81,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           }
         } catch (e) {
           // the user might not have required permissions to fetch pipelines
-          mlLog.error(e);
+          // log the error to the debug log as this might be a common situation and
+          // we don't need to fill kibana's log with these messages.
+          mlLog.debug(e);
         }
 
         return response.ok({
