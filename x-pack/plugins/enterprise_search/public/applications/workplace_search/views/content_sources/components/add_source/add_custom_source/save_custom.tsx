@@ -25,23 +25,22 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { docLinks } from '../../../../../shared/doc_links';
-import { LicensingLogic } from '../../../../../shared/licensing';
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
-import { AppLogic } from '../../../../app_logic';
-import { LicenseBadge } from '../../../../components/shared/license_badge';
+import { docLinks } from '../../../../../../shared/doc_links';
+import { LicensingLogic } from '../../../../../../shared/licensing';
+import { EuiLinkTo } from '../../../../../../shared/react_router_helpers';
+import { AppLogic } from '../../../../../app_logic';
+import { LicenseBadge } from '../../../../../components/shared/license_badge';
 import {
   SOURCES_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
   getContentSourcePath,
   getSourcesPath,
-} from '../../../../routes';
-import { LEARN_CUSTOM_FEATURES_BUTTON } from '../../constants';
+} from '../../../../../routes';
+import { LEARN_CUSTOM_FEATURES_BUTTON } from '../../../constants';
 
-import { SourceIdentifier } from '../source_identifier';
+import { SourceIdentifier } from '../../source_identifier';
 
-import { AddCustomSourceLogic } from './add_custom_source_logic';
-import { AddSourceHeader } from './add_source_header';
+import { AddSourceHeader } from '../add_source_header';
 import {
   SAVE_CUSTOM_BODY1,
   SAVE_CUSTOM_BODY2,
@@ -52,7 +51,9 @@ import {
   SAVE_CUSTOM_STYLING_RESULTS_LINK,
   SAVE_CUSTOM_DOC_PERMISSIONS_TITLE,
   SAVE_CUSTOM_DOC_PERMISSIONS_LINK,
-} from './constants';
+} from '../constants';
+
+import { AddCustomSourceLogic } from './add_custom_source_logic';
 
 export const SaveCustom: React.FC = () => {
   const { newCustomSource, sourceData } = useValues(AddCustomSourceLogic);

@@ -20,13 +20,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { docLinks } from '../../../../../shared/doc_links';
+import { docLinks } from '../../../../../../shared/doc_links';
 
-import { SOURCE_NAME_LABEL } from '../../constants';
+import { SOURCE_NAME_LABEL } from '../../../constants';
+
+import { AddSourceHeader } from '../add_source_header';
+import { CONFIG_CUSTOM_BUTTON, CONFIG_CUSTOM_LINK_TEXT } from '../constants';
 
 import { AddCustomSourceLogic } from './add_custom_source_logic';
-import { AddSourceHeader } from './add_source_header';
-import { CONFIG_CUSTOM_BUTTON, CONFIG_CUSTOM_LINK_TEXT } from './constants';
 
 export const ConfigureCustom: React.FC = () => {
   const { setCustomSourceNameValue, createContentSource } = useActions(AddCustomSourceLogic);

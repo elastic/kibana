@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues } from '../../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,10 +13,10 @@ import { shallow } from 'enzyme';
 
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { EuiLinkTo } from '../../../../../../shared/react_router_helpers';
 
-import { LicenseBadge } from '../../../../components/shared/license_badge';
-import { staticCustomSourceData } from '../../source_data';
+import { LicenseBadge } from '../../../../../components/shared/license_badge';
+import { staticCustomSourceData } from '../../../source_data';
 
 import { SaveCustom } from './save_custom';
 
