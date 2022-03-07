@@ -226,9 +226,9 @@ export const getAgentDataHandler: RequestHandler<
 > = async (context, request, response) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    const results = await AgentService.getIncomingDataByAgentsId(esClient, request.query.agentsId);
+    const items = await AgentService.getIncomingDataByAgentsId(esClient, request.query.agentsId);
 
-    const body = { results };
+    const body = { items };
 
     return response.ok({ body });
   } catch (error) {
