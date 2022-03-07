@@ -92,7 +92,7 @@ export function MachineLearningStackManagementJobsProvider(
       const resultToast = await toasts.getToastElement(1);
       const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
       const title: string = await titleElement.getVisibleText();
-      expect(title).to.match(/^\d+ job[s]? synchronized$/);
+      expect(title).to.match(/^\d+ item[s]? synchronized$/);
 
       const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
       await dismissButton.click();

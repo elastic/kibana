@@ -647,7 +647,8 @@ function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
 }
 
 function getModelIdsFromRequest([params]: MlGetTrainedModelParams): string[] {
-  const ids = params?.model_id?.split(',');
+  const id = params?.model_id;
+  const ids = Array.isArray(id) ? id : id?.split(',');
   return ids || [];
 }
 
