@@ -21,9 +21,8 @@ import {
   sendGetFleetStatus,
   sendGetOneAgentPolicy,
   useGetAgents,
-  useGetAgentPolicies,
 } from '../../hooks/use_request';
-import { FleetStatusProvider, ConfigContext } from '../../hooks';
+import { FleetStatusProvider, ConfigContext, useAgentEnrollmentFlyoutData } from '../../hooks';
 
 import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 
@@ -102,13 +101,13 @@ describe('<AgentEnrollmentFlyout />', () => {
       data: { items: [{ policy_id: 'fleet-server-policy' }] },
     });
 
-    (useGetAgentPolicies as jest.Mock).mockReturnValue?.({
-      data: { items: [{ id: 'fleet-server-policy' }] },
+    (useAgentEnrollmentFlyoutData as jest.Mock).mockReturnValue?.({
+      agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
+      refreshAgentPolicies: jest.fn(),
     });
 
     await act(async () => {
       testBed = await setup({
-        agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
         onClose: jest.fn(),
       });
       testBed.component.update();
@@ -117,6 +116,25 @@ describe('<AgentEnrollmentFlyout />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('should show loading when agent policies are loading', async () => {
+    (useAgentEnrollmentFlyoutData as jest.Mock).mockReturnValue?.({
+      agentPolicies: [],
+      refreshAgentPolicies: jest.fn(),
+      isLoadingInitialAgentPolicies: true,
+    });
+
+    await act(async () => {
+      testBed = await setup({
+        onClose: jest.fn(),
+      });
+      testBed.component.update();
+    });
+
+    const { exists } = testBed;
+    expect(exists('agentEnrollmentFlyout')).toBe(true);
+    expect(exists('loadingSpinner')).toBe(true);
   });
 
   describe('managed instructions', () => {
@@ -132,7 +150,6 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
-            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             agentPolicy: testAgentPolicy,
             onClose: jest.fn(),
           });
@@ -173,7 +190,6 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
-            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             onClose: jest.fn(),
             viewDataStep: { title: 'View Data', children: <div /> },
           });
@@ -193,7 +209,6 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
-            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             onClose: jest.fn(),
             viewDataStep: undefined,
           });
@@ -224,7 +239,6 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
-            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             agentPolicy: testAgentPolicy,
             onClose: jest.fn(),
           });

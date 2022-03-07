@@ -11,6 +11,7 @@ import { tagcloudFunction } from './tagcloud_function';
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { ScaleOptions, Orientation } from '../constants';
 
 type Arguments = Parameters<ReturnType<typeof tagcloudFunction>['fn']>[1];
 
@@ -30,8 +31,8 @@ describe('interpreter/functions#tagcloud', () => {
     ],
   } as unknown as Datatable;
   const visConfig = {
-    scale: 'linear',
-    orientation: 'single',
+    scale: ScaleOptions.LINEAR,
+    orientation: Orientation.SINGLE,
     minFontSize: 18,
     maxFontSize: 72,
     showLabel: true,

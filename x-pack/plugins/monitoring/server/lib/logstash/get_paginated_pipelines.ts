@@ -63,9 +63,8 @@ export async function getPaginatedPipelines({
 }: GetPaginatedPipelinesParams) {
   const { throughputMetric, nodesCountMetric } = metrics;
   const sortField = sort.field;
-  const config = req.server.config();
-  // TODO type config
-  const size = config.get('monitoring.ui.max_bucket_size') as unknown as number;
+  const config = req.server.config;
+  const size = config.ui.max_bucket_size;
   let pipelines = await getLogstashPipelineIds({
     req,
     clusterUuid,

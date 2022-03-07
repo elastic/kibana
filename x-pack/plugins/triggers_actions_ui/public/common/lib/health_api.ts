@@ -6,9 +6,28 @@
  */
 
 import { HttpSetup } from 'kibana/public';
+import { BASE_TRIGGERS_ACTIONS_UI_API_PATH } from '../../../common';
 
-const TRIGGERS_ACTIONS_UI_API_ROOT = '/api/triggers_actions_ui';
+interface TriggersActionsUiHealth {
+  isRulesAvailable: boolean;
+}
 
-export async function triggersActionsUiHealth({ http }: { http: HttpSetup }): Promise<any> {
-  return await http.get(`${TRIGGERS_ACTIONS_UI_API_ROOT}/_health`);
+interface TriggersActionsServerHealth {
+  isAlertsAvailable: boolean;
+}
+
+export async function triggersActionsUiHealth({
+  http,
+}: {
+  http: HttpSetup;
+}): Promise<TriggersActionsUiHealth> {
+  const result = await http.get<TriggersActionsServerHealth>(
+    `${BASE_TRIGGERS_ACTIONS_UI_API_PATH}/_health`
+  );
+  if (result) {
+    return {
+      isRulesAvailable: result.isAlertsAvailable,
+    };
+  }
+  return result;
 }

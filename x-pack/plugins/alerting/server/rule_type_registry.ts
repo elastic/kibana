@@ -26,6 +26,7 @@ import {
   RecoveredActionGroupId,
   ActionGroup,
   validateDurationSchema,
+  parseDuration,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
@@ -35,6 +36,7 @@ export interface ConstructorOptions {
   taskRunnerFactory: TaskRunnerFactory;
   licenseState: ILicenseState;
   licensing: LicensingPluginSetup;
+  minimumScheduleInterval: string;
 }
 
 export interface RegistryRuleType
@@ -49,8 +51,8 @@ export interface RegistryRuleType
     | 'minimumLicenseRequired'
     | 'isExportable'
     | 'ruleTaskTimeout'
-    | 'minimumScheduleInterval'
     | 'defaultScheduleInterval'
+    | 'doesSetRecoveryContext'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -128,13 +130,21 @@ export class RuleTypeRegistry {
   private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
+  private readonly minimumScheduleInterval: string;
   private readonly licensing: LicensingPluginSetup;
 
-  constructor({ taskManager, taskRunnerFactory, licenseState, licensing }: ConstructorOptions) {
+  constructor({
+    taskManager,
+    taskRunnerFactory,
+    licenseState,
+    licensing,
+    minimumScheduleInterval,
+  }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
     this.licenseState = licenseState;
     this.licensing = licensing;
+    this.minimumScheduleInterval = minimumScheduleInterval;
   }
 
   public has(id: string) {
@@ -208,20 +218,19 @@ export class RuleTypeRegistry {
           )
         );
       }
-    }
 
-    // validate minimumScheduleInterval here
-    if (ruleType.minimumScheduleInterval) {
-      const invalidMinimumTimeout = validateDurationSchema(ruleType.minimumScheduleInterval);
-      if (invalidMinimumTimeout) {
+      const defaultIntervalInMs = parseDuration(ruleType.defaultScheduleInterval);
+      const minimumIntervalInMs = parseDuration(this.minimumScheduleInterval);
+      if (defaultIntervalInMs < minimumIntervalInMs) {
         throw new Error(
           i18n.translate(
-            'xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutRuleTypeError',
+            'xpack.alerting.ruleTypeRegistry.register.defaultTimeoutTooShortRuleTypeError',
             {
-              defaultMessage: 'Rule type "{id}" has invalid minimum interval: {errorMessage}.',
+              defaultMessage:
+                'Rule type "{id}" cannot specify a default interval less than {minimumInterval}.',
               values: {
                 id: ruleType.id,
-                errorMessage: invalidMinimumTimeout,
+                minimumInterval: this.minimumScheduleInterval,
               },
             }
           )
@@ -329,8 +338,8 @@ export class RuleTypeRegistry {
             minimumLicenseRequired,
             isExportable,
             ruleTaskTimeout,
-            minimumScheduleInterval,
             defaultScheduleInterval,
+            doesSetRecoveryContext,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -343,8 +352,8 @@ export class RuleTypeRegistry {
           minimumLicenseRequired,
           isExportable,
           ruleTaskTimeout,
-          minimumScheduleInterval,
           defaultScheduleInterval,
+          doesSetRecoveryContext,
           enabledInLicense: !!this.licenseState.getLicenseCheckForRuleType(
             id,
             name,

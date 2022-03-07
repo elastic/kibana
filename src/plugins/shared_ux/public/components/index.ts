@@ -13,7 +13,17 @@ import { withSuspense } from './utility';
  * The Lazily-loaded `ExitFullScreenButton` component.  Consumers should use `React.Suspennse` or the
  * `withSuspense` HOC to load this component.
  */
-export const LazyExitFullScreenButton = React.lazy(() => import('./exit_full_screen_button'));
+export const LazyExitFullScreenButton = React.lazy(() =>
+  import('./exit_full_screen_button').then(({ ExitFullScreenButton }) => ({
+    default: ExitFullScreenButton,
+  }))
+);
+
+export const LazySolutionToolbarButton = React.lazy(() =>
+  import('./toolbar/index').then(({ SolutionToolbarButton }) => ({
+    default: SolutionToolbarButton,
+  }))
+);
 
 export const RedirectAppLinks = React.lazy(() => import('./app_links'));
 
@@ -23,3 +33,27 @@ export const RedirectAppLinks = React.lazy(() => import('./app_links'));
  * a predefined fallback and error boundary.
  */
 export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
+
+/**
+ * A `SolutionToolbarButton` component that is wrapped by the `withSuspense` HOC.  This component can
+ * be used directly by consumers and will load the `LazySolutionToolbarButton` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const SolutionToolbarButton = withSuspense(LazySolutionToolbarButton);
+
+/**
+ * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const LazyNoDataViewsPage = React.lazy(() =>
+  import('./empty_state/no_data_views').then(({ NoDataViews }) => ({
+    default: NoDataViews,
+  }))
+);
+
+/**
+ * A `NoDataViewsPage` component that is wrapped by the `withSuspense` HOC.  This component can
+ * be used directly by consumers and will load the `LazyNoDataViewsPage` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const NoDataViewsPage = withSuspense(LazyNoDataViewsPage);

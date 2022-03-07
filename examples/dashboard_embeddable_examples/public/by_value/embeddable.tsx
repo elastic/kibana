@@ -82,6 +82,7 @@ const initialInput: DashboardContainerInput = {
     to: 'now',
     from: 'now-1d',
   },
+  timeRestore: false,
   title: 'test',
   query: {
     query: '',

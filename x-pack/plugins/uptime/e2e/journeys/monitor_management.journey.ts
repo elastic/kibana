@@ -10,9 +10,11 @@ import { monitorManagementPageProvider } from '../page_objects/monitor_managemen
 import { DataStream } from '../../common/runtime_types/monitor_management';
 import { byTestId } from './utils';
 
+const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
+
 const basicMonitorDetails = {
-  location: 'US Central',
-  schedule: '@every 3m',
+  location: customLocation || 'US Central',
+  schedule: '3',
 };
 const httpName = 'http monitor';
 const icmpName = 'icmp monitor';
@@ -156,7 +158,7 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
   const defaultMonitorDetails = {
     name: 'Sample monitor',
     location: 'US Central',
-    schedule: '@every 3m',
+    schedule: '3',
     apmServiceName: 'service',
   };
 

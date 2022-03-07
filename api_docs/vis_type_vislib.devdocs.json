@@ -39,7 +39,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"goal\" | \"heatmap\" | \"metric\" | \"gauge\" | \"pie\""
+              "\"goal\" | \"heatmap\" | \"gauge\" | \"metric\" | \"pie\""
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
             "deprecated": false
@@ -338,7 +338,7 @@
         "label": "VislibChartType",
         "description": [],
         "signature": [
-          "\"goal\" | \"heatmap\" | \"metric\" | \"gauge\" | \"pie\""
+          "\"goal\" | \"heatmap\" | \"gauge\" | \"metric\" | \"pie\""
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,

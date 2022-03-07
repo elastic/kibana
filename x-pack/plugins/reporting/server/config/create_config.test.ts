@@ -6,11 +6,10 @@
  */
 
 import * as Rx from 'rxjs';
-import { CoreSetup, HttpServerInfo, PluginInitializerContext } from 'src/core/server';
-import { coreMock } from 'src/core/server/mocks';
-import { LevelLogger } from '../lib/level_logger';
-import { createMockConfigSchema, createMockLevelLogger } from '../test_helpers';
-import { ReportingConfigType } from './';
+import type { CoreSetup, HttpServerInfo, Logger, PluginInitializerContext } from 'kibana/server';
+import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+import { createMockConfigSchema } from '../test_helpers';
+import type { ReportingConfigType } from './';
 import { createConfig$ } from './create_config';
 
 const createMockConfig = (
@@ -20,14 +19,14 @@ const createMockConfig = (
 describe('Reporting server createConfig$', () => {
   let mockCoreSetup: CoreSetup;
   let mockInitContext: PluginInitializerContext;
-  let mockLogger: jest.Mocked<LevelLogger>;
+  let mockLogger: jest.Mocked<Logger>;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockInitContext = coreMock.createPluginInitializerContext(
       createMockConfigSchema({ kibanaServer: {} })
     );
-    mockLogger = createMockLevelLogger();
+    mockLogger = loggingSystemMock.createLogger();
   });
 
   afterEach(() => {

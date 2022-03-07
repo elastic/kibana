@@ -265,10 +265,15 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     esClient,
     spaceId,
     force: request.body?.force,
+    ignoreConstraints: request.body?.ignore_constraints,
   });
+
   if (!res.error) {
     const body: InstallPackageResponse = {
       items: res.assets || [],
+      _meta: {
+        install_source: res.installSource,
+      },
     };
     return response.ok({ body });
   } else {
@@ -341,6 +346,9 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     const body: InstallPackageResponse = {
       items: res.assets || [],
       response: res.assets || [],
+      _meta: {
+        install_source: res.installSource,
+      },
     };
     return response.ok({ body });
   } else {

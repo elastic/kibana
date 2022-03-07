@@ -23,7 +23,7 @@ import {
   selectNumberOfAlerts,
   waitForAlerts,
 } from '../../tasks/alerts';
-import { createCustomRuleActivated, deleteCustomRule } from '../../tasks/api_calls/rules';
+import { createCustomRuleEnabled, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../../tasks/login';
@@ -31,11 +31,11 @@ import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe('Closing alerts', () => {
+describe.skip('Closing alerts', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
-    createCustomRuleActivated(getNewRule(), '1', '100m', 100);
+    createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
     refreshPage();
     waitForAlertsToPopulate(100);
     deleteCustomRule();
