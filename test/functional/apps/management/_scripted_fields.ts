@@ -23,8 +23,9 @@
 //   it will automatically insert a a closing square brace ], etc.
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const browser = getService('browser');
@@ -77,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
-        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
+        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         const script = `1`;
@@ -90,7 +91,7 @@ export default function ({ getService, getPageObjects }) {
           script
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10)).to.be(
             startingCount + 1
           );
         });
@@ -111,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
-        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
+        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         const script = `if (doc['machine.ram'].size() == 0) return -1;
@@ -126,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
           script
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10)).to.be(
             startingCount + 1
           );
         });
@@ -150,7 +151,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      //add a test to sort numeric scripted field
+      // add a test to sort numeric scripted field
       it('should sort scripted field value in Discover', async function () {
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
         // after the first click on the scripted field, it becomes secondary sort after time.
@@ -201,7 +202,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
-        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
+        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
@@ -213,7 +214,7 @@ export default function ({ getService, getPageObjects }) {
           "if (doc['response.raw'].value == '200') { return 'good'} else { return 'bad'}"
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10)).to.be(
             startingCount + 1
           );
         });
@@ -237,7 +238,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      //add a test to sort string scripted field
+      // add a test to sort string scripted field
       it('should sort scripted field value in Discover', async function () {
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         // after the first click on the scripted field, it becomes secondary sort after time.
@@ -287,7 +288,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
-        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
+        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
@@ -299,7 +300,7 @@ export default function ({ getService, getPageObjects }) {
           "doc['response.raw'].value == '200'"
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10)).to.be(
             startingCount + 1
           );
         });
@@ -335,8 +336,8 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeAllFilters();
       });
 
-      //add a test to sort boolean
-      //existing bug: https://github.com/elastic/kibana/issues/75519 hence the issue is skipped.
+      // add a test to sort boolean
+      // existing bug: https://github.com/elastic/kibana/issues/75519 hence the issue is skipped.
       it.skip('should sort scripted field value in Discover', async function () {
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         // after the first click on the scripted field, it becomes secondary sort after time.
@@ -374,7 +375,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
-        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
+        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
@@ -386,7 +387,7 @@ export default function ({ getService, getPageObjects }) {
           "doc['utc_time'].value.toEpochMilli() + (1000) * 60 * 60"
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10)).to.be(
             startingCount + 1
           );
         });
@@ -410,8 +411,8 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      //add a test to sort date scripted field
-      //https://github.com/elastic/kibana/issues/75711
+      // add a test to sort date scripted field
+      // https://github.com/elastic/kibana/issues/75711
       it.skip('should sort scripted field value in Discover', async function () {
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         // after the first click on the scripted field, it becomes secondary sort after time.

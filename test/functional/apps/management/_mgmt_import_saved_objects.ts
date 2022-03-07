@@ -8,13 +8,14 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
 
-  //in 6.4.0 bug the Saved Search conflict would be resolved and get imported but the visualization
-  //that referenced the saved search was not imported.( https://github.com/elastic/kibana/issues/22238)
+  // in 6.4.0 bug the Saved Search conflict would be resolved and get imported but the visualization
+  // that referenced the saved search was not imported.( https://github.com/elastic/kibana/issues/22238)
 
   describe('mgmt saved objects', function describeIndexTests() {
     before(async () => {
@@ -41,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.savedObjects.waitTableIsLoaded();
       await PageObjects.savedObjects.searchForObject('mysaved');
 
-      //instead of asserting on count- am asserting on the titles- which is more accurate than count.
+      // instead of asserting on count- am asserting on the titles- which is more accurate than count.
       const objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('mysavedsearch')).to.be(true);
       expect(objects.includes('mysavedviz')).to.be(true);
