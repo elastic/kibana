@@ -28,7 +28,7 @@ export const PureComponent = (params: Params) => {
 PureComponent.argTypes = {
   recommended: {
     control: 'boolean',
-    defaultValue: true,
+    defaultValue: false,
   },
   button: {
     control: {

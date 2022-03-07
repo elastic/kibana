@@ -9,7 +9,7 @@
 import { EuiCardProps } from '@elastic/eui';
 import { MouseEventHandler, ReactNode } from 'react';
 
-export type NoDataPageActions = Partial<EuiCardProps> & {
+export type NoDataCardProps = Partial<EuiCardProps> & {
   /**
    * Applies the `Recommended` beta badge and makes the button `fill`
    */
