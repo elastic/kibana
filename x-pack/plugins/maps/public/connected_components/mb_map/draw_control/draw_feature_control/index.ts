@@ -15,7 +15,7 @@ import {
   ReduxStateProps,
   OwnProps,
 } from './draw_feature_control';
-import { addNewFeatureToIndex, deleteFeatureFromIndex, updateEditShape } from '../../../../actions';
+import { addNewFeatureToIndex, deleteFeatureFromIndex } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 import { getEditState, getLayerById } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
@@ -34,14 +34,11 @@ function mapDispatchToProps(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>
 ): ReduxDispatchProps {
   return {
-    addNewFeatureToIndex(geometry: Geometry | Position[]) {
-      dispatch(addNewFeatureToIndex(geometry));
+    addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
+      dispatch(addNewFeatureToIndex(geometries));
     },
     deleteFeatureFromIndex(featureId: string) {
       dispatch(deleteFeatureFromIndex(featureId));
-    },
-    disableDrawState() {
-      dispatch(updateEditShape(null));
     },
   };
 }

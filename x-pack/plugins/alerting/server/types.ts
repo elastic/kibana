@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
 import type {
   IRouter,
   RequestHandlerContext,
   SavedObjectReference,
-  ElasticsearchClient,
   IUiSettingsClient,
 } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -40,15 +38,12 @@ import {
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
+  MappedParams,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-
-export interface ElasticsearchClientWithChild extends ElasticsearchClient {
-  child: Client['child'];
-}
 
 /**
  * @public
@@ -234,6 +229,7 @@ export interface RawRule extends SavedObjectAttributes {
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
+  mapped_params?: MappedParams;
   scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
@@ -248,6 +244,7 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
+  snoozeEndTime?: string;
 }
 
 export type AlertInfoParams = Pick<

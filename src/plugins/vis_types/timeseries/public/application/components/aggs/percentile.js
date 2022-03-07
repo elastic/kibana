@@ -90,7 +90,11 @@ export function PercentileAgg(props) {
             restrict={RESTRICT_FIELDS}
             indexPattern={indexPattern}
             value={model.field}
-            onChange={handleSelectChange('field')}
+            onChange={(value) =>
+              handleChange({
+                field: value?.[0],
+              })
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem>

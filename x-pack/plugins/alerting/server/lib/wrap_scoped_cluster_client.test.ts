@@ -9,7 +9,6 @@ import { Client } from '@elastic/elasticsearch';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
-import { ElasticsearchClientWithChild } from '../types';
 
 const esQuery = {
   body: { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } },
@@ -33,14 +32,16 @@ describe('wrapScopedClusterClient', () => {
     jest.useRealTimers();
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('searches with asInternalUser when specified', async () => {
     const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    (
-      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
-    ).child.mockReturnValue(childClient as unknown as Client);
+    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     const asInternalUserWrappedSearchFn = childClient.search;
 
     const wrappedSearchClient = createWrappedScopedClusterClientFactory({
@@ -63,9 +64,7 @@ describe('wrapScopedClusterClient', () => {
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    (
-      scopedClusterClient.asCurrentUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
-    ).child.mockReturnValue(childClient as unknown as Client);
+    scopedClusterClient.asCurrentUser.child.mockReturnValue(childClient as unknown as Client);
     const asCurrentUserWrappedSearchFn = childClient.search;
 
     const wrappedSearchClient = createWrappedScopedClusterClientFactory({
@@ -88,9 +87,7 @@ describe('wrapScopedClusterClient', () => {
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    (
-      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
-    ).child.mockReturnValue(childClient as unknown as Client);
+    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     const asInternalUserWrappedSearchFn = childClient.search;
 
     const wrappedSearchClient = createWrappedScopedClusterClientFactory({
@@ -114,9 +111,7 @@ describe('wrapScopedClusterClient', () => {
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    (
-      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
-    ).child.mockReturnValue(childClient as unknown as Client);
+    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     const asInternalUserWrappedSearchFn = childClient.search;
 
     asInternalUserWrappedSearchFn.mockRejectedValueOnce(new Error('something went wrong!'));
@@ -132,14 +127,39 @@ describe('wrapScopedClusterClient', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
   });
 
+  test('handles empty search result object', async () => {
+    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
+    const asInternalUserWrappedSearchFn = childClient.search;
+    // @ts-ignore incomplete return type
+    asInternalUserWrappedSearchFn.mockResolvedValue({});
+
+    const wrappedSearchClientFactory = createWrappedScopedClusterClientFactory({
+      scopedClusterClient,
+      rule,
+      logger,
+    });
+
+    const wrappedSearchClient = wrappedSearchClientFactory.client();
+    await wrappedSearchClient.asInternalUser.search(esQuery);
+
+    expect(asInternalUserWrappedSearchFn).toHaveBeenCalledTimes(1);
+    expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+    expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
+    const stats = wrappedSearchClientFactory.getMetrics();
+    expect(stats.numSearches).toEqual(1);
+    expect(stats.esSearchDurationMs).toEqual(0);
+  });
+
   test('keeps track of number of queries', async () => {
     const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    (
-      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
-    ).child.mockReturnValue(childClient as unknown as Client);
+    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     const asInternalUserWrappedSearchFn = childClient.search;
     // @ts-ignore incomplete return type
     asInternalUserWrappedSearchFn.mockResolvedValue({ took: 333 });
