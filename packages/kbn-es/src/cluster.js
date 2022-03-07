@@ -12,7 +12,7 @@ const chalk = require('chalk');
 const path = require('path');
 const { Client } = require('@elastic/elasticsearch');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
-const { ES_BIN, ES_KEYSTORE_BIN } = require('./paths');
+const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
 const {
   log: defaultLog,
   parseEsLog,
@@ -159,12 +159,11 @@ exports.Cluster = class Cluster {
    * @returns {Promise}
    */
   async installPlugins(installPath, plugins, options) {
-    let esJavaOpts = this.javaOptions(options);
-    for (const plugin in plugins.split(',')) {
+    const esJavaOpts = this.javaOptions(options);
+    for (const plugin of plugins.split(',')) {
       await execa(ES_PLUGIN_BIN, ['install', plugin.trim()], {
         cwd: installPath,
         env: {
-          ...process.env,
           JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
           ES_JAVA_OPTS: esJavaOpts.trim(),
         }
@@ -172,10 +171,7 @@ exports.Cluster = class Cluster {
     }
   }
 
-  async configureKeystoreWithSecureSettingsFiles(
-    installPath,
-    secureSettingsFiles
-  ) {
+  async configureKeystoreWithSecureSettingsFiles(installPath, secureSettingsFiles) {
     const env = { JAVA_HOME: '' };
     for (const [secureSettingName, secureSettingFile] of secureSettingsFiles) {
       this._log.info(
@@ -320,9 +316,9 @@ exports.Cluster = class Cluster {
     );
 
     this._log.info('%s %s', ES_BIN, args.join(' '));
-    let esJavaOpts = this.javaOptions(options);
+    const esJavaOpts = this.javaOptions(options);
 
-    this._log.info('ES_JAVA_OPTS: %s', esJavaOpts.trim());
+    this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
@@ -471,6 +467,6 @@ exports.Cluster = class Cluster {
       // 1536m === 1.5g
       esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
-    return esJavaOpts;
+    return esJavaOpts.trim();
   }
 };
