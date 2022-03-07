@@ -28,7 +28,7 @@ import { HeaderActions } from '../actions/header_actions';
 jest.mock('../../../../../common/lib/kibana');
 
 const mockUseCreateFieldButton = jest.fn().mockReturnValue(<></>);
-jest.mock('../../../create_field_button', () => ({
+jest.mock('../../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: (...params: unknown[]) => mockUseCreateFieldButton(...params),
 }));
 

@@ -196,6 +196,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       std_dev: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-extendedstats-aggregation.html`,
       sum: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
       top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
+      top_metrics: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-metrics.html`,
     },
     runtimeFields: {
       overview: `${ELASTICSEARCH_DOCS}runtime.html`,

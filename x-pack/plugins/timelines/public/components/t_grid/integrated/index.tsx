@@ -21,7 +21,6 @@ import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   BulkActionsProp,
-  CreateFieldComponentType,
   TGridCellAction,
   TimelineId,
   TimelineTabs,
@@ -43,6 +42,7 @@ import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
+import { FieldBrowserOptions } from '../../fields_browser';
 import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
@@ -98,7 +98,6 @@ export interface TGridIntegratedProps {
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
-  createFieldComponent?: CreateFieldComponentType;
   data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
   dataViewId?: string | null;
@@ -108,6 +107,7 @@ export interface TGridIntegratedProps {
   docValueFields: DocValueFields[];
   end: string;
   entityType: EntityType;
+  fieldBrowserOptions?: FieldBrowserOptions;
   filters: Filter[];
   filterStatus?: AlertStatus;
   globalFullScreen: boolean;
@@ -153,12 +153,12 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   docValueFields,
   end,
   entityType,
+  fieldBrowserOptions,
   filters,
   filterStatus,
   globalFullScreen,
   graphEventId,
   graphOverlay = null,
-  createFieldComponent,
   hasAlertsCrud,
   id,
   indexNames,
@@ -363,10 +363,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                         appId={appId}
                         browserFields={browserFields}
                         bulkActions={bulkActions}
-                        createFieldComponent={createFieldComponent}
                         data={nonDeletedEvents}
                         defaultCellActions={defaultCellActions}
                         disabledCellActions={disabledCellActions}
+                        fieldBrowserOptions={fieldBrowserOptions}
                         filterQuery={filterQuery}
                         filters={filters}
                         filterStatus={filterStatus}
