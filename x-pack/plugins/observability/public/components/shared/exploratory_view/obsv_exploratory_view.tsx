@@ -29,7 +29,6 @@ import { getMobileKPIDistributionConfig } from './configurations/mobile/distribu
 import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config';
 import { getMobileDeviceDistributionConfig } from './configurations/mobile/device_distribution_config';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { getMetricsKPIConfig } from './configurations/infra_metrics/kpi_over_time_config';
 import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
 
 export const DataTypesLabels = {
@@ -45,11 +44,11 @@ export const DataTypesLabels = {
   ),
 
   [DataTypes.METRICS]: i18n.translate('xpack.observability.overview.exploratoryView.metricsLabel', {
-    defaultMessage: 'Infra metrics',
+    defaultMessage: 'Metrics',
   }),
 
   [DataTypes.LOGS]: i18n.translate('xpack.observability.overview.exploratoryView.logsLabel', {
-    defaultMessage: 'Infra logs',
+    defaultMessage: 'Logs',
   }),
 
   [DataTypes.MOBILE]: i18n.translate(
