@@ -90,7 +90,7 @@ export const previewRulesRoute = async (
           ].includes(invocationCount)
         ) {
           return response.ok({
-            body: { logs: [{ errors: ['Invalid invocation count'], warnings: [] }] },
+            body: { logs: [{ errors: ['Invalid invocation count'], warnings: [], duration: 0 }] },
           });
         }
 
