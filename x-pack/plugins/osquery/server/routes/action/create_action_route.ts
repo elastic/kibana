@@ -68,7 +68,11 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       }
 
       const { agentSelection } = request.body as { agentSelection: AgentSelection };
-      const selectedAgents = await parseAgentSelection(soClient, osqueryContext, agentSelection);
+      const selectedAgents = await parseAgentSelection(
+        internalSavedObjectsClient,
+        osqueryContext,
+        agentSelection
+      );
       incrementCount(internalSavedObjectsClient, 'live_query');
       if (!selectedAgents.length) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
