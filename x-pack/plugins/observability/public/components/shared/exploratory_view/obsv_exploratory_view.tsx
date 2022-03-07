@@ -69,10 +69,6 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
     label: DataTypesLabels[DataTypes.UX],
   },
   {
-    id: DataTypes.METRICS,
-    label: DataTypesLabels[DataTypes.METRICS],
-  },
-  {
     id: DataTypes.LOGS,
     label: DataTypesLabels[DataTypes.LOGS],
   },
@@ -100,7 +96,6 @@ export const obsvReportConfigMap = {
     getMobileKPIDistributionConfig,
     getMobileDeviceDistributionConfig,
   ],
-  [DataTypes.METRICS]: [getMetricsKPIConfig],
   [DataTypes.LOGS]: [getLogsKPIConfig],
 };
 
