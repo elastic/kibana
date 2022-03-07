@@ -6,14 +6,7 @@
  */
 
 import { some } from 'lodash/fp';
-import {
-  EuiButtonEmpty,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -24,16 +17,9 @@ import { APP_ID } from '../../../../../common/constants';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
-import {
-  ISOLATE_HOST,
-  UNISOLATE_HOST,
-} from '../../../../detections/components/host_isolation/translations';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
-import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
-import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
 import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
 import { HostRisk } from '../../../../common/containers/hosts_risk/types';
@@ -257,15 +243,17 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         hostRisk={hostRisk}
         handleOnEventClosed={handleOnEventClosed}
       />
-      <EventDetailsFooter
+      <EventDetailsFlyoutFooter
+        activePanel={activePanel}
         detailsData={detailsData}
-        detailsEcsData={ecsData}
+        ecsData={ecsData}
         expandedEvent={expandedEvent}
         handleOnEventClosed={handleOnEventClosed}
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        loadingEventDetails={loading}
-        onAddIsolationStatusClick={showHostIsolationPanel}
+        loading={loading}
+        showAlertDetails={showAlertDetails}
+        showHostIsolationPanel={showHostIsolationPanel}
         timelineId={timelineId}
+        setActivePanel={setActivePanel}
       />
     </CasesContext>
   );
