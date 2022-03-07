@@ -20,6 +20,7 @@ import {
 } from '../../../../task_manager/server';
 import { CancellationToken } from '../../../common/cancellation_token';
 import { ReportingError, UnknownError, QueueTimeoutError } from '../../../common/errors';
+import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
@@ -232,7 +233,7 @@ export class ExecuteReportTask implements ReportingTask {
       const defaultOutput = null;
       docOutput.content = output.toString() || defaultOutput;
       docOutput.content_type = unknownMime;
-      docOutput.warnings = [output.details ?? output.toString()];
+      docOutput.warnings = [output.toString()];
       docOutput.error_code = output.code;
     }
 
@@ -417,10 +418,7 @@ export class ExecuteReportTask implements ReportingTask {
                 if (report == null) {
                   throw new Error(`Report ${jobId} is null!`);
                 }
-                const error =
-                  failedToExecuteErr instanceof ReportingError
-                    ? failedToExecuteErr
-                    : new UnknownError();
+                const error = mapToReportingError(failedToExecuteErr);
                 error.details =
                   error.details ||
                   `Max attempts (${attempts}) reached for job ${jobId}. Failed with: ${failedToExecuteErr.message}`;

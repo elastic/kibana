@@ -142,7 +142,6 @@ export class HeadlessChromiumDriverFactory {
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
       let browser: Browser | undefined;
-
       try {
         browser = await puppeteer.launch({
           pipe: !this.config.browser.chromium.inspect,
