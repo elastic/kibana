@@ -48,7 +48,7 @@ export async function generateData({
           .timestamp(timestamp)
           .duration(coldStartTransaction.duration)
           .success()
-          .serialize(),
+          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
