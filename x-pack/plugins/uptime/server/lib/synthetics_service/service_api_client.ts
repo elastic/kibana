@@ -104,12 +104,11 @@ export class ServiceAPIClient {
         method,
         url: url + (runOnce ? '/run' : '/monitors'),
         data: { monitors: monitorsStreams, output, stack_version: this.kibanaVersion },
-        headers:
-          process.env.NODE_ENV !== 'production' && this.authorization
-            ? {
-                Authorization: this.authorization,
-              }
-            : undefined,
+        headers: this.authorization
+          ? {
+              Authorization: this.authorization,
+            }
+          : undefined,
         httpsAgent: this.getHttpsAgent(),
       });
     };
