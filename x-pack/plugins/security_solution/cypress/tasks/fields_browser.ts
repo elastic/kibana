@@ -44,6 +44,7 @@ export const clearFieldsBrowser = () => {
 
 export const closeFieldsBrowser = () => {
   cy.get(CLOSE_BTN).click({ force: true });
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.exist');
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {

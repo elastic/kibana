@@ -40,7 +40,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
   /** all field names shown in the field browser must contain this string (when specified) */
   const [filterInput, setFilterInput] = useState('');
-  /** all field names shown in the field browser must contain this string (when specified) */
+  /** debounced filterInput, the one that is applied to the filteredBrowserFields */
   const [appliedFilterInput, setAppliedFilterInput] = useState('');
   /** all fields in this collection have field names that match the filterInput */
   const [filteredBrowserFields, setFilteredBrowserFields] = useState<BrowserFields | null>(null);
@@ -94,8 +94,8 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   /** Invoked when the user types in the filter input */
   const updateFilter = useCallback(
     (newFilterInput: string) => {
-      setFilterInput(newFilterInput);
       setIsSearching(true);
+      setFilterInput(newFilterInput);
       debouncedApplyFilterInput(newFilterInput);
     },
     [debouncedApplyFilterInput]
