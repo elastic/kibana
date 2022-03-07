@@ -69,7 +69,7 @@ describe('Risky Hosts Link Panel', () => {
         `${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL}`
       ).should('not.exist');
       cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
-      cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 host');
+      cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 6 hosts');
 
       changeSpace(testSpaceName);
       cy.visit(`/s/${testSpaceName}${OVERVIEW_URL}`);
