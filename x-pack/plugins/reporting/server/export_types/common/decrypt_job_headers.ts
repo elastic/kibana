@@ -6,12 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cryptoFactory, LevelLogger } from '../../lib';
+import type { Logger } from 'kibana/server';
+import { cryptoFactory } from '../../lib';
 
 export const decryptJobHeaders = async (
   encryptionKey: string | undefined,
   headers: string,
-  logger: LevelLogger
+  logger: Logger
 ): Promise<Record<string, string>> => {
   try {
     if (typeof headers !== 'string') {
