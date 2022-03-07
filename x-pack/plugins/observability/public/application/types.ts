@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ApplicationStart,
   ChromeStart,
   HttpStart,
@@ -13,6 +13,7 @@ import {
   NotificationsStart,
   OverlayStart,
   SavedObjectsStart,
+  ThemeServiceStart,
 } from 'kibana/public';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
@@ -23,19 +24,19 @@ import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions
 import { CasesUiStart } from '../../../cases/public';
 
 export interface ObservabilityAppServices {
-  http: HttpStart;
-  chrome: ChromeStart;
-  overlays: OverlayStart;
-  storage: IStorageWrapper;
-  data: DataPublicPluginStart;
-  uiSettings: IUiSettingsClient;
   application: ApplicationStart;
-  notifications: NotificationsStart;
-  stateTransfer: EmbeddableStateTransfer;
-  navigation: NavigationPublicPluginStart;
-  savedObjectsClient: SavedObjectsStart['client'];
-
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  lens: LensPublicStart;
   cases: CasesUiStart;
+  chrome: ChromeStart;
+  data: DataPublicPluginStart;
+  http: HttpStart;
+  lens: LensPublicStart;
+  navigation: NavigationPublicPluginStart;
+  notifications: NotificationsStart;
+  overlays: OverlayStart;
+  savedObjectsClient: SavedObjectsStart['client'];
+  stateTransfer: EmbeddableStateTransfer;
+  storage: IStorageWrapper;
+  theme: ThemeServiceStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  uiSettings: IUiSettingsClient;
 }
