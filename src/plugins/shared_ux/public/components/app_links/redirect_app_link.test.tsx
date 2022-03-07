@@ -24,7 +24,6 @@ describe('RedirectAppLinks', () => {
 
   it('intercept click events on children link elements', () => {
     let event: MouseEvent;
-
     const component = mount(
       <div
         onClick={(e) => {

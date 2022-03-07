@@ -40,7 +40,6 @@ export const RedirectAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = (
   navigateToUrl,
   currentAppId$,
   children,
-  className,
   ...otherProps
 }) => {
   const currentAppId = useObservable(currentAppId$, undefined);
@@ -54,13 +53,13 @@ export const RedirectAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = (
             navigateToUrl,
           })
         : undefined,
-    [navigateToUrl, currentAppId]
+    [currentAppId, navigateToUrl]
   );
 
   return (
     <Component
+      containerRef={containerRef}
       children={children}
-      className={className}
       {...otherProps}
       clickHandler={clickHandler}
     />

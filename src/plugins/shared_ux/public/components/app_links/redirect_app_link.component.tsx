@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef } from 'react';
+import React, { LegacyRef } from 'react';
 import classNames from 'classnames';
 
 /**
@@ -14,19 +14,19 @@ import classNames from 'classnames';
  */
 export interface Props extends React.HTMLAttributes<HTMLDivElement> {
   clickHandler: React.MouseEventHandler<HTMLElement> | undefined;
+  containerRef?: LegacyRef<HTMLDivElement>;
   children?: React.ReactNode;
   className?: string;
   'data-test-subj'?: string;
 }
 
 export const RedirectAppLinksComponent = ({
+  containerRef,
   clickHandler,
   children,
   className,
   ...otherProps
 }: Props) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div
