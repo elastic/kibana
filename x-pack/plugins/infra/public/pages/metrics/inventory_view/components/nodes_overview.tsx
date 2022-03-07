@@ -18,6 +18,7 @@ import { Map } from './waffle/map';
 import { TableView } from './table_view';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
+import { Legend } from './waffle/legend';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -130,6 +131,12 @@ export const NodesOverview = ({
         dataBounds={dataBounds}
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
+      />
+      <Legend
+        formatter={formatter}
+        bounds={bounds}
+        dataBounds={dataBounds}
+        legend={options.legend}
       />
     </MapContainer>
   );
