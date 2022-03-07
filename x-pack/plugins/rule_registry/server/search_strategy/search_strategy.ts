@@ -36,7 +36,8 @@ export const ruleRegistrySearchStrategyProvider = (
   security?: SecurityPluginSetup,
   spaces?: SpacesPluginStart
 ): ISearchStrategy<RuleRegistrySearchRequest, RuleRegistrySearchResponse> => {
-  let es = data.search.searchAsInternalUser;
+  const internalUserEs = data.search.searchAsInternalUser;
+  const requestUserEs = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
   return {
     search: (request, options, deps) => {
       // SIEM uses RBAC fields in their alerts but also utilizes ES DLS which
@@ -45,7 +46,6 @@ export const ruleRegistrySearchStrategyProvider = (
       let siemRequest = false;
       if (request.featureIds.length === 1 && request.featureIds[0] === AlertConsumers.SIEM) {
         siemRequest = true;
-        es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
       } else if (request.featureIds.includes(AlertConsumers.SIEM)) {
         throw new Error(
           'The ruleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.'
@@ -109,7 +109,6 @@ export const ruleRegistrySearchStrategyProvider = (
 
           const query = {
             bool: {
-              ...request.query?.bool,
               filter,
             },
           };
@@ -122,7 +121,7 @@ export const ruleRegistrySearchStrategyProvider = (
               query,
             },
           };
-          return es.search({ ...request, params }, options, deps);
+          return (siemRequest ? requestUserEs : internalUserEs).search({ params }, options, deps);
         }),
         map((response) => {
           // Do we have to loop over each hit? Yes.
@@ -157,9 +156,8 @@ export const ruleRegistrySearchStrategyProvider = (
       );
     },
     cancel: async (id, options, deps) => {
-      if (es.cancel) {
-        return es.cancel(id, options, deps);
-      }
+      if (internalUserEs.cancel) internalUserEs.cancel(id, options, deps);
+      if (requestUserEs.cancel) requestUserEs.cancel(id, options, deps);
     },
   };
 };

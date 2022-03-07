@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // TODO: need xavier's help here
-    describe.skip('siem', () => {
+    describe('siem', () => {
       before(async () => {
         await createSignalsIndex(supertest, log);
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');

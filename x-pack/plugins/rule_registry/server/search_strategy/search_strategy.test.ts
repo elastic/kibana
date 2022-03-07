@@ -68,6 +68,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   });
 
   let getAuthzFilterSpy: jest.SpyInstance;
+  const searchStrategySearch = jest.fn().mockImplementation(() => of(response));
 
   beforeEach(() => {
     ruleDataService.findIndicesByFeature.mockImplementation(() => {
@@ -80,7 +81,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     data.search.getSearchStrategy.mockImplementation(() => {
       return {
-        search: () => of(response),
+        search: searchStrategySearch,
       };
     });
 
@@ -100,6 +101,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     data.search.getSearchStrategy.mockClear();
     (data.search.searchAsInternalUser.search as jest.Mock).mockClear();
     getAuthzFilterSpy.mockClear();
+    searchStrategySearch.mockClear();
   });
 
   it('should handle a basic search request', async () => {
@@ -280,7 +282,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
     expect(data.search.searchAsInternalUser.search).toHaveBeenCalled();
-    expect(data.search.getSearchStrategy).not.toHaveBeenCalled();
+    expect(searchStrategySearch).not.toHaveBeenCalled();
   });
 
   it('should use scoped user when requesting siem alerts as RBAC is not applied', async () => {
@@ -305,6 +307,6 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
     expect(data.search.searchAsInternalUser.search).not.toHaveBeenCalled();
-    expect(data.search.getSearchStrategy).toHaveBeenCalled();
+    expect(searchStrategySearch).toHaveBeenCalled();
   });
 });
