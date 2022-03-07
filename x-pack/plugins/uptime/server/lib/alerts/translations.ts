@@ -78,6 +78,15 @@ export const commonMonitorStateI18 = [
       }
     ),
   },
+  {
+    name: 'monitorUptimeUrl',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorUptimeUrl',
+      {
+        defaultMessage: 'Uptime app monitor detail url, appended alongside kibanaBaseUrl.',
+      }
+    ),
+  },
 ];
 
 export const commonStateTranslations = [

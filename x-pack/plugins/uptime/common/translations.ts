@@ -21,15 +21,33 @@ export const VALUE_MUST_BE_AN_INTEGER = i18n.translate('xpack.uptime.settings.in
 export const MonitorStatusTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
     defaultMessage:
-      'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}',
+      'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage} View status in uptime app {monitorUptimeUrl}',
     values: {
       monitorName: '{{state.monitorName}}',
       monitorUrl: '{{{state.monitorUrl}}}',
       statusMessage: '{{{state.statusMessage}}}',
       latestErrorMessage: '{{{state.latestErrorMessage}}}',
       observerLocation: '{{state.observerLocation}}',
+      monitorUptimeUrl: '{{state.monitorUptimeUrl}}',
+      kibanaBaseUrl: '{{kibanaBaseUrl}}',
     },
   }),
+  defaultSlackActionMessage: i18n.translate(
+    'xpack.uptime.alerts.monitorStatus.defaultActionMessage.slack',
+    {
+      defaultMessage: `*Monitor: {monitorName} is down* :warning: <{monitorUptimeUrl}|View status in Uptime> | <{kibanaBaseUrl}/app/management/insightsAndAlerting/triggersActions/rule/{ruleId}|Mute alert rule> \n{monitorName} with url {monitorUrl} is {statusMessage} from {observerLocation}. The latest error message is {latestErrorMessage}`,
+      values: {
+        monitorName: '{{state.monitorName}}',
+        monitorUrl: '{{{state.monitorUrl}}}',
+        statusMessage: '{{state.statusMessage}}',
+        latestErrorMessage: '{{{state.latestErrorMessage}}}',
+        observerLocation: '{{state.observerLocation}}',
+        monitorUptimeUrl: '{{state.monitorUptimeUrl}}',
+        kibanaBaseUrl: '{{kibanaBaseUrl}}',
+        ruleId: '{{rule.id}}',
+      },
+    }
+  ),
   name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
     defaultMessage: 'Uptime monitor status',
   }),

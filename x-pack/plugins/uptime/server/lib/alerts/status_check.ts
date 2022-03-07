@@ -37,6 +37,7 @@ import { UMServerLibs, UptimeESClient, createUptimeESClient } from '../lib';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
 import { ALERT_REASON_MSG, MESSAGE, MONITOR_WITH_GEO, ACTION_VARIABLES } from './action_variables';
+import { UptimeServerSetup } from '../adapters';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 /**
@@ -138,17 +139,31 @@ export const formatFilterString = async (
     search
   );
 
-export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
+const getUptimeMonitorUrl = (server: UptimeServerSetup, monitorId?: string) => {
+  const publicUrl = server.coreSetup.http.basePath.publicBaseUrl;
+  if (!publicUrl || !monitorId) {
+    return;
+  }
+  return `${publicUrl}/app/uptime/monitor/${Buffer.from(monitorId).toString('base64')}`;
+};
+
+export const getMonitorSummary = (
+  monitorInfo: Ping,
+  statusMessage: string,
+  server: UptimeServerSetup
+) => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
+
   const summary = {
+    monitorName,
+    observerLocation,
     monitorUrl: monitorInfo.url?.full,
     monitorId: monitorInfo.monitor?.id,
-    monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
     monitorType: monitorInfo.monitor?.type,
     latestErrorMessage: monitorInfo.error?.message,
-    observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
     observerHostname: monitorInfo.agent?.name,
+    monitorUptimeUrl: getUptimeMonitorUrl(server, monitorInfo.monitor?.id),
   };
 
   return {
@@ -214,7 +229,7 @@ export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   return `${urlText}_${monIdByLoc}`;
 };
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
+export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (server, libs) => ({
   id: 'xpack.uptime.alerts.monitorStatus',
   producer: 'uptime',
   name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
@@ -347,7 +362,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         );
 
         const statusMessage = getStatusMessage(monitorStatusMessageParams);
-        const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
+        const monitorSummary = getMonitorSummary(monitorInfo, statusMessage, server);
         const alert = alertWithLifecycle({
           id: getInstanceId(monitorInfo, monitorLoc.location),
           fields: getMonitorAlertDocument(monitorSummary),
@@ -407,7 +422,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         availMonInfo!,
         availability
       );
-      const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
+      const monitorSummary = getMonitorSummary(monitorInfo, statusMessage, server);
       const alert = alertWithLifecycle({
         id: getInstanceId(monitorInfo, monIdByLoc),
         fields: getMonitorAlertDocument(monitorSummary),

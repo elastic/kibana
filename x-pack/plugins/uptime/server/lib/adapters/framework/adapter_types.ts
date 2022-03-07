@@ -6,7 +6,12 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type { SavedObjectsClientContract, IScopedClusterClient, Logger } from 'src/core/server';
+import type {
+  SavedObjectsClientContract,
+  IScopedClusterClient,
+  Logger,
+  CoreSetup,
+} from 'src/core/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
 import { ObservabilityPluginSetup } from '../../../../../observability/server';
 import {
@@ -43,6 +48,7 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 ) => Promise<T> | T;
 
 export interface UptimeServerSetup {
+  coreSetup: CoreSetup;
   router: UptimeRouter;
   config: UptimeConfig;
   cloud?: CloudSetup;

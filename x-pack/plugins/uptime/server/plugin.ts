@@ -75,6 +75,7 @@ export class Plugin implements PluginType {
 
     this.server = {
       config,
+      coreSetup: core,
       router: core.http.createRouter(),
       cloud: plugins.cloud,
       kibanaVersion: this.initContext.env.packageInfo.version,
