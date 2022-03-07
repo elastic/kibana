@@ -302,7 +302,7 @@ export class ElasticsearchConfig {
   /**
    * The maximum number of sockets that can be used for communications with elasticsearch.
    */
-  public readonly maxSockets?: number;
+  public readonly maxSockets: number;
 
   /**
    * Whether to use compression for communications with elasticsearch.

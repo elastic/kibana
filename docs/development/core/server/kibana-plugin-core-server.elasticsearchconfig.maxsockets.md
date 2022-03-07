@@ -9,5 +9,5 @@ The maximum number of sockets that can be used for communications with elasticse
 <b>Signature:</b>
 
 ```typescript
-readonly maxSockets?: number;
+readonly maxSockets: number;
 ```
