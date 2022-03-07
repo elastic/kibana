@@ -15,9 +15,11 @@ export interface FullStoryDeps {
 }
 
 export type FullstoryUserVars = Record<string, any>;
+export type FullstoryVars = Record<string, any>;
 
 export interface FullStoryApi {
   identify(userId: string, userVars?: FullstoryUserVars): void;
+  setVars(pageName: string, vars?: FullstoryVars): void;
   setUserVars(userVars?: FullstoryUserVars): void;
   event(eventName: string, eventProperties: Record<string, any>): void;
 }
