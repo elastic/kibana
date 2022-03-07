@@ -43,6 +43,8 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
 
   /** all field names shown in the field browser must contain this string (when specified) */
   const [filterInput, setFilterInput] = useState('');
+
+  const [appliedFilterInput, setAppliedFilterInput] = useState('');
   /** all fields in this collection have field names that match the filterInput */
   const [filteredBrowserFields, setFilteredBrowserFields] = useState<BrowserFields | null>(null);
   /** when true, show a spinner in the input to indicate the field browser is searching for matching field names */
@@ -51,15 +53,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   const [selectedCategoryId, setSelectedCategoryId] = useState(DEFAULT_CATEGORY_NAME);
   /** show the field browser */
   const [show, setShow] = useState(false);
-  useEffect(() => {
-    return () => {
-      if (inputTimeoutId.current !== 0) {
-        // ⚠️ mutation: cancel any remaining timers and zero-out the timer id:
-        clearTimeout(inputTimeoutId.current);
-        inputTimeoutId.current = 0;
-      }
-    };
-  }, []);
 
   /** Shows / hides the field browser */
   const onShow = useCallback(() => {
@@ -69,52 +62,68 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   /** Invoked when the field browser should be hidden */
   const onHide = useCallback(() => {
     setFilterInput('');
+    setAppliedFilterInput('');
     setFilteredBrowserFields(null);
     setIsSearching(false);
     setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
     setShow(false);
   }, []);
 
-  /** Invoked when the user types in the filter input */
-  const updateFilter = useCallback(
-    (newFilterInput: string) => {
-      setFilterInput(newFilterInput);
-      setIsSearching(true);
-      if (inputTimeoutId.current !== 0) {
-        clearTimeout(inputTimeoutId.current); // ⚠️ mutation: cancel any previous timers
-      }
-      // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
-      inputTimeoutId.current = window.setTimeout(() => {
-        const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
-          browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
-          substring: newFilterInput,
-        });
-        setFilteredBrowserFields(newFilteredBrowserFields);
-        setIsSearching(false);
+  const newFilteredBrowserFields = useMemo(() => {
+    return filterBrowserFieldsByFieldName({
+      browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
+      substring: appliedFilterInput,
+    });
+  }, [appliedFilterInput, browserFields]);
 
-        const newSelectedCategoryId =
-          newFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
-            ? DEFAULT_CATEGORY_NAME
-            : Object.keys(newFilteredBrowserFields)
-                .sort()
-                .reduce<string>(
-                  (selected, category) =>
-                    newFilteredBrowserFields[category].fields != null &&
-                    newFilteredBrowserFields[selected].fields != null &&
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    Object.keys(newFilteredBrowserFields[category].fields!).length >
-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                      Object.keys(newFilteredBrowserFields[selected].fields!).length
-                      ? category
-                      : selected,
-                  Object.keys(newFilteredBrowserFields)[0]
-                );
-        setSelectedCategoryId(newSelectedCategoryId);
-      }, INPUT_TIMEOUT);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [browserFields, filterInput, inputTimeoutId.current]
-  );
+  const newSelectedCategoryId = useMemo(() => {
+    if (appliedFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0) {
+      return DEFAULT_CATEGORY_NAME;
+    } else {
+      return Object.keys(newFilteredBrowserFields)
+        .sort()
+        .reduce<string>((selected, category) => {
+          const filteredBrowserFieldsByCategory =
+            (newFilteredBrowserFields[category] && newFilteredBrowserFields[category].fields) || [];
+          const filteredBrowserFieldsBySelected =
+            (newFilteredBrowserFields[selected] && newFilteredBrowserFields[selected].fields) || [];
+          return newFilteredBrowserFields[category].fields != null &&
+            newFilteredBrowserFields[selected].fields != null &&
+            Object.keys(filteredBrowserFieldsByCategory).length >
+              Object.keys(filteredBrowserFieldsBySelected).length
+            ? category
+            : selected;
+        }, Object.keys(newFilteredBrowserFields)[0]);
+    }
+  }, [appliedFilterInput, newFilteredBrowserFields]);
+
+  /** Invoked when the user types in the filter input */
+  const updateFilter = useCallback((newFilterInput: string) => {
+    setFilterInput(newFilterInput);
+    setIsSearching(true);
+  }, []);
+
+  useEffect(() => {
+    if (inputTimeoutId.current !== 0) {
+      clearTimeout(inputTimeoutId.current); // ⚠️ mutation: cancel any previous timers
+    }
+    // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
+    inputTimeoutId.current = window.setTimeout(() => {
+      setIsSearching(false);
+      setAppliedFilterInput(filterInput);
+    }, INPUT_TIMEOUT);
+    return () => {
+      clearTimeout(inputTimeoutId.current);
+    };
+  }, [filterInput]);
+
+  useEffect(() => {
+    setFilteredBrowserFields(newFilteredBrowserFields);
+  }, [newFilteredBrowserFields]);
+
+  useEffect(() => {
+    setSelectedCategoryId(newSelectedCategoryId);
+  }, [newSelectedCategoryId]);
 
   // only merge in the default category if the field browser is visible
   const browserFieldsWithDefaultCategory = useMemo(() => {
@@ -152,6 +161,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           onSearchInputChange={updateFilter}
           restoreFocusTo={customizeColumnsButtonRef}
           searchInput={filterInput}
+          appliedFilterInput={appliedFilterInput}
           selectedCategoryId={selectedCategoryId}
           timelineId={timelineId}
           width={width}
