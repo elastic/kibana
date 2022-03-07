@@ -7,12 +7,11 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { InstallResult, PreconfiguredOutput } from '../../../common/types';
-import type { NewPackagePolicy, Output } from '../../types';
+import type { PreconfiguredOutput } from '../../../common/types';
+import type { Output } from '../../types';
 
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
-import type { InstallPackageParams } from '../epm/packages/install';
 
 import { createOrUpdatePreconfiguredOutputs, cleanPreconfiguredOutputs } from './outputs';
 
