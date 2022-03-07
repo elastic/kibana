@@ -90,9 +90,10 @@ export const SourcesRouter: React.FC = () => {
           : externalConnectorAvailable
           ? 'external'
           : 'custom';
+        const showChoice = defaultOption !== 'internal' && hasMultipleConnectorOptions(sourceData);
         return (
           <Route key={i} exact path={path}>
-            {hasMultipleConnectorOptions(sourceData) ? (
+            {showChoice ? (
               <ConfigurationChoice sourceData={sourceData} />
             ) : (
               <Redirect exact from={path} to={`${path}/${defaultOption}`} />
