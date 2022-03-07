@@ -138,9 +138,18 @@ export function Detail() {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: packageInfoLoading,
+    isInitialRequest: packageIsInitialRequest,
+    resendRequest: refreshPackageInfo,
   } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
-  const isLoading = packageInfoLoading || permissionCheck.isLoading;
+  // Refresh package info when statu change
+  useEffect(() => {
+    if (packageInstallStatus === 'installed') {
+      refreshPackageInfo();
+    }
+  }, [packageInstallStatus, refreshPackageInfo]);
+
+  const isLoading = (packageInfoLoading && !packageIsInitialRequest) || permissionCheck.isLoading;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
