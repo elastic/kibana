@@ -6,14 +6,14 @@
  */
 
 import apm from 'elastic-apm-node';
+import type { Logger } from 'kibana/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
+import type { ReportingCore } from '../../';
 import { LayoutTypes } from '../../../../screenshotting/common';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import type { PngMetrics } from '../../../common/types';
-import { ReportingCore } from '../../';
-import { ScreenshotOptions } from '../../types';
-import { LevelLogger } from '../../lib';
+import type { ScreenshotOptions } from '../../types';
 
 interface PngResult {
   buffer: Buffer;
@@ -23,7 +23,7 @@ interface PngResult {
 
 export function generatePngObservable(
   reporting: ReportingCore,
-  logger: LevelLogger,
+  logger: Logger,
   options: ScreenshotOptions
 ): Rx.Observable<PngResult> {
   const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);

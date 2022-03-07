@@ -150,6 +150,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             data-test-subj="savedViews-openPopover"
             iconType="arrowDown"
             iconSide="right"
+            color="text"
           >
             {currentView
               ? currentView.name

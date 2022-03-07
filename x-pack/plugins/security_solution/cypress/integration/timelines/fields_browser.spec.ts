@@ -8,14 +8,13 @@
 import {
   FIELDS_BROWSER_CATEGORIES_COUNT,
   FIELDS_BROWSER_FIELDS_COUNT,
-  FIELDS_BROWSER_HOST_CATEGORIES_COUNT,
   FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER,
   FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
   FIELDS_BROWSER_MESSAGE_HEADER,
-  FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
-  FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
-  FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
   FIELDS_BROWSER_FILTER_INPUT,
+  FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER,
+  FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES,
+  FIELDS_BROWSER_CATEGORY_BADGE,
 } from '../../screens/fields_browser';
 import { TIMELINE_FIELDS_BUTTON } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
@@ -26,13 +25,14 @@ import {
   clearFieldsBrowser,
   closeFieldsBrowser,
   filterFieldsBrowser,
+  toggleCategoryFilter,
   removesMessageField,
   resetFields,
+  toggleCategory,
 } from '../../tasks/fields_browser';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
-import { ecsFieldMap } from '../../../../rule_registry/common/assets/field_maps/ecs_field_map';
 
 import { HOSTS_URL } from '../../urls/navigation';
 
@@ -61,21 +61,8 @@ describe('Fields Browser', () => {
       clearFieldsBrowser();
     });
 
-    it('displays the `default ECS` category (by default)', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).should('have.text', 'default ECS');
-    });
-
-    it('the `defaultECS` (selected) category count matches the default timeline header count', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should(
-        'have.text',
-        `${defaultHeaders.length}`
-      );
-    });
-
-    it('displays a checked checkbox for all of the default timeline columns', () => {
-      defaultHeaders.forEach((header) =>
-        cy.get(`[data-test-subj="field-${header.id}-checkbox"]`).should('be.checked')
-      );
+    it('displays all categories (by default)', () => {
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES).should('be.empty');
     });
 
     it('displays the expected count of categories that match the filter input', () => {
@@ -83,54 +70,50 @@ describe('Fields Browser', () => {
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_CATEGORIES_COUNT).should('have.text', '2 categories');
+      cy.get(FIELDS_BROWSER_CATEGORIES_COUNT).should('have.text', '2');
     });
 
     it('displays a search results label with the expected count of fields matching the filter input', () => {
       const filterInput = 'host.mac';
-
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_HOST_CATEGORIES_COUNT)
-        .invoke('text')
-        .then((hostCategoriesCount) => {
-          cy.get(FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT)
-            .invoke('text')
-            .then((systemCategoriesCount) => {
-              cy.get(FIELDS_BROWSER_FIELDS_COUNT).should(
-                'have.text',
-                `${+hostCategoriesCount + +systemCategoriesCount} fields`
-              );
-            });
-        });
+      cy.get(FIELDS_BROWSER_FIELDS_COUNT).should('contain.text', '2');
     });
 
-    it('displays a count of only the fields in the selected category that match the filter input', () => {
-      const filterInput = 'host.geo.c';
+    it('the `default ECS` category matches the default timeline header fields', () => {
+      const category = 'default ECS';
+      toggleCategory(category);
+      cy.get(FIELDS_BROWSER_FIELDS_COUNT).should('contain.text', `${defaultHeaders.length}`);
 
-      filterFieldsBrowser(filterInput);
+      defaultHeaders.forEach((header) => {
+        cy.get(`[data-test-subj="field-${header.id}-checkbox"]`).should('be.checked');
+      });
+      toggleCategory(category);
+    });
 
-      const fieldsThatMatchFilterInput = Object.keys(ecsFieldMap).filter((fieldName) => {
-        const dotDelimitedFieldParts = fieldName.split('.');
-        const fieldPartMatch = dotDelimitedFieldParts.filter((fieldPart) => {
-          const camelCasedStringsMatching = fieldPart
-            .split('_')
-            .some((part) => part.startsWith(filterInput));
-          if (fieldPart.startsWith(filterInput)) {
-            return true;
-          } else if (camelCasedStringsMatching) {
-            return true;
-          } else {
-            return false;
-          }
-        });
-        return fieldName.startsWith(filterInput) || fieldPartMatch.length > 0;
-      }).length;
+    it('creates the category badge when it is selected', () => {
+      const category = 'host';
 
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should(
-        'have.text',
-        fieldsThatMatchFilterInput
-      );
+      cy.get(FIELDS_BROWSER_CATEGORY_BADGE(category)).should('not.exist');
+      toggleCategory(category);
+      cy.get(FIELDS_BROWSER_CATEGORY_BADGE(category)).should('exist');
+      toggleCategory(category);
+    });
+
+    it('search a category should match the category in the category filter', () => {
+      const category = 'host';
+
+      filterFieldsBrowser(category);
+      toggleCategoryFilter();
+      cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER).should('contain.text', category);
+    });
+
+    it('search a category should filter out non matching categories in the category filter', () => {
+      const category = 'host';
+      const categoryCheck = 'event';
+      filterFieldsBrowser(category);
+      toggleCategoryFilter();
+      cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER).should('not.contain.text', categoryCheck);
     });
   });
 
@@ -157,18 +140,15 @@ describe('Fields Browser', () => {
       cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('not.exist');
     });
 
-    it('selects a search results label with the expected count of categories matching the filter input', () => {
-      const category = 'host';
-      filterFieldsBrowser(category);
-
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).should('have.text', category);
-    });
-
     it('adds a field to the timeline when the user clicks the checkbox', () => {
       const filterInput = 'host.geo.c';
 
-      filterFieldsBrowser(filterInput);
+      closeFieldsBrowser();
       cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('not.exist');
+
+      openTimelineFieldsBrowser();
+
+      filterFieldsBrowser(filterInput);
       addsHostGeoCityNameToTimeline();
       closeFieldsBrowser();
 
