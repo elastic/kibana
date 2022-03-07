@@ -7,23 +7,24 @@
 
 import { parse } from 'query-string';
 import { useLocation } from 'react-router-dom';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../application/types';
 import { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import { getAbsoluteTime } from '../utils/date';
 import { UI_SETTINGS, useKibanaUISettings } from './use_kibana_ui_settings';
-import { usePluginContext } from './use_plugin_context';
 
 const getParsedParams = (search: string) => {
   return parse(search.slice(1), { sort: false });
 };
 
 export function useTimeRange() {
-  const { plugins } = usePluginContext();
+  const { data } = useKibana<ObservabilityAppServices>().services;
 
   const timePickerTimeDefaults = useKibanaUISettings<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
 
-  const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
+  const timePickerSharedState = data.query.timefilter.timefilter.getTime();
 
   const { rangeFrom, rangeTo } = getParsedParams(useLocation().search);
 
