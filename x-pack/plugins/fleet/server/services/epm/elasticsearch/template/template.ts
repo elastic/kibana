@@ -320,6 +320,14 @@ export function generateTemplateName(dataStream: RegistryDataStream): string {
   return getRegistryDataStreamAssetBaseName(dataStream);
 }
 
+/**
+ * Given a data stream name, return the indexTemplate name
+ */
+function dataStreamNameToIndexTemplateName(dataStreamName: string): string {
+  const [type, dataset] = dataStreamName.split('-'); // ignore namespace at the end
+  return [type, dataset].join('-');
+}
+
 export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
   // undefined or explicitly set to false
   // See also https://github.com/elastic/package-spec/pull/102
@@ -491,7 +499,11 @@ const updateAllDataStreams = async (
   logger: Logger
 ): Promise<void> => {
   const updatedataStreamPromises = indexNameWithTemplates.map((templateEntry) => {
-    return updateExistingDataStream({ esClient, logger, ...templateEntry });
+    return updateExistingDataStream({
+      esClient,
+      logger,
+      dataStreamName: templateEntry.dataStreamName,
+    });
   });
   await Promise.all(updatedataStreamPromises);
 };
@@ -499,21 +511,16 @@ const updateExistingDataStream = async ({
   dataStreamName,
   esClient,
   logger,
-  indexTemplate,
-  composedOfTemplates,
 }: {
   dataStreamName: string;
   esClient: ElasticsearchClient;
   logger: Logger;
-  indexTemplate: IndexTemplate;
-  composedOfTemplates: TemplateMap;
 }) => {
-  const mappingComponentTemplate = getTemplateWithNameEndingIn(
-    composedOfTemplates,
-    MAPPINGS_TEMPLATE_SUFFIX
-  );
-  // @ts-expect-error 2339
-  const mappings = mappingComponentTemplate?.template?.mappings;
+  const {
+    template: { mappings, settings },
+  } = await esClient.indices.simulateTemplate({
+    name: dataStreamNameToIndexTemplateName(dataStreamName),
+  });
 
   try {
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
@@ -540,14 +547,13 @@ const updateExistingDataStream = async ({
   // update settings after mappings was successful to ensure
   // pointing to the new pipeline is safe
   // for now, only update the pipeline
-  const { settings } = indexTemplate.template;
-  if (!settings.index.default_pipeline) return;
+  if (!settings?.index?.default_pipeline) return;
   try {
     await retryTransientEsErrors(
       () =>
         esClient.indices.putSettings({
           index: dataStreamName,
-          body: { default_pipeline: settings.index.default_pipeline },
+          body: { default_pipeline: settings!.index!.default_pipeline },
         }),
       { logger }
     );
