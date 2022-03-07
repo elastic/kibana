@@ -24,6 +24,7 @@ import { Document } from '../persistence/saved_object_store';
 
 import {
   setState,
+  applyChanges,
   useLensSelector,
   useLensDispatch,
   LensAppState,
@@ -276,6 +277,7 @@ export function App({
 
   const runSave = useCallback(
     (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+      dispatch(applyChanges());
       return runSaveLensVisualization(
         {
           lastKnownDoc,
@@ -316,6 +318,7 @@ export function App({
       redirectTo,
       lensAppServices,
       dispatchSetState,
+      dispatch,
       setIsSaveModalVisible,
     ]
   );

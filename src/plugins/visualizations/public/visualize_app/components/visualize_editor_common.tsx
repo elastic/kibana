@@ -17,7 +17,7 @@ import { ExperimentalVisInfo } from './experimental_vis_info';
 import { useKibana } from '../../../../kibana_react/public';
 import { urlFor } from '../../../../visualizations/public';
 import { getUISettings } from '../../services';
-import { SplitChartWarning, NEW_HEATMAP_CHARTS_LIBRARY } from './split_chart_warning';
+import { SplitChartWarning } from './split_chart_warning';
 import {
   SavedVisInstance,
   VisualizeAppState,
@@ -25,6 +25,11 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
+import {
+  CHARTS_CONFIG_TOKENS,
+  CHARTS_WITHOUT_SMALL_MULTIPLES,
+  isSplitChart as isSplitChartFn,
+} from '../utils/split_chart_warning_helpers';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -110,8 +115,17 @@ export const VisualizeEditorCommon = ({
     return null;
   }, [visInstance?.savedVis, services, visInstance?.vis?.type.title]);
   // Adds a notification for split chart on the new implementation as it is not supported yet
-  const isSplitChart = visInstance?.vis?.data?.aggs?.aggs.some((agg) => agg.schema === 'split');
-  const hasHeatmapLegacyhartsEnabled = getUISettings().get(NEW_HEATMAP_CHARTS_LIBRARY);
+  const chartName = visInstance?.vis.type.name;
+  const isSplitChart = isSplitChartFn(chartName, visInstance?.vis?.data?.aggs);
+
+  const chartsWithoutSmallMultiples: string[] = Object.values(CHARTS_WITHOUT_SMALL_MULTIPLES);
+  const chartNeedsWarning = chartName ? chartsWithoutSmallMultiples.includes(chartName) : false;
+  const chartToken =
+    chartName && chartNeedsWarning
+      ? CHARTS_CONFIG_TOKENS[chartName as CHARTS_WITHOUT_SMALL_MULTIPLES]
+      : undefined;
+
+  const hasLegacyChartsEnabled = chartToken ? getUISettings().get(chartToken) : true;
 
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
@@ -134,9 +148,12 @@ export const VisualizeEditorCommon = ({
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
-      {!hasHeatmapLegacyhartsEnabled &&
-        isSplitChart &&
-        visInstance?.vis.type.name === 'heatmap' && <SplitChartWarning />}
+      {!hasLegacyChartsEnabled && isSplitChart && chartNeedsWarning && chartToken && chartName && (
+        <SplitChartWarning
+          chartType={chartName as CHARTS_WITHOUT_SMALL_MULTIPLES}
+          chartConfigToken={chartToken}
+        />
+      )}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
       {getLegacyUrlConflictCallout()}
       {visInstance && (
