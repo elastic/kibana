@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import type { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IScopedClusterClient, IUiSettingsClient, Logger } from 'kibana/server';
 import type { IScopedSearchClient } from 'src/plugins/data/server';
 import type { Datatable } from 'src/plugins/expressions/server';
 import type { Writable } from 'stream';
@@ -32,16 +32,15 @@ import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import {
   AuthenticationExpiredError,
-  UnknownError,
   ReportingError,
+  UnknownError,
 } from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import type { LevelLogger } from '../../../lib';
 import type { TaskRunResult } from '../../../lib/tasks';
 import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
-import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { i18nTexts } from './i18n_texts';
+import { MaxSizeStringBuilder } from './max_size_string_builder';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -65,7 +64,7 @@ export class CsvGenerator {
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
-    private logger: LevelLogger,
+    private logger: Logger,
     private stream: Writable
   ) {}
 
@@ -316,7 +315,7 @@ export class CsvGenerator {
         }
 
         if (!results) {
-          this.logger.warning(`Search results are undefined!`);
+          this.logger.warn(`Search results are undefined!`);
           break;
         }
 
@@ -396,7 +395,7 @@ export class CsvGenerator {
     this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
-      this.logger.warning(
+      this.logger.warn(
         `ES scroll returned fewer total hits than expected! ` +
           `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
       );

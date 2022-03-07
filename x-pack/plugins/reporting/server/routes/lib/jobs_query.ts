@@ -137,7 +137,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     async get(user, id) {
       const { logger } = reportingCore.getPluginSetupDeps();
       if (!id) {
-        logger.warning(`No ID provided for GET`);
+        logger.warn(`No ID provided for GET`);
         return;
       }
 
@@ -162,7 +162,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       const result = response?.hits?.hits?.[0];
       if (!result?._source) {
-        logger.warning(`No hits resulted in search`);
+        logger.warn(`No hits resulted in search`);
         return;
       }
 
