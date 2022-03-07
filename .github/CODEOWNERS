@@ -416,14 +416,17 @@ x-pack/plugins/security_solution/cypress/upgrade_integration @elastic/security-e
 x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
+## Security Solution sub teams - adaptive-workload-protection
+x-pack/plugins/session_view @elastic/awp-platform
+
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
 
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
 
-# Cloud Posture Security
-/x-pack/plugins/cloud_security_posture/ @elastic/cloud-posture-security
+# Cloud Security Posture
+/x-pack/plugins/cloud_security_posture/ @elastic/cloud-security-posture-control-plane
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
