@@ -9,8 +9,6 @@ import React, { FC, useEffect } from 'react';
 import type { CoreStart, ThemeServiceStart } from 'kibana/public';
 import type { Action, UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import { EuiLoadingChart } from '@elastic/eui';
-// import useOnmount from 'react-use/lib/useOnmount';
 import {
   EmbeddableFactory,
   EmbeddableInput,
