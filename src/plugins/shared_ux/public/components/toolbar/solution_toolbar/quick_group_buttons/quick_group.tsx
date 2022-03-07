@@ -12,6 +12,7 @@ import {
   htmlIdGenerator,
   EuiButtonGroupOptionProps,
   useEuiTheme,
+  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -30,9 +31,10 @@ const strings = {
     }),
 };
 
-export interface QuickButtonProps extends Pick<EuiButtonGroupOptionProps, 'iconType'> {
+export interface QuickButtonProps {
   createType: string;
   onClick: () => void;
+  iconType: IconType;
 }
 
 export interface Props {
@@ -43,6 +45,7 @@ type Option = EuiButtonGroupOptionProps & Omit<QuickButtonProps, 'createType'>;
 
 export const QuickButtonGroup = ({ buttons }: Props) => {
   const { euiTheme } = useEuiTheme();
+
   const buttonGroupOptions: Option[] = buttons.map((button: QuickButtonProps, index) => {
     const { createType: label, ...rest } = button;
     const title = strings.getAriaButtonLabel(label);
