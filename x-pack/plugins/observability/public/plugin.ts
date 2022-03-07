@@ -129,7 +129,6 @@ export class Plugin
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
     const { createUseRulesLink } = await import('./hooks/create_use_rules_link');
-
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initializerContext.config.get();
@@ -144,15 +143,14 @@ export class Plugin
       // Load application bundle
       const { renderApp } = await import('./application');
       // Get start services
-      const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
-
+      const [coreStart, pluginsStart, startPromise] = await coreSetup.getStartServices();
       return renderApp({
         config,
         core: coreStart,
         plugins: pluginsStart,
         appMountParameters: params,
         observabilityRuleTypeRegistry,
-        ObservabilityPageTemplate: navigation.PageTemplate,
+        ObservabilityPageTemplate: (await startPromise).navigation.PageTemplate,
       });
     };
 
