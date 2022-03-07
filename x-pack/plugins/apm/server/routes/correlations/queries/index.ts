@@ -7,6 +7,7 @@
 
 export { fetchChangePointPValues } from './query_change_point';
 export { fetchFailedTransactionsCorrelationPValues } from './query_failure_correlation';
+export { fetchSpikeAnalysisFrequentItems } from './query_spike_analysis_frequent_items';
 export { fetchPValues } from './query_p_values';
 export { fetchSignificantCorrelations } from './query_significant_correlations';
 export { fetchTransactionDurationFieldCandidates } from './query_field_candidates';

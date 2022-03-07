@@ -30,3 +30,22 @@ export interface ChangePointsResponse {
   changePoints?: ChangePoint[];
   fieldStats?: FieldStats[];
 }
+
+/*
+{
+  "response.keyword" : [
+    "200"
+  ],
+  "host.keyword" : [
+    "artifacts.elastic.co"
+  ],
+  "doc_count" : 635,
+  "support" : 0.40994189799870884
+}
+*/
+
+interface Aggs {
+  doc_count: number;
+  support: number;
+}
+export type FrequentItems = Aggs & Record<string, string[]>;

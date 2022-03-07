@@ -18,6 +18,9 @@ import {
   EuiSplitPanel,
   EuiStat,
   EuiTabbedContent,
+  EuiIcon,
+  EuiTreeView,
+  EuiToken,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +31,7 @@ import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { ImpactBar } from './impact_bar';
 import { useChangePointDetection, ChangePoint } from './use_change_point_detection';
 import type { BaseSpikeAnalysisTableProps } from './spike_analysis_table_embeddable';
+import type { ItemSetTreeNode } from './itemset_tree';
 
 const loadingText = i18n.translate('xpack.apm.correlations.correlationsTable.loadingText', {
   defaultMessage: 'Loading...',
@@ -287,6 +291,27 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     [barSeries, response.changePoints]
   );
 
+  const treeItems = useMemo(() => {
+    let id = 1;
+    const mapL = (d: ItemSetTreeNode) => {
+      id = id + 1;
+      return {
+        label: Object.entries(d.itemSet.items)
+          .map(([key, value]) => `${key}:${value.join('/')}`)
+          .join(),
+        id: `item_${id}`,
+        icon: <EuiIcon size="s" type="folderClosed" />,
+        iconWhenExpanded: <EuiIcon size="s" type="folderOpen" />,
+        isExpanded: true,
+        children: d.children.map(mapL),
+      };
+    };
+
+    return (response?.tree && response?.tree.root.children.map(mapL)) ?? [];
+  }, [response?.tree]);
+
+  console.log('treeItems', treeItems);
+
   const tabs = [
     {
       id: 'saTable',
@@ -383,6 +408,15 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
             );
           })}
         </EuiFlexGroup>
+      ),
+    },
+    {
+      id: 'saTree',
+      name: 'Tree',
+      content: (
+        <div style={{ width: '100%' }}>
+          <EuiTreeView items={treeItems} aria-label="Sample Folder Tree" />
+        </div>
       ),
     },
   ];

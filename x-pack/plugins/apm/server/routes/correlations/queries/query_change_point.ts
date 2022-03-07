@@ -9,7 +9,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
 import { SPIKE_ANALYSIS_THRESHOLD } from '../../../../common/correlations/constants';
 import { CorrelationsParams } from '../../../../common/correlations/types';
-import { ChangePointParams } from '../../../../common/correlations/change_point/types';
+import {
+  ChangePoint,
+  ChangePointParams,
+} from '../../../../common/correlations/change_point/types';
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
@@ -95,7 +98,7 @@ export const fetchChangePointPValues = async (
     deviationMax: number;
   }
 ) => {
-  const result = [];
+  const result: ChangePoint[] = [];
 
   for (const fieldName of fieldNames) {
     const request = getChangePointRequest(params, fieldName, windowParameters);

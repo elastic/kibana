@@ -1,0 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient } from 'src/core/server';
+
+import type { CorrelationsParams } from '../../../../common/correlations/types';
+
+import { fetchSpikeAnalysisFrequentItems } from './index';
+
+export const fetchFrequentItems = async (
+  esClient: ElasticsearchClient,
+  paramsWithIndex: CorrelationsParams,
+  fieldCandidates: string[]
+) => {
+  const frequentItems = await fetchSpikeAnalysisFrequentItems(
+    esClient,
+    paramsWithIndex,
+    fieldCandidates
+  );
+
+  // const ccsWarning =
+  //   rejected.length > 0 && paramsWithIndex?.index.includes(':');
+
+  return { frequentItems, ccsWarning: false };
+};

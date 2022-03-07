@@ -16,6 +16,7 @@ import { isActivePlatinumLicense } from '../../../common/license_check';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import {
   fetchChangePointPValues,
+  fetchSpikeAnalysisFrequentItems,
   fetchPValues,
   fetchSignificantCorrelations,
   fetchTransactionDurationFieldCandidates,
@@ -35,6 +36,10 @@ import {
 } from '../../../common/correlations/field_stats_types';
 import { FieldValuePair } from '../../../common/correlations/types';
 import { FailedTransactionsCorrelation } from '../../../common/correlations/failed_transactions_correlations/types';
+import type {
+  ChangePoint,
+  FrequentItems,
+} from '../../../common/correlations/change_point/types';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:
@@ -383,7 +388,13 @@ const changePointPValuesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    changePoints: Array<
+      import('./../../../common/correlations/change_point/types').ChangePoint
+    >;
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -409,7 +420,7 @@ const changePointPValuesRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_change_point_p_values',
-      async () =>
+      async (): Promise<{ changePoints: ChangePoint[] }> =>
         await fetchChangePointPValues(
           esClient,
           paramsWithIndex,
@@ -420,8 +431,62 @@ const changePointPValuesRoute = createApmServerRoute({
   },
 });
 
+const changePointFrequentItemsRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/correlations/change_point_frequent_items',
+  params: t.type({
+    body: t.intersection([
+      t.partial({
+        indexPatternTitle: t.string,
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+      }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.type({
+        fieldCandidates: t.array(
+          t.type({
+            fieldName: t.string,
+            fieldValue: t.union([t.string, t.number]),
+          })
+        ),
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<{ frequentItems: FrequentItems }> => {
+    const { context } = resources;
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
+    const { indices } = await setupRequest(resources);
+    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+
+    const { fieldCandidates, indexPatternTitle, ...params } =
+      resources.params.body;
+
+    const paramsWithIndex = {
+      ...params,
+      index: indexPatternTitle ?? indices.transaction,
+    };
+
+    return withApmSpan(
+      'get_change_point_frequent_items',
+      async (): Promise<{ frequentItems: FrequentItemsAggs }> =>
+        await fetchSpikeAnalysisFrequentItems(
+          esClient,
+          paramsWithIndex,
+          fieldCandidates
+        )
+    );
+  },
+});
+
 export const correlationsRouteRepository = {
   ...changePointPValuesRoute,
+  ...changePointFrequentItemsRoute,
   ...pValuesRoute,
   ...fieldCandidatesRoute,
   ...fieldStatsRoute,

@@ -28,6 +28,8 @@ import {
   getReducer,
   CorrelationsProgress,
 } from './analysis_hook_utils';
+import { generateItemsets } from './generate_itemsets';
+import { ItemSetTreeNode } from './itemset_tree';
 // import { useFetchParams } from './use_fetch_params';
 
 export interface FieldValuePair {
@@ -89,9 +91,22 @@ export interface ChangePointsResponse {
   changePoints?: ChangePoint[];
   fieldStats?: FieldStats[];
   overallTimeSeries?: HistogramItem[];
+  tree?: {
+    root: ItemSetTreeNode;
+    minQualityRatio: number;
+    parentQualityWeight: number;
+    parentSimilarityWeight: number;
+  };
 }
 
 type HistogramResponse = Array<{ data: HistogramItem[] }>;
+
+interface ItemsMeta {
+  doc_count: number;
+  support: number;
+}
+export type Items = Record<string, string[]>;
+export type FrequentItems = ItemsMeta & Items;
 
 export const DEBOUNCE_INTERVAL = 100;
 
@@ -266,6 +281,34 @@ export function useChangePointDetection(
       });
 
       responseUpdate.overallTimeSeries = overallTimeSeries[0].data;
+
+      const frequentItemsFieldCandidates = responseUpdate.changePoints
+        ?.map(({ fieldName, fieldValue }) => ({ fieldName, fieldValue }))
+        .filter(
+          (d) =>
+            d.fieldName !== 'clientip' &&
+            d.fieldName !== 'ip' &&
+            d.fieldName !== 'extension.keyword'
+        );
+
+      const { frequentItems, totalDocCount } = await http.post<{
+        frequentItems: { frequent_sets: FrequentItems[] };
+        totalDocCount: number;
+      }>('/internal/apm/correlations/change_point_frequent_items', {
+        signal: abortCtrl.current.signal,
+        body: JSON.stringify({
+          ...fetchParams,
+          fieldCandidates: frequentItemsFieldCandidates,
+        }),
+      });
+
+      const tree = generateItemsets(
+        frequentItems.frequent_sets,
+        responseUpdate.changePoints ?? [],
+        totalDocCount
+      );
+
+      responseUpdate.tree = tree;
 
       // time series filtered by fields
       if (responseUpdate.changePoints) {
