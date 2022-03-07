@@ -8,8 +8,7 @@
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
-import type { Datatable } from 'src/plugins/expressions/public';
-import type { TableSuggestion, VisualizationSuggestion } from '../../../../lens/public';
+import type { SuggestionRequest, VisualizationSuggestion } from '../../../../lens/public';
 import type { ChoroplethChartState } from './types';
 import { Icon } from './icon';
 import { getEmsSuggestion } from './get_ems_suggestion';
@@ -18,22 +17,31 @@ import { getEmsSuggestion } from './get_ems_suggestion';
  * Generate choroplath chart suggestions for buckets that match administrative boundaries from the Elastic Maps Service.
  */
 export function getSuggestions(
-  table: TableSuggestion,
-  activeData: Record<string, Datatable> | undefined,
+  suggestionRequest: SuggestionRequest<ChoroplethChartState>,
   emsFileLayers: FileLayer[]
 ): Array<VisualizationSuggestion<ChoroplethChartState>> {
+  const { activeData, keptLayerIds, state, table } = suggestionRequest;
+
   if (!activeData) {
+    return [];
+  }
+
+  const isUnchanged = state && table.changeType === 'unchanged';
+  if (
+    isUnchanged ||
+    keptLayerIds.length > 1 ||
+    (keptLayerIds.length && table.layerId !== keptLayerIds[0])
+  ) {
     return [];
   }
 
   const [buckets, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
-  // Do not return suggestions for tables with multiple buckets.
-  // This will avoid providing multiple suggestions for table with "time" and "top value" buckets
-  if (buckets.length > 1) {
+  if (buckets.length !== 1 || metrics.length !== 1) {
     return [];
   }
 
+  const metric = metrics[0];
   const suggestions: Array<VisualizationSuggestion<ChoroplethChartState>> = [];
   buckets
     .filter((col) => {
@@ -48,26 +56,24 @@ export function getSuggestions(
             bucket.columnId
           );
           if (emsSuggestion) {
-            metrics.forEach((metric) => {
-              suggestions.push({
-                title: i18n.translate('xpack.maps.lens.choroplethChart.suggestionLabel', {
-                  defaultMessage: '{emsLayerLabel} by {metricLabel}',
-                  values: {
-                    emsLayerLabel: emsSuggestion.displayName,
-                    metricLabel: metric.operation.label.toLowerCase(),
-                  },
-                }),
-                // To avoid flooding suggestions with choropleth visualizations, lower score after first match
-                score: suggestions.length === 0 ? 0.7 : 0.1,
-                state: {
-                  layerId: tableId,
-                  emsLayerId: emsSuggestion.layerId,
-                  emsField: emsSuggestion.field,
-                  valueAccessor: metric.columnId,
-                  regionAccessor: bucket.columnId,
+            suggestions.push({
+              title: i18n.translate('xpack.maps.lens.choroplethChart.suggestionLabel', {
+                defaultMessage: '{emsLayerLabel} by {metricLabel}',
+                values: {
+                  emsLayerLabel: emsSuggestion.displayName,
+                  metricLabel: metric.operation.label.toLowerCase(),
                 },
-                previewIcon: Icon,
-              });
+              }),
+              // To avoid flooding suggestions with choropleth visualizations, lower score after first match
+              score: suggestions.length === 0 ? 0.7 : 0.1,
+              state: {
+                layerId: tableId,
+                emsLayerId: emsSuggestion.layerId,
+                emsField: emsSuggestion.field,
+                valueAccessor: metric.columnId,
+                regionAccessor: bucket.columnId,
+              },
+              previewIcon: Icon,
             });
           }
         }
