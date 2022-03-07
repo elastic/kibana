@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/constants';
 import { generateNavLink } from '../../../shared/layout';
 
-import { ROOT_PATH, SEARCH_INDICIES_PATH, SETTINGS_PATH } from '../../routes';
+import { ROOT_PATH, SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../routes';
 
 import { useSearchIndicesNav } from '../search_index/index_nav';
 
@@ -41,19 +41,19 @@ export const useEnterpriseSearchContentNav = () => {
         shouldShowActiveForSubroutes: false,
         items: [
           {
-            id: 'search_indicies',
-            name: i18n.translate('xpack.enterpriseSearch.content.nav.searchIndiciesTitle', {
-              defaultMessage: 'Search indicies',
+            id: 'search_indices',
+            name: i18n.translate('xpack.enterpriseSearch.content.nav.searchIndicesTitle', {
+              defaultMessage: 'Search indices',
             }),
             ...generateNavLink({
-              to: SEARCH_INDICIES_PATH,
+              to: SEARCH_INDICES_PATH,
               isRoot: true,
               shouldShowActiveForSubroutes: true,
               items: useSearchIndicesNav(),
             }),
           },
           {
-            id: 'search_indicies',
+            id: 'search_indices',
             name: i18n.translate('xpack.enterpriseSearch.content.nav.settingsTitle', {
               defaultMessage: 'Settings',
             }),

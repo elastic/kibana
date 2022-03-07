@@ -21,7 +21,7 @@ import { ContentOverview } from './components/content_overview';
 import { ErrorConnecting } from './components/error_connecting';
 import { SearchIndicesRouter } from './components/search_indices';
 import { Settings } from './components/settings';
-import { SETUP_GUIDE_PATH, ROOT_PATH, SEARCH_INDICIES_PATH, SETTINGS_PATH } from './routes';
+import { SETUP_GUIDE_PATH, ROOT_PATH, SEARCH_INDICES_PATH, SETTINGS_PATH } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -70,7 +70,7 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       <Route exact path={ROOT_PATH}>
         <ContentOverview />
       </Route>
-      <Route path={SEARCH_INDICIES_PATH}>
+      <Route path={SEARCH_INDICES_PATH}>
         <SearchIndicesRouter />
       </Route>
       <Route path={SETTINGS_PATH}>
