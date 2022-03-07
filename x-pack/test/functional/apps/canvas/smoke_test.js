@@ -50,7 +50,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
 
         const path = new URL(url).pathname;
 
-        expect(path).to.equal(`app/canvas/workpad/${testWorkpadId}/page/1`);
+        expect(path).to.equal(`/app/canvas/workpad/${testWorkpadId}/page/1`);
       });
     });
 
