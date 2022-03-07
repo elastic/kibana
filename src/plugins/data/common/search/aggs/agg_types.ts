@@ -36,6 +36,7 @@ export const getAggTypes = () => ({
     { name: METRIC_TYPES.PERCENTILES, fn: metrics.getPercentilesMetricAgg },
     { name: METRIC_TYPES.PERCENTILE_RANKS, fn: metrics.getPercentileRanksMetricAgg },
     { name: METRIC_TYPES.TOP_HITS, fn: metrics.getTopHitMetricAgg },
+    { name: METRIC_TYPES.TOP_METRICS, fn: metrics.getTopMetricsMetricAgg },
     { name: METRIC_TYPES.DERIVATIVE, fn: metrics.getDerivativeMetricAgg },
     { name: METRIC_TYPES.CUMULATIVE_SUM, fn: metrics.getCumulativeSumMetricAgg },
     { name: METRIC_TYPES.MOVING_FN, fn: metrics.getMovingAvgMetricAgg },
@@ -109,4 +110,5 @@ export const getAggTypesFunctions = () => [
   metrics.aggStdDeviation,
   metrics.aggSum,
   metrics.aggTopHit,
+  metrics.aggTopMetrics,
 ];
