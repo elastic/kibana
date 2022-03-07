@@ -28,11 +28,15 @@ export default function (providerContext: FtrProviderContext) {
   );
 
   const bundlePackage = async (name: string) => {
+    log.info(`Bundling package ${name} into ${BUNDLED_PACKAGES_DIR}`);
     try {
       await fs.access(BUNDLED_PACKAGES_DIR);
     } catch (error) {
+      log.info(`Bundled package dir not found, creating it...`);
       await fs.mkdir(BUNDLED_PACKAGES_DIR);
     }
+
+    log.info(`Copying ${name}.zip from ${BUNDLED_PACKAGE_FIXTURES_DIR} to ${BUNDLED_PACKAGES_DIR}`);
 
     await fs.copyFile(
       path.join(BUNDLED_PACKAGE_FIXTURES_DIR, `${name}.zip`),
@@ -49,6 +53,7 @@ export default function (providerContext: FtrProviderContext) {
 
         // Only remove fixture files - leave normal bundled packages in place
         if (isFixtureFile) {
+          log.info(`Removing fixture bundled package ${file}`);
           await fs.unlink(path.join(BUNDLED_PACKAGES_DIR, file));
         }
       }
