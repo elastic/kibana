@@ -357,32 +357,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             isExpandable={true}
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             isSelectable={false}
-            onTableChange={(tableSettings) => {
-              // Temp solution until EUI is upgraded https://github.com/elastic/eui/pull/5588
-              // EUI is currently exposing field name instead of field for sort
-              // in its callback whenever pagination changes
-              // so for consistency we want to find the correct column's id
-              const fieldToMatch = tableSettings.sort?.field as string;
-
-              const matchedColumn = columns.find(
-                (c) =>
-                  // @ts-ignore
-                  c.field === fieldToMatch ||
-                  (typeof c.name === 'string' && c.name === fieldToMatch)
-              );
-              if (matchedColumn) {
-                const correctedTableSettings = {
-                  ...tableSettings,
-                  sort: {
-                    ...tableSettings.sort,
-                    // @ts-ignore
-                    field: matchedColumn.field,
-                  },
-                };
-                // @ts-ignore
-                onTableChange(correctedTableSettings);
-              }
-            }}
+            onTableChange={onTableChange}
             data-test-subj={'dataVisualizerTable'}
             rowProps={(item) => ({
               'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
