@@ -6,7 +6,11 @@
  */
 
 import { ROLES } from '../../../common/test';
-import { getExceptionList, expectedExportedExceptionList } from '../../objects/exception';
+import {
+  getException,
+  getExceptionList,
+  expectedExportedExceptionList,
+} from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
 
 import { RULE_STATUS } from '../../screens/create_new_rule';
