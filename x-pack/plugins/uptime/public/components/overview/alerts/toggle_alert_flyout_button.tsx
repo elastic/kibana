@@ -18,7 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { ClientPluginsStart } from '../../../../public/apps/plugin';
+
 import { ToggleFlyoutTranslations } from './translations';
 import { ToggleAlertFlyoutButtonProps } from './alerts_containers';
 
@@ -46,7 +47,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
   const kibana = useKibana();
   const {
     services: { observability },
-  } = useKibanaContextForPlugin();
+  } = useKibana<ClientPluginsStart>();
   const manageRulesUrl = observability.useRulesLink();
   const hasUptimeWrite = kibana.services.application?.capabilities.uptime?.save ?? false;
 

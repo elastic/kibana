@@ -12,18 +12,6 @@ import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ActionMenuContent } from './action_menu_content';
 
-const mockStartServices = mockCoreMock.createStart();
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      ...mockStartServices,
-      observability: {
-        useRulesLink: jest.fn().mockImplementation(() => ({ href: 'newRuleLink' })),
-      },
-    },
-  }),
-}));
-
 describe('ActionMenuContent', () => {
   it('renders alerts dropdown', async () => {
     const { getByLabelText, getByText } = render(<ActionMenuContent config={{}} />);

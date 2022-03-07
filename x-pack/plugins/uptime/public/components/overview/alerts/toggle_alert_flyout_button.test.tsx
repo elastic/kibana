@@ -17,18 +17,6 @@ import {
 import { ToggleAlertFlyoutButtonComponent } from './toggle_alert_flyout_button';
 import { ToggleFlyoutTranslations } from './translations';
 
-const mockStartServices = mockCoreMock.createStart();
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      ...mockStartServices,
-      observability: {
-        useRulesLink: jest.fn().mockImplementation(() => ({ href: 'newRuleLink' })),
-      },
-    },
-  }),
-}));
-
 describe('ToggleAlertFlyoutButtonComponent', () => {
   describe('when users have write access to uptime', () => {
     it('enables the button to create a rule', () => {
