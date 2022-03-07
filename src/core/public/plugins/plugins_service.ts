@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { withTimeout, isPromise } from '@kbn/std';
 import { PluginName, PluginOpaqueId } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
@@ -19,7 +18,6 @@ import {
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
 import { InjectedPluginMetadata } from '../injected_metadata';
 
-const Sec = 1000;
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
 /** @internal */
@@ -98,34 +96,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         {} as Record<PluginName, unknown>
       );
 
-      let contract: unknown;
-      const contractOrPromise = plugin.setup(
+      const contract = plugin.setup(
         createPluginSetupContext(this.coreContext, deps, plugin),
         pluginDepContracts
       );
-      if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          // eslint-disable-next-line no-console
-          console.log(
-            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
-
-        const contractMaybe = await withTimeout({
-          promise: contractOrPromise,
-          timeoutMs: 10 * Sec,
-        });
-
-        if (contractMaybe.timedout) {
-          throw new Error(
-            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
-          );
-        } else {
-          contract = contractMaybe.value;
-        }
-      } else {
-        contract = contractOrPromise;
-      }
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
@@ -152,34 +126,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         {} as Record<PluginName, unknown>
       );
 
-      let contract: unknown;
-      const contractOrPromise = plugin.start(
+      const contract = plugin.start(
         createPluginStartContext(this.coreContext, deps, plugin),
         pluginDepContracts
       );
-      if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          // eslint-disable-next-line no-console
-          console.log(
-            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
-
-        const contractMaybe = await withTimeout({
-          promise: contractOrPromise,
-          timeoutMs: 10 * Sec,
-        });
-
-        if (contractMaybe.timedout) {
-          throw new Error(
-            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
-          );
-        } else {
-          contract = contractMaybe.value;
-        }
-      } else {
-        contract = contractOrPromise;
-      }
 
       contracts.set(pluginName, contract);
     }
