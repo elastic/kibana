@@ -41,20 +41,12 @@ export class TaskManagerUtils {
                   },
                 },
               ],
-              must_not: [
-                {
-                  term: {
-                    'task.type': 'sampleTask',
-                  },
-                },
-              ],
             },
           },
         },
       });
       // @ts-expect-error
       if (searchResult.hits.total.value) {
-        console.log(`searchResults ${JSON.stringify(searchResult.hits)}`);
         // @ts-expect-error
         throw new Error(`Expected 0 tasks but received ${searchResult.hits.total.value}`);
       }
