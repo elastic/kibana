@@ -9,6 +9,7 @@ import { JsonObject } from '@kbn/utility-types';
 import { CoreSetup, Plugin, PluginInitializerContext, Logger } from 'kibana/server';
 import { registerDynamicRoute } from './routes';
 import { MakeSchemaFrom } from '../../../../src/plugins/usage_collection/server';
+import { ServiceStatus } from '../../../../src/core/server';
 import { TYPE_ALLOWLIST } from './constants';
 
 export interface MonitoringCollectionSetup {
@@ -46,6 +47,11 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     const router = core.http.createRouter();
     const kibanaIndex = core.savedObjects.getKibanaIndex();
 
+    let status: ServiceStatus<unknown>;
+    core.status.overall$.subscribe((newStatus) => {
+      status = newStatus;
+    });
+
     registerDynamicRoute({
       router,
       config: {
@@ -55,7 +61,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         server: core.http.getServerInfo(),
         uuid: this.initializerContext.env.instanceUuid,
       },
-      overallStatus$: core.status.overall$,
+      getStatus: () => status,
       getMetric: async (type: string) => {
         return await this.getMetric(type);
       },

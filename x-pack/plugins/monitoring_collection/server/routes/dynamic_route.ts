@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Observable } from 'rxjs';
 import { JsonObject } from '@kbn/utility-types';
 import { schema } from '@kbn/config-schema';
 import { IRouter, ServiceStatus } from '../../../../../src/core/server';
@@ -14,7 +13,7 @@ import { MetricResult } from '../plugin';
 export function registerDynamicRoute({
   router,
   config,
-  overallStatus$,
+  getStatus,
   getMetric,
 }: {
   router: IRouter;
@@ -29,7 +28,7 @@ export function registerDynamicRoute({
       port: number;
     };
   };
-  overallStatus$: Observable<ServiceStatus>;
+  getStatus: () => ServiceStatus<unknown>;
   getMetric: (
     type: string
   ) => Promise<Array<MetricResult<JsonObject>> | MetricResult<JsonObject> | undefined>;
@@ -52,7 +51,7 @@ export function registerDynamicRoute({
       const [data, clusterUuid, kibana] = await Promise.all([
         getMetric(type),
         getESClusterUuid(context.core.elasticsearch.client),
-        getKibanaStats({ config, overallStatus$ }),
+        getKibanaStats({ config, getStatus }),
       ]);
 
       return res.ok({

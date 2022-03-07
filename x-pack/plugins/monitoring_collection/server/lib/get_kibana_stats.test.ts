@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BehaviorSubject } from 'rxjs';
-import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
+import { ServiceStatusLevels } from '../../../../../src/core/server';
 import { getKibanaStats } from '.';
 
 describe('getKibanaStats', () => {
@@ -22,11 +21,11 @@ describe('getKibanaStats', () => {
   };
 
   it('should return the stats', async () => {
-    const overallStatus$ = new BehaviorSubject<ServiceStatus>({
+    const getStatus = () => ({
       level: ServiceStatusLevels.available,
       summary: 'Service is working',
     });
-    const stats = await getKibanaStats({ config, overallStatus$ });
+    const stats = await getKibanaStats({ config, getStatus });
     expect(stats).toStrictEqual({
       uuid: config.uuid,
       name: config.server.name,
@@ -41,11 +40,11 @@ describe('getKibanaStats', () => {
   });
 
   it('should handle a non green status', async () => {
-    const overallStatus$ = new BehaviorSubject<ServiceStatus>({
+    const getStatus = () => ({
       level: ServiceStatusLevels.critical,
       summary: 'Service is NOT working',
     });
-    const stats = await getKibanaStats({ config, overallStatus$ });
+    const stats = await getKibanaStats({ config, getStatus });
     expect(stats).toStrictEqual({
       uuid: config.uuid,
       name: config.server.name,

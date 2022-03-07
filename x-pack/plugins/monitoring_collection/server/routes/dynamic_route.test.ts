@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { registerDynamicRoute } from './dynamic_route';
 import {
   KibanaRequest,
   KibanaResponseFactory,
-  ServiceStatus,
   ServiceStatusLevels,
 } from '../../../../../src/core/server';
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
@@ -39,7 +37,7 @@ describe('dynamic route', () => {
     },
   };
 
-  const overallStatus$ = new BehaviorSubject<ServiceStatus>({
+  const getStatus = () => ({
     level: ServiceStatusLevels.available,
     summary: 'Service is working',
   });
@@ -53,7 +51,7 @@ describe('dynamic route', () => {
     registerDynamicRoute({
       router,
       config: kibanaStatsConfig,
-      overallStatus$,
+      getStatus,
       getMetric,
     });
 
@@ -89,7 +87,7 @@ describe('dynamic route', () => {
     const getMetric = async () => {
       return {};
     };
-    registerDynamicRoute({ router, config: kibanaStatsConfig, overallStatus$, getMetric });
+    registerDynamicRoute({ router, config: kibanaStatsConfig, getStatus, getMetric });
 
     const [_, handler] = router.get.mock.calls[0];
 
