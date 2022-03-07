@@ -36,7 +36,11 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
-  maxSockets: schema.number({ defaultValue: Infinity }),
+  maxSockets: schema.number({
+    defaultValue: Infinity,
+    min: 1,
+    max: Infinity,
+  }),
   compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
     schema.string({

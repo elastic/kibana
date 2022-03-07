@@ -16,6 +16,7 @@ const createConfig = (
   return {
     customHeaders: {},
     compression: false,
+    maxSockets: Infinity,
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
@@ -108,12 +109,12 @@ describe('parseClientOptions', () => {
     });
 
     describe('`maxSockets` option', () => {
-      it('`maxSockets` is taken into account when specified', () => {
+      it('uses the specified config value', () => {
         const options = parseClientOptions(createConfig({ maxSockets: 1024 }), false);
         expect(options.agent).toHaveProperty('maxSockets', 1024);
       });
 
-      it('`maxSockets` has a default value of Infinity if not specified', () => {
+      it('defaults to `Infinity` if not specified by the config', () => {
         const options = parseClientOptions(createConfig({}), false);
         expect(options.agent).toHaveProperty('maxSockets', Infinity);
       });
