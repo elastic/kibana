@@ -70,6 +70,7 @@ describe('LogEntries search strategy', () => {
       )
       .toPromise();
 
+    expect(logViewsMock.getScopedClient).toHaveBeenCalled();
     expect(logViewsClientMock.getResolvedLogView).toHaveBeenCalled();
     expect(esSearchStrategyMock.search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -155,6 +156,7 @@ describe('LogEntries search strategy', () => {
       )
       .toPromise();
 
+    expect(logViewsMock.getScopedClient).toHaveBeenCalled();
     expect(logViewsClientMock.getResolvedLogView).toHaveBeenCalled();
     expect(esSearchStrategyMock.search).toHaveBeenCalled();
     expect(response.id).toEqual(requestId);
