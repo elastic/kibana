@@ -12,8 +12,9 @@ import {
   EVENT_BUFFER_LENGTH,
   getQueryBody,
   FindEventsOptionsBySavedObjectFilter,
+  AggregateEventsOptionsBySavedObjectFilter,
 } from './cluster_client_adapter';
-import { queryOptionsSchema } from '../event_log_client';
+import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
@@ -619,6 +620,104 @@ describe('queryEventsBySavedObject', () => {
       per_page: 6,
       total: 1,
       data: [{ foo: 'bar' }],
+    });
+  });
+});
+
+describe('aggregateEventsBySavedObject', () => {
+  const DEFAULT_OPTIONS = {
+    ...queryOptionsSchema.validate({}),
+    aggs: {
+      genericAgg: {
+        term: {
+          field: 'event.action',
+          size: 10,
+        },
+      },
+    },
+  };
+
+  test('should call cluster with correct options', async () => {
+    clusterClient.search.mockResponse({
+      aggregations: {
+        genericAgg: {
+          buckets: [
+            {
+              key: 'execute',
+              doc_count: 10,
+            },
+            {
+              key: 'execute-start',
+              doc_count: 10,
+            },
+            {
+              key: 'new-instance',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
+    const options: AggregateEventsOptionsBySavedObjectFilter = {
+      index: 'index-name',
+      namespace: 'namespace',
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      aggregateOptions: DEFAULT_OPTIONS as AggregateOptionsType,
+    };
+    const result = await clusterClientAdapter.aggregateEventsBySavedObjects(options);
+
+    const [query] = clusterClient.search.mock.calls[0];
+    expect(query).toEqual({
+      index: 'index-name',
+      body: {
+        size: 0,
+        query: getQueryBody(
+          logger,
+          options,
+          pick(options.aggregateOptions, ['start', 'end', 'filter'])
+        ),
+        aggs: {
+          genericAgg: {
+            term: {
+              field: 'event.action',
+              size: 10,
+            },
+          },
+        },
+      },
+    });
+    expect(result).toEqual({
+      aggregateResults: {
+        genericAgg: {
+          buckets: [
+            {
+              key: 'execute',
+              doc_count: 10,
+            },
+            {
+              key: 'execute-start',
+              doc_count: 10,
+            },
+            {
+              key: 'new-instance',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
     });
   });
 });
