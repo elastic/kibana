@@ -301,10 +301,13 @@ function extractQueriesFromTerms(
       }
       if (typeof value !== 'string' && Array.isArray(value.keys)) {
         return value.keys
-          .map((term: string, index: number) => `${fields[index]}: ${`"${escape(term)}"`}`)
+          .map(
+            (term: string, index: number) =>
+              `${fields[index]}: ${`"${term === '' ? escape(term) : term}"`}`
+          )
           .join(' AND ');
       }
-      return `${column.sourceField}: ${`"${escape(value)}"`}`;
+      return `${column.sourceField}: ${`"${value === '' ? escape(value) : value}"`}`;
     })
     .filter(Boolean) as string[];
 
