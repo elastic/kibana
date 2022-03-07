@@ -123,7 +123,12 @@ export function DiscoverSidebarComponent({
 
   useEffect(() => {
     if (documents) {
-      const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts, state.sqlMode, table);
+      const newFields = getIndexPatternFieldList(
+        selectedIndexPattern,
+        fieldCounts,
+        state.sqlMode,
+        table
+      );
       setFields(newFields);
     }
   }, [selectedIndexPattern, fieldCounts, documents, state.sqlMode, table]);
@@ -151,7 +156,16 @@ export function DiscoverSidebarComponent({
     popular: popularFields,
     unpopular: unpopularFields,
   } = useMemo(
-    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
+    () =>
+      groupFields(
+        fields,
+        columns,
+        popularLimit,
+        fieldCounts,
+        fieldFilter,
+        useNewFieldsApi,
+        state.sqlMode
+      ),
     [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
   );
 

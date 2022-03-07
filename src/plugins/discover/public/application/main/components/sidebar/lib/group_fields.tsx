@@ -24,7 +24,8 @@ export function groupFields(
   popularLimit: number,
   fieldCounts: Record<string, number> | undefined,
   fieldFilterState: FieldFilterState,
-  useNewFieldsApi: boolean
+  useNewFieldsApi: boolean,
+  sqlMode: boolean
 ): GroupedFields {
   const showUnmappedFields = useNewFieldsApi;
   const result: GroupedFields = {
@@ -51,7 +52,7 @@ export function groupFields(
   const fieldsSorted = fields.sort(compareFn);
 
   for (const field of fieldsSorted) {
-    if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
+    if (!sqlMode && !isFieldFiltered(field, fieldFilterState, fieldCounts)) {
       continue;
     }
 

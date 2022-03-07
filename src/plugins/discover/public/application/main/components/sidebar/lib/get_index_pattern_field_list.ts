@@ -26,7 +26,7 @@ export function getIndexPatternFieldList(
     return table.columns.map((c) => ({
       displayName: c.name,
       name: c.name,
-      type: c.type,
+      type: c.meta.type,
     }));
   }
 
