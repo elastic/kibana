@@ -12,10 +12,11 @@ import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
-import { TimeRange } from '../../../../../../src/plugins/data/common';
+import { epochToKbnDateFormat, getInterval, getTicks, getTimeRanges } from './time_utils';
+import { TimeRange, TimeRangeBounds } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
+import { TimeSliderPopover } from './timeslider_popover';
 
 export interface Props {
   closeTimeslider: () => void;
@@ -23,6 +24,8 @@ export interface Props {
   isTimesliderOpen: boolean;
   timeRange: TimeRange;
   waitForTimesliceToLoad$: Observable<void>;
+  setTimeRangeStep: (timeRangeStep: number) => void;
+  timeRangeStep: number;
   updateGlobalTimeRange: (timeslice: number[]) => void;
 }
 
@@ -51,6 +54,9 @@ class KeyedTimeslider extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _timeoutId: number | undefined;
   private _subscription: Subscription | undefined;
+  defaultRange: {
+    timeRangeBounds: TimeRangeBounds;
+  };
 
   constructor(props: Props) {
     super(props);
@@ -63,14 +69,34 @@ class KeyedTimeslider extends Component<Props, State> {
     const min = timeRangeBounds.min.valueOf();
     const max = timeRangeBounds.max.valueOf();
     const interval = getInterval(min, max);
-    const timeslice: [number, number] = [min, max];
+
+    const ranges = getTimeRanges(timeRangeBounds);
+    const hasMatch =
+      ranges.filter((val) => {
+        return val.ms === props.timeRangeStep;
+      }).length > 0;
+
+    let updatedInterval =
+      props.timeRangeStep > 1 && max - min > props.timeRangeStep ? props.timeRangeStep : interval;
+    const ticks = getTicks(min, max, interval);
+
+    if (!hasMatch) {
+      this.props.setTimeRangeStep(1);
+      updatedInterval = interval;
+    }
+
+    this.defaultRange = {
+      timeRangeBounds,
+    };
+
+    const timeslice: [number, number] = [ticks[0].value, ticks[0].value + updatedInterval];
 
     this.state = {
       isPaused: true,
       max,
       min,
-      range: interval,
-      ticks: getTicks(min, max, interval),
+      range: updatedInterval,
+      ticks,
       timeslice,
     };
   }
@@ -82,8 +108,6 @@ class KeyedTimeslider extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    // auto-select range between first tick and second tick
-    this._onChange([this.state.ticks[0].value, this.state.ticks[1].value]);
   }
 
   _doesTimesliceCoverTimerange() {
@@ -165,6 +189,20 @@ class KeyedTimeslider extends Component<Props, State> {
     });
   }
 
+  _updateTimeRange = (data: { label: string; ms: number }) => {
+    const interval = getInterval(this.state.min, this.state.max);
+    const updatedTicks = getTicks(this.state.min, this.state.max, interval);
+    this.setState({
+      ticks: updatedTicks,
+      range: data.ms > 1 ? data.ms : interval,
+    });
+    this._onChange([
+      updatedTicks[0].value,
+      updatedTicks[0].value + (data.ms > 1 ? data.ms : interval),
+    ]);
+    this.props.setTimeRangeStep(data.ms);
+  };
+
   render() {
     return (
       <div className="mapTimeslider mapTimeslider--animation">
@@ -177,6 +215,12 @@ class KeyedTimeslider extends Component<Props, State> {
             aria-label={i18n.translate('xpack.maps.timeslider.closeLabel', {
               defaultMessage: 'Close timeslider',
             })}
+          />
+
+          <TimeSliderPopover
+            timeRangeBounds={this.defaultRange.timeRangeBounds}
+            timeRangeStep={this.props.timeRangeStep}
+            handler={this._updateTimeRange}
           />
 
           <div className="mapTimeslider__timeWindow">

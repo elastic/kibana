@@ -33,6 +33,15 @@ $timesliderWidth: 650px;
   right: $euiSizeXS;
 }
 
+.mapTimeslider__timeRange {
+  display: inline-flex;
+  align-items: center;
+
+  > .euiPopover {
+    margin-right: 10px;
+  }
+}
+
 .mapTimeslider__timeWindow {
   display: flex;
   flex: 1;
@@ -63,4 +72,14 @@ $timesliderWidth: 650px;
 
 .mapTimeslider--animation {
   animation: mapAnimationPulse .6s ease-in-out;
+}
+
+.mapTimeslider__euiButton-controls {
+  min-width: 0;
+}
+
+.mapTimeslider_form {
+  .euiCallOut {
+    max-width: 350px;
+  }
 }

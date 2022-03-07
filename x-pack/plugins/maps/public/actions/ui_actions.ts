@@ -24,6 +24,7 @@ export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
 export const SET_DRAW_MODE = 'SET_DRAW_MODE';
+export const SET_TIMERANGE_STEP = 'SET_TIMERANGE_STEP';
 
 export function exitFullScreen() {
   return {
@@ -121,5 +122,12 @@ export function closeTimeslider() {
       isTimesliderOpen: false,
     });
     dispatch(setQuery({ clearTimeslice: true }));
+  };
+}
+
+export function setTimeRangeStep(timeRangeStep: number) {
+  return {
+    type: SET_TIMERANGE_STEP,
+    timeRangeStep,
   };
 }

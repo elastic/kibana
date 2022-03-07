@@ -6,8 +6,9 @@
  */
 
 import moment from 'moment-timezone';
+import { i18n } from '@kbn/i18n';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
-import { calcAutoIntervalNear } from '../../../../../../src/plugins/data/common';
+import { calcAutoIntervalNear, TimeRangeBounds } from '../../../../../../src/plugins/data/common';
 import { getUiSettings } from '../../kibana_services';
 
 function getTimezone() {
@@ -73,12 +74,96 @@ export function getTicks(min: number, max: number, interval: number): EuiRangeTi
   let tick = Math.ceil(min / interval) * interval;
   const ticks: EuiRangeTick[] = [];
   while (tick < max) {
+    let value = tick;
+    let label = moment.tz(tick, timezone).format(format);
+
+    if (max - min > moment.duration(2, 'd').asMilliseconds()) {
+      value = moment(tick).startOf('day').valueOf();
+      label = moment.tz(moment(tick).startOf('day').valueOf(), timezone).format(format);
+    }
+
     ticks.push({
-      value: tick,
-      label: moment.tz(tick, timezone).format(format),
+      value,
+      label,
     });
     tick += interval;
   }
 
   return ticks;
+}
+
+export const RANGE = [
+  {
+    label: i18n.translate('xpack.maps.timeslider.label1Year', { defaultMessage: '1 year' }),
+    ms: moment.duration(1, 'y').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label6Month', { defaultMessage: '6 months' }),
+    ms: moment.duration(6, 'M').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label3month', { defaultMessage: '3 months' }),
+    ms: moment.duration(3, 'M').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label1month', { defaultMessage: '1 month' }),
+    ms: moment.duration(1, 'M').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.labelDay', { defaultMessage: '1 day' }),
+    ms: moment.duration(1, 'd').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label12Hours', { defaultMessage: '12 hours' }),
+    ms: moment.duration(12, 'h').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label6Hours', { defaultMessage: '6 hours' }),
+    ms: moment.duration(6, 'h').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label3Hours', { defaultMessage: '3 hours' }),
+    ms: moment.duration(3, 'h').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label1Hour', { defaultMessage: '1 hour' }),
+    ms: moment.duration(1, 'h').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label30Minutes', { defaultMessage: '30 minutes' }),
+    ms: moment.duration(30, 'm').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label15Minutes', { defaultMessage: '15 minutes' }),
+    ms: moment.duration(15, 'm').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label10Minutes', { defaultMessage: '10 minutes' }),
+    ms: moment.duration(10, 'm').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label5Minutes', { defaultMessage: '5 minutes' }),
+    ms: moment.duration(5, 'm').asMilliseconds(),
+  },
+  {
+    label: i18n.translate('xpack.maps.timeslider.label1Minute', { defaultMessage: '1 minute' }),
+    ms: moment.duration(1, 'm').asMilliseconds(),
+  },
+];
+
+export function getTimeRanges(timeRangeBounds: TimeRangeBounds) {
+  if (timeRangeBounds.min === undefined || timeRangeBounds.max === undefined) {
+    throw new Error(
+      'Unable to create Timeslider component, timeRangeBounds min or max are undefined'
+    );
+  }
+  const min = timeRangeBounds.min.valueOf();
+  const max = timeRangeBounds.max.valueOf();
+  const timeRange = max - min;
+
+  return RANGE.filter((range) => {
+    const noMoreThan20Steps = timeRange / range.ms <= 31;
+    const needsAtLEastTwoSteps = timeRange / range.ms >= 2;
+    return noMoreThan20Steps && needsAtLEastTwoSteps;
+  });
 }

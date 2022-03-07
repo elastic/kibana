@@ -31,4 +31,5 @@ export interface SerializedMapState {
 export interface SerializedUiState {
   isLayerTOCOpen: boolean;
   openTOCDetails: string[];
+  timeRangeStep: number;
 }
