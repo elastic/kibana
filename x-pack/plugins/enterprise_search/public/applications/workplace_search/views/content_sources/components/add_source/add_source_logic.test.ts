@@ -664,11 +664,13 @@ describe('AddSourceLogic', () => {
         });
 
         it('handles error', async () => {
+          const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
           http.post.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
           await nextTick();
 
+          expect(setButtonNotLoadingSpy).toHaveBeenCalled();
           expect(errorCallback).toHaveBeenCalled();
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
