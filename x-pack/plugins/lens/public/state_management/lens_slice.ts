@@ -83,6 +83,10 @@ export const getPreloadedState = ({
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
+export const enableAutoApply = createAction<void>('lens/enableAutoApply');
+export const disableAutoApply = createAction<void>('lens/disableAutoApply');
+export const applyChanges = createAction<void>('lens/applyChanges');
+export const setChangesApplied = createAction<boolean>('lens/setChangesApplied');
 export const updateState = createAction<{
   updater: (prevState: LensAppState) => LensAppState;
 }>('lens/updateState');
@@ -162,6 +166,10 @@ export const lensActions = {
   setState,
   onActiveDataChange,
   setSaveable,
+  enableAutoApply,
+  disableAutoApply,
+  applyChanges,
+  setChangesApplied,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -201,6 +209,22 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...state,
         isSaveable: payload,
       };
+    },
+    [enableAutoApply.type]: (state) => {
+      state.autoApplyDisabled = false;
+    },
+    [disableAutoApply.type]: (state) => {
+      state.autoApplyDisabled = true;
+      state.changesApplied = true;
+    },
+    [applyChanges.type]: (state) => {
+      if (typeof state.applyChangesCounter === 'undefined') {
+        state.applyChangesCounter = 0;
+      }
+      state.applyChangesCounter!++;
+    },
+    [setChangesApplied.type]: (state, { payload: applied }) => {
+      state.changesApplied = applied;
     },
     [updateState.type]: (
       state,
