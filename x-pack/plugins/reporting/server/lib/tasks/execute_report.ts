@@ -19,7 +19,7 @@ import {
   TaskRunCreatorFunction,
 } from '../../../../task_manager/server';
 import { CancellationToken } from '../../../common/cancellation_token';
-import { ReportingError, UnknownError, QueueTimeoutError } from '../../../common/errors';
+import { ReportingError, QueueTimeoutError } from '../../../common/errors';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
