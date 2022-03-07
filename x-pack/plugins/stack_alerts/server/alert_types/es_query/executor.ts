@@ -25,24 +25,36 @@ export async function executor(
   const { alertId, name, services, params, state } = options;
   const { alertFactory, search, searchSourceClient } = services;
   const currentTimestamp = new Date().toISOString();
-  const previousTimestamp = state.latestTimestamp;
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
 
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
-  let timestamp: string | undefined = tryToParseAsDate(previousTimestamp);
+  let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
+
+  // During each alert execution, we run the configured query, get a hit count
+  // (hits.total) and retrieve up to params.size hits. We
+  // evaluate the threshold condition using the value of hits.total. If the threshold
+  // condition is met, the hits are counted toward the query match and we update
+  // the alert state with the timestamp of the latest hit. In the next execution
+  // of the alert, the latestTimestamp will be used to gate the query in order to
+  // avoid counting a document multiple times.
 
   const { numMatches, searchResult, dateStart, dateEnd } = esQueryAlert
-    ? await fetchEsQuery(alertId, name, params as OnlyEsQueryAlertParams, timestamp, {
+    ? await fetchEsQuery(alertId, name, params as OnlyEsQueryAlertParams, latestTimestamp, {
         search,
         logger,
       })
-    : await fetchSearchSourceQuery(alertId, params as OnlySearchSourceAlertParams, timestamp, {
-        searchSourceClient,
-        logger,
-      });
+    : await fetchSearchSourceQuery(
+        alertId,
+        params as OnlySearchSourceAlertParams,
+        latestTimestamp,
+        {
+          searchSourceClient,
+          logger,
+        }
+      );
 
   // apply the alert condition
   const conditionMet = compareFn(numMatches, params.threshold);
@@ -72,7 +84,7 @@ export async function executor(
     const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
     alertInstance
       // store the params we would need to recreate the query that led to this alert instance
-      .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
+      .replaceState({ latestTimestamp, dateStart, dateEnd })
       .scheduleActions(ActionGroupId, actionContext);
 
     // update the timestamp based on the current search results
@@ -80,11 +92,11 @@ export async function executor(
       searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
     );
     if (firstValidTimefieldSort) {
-      timestamp = firstValidTimefieldSort;
+      latestTimestamp = firstValidTimefieldSort;
     }
   }
 
-  return { latestTimestamp: timestamp };
+  return { latestTimestamp };
 }
 
 function getInvalidWindowSizeError(windowValue: string) {

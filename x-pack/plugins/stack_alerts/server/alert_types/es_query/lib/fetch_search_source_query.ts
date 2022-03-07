@@ -7,12 +7,16 @@
 import { buildRangeFilter, Filter } from '@kbn/es-query';
 import { Logger } from 'kibana/server';
 import { OnlySearchSourceAlertParams } from '../types';
-import { getTime, ISearchStartSearchSource } from '../../../../../../../src/plugins/data/common';
+import {
+  getTime,
+  ISearchSource,
+  ISearchStartSearchSource,
+} from '../../../../../../../src/plugins/data/common';
 
 export async function fetchSearchSourceQuery(
   alertId: string,
   params: OnlySearchSourceAlertParams,
-  timestamp: string | undefined,
+  latestTimestamp: string | undefined,
   services: {
     logger: Logger;
     searchSourceClient: Promise<ISearchStartSearchSource>;
@@ -20,15 +24,43 @@ export async function fetchSearchSourceQuery(
 ) {
   const { logger, searchSourceClient } = services;
   const client = await searchSourceClient;
-  const loadedSearchSource = await client.create(params.searchConfiguration);
-  const index = loadedSearchSource.getField('index');
+  const initialSearchSource = await client.create(params.searchConfiguration);
+
+  const { searchSource, dateStart, dateEnd } = updateSearchSource(
+    initialSearchSource,
+    params,
+    latestTimestamp
+  );
+
+  logger.debug(
+    `search source query alert (${alertId}) query: ${JSON.stringify(
+      searchSource.getSearchRequestBody()
+    )}`
+  );
+
+  const searchResult = await searchSource.fetch();
+
+  return {
+    numMatches: Number(searchResult.hits.total),
+    searchResult,
+    dateStart,
+    dateEnd,
+  };
+}
+
+export function updateSearchSource(
+  searchSource: ISearchSource,
+  params: OnlySearchSourceAlertParams,
+  latestTimestamp: string | undefined
+) {
+  const index = searchSource.getField('index');
 
   const timeFieldName = index?.timeFieldName;
   if (!timeFieldName) {
     throw new Error('Invalid data view without timeFieldName.');
   }
 
-  loadedSearchSource.setField('size', params.size);
+  searchSource.setField('size', params.size);
 
   const timerangeFilter = getTime(index, {
     from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
@@ -38,25 +70,17 @@ export async function fetchSearchSourceQuery(
   const dateEnd = timerangeFilter?.query.range[timeFieldName].lte;
   const filters = [timerangeFilter];
 
-  if (timestamp) {
+  if (latestTimestamp && latestTimestamp > dateStart) {
+    // add additional filter for documents with a timestamp greater then
+    // the timestamp of the previous run, so that those documents are not counted twice
     const field = index.fields.find((f) => f.name === timeFieldName);
-    const addTimeRangeField = buildRangeFilter(field!, { gt: timestamp }, index);
+    const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
     filters.push(addTimeRangeField);
   }
-  const searchSourceChild = loadedSearchSource.createChild();
+  const searchSourceChild = searchSource.createChild();
   searchSourceChild.setField('filter', filters as Filter[]);
-
-  logger.debug(
-    `search source query alert (${alertId}) query: ${JSON.stringify(
-      searchSourceChild.getSearchRequestBody()
-    )}`
-  );
-
-  const searchResult = await searchSourceChild.fetch();
-
   return {
-    numMatches: Number(searchResult.hits.total),
-    searchResult,
+    searchSource: searchSourceChild,
     dateStart,
     dateEnd,
   };

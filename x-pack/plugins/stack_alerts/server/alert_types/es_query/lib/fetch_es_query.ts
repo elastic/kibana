@@ -12,6 +12,9 @@ import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_q
 import { ES_QUERY_ID } from '../constants';
 import { getSearchParams } from './get_search_params';
 
+/**
+ * Fetching matching documents for a given alert from elasticsearch by a given index and query
+ */
 export async function fetchEsQuery(
   alertId: string,
   name: string,
@@ -25,14 +28,6 @@ export async function fetchEsQuery(
   const { search, logger } = services;
   const abortableEsClient = search.asCurrentUser;
   const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
-
-  // During each alert execution, we run the configured query, get a hit count
-  // (hits.total) and retrieve up to params.size hits. We
-  // evaluate the threshold condition using the value of hits.total. If the threshold
-  // condition is met, the hits are counted toward the query match and we update
-  // the alert state with the timestamp of the latest hit. In the next execution
-  // of the alert, the latestTimestamp will be used to gate the query in order to
-  // avoid counting a document multiple times.
 
   const filter = timestamp
     ? {
