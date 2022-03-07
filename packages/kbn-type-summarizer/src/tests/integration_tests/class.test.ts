@@ -69,7 +69,7 @@ it('prints basic class correctly', async () => {
     }
   `);
   expect(output.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/tests/__tmp__/dist_dts/index.d.ts' ]
+    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
     debug Ignoring 1 global declarations for \\"Record\\"
     debug Ignoring 5 global declarations for \\"Promise\\"
     "
