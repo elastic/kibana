@@ -7,10 +7,17 @@
 
 import { KueryNode } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash';
-
 import mappings from '../../saved_objects/mappings.json';
 
 const astFunctionType = ['is', 'range', 'nested'];
+
+export const getFieldNameAttribute = (fieldName: string, attributesToIgnore: string[]) => {
+  const fieldNameSplit = (fieldName || '')
+    .split('.')
+    .filter((fn: string) => !attributesToIgnore.includes(fn));
+
+  return fieldNameSplit.length > 0 ? fieldNameSplit[0] : '';
+};
 
 export const validateOperationOnAttributes = (
   astFilter: KueryNode | null,
@@ -44,28 +51,41 @@ export const validateSearchFields = (searchFields: string[], excludedFieldNames:
   }
 };
 
-interface ValidateFilterKueryNodeParams {
+export interface IterateActionProps {
+  ast: KueryNode;
+  index: number;
+  fieldName: string;
+  localFieldName: string;
+}
+
+export interface IterateFilterKureyNodeParams {
   astFilter: KueryNode;
-  excludedFieldNames: string[];
   hasNestedKey?: boolean;
   nestedKeys?: string;
   storeValue?: boolean;
   path?: string;
+  action?: (props: IterateActionProps) => void;
 }
 
-export const validateFilterKueryNode = ({
+export interface ValidateFilterKueryNodeParams extends IterateFilterKureyNodeParams {
+  excludedFieldNames: string[];
+}
+
+export const iterateFilterKureyNode = ({
   astFilter,
-  excludedFieldNames,
   hasNestedKey = false,
   nestedKeys,
   storeValue,
   path = 'arguments',
-}: ValidateFilterKueryNodeParams) => {
+  action = () => {},
+}: IterateFilterKureyNodeParams) => {
   let localStoreValue = storeValue;
   let localNestedKeys: string | undefined;
+  let localFieldName: string = '';
   if (localStoreValue === undefined) {
     localStoreValue = astFilter.type === 'function' && astFunctionType.includes(astFilter.function);
   }
+
   astFilter.arguments.forEach((ast: KueryNode, index: number) => {
     if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
       localNestedKeys = ast.value;
@@ -80,25 +100,56 @@ export const validateFilterKueryNode = ({
 
     if (ast.arguments) {
       const myPath = `${path}.${index}`;
-      validateFilterKueryNode({
+      iterateFilterKureyNode({
         astFilter: ast,
-        excludedFieldNames,
         storeValue: ast.type === 'function' && astFunctionType.includes(ast.function),
         path: `${myPath}.arguments`,
         hasNestedKey: ast.type === 'function' && ast.function === 'nested',
         nestedKeys: localNestedKeys || nestedKeys,
+        action,
       });
     }
 
-    if (localStoreValue && index === 0) {
+    if (localStoreValue) {
       const fieldName = nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value;
-      const fieldNameSplit = fieldName
-        .split('.')
-        .filter((fn: string) => !['alert', 'attributes'].includes(fn));
-      const firstAttribute = fieldNameSplit.length > 0 ? fieldNameSplit[0] : '';
+
+      if (index === 0) {
+        localFieldName = fieldName;
+      }
+
+      action({
+        ast,
+        index,
+        fieldName,
+        localFieldName,
+      });
+    }
+  });
+};
+
+export const validateFilterKueryNode = ({
+  astFilter,
+  excludedFieldNames,
+  hasNestedKey = false,
+  nestedKeys,
+  storeValue,
+  path = 'arguments',
+}: ValidateFilterKueryNodeParams) => {
+  const action = ({ index, fieldName }: IterateActionProps) => {
+    if (index === 0) {
+      const firstAttribute = getFieldNameAttribute(fieldName, ['alert', 'attributes']);
       if (excludedFieldNames.includes(firstAttribute)) {
         throw new Error(`Filter is not supported on this field ${fieldName}`);
       }
     }
+  };
+
+  iterateFilterKureyNode({
+    astFilter,
+    hasNestedKey,
+    nestedKeys,
+    storeValue,
+    path,
+    action,
   });
 };
