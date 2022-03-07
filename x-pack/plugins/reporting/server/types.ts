@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { FieldFormatsStart } from 'src/plugins/field_formats/server';
@@ -29,7 +29,6 @@ import type { CancellationToken } from '../common/cancellation_token';
 import type { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
-import type { LevelLogger } from './lib';
 import type { ReportTaskParams } from './lib/tasks';
 
 /**
@@ -71,12 +70,12 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
 
 export type CreateJobFnFactory<CreateJobFnType> = (
   reporting: ReportingCore,
-  logger: LevelLogger
+  logger: Logger
 ) => CreateJobFnType;
 
 export type RunTaskFnFactory<RunTaskFnType> = (
   reporting: ReportingCore,
-  logger: LevelLogger
+  logger: Logger
 ) => RunTaskFnType;
 
 export interface ExportTypeDefinition<
