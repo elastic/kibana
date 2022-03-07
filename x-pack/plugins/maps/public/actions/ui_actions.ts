@@ -24,8 +24,8 @@ export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
 export const SET_DRAW_MODE = 'SET_DRAW_MODE';
-export const SET_DELETED_FEATURES = 'UPDATE_DELETED_FEATURES';
-export const REMOVE_DELETED_FEATURES = 'REMOVE_DELETED_FEATURES';
+export const PUSH_DELETED_FEATURE_ID = 'PUSH_DELETED_FEATURE_ID';
+export const CLEAR_DELETED_FEATURE_IDS = 'CLEAR_DELETED_FEATURE_IDS';
 
 export function exitFullScreen() {
   return {
@@ -126,15 +126,15 @@ export function closeTimeslider() {
   };
 }
 
-export function setDeletedFeatures(layerId: string) {
+export function pushDeletedFeatureId(featureId: string) {
   return {
-    type: SET_DELETED_FEATURES,
-    layerId,
+    type: PUSH_DELETED_FEATURE_ID,
+    layerId: featureId,
   };
 }
 
-export function removeDeletedFeatures() {
+export function clearDeletedFeatureIds() {
   return {
-    type: REMOVE_DELETED_FEATURES,
+    type: CLEAR_DELETED_FEATURE_IDS,
   };
 }

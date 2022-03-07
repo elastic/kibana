@@ -19,8 +19,8 @@ import {
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
   SET_DRAW_MODE,
-  SET_DELETED_FEATURES,
-  REMOVE_DELETED_FEATURES,
+  PUSH_DELETED_FEATURE_ID,
+  CLEAR_DELETED_FEATURE_IDS,
 } from '../actions';
 import { DRAW_MODE } from '../../common/constants';
 
@@ -86,12 +86,12 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
           return layerId !== action.layerId;
         }),
       };
-    case SET_DELETED_FEATURES:
+    case PUSH_DELETED_FEATURE_ID:
       return {
         ...state,
         deletedFeatureIds: [...state.deletedFeatureIds, action.layerId],
       };
-    case REMOVE_DELETED_FEATURES:
+    case CLEAR_DELETED_FEATURE_IDS:
       return {
         ...state,
         deletedFeatureIds: [],
