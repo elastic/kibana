@@ -287,7 +287,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
           text: toMountPoint(
             <FormattedMessage
               id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
-              defaultMessage="Track its progress in {path}"
+              defaultMessage="Track its progress in {path}."
               values={{
                 path: (
                   <a href={this.props.apiClient.getManagementLink()}>
