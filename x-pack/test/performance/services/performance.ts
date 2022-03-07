@@ -31,7 +31,7 @@ type Steps = Array<{ name: string; fn: StepFn }>;
 export class PerformanceTestingService extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly lifecycle = this.ctx.getService('lifecycle');
-  private readonly userActions = this.ctx.getService('userActions');
+  private readonly inputDelays = this.ctx.getService('inputDelays');
   private browser: ChromiumBrowser | undefined;
   private storageState: StorageState | undefined;
   private currentSpanStack: Array<Span | null> = [];
@@ -111,8 +111,6 @@ export class PerformanceTestingService extends FtrService {
     }
 
     await this.withSpan('initial login', undefined, async () => {
-      const { INPUT_DELAYS } = this.userActions.getDelays();
-
       const kibanaUrl = Url.format({
         protocol: this.config.get('servers.kibana.protocol'),
         hostname: this.config.get('servers.kibana.hostname'),
@@ -129,9 +127,9 @@ export class PerformanceTestingService extends FtrService {
       const passwordLocator = page.locator('[data-test-subj=loginPassword]');
       const submitButtonLocator = page.locator('[data-test-subj=loginSubmit]');
 
-      await usernameLocator?.type('elastic', { delay: INPUT_DELAYS.TYPING });
-      await passwordLocator?.type('changeme', { delay: INPUT_DELAYS.TYPING });
-      await submitButtonLocator?.click({ delay: INPUT_DELAYS.MOUSE_CLICK });
+      await usernameLocator?.type('elastic', { delay: this.inputDelays.TYPING });
+      await passwordLocator?.type('changeme', { delay: this.inputDelays.TYPING });
+      await submitButtonLocator?.click({ delay: this.inputDelays.MOUSE_CLICK });
 
       await page.waitForSelector('#headerUserMenu');
 
