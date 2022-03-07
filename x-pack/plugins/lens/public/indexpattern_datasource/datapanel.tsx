@@ -399,7 +399,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             })
           : i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
               defaultMessage:
-                'Available fields have data in the entire data view. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+                'Available fields in the data view. This can be influenced by current query and time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
             }),
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
