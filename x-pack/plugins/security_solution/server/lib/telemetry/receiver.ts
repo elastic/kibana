@@ -80,6 +80,13 @@ export interface ITelemetryReceiver {
     TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
   >;
 
+  fetchEndpointMetadata(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  >;
+
   fetchDiagnosticAlerts(
     executeFrom: string,
     executeTo: string
@@ -250,6 +257,53 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             },
             aggs: {
               latest_metrics: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      '@timestamp': {
+                        order: 'desc' as const,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    return this.esClient.search(query, { meta: true });
+  }
+
+  public async fetchEndpointMetadata(executeFrom: string, executeTo: string) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve elastic endpoint metrics');
+    }
+
+    const query: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: `.ds-metrics-endpoint.metadata-*`,
+      ignore_unavailable: false,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: executeFrom,
+              lt: executeTo,
+            },
+          },
+        },
+        aggs: {
+          endpoint_metadata: {
+            terms: {
+              field: 'agent.id',
+              size: this.max_records,
+            },
+            aggs: {
+              latest_metadata: {
                 top_hits: {
                   size: 1,
                   sort: [

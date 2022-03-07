@@ -74,8 +74,10 @@ it('prints the function declaration, including comments', async () => {
     }
   `);
   expect(result.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemap for packages/kbn-type-summarizer/tests/__tmp__/dist_dts/bar.d.ts
-    debug loaded sourcemap for packages/kbn-type-summarizer/tests/__tmp__/dist_dts/index.d.ts
+    "debug loaded sourcemaps for [
+      'packages/kbn-type-summarizer/tests/__tmp__/dist_dts/bar.d.ts',
+      'packages/kbn-type-summarizer/tests/__tmp__/dist_dts/index.d.ts'
+    ]
     "
   `);
 });
