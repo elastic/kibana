@@ -29,8 +29,6 @@ async function navigate({
   if (deviceType) prefilledParams.push(formatSearchKey('deviceType', deviceType));
   if (monitorType) prefilledParams.push(formatSearchKey('monitorType', monitorType));
   if (url) prefilledParams.push(formatSearchKey('url', url));
-  if (isElasticAgentMonitor)
-    prefilledParams.push(formatSearchKey('isElasticAgentMonitor', isElasticAgentMonitor));
   const searchString = prefilledParams.join('&');
 
   const path =

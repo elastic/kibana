@@ -7,5 +7,10 @@
 
 import { uptimeOverviewNavigatorParams } from './overview';
 import { uptimeAddMonitorNavigatorParams } from './add_monitor';
+import { uptimeAddElasticAgentMonitorNavigatorParams } from './add_elastic_agent_monitor';
 
-export const locators = [uptimeOverviewNavigatorParams, uptimeAddMonitorNavigatorParams];
+export const locators = [
+  uptimeOverviewNavigatorParams,
+  uptimeAddMonitorNavigatorParams,
+  uptimeAddElasticAgentMonitorNavigatorParams,
+];

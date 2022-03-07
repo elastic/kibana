@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { UptimeSettingsContext } from '../../../contexts';
+import { MONITOR_EDIT_PATH } from '../../../../common/constants/ui';
 import { DeleteMonitor } from './delete_monitor';
 
 interface Props {
@@ -19,7 +20,7 @@ interface Props {
 }
 
 export const Actions = ({ id, name, onUpdate, isDisabled }: Props) => {
-  const { basePath } = useContext(UptimeSettingsContext);
+  const history = useHistory();
 
   return (
     <EuiFlexGroup>
@@ -27,7 +28,9 @@ export const Actions = ({ id, name, onUpdate, isDisabled }: Props) => {
         <EuiButtonIcon
           isDisabled={isDisabled}
           iconType="pencil"
-          href={`${basePath}/app/uptime/edit-monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
+          href={history.createHref({
+            pathname: `${MONITOR_EDIT_PATH}/${Buffer.from(id, 'utf8').toString('base64')}`,
+          })}
           aria-label={EDIT_MONITOR_LABEL}
           data-test-subj="monitorManagementEditMonitor"
         />

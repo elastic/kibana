@@ -30,7 +30,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const hasFleetAllPrivileges = useAuthz().fleet.all;
   const kibanaVersion = useKibanaVersion();
   const refreshAgent = useAgentRefresh();
-  const { share, http, cloud } = useStartServices();
+  const { share, cloud } = useStartServices();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
@@ -38,8 +38,9 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
 
   const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
 
-  const uptimeAddMonitorLocator = share.url.locators.get('uptime-add-monitor-locator');
-  const kibanaBaseUrl = http.basePath.publicBaseUrl;
+  const uptimeAddMonitorLocator = share.url.locators.get(
+    'uptime-add-elastic-agent-monitor-locator'
+  );
 
   const onClose = useMemo(() => {
     if (onCancelReassign) {
@@ -135,9 +136,8 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
                   onClick={() => {
                     if (uptimeAddMonitorLocator) {
                       uptimeAddMonitorLocator.navigate({
-                        monitorType: 'http',
-                        url: `${kibanaBaseUrl}/api/fleet/agents/${agent.id}`,
-                        isElasticAgentMonitor: true,
+                        agentId: agent.id,
+                        monitorName: `Elastic Agent - ${agent.local_metadata.host.name}`,
                       });
                     }
                   }}

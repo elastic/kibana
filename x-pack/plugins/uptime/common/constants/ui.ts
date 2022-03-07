@@ -4,12 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export const MONITOR_PATH = '/monitor';
 
-export const MONITOR_ROUTE = '/monitor/:monitorId?';
+export const MONITOR_ROUTE = `${MONITOR_PATH}/:monitorId?`;
 
 export const MONITOR_ADD_ROUTE = '/add-monitor';
 
-export const MONITOR_EDIT_ROUTE = '/edit-monitor/:monitorId';
+export const MONITOR_ADD_ELASTIC_ROUTE = '/add-monitor';
+
+export const MONITOR_ADD_ELASTIC_AGENT_ROUTE = '/add-elastic-agent-monitor';
+
+export const MONITOR_EDIT_PATH = '/edit-monitor';
+
+export const MONITOR_EDIT_ROUTE = `${MONITOR_EDIT_PATH}/:monitorId`;
+
+export const MONITOR_EDIT_ELASTIC_AGENT_PATH = '/edit-elastic-agent-montior';
+
+export const MONITOR_EDIT_ELASTIC_AGENT_ROUTE = `${MONITOR_EDIT_ELASTIC_AGENT_PATH}/:monitorId`;
 
 export const MONITOR_MANAGEMENT_ROUTE = '/manage-monitors';
 

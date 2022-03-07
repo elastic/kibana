@@ -15,18 +15,22 @@ import {
   MAPPING_ERROR_ROUTE,
   MONITOR_ROUTE,
   MONITOR_ADD_ROUTE,
+  MONITOR_ADD_ELASTIC_AGENT_ROUTE,
   MONITOR_EDIT_ROUTE,
+  MONITOR_EDIT_ELASTIC_AGENT_ROUTE,
   MONITOR_MANAGEMENT_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
   SYNTHETIC_CHECK_STEPS_ROUTE,
-} from '../common/constants';
+} from '../common/constants/ui';
 import {
   MappingErrorPage,
   MonitorPage,
   AddMonitorPage,
+  AddElasticAgentMonitorPage,
   EditMonitorPage,
+  EditElasticAgentMonitorPage,
   MonitorManagementPage,
   StepDetailPage,
   NotFoundPage,
@@ -250,6 +254,46 @@ const getRoutes = (config: UptimeConfig, canSave: boolean): RouteProps[] => {
               ),
               rightSideItems: [<AddMonitorBtn isDisabled={!canSave} />],
             },
+          },
+          {
+            title: i18n.translate('xpack.uptime.addMonitorElasticAgentRoute.title', {
+              defaultMessage: 'Monitor Elastic Agent with Uptime | {baseTitle}',
+              values: { baseTitle },
+            }),
+            path: MONITOR_ADD_ELASTIC_AGENT_ROUTE,
+            component: AddElasticAgentMonitorPage,
+            dataTestSubj: 'uptimeMonitorAddElasticAgentPage',
+            telemetryId: UptimePage.MonitorAddElasticAgent,
+            pageHeader: {
+              pageTitle: (
+                <FormattedMessage
+                  id="xpack.uptime.addElasticAgentMonitor.pageHeader.title"
+                  defaultMessage="Monitor Elastic Agent with Uptime"
+                />
+              ),
+            },
+            bottomBar: <MonitorManagementBottomBar />,
+            bottomBarProps: { paddingSize: 'm' as const },
+          },
+          {
+            title: i18n.translate('xpack.uptime.editMonitorElasticAgentRoute.title', {
+              defaultMessage: 'Monitor Elastic Agent with Uptime | {baseTitle}',
+              values: { baseTitle },
+            }),
+            path: MONITOR_EDIT_ELASTIC_AGENT_ROUTE,
+            component: EditElasticAgentMonitorPage,
+            dataTestSubj: 'uptimeMonitorEditElasticAgentPage',
+            telemetryId: UptimePage.MonitorEditElasticAgent,
+            pageHeader: {
+              pageTitle: (
+                <FormattedMessage
+                  id="xpack.uptime.editElasticAgentMonitor.pageHeader.title"
+                  defaultMessage="Monitor Elastic Agent with Uptime"
+                />
+              ),
+            },
+            bottomBar: <MonitorManagementBottomBar />,
+            bottomBarProps: { paddingSize: 'm' as const },
           },
         ]
       : []),

@@ -34,3 +34,4 @@ export const casesPath = '/cases';
 // by other plugins as well, so defined here to prevent cross-references.
 export const uptimeOverviewLocatorID = 'uptime-overview-locator';
 export const uptimeAddMonitorLocatorID = 'uptime-add-monitor-locator';
+export const uptimeAddElasticAgentMonitorLocatorID = 'uptime-add-elastic-agent-monitor-locator';

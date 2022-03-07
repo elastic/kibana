@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import {
   ConfigKey,
-  MonitorFields,
+  MonitorFields as MonitorFieldsType,
   TLSFields,
   DataStream,
   ScheduleUnit,
@@ -17,13 +17,16 @@ import { useTrackPageview } from '../../../../observability/public';
 import { SyntheticsProviders } from '../fleet_package/contexts';
 import { PolicyConfig } from '../fleet_package/types';
 import { MonitorConfig } from './monitor_config/monitor_config';
+import { ElasticAgentMonitorFields } from './monitor_config/elastic_agent/elastic_agent_fields';
+import { MonitorFields } from './monitor_config/monitor_fields';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants';
 
 interface Props {
-  monitor: MonitorFields;
+  monitor: MonitorFieldsType;
+  isElasticAgentMonitor?: boolean;
 }
 
-export const EditMonitorConfig = ({ monitor }: Props) => {
+export const EditMonitorConfig = ({ monitor, isElasticAgentMonitor = false }: Props) => {
   useTrackPageview({ app: 'uptime', path: 'edit-monitor' });
   useTrackPageview({ app: 'uptime', path: 'edit-monitor', delay: 15000 });
 
@@ -88,7 +91,10 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
       browserDefaultValues={fullDefaultConfig[DataStream.BROWSER]}
       tlsDefaultValues={defaultTLSConfig}
     >
-      <MonitorConfig isEdit={true} />
+      <MonitorConfig
+        isEdit={true}
+        fields={isElasticAgentMonitor ? MonitorFields : ElasticAgentMonitorFields}
+      />
     </SyntheticsProviders>
   );
 };

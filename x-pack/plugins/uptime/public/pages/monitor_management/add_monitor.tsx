@@ -12,6 +12,7 @@ import { ScheduleUnit, DataStream, ConfigKey } from '../../../common/runtime_typ
 import { SyntheticsProviders, defaultConfig } from '../../components/fleet_package/contexts';
 import { Loader } from '../../components/monitor_management/loader/loader';
 import { MonitorConfig } from '../../components/monitor_management/monitor_config/monitor_config';
+import { MonitorFields } from '../../components/monitor_management/monitor_config/monitor_fields';
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 
@@ -22,7 +23,7 @@ export const AddMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
 
   const [useGetUrlParams] = useUrlParams();
-  const { serviceName, monitorType, url, isElasticAgentMonitor } = useGetUrlParams();
+  const { serviceName, monitorType, url } = useGetUrlParams();
 
   const { error, loading, locations } = useLocations();
 
@@ -49,10 +50,9 @@ export const AddMonitorPage: React.FC = () => {
         httpDefaultValues={{
           ...defaultConfig[DataStream.HTTP],
           [ConfigKey.URLS]: url || '',
-          [ConfigKey.IS_ELASTIC_AGENT_MONITOR]: isElasticAgentMonitor || false,
         }}
       >
-        <MonitorConfig isEdit={false} />
+        <MonitorConfig isEdit={false} fields={MonitorFields} />
       </SyntheticsProviders>
     </Loader>
   );

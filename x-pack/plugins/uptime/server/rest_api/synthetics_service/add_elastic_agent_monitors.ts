@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  KibanaRequest,
-  SavedObject,
-} from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { httpDefaultFields } from '../../../common/constants/monitor_defaults';

@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview, FETCH_STATUS, useFetcher } from '../../../../observability/public';
-import { MonitorFields } from '../../../common/runtime_types';
+import { MonitorFields as MonitorFieldsType } from '../../../common/runtime_types';
 import { EditMonitorConfig } from '../../components/monitor_management/edit_monitor_config';
 import { Loader } from '../../components/monitor_management/loader/loader';
 import { getMonitor } from '../../state/api';
@@ -27,7 +27,7 @@ export const EditMonitorPage: React.FC = () => {
     return getMonitor({ id: Buffer.from(monitorId, 'base64').toString('utf8') });
   }, [monitorId]);
 
-  const monitor = data?.attributes as MonitorFields;
+  const monitor = data?.attributes as MonitorFieldsType;
   const { error: locationsError, loading: locationsLoading } = useLocations();
 
   return (

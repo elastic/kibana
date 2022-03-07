@@ -49,7 +49,7 @@ export const getAPIKeyForSyntheticsService = async ({
   });
 };
 
-export const getAPIKeyForElasticAgentMonitoring = async ({
+export const generateAPIKeyForElasticAgentMonitoring = async ({
   request,
   server,
 }: {
@@ -76,6 +76,29 @@ export const getAPIKeyForElasticAgentMonitoring = async ({
     security,
     authSavedObjectsClient,
   });
+};
+
+export const getAPIKeyForElasticAgentMonitoring = async ({
+  request,
+  server,
+}: {
+  server: UptimeServerSetup;
+  request?: KibanaRequest;
+}): Promise<SyntheticsServiceApiKey | undefined> => {
+  const { encryptedSavedObjects } = server;
+
+  const encryptedClient = encryptedSavedObjects.getClient({
+    includedHiddenTypes: [elasticAgentMonitoringApiKey.name],
+  });
+
+  try {
+    const apiKey = await getElasticAgentMonitoringAPIKey(encryptedClient);
+    if (apiKey) {
+      return apiKey;
+    }
+  } catch (err) {
+    // TODO: figure out how to handle decryption errors
+  }
 };
 
 export const generateAndSaveAPIKey = async ({
@@ -167,8 +190,6 @@ export const generateAndSaveAPIKeyForElasticAgentMonitoring = async ({
     },
     role_descriptors: {},
   });
-
-  console.warn('apiKeyResult', apiKeyResult);
 
   if (apiKeyResult) {
     const { id, name, api_key: apiKey } = apiKeyResult;

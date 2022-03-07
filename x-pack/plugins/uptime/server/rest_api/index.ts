@@ -34,6 +34,11 @@ import {
   getSyntheticsMonitorRoute,
 } from './synthetics_service/get_monitor';
 import { addSyntheticsMonitorRoute } from './synthetics_service/add_monitor';
+import {
+  hasApiKeyForElasticAgentMonitorRoute,
+  setApiKeyForElasticAgentMonitorRoute,
+} from './synthetics_service/get_elastic_agent_api_key';
+
 import { editSyntheticsMonitorRoute } from './synthetics_service/edit_monitor';
 import { deleteSyntheticsMonitorRoute } from './synthetics_service/delete_monitor';
 import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
@@ -71,4 +76,6 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   deleteSyntheticsMonitorRoute,
   runOnceSyntheticsMonitorRoute,
   testNowMonitorRoute,
+  hasApiKeyForElasticAgentMonitorRoute,
+  setApiKeyForElasticAgentMonitorRoute,
 ];

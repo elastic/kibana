@@ -33,6 +33,8 @@ import { monitorManagementListSelector } from '../../../state/selectors';
 
 import { kibanaService } from '../../../state/kibana_service';
 
+import { useUrlParams } from '../../../hooks/use_url_params';
+
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
   isValid: boolean;
@@ -54,6 +56,9 @@ export const ActionBar = ({
   const { basePath } = useContext(UptimeSettingsContext);
   const { locations } = useSelector(monitorManagementListSelector);
 
+  const [useGetUrlParams] = useUrlParams();
+  const { elasticAgentId } = useGetUrlParams();
+
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSuccessful, setIsSuccessful] = useState(false);
@@ -66,6 +71,7 @@ export const ActionBar = ({
     return setMonitor({
       monitor,
       id: monitorId ? Buffer.from(monitorId, 'base64').toString('utf8') : undefined,
+      elasticAgentId,
     });
   }, [monitor, monitorId, isValid, isSaving]);
 

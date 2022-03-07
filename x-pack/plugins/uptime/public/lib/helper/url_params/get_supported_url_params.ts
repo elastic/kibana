@@ -26,8 +26,9 @@ export interface UptimeUrlParams {
   query?: string;
   serviceName?: string;
   monitorType?: string;
+  monitorName?: string;
   url: string;
-  isElasticAgentMonitor: boolean;
+  elasticAgentId: string;
 }
 
 const {
@@ -86,7 +87,8 @@ export const getSupportedUrlParams = (params: {
     serviceName,
     url,
     monitorType,
-    isElasticAgentMonitor,
+    monitorName,
+    elasticAgentId,
   } = filteredParams;
 
   return {
@@ -113,6 +115,7 @@ export const getSupportedUrlParams = (params: {
     serviceName: serviceName || '',
     url: url || '',
     monitorType,
-    isElasticAgentMonitor: parseBoolean(isElasticAgentMonitor, false),
+    monitorName,
+    elasticAgentId: elasticAgentId || '',
   };
 };

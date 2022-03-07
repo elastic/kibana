@@ -43,4 +43,5 @@ export enum API_URLS {
   RUN_ONCE_MONITOR = '/internal/uptime/service/monitors/run_once',
   TRIGGER_MONITOR = '/internal/uptime/service/monitors/trigger',
   ELASTIC_AGENT_MONITORS = '/internal/uptime/service/agent_monitors',
+  ELASTIC_AGENT_MONITOR_API_KEY = '/internal/uptime/service/elastic_agent/has_api_key',
 }

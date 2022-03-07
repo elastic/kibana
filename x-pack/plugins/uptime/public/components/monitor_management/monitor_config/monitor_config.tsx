@@ -23,11 +23,16 @@ import { usePolicy } from '../../fleet_package/hooks/use_policy';
 import { validate } from '../validation';
 import { ActionBarPortal } from '../action_bar/action_bar_portal';
 import { useFormatMonitor } from '../hooks/use_format_monitor';
-import { MonitorFields } from './monitor_fields';
 import { TestNowMode, TestRun } from '../test_now_mode/test_now_mode';
 import { MonitorFields as MonitorFieldsType } from '../../../../common/runtime_types';
 
-export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
+export const MonitorConfig = ({
+  isEdit = false,
+  fields: Fields,
+}: {
+  isEdit: boolean;
+  fields: ({ isFormSubmitted }: { isFormSubmitted: boolean }) => React.ReactElement;
+}) => {
   const { monitorType } = usePolicyConfigContext();
 
   /* raw policy config compatible with the UI. Save this to saved objects */
@@ -95,7 +100,7 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
 
   return (
     <>
-      <MonitorFields isFormSubmitted={hasBeenSubmitted} />
+      <Fields isFormSubmitted={hasBeenSubmitted} />
 
       {flyout}
 

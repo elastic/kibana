@@ -18,6 +18,7 @@ import {
   TLSFieldsContextProvider,
 } from '../../fleet_package/contexts';
 import { MonitorConfig } from './monitor_config';
+import { MonitorFields } from './monitor_fields';
 
 describe('<MonitorConfig />', () => {
   const WrappedComponent = ({ isEditable = true, isEdit = false }) => {
@@ -28,7 +29,7 @@ describe('<MonitorConfig />', () => {
             <BrowserContextProvider>
               <ICMPSimpleFieldsContextProvider>
                 <TLSFieldsContextProvider>
-                  <MonitorConfig isEdit={isEdit} />
+                  <MonitorConfig isEdit={isEdit} fields={MonitorFields} />
                 </TLSFieldsContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </BrowserContextProvider>

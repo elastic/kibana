@@ -6,19 +6,15 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObject } from 'kibana/server';
-import {
-  ConfigKey,
-  DataStream,
-  MonitorFields,
-  SyntheticsMonitor,
-  HTTPMonitor,
-} from '../../../common/runtime_types';
+import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from './telemetry/monitor_upgrade_sender';
 import { getAPIKeyForElasticAgentMonitoring } from '../../lib/synthetics_service/get_api_key';
+
+import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
 
 export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
@@ -27,7 +23,10 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     body: schema.any(),
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
-    const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
+    const monitor: SyntheticsMonitor = request.body.monitor as SyntheticsMonitor;
+    const id: string = request.body.id;
+    const isElasticAgentMonitor = monitor[ConfigKey.IS_ELASTIC_AGENT_MONITOR];
+    let elasticAgentMonitoringApiKey: SyntheticsServiceApiKey | undefined;
 
     const validationResult = validateMonitor(monitor as MonitorFields);
 
@@ -36,33 +35,41 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    if (
-      monitor[ConfigKey.IS_ELASTIC_AGENT_MONITOR] === true &&
-      monitor[ConfigKey.MONITOR_TYPE] === DataStream.HTTP
-    ) {
-      const key = await getAPIKeyForElasticAgentMonitoring({ request, server });
-      monitor[ConfigKey.REQUEST_HEADERS_CHECK] = {
-        ...monitor[ConfigKey.REQUEST_HEADERS_CHECK],
-        Authorization: `ApiKey ${Buffer.from(`${key?.id}:${key?.apiKey}`, 'utf8').toString(
-          'base64'
-        )}`,
-      };
+    if (monitor[ConfigKey.IS_ELASTIC_AGENT_MONITOR] === true) {
+      elasticAgentMonitoringApiKey = await getAPIKeyForElasticAgentMonitoring({ request, server });
     }
 
     const newMonitor: SavedObject<SyntheticsMonitor> =
-      await savedObjectsClient.create<SyntheticsMonitor>(syntheticsMonitorType, {
-        ...monitor,
-        revision: 1,
-      });
+      await savedObjectsClient.create<SyntheticsMonitor>(
+        syntheticsMonitorType,
+        {
+          ...monitor,
+          revision: 1,
+        },
+        {
+          id,
+        }
+      );
 
     const { syntheticsService } = server;
 
     const errors = await syntheticsService.pushConfigs(request, [
       {
         ...newMonitor.attributes,
+        ...(isElasticAgentMonitor
+          ? {
+              [ConfigKey.REQUEST_HEADERS_CHECK]: {
+                Authorization: `ApiKey ${Buffer.from(
+                  `${elasticAgentMonitoringApiKey?.id}:${elasticAgentMonitoringApiKey?.apiKey}`,
+                  'utf8'
+                ).toString('base64')}`,
+              },
+            }
+          : {}),
         id: newMonitor.id,
         fields: {
           config_id: newMonitor.id,
+          is_elastic_agent_monitor: isElasticAgentMonitor ? true : false,
         },
         fields_under_root: true,
       },

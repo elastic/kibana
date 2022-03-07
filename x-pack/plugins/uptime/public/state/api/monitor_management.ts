@@ -21,14 +21,19 @@ import { apiService } from './utils';
 export const setMonitor = async ({
   monitor,
   id,
+  elasticAgentId,
 }: {
   monitor: SyntheticsMonitor;
   id?: string;
+  elasticAgentId?: string;
 }): Promise<ServiceLocationErrors> => {
   if (id) {
     return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
   } else {
-    return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
+    return await apiService.post(API_URLS.SYNTHETICS_MONITORS, {
+      monitor,
+      id: elasticAgentId,
+    });
   }
 };
 
@@ -77,4 +82,15 @@ export interface TestNowResponse {
 
 export const testNowMonitor = async (configId: string): Promise<TestNowResponse | undefined> => {
   return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
+};
+
+export const hasElasticAgentMonitoringApiKey = async (): Promise<{ hasApiKey: boolean }> => {
+  const { hasApiKey } = await apiService.get(API_URLS.ELASTIC_AGENT_MONITOR_API_KEY);
+  return {
+    hasApiKey,
+  };
+};
+
+export const setElasticAgentMonitoringApiKey = async (): Promise<void> => {
+  await apiService.post(API_URLS.ELASTIC_AGENT_MONITOR_API_KEY);
 };

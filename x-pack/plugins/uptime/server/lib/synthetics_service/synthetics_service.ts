@@ -18,7 +18,7 @@ import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { addElasticAgentMonitors } from '../../rest_api/synthetics_service/add_elastic_agent_monitors';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
-import { getAPIKeyForSyntheticsService } from './get_api_key';
+import { getAPIKeyForSyntheticsService, getAPIKeyForElasticAgentMonitoring } from './get_api_key';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../../common/config';
@@ -203,12 +203,11 @@ export class SyntheticsService {
     configs?: Array<
       SyntheticsMonitorWithId & {
         fields_under_root?: boolean;
-        fields?: { config_id: string };
+        fields?: { config_id: string; is_elastic_agent_monitor: boolean };
       }
     >
   ) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
-    console.warn('monitors', JSON.stringify(monitors));
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
       return;
@@ -291,6 +290,10 @@ export class SyntheticsService {
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
 
+    const elasticAgentMonitoringApiKey = await getAPIKeyForElasticAgentMonitoring({
+      server: this.server,
+    });
+
     if (!savedObjectsClient?.find) {
       return [] as SyntheticsMonitorWithId[];
     }
@@ -316,12 +319,27 @@ export class SyntheticsService {
       });
     }
 
-    return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
-      ...attributes,
-      id,
-      fields_under_root: true,
-      fields: { config_id: id },
-    })) as SyntheticsMonitorWithId[];
+    return (findResult.saved_objects ?? []).map(({ attributes, id }) => {
+      return {
+        ...attributes,
+        id,
+        fields_under_root: true,
+        ...([attributes[ConfigKey.IS_ELASTIC_AGENT_MONITOR]]
+          ? {
+              [ConfigKey.REQUEST_HEADERS_CHECK]: {
+                Authorization: `ApiKey ${Buffer.from(
+                  `${elasticAgentMonitoringApiKey?.id}:${elasticAgentMonitoringApiKey?.apiKey}`,
+                  'utf8'
+                ).toString('base64')}`,
+              },
+            }
+          : {}),
+        fields: {
+          config_id: id,
+          is_elastic_agent_monitor: attributes[ConfigKey.IS_ELASTIC_AGENT_MONITOR] ? true : false,
+        },
+      };
+    }) as SyntheticsMonitorWithId[];
   }
 
   formatConfigs(configs: SyntheticsMonitorWithId[]) {
