@@ -1246,6 +1246,12 @@ interface BaseListResponse<D = unknown> {
   total: number;
 }
 
+export interface AdditionalOnSwitchChangeParams {
+  value: boolean;
+  policyConfigData: UIPolicyConfig;
+  protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+}
+
 /**
  * Returned by the server via GET /api/endpoint/metadata
  */
