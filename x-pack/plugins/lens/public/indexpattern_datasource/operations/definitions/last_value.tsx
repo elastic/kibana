@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption, EuiSwitch } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
@@ -98,6 +98,7 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   operationType: 'last_value';
   params: {
     sortField: string;
+    useTopHit?: boolean;
     // last value on numeric fields can be formatted
     format?: {
       id: string;
@@ -197,18 +198,28 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   filterable: true,
   shiftable: true,
   toEsAggsFn: (column, columnId) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
+    const initialArgs = {
       id: columnId,
       enabled: true,
       schema: 'metric',
       field: column.sourceField,
-      aggregate: 'concat',
       size: 1,
       sortOrder: 'desc',
       sortField: column.params.sortField,
       // time shift is added to wrapping aggFilteredMetric if filter is set
       timeShift: column.filter ? undefined : column.timeShift,
-    }).toAst();
+    } as const;
+    return (
+      column.params.useTopHit
+        ? buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
+            ...initialArgs,
+            aggregate: 'concat',
+          })
+        : buildExpressionFunction<AggFunctionsMapping['aggTopMetrics']>(
+            'aggTopMetrics',
+            initialArgs
+          )
+    ).toAst();
   },
 
   isTransferable: (column, newIndexPattern) => {
@@ -285,6 +296,24 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                   ]
                 : []) as unknown as EuiComboBoxOptionOption[]
             }
+          />
+        </EuiFormRow>
+        <EuiFormRow display="rowCompressed" fullWidth>
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.lastValue.useTopHit', {
+              defaultMessage: 'Show array values',
+            })}
+            checked={Boolean(currentColumn.params.useTopHit)}
+            onChange={() => {
+              updateLayer(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'useTopHit',
+                  value: !currentColumn.params.useTopHit,
+                })
+              );
+            }}
           />
         </EuiFormRow>
       </>
