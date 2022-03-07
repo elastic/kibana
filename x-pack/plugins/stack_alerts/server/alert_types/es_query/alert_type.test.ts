@@ -7,25 +7,22 @@
 
 import uuid from 'uuid';
 import type { Writable } from '@kbn/utility-types';
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices } from '../../../../alerting/server';
 import {
   AlertServicesMock,
   alertsMock,
   AlertInstanceMock,
-} from '../../../../../alerting/server/mocks';
-import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
+} from '../../../../alerting/server/mocks';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType } from './alert_type';
-import { EsQueryAlertParams, EsQueryAlertState } from '../alert_type_params';
-import { ActionContext } from '../action_context';
-import {
-  ESSearchResponse,
-  ESSearchRequest,
-} from '../../../../../../../src/core/types/elasticsearch';
+import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
+import { ActionContext } from './action_context';
+import { ESSearchResponse, ESSearchRequest } from '../../../../../../src/core/types/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
-import { coreMock } from '../../../../../../../src/core/server/mocks';
-import { ActionGroupId, ConditionMetAlertInstanceId } from '../constants';
-import { OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from '../types';
+import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+import { coreMock } from '../../../../../../src/core/server/mocks';
+import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
 import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
 
 const logger = loggingSystemMock.create().get();

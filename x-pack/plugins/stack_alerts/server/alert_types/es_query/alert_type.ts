@@ -6,17 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Logger } from 'src/core/server';
-import { RuleType } from '../../../types';
-import { ActionContext } from '../action_context';
+import { CoreSetup, Logger } from 'kibana/server';
+import { RuleType } from '../../types';
+import { ActionContext } from './action_context';
 import {
   EsQueryAlertParams,
   EsQueryAlertParamsSchema,
   EsQueryAlertState,
-} from '../alert_type_params';
-import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
-import { ExecutorOptions } from '../types';
-import { ActionGroupId, ES_QUERY_ID } from '../constants';
+} from './alert_type_params';
+import { STACK_ALERTS_FEATURE_ID } from '../../../common';
+import { ExecutorOptions } from './types';
+import { ActionGroupId, ES_QUERY_ID } from './constants';
 import { executor } from './executor';
 
 export function getAlertType(

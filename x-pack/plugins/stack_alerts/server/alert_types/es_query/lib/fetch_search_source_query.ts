@@ -6,8 +6,8 @@
  */
 import { buildRangeFilter, Filter } from '@kbn/es-query';
 import { Logger } from 'kibana/server';
-import { OnlySearchSourceAlertParams } from '../../types';
-import { getTime, ISearchStartSearchSource } from '../../../../../../../../src/plugins/data/common';
+import { OnlySearchSourceAlertParams } from '../types';
+import { getTime, ISearchStartSearchSource } from '../../../../../../../src/plugins/data/common';
 
 export async function fetchSearchSourceQuery(
   alertId: string,

@@ -6,10 +6,10 @@
  */
 import { Logger } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { OnlyEsQueryAlertParams } from '../../types';
-import { IAbortableClusterClient } from '../../../../../../alerting/server';
-import { buildSortedEventsQuery } from '../../../../../common/build_sorted_events_query';
-import { ES_QUERY_ID } from '../../constants';
+import { OnlyEsQueryAlertParams } from '../types';
+import { IAbortableClusterClient } from '../../../../../alerting/server';
+import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
+import { ES_QUERY_ID } from '../constants';
 import { getSearchParams } from './get_search_params';
 
 export async function fetchEsQuery(

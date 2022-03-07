@@ -6,15 +6,14 @@
  */
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Logger } from 'src/core/server';
-import { addMessages, EsQueryAlertActionContext } from '../action_context';
-import { ComparatorFns } from '../../lib';
-import { parseDuration } from '../../../../../alerting/server';
-import { ExecutorOptions, OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from '../types';
-import { ActionGroupId, ConditionMetAlertInstanceId } from '../constants';
-import { getContextConditionsDescription, getInvalidComparatorError } from './messages';
+import { CoreSetup, Logger } from 'kibana/server';
+import { addMessages, EsQueryAlertActionContext } from './action_context';
+import { ComparatorFns, getHumanReadableComparator } from '../lib';
+import { parseDuration } from '../../../../alerting/server';
+import { ExecutorOptions, OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
+import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';
-import { EsQueryAlertParams } from '../alert_type_params';
+import { EsQueryAlertParams } from './alert_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 
 export async function executor(
@@ -159,4 +158,23 @@ export function isEsQueryAlert(options: ExecutorOptions<EsQueryAlertParams>) {
 
 export function getChecksum(params: EsQueryAlertParams) {
   return sha256.create().update(JSON.stringify(params));
+}
+
+export function getInvalidComparatorError(comparator: string) {
+  return i18n.translate('xpack.stackAlerts.esQuery.invalidComparatorErrorMessage', {
+    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
+    values: {
+      comparator,
+    },
+  });
+}
+
+export function getContextConditionsDescription(comparator: string, threshold: number[]) {
+  return i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
+    defaultMessage: 'Number of matching documents is {thresholdComparator} {threshold}',
+    values: {
+      thresholdComparator: getHumanReadableComparator(comparator),
+      threshold: threshold.join(' and '),
+    },
+  });
 }
