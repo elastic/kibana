@@ -20,6 +20,7 @@ import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 import { LensPublicStart } from '../../../lens/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 import { CasesUiStart } from '../../../cases/public';
@@ -30,6 +31,7 @@ export interface ObservabilityAppServices {
   cases: CasesUiStart;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   docLinks: DocLinksStart;
   http: HttpStart;
   lens: LensPublicStart;
