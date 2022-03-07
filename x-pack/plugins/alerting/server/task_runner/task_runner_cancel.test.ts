@@ -25,6 +25,7 @@ import {
   executionContextServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
+  uiSettingsServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
@@ -94,6 +95,7 @@ describe('Task Runner Cancel', () => {
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
+  const uiSettingsService = uiSettingsServiceMock.createStartContract();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -103,6 +105,7 @@ describe('Task Runner Cancel', () => {
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
     savedObjects: savedObjectsService,
+    uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),

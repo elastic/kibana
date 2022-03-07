@@ -6,18 +6,34 @@
  */
 
 import { some } from 'lodash/fp';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
+import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../common/constants';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
+import {
+  ISOLATE_HOST,
+  UNISOLATE_HOST,
+} from '../../../../detections/components/host_isolation/translations';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
+import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
+import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
 import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
 import { HostRisk } from '../../../../common/containers/hosts_risk/types';
@@ -88,6 +104,14 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const [isolateAction, setIsolateAction] = useState<'isolateHost' | 'unisolateHost'>(
     'isolateHost'
   );
+
+  const {
+    services: { cases },
+  } = useKibana();
+
+  const CasesContext = cases.getCasesContext();
+  const casesPermissions = useGetUserCasesPermissions();
+
   const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
     useState(false);
 
@@ -212,7 +236,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       />
     </>
   ) : (
-    <>
+    <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
       <ExpandableEventTitle
         isAlert={isAlert}
         loading={loading}
@@ -233,7 +257,17 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         hostRisk={hostRisk}
         handleOnEventClosed={handleOnEventClosed}
       />
-    </>
+      <EventDetailsFooter
+        detailsData={detailsData}
+        detailsEcsData={ecsData}
+        expandedEvent={expandedEvent}
+        handleOnEventClosed={handleOnEventClosed}
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        loadingEventDetails={loading}
+        onAddIsolationStatusClick={showHostIsolationPanel}
+        timelineId={timelineId}
+      />
+    </CasesContext>
   );
 };
 
