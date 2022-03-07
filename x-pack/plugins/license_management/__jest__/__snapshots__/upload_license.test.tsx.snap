@@ -459,7 +459,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     <button
                                       aria-label="Closes this modal window"
                                       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-                                      disabled={false}
                                       onClick={[Function]}
                                       type="button"
                                     >
