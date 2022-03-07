@@ -288,7 +288,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             params: {
               risk_score: 40,
               severity: 'medium',
