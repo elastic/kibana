@@ -16,8 +16,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
@@ -93,7 +94,6 @@ export default function ({ getService, getPageObjects }) {
       expect(response.body.result).to.be('updated');
       await PageObjects.settings.controlChangeSave();
       await retry.try(async function () {
-        //await PageObjects.common.sleep(2000);
         const message = await PageObjects.common.closeToast();
         expect(message).to.contain('Unable');
       });

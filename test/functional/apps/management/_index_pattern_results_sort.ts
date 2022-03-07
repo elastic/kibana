@@ -7,8 +7,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings', 'common']);
@@ -18,7 +19,7 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.createIndexPattern();
+      await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     after(async function () {
@@ -30,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
         heading: 'Name',
         first: '@message',
         last: 'xss.raw',
-        selector: async function () {
+        async selector() {
           const tableRow = await PageObjects.settings.getTableRow(0, 0);
           return await tableRow.getVisibleText();
         },
@@ -39,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
         heading: 'Type',
         first: '',
         last: 'text',
-        selector: async function () {
+        async selector() {
           const tableRow = await PageObjects.settings.getTableRow(0, 1);
           return await tableRow.getVisibleText();
         },
@@ -49,7 +50,6 @@ export default function ({ getService, getPageObjects }) {
     columns.forEach(function (col) {
       describe('sort by heading - ' + col.heading, function indexPatternCreation() {
         it('should sort ascending', async function () {
-          console.log('col.heading', col.heading);
           if (col.heading !== 'Name') {
             await PageObjects.settings.sortBy(col.heading);
           }

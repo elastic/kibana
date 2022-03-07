@@ -7,13 +7,14 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings']);
   const SCRIPTED_FIELD_NAME = 'myScriptedField';
 
-  const scriptResultToJson = (scriptResult) => {
+  const scriptResultToJson = (scriptResult: string) => {
     try {
       return JSON.parse(scriptResult);
     } catch (e) {
@@ -26,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
       await browser.setWindowSize(1200, 800);
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.createIndexPattern();
+      await PageObjects.settings.createIndexPattern('logstash-*');
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
@@ -67,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
     it('should display additional fields', async function () {
       const scriptResults = await PageObjects.settings.executeScriptedField(
         `doc['bytes'].value * 2`,
-        ['bytes']
+        'bytes'
       );
       const [{ _id, bytes }] = scriptResultToJson(scriptResults);
       expect(_id).to.be.a('string');

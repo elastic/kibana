@@ -7,8 +7,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
@@ -19,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
 
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader'], false);
+      await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader']);
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/large_fields');
       await PageObjects.settings.navigateTo();

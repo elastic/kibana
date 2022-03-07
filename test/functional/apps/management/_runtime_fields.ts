@@ -7,8 +7,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const browser = getService('browser');
@@ -36,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
-        const startingCount = parseInt(await PageObjects.settings.getFieldsTabCount());
+        const startingCount = parseInt(await PageObjects.settings.getFieldsTabCount(), 10);
         await log.debug('add runtime field');
         await PageObjects.settings.addRuntimeField(
           fieldName,
@@ -51,7 +52,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickSaveField();
 
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getFieldsTabCount())).to.be(startingCount + 1);
+          expect(parseInt(await PageObjects.settings.getFieldsTabCount(), 10)).to.be(
+            startingCount + 1
+          );
         });
       });
 

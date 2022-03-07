@@ -7,8 +7,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
@@ -23,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     beforeEach(async () => {
-      await PageObjects.settings.createIndexPattern();
+      await PageObjects.settings.createIndexPattern('logstash-*');
       // increase Popularity of geo.coordinates
       log.debug('Starting openControlsByName (' + fieldName + ')');
       await PageObjects.settings.openControlsByName(fieldName);
