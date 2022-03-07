@@ -560,7 +560,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO update this
+      documentationUrl: docLinks.workplaceSearchSharePointServer,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-sharepoint-server-connector',
     },
