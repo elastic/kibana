@@ -19,7 +19,12 @@ import {
   TaskRunCreatorFunction,
 } from '../../../../task_manager/server';
 import { CancellationToken } from '../../../common/cancellation_token';
-import { ReportingError, UnknownError, QueueTimeoutError } from '../../../common/errors';
+import {
+  ReportingError,
+  UnknownError,
+  QueueTimeoutError,
+  KibanaShuttingDownError,
+} from '../../../common/errors';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
@@ -287,6 +292,12 @@ export class ExecuteReportTask implements ReportingTask {
     return report;
   }
 
+  // Generic is used to let TS infer the return type at call site.
+  private async throwIfKibanaShutsDown<T>(): Promise<T> {
+    await this.reporting.getKibanaShutdown$().toPromise();
+    throw new KibanaShuttingDownError();
+  }
+
   /*
    * Provides a TaskRunner for Task Manager
    */
@@ -360,7 +371,10 @@ export class ExecuteReportTask implements ReportingTask {
 
             eventLog.logExecutionStart();
 
-            const output = await this._performJob(task, cancellationToken, stream);
+            const output = await Promise.race<TaskRunResult>([
+              this._performJob(task, cancellationToken, stream),
+              this.throwIfKibanaShutsDown(),
+            ]);
 
             stream.end();
 
