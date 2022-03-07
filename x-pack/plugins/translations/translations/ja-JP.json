@@ -805,7 +805,6 @@
     "xpack.lens.shared.maxLinesLabel": "最大行",
     "xpack.lens.shared.nestedLegendLabel": "ネスト済み",
     "xpack.lens.shared.overwriteAxisTitle": "軸タイトルを上書き",
-    "xpack.lens.shared.ShowAxisTitleLabel": "表示",
     "xpack.lens.shared.ticksPositionOptions": "帯の目盛",
     "xpack.lens.shared.ticksPositionOptionsTooltip": "目盛を均等に分布するのではなく、各帯の境界に目盛を表示します",
     "xpack.lens.shared.truncateLegend": "テキストを切り捨て",

@@ -811,7 +811,6 @@
     "xpack.lens.shared.maxLinesLabel": "最大行数",
     "xpack.lens.shared.nestedLegendLabel": "嵌套",
     "xpack.lens.shared.overwriteAxisTitle": "覆盖轴标题",
-    "xpack.lens.shared.ShowAxisTitleLabel": "显示",
     "xpack.lens.shared.ticksPositionOptions": "波段上的刻度",
     "xpack.lens.shared.ticksPositionOptionsTooltip": "将刻度放在每个波段边框上，而不是平均分布",
     "xpack.lens.shared.truncateLegend": "截断文本",
