@@ -7,8 +7,9 @@
 
 import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../../../application/types';
 import { ErrorPanel } from './error_panel';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 interface AppLink {
   label: string;
@@ -23,7 +24,7 @@ interface Props {
 }
 
 export function SectionContainer({ title, appLink, children, hasError }: Props) {
-  const { core } = usePluginContext();
+  const { http } = useKibana<ObservabilityAppServices>().services;
   return (
     <EuiPanel hasShadow={true} color="subdued">
       <EuiAccordion
@@ -41,7 +42,7 @@ export function SectionContainer({ title, appLink, children, hasError }: Props) 
               iconType={'sortRight'}
               size="xs"
               color="text"
-              href={core.http.basePath.prepend(appLink.href)}
+              href={http.basePath.prepend(appLink.href)}
             >
               {appLink.label}
             </EuiButtonEmpty>
