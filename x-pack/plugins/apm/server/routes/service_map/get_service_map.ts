@@ -64,29 +64,42 @@ async function getConnectionData({
       return init;
     }
 
+    // const chunkedResponses = await withApmSpan(
+    //   'get_service_paths_from_all_trace_ids',
+    //   () =>
+    //     Promise.all(
+    //       chunks.map((traceIdsChunk) =>
+    //         getServiceMapFromTraceIds({
+    //           setup,
+    //           traceIds: traceIdsChunk,
+    //           start,
+    //           end,
+    //         })
+    //       )
+    //     )
+    // );
+
+    // return chunkedResponses.reduce((prev, current) => {
+    //   return {
+    //     connections: prev.connections.concat(current.connections),
+    //     discoveredServices: prev.discoveredServices.concat(
+    //       current.discoveredServices
+    //     ),
+    //   };
+    // });
+
     const chunkedResponses = await withApmSpan(
       'get_service_paths_from_all_trace_ids',
       () =>
-        Promise.all(
-          chunks.map((traceIdsChunk) =>
-            getServiceMapFromTraceIds({
-              setup,
-              traceIds: traceIdsChunk,
-              start,
-              end,
-            })
-          )
-        )
+        getServiceMapFromTraceIds({
+          setup,
+          traceIds,
+          start,
+          end,
+        })
     );
 
-    return chunkedResponses.reduce((prev, current) => {
-      return {
-        connections: prev.connections.concat(current.connections),
-        discoveredServices: prev.discoveredServices.concat(
-          current.discoveredServices
-        ),
-      };
-    });
+    return chunkedResponses;
   });
 }
 

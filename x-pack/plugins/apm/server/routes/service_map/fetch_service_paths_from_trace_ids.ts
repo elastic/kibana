@@ -7,13 +7,26 @@
 
 import { rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
+import {
+  AGENT_NAME,
+  PARENT_ID,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_ID,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+  TRACE_ID,
+  TRANSACTION_ID,
+} from '../../../common/elasticsearch_fieldnames';
 import {
   ConnectionNode,
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getServicePathsFromTraceIds } from './get_service_paths_from_trace_ids';
 
 export async function fetchServicePathsFromTraceIds(
   setup: Setup,
@@ -215,12 +228,25 @@ export async function fetchServicePathsFromTraceIds(
     },
   };
 
-  const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
-    'get_service_paths_from_trace_ids',
-    serviceMapParams
-  );
+  // TODO: caue : change name
+  const hitsResponse = await fetchServicePathsFromTraceIdsHits({
+    setup,
+    traceIds,
+    startRange,
+    endRange,
+  });
 
-  return serviceMapFromTraceIdsScriptResponse as {
+  const servicePaths = await getServicePathsFromTraceIds({
+    servicePathsFromTraceIds: hitsResponse,
+  });
+
+  const response = {
+    aggregations: {
+      service_map: {
+        value: servicePaths,
+      },
+    },
+  } as {
     aggregations?: {
       service_map: {
         value: {
@@ -233,4 +259,83 @@ export async function fetchServicePathsFromTraceIds(
       };
     };
   };
+  return response;
+
+  //   const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
+  //     'get_service_paths_from_trace_ids_scripted_metrics',
+  //     serviceMapParams
+  //   );
+  // return serviceMapFromTraceIdsScriptResponse as {
+  //   aggregations?: {
+  //     service_map: {
+  //       value: {
+  //         paths: ConnectionNode[][];
+  //         discoveredServices: Array<{
+  //           from: ExternalConnectionNode;
+  //           to: ServiceConnectionNode;
+  //         }>;
+  //       };
+  //     };
+  //   };
+  // };
+}
+
+export type ServicePathsFromTraceIds = Awaited<
+  ReturnType<typeof fetchServicePathsFromTraceIdsHits>
+>;
+
+async function fetchServicePathsFromTraceIdsHits({
+  setup,
+  traceIds,
+  startRange,
+  endRange,
+}: {
+  setup: Setup;
+  traceIds: string[];
+  startRange: number;
+  endRange: number;
+}) {
+  const { apmEventClient } = setup;
+  const hitsParams = {
+    apm: {
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
+    body: {
+      // TODO: caue check if this number is correct
+      size: 1000,
+      _source: [
+        PARENT_ID,
+        SERVICE_NAME,
+        SERVICE_ENVIRONMENT,
+        TRACE_ID,
+        PROCESSOR_EVENT,
+        SPAN_ID,
+        SPAN_TYPE,
+        SPAN_SUBTYPE,
+        SPAN_DESTINATION_SERVICE_RESOURCE,
+        AGENT_NAME,
+        TRANSACTION_ID,
+      ],
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                [TRACE_ID]: traceIds,
+              },
+            },
+            ...rangeQuery(startRange, endRange),
+          ],
+        },
+      },
+    },
+  };
+
+  // TODO: caue : change name
+  const hitsResponse = await apmEventClient.search(
+    'fetch_service_paths_from_trace_ids_hitsParams',
+    hitsParams
+  );
+
+  return hitsResponse.hits.hits;
 }
