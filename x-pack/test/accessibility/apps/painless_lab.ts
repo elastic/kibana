@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // github.com/elastic/kibana/issues/75876
-    it.skip('click on the context button', async () => {
+    // adding the sleep to fix the timing issue to get the focus.
+    it('click on the context button', async () => {
       const painlessTabsContext = await find.byCssSelector(
         '[data-test-subj="painlessTabs"] #context'
       );
@@ -48,18 +49,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it.skip('click on the Basic button', async () => {
+    it('click on the Basic button', async () => {
+      await testSubjects.click('painlessContextDropDown');
+      await a11y.testAppSnapshot();
       await testSubjects.click('basicButtonDropdown');
+      await PageObjects.common.sleep(2000);
       await a11y.testAppSnapshot();
     });
 
-    it.skip('click on the Filter button', async () => {
+    it('click on the Filter button', async () => {
+      await testSubjects.click('painlessContextDropDown');
+      await a11y.testAppSnapshot();
       await testSubjects.click('filterButtonDropdown');
+      await PageObjects.common.sleep(2000);
       await a11y.testAppSnapshot();
     });
 
-    it.skip('click on the Score button', async () => {
+    it('click on the Score button', async () => {
+      await testSubjects.click('painlessContextDropDown');
+      await a11y.testAppSnapshot();
       await testSubjects.click('scoreButtonDropdown');
+      await PageObjects.common.sleep(2000);
       await a11y.testAppSnapshot();
     });
   });
