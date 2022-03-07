@@ -33,13 +33,13 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({ request, title,
     <EuiFlyout maxWidth={480} onClose={closeFlyout}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>{title}</h2>
+          <h2 data-test-subj="apiRequestFlyoutTitle">{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
         <EuiText>
-          <p>{description}</p>
+          <p data-test-subj="apiRequestFlyoutDescription">{description}</p>
         </EuiText>
         <EuiSpacer />
         <EuiCodeBlock language="json" isCopyable data-test-subj="apiRequestFlyoutBody">

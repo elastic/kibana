@@ -30,6 +30,7 @@ export {
   XJson,
   JsonEditor,
   attemptToURIDecode,
+  ViewApiRequest,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
 export type {
