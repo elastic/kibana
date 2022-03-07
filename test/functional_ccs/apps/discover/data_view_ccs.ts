@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from './ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
+  const remoteEsArchiver = getService('remoteEsArchiver');
 
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
@@ -30,8 +30,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/126658
   describe.skip('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_logstash_reader',
+        'ccs_remote_search',
+      ]);
+      await remoteEsArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -45,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('use ccs to create a new data view', async function () {
-      const dataViewToCreate = 'remote:logstash';
+      const dataViewToCreate = 'ftr-remote:logstash';
       await createDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
