@@ -17,6 +17,7 @@ import {
 } from './cases_context_reducer';
 import { CasesContextFeatures, CasesFeatures } from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
+import { ReleasePhase } from '../types';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
@@ -27,12 +28,14 @@ export interface CasesContextValue {
   userCanCrud: boolean;
   basePath: string;
   features: CasesContextFeatures;
+  releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
 }
 
 export interface CasesContextProps extends Pick<CasesContextValue, 'owner' | 'userCanCrud'> {
   basePath?: string;
   features?: CasesFeatures;
+  releasePhase?: ReleasePhase;
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
@@ -44,7 +47,7 @@ export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' 
 
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
-  value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {} },
+  value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {}, releasePhase = 'ga' },
 }) => {
   const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
@@ -57,6 +60,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
      * of the DEFAULT_FEATURES object
      */
     features: merge({}, DEFAULT_FEATURES, features),
+    releasePhase,
     dispatch,
   }));
 

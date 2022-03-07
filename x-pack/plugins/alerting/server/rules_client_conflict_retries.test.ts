@@ -52,6 +52,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  minimumScheduleInterval: '1m',
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -101,7 +102,7 @@ async function update(success: boolean) {
     await rulesClient.update({
       id: MockAlertId,
       data: {
-        schedule: { interval: '5s' },
+        schedule: { interval: '1m' },
         name: 'cba',
         tags: ['bar'],
         params: { bar: true },
@@ -267,7 +268,7 @@ function setupRawAlertMocks(
       enabled: true,
       tags: ['foo'],
       alertTypeId: 'myType',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
       params: {},

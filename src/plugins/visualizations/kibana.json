@@ -12,9 +12,10 @@
     "embeddable",
     "inspector",
     "savedObjects",
+    "screenshotMode",
     "presentationUtil"
   ],
-  "optionalPlugins": [ "home", "share", "usageCollection", "spaces", "savedObjectsTaggingOss"],
+  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "savedObjectsTaggingOss"],
   "requiredBundles": ["kibanaUtils", "discover", "kibanaReact", "home"],
   "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions"],
   "owner": {

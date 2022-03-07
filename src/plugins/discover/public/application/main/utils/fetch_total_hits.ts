@@ -30,11 +30,7 @@ export function fetchTotalHits(
   }
 
   const executionContext = {
-    type: 'application',
-    name: 'discover',
     description: 'fetch total hits',
-    url: window.location.pathname,
-    id: savedSearch.id ?? '',
   };
 
   const fetch$ = searchSource
