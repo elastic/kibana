@@ -7,8 +7,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
@@ -35,8 +36,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/124663
-    describe.skip('validation', function () {
+    describe('validation', function () {
       it('can display errors', async function () {
         await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.settings.setIndexPatternField('log-fake*');
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('can resolve errors and submit', async function () {
         await PageObjects.settings.setIndexPatternField('log*');
-        await (await PageObjects.settings.getSaveIndexPatternButton()).click();
+        await (await PageObjects.settings.getSaveDataViewButtonActive()).click();
         await PageObjects.settings.removeIndexPattern();
       });
     });
@@ -72,10 +72,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('index pattern creation', function indexPatternCreation() {
-      let indexPatternId;
+      let indexPatternId: string;
 
       before(function () {
-        return PageObjects.settings.createIndexPattern().then((id) => (indexPatternId = id));
+        return PageObjects.settings
+          .createIndexPattern('logstash-*')
+          .then((id) => (indexPatternId = id));
       });
 
       it('should have index pattern in page header', async function () {
