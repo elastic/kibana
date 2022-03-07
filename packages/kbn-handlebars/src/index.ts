@@ -194,7 +194,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.output.push('null');
   }
 
-  getParams(block: { params: hbs.AST.Expression[] }): any[] {
+  private getParams(block: { params: hbs.AST.Expression[] }): any[] {
     const currentOutput = this.output;
     this.output = [];
     this.acceptArray(block.params);
