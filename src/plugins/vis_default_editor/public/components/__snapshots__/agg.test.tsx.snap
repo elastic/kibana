@@ -17,7 +17,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
   data-test-subj="visEditorAggAccordion1"
   element="div"
   extraAction={
-    <div>
+    <React.Fragment>
       <EuiToolTip
         content="Enable   aggregation"
         delay="regular"
@@ -32,7 +32,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
           onClick={[Function]}
         />
       </EuiToolTip>
-    </div>
+    </React.Fragment>
   }
   id="visEditorAggAccordion1"
   initialIsOpen={true}
