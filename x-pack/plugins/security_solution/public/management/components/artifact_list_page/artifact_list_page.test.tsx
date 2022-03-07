@@ -96,10 +96,12 @@ describe('When using the ArtifactListPage component', () => {
         />
       ));
     };
-  });
 
-  afterEach(() => {
-    useUserPrivileges.mockClear();
+    // Ensure user privileges are reset
+    useUserPrivileges.mockReturnValue({
+      ...useUserPrivileges(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+    });
   });
 
   it('should display a loader while determining which view to show', async () => {
@@ -536,6 +538,7 @@ describe('When using the ArtifactListPage component', () => {
         });
 
         useUserPrivileges.mockReturnValue({
+          ...useUserPrivileges(),
           endpointPrivileges: getEndpointPrivilegesInitialStateMock({
             canCreateArtifactsByPolicy: false,
           }),
@@ -806,7 +809,9 @@ describe('When using the ArtifactListPage component', () => {
         const firstPolicyTestId = `policiesSelector-popover-items-${policyId}`;
 
         await act(async () => {
-          expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();
+          await waitFor(() => {
+            expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();
+          });
         });
 
         act(() => {
