@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
       await runRequest(`${testIndexPattern}_invalid`, 404);
     });
 
-    it('should return empty job capabilities of fields for an index that exists with incorrect rollup parameter', async () => {
+    it('should return empty job capabilities of fields for a non-rollup index with rollup parameter set to true', async () => {
       const body = await runRequest(testIndexPattern, 200, true);
       await ml.testExecution.logTestStep(
         `response should contain object for ${testIndexPattern} index pattern`

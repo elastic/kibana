@@ -90,8 +90,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should find single job from different space when run across all spaces', async () => {
-      const body = await runRequest(idSpace1, 200, [jobIdSpace1], true);
-      expect(body).to.eql({ [jobIdSpace1]: { exists: true } });
+      const body = await runRequest(idSpace1, 200, [jobIdSpace2], true);
+      expect(body).to.eql({ [jobIdSpace2]: { exists: true } });
     });
   });
 };
