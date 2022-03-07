@@ -32,7 +32,11 @@ import type {
 } from '../../../types';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
-import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
+import {
+  setPackageInfo,
+  generatePackageInfoFromArchiveBuffer,
+  unpackBufferToCache,
+} from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 
@@ -391,7 +395,7 @@ async function installPackageByUpload({
   let installType: InstallType = 'unknown';
   const telemetryEvent: PackageUpdateEvent = getTelemetryEvent('', '');
   try {
-    const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
+    const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
 
     const installedPkg = await getInstallationObject({
       savedObjectsClient,

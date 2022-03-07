@@ -12,7 +12,7 @@ import JSON5 from 'json5';
 import { REPO_ROOT } from '@kbn/utils';
 
 import * as Registry from '../services/epm/registry';
-import { parseAndVerifyArchiveEntries } from '../services/epm/archive';
+import { generatePackageInfoFromArchiveBuffer } from '../services/epm/archive';
 
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
@@ -64,7 +64,7 @@ describe('validate bundled packages', () => {
     for (const packageObject of packageObjects) {
       const { registryPackage, packageArchive } = packageObject;
 
-      const archivePackageInfo = await parseAndVerifyArchiveEntries(
+      const archivePackageInfo = await generatePackageInfoFromArchiveBuffer(
         packageArchive.archiveBuffer,
         'application/zip'
       );

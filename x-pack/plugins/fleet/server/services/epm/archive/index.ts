@@ -23,7 +23,7 @@ import { getBufferExtractor } from './extract';
 
 export * from './cache';
 export { getBufferExtractor, untarBuffer, unzipBuffer } from './extract';
-export { parseAndVerifyArchiveBuffer as parseAndVerifyArchiveEntries } from './validation';
+export { generatePackageInfoFromArchiveBuffer } from './parse';
 
 export interface ArchiveEntry {
   path: string;

@@ -54,7 +54,7 @@ jest.mock('../kibana/index_pattern/install', () => {
 });
 jest.mock('../archive', () => {
   return {
-    parseAndVerifyArchiveEntries: jest.fn(() =>
+    generatePackageInfoFromArchiveBuffer: jest.fn(() =>
       Promise.resolve({ packageInfo: { name: 'apache', version: '1.3.0' } })
     ),
     unpackBufferToCache: jest.fn(),

@@ -35,12 +35,15 @@ const MANIFEST_NAME = 'manifest.yml';
 
 const DEFAULT_RELEASE_VALUE = 'ga';
 
+// Ingest pipelines are specified in a `data_stream/<name>/elasticsearch/ingest_pipeline/` directory where a `default`
+// ingest pipeline should be specified by one of these filenames.
 const DEFAULT_INGEST_PIPELINE_VALUE = 'default';
 const DEFAULT_INGEST_PIPELINE_FILE_NAME_YML = 'default.yml';
 const DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON = 'default.json';
 
 // Borrowed from https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/utils/expand_dotted.ts
-// With some alterations around non-object values
+// with some alterations around non-object values. The package registry service expands some dotted fields from manifest files,
+// so we need to do the same here.
 const expandDottedField = (dottedFieldName: string, val: unknown): object => {
   const parts = dottedFieldName.split('.');
 
@@ -113,10 +116,19 @@ const registryPolicyTemplateProps = Object.values(RegistryPolicyTemplateKeys);
 const registryStreamProps = Object.values(RegistryStreamKeys);
 const registryDataStreamProps = Object.values(RegistryDataStreamKeys);
 
-// TODO: everything below performs verification of manifest.yml files, and hence duplicates functionality already implemented in the
-// package registry. At some point this should probably be replaced (or enhanced) with verification based on
-// https://github.com/elastic/package-spec/
-export async function parseAndVerifyArchiveBuffer(
+/*
+  This function generates a package info object (see type `ArchivePackage`) by parsing and verifying the `manifest.yml` file as well
+  as the directory structure for the given package archive and other files adhering to the package spec: https://github.com/elastic/package-spec.
+
+  Currently, this process is duplicative of logic that's already implemented in the Package Registry codebase,
+  e.g. https://github.com/elastic/package-registry/blob/main/packages/package.go. Because of this duplication, it's likely for our parsing/verification
+  logic to fall out of sync with the registry codebase's implementation.
+
+  This should be addressed in https://github.com/elastic/kibana/issues/115032
+  where we'll no longer use the package registry endpoint as a source of truth for package info objects, and instead Fleet will _always_ generate
+  them in the manner implemented below.
+*/
+export async function generatePackageInfoFromArchiveBuffer(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
@@ -363,7 +375,6 @@ export function parseAndVerifyStreams(
         streamObject.vars = vars;
       }
 
-      // default template path name see https://github.com/elastic/package-registry/blob/master/util/dataset.go#L143
       streams.push(
         Object.entries(restOfProps).reduce((validatedStream, [key, value]) => {
           if (registryStreamProps.includes(key as RegistryStreamKeys)) {
