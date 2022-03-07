@@ -11,14 +11,14 @@ import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import classNames from 'classnames';
 
-import { ControlGroupStrings } from '../control_group_strings';
+import { ControlGroupStrings } from '../control_group/control_group_strings';
 import { ControlsIllustration } from './controls_illustration';
-import { ControlGroupContainer } from '../embeddable/control_group_container';
+import { ControlGroupContainer } from '../control_group/embeddable/control_group_container';
 
 const CONTROLS_CALLOUT_STATE_KEY = 'dashboard:controlsCalloutDismissed';
 
-interface CalloutProps {
-  controlEmbeddable: ControlGroupContainer | undefined;
+export interface CalloutProps {
+  controlEmbeddable?: ControlGroupContainer | undefined;
 }
 
 export const ControlsCallout = ({ controlEmbeddable }: CalloutProps) => {
@@ -64,3 +64,7 @@ export const ControlsCallout = ({ controlEmbeddable }: CalloutProps) => {
     </EuiPanel>
   );
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default ControlsCallout;

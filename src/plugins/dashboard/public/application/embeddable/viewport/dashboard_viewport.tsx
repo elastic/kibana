@@ -13,7 +13,12 @@ import { DashboardContainer, DashboardReactContextValue } from '../dashboard_con
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { ControlGroupContainer, ControlsCallout } from '../../../../../controls/public';
+import {
+  CalloutProps,
+  ControlGroupContainer,
+  LazyControlsCallout,
+} from '../../../../../controls/public';
+import { withSuspense } from '../../../services/presentation_util';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
@@ -30,6 +35,8 @@ interface State {
   panelCount: number;
   isEmbeddedExternally?: boolean;
 }
+
+const ControlsCallout = withSuspense<CalloutProps>(LazyControlsCallout);
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;

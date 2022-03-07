@@ -28,7 +28,6 @@ export { OPTIONS_LIST_CONTROL, CONTROL_GROUP_TYPE } from '../common';
 
 export {
   ControlGroupContainer,
-  ControlsCallout,
   ControlGroupContainerFactory,
   type ControlGroupInput,
   type ControlGroupOutput,
@@ -39,6 +38,8 @@ export {
   OptionsListEmbeddable,
   type OptionsListEmbeddableInput,
 } from './control_types';
+
+export { LazyControlsCallout, type CalloutProps } from './controls_callout';
 
 export function plugin() {
   return new ControlsPlugin();

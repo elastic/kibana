@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { ControlGroupContainer } from './embeddable/control_group_container';
-export type { ControlGroupInput, ControlGroupOutput } from './types';
-
-export { CONTROL_GROUP_TYPE } from './types';
-export { ControlGroupContainerFactory } from './embeddable/control_group_container_factory';
+import React from 'react';
+export const LazyControlsCallout = React.lazy(() => import('./controls_callout'));
+export type { CalloutProps } from './controls_callout';
