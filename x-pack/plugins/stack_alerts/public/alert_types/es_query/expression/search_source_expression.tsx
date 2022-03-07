@@ -144,34 +144,9 @@ export const SearchSourceExpression = ({
       <EuiText size="xs">
         <FormattedMessage
           id="xpack.stackAlerts.searchThreshold.ui.notEditable"
-          defaultMessage="The data view, query, and filter cannot be edited."
+          defaultMessage="The data view, query, and filter are initialized in Discover cannot be edited subsequently."
         />
       </EuiText>
-
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.searchSource.ui.selectSizePrompt"
-            defaultMessage="Select a size"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ValueExpression
-        description={i18n.translate('xpack.stackAlerts.searchSource.ui.sizeExpression', {
-          defaultMessage: 'Size',
-        })}
-        data-test-subj="sizeValueExpression"
-        value={size}
-        errors={errors.size}
-        display="fullWidth"
-        popupPosition={'upLeft'}
-        onChangeSelectedValue={(updatedValue) => {
-          setParam('size', updatedValue);
-        }}
-      />
-
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
         <h5>
@@ -210,7 +185,31 @@ export const SearchSourceExpression = ({
           setParam('timeWindowUnit', selectedWindowUnit)
         }
       />
-      <EuiSpacer />
+      <EuiSpacer size="s" />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.stackAlerts.searchSource.ui.selectSizePrompt"
+            defaultMessage="Select a size"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <ValueExpression
+        description={i18n.translate('xpack.stackAlerts.searchSource.ui.sizeExpression', {
+          defaultMessage: 'Size',
+        })}
+        data-test-subj="sizeValueExpression"
+        value={size}
+        errors={errors.size}
+        display="fullWidth"
+        popupPosition={'upLeft'}
+        onChangeSelectedValue={(updatedValue) => {
+          setParam('size', updatedValue);
+        }}
+      />
+
+      <EuiSpacer size="s" />
     </Fragment>
   );
 };
