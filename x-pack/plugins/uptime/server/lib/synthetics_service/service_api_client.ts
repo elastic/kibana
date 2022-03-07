@@ -31,6 +31,7 @@ export interface ServiceData {
 }
 
 export class ServiceAPIClient {
+  private readonly username?: string;
   private readonly authorization: string;
   public locations: ServiceLocations;
   private logger: Logger;
