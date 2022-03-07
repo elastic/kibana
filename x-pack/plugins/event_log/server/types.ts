@@ -56,7 +56,7 @@ export interface IEventLogClient {
     options?: Partial<AggregateOptionsType>,
     legacyIds?: string[]
   ): Promise<{
-    aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
+    aggregateResults: Record<string, estypes.AggregationsAggregate> | undefined;
   }>;
 }
 

@@ -53,6 +53,9 @@ export const queryOptionsSchema = schema.object({
   sort: sortFieldsSchema,
   filter: schema.maybe(schema.string()),
 });
+
+export type QueryOptionsType = Pick<TypeOf<typeof queryOptionsSchema>, 'start' | 'end' | 'filter'>;
+
 // page & perPage are required, other fields are optional
 // using schema.maybe allows us to set undefined, but not to make the field optional
 export type FindOptionsType = Pick<
@@ -61,7 +64,7 @@ export type FindOptionsType = Pick<
 > &
   Partial<TypeOf<typeof queryOptionsSchema>>;
 
-export type AggregateOptionsType = Pick<TypeOf<typeof queryOptionsSchema>, 'sort' | 'filter'> &
+export type AggregateOptionsType = Pick<TypeOf<typeof queryOptionsSchema>, 'filter'> &
   Partial<TypeOf<typeof queryOptionsSchema>> & {
     aggs: Record<string, estypes.AggregationsAggregationContainer>;
   };
@@ -87,7 +90,7 @@ export class EventLogClient implements IEventLogClient {
     this.request = request;
   }
 
-  async findEventsBySavedObjectIds(
+  public async findEventsBySavedObjectIds(
     type: string,
     ids: string[],
     options?: Partial<FindOptionsType>,
@@ -95,15 +98,12 @@ export class EventLogClient implements IEventLogClient {
   ): Promise<QueryEventsBySavedObjectResult> {
     const findOptions = queryOptionsSchema.validate(options ?? {});
 
-    const space = await this.spacesService?.getActiveSpace(this.request);
-    const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
-
-    // verify the user has the required permissions to view this saved objects
+    // verify the user has the required permissions to view this saved object
     await this.savedObjectGetter(type, ids);
 
     return await this.esContext.esAdapter.queryEventsBySavedObjects({
       index: this.esContext.esNames.indexPattern,
-      namespace,
+      namespace: await this.getNamespace(),
       type,
       ids,
       findOptions,
@@ -111,27 +111,29 @@ export class EventLogClient implements IEventLogClient {
     });
   }
 
-  async aggregateEventsBySavedObjectIds(
+  public async aggregateEventsBySavedObjectIds(
     type: string,
     ids: string[],
-    options?: Partial<AggregateOptionsType>,
+    options?: AggregateOptionsType,
     legacyIds?: string[]
   ) {
-    // const aggregateOptions = queryOptionsSchema.validate(options ?? {});
+    const aggregateOptions = queryOptionsSchema.validate(options ?? {});
 
-    const space = await this.spacesService?.getActiveSpace(this.request);
-    const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
-
-    // verify the user has the required permissions to view this saved objects
+    // verify the user has the required permissions to view this saved object
     await this.savedObjectGetter(type, ids);
 
     return await this.esContext.esAdapter.aggregateEventsBySavedObjects({
       index: this.esContext.esNames.indexPattern,
-      namespace,
+      namespace: await this.getNamespace(),
       type,
       ids,
-      findOptions: options as AggregateOptionsType,
+      aggregateOptions: aggregateOptions as AggregateOptionsType,
       legacyIds,
     });
+  }
+
+  private async getNamespace() {
+    const space = await this.spacesService?.getActiveSpace(this.request);
+    return space && this.spacesService?.spaceIdToNamespace(space.id);
   }
 }

@@ -14,7 +14,7 @@ import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
-import { AggregateOptionsType, FindOptionsType } from '../event_log_client';
+import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
@@ -47,9 +47,16 @@ interface QueryOptionsEventsBySavedObjectFilter {
   namespace: string | undefined;
   type: string;
   ids: string[];
-  findOptions: FindOptionsType;
   legacyIds?: string[];
 }
+
+export type FindEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
+  findOptions: FindOptionsType;
+};
+
+export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
+  aggregateOptions: AggregateOptionsType;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
@@ -327,20 +334,26 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   }
 
   public async queryEventsBySavedObjects(
-    queryOptions: QueryOptionsEventsBySavedObjectFilter
+    queryOptions: FindEventsOptionsBySavedObjectFilter
   ): Promise<QueryEventsBySavedObjectResult> {
     const { index, type, ids, findOptions } = queryOptions;
     const { page, per_page: perPage, sort } = findOptions;
 
     const esClient = await this.elasticsearchClientPromise;
 
-    const query = getQueryBody(this.logger, queryOptions);
+    const query = getQueryBody(
+      this.logger,
+      queryOptions,
+      pick(queryOptions.findOptions, ['start', 'end', 'filter'])
+    );
 
     const body: estypes.SearchRequest['body'] = {
       size: perPage,
       from: (page - 1) * perPage,
-      sort: (sort ?? []).map((s) => ({ [s.sort_field]: { order: s.sort_order } })),
       query,
+      ...(sort
+        ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
+        : {}),
     };
 
     try {
@@ -365,16 +378,20 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   }
 
   public async aggregateEventsBySavedObjects(
-    queryOptions: QueryOptionsEventsBySavedObjectFilter
+    queryOptions: AggregateEventsOptionsBySavedObjectFilter
   ): Promise<{
-    aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
+    aggregateResults: Record<string, estypes.AggregationsAggregate> | undefined;
   }> {
-    const { index, type, ids, findOptions } = queryOptions;
-    const { page, per_page: perPage, sort, aggs } = findOptions as AggregateOptionsType;
+    const { index, type, ids, aggregateOptions } = queryOptions;
+    const { aggs } = aggregateOptions;
 
     const esClient = await this.elasticsearchClientPromise;
 
-    const query = getQueryBody(this.logger, queryOptions);
+    const query = getQueryBody(
+      this.logger,
+      queryOptions,
+      pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
+    );
 
     const body: estypes.SearchRequest['body'] = {
       size: 0,
@@ -388,7 +405,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         body,
       });
       return {
-        aggregations,
+        aggregateResults: aggregations,
       };
     } catch (err) {
       throw new Error(
@@ -418,14 +435,18 @@ function getNamespaceQuery(namespace?: string) {
   return namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
 }
 
-function getQueryBody(logger: Logger, queryOptions: QueryOptionsEventsBySavedObjectFilter) {
-  const { namespace, type, ids, findOptions, legacyIds } = queryOptions;
-  const { start, end, filter } = findOptions;
+export function getQueryBody(
+  logger: Logger,
+  opts: FindEventsOptionsBySavedObjectFilter | AggregateEventsOptionsBySavedObjectFilter,
+  queryOptions: QueryOptionsType
+) {
+  const { namespace, type, ids, legacyIds } = opts;
+  const { start, end, filter } = queryOptions ?? {};
 
   const namespaceQuery = getNamespaceQuery(namespace);
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
-    dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : [];
+    dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
   } catch (err) {
     logger.debug(
       `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
@@ -575,7 +596,7 @@ function getQueryBody(logger: Logger, queryOptions: QueryOptionsEventsBySavedObj
 
   return {
     bool: {
-      filter: dslFilterQuery,
+      ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
       must: reject(musts, isUndefined),
     },
   };
