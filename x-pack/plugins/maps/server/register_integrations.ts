@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from 'kibana/server';
 import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
-import { APP_ID, OPEN_WIZARD_URL, getFullPath } from '../common/constants';
+import { APP_ID, OPEN_LAYER_WIZARD, getFullPath, WIZARD_ID } from '../common/constants';
 
 export function registerIntegrations(
   core: CoreSetup,
@@ -44,7 +44,7 @@ export function registerIntegrations(
       defaultMessage: 'Upload GeoJson with Elastic Maps.',
     }),
     uiInternalPath: core.http.basePath.prepend(
-      `${getFullPath('?' + OPEN_WIZARD_URL + '=uploadGeojson')}`
+      `${getFullPath('?' + OPEN_LAYER_WIZARD + '=' + WIZARD_ID.GEO_JSON)}`
     ),
     icons: [
       {
@@ -68,7 +68,7 @@ export function registerIntegrations(
       }
     ),
     uiInternalPath: core.http.basePath.prepend(
-      `${getFullPath('?' + OPEN_WIZARD_URL + '=uploadGeojson')}`
+      `${getFullPath('?' + OPEN_LAYER_WIZARD + '=' + WIZARD_ID.GEO_JSON)}`
     ),
     icons: [
       {

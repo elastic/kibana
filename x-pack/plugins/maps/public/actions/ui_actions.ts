@@ -125,14 +125,14 @@ export function closeTimeslider() {
   };
 }
 
-export function openLayerWizard(layerWizardId: string) {
+export function openLayerWizard(autoOpenLayerWizardId: string) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch(setSelectedLayer(null));
     dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
     dispatch(setDrawMode(DRAW_MODE.NONE));
     dispatch({
       type: SET_LAYER_WIZARD_ID,
-      layerWizardId,
+      autoOpenLayerWizardId,
     });
   };
 }

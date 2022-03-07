@@ -35,7 +35,7 @@ export interface Props {
   isLoadingPreviewLayers: boolean;
   promotePreviewLayers: () => void;
   enableEditMode: () => void;
-  layerWizardId: string;
+  autoOpenLayerWizardId: string;
   clearLayerWizard: () => void;
 }
 
@@ -63,13 +63,13 @@ export class AddLayerPanel extends Component<Props, State> {
   };
 
   componentDidMount() {
-    if (this.props.layerWizardId) {
+    if (this.props.autoOpenLayerWizardId) {
       this._openWizard();
     }
   }
 
   _openWizard() {
-    const selectedWizard = getWizardById(this.props.layerWizardId);
+    const selectedWizard = getWizardById(this.props.autoOpenLayerWizardId);
 
     if (selectedWizard) {
       this._onWizardSelect(selectedWizard);

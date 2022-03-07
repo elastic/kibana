@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OPEN_WIZARD_URL } from '../../../../common/constants';
+import { OPEN_LAYER_WIZARD } from '../../../../common/constants';
 
 export function getOpenLayerWizardFromUrlParam() {
   const locationSplit = window.location.href.split(/[?#]+/);
@@ -15,9 +15,9 @@ export function getOpenLayerWizardFromUrlParam() {
   }
 
   const mapAppParams = new URLSearchParams(locationSplit[1]);
-  if (!mapAppParams.has(OPEN_WIZARD_URL)) {
+  if (!mapAppParams.has(OPEN_LAYER_WIZARD)) {
     return '';
   }
 
-  return mapAppParams.has(OPEN_WIZARD_URL) ? mapAppParams.get(OPEN_WIZARD_URL) : '';
+  return mapAppParams.has(OPEN_LAYER_WIZARD) ? mapAppParams.get(OPEN_LAYER_WIZARD) : '';
 }
