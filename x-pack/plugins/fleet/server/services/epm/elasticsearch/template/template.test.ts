@@ -836,6 +836,12 @@ describe('EPM template', () => {
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any);
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [
         {
@@ -864,6 +870,14 @@ describe('EPM template', () => {
           { name: 'test-replicated', replicated: true },
         ],
       } as any);
+
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any);
+
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [
         {
