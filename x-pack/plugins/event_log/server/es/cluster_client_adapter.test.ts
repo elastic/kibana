@@ -393,7 +393,9 @@ describe('setIndexToHidden', () => {
     expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
       index: 'foo-bar-000001',
       body: {
-        'index.hidden': true,
+        index: {
+          hidden: true,
+        },
       },
     });
   });

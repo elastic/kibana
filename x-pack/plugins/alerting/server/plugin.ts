@@ -6,7 +6,6 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { first } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
@@ -58,7 +57,7 @@ import {
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
 import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
-import { AlertsConfig } from './config';
+import { AlertingConfig, PublicAlertingConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
@@ -99,6 +98,7 @@ export interface PluginSetupContract {
     >
   ): void;
   getSecurityHealth: () => Promise<SecurityHealth>;
+  getConfig: () => PublicAlertingConfig;
 }
 
 export interface PluginStartContract {
@@ -136,7 +136,7 @@ export interface AlertingPluginsStart {
 }
 
 export class AlertingPlugin {
-  private readonly config: Promise<AlertsConfig>;
+  private readonly config: AlertingConfig;
   private readonly logger: Logger;
   private ruleTypeRegistry?: RuleTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
@@ -153,7 +153,7 @@ export class AlertingPlugin {
   private usageCounter: UsageCounter | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
+    this.config = initializerContext.config.get();
     this.logger = initializerContext.logger.get();
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
@@ -201,6 +201,7 @@ export class AlertingPlugin {
       taskRunnerFactory: this.taskRunnerFactory,
       licenseState: this.licenseState,
       licensing: plugins.licensing,
+      minimumScheduleInterval: this.config.minimumScheduleInterval,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -286,13 +287,12 @@ export class AlertingPlugin {
           throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
 
-        alertingConfig.then((config) => {
-          ruleType.ruleTaskTimeout = ruleType.ruleTaskTimeout ?? config.defaultRuleTaskTimeout;
-          ruleType.cancelAlertsOnRuleTimeout =
-            ruleType.cancelAlertsOnRuleTimeout ?? config.cancelAlertsOnRuleTimeout;
-          ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
-          ruleTypeRegistry.register(ruleType);
-        });
+        ruleType.ruleTaskTimeout =
+          ruleType.ruleTaskTimeout ?? alertingConfig.defaultRuleTaskTimeout;
+        ruleType.cancelAlertsOnRuleTimeout =
+          ruleType.cancelAlertsOnRuleTimeout ?? alertingConfig.cancelAlertsOnRuleTimeout;
+        ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
+        ruleTypeRegistry.register(ruleType);
       },
       getSecurityHealth: async () => {
         return await getSecurityHealth(
@@ -303,6 +303,11 @@ export class AlertingPlugin {
             return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
           }
         );
+      },
+      getConfig: () => {
+        return {
+          minimumScheduleInterval: alertingConfig.minimumScheduleInterval,
+        };
       },
     };
   }
@@ -360,6 +365,7 @@ export class AlertingPlugin {
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
+      minimumScheduleInterval: this.config.minimumScheduleInterval,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {
@@ -375,26 +381,25 @@ export class AlertingPlugin {
       return alertingAuthorizationClientFactory!.create(request);
     };
 
-    this.config.then((config) => {
-      taskRunnerFactory.initialize({
-        logger,
-        savedObjects: core.savedObjects,
-        elasticsearch: core.elasticsearch,
-        getRulesClientWithRequest,
-        spaceIdToNamespace,
-        actionsPlugin: plugins.actions,
-        encryptedSavedObjectsClient,
-        basePathService: core.http.basePath,
-        eventLogger: this.eventLogger!,
-        internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
-        executionContext: core.executionContext,
-        ruleTypeRegistry: this.ruleTypeRegistry!,
-        kibanaBaseUrl: this.kibanaBaseUrl,
-        supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
-        maxEphemeralActionsPerRule: config.maxEphemeralActionsPerAlert,
-        cancelAlertsOnRuleTimeout: config.cancelAlertsOnRuleTimeout,
-        usageCounter: this.usageCounter,
-      });
+    taskRunnerFactory.initialize({
+      logger,
+      savedObjects: core.savedObjects,
+      uiSettings: core.uiSettings,
+      elasticsearch: core.elasticsearch,
+      getRulesClientWithRequest,
+      spaceIdToNamespace,
+      actionsPlugin: plugins.actions,
+      encryptedSavedObjectsClient,
+      basePathService: core.http.basePath,
+      eventLogger: this.eventLogger!,
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      executionContext: core.executionContext,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
+      kibanaBaseUrl: this.kibanaBaseUrl,
+      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
+      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
+      cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      usageCounter: this.usageCounter,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

@@ -28,6 +28,12 @@ describe('es', () => {
       getIndexPatternsService: () => ({
         find: async () => [],
       }),
+      request: {
+        events: {
+          aborted$: of(),
+        },
+        body: {},
+      },
     };
   }
 
@@ -46,9 +52,11 @@ describe('es', () => {
     });
 
     test('should call data search with sessionId, isRestore and isStored', async () => {
+      const baseTlConfig = stubRequestAndServer({ rawResponse: esResponse });
       tlConfig = {
-        ...stubRequestAndServer({ rawResponse: esResponse }),
+        ...baseTlConfig,
         request: {
+          ...baseTlConfig.request,
           body: {
             searchSession: {
               sessionId: '1',

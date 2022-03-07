@@ -35,6 +35,7 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+            id: 'test',
           },
           dns: {
             question: {
@@ -110,6 +111,7 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+            id: 'test',
           },
           dns: {
             question: {
