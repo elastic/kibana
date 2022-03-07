@@ -78,6 +78,7 @@ describe('config schema', () => {
             "ignoreVersionMismatch": false,
             "logFetchCount": 10,
             "logQueries": false,
+            "maxSockets": Infinity,
             "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [
               "authorization",
