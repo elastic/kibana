@@ -272,6 +272,54 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should create rules with mapped parameters', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const createResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            params: {
+              risk_score: 40,
+              severity: 'medium',
+              another_param: 'another',
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
+          })
+        )
+        .expect(200);
+
+      const response = await supertest.get(
+        `${getUrlPrefix(
+          Spaces.space1.id
+        )}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
+      );
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
+      expect(response.body.total).to.equal(1);
+      expect(response.body.data[0].mapped_params).to.eql({
+        risk_score: 40,
+        severity: '40-medium',
+      });
+    });
+
     it('should allow providing custom saved object ids (uuid v1)', async () => {
       const customId = '09570bb0-6299-11eb-8fde-9fe5ce6ea450';
       const response = await supertest

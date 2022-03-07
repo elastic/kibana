@@ -22,7 +22,7 @@ image::images/job_view.png[Jenkins job view showing a test failure]
 1. *Git Changes:* the list of commits that were in this build which weren't in the previous build. For Pull Requests this list is calculated by comparing against the most recent Pull Request which was tested, it is not limited to build for this specific Pull Request, so it's not very useful.
 2. *Test Results:* A link to the test results screen, and shortcuts to the failed tests. Functional tests capture and store the log output from each specific test, and make it visible at these links. For other test runners only the error message is visible and log output must be tracked down in the *Pipeline Steps*.
 3. *Google Cloud Storage (GCS) Upload Report:* Link to the screen which lists out the artifacts uploaded to GCS during this job execution.
-4. *Pipeline Steps:*: A breakdown of the pipline that was executed, along with individual log output for each step in the pipeline.
+4. *Pipeline Steps:*: A breakdown of the pipeline that was executed, along with individual log output for each step in the pipeline.
 
 [discrete]
 === Viewing ciGroup/test Logs

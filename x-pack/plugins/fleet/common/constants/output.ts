@@ -23,3 +23,5 @@ export const DEFAULT_OUTPUT: NewOutput = {
   type: outputType.Elasticsearch,
   hosts: [''],
 };
+
+export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
