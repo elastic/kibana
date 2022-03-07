@@ -24,8 +24,8 @@ export function generateData({ start, end }: { start: number; end: number }) {
   const traceEvents = timerange(start, end)
     .interval('1m')
     .rate(rate)
-    .flatMap((timestamp) => [
-      ...instance
+    .spans((timestamp) =>
+      instance
         .transaction(transaction.name)
         .defaults({
           'service.runtime.name': 'AWS_Lambda_python3.8',
@@ -34,8 +34,8 @@ export function generateData({ start, end }: { start: number; end: number }) {
         .timestamp(timestamp)
         .duration(transaction.duration)
         .success()
-        .serialize(),
-    ]);
+        .serialize()
+    );
 
   return traceEvents;
 }
