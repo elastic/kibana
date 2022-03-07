@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from 'src/core/server';
+import type { IRouter } from 'src/core/server';
 import { SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
@@ -13,6 +13,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { getLatestCycleIds } from './get_latest_cycle_ids';
 
 import { CSP_KUBEBEAT_INDEX_PATTERN, FINDINGS_ROUTE_PATH } from '../../../common/constants';
+import { CspAppContext } from '../../plugin';
 
 type FindingsQuerySchema = TypeOf<typeof findingsInputSchema>;
 
@@ -70,7 +71,7 @@ const buildOptionsRequest = (queryParams: FindingsQuerySchema): FindingsOptions 
   ...getSearchFields(queryParams.fields),
 });
 
-export const defineFindingsIndexRoute = (router: IRouter, logger: Logger): void =>
+export const defineFindingsIndexRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: FINDINGS_ROUTE_PATH,
@@ -83,7 +84,7 @@ export const defineFindingsIndexRoute = (router: IRouter, logger: Logger): void 
 
         const latestCycleIds =
           request.query.latest_cycle === true
-            ? await getLatestCycleIds(esClient, logger)
+            ? await getLatestCycleIds(esClient, cspContext.logger)
             : undefined;
 
         const query = buildQueryRequest(latestCycleIds);

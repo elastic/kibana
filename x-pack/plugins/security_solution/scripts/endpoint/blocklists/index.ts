@@ -80,7 +80,7 @@ const createBlocklists: RunFn = async ({ flags, log }) => {
       const body = eventGenerator.generateBlocklistForCreate();
 
       if (isArtifactByPolicy(body)) {
-        const nmExceptions = Math.floor(Math.random() * 3) || 1;
+        const nmExceptions = eventGenerator.randomN(3) || 1;
         body.tags = Array.from({ length: nmExceptions }, () => {
           return `policy:${randomPolicyId()}`;
         });
