@@ -7,64 +7,58 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SAVE = i18n.translate('xpack.cloudSecurityPosture.rules.saveButtonLabel', {
+export const SAVE = i18n.translate('xpack.csp.rules.saveButtonLabel', {
   defaultMessage: 'Save',
 });
 
-export const CANCEL = i18n.translate('xpack.cloudSecurityPosture.rules.cancelButtonLabel', {
+export const CANCEL = i18n.translate('xpack.csp.rules.cancelButtonLabel', {
   defaultMessage: 'Cancel',
 });
 
-export const UNKNOWN_ERROR = i18n.translate(
-  'xpack.cloudSecurityPosture.rules.unknownErrorMessage',
-  { defaultMessage: 'Unknown Error' }
-);
+export const UNKNOWN_ERROR = i18n.translate('xpack.csp.rules.unknownErrorMessage', {
+  defaultMessage: 'Unknown Error',
+});
 
-export const REFRESH = i18n.translate('xpack.cloudSecurityPosture.rules.refreshButtonLabel', {
+export const REFRESH = i18n.translate('xpack.csp.rules.refreshButtonLabel', {
   defaultMessage: 'Refresh',
 });
 
-export const SEARCH = i18n.translate('xpack.cloudSecurityPosture.rules.searchPlaceholder', {
+export const SEARCH = i18n.translate('xpack.csp.rules.searchPlaceholder', {
   defaultMessage: 'Search',
 });
 
-export const BULK_ACTIONS = i18n.translate(
-  'xpack.cloudSecurityPosture.rules.bulkActionsButtonLabel',
-  { defaultMessage: 'Bulk Actions' }
-);
+export const BULK_ACTIONS = i18n.translate('xpack.csp.rules.bulkActionsButtonLabel', {
+  defaultMessage: 'Bulk Actions',
+});
 
-export const RULE_NAME = i18n.translate(
-  'xpack.cloudSecurityPosture.rules.ruleNameColumnHeaderLabel',
-  { defaultMessage: 'Rule Name' }
-);
+export const RULE_NAME = i18n.translate('xpack.csp.rules.ruleNameColumnHeaderLabel', {
+  defaultMessage: 'Rule Name',
+});
 
-export const SECTION = i18n.translate('xpack.cloudSecurityPosture.rules.sectionColumnHeaderLabel', {
+export const SECTION = i18n.translate('xpack.csp.rules.sectionColumnHeaderLabel', {
   defaultMessage: 'Section',
 });
 
-export const UPDATED_AT = i18n.translate(
-  'xpack.cloudSecurityPosture.rules.updatedAtColumnHeaderLabel',
-  { defaultMessage: 'Updated at' }
-);
+export const UPDATED_AT = i18n.translate('xpack.csp.rules.updatedAtColumnHeaderLabel', {
+  defaultMessage: 'Updated at',
+});
 
-export const ENABLED = i18n.translate('xpack.cloudSecurityPosture.rules.enabledColumnHeaderLabel', {
+export const ENABLED = i18n.translate('xpack.csp.rules.enabledColumnHeaderLabel', {
   defaultMessage: 'Enabled',
 });
 
-export const DISABLE = i18n.translate('xpack.cloudSecurityPosture.rules.disableLabel', {
+export const DISABLE = i18n.translate('xpack.csp.rules.disableLabel', {
   defaultMessage: 'Disable',
 });
 
-export const ENABLE = i18n.translate('xpack.cloudSecurityPosture.rules.enableLabel', {
+export const ENABLE = i18n.translate('xpack.csp.rules.enableLabel', {
   defaultMessage: 'Enable',
 });
 
-export const MISSING_RULES = i18n.translate(
-  'xpack.cloudSecurityPosture.rules.missingRulesMessage',
-  { defaultMessage: 'Rules are missing' }
-);
+export const MISSING_RULES = i18n.translate('xpack.csp.rules.missingRulesMessage', {
+  defaultMessage: 'Rules are missing',
+});
 
-export const UPDATE_FAILED = i18n.translate(
-  'xpack.cloudSecurityPosture.rules.updateFailedMessage',
-  { defaultMessage: 'Update failed' }
-);
+export const UPDATE_FAILED = i18n.translate('xpack.csp.rules.updateFailedMessage', {
+  defaultMessage: 'Update failed',
+});
