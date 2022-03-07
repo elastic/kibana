@@ -8,12 +8,13 @@
 import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { InfraClientStartDeps } from '../../../types';
 
 export const ManageAlertsContextMenuItem = () => {
   const {
     services: { observability },
-  } = useKibanaContextForPlugin();
+  } = useKibana<InfraClientStartDeps>();
   const manageRulesLinkProps = observability.useRulesLink();
   return (
     <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageRulesLinkProps}>

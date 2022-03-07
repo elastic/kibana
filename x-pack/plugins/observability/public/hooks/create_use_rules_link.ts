@@ -6,7 +6,7 @@
  */
 import { Options, useLinkProps } from './use_link_props';
 
-export function useRulesLinkCreator(isNewRuleManagementEnabled = false) {
+export function createUseRulesLink(isNewRuleManagementEnabled = false) {
   return function (options: Options = {}) {
     const linkProps = isNewRuleManagementEnabled
       ? {
@@ -17,7 +17,6 @@ export function useRulesLinkCreator(isNewRuleManagementEnabled = false) {
           app: 'management',
           pathname: '/insightsAndAlerting/triggersActions/alerts',
         };
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     return useLinkProps(linkProps, options);
   };
 }

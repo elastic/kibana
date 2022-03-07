@@ -46,7 +46,7 @@ import { createNavigationRegistry, NavigationEntry } from './services/navigation
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
-import { useRulesLinkCreator } from './hooks/use_rules_link_creator';
+import { createUseRulesLink } from './hooks/create_use_rules_link';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -252,8 +252,7 @@ export class Plugin
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useRulesLink: useRulesLinkCreator(config.unsafe.rules.enabled),
+      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
     };
   }
 
@@ -282,8 +281,7 @@ export class Plugin
       },
       createExploratoryViewUrl,
       ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useRulesLink: useRulesLinkCreator(config.unsafe.rules.enabled),
+      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
     };
   }
 }

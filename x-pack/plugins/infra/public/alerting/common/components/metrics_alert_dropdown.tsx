@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { InfraClientStartDeps } from '../../../types';
 
 type VisibleFlyoutType = 'inventory' | 'threshold' | null;
 
@@ -27,7 +27,7 @@ export const MetricsAlertDropdown = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const {
     services: { observability },
-  } = useKibanaContextForPlugin();
+  } = useKibana<InfraClientStartDeps>();
   const canCreateAlerts = useMemo(
     () => Boolean(uiCapabilities?.infrastructure?.save),
     [uiCapabilities]
