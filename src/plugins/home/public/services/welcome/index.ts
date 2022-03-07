@@ -6,13 +6,5 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import './welcome.test.mocks';
-import { Welcome } from './welcome';
-
-test('should render a Welcome screen', () => {
-  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} />);
-
-  expect(component).toMatchSnapshot();
-});
+export type { WelcomeServiceSetup, WelcomeRenderTelemetryNotice } from './welcome_service';
+export { WelcomeService } from './welcome_service';
