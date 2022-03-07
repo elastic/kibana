@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }) {
           'global_dashboard_all',
           'meta_for_geoshape_data_reader',
         ],
-        false
+        { skipBrowserRefresh: true }
       );
     });
 

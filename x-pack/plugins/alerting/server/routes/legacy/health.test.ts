@@ -52,7 +52,6 @@ const ruleTypes = [
     },
     producer: 'test',
     enabledInLicense: true,
-    minimumScheduleInterval: '1m',
     defaultScheduleInterval: '10m',
   } as RegistryAlertTypeWithAuth,
 ];

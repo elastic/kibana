@@ -8,6 +8,7 @@
 import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   PluginSetupContract as ActionsPluginSetup,
@@ -15,7 +16,6 @@ import {
 } from '../../actions/server';
 import { APP_ID } from '../common/constants';
 
-import { initCaseApi } from './routes/api';
 import {
   createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
@@ -28,13 +28,21 @@ import { CasesClient } from './client';
 import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import {
+  PluginStartContract as FeaturesPluginStart,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '../../features/server';
 import { LensServerPluginSetup } from '../../lens/server';
+import { getCasesKibanaFeature } from './features';
+import { registerRoutes } from './routes/api/register_routes';
+import { getExternalRoutes } from './routes/api/get_external_routes';
 
 export interface PluginsSetup {
-  security?: SecurityPluginSetup;
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
+  features: FeaturesPluginSetup;
+  usageCollection?: UsageCollectionSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface PluginsStart {
@@ -74,6 +82,8 @@ export class CasePlugin {
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
+    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+
     core.savedObjects.registerType(
       createCaseCommentSavedObjectType({
         migrationDeps: {
@@ -100,10 +110,14 @@ export class CasePlugin {
     );
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
-    initCaseApi({
-      logger: this.log,
+    const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+
+    registerRoutes({
       router,
+      routes: getExternalRoutes(),
+      logger: this.log,
       kibanaVersion: this.kibanaVersion,
+      telemetryUsageCounter,
     });
   }
 

@@ -26,7 +26,7 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
 import * as helpers from '../helpers';
-import { mockCasesContext } from '../../../../common/mock/mock_cases_context';
+import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
