@@ -99,7 +99,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     browserFields,
     indexPattern: indexPatterns,
-    loading: indexPatternsLoading,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
@@ -360,7 +359,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const casesPermissions = useGetUserCasesPermissions();
   const CasesContext = kibana.services.cases.getCasesContext();
 
-  if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
+  if (loading || isEmpty(selectedPatterns)) {
     return null;
   }
 
