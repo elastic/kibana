@@ -38,7 +38,7 @@ const Wrapper = styled.div`
   }
 `;
 
-export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
+export const VIZ_ACTIONS_BUTTON_CLASS = 'viz-actions-trigger';
 
 const owner = APP_ID;
 
@@ -177,7 +177,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     () => !canUseEditor() || attributes == null,
     [attributes, canUseEditor]
   );
-
   const items = useMemo(
     () => [
       <EuiContextMenuItem
@@ -239,16 +238,14 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
       userCanCrud,
     ]
   );
-
   const button = (
     <EuiButtonIcon
-      className={HISTOGRAM_ACTIONS_BUTTON_CLASS}
+      className={VIZ_ACTIONS_BUTTON_CLASS}
       iconType="boxesHorizontal"
       onClick={onButtonClick}
       data-test-subj={dataTestSubj}
     />
   );
-
   return (
     <Wrapper className={className} data-test-subj={`${dataTestSubj}-wrapper`}>
       {isSaveModalVisible && (

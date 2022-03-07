@@ -29,7 +29,7 @@ import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
-import { HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VIZ_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
@@ -211,7 +211,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     <>
       <HoverVisibilityContainer
         show={!isInitialLoading}
-        targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}
+        targetClassNames={[VIZ_ACTIONS_BUTTON_CLASS]}
       >
         <HistogramPanel
           data-test-subj={`${id}Panel`}

@@ -36,7 +36,7 @@ import {
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
 import type { ChartData } from './common';
-import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VisualizationActions, VIZ_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { VisualizationActionsProps } from '../visualization_actions/types';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 
@@ -186,7 +186,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
 
   return (
     <Wrapper>
-      <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
+      <HoverVisibilityContainer targetClassNames={[VIZ_ACTIONS_BUTTON_CLASS]}>
         {isVlidSeriesExist && barChart && (
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem grow={true}>

@@ -33,7 +33,7 @@ import {
   useTheme,
   Wrapper,
 } from './common';
-import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VisualizationActions, VIZ_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { VisualizationActionsProps } from '../visualization_actions/types';
 
 import { HoverVisibilityContainer } from '../hover_visibility_container';
@@ -163,7 +163,7 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
 
   return (
     <Wrapper>
-      <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
+      <HoverVisibilityContainer targetClassNames={[VIZ_ACTIONS_BUTTON_CLASS]}>
         {isVlidSeriesExist && areaChart && (
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem grow={true}>

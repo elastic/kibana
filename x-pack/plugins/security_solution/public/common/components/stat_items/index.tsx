@@ -31,7 +31,7 @@ import { histogramDateTimeFormatter } from '../utils';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton } from '../inspect';
-import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VisualizationActions, VIZ_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { LensAttributes } from '../visualization_actions/types';
 
@@ -270,7 +270,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                   )}
 
                   <FlexItem>
-                    <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
+                    <HoverVisibilityContainer targetClassNames={[VIZ_ACTIONS_BUTTON_CLASS]}>
                       <StatValue>
                         <p data-test-subj="stat-title">
                           {field.value != null ? field.value.toLocaleString() : getEmptyTagValue()}{' '}
