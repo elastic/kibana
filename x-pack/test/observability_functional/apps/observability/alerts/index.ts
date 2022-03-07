@@ -17,7 +17,7 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
 const ACTIVE_ALERTS_CELL_COUNT = 48;
 const RECOVERED_ALERTS_CELL_COUNT = 24;
 const TOTAL_ALERTS_CELL_COUNT = 72;
-const DISABLED_ALERTS_CHECKBOX = 10;
+const DISABLED_ALERTS_CHECKBOX = 6;
 const ENABLED_ALERTS_CHECKBOX = 2;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
