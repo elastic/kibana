@@ -49,7 +49,7 @@ export const ProtectionSwitch = React.memo(
     const handleSwitchChange = useCallback(
       (event) => {
         if (policyDetailsConfig) {
-          let newPayload: UIPolicyConfig = cloneDeep(policyDetailsConfig);
+          const newPayload = cloneDeep(policyDetailsConfig);
           if (event.target.checked === false) {
             for (const os of osList) {
               if (os === 'windows') {
@@ -94,16 +94,21 @@ export const ProtectionSwitch = React.memo(
             }
           }
           if (additionalOnSwitchChange) {
-            newPayload = additionalOnSwitchChange({
+            const additionalPayload = additionalOnSwitchChange({
               value: event.target.checked,
               policyConfigData: newPayload,
               protectionOsList: osList,
             });
+            dispatch({
+              type: 'userChangedPolicyConfig',
+              payload: { policyConfig: additionalPayload },
+            });
+          } else {
+            dispatch({
+              type: 'userChangedPolicyConfig',
+              payload: { policyConfig: newPayload },
+            });
           }
-          dispatch({
-            type: 'userChangedPolicyConfig',
-            payload: { policyConfig: newPayload },
-          });
         }
       },
       [dispatch, policyDetailsConfig, isPlatinumPlus, protection, osList, additionalOnSwitchChange]
