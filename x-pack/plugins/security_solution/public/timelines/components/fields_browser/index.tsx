@@ -53,7 +53,6 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   const {
     dataViewFieldEditor,
     data: { dataViews },
-    application: { capabilities },
   } = useKibana().services;
 
   const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
