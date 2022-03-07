@@ -39,7 +39,7 @@ import {
   ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
 import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getTheme, getUiActions } from '../services';
+import { getExecutionContext, getExpressions, getTheme, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
@@ -398,20 +398,18 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
-    const parentContext = this.parent?.getInput().executionContext;
+    const parentContext = this.parent?.getInput().executionContext || getExecutionContext().get();
     const child: KibanaExecutionContext = {
       type: 'visualization',
       name: this.vis.type.name,
-      id: this.vis.id ?? 'an_unsaved_vis',
+      id: this.vis.id ?? 'new',
       description: this.vis.title || this.input.title || this.vis.type.name,
       url: this.output.editUrl,
     };
-    const context = parentContext
-      ? {
-          ...parentContext,
-          child,
-        }
-      : child;
+    const context = {
+      ...parentContext,
+      child,
+    };
 
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {

@@ -24,6 +24,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
+import { useExecutionContext } from '../../../../kibana_react/public';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -49,6 +50,12 @@ export function DiscoverMainRoute() {
     Array<SavedObject<IndexPatternAttributes>>
   >([]);
   const { id } = useParams<DiscoverLandingParams>();
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: id || 'new',
+  });
 
   const navigateToOverview = useCallback(() => {
     core.application.navigateToApp('kibanaOverview', { path: '#' });
