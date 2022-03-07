@@ -25,6 +25,7 @@ export type { EuiCodeEditorProps } from './components/code_editor';
 export { EuiCodeEditor } from './components/code_editor';
 export type { Frequency } from './components/cron_editor';
 export { CronEditor } from './components/cron_editor';
+export { ViewApiRequest } from './components/view_api_request';
 
 export type {
   SendRequestConfig,
