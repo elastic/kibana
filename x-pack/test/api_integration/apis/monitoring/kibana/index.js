@@ -8,10 +8,10 @@
 export default function ({ loadTestFile }) {
   describe('Kibana', () => {
     loadTestFile(require.resolve('./overview'));
-    // loadTestFile(require.resolve('./overview_mb'));
+    loadTestFile(require.resolve('./overview_mb'));
     loadTestFile(require.resolve('./listing'));
-    // loadTestFile(require.resolve('./listing_mb'));
+    loadTestFile(require.resolve('./listing_mb'));
     loadTestFile(require.resolve('./instance'));
-    // loadTestFile(require.resolve('./instance_mb'));
+    loadTestFile(require.resolve('./instance_mb'));
   });
 }
