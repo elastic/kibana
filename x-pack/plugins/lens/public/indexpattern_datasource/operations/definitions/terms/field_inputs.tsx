@@ -21,6 +21,7 @@ import { FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
 import type { IndexPattern, IndexPatternPrivateState } from '../../../types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
+import { supportedTypes } from './constants';
 
 const generateId = htmlIdGenerator();
 export const MAX_MULTI_FIELDS_SIZE = 3;
@@ -131,14 +132,22 @@ export function FieldInputs({
         {localValues.map(({ id, value, isNew }, index) => {
           // need to filter the available fields for multiple terms
           // * a scripted field should be removed
-          // * if a field has been used, should it be removed? Probably yes?
-          // * if a scripted field was used in a singular term, should it be marked as invalid for multi-terms? Probably yes?
+          // * a field of unsupported type should be removed
+          // * a field that has been used
+          // * a scripted field was used in a singular term, should be marked as invalid for multi-terms
           const filteredOperationByField = Object.keys(operationSupportMatrix.operationByField)
-            .filter(
-              (key) =>
-                (!rawValuesLookup.has(key) && !indexPattern.getFieldByName(key)?.scripted) ||
-                key === value
-            )
+            .filter((key) => {
+              if (key === value) {
+                return true;
+              }
+              const field = indexPattern.getFieldByName(key);
+              return (
+                !rawValuesLookup.has(key) &&
+                field &&
+                !field.scripted &&
+                supportedTypes.has(field.type)
+              );
+            })
             .reduce<OperationSupportMatrix['operationByField']>((memo, key) => {
               memo[key] = operationSupportMatrix.operationByField[key];
               return memo;

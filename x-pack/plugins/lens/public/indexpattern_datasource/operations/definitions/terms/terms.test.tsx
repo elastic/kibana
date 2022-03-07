@@ -1439,6 +1439,38 @@ describe('terms', () => {
       );
     });
 
+    it('should filter fields with unsupported types when in multi terms mode', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      // get inner instance
+      expect(
+        instance.find('[data-test-subj="indexPattern-dimension-field-0"]').at(1).prop('options')
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            options: expect.arrayContaining([
+              expect.not.objectContaining({ 'data-test-subj': 'lns-fieldOption-timestamp' }),
+            ]),
+          }),
+        ])
+      );
+    });
+
     it('should limit the number of multiple fields', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
