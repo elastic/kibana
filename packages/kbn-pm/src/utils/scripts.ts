@@ -21,6 +21,12 @@ export async function installInDir(directory: string, extraArgs: string[] = []) 
   // given time (e.g. to avoid conflicts).
   await spawn(YARN_EXEC, options, {
     cwd: directory,
+    env: {
+      SASS_BINARY_SITE:
+        'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
+      RE2_DOWNLOAD_MIRROR:
+        'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
+    },
   });
 }
 
