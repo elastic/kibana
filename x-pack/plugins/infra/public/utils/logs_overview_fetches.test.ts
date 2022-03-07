@@ -109,7 +109,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const response = await hasData();
 
       expect(mockedCallFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
-      expect(response).toBe(true);
+      expect(response).toEqual({ hasData: true, indices: 'test-index' });
     });
 
     it('should return false when only empty indices exist', async () => {
@@ -123,7 +123,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const response = await hasData();
 
       expect(mockedCallFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
-      expect(response).toBe(false);
+      expect(response).toEqual({ hasData: false, indices: 'test-index' });
     });
 
     it('should return false when no index exists', async () => {
@@ -137,7 +137,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const response = await hasData();
 
       expect(mockedCallFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
-      expect(response).toBe(false);
+      expect(response).toEqual({ hasData: false, indices: 'test-index' });
     });
   });
 

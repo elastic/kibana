@@ -149,7 +149,7 @@ describe('HasDataContextProvider', () => {
               hasData: false,
               status: 'success',
             },
-            infra_logs: { hasData: false, status: 'success' },
+            infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
             infra_metrics: { hasData: false, status: 'success' },
             ux: {
               hasData: false,
@@ -212,7 +212,7 @@ describe('HasDataContextProvider', () => {
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
-            infra_logs: { hasData: false, status: 'success' },
+            infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
             infra_metrics: { hasData: false, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: false,
@@ -279,7 +279,7 @@ describe('HasDataContextProvider', () => {
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
-            infra_logs: { hasData: true, status: 'success' },
+            infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
             infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: true,
@@ -442,7 +442,7 @@ describe('HasDataContextProvider', () => {
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
-            infra_logs: { hasData: true, status: 'success' },
+            infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
             infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: true,
