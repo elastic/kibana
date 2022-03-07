@@ -6,3 +6,5 @@
  */
 
 export { resetPreconfiguredAgentPolicies } from './reset_agent_policies';
+
+export { ensurePreconfiguredOutputs } from './outputs';
