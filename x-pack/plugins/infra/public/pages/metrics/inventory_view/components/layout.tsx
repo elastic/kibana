@@ -156,21 +156,26 @@ export const Layout = React.memo(
                           gutterSize="m"
                         >
                           <Toolbar nodeType={nodeType} currentTime={currentTime} />
-                          {view === 'map' && (
+                          <EuiFlexGroup
+                            responsive={false}
+                            style={{ margin: 0, justifyContent: 'end' }}
+                          >
+                            {view === 'map' && (
+                              <EuiFlexItem grow={false}>
+                                <LegendControls
+                                  options={legend != null ? legend : DEFAULT_LEGEND}
+                                  dataBounds={dataBounds}
+                                  bounds={bounds}
+                                  autoBounds={autoBounds}
+                                  boundsOverride={boundsOverride}
+                                  onChange={handleLegendControlChange}
+                                />
+                              </EuiFlexItem>
+                            )}
                             <EuiFlexItem grow={false}>
-                              <LegendControls
-                                options={legend != null ? legend : DEFAULT_LEGEND}
-                                dataBounds={dataBounds}
-                                bounds={bounds}
-                                autoBounds={autoBounds}
-                                boundsOverride={boundsOverride}
-                                onChange={handleLegendControlChange}
-                              />
+                              <ViewSwitcher view={view} onChange={changeView} />
                             </EuiFlexItem>
-                          )}
-                          <EuiFlexItem grow={false}>
-                            <ViewSwitcher view={view} onChange={changeView} />
-                          </EuiFlexItem>
+                          </EuiFlexGroup>
                         </EuiFlexGroup>
                       </TopActionContainer>
                       <AutoSizer bounds>
