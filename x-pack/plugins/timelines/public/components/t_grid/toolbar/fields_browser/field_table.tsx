@@ -16,7 +16,7 @@ import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import { tGridActions } from '../../../../store/t_grid';
 import type { GetFieldTableColumns } from '../../../../../common/types/fields_browser';
 
-interface FieldTableProps {
+export interface FieldTableProps {
   timelineId: string;
   columnHeaders: ColumnHeaderOptions[];
   /**

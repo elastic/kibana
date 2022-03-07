@@ -150,12 +150,9 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     [dataView, selectedDataViewId, dataViewFieldEditor, indexFieldsSearch, dispatch, timelineId]
   );
 
-  const hasFieldEditPermission: boolean = useMemo(
-    () =>
-      dataViewFieldEditor?.userPermissions.editIndexPattern() &&
-      // remove below check once resolved: https://github.com/elastic/kibana/issues/122462
-      !!capabilities.indexPatterns.save,
-    [capabilities.indexPatterns.save, dataViewFieldEditor?.userPermissions]
+  const hasFieldEditPermission = useMemo(
+    () => dataViewFieldEditor?.userPermissions.editIndexPattern(),
+    [dataViewFieldEditor?.userPermissions]
   );
 
   const createFieldButton = useCreateFieldButton({
