@@ -58,7 +58,7 @@ describe('getIndices', () => {
     const result = await getIndices({ http, pattern: '*:kibana', isRollupIndex });
 
     expect(http.get).toHaveBeenCalled();
-    expect(result.length).toBe(4);
+    expect(result.length).toBe(3);
     expect(result[0].name).toBe('f-alias');
     expect(result[1].name).toBe('foo');
     expect(result[2].name).toBe('kibana_sample_data_ecommerce');
