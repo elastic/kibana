@@ -89,11 +89,16 @@ export class SimpleSavedObject<T = unknown> {
           return sso;
         });
     } else {
-      return this.client.create(this.type, this.attributes, {
-        migrationVersion: this.migrationVersion,
-        coreMigrationVersion: this.coreMigrationVersion,
-        references: this.references,
-      });
+      return this.client
+        .create(this.type, this.attributes, {
+          migrationVersion: this.migrationVersion,
+          coreMigrationVersion: this.coreMigrationVersion,
+          references: this.references,
+        })
+        .then((sso) => {
+          this.updatedAt = sso.updatedAt;
+          return sso;
+        });
     }
   }
 
