@@ -8,14 +8,15 @@
 import React from 'react';
 import { useHasData } from '../../../hooks/use_has_data';
 import { ObservabilityStatusBoxes } from './observability_status_boxes';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getEmptySections } from '../../../pages/overview/empty_section';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../../../application/types';
 
 export function ObservabilityStatus() {
-  const { core } = usePluginContext();
+  const { http } = useKibana<ObservabilityAppServices>().services;
   const { hasDataMap } = useHasData();
 
-  const appEmptySections = getEmptySections({ core });
+  const appEmptySections = getEmptySections({ http });
 
   const boxes = appEmptySections.map((app) => {
     return {

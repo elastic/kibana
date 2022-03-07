@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import { ISection } from '../../typings/section';
 
-export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
+export const getEmptySections = ({ http }: { http: HttpSetup }): ISection[] => {
   return [
     {
       id: 'infra_logs',
@@ -24,7 +24,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.logs.link', {
         defaultMessage: 'Install Filebeat',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial_directory/logging'),
+      href: http.basePath.prepend('/app/home#/tutorial_directory/logging'),
     },
     {
       id: 'apm',
@@ -39,7 +39,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.apm.link', {
         defaultMessage: 'Install Agent',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial/apm'),
+      href: http.basePath.prepend('/app/home#/tutorial/apm'),
     },
     {
       id: 'infra_metrics',
@@ -54,7 +54,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.metrics.link', {
         defaultMessage: 'Install Metricbeat',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
+      href: http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
     },
     {
       id: 'synthetics',
@@ -69,7 +69,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.uptime.link', {
         defaultMessage: 'Install Heartbeat',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
+      href: http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
     },
     {
       id: 'ux',
@@ -84,7 +84,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.ux.link', {
         defaultMessage: 'Install RUM Agent',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial/apm'),
+      href: http.basePath.prepend('/app/home#/tutorial/apm'),
     },
     {
       id: 'alert',
@@ -99,9 +99,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
         defaultMessage: 'Create rule',
       }),
-      href: core.http.basePath.prepend(
-        '/app/management/insightsAndAlerting/triggersActions/alerts'
-      ),
+      href: http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/alerts'),
     },
   ];
 };
