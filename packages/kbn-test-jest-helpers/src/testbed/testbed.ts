@@ -9,6 +9,9 @@
 import { Component as ReactComponent } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ComponentType, HTMLAttributes, ReactWrapper } from 'enzyme';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { axe, toHaveNoViolations } from 'jest-axe';
+expect.extend(toHaveNoViolations);
 
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
@@ -290,6 +293,26 @@ export function registerTestBed<T extends string = string>(
         router.history.push(url);
       };
 
+      /**
+       * ----------------------------------------------------------------
+       * A11y
+       * ----------------------------------------------------------------
+       */
+      const getCriticalViolations: TestBed<T>['a11y']['getCriticalViolations'] = async () => {
+        const html = component.html();
+        const axeResults = await axe(html, { resultTypes: ['violations'] });
+
+        return axeResults.violations
+          .filter((violation) => violation.impact === 'critical')
+          .map((violation) => violation.description);
+      };
+
+      const assertA11y: TestBed<T>['a11y']['assertA11y'] = async () => {
+        const html = component.html();
+        const results = await axe(html);
+        expect(results).toHaveNoViolations();
+      };
+
       const testBed: TestBed<T> = {
         component,
         exists,
@@ -308,6 +331,10 @@ export function registerTestBed<T extends string = string>(
         },
         router: {
           navigateTo,
+        },
+        a11y: {
+          getCriticalViolations,
+          assertA11y,
         },
       };
 

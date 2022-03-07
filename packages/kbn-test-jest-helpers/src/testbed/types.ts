@@ -31,7 +31,7 @@ export interface EuiTableMetaData {
 }
 
 export interface TestBed<T = string> {
-  /** The comonent under test */
+  /** The component under test */
   component: ReactWrapper;
   /**
    * Pass it a `data-test-subj` and it will return true if it exists or false if it does not exist.
@@ -131,6 +131,10 @@ export interface TestBed<T = string> {
      * Navigate to another React router <Route />
      */
     navigateTo: (url: string) => void;
+  };
+  a11y: {
+    getCriticalViolations: (wrapper?: T | ReactWrapper) => Promise<string[]>;
+    assertA11y: () => Promise<void>;
   };
 }
 
