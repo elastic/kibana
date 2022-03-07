@@ -121,13 +121,16 @@ describe('field_items', () => {
 
   describe('getFieldColumns', () => {
     const onToggleColumn = jest.fn();
+    const getFieldColumnsParams = { onToggleColumn, onHide: () => {} };
 
     beforeEach(() => {
       onToggleColumn.mockClear();
     });
 
     it('should return default field columns', () => {
-      expect(getFieldColumns({ onToggleColumn }).map((column) => omit('render', column))).toEqual([
+      expect(
+        getFieldColumns(getFieldColumnsParams).map((column) => omit('render', column))
+      ).toEqual([
         {
           field: 'selected',
           name: '',
@@ -173,7 +176,7 @@ describe('field_items', () => {
 
       expect(
         getFieldColumns({
-          onToggleColumn,
+          ...getFieldColumnsParams,
           getFieldTableColumns: () => customColumns,
         }).map((column) => omit('render', column))
       ).toEqual([
@@ -195,7 +198,7 @@ describe('field_items', () => {
         columnHeaders: [],
       });
 
-      const columns = getFieldColumns({ onToggleColumn });
+      const columns = getFieldColumns(getFieldColumnsParams);
       const { getByTestId, getAllByText } = render(
         <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
       );
@@ -218,7 +221,7 @@ describe('field_items', () => {
         columnHeaders: [],
       });
 
-      const columns = getFieldColumns({ onToggleColumn });
+      const columns = getFieldColumns(getFieldColumnsParams);
       const { getByTestId } = render(
         <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
       );

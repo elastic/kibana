@@ -5,141 +5,66 @@
  * 2.0.
  */
 
-import { render, fireEvent, act, screen } from '@testing-library/react';
-import React, { MutableRefObject } from 'react';
-import { CreateFieldButton, CreateFieldEditorActions } from './index';
-import {
-  indexPatternFieldEditorPluginMock,
-  Start,
-} from '../../../../../../../../src/plugins/data_view_field_editor/public/mocks';
+import { render } from '@testing-library/react';
+import React from 'react';
+import { useCreateFieldButton, UseCreateFieldButton, UseCreateFieldButtonProps } from './index';
 
 import { TestProviders } from '../../../../common/mock';
-import { useKibana } from '../../../../common/lib/kibana';
-import type { DataView } from '../../../../../../../../src/plugins/data/common';
-import { TimelineId } from '../../../../../common/types';
+import { renderHook } from '@testing-library/react-hooks';
 
-let mockIndexPatternFieldEditor: Start;
-jest.mock('../../../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const mockOpenFieldEditor = jest.fn();
+const mockOnHide = jest.fn();
 
-const runAllPromises = () => new Promise(setImmediate);
+const renderUseCreateFieldButton = (props: Partial<UseCreateFieldButtonProps> = {}) =>
+  renderHook<UseCreateFieldButtonProps, ReturnType<UseCreateFieldButton>>(
+    () =>
+      useCreateFieldButton({
+        hasFieldEditPermission: true,
+        loading: false,
+        openFieldEditor: mockOpenFieldEditor,
+        ...props,
+      }),
+    {
+      wrapper: TestProviders,
+    }
+  );
 
-describe('CreateFieldButton', () => {
+describe('useCreateFieldButton', () => {
   beforeEach(() => {
-    mockIndexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
-    mockIndexPatternFieldEditor.userPermissions.editIndexPattern = () => true;
-    useKibanaMock().services.dataViewFieldEditor = mockIndexPatternFieldEditor;
-    useKibanaMock().services.data.dataViews.get = () => new Promise(() => undefined);
-
-    useKibanaMock().services.application.capabilities = {
-      ...useKibanaMock().services.application.capabilities,
-      indexPatterns: { save: true },
-    };
-  });
-  // refactor below tests once resolved: https://github.com/elastic/kibana/issues/122462
-  it('displays the button when user has read permissions and write permissions', () => {
-    render(
-      <CreateFieldButton
-        selectedDataViewId={'dataViewId'}
-        onClick={() => undefined}
-        timelineId={TimelineId.detectionsPage}
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    expect(screen.getByRole('button')).toBeInTheDocument();
+    jest.clearAllMocks();
   });
 
-  it("doesn't display the button when user doesn't have read permissions", () => {
-    mockIndexPatternFieldEditor.userPermissions.editIndexPattern = () => false;
-    render(
-      <CreateFieldButton
-        selectedDataViewId={'dataViewId'}
-        onClick={() => undefined}
-        timelineId={TimelineId.detectionsPage}
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  it('should return the button component function when user has edit permissions', async () => {
+    const { result } = renderUseCreateFieldButton();
+    expect(result.current).not.toBeUndefined();
   });
 
-  it("doesn't display the button when user doesn't have write permissions", () => {
-    useKibanaMock().services.application.capabilities = {
-      ...useKibanaMock().services.application.capabilities,
-      indexPatterns: { save: false },
-    };
-    render(
-      <CreateFieldButton
-        selectedDataViewId={'dataViewId'}
-        onClick={() => undefined}
-        timelineId={TimelineId.detectionsPage}
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  it('should return the undefined when user do not has edit permissions', async () => {
+    const { result } = renderUseCreateFieldButton({ hasFieldEditPermission: false });
+    expect(result.current).toBeUndefined();
   });
 
-  it("calls 'onClick' param when the button is clicked", async () => {
-    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+  it('should return a button wrapped component', async () => {
+    const { result } = renderUseCreateFieldButton();
 
-    const onClickParam = jest.fn();
-    await act(async () => {
-      render(
-        <CreateFieldButton
-          selectedDataViewId={'dataViewId'}
-          onClick={onClickParam}
-          timelineId={TimelineId.detectionsPage}
-        />,
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await runAllPromises();
+    const CreateFieldButton = result.current!;
+    const { getByRole } = render(<CreateFieldButton onHide={mockOnHide} />, {
+      wrapper: TestProviders,
     });
 
-    fireEvent.click(screen.getByRole('button'));
-    expect(onClickParam).toHaveBeenCalled();
+    expect(getByRole('button')).toBeInTheDocument();
   });
 
-  it("stores 'closeEditor' in the actions ref when editor is open", async () => {
-    const mockCloseEditor = jest.fn();
-    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
+  it('should call openFieldEditor and hide the modal when button clicked', async () => {
+    const { result } = renderUseCreateFieldButton();
 
-    const editorActionsRef: MutableRefObject<CreateFieldEditorActions> = React.createRef();
-    await act(async () => {
-      render(
-        <CreateFieldButton
-          selectedDataViewId={'dataViewId'}
-          onClick={() => undefined}
-          timelineId={TimelineId.detectionsPage}
-          editorActionsRef={editorActionsRef}
-        />,
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await runAllPromises();
+    const CreateFieldButton = result.current!;
+    const { getByRole } = render(<CreateFieldButton onHide={mockOnHide} />, {
+      wrapper: TestProviders,
     });
 
-    expect(editorActionsRef?.current).toBeNull();
-
-    fireEvent.click(screen.getByRole('button'));
-
-    expect(mockCloseEditor).not.toHaveBeenCalled();
-    expect(editorActionsRef?.current?.closeEditor).toBeDefined();
-
-    editorActionsRef!.current!.closeEditor();
-
-    expect(mockCloseEditor).toHaveBeenCalled();
-    expect(editorActionsRef!.current).toBeNull();
+    getByRole('button').click();
+    expect(mockOpenFieldEditor).toHaveBeenCalled();
+    expect(mockOnHide).toHaveBeenCalled();
   });
 });
