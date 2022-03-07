@@ -50,7 +50,7 @@ Handlebars.compileAST = function (template: string, options?: ExtendedCompileOpt
 
 class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private scopes: any[] = [];
-  private values: any[] = [];
+  private output: any[] = [];
   private template: string;
   private compileOptions: ExtendedCompileOptions;
   private helpers: { [name: string]: Handlebars.HelperDelegate };
@@ -91,7 +91,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   render(context: any, options: ExtendedRuntimeOptions = {}): string {
     this.scopes = [context];
-    this.values = [];
+    this.output = [];
     this.container = {
       helpers: Object.assign({}, this.helpers, options.helpers),
     };
@@ -101,7 +101,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     }
 
     this.accept(this.ast);
-    return this.values.join('');
+    return this.output.join('');
   }
 
   MustacheStatement(mustache: hbs.AST.MustacheStatement) {
@@ -128,7 +128,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
           this.defaultHelperOptions
         )
       );
-      this.values.push(result);
+      this.output.push(result);
       return;
     }
 
@@ -164,42 +164,42 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const context = this.scopes[path.depth];
     const value = path.parts[0] === undefined ? context : get(context, path.parts);
     if (this.compileOptions.noEscape === true || typeof value !== 'string') {
-      this.values.push(value);
+      this.output.push(value);
     } else {
-      this.values.push(Handlebars.escapeExpression(value));
+      this.output.push(Handlebars.escapeExpression(value));
     }
   }
 
   ContentStatement(content: hbs.AST.ContentStatement) {
-    this.values.push(content.value);
+    this.output.push(content.value);
   }
 
   StringLiteral(string: hbs.AST.StringLiteral) {
-    this.values.push(string.value);
+    this.output.push(string.value);
   }
 
   NumberLiteral(number: hbs.AST.NumberLiteral) {
-    this.values.push(number.value);
+    this.output.push(number.value);
   }
 
   BooleanLiteral(bool: hbs.AST.BooleanLiteral) {
-    this.values.push(bool.value);
+    this.output.push(bool.value);
   }
 
   UndefinedLiteral() {
-    this.values.push('undefined');
+    this.output.push('undefined');
   }
 
   NullLiteral() {
-    this.values.push('null');
+    this.output.push('null');
   }
 
   getParams(block: { params: hbs.AST.Expression[] }): any[] {
-    const currentValues = this.values;
-    this.values = [];
+    const currentOutput = this.output;
+    this.output = [];
     this.acceptArray(block.params);
-    const params = this.values;
-    this.values = currentValues;
+    const params = this.output;
+    this.output = currentOutput;
     return params;
   }
 }
