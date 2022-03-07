@@ -59,19 +59,6 @@ describe('ThreatIntelLinkPanel', () => {
     expect(wrapper.find('[data-test-subj="cti-enable-integrations-button"]').length).toEqual(0);
   });
 
-  it('renders Enable source buttons when not all integrations installed', () => {
-    const wrapper = mount(
-      <Provider store={store}>
-        <I18nProvider>
-          <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel {...mockProps} />
-          </ThemeProvider>
-        </I18nProvider>
-      </Provider>
-    );
-    expect(wrapper.find('[data-test-subj="cti-enable-integrations-button"]').length).not.toBe(0);
-  });
-
   it('renders CtiDisabledModule when Threat Intel module is disabled', () => {
     const wrapper = mount(
       <Provider store={store}>

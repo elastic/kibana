@@ -25368,7 +25368,6 @@
     "xpack.securitySolution.overview.ctiDashboardInfoPanelButton": "如何加载 Kibana 仪表板",
     "xpack.securitySolution.overview.ctiDashboardInfoPanelTitle": "启用 Kibana 仪表板以查看源",
     "xpack.securitySolution.overview.ctiDashboardOtherDatasourceTitle": "其他",
-    "xpack.securitySolution.overview.ctiDashboardSomeModulesDisabledTItle": "一些威胁情报源处于禁用状态",
     "xpack.securitySolution.overview.ctiDashboardSubtitle": "正在显示：{totalCount} 个{totalCount, plural, other {指标}}",
     "xpack.securitySolution.overview.ctiDashboardTitle": "威胁情报",
     "xpack.securitySolution.overview.ctiDashboardWarningPanelBody": "我们尚未从选定时间范围检测到任何数据，请尝试搜索其他时间范围。",

@@ -25337,7 +25337,6 @@
     "xpack.securitySolution.overview.ctiDashboardInfoPanelButton": "Kibanaダッシュボードを読み込む方法",
     "xpack.securitySolution.overview.ctiDashboardInfoPanelTitle": "ソースを表示するには、Kibanaダッシュボードを有効にします",
     "xpack.securitySolution.overview.ctiDashboardOtherDatasourceTitle": "その他",
-    "xpack.securitySolution.overview.ctiDashboardSomeModulesDisabledTItle": "一部の脅威インテリジェンスソースが無効です",
     "xpack.securitySolution.overview.ctiDashboardSubtitle": "{totalCount} {totalCount, plural, other  {個の指標}}を表示しています",
     "xpack.securitySolution.overview.ctiDashboardTitle": "脅威インテリジェンス",
     "xpack.securitySolution.overview.ctiDashboardWarningPanelBody": "選択した時間範囲からデータが検出されませんでした。別の時間範囲の検索を試してください。",
