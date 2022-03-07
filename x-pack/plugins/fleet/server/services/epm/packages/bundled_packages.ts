@@ -33,10 +33,15 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
       })
     );
 
+    const logger = appContextService.getLogger();
+    logger.info(
+      `Got bundled packages: ${result.map((pkg) => `${pkg.name}-${pkg.version}`).join(', ')}`
+    );
+
     return result;
   } catch (err) {
     const logger = appContextService.getLogger();
-    logger.debug(`Unable to read bundled packages from ${BUNDLED_PACKAGE_DIRECTORY}`);
+    logger.info(`Unable to read bundled packages from ${BUNDLED_PACKAGE_DIRECTORY}`);
 
     return [];
   }
@@ -44,6 +49,10 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
 
 export async function getBundledPackageByName(name: string): Promise<BundledPackage | undefined> {
   const bundledPackages = await getBundledPackages();
+  const logger = appContextService.getLogger();
+  logger.info(
+    `Got bundled packages: ${bundledPackages.map((pkg) => `${pkg.name}-${pkg.version}`).join(', ')}`
+  );
   const bundledPackage = bundledPackages.find((pkg) => pkg.name === name);
 
   return bundledPackage;
