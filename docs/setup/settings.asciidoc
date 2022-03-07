@@ -90,6 +90,10 @@ enforce even rudimentary CSP rules, though {kib} is still accessible. This
 configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enabled.
 *Default: `true`*
 
+|[[elasticsearch-maxSockets]] `elasticsearch.maxSockets`
+ | The maximum number of sockets that can be used for communications with elasticsearch.
+*Default: `Infinity`*
+
 | `elasticsearch.customHeaders:`
  | Header names and values to send to {es}. Any custom headers cannot be
 overwritten by client-side headers, regardless of the
