@@ -6,16 +6,10 @@
  */
 import { getOr } from 'lodash/fp';
 import { createSelector } from 'reselect';
-import { TGridModel, State } from '.';
+import { TGridModel } from '.';
 import { tGridDefaults, getTGridManageDefaults } from './defaults';
 
-interface TGridById {
-  [id: string]: TGridModel;
-}
-
 const getDefaultTgrid = (id: string) => ({ ...tGridDefaults, ...getTGridManageDefaults(id) });
-
-export const standaloneTGridById = (state: State): TGridById => state.timelineById;
 
 export const selectTGridById = (state: unknown, timelineId: string): TGridModel => {
   return getOr(
