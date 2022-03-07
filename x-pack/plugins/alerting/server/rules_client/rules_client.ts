@@ -1477,6 +1477,78 @@ export class RulesClient {
     }
   }
 
+  public async snooze({
+    id,
+    snoozeEndTime,
+  }: {
+    id: string;
+    snoozeEndTime?: string;
+  }): Promise<void> {
+    return await retryIfConflicts(
+      this.logger,
+      `rulesClient.snooze('${id}', ${snoozeEndTime})`,
+      async () => await this.snoozeWithOCC({ id, snoozeEndTime })
+    );
+  }
+
+  private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime?: string }) {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: attributes.alertTypeId,
+        consumer: attributes.consumer,
+        operation: WriteOperations.MuteAll,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.SNOOZE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.SNOOZE,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    // If no snoozeEndTime is set, instead mute all
+    const newAttrs = snoozeEndTime
+      ? { snoozeEndTime: new Date(snoozeEndTime).toISOString() }
+      : { muteAll: true, mutedInstanceIds: [] };
+
+    const updateAttributes = this.updateMeta({
+      ...newAttrs,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    );
+  }
+
   public async muteAll({ id }: { id: string }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
