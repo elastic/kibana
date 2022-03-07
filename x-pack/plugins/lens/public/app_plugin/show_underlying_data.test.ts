@@ -112,8 +112,11 @@ describe('getLayerMetaInfo', () => {
       getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(),
       getFilters: jest.fn(() => ({
-        kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
-        lucene: [],
+        enabled: {
+          kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
+          lucene: [],
+        },
+        disabled: { kuery: [], lucene: [] },
       })),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
@@ -128,15 +131,18 @@ describe('getLayerMetaInfo', () => {
     expect(error).toBeUndefined();
     expect(meta?.columns).toEqual(['bytes']);
     expect(meta?.filters).toEqual({
-      kuery: [
-        [
-          {
-            language: 'kuery',
-            query: 'memory > 40000',
-          },
+      enabled: {
+        kuery: [
+          [
+            {
+              language: 'kuery',
+              query: 'memory > 40000',
+            },
+          ],
         ],
-      ],
-      lucene: [],
+        lucene: [],
+      },
+      disabled: { kuery: [], lucene: [] },
     });
   });
 });
@@ -149,7 +155,7 @@ describe('combineQueryAndFilters', () => {
         {
           id: 'testDatasource',
           columns: [],
-          filters: { kuery: [], lucene: [] },
+          filters: { enabled: { kuery: [], lucene: [] }, disabled: { kuery: [], lucene: [] } },
         },
         undefined
       )
@@ -164,7 +170,10 @@ describe('combineQueryAndFilters', () => {
         {
           id: 'testDatasource',
           columns: [],
-          filters: { kuery: [[{ language: 'kuery', query: 'otherField: *' }]], lucene: [] },
+          filters: {
+            enabled: { kuery: [[{ language: 'kuery', query: 'otherField: *' }]], lucene: [] },
+            disabled: { kuery: [], lucene: [] },
+          },
         },
         undefined
       )
@@ -182,7 +191,10 @@ describe('combineQueryAndFilters', () => {
         {
           id: 'testDatasource',
           columns: [],
-          filters: { kuery: [[{ language: 'kuery', query: 'otherField: *' }]], lucene: [] },
+          filters: {
+            enabled: { kuery: [[{ language: 'kuery', query: 'otherField: *' }]], lucene: [] },
+            disabled: { kuery: [], lucene: [] },
+          },
         },
         undefined
       )
@@ -199,17 +211,20 @@ describe('combineQueryAndFilters', () => {
           id: 'testDatasource',
           columns: [],
           filters: {
-            kuery: [
-              [
-                { language: 'kuery', query: 'myfield: *' },
-                { language: 'kuery', query: 'otherField: *' },
+            enabled: {
+              kuery: [
+                [
+                  { language: 'kuery', query: 'myfield: *' },
+                  { language: 'kuery', query: 'otherField: *' },
+                ],
+                [
+                  { language: 'kuery', query: 'myfieldCopy: *' },
+                  { language: 'kuery', query: 'otherFieldCopy: *' },
+                ],
               ],
-              [
-                { language: 'kuery', query: 'myfieldCopy: *' },
-                { language: 'kuery', query: 'otherFieldCopy: *' },
-              ],
-            ],
-            lucene: [],
+              lucene: [],
+            },
+            disabled: { kuery: [], lucene: [] },
           },
         },
         undefined
@@ -232,8 +247,11 @@ describe('combineQueryAndFilters', () => {
           id: 'testDatasource',
           columns: [],
           filters: {
-            kuery: [[{ language: 'kuery', query: 'myfield: *' }]],
-            lucene: [],
+            enabled: {
+              kuery: [[{ language: 'kuery', query: 'myfield: *' }]],
+              lucene: [],
+            },
+            disabled: { kuery: [], lucene: [] },
           },
         },
         undefined
@@ -316,8 +334,11 @@ describe('combineQueryAndFilters', () => {
           id: 'testDatasource',
           columns: [],
           filters: {
-            kuery: [],
-            lucene: [[{ language: 'lucene', query: 'anotherField' }]],
+            enabled: {
+              kuery: [],
+              lucene: [[{ language: 'lucene', query: 'anotherField' }]],
+            },
+            disabled: { kuery: [], lucene: [] },
           },
         },
         undefined
@@ -395,8 +416,11 @@ describe('combineQueryAndFilters', () => {
           id: 'testDatasource',
           columns: [],
           filters: {
-            kuery: [[{ language: 'kuery', query: 'myfield: *' }]],
-            lucene: [[{ language: 'lucene', query: 'anotherField' }]],
+            enabled: {
+              kuery: [[{ language: 'kuery', query: 'myfield: *' }]],
+              lucene: [[{ language: 'lucene', query: 'anotherField' }]],
+            },
+            disabled: { kuery: [], lucene: [] },
           },
         },
         undefined
@@ -487,22 +511,25 @@ describe('combineQueryAndFilters', () => {
           id: 'testDatasource',
           columns: [],
           filters: {
-            kuery: [
-              [{ language: 'kuery', query: 'bytes > 4000' }],
-              [
-                { language: 'kuery', query: 'memory > 5000' },
-                { language: 'kuery', query: 'memory >= 15000' },
+            enabled: {
+              kuery: [
+                [{ language: 'kuery', query: 'bytes > 4000' }],
+                [
+                  { language: 'kuery', query: 'memory > 5000' },
+                  { language: 'kuery', query: 'memory >= 15000' },
+                ],
+                [{ language: 'kuery', query: 'myField: *' }],
+                [{ language: 'kuery', query: 'otherField >= 15' }],
               ],
-              [{ language: 'kuery', query: 'myField: *' }],
-              [{ language: 'kuery', query: 'otherField >= 15' }],
-            ],
-            lucene: [
-              [{ language: 'lucene', query: 'filteredField: 400' }],
-              [
-                { language: 'lucene', query: 'aNewField' },
-                { language: 'lucene', query: 'anotherNewField: 200' },
+              lucene: [
+                [{ language: 'lucene', query: 'filteredField: 400' }],
+                [
+                  { language: 'lucene', query: 'aNewField' },
+                  { language: 'lucene', query: 'anotherNewField: 200' },
+                ],
               ],
-            ],
+            },
+            disabled: { kuery: [], lucene: [] },
           },
         },
         undefined
@@ -570,6 +597,206 @@ describe('combineQueryAndFilters', () => {
         language: 'kuery',
         query:
           '( myField: * ) AND ( ( bytes > 4000 ) AND ( ( memory > 5000 ) OR ( memory >= 15000 ) ) AND ( myField: * ) AND ( otherField >= 15 ) )',
+      },
+    });
+  });
+
+  it('should add ignored filters as disabled', () => {
+    expect(
+      combineQueryAndFilters(
+        { language: 'lucene', query: 'myField' },
+        [],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            disabled: {
+              kuery: [[{ language: 'kuery', query: 'myfield: *' }]],
+              lucene: [[{ language: 'lucene', query: 'anotherField' }]],
+            },
+            enabled: { kuery: [], lucene: [] },
+          },
+        },
+        undefined
+      )
+    ).toEqual({
+      filters: [
+        {
+          $state: {
+            store: 'appState',
+          },
+          bool: {
+            filter: [],
+            must: [
+              {
+                query_string: {
+                  query: 'anotherField',
+                },
+              },
+            ],
+            must_not: [],
+            should: [],
+          },
+          meta: {
+            alias: 'anotherField (lucene)',
+            disabled: true,
+            index: 'testDatasource',
+            negate: false,
+            type: 'custom',
+          },
+        },
+        {
+          $state: {
+            store: 'appState',
+          },
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      exists: {
+                        field: 'myfield',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+          meta: {
+            alias: 'myfield: *',
+            disabled: true,
+            index: 'testDatasource',
+            negate: false,
+            type: 'custom',
+          },
+        },
+      ],
+      query: {
+        language: 'lucene',
+        query: 'myField',
+      },
+    });
+  });
+
+  it('should work together with enabled and disabled filters', () => {
+    expect(
+      combineQueryAndFilters(
+        { language: 'lucene', query: 'myField' },
+        [],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            disabled: {
+              kuery: [[{ language: 'kuery', query: 'myfield: abc' }]],
+              lucene: [[{ language: 'lucene', query: 'anotherField > 5000' }]],
+            },
+            enabled: {
+              kuery: [[{ language: 'kuery', query: 'myfield: *' }]],
+              lucene: [[{ language: 'lucene', query: 'anotherField' }]],
+            },
+          },
+        },
+        undefined
+      )
+    ).toEqual({
+      filters: [
+        {
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      exists: {
+                        field: 'myfield',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+          meta: {
+            index: 'testDatasource',
+            type: 'custom',
+            disabled: false,
+            negate: false,
+            alias: 'Lens context (kuery)',
+          },
+          $state: {
+            store: 'appState',
+          },
+        },
+        {
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: 'anotherField > 5000',
+                },
+              },
+            ],
+            filter: [],
+            should: [],
+            must_not: [],
+          },
+          meta: {
+            index: 'testDatasource',
+            type: 'custom',
+            disabled: true,
+            negate: false,
+            alias: 'anotherField > 5000 (lucene)',
+          },
+          $state: {
+            store: 'appState',
+          },
+        },
+        {
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        myfield: 'abc',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+          meta: {
+            index: 'testDatasource',
+            type: 'custom',
+            disabled: true,
+            negate: false,
+            alias: 'myfield: abc',
+          },
+          $state: {
+            store: 'appState',
+          },
+        },
+      ],
+      query: {
+        language: 'lucene',
+        query: '( myField ) AND ( anotherField )',
       },
     });
   });
