@@ -13,13 +13,14 @@ import Fsp from 'fs/promises';
 
 import * as ts from 'typescript';
 import stripAnsi from 'strip-ansi';
+import normalizePath from 'normalize-path';
 
-import { loadTsConfigFile } from '../src/lib/tsconfig_file';
-import { createTsProject } from '../src/lib/ts_project';
-import { TestLog } from '../src/lib/log';
-import { summarizePackage } from '../src/summarize_package';
+import { loadTsConfigFile } from '../lib/tsconfig_file';
+import { createTsProject } from '../lib/ts_project';
+import { TestLog } from '../lib/log';
+import { summarizePackage } from '../summarize_package';
 
-const TMP_DIR = Path.resolve(__dirname, '__tmp__');
+const TMP_DIR = Path.resolve(__dirname, '../../__tmp__');
 
 const DIAGNOSTIC_HOST = {
   getCanonicalFileName: (p: string) => p,
@@ -153,11 +154,11 @@ class MockCli {
 
     // summarize the .d.ts files into the output dir
     await summarizePackage(log, {
-      dtsDir: this.dtsOutputDir,
-      inputPaths: [this.inputPath],
-      outputDir: this.outputDir,
+      dtsDir: normalizePath(this.dtsOutputDir),
+      inputPaths: [normalizePath(this.inputPath)],
+      outputDir: normalizePath(this.outputDir),
       repoRelativePackageDir: 'src',
-      tsconfigPath: this.tsconfigPath,
+      tsconfigPath: normalizePath(this.tsconfigPath),
       strictPrinting: false,
     });
 

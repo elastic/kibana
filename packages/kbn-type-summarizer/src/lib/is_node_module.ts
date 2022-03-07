@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-
 import isPathInside from 'is-path-inside';
+
+import * as Path from './path';
 
 export function isNodeModule(dtsDir: string, path: string) {
   return (isPathInside(path, dtsDir) ? Path.relative(dtsDir, path) : path)
-    .split(Path.sep)
+    .split('/')
     .includes('node_modules');
 }

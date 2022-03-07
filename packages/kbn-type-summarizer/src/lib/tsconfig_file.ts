@@ -7,8 +7,8 @@
  */
 
 import * as ts from 'typescript';
-import Path from 'path';
 
+import * as Path from './path';
 import { CliError } from './cli_error';
 
 export function readTsConfigFile(path: string) {

@@ -10,10 +10,7 @@ PKG_REQUIRE_NAME = "@kbn/type-summarizer"
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
-  ],
-  exclude = [
-    "**/*.test.*"
-  ],
+  ]
 )
 
 SRCS = SOURCE_FILES

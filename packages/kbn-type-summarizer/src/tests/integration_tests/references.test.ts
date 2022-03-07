@@ -60,9 +60,9 @@ it('collects references from source files which contribute to result', async () 
   `);
   expect(result.logs).toMatchInlineSnapshot(`
     "debug loaded sourcemaps for [
-      'packages/kbn-type-summarizer/tests/__tmp__/dist_dts/files/foo.d.ts',
-      'packages/kbn-type-summarizer/tests/__tmp__/dist_dts/files/index.d.ts',
-      'packages/kbn-type-summarizer/tests/__tmp__/dist_dts/index.d.ts'
+      'packages/kbn-type-summarizer/__tmp__/dist_dts/files/foo.d.ts',
+      'packages/kbn-type-summarizer/__tmp__/dist_dts/files/index.d.ts',
+      'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
     ]
     debug Ignoring 5 global declarations for \\"Promise\\"
     debug Ignoring 4 global declarations for \\"Symbol\\"
