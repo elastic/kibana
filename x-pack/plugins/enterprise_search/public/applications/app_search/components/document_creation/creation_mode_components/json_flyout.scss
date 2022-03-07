@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { DocumentCreationButtons } from './document_creation_buttons';
-export { DocumentCreationFlyout } from './document_creation_flyout';
-export { DocumentCreationLogic, ActiveJsonTab } from './document_creation_logic';
+.enterpriseSearchTabbedFlyoutHeader.euiFlyoutHeader {
+  padding-bottom: 0;
+}

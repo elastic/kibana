@@ -20,10 +20,13 @@ import {
 import { DocumentCreationMode, DocumentCreationStep, DocumentCreationSummary } from './types';
 import { readUploadedFileAsText } from './utils';
 
+export type ActiveJsonTab = 'uploadTab' | 'pasteTab';
+
 interface DocumentCreationValues {
   isDocumentCreationOpen: boolean;
   creationMode: DocumentCreationMode;
   creationStep: DocumentCreationStep;
+  activeJsonTab: ActiveJsonTab;
   textInput: string;
   fileInput: File | null;
   isUploading: boolean;
@@ -37,6 +40,7 @@ interface DocumentCreationActions {
   openDocumentCreation(creationMode: DocumentCreationMode): { creationMode: DocumentCreationMode };
   closeDocumentCreation(): void;
   setCreationStep(creationStep: DocumentCreationStep): { creationStep: DocumentCreationStep };
+  setActiveJsonTab(activeJsonTab: ActiveJsonTab): { activeJsonTab: ActiveJsonTab };
   setTextInput(textInput: string): { textInput: string };
   setFileInput(fileInput: File | null): { fileInput: File | null };
   setWarnings(warnings: string[]): { warnings: string[] };
@@ -56,6 +60,7 @@ export const DocumentCreationLogic = kea<
     openDocumentCreation: (creationMode) => ({ creationMode }),
     closeDocumentCreation: () => null,
     setCreationStep: (creationStep) => ({ creationStep }),
+    setActiveJsonTab: (activeJsonTab) => ({ activeJsonTab }),
     setTextInput: (textInput) => ({ textInput }),
     setFileInput: (fileInput) => ({ fileInput }),
     setWarnings: (warnings) => ({ warnings }),
@@ -75,9 +80,15 @@ export const DocumentCreationLogic = kea<
       },
     ],
     creationMode: [
-      'text',
+      'api',
       {
         openDocumentCreation: (_, { creationMode }) => creationMode,
+      },
+    ],
+    activeJsonTab: [
+      'uploadTab',
+      {
+        setActiveJsonTab: (_, { activeJsonTab }) => activeJsonTab,
       },
     ],
     creationStep: [

@@ -31,7 +31,7 @@ describe('DocumentCreationLogic', () => {
 
   const DEFAULT_VALUES = {
     isDocumentCreationOpen: false,
-    creationMode: 'text',
+    creationMode: 'api',
     creationStep: DocumentCreationStep.AddDocuments,
     textInput: dedent(DOCUMENTS_API_JSON_EXAMPLE),
     fileInput: null,

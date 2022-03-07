@@ -16,8 +16,8 @@ import { EuiFlyout } from '@elastic/eui';
 import {
   ShowCreationModes,
   ApiCodeExample,
-  PasteJsonText,
-  UploadJsonFile,
+  PasteJsonTextTabContent,
+  UploadJsonFileTabContent,
 } from './creation_mode_components';
 import { Summary } from './creation_response_components';
 import { DocumentCreationFlyout, FlyoutContent } from './document_creation_flyout';
@@ -26,7 +26,7 @@ import { DocumentCreationStep } from './types';
 describe('DocumentCreationFlyout', () => {
   const values = {
     isDocumentCreationOpen: true,
-    creationMode: 'text',
+    creationMode: 'api',
     creationStep: DocumentCreationStep.AddDocuments,
   };
   const actions = {
@@ -70,18 +70,18 @@ describe('DocumentCreationFlyout', () => {
         expect(wrapper.find(ApiCodeExample)).toHaveLength(1);
       });
 
-      it('renders PasteJsonText', () => {
-        setMockValues({ ...values, creationMode: 'text' });
+      it('renders PasteJsonTextTabContent', () => {
+        setMockValues({ ...values, creationMode: 'json' });
         const wrapper = shallow(<FlyoutContent />);
 
-        expect(wrapper.find(PasteJsonText)).toHaveLength(1);
+        expect(wrapper.find(PasteJsonTextTabContent)).toHaveLength(1);
       });
 
-      it('renders UploadJsonFile', () => {
-        setMockValues({ ...values, creationMode: 'file' });
+      it('renders UploadJsonFileTabContent', () => {
+        setMockValues({ ...values, creationMode: 'json' });
         const wrapper = shallow(<FlyoutContent />);
 
-        expect(wrapper.find(UploadJsonFile)).toHaveLength(1);
+        expect(wrapper.find(UploadJsonFileTabContent)).toHaveLength(1);
       });
     });
 
