@@ -8,7 +8,7 @@
 import {
   FIELDS_BROWSER_CHECKBOX,
   FIELDS_BROWSER_CONTAINER,
-  FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
+  FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES,
 } from '../../screens/fields_browser';
 import {
   HOST_GEO_CITY_NAME_HEADER,
@@ -17,7 +17,11 @@ import {
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
 
-import { closeFieldsBrowser, filterFieldsBrowser } from '../../tasks/fields_browser';
+import {
+  closeFieldsBrowser,
+  filterFieldsBrowser,
+  toggleCategory,
+} from '../../tasks/fields_browser';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { openEvents } from '../../tasks/hosts/main';
 import {
@@ -60,11 +64,13 @@ describe('Events Viewer', () => {
       cy.get(FIELDS_BROWSER_CONTAINER).should('not.exist');
     });
 
-    it('displays the `default ECS` category (by default)', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).should('have.text', 'default ECS');
+    it('displays all categories (by default)', () => {
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES).should('be.empty');
     });
 
     it('displays a checked checkbox for all of the default events viewer columns that are also in the default ECS category', () => {
+      const category = 'default ECS';
+      toggleCategory(category);
       defaultHeadersInDefaultEcsCategory.forEach((header) =>
         cy.get(FIELDS_BROWSER_CHECKBOX(header.id)).should('be.checked')
       );
