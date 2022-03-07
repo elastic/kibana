@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setTimeout } from 'timers/promises';
+
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
@@ -13,7 +15,6 @@ import type {
   Logger,
 } from 'src/core/server';
 import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from 'src/core/server/types';
-
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
@@ -166,7 +167,40 @@ export async function getKibanaAssets(
   return result;
 }
 
-async function installKibanaSavedObjects({
+const isImportConflictError = (e: SavedObjectsImportFailure) => e?.error?.type === 'conflict';
+/**
+ * retry saved object import if only conflict errors are encountered
+ */
+async function retryImportOnConflictError(
+  importCall: () => ReturnType<SavedObjectsImporterContract['import']>,
+  {
+    logger,
+    maxAttempts = 50,
+    _attempt = 0,
+  }: { logger?: Logger; _attempt?: number; maxAttempts?: number } = {}
+): ReturnType<SavedObjectsImporterContract['import']> {
+  const result = await importCall();
+
+  const errors = result.errors ?? [];
+  if (_attempt < maxAttempts && errors.length && errors.every(isImportConflictError)) {
+    const retryCount = _attempt + 1;
+    const retryDelayMs = 1000 + Math.floor(Math.random() * 3000); // 1s + 0-3s of jitter
+
+    logger?.debug(
+      `Retrying import operation after [${
+        retryDelayMs * 1000
+      }s] due to conflict errors: ${JSON.stringify(errors)}`
+    );
+
+    await setTimeout(retryDelayMs);
+    return retryImportOnConflictError(importCall, { logger, _attempt: retryCount });
+  }
+
+  return result;
+}
+
+// only exported for testing
+export async function installKibanaSavedObjects({
   savedObjectsImporter,
   kibanaAssets,
   logger,
@@ -185,18 +219,19 @@ async function installKibanaSavedObjects({
     return [];
   } else {
     const { successResults: importSuccessResults = [], errors: importErrors = [] } =
-      await savedObjectsImporter.import({
-        overwrite: true,
-        readStream: createListStream(toBeSavedObjects),
-        createNewCopies: false,
-      });
+      await retryImportOnConflictError(() =>
+        savedObjectsImporter.import({
+          overwrite: true,
+          readStream: createListStream(toBeSavedObjects),
+          createNewCopies: false,
+        })
+      );
 
     allSuccessResults = importSuccessResults;
     const [referenceErrors, otherErrors] = partition(
       importErrors,
       (e) => e?.error?.type === 'missing_references'
     );
-
     if (otherErrors?.length) {
       throw new Error(
         `Encountered ${
