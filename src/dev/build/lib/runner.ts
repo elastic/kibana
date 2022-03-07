@@ -33,29 +33,30 @@ export interface Task {
 export function createRunner({ config, log }: Options) {
   async function execTask(desc: string, task: Task | GlobalTask, lastArg: any) {
     log.info(desc);
-    log.indent(4);
-
-    const start = Date.now();
-    const time = () => {
-      const sec = (Date.now() - start) / 1000;
-      const minStr = sec > 60 ? `${Math.floor(sec / 60)} min ` : '';
-      const secStr = `${Math.round(sec % 60)} sec`;
-      return chalk.dim(`${minStr}${secStr}`);
-    };
-
     try {
-      await task.run(config, log, lastArg);
-      log.success(chalk.green('✓'), time());
-    } catch (error) {
-      if (!isErrorLogged(error)) {
-        log.error(`failure ${time()}`);
-        log.error(error);
-        markErrorLogged(error);
-      }
+      await log.indent(4, async () => {
+        const start = Date.now();
+        const time = () => {
+          const sec = (Date.now() - start) / 1000;
+          const minStr = sec > 60 ? `${Math.floor(sec / 60)} min ` : '';
+          const secStr = `${Math.round(sec % 60)} sec`;
+          return chalk.dim(`${minStr}${secStr}`);
+        };
 
-      throw error;
+        try {
+          await task.run(config, log, lastArg);
+          log.success(chalk.green('✓'), time());
+        } catch (error) {
+          if (!isErrorLogged(error)) {
+            log.error(`failure ${time()}`);
+            log.error(error);
+            markErrorLogged(error);
+          }
+
+          throw error;
+        }
+      });
     } finally {
-      log.indent(-4);
       log.write('');
     }
   }

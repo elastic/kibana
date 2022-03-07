@@ -137,4 +137,4 @@ If you only want to run the build once you can run:
 node scripts/build_kibana_platform_plugins --validate-limits --focus {pluginId}
 -----------
 
-This command needs to apply production optimizations to get the right sizes, which means that the optimizer will take significantly longer to run and on most developmer machines will consume all of your machines resources for 20 minutes or more. If you'd like to multi-task while this is running you might need to limit the number of workers using the `--max-workers` flag.
+This command needs to apply production optimizations to get the right sizes, which means that the optimizer will take significantly longer to run and on most developer machines will consume all of your machines resources for 20 minutes or more. If you'd like to multi-task while this is running you might need to limit the number of workers using the `--max-workers` flag.
