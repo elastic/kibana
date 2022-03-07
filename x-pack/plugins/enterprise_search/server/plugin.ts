@@ -27,6 +27,7 @@ import {
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   LOGS_SOURCE_ID,
+  ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
 } from '../common/constants';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -183,6 +184,14 @@ export class EnterpriseSearchPlugin implements Plugin {
       logIndices: {
         type: 'index_name',
         indexName: '.ent-search-*',
+      },
+    });
+
+    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
+      name: 'Enterprise Search Audit Logs',
+      logIndices: {
+        type: 'index_name',
+        indexName: 'logs-enterprise_search*',
       },
     });
   }
