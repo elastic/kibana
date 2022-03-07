@@ -21,6 +21,7 @@ import agent from 'elastic-apm-node';
 import type { Duration } from 'moment';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import apm from 'elastic-apm-node';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import type { InternalExecutionContextSetup } from '../execution_context';
@@ -338,7 +339,11 @@ export class HttpServer {
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
-      if (parentContext) executionContext?.set(parentContext);
+
+      if (executionContext && parentContext) {
+        executionContext.set(parentContext);
+        apm.addLabels(executionContext.getAsLabels());
+      }
 
       executionContext?.setRequestId(requestId);
 
