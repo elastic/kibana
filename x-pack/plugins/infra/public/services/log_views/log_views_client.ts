@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
 import { HttpStart } from 'src/core/public';
 import { ISearchGeneric } from 'src/plugins/data/public';
 import { DataViewsContract } from 'src/plugins/data_views/public';
@@ -55,9 +56,39 @@ export class LogViewsClient implements ILogViewsClient {
   }
 
   public async getResolvedLogViewStatus(resolvedLogView: ResolvedLogView): Promise<LogViewStatus> {
-    // TODO: add actual implementation
+    const indexStatus = await this.search({
+      params: {
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        index: resolvedLogView.indices,
+        size: 0,
+        terminate_after: 1,
+        track_total_hits: 1,
+      },
+    })
+      .toPromise()
+      .then(
+        ({ rawResponse }) => {
+          if (rawResponse._shards.total <= 0) {
+            return 'missing' as const;
+          }
+
+          if (decodeTotalHits(rawResponse.hits.total).value > 0) {
+            return 'available' as const;
+          }
+
+          return 'empty' as const;
+        },
+        (err) => {
+          if (err.status === 404) {
+            return 'missing' as const;
+          }
+          throw err;
+        }
+      );
+
     return {
-      index: 'unknown',
+      index: indexStatus,
     };
   }
 
@@ -86,3 +117,9 @@ export class LogViewsClient implements ILogViewsClient {
     return await resolveLogView(logViewAttributes, this.dataViews, this.config);
   }
 }
+
+const decodeTotalHits = decodeOrThrow(
+  rt.type({
+    value: rt.number,
+  })
+);
