@@ -124,6 +124,15 @@ export class DataRecognizer {
   private _resultsService: ReturnType<typeof resultsServiceProvider>;
   private _calculateModelMemoryLimit: ReturnType<typeof calculateModelMemoryLimitProvider>;
 
+  /**
+   * A temporary cache of configs loaded from disk and from save object service.
+   * The configs from disk will not change while kibana is running.
+   * The configs from saved objects could potentially change while an instance of
+   * DataRecognizer exists, if a fleet package containing modules is installed.
+   * However the chance of this happening is very low and so the benefit of using
+   * this cache outweighs the risk of the cache being out of date during the short
+   * existence of a DataRecognizer instance.
+   */
   private _configCache: Config[] | null = null;
 
   /**
