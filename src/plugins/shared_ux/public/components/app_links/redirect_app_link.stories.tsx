@@ -24,7 +24,7 @@ export default {
   },
 };
 
-export const ConnectedComponent = () => {
+export const Component = () => {
   return (
     <EuiFlexGroup gutterSize="m" responsive={false} wrap>
       <EuiFlexItem grow={false}>

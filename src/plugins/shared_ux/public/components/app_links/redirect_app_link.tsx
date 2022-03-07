@@ -9,7 +9,6 @@
 import React, { FunctionComponent, useRef, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ApplicationStart } from 'src/core/public';
-import { RedirectAppLinksComponent as Component } from './redirect_app_link.component';
 import { createNavigateToUrlClickHandler } from './click_handler';
 
 export interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -57,11 +56,9 @@ export const RedirectAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = (
   );
 
   return (
-    <Component
-      containerRef={containerRef}
-      children={children}
-      {...otherProps}
-      clickHandler={clickHandler}
-    />
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+    <div ref={containerRef} {...otherProps} onClick={clickHandler}>
+      {children}
+    </div>
   );
 };
