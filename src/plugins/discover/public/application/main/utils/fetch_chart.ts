@@ -40,11 +40,7 @@ export function fetchChart(
   const chartAggConfigs = updateSearchSource(searchSource, interval, data);
 
   const executionContext = {
-    type: 'application',
-    name: 'discover',
     description: 'fetch chart data and total hits',
-    url: window.location.pathname,
-    id: savedSearch.id ?? '',
   };
 
   const fetch$ = searchSource

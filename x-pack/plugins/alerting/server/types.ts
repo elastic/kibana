@@ -40,6 +40,7 @@ import {
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
+  MappedParams,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
@@ -236,6 +237,7 @@ export interface RawRule extends SavedObjectAttributes {
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
+  mapped_params?: MappedParams;
   scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
@@ -250,6 +252,7 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
+  snoozeEndTime?: string;
 }
 
 export type AlertInfoParams = Pick<
