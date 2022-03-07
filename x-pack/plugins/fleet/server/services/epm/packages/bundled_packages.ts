@@ -15,6 +15,9 @@ import { splitPkgKey } from '../registry';
 const BUNDLED_PACKAGE_DIRECTORY = path.join(__dirname, '../../../../target/bundled_packages');
 
 export async function getBundledPackages(): Promise<BundledPackage[]> {
+  const logger = appContextService.getLogger();
+  logger.info(`Reading bundled packages from ${BUNDLED_PACKAGE_DIRECTORY}`);
+
   try {
     const dirContents = await fs.readdir(BUNDLED_PACKAGE_DIRECTORY);
     const zipFiles = dirContents.filter((file) => file.endsWith('.zip'));
@@ -33,14 +36,12 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
       })
     );
 
-    const logger = appContextService.getLogger();
     logger.info(
       `Got bundled packages: ${result.map((pkg) => `${pkg.name}-${pkg.version}`).join(', ')}`
     );
 
     return result;
   } catch (err) {
-    const logger = appContextService.getLogger();
     logger.info(`Unable to read bundled packages from ${BUNDLED_PACKAGE_DIRECTORY}`);
 
     return [];
