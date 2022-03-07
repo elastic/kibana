@@ -38,8 +38,8 @@ declare global {
   }
 }
 
-Cypress.Commands.add('getBySel', (selector, options) =>
-  cy.get(`[data-test-subj="${selector}"]`, options)
+Cypress.Commands.add('getBySel', (selector, ...args) =>
+  cy.get(`[data-test-subj="${selector}"]`, ...args)
 );
 
 // Alternatively you can use CommonJS syntax:
