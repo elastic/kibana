@@ -9,11 +9,36 @@ import { useMemo } from 'react';
 import { useEuiTheme, transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
-export const useStyles = () => {
+interface StylesDeps {
+  isInvestigated: boolean;
+  isSelected: boolean;
+}
+
+export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { size, colors, font } = euiTheme;
+
+    const getHighlightColors = () => {
+      let bgColor = 'none';
+      let hoverBgColor = `${transparentize(colors.primary, 0.04)}`;
+
+      if (isInvestigated && isSelected) {
+        bgColor = `${transparentize(colors.danger, 0.08)}`;
+        hoverBgColor = `${transparentize(colors.danger, 0.12)}`;
+      } else if (isInvestigated) {
+        bgColor = `${transparentize(colors.danger, 0.04)}`;
+        hoverBgColor = `${transparentize(colors.danger, 0.12)}`;
+      } else if (isSelected) {
+        bgColor = `${transparentize(colors.primary, 0.08)}`;
+        hoverBgColor = `${transparentize(colors.primary, 0.12)}`;
+      }
+
+      return { bgColor, hoverBgColor };
+    };
+
+    const { bgColor, hoverBgColor } = getHighlightColors();
 
     const alert: CSSObject = {
       fontFamily: font.family,
@@ -26,16 +51,9 @@ export const useStyles = () => {
       '&:not(:last-child)': {
         marginBottom: size.s,
       },
+      background: bgColor,
       '&:hover': {
-        background: `${transparentize(colors.primary, 0.04)}`,
-      },
-    };
-
-    const selectedAlert: CSSObject = {
-      ...alert,
-      background: `${transparentize(colors.danger, 0.04)}`,
-      '&:hover': {
-        background: `${transparentize(colors.danger, 0.12)}`,
+        background: hoverBgColor,
       },
     };
 
@@ -60,9 +78,8 @@ export const useStyles = () => {
       alert,
       alertRowItem,
       alertStatus,
-      selectedAlert,
     };
-  }, [euiTheme]);
+  }, [euiTheme, isInvestigated, isSelected]);
 
   return cached;
 };

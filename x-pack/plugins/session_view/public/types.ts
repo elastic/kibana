@@ -7,10 +7,18 @@
 import { ReactNode } from 'react';
 import { CoreStart } from '../../../../src/core/public';
 import { TimelinesUIStart } from '../../timelines/public';
+import { ProcessEvent } from '../common/types/process_tree';
 
 export type SessionViewServices = CoreStart & {
   timelines: TimelinesUIStart;
 };
+
+export interface SessionViewDeps {
+  // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
+  sessionEntityId: string;
+  height?: number;
+  jumpToEvent?: ProcessEvent;
+}
 
 export interface EuiTabProps {
   id: string;

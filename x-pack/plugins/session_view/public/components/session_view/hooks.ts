@@ -17,8 +17,8 @@ export const useFetchSessionViewProcessEvents = (
   jumpToEvent: ProcessEvent | undefined
 ) => {
   const { http } = useKibana<CoreStart>().services;
-
-  const jumpToCursor = jumpToEvent && jumpToEvent['@timestamp'];
+  const [isJumpToBeginning, setIsJumpToBeginning] = useState<boolean>(false);
+  const jumpToCursor = jumpToEvent && jumpToEvent.process.start;
 
   const query = useInfiniteQuery(
     'sessionViewProcessEvents',
@@ -66,10 +66,11 @@ export const useFetchSessionViewProcessEvents = (
   );
 
   useEffect(() => {
-    if (jumpToEvent && query.data?.pages.length === 1) {
-      query.fetchPreviousPage();
+    if (jumpToEvent && query.data?.pages.length === 1 && !isJumpToBeginning) {
+      query.fetchPreviousPage({ cancelRefetch: true });
+      setIsJumpToBeginning(true);
     }
-  }, [jumpToEvent, query]);
+  }, [jumpToEvent, query, isJumpToBeginning]);
 
   return query;
 };

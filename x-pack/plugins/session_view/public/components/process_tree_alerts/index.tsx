@@ -12,12 +12,14 @@ import { ProcessTreeAlert } from '../process_tree_alert';
 
 interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
+  jumpToAlertID?: string;
   selectedAlert: ProcessEventAlert | null;
   onAlertSelected: (alert: ProcessEventAlert | null) => void;
 }
 
 export function ProcessTreeAlerts({
   alerts,
+  jumpToAlertID,
   selectedAlert,
   onAlertSelected,
 }: ProcessTreeAlertsDeps) {
@@ -32,6 +34,7 @@ export function ProcessTreeAlerts({
       {alerts.map((alert: ProcessEvent) => (
         <ProcessTreeAlert
           alert={alert}
+          isInvestigated={!!jumpToAlertID && jumpToAlertID === alert.kibana?.alert.uuid}
           isSelected={!!selectedAlert?.uuid && alert.kibana?.alert.uuid === selectedAlert?.uuid}
           onAlertSelected={onAlertSelected}
         />

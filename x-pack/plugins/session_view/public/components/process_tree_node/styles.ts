@@ -11,10 +11,10 @@ import { CSSObject } from '@emotion/react';
 
 interface StylesDeps {
   depth: number;
-  hasAlerts: boolean;
+  hasInvestigatedAlert: boolean;
 }
 
-export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
+export const useStyles = ({ depth, hasInvestigatedAlert }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
@@ -50,7 +50,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       let borderColor = 'transparent';
 
       // TODO: alerts highlight colors
-      if (hasAlerts) {
+      if (hasInvestigatedAlert) {
         bgColor = transparentize(colors.danger, 0.04);
         borderColor = transparentize(colors.danger, 0.48);
       }
@@ -112,7 +112,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       workingDir,
       alertDetails,
     };
-  }, [depth, euiTheme, hasAlerts]);
+  }, [depth, euiTheme, hasInvestigatedAlert]);
 
   return cached;
 };

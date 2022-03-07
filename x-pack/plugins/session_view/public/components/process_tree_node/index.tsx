@@ -31,6 +31,7 @@ interface ProcessDeps {
   isSessionLeader?: boolean;
   depth?: number;
   onProcessSelected?: (process: Process) => void;
+  jumpToAlertID?: string;
   selectedAlert: ProcessEventAlert | null;
   onAlertSelected: (alert: ProcessEventAlert | null) => void;
 }
@@ -45,6 +46,7 @@ export function ProcessTreeNode({
   onProcessSelected,
   selectedAlert,
   onAlertSelected,
+  jumpToAlertID,
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
@@ -58,8 +60,19 @@ export function ProcessTreeNode({
   }, [isSessionLeader, process.autoExpand]);
 
   const alerts = process.getAlerts();
-  const styles = useStyles({ depth, hasAlerts: !!alerts.length });
+  const hasInvestigatedAlert = !!(
+    alerts.length &&
+    alerts.find((alert) => jumpToAlertID && jumpToAlertID === alert.kibana?.alert.uuid)
+  );
+  const styles = useStyles({ depth, hasInvestigatedAlert });
   const buttonStyles = useButtonStyles();
+
+  // Automatically expand alerts list when investigating an alert
+  useEffect(() => {
+    if (hasInvestigatedAlert) {
+      setAlertsExpanded(true);
+    }
+  }, [hasInvestigatedAlert]);
 
   useLayoutEffect(() => {
     if (searchMatched !== null && textRef.current) {
@@ -104,7 +117,7 @@ export function ProcessTreeNode({
 
   const processDetails = process.getDetails();
 
-  if (!processDetails) {
+  if (!(processDetails && processDetails.process)) {
     return null;
   }
 
@@ -199,6 +212,7 @@ export function ProcessTreeNode({
       {alertsExpanded && (
         <ProcessTreeAlerts
           alerts={alerts}
+          jumpToAlertID={jumpToAlertID}
           selectedAlert={selectedAlert}
           onAlertSelected={onAlertSelected}
         />
@@ -213,6 +227,7 @@ export function ProcessTreeNode({
                 process={child}
                 depth={childrenTreeDepth}
                 onProcessSelected={onProcessSelected}
+                jumpToAlertID={jumpToAlertID}
                 selectedAlert={selectedAlert}
                 onAlertSelected={onAlertSelected}
               />

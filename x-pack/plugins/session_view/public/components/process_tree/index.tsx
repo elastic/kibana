@@ -171,6 +171,7 @@ export const ProcessTree = ({
           isSessionLeader
           process={sessionLeader}
           onProcessSelected={onProcessSelected}
+          jumpToAlertID={jumpToEvent?.kibana?.alert.uuid}
           selectedAlert={selectedAlert}
           onAlertSelected={onAlertSelected}
         />
