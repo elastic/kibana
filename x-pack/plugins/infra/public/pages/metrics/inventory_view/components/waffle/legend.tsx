@@ -41,6 +41,6 @@ export const Legend: React.FC<Props> = ({ legend, bounds, formatter }) => {
 };
 
 const LegendContainer = euiStyled.div`
-  margin-left: 10px;
+  margin: 0 10px;
   display: flex;
 `;
