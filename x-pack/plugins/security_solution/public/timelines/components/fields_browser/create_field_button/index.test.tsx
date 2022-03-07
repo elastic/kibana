@@ -11,15 +11,15 @@ import { CreateFieldButton, CreateFieldEditorActions } from './index';
 import {
   indexPatternFieldEditorPluginMock,
   Start,
-} from '../../../../../../../src/plugins/data_view_field_editor/public/mocks';
+} from '../../../../../../../../src/plugins/data_view_field_editor/public/mocks';
 
-import { TestProviders } from '../../../common/mock';
-import { useKibana } from '../../../common/lib/kibana';
-import type { DataView } from '../../../../../../../src/plugins/data/common';
-import { TimelineId } from '../../../../common/types';
+import { TestProviders } from '../../../../common/mock';
+import { useKibana } from '../../../../common/lib/kibana';
+import type { DataView } from '../../../../../../../../src/plugins/data/common';
+import { TimelineId } from '../../../../../common/types';
 
 let mockIndexPatternFieldEditor: Start;
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const runAllPromises = () => new Promise(setImmediate);

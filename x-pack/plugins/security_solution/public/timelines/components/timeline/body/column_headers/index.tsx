@@ -34,7 +34,7 @@ import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { CreateFieldEditorActions, useCreateFieldButton } from '../../../create_field_button';
+import { useFieldBrowserOptions, CreateFieldEditorActions } from '../../../fields_browser';
 
 export interface ColumnHeadersComponentProps {
   actionsColumnWidth: number;
@@ -190,11 +190,11 @@ export const ColumnHeadersComponent = ({
     [trailingControlColumns]
   );
 
-  const createFieldComponent = useCreateFieldButton(
-    SourcererScopeName.timeline,
-    timelineId as TimelineId,
-    fieldEditorActionsRef
-  );
+  const fieldBrowserOptions = useFieldBrowserOptions({
+    sourcererScope: SourcererScopeName.timeline,
+    timelineId: timelineId as TimelineId,
+    editorActionsRef: fieldEditorActionsRef,
+  });
 
   const LeadingHeaderActions = useMemo(() => {
     return leadingHeaderCells.map(
@@ -221,7 +221,7 @@ export const ColumnHeadersComponent = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
-                createFieldComponent={createFieldComponent}
+                fieldBrowserOptions={fieldBrowserOptions}
               />
             )}
           </EventsThGroupActions>
@@ -234,7 +234,7 @@ export const ColumnHeadersComponent = ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
-    createFieldComponent,
+    fieldBrowserOptions,
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,
@@ -270,7 +270,7 @@ export const ColumnHeadersComponent = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
-                createFieldComponent={createFieldComponent}
+                fieldBrowserOptions={fieldBrowserOptions}
               />
             )}
           </EventsThGroupActions>
@@ -283,7 +283,7 @@ export const ColumnHeadersComponent = ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
-    createFieldComponent,
+    fieldBrowserOptions,
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,
