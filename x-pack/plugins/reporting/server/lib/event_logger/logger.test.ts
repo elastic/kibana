@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { ConcreteTaskInstance } from '../../../../task_manager/server';
-import { createMockLevelLogger } from '../../test_helpers';
 import { BasePayload } from '../../types';
 import { Report } from '../store';
 import { ReportingEventLogger, reportingEventLoggerFactory } from './logger';
@@ -21,7 +21,7 @@ describe('Event Logger', () => {
   let factory: ReportingEventLogger;
 
   beforeEach(() => {
-    factory = reportingEventLoggerFactory(createMockLevelLogger());
+    factory = reportingEventLoggerFactory(loggingSystemMock.createLogger());
   });
 
   it(`should construct with an internal seed object`, () => {

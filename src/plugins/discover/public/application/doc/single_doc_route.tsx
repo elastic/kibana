@@ -16,6 +16,7 @@ import { withQueryParams } from '../../utils/with_query_params';
 import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
 import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useExecutionContext } from '../../../../kibana_react/public';
 
 export interface SingleDocRouteProps {
   /**
@@ -31,10 +32,16 @@ export interface DocUrlParams {
 
 const SingleDoc = ({ id }: SingleDocRouteProps) => {
   const services = useDiscoverServices();
-  const { chrome, timefilter } = services;
+  const { chrome, timefilter, core } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
   const breadcrumb = useMainRouteBreadcrumb();
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'single-doc',
+    id: indexPatternId,
+  });
 
   useEffect(() => {
     chrome.setBreadcrumbs([
