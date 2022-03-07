@@ -142,13 +142,13 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
     ) => {
       inflightApiCalls++;
 
-      // If a delay was defined, then await that first
+      // We always wait at least 1ms
+      await new Promise((r) => setTimeout(r, 1));
+
+      // If a delay was defined, then await for that as well
       if (delay) {
         await delay(apiOptions);
       }
-
-      // We always wait at least 1ms
-      await new Promise((r) => setTimeout(r, 1));
 
       inflightApiCalls--;
 
