@@ -26,10 +26,20 @@ export const ProtectionSwitch = React.memo(
     protection,
     protectionLabel,
     osList,
+    additionalOnSwitchChange,
   }: {
     protection: PolicyProtection;
     protectionLabel?: string;
     osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+    additionalOnSwitchChange?: ({
+      value,
+      os,
+      policyConfigData,
+    }: {
+      value: boolean;
+      os: string;
+      policyConfigData: UIPolicyConfig;
+    }) => {};
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
@@ -60,6 +70,13 @@ export const ProtectionSwitch = React.memo(
                     event.target.checked;
                 }
               }
+              if (additionalOnSwitchChange) {
+                additionalOnSwitchChange({
+                  value: event.target.checked,
+                  os,
+                  policyConfigData: newPayload,
+                });
+              }
             }
           } else {
             for (const os of osList) {
@@ -81,6 +98,13 @@ export const ProtectionSwitch = React.memo(
                     event.target.checked;
                 }
               }
+              if (additionalOnSwitchChange) {
+                additionalOnSwitchChange({
+                  value: event.target.checked,
+                  os,
+                  policyConfigData: newPayload,
+                });
+              }
             }
           }
           dispatch({
@@ -89,7 +113,7 @@ export const ProtectionSwitch = React.memo(
           });
         }
       },
-      [dispatch, policyDetailsConfig, isPlatinumPlus, protection, osList]
+      [dispatch, policyDetailsConfig, isPlatinumPlus, protection, osList, additionalOnSwitchChange]
     );
 
     return (
