@@ -84,7 +84,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       };
     });
 
-    data.search.searchAsInternalUser.search.mockImplementation(() => {
+    (data.search.searchAsInternalUser.search as jest.Mock).mockImplementation(() => {
       return of(response);
     });
 
@@ -98,7 +98,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   afterEach(() => {
     ruleDataService.findIndicesByFeature.mockClear();
     data.search.getSearchStrategy.mockClear();
-    data.search.searchAsInternalUser.search.mockClear();
+    (data.search.searchAsInternalUser.search as jest.Mock).mockClear();
     getAuthzFilterSpy.mockClear();
   });
 

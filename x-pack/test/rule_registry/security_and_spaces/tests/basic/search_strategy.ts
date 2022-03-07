@@ -65,27 +65,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('siem', () => {
-      beforeEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await createSignalsIndex(supertest, log);
-      });
-
-      afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
-      });
-
+    // TODO: need xavier's help here
+    describe.skip('siem', () => {
       before(async () => {
+        await createSignalsIndex(supertest, log);
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      });
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
-      });
 
-      it('should return alerts from siem rules', async () => {
         const rule: QueryCreateSchema = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -93,7 +79,16 @@ export default ({ getService }: FtrProviderContext) => {
         const { id: createdId } = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, log, createdId);
         await waitForSignalsToBePresent(supertest, log, 1, [createdId]);
+      });
 
+      after(async () => {
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      });
+
+      it('should return alerts from siem rules', async () => {
         const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
@@ -113,17 +108,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should throw an error when trying to to search for more than just siem', async () => {
-        const rule: QueryCreateSchema = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
-          query: `_id:${ID}`,
+        type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
+          statusCode: number;
+          message: string;
         };
-        const { id: createdId } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, createdId);
-        await waitForSignalsToBePresent(supertest, log, 1, [createdId]);
-
-        type RuleRegistrySearchResponseWithErrors =
-          | RuleRegistrySearchResponse
-          | { statusCode: number; message: string };
         const result = await secureBsearch.send<RuleRegistrySearchResponseWithErrors>({
           supertestWithoutAuth,
           auth: {
