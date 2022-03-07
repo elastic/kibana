@@ -8,6 +8,7 @@
 import type {
   ApplicationStart,
   ChromeStart,
+  DocLinksStart,
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
@@ -29,6 +30,7 @@ export interface ObservabilityAppServices {
   cases: CasesUiStart;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
+  docLinks: DocLinksStart;
   http: HttpStart;
   lens: LensPublicStart;
   navigation: NavigationPublicPluginStart;

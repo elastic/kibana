@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../../application/types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTrackPageview } from '../../hooks/use_track_metric';
@@ -24,13 +26,14 @@ export function LandingPage() {
     },
   ]);
 
-  const { core, ObservabilityPageTemplate } = usePluginContext();
+  const { http, docLinks } = useKibana<ObservabilityAppServices>().services;
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   const noDataConfig = getNoDataConfig({
     // Set it to false because the landing page is only visible when there's no data
     hasData: false,
-    basePath: core.http.basePath,
-    docsLink: core.docLinks.links.observability.guide,
+    basePath: http.basePath,
+    docsLink: docLinks.links.observability.guide,
   });
 
   return (
