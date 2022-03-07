@@ -34,8 +34,12 @@ export const useObservable = <
   return output$;
 };
 
-export const useBehaviorSubject = <InputValue, OutputValue>(
-  deriveObservableOnce: (input$: Observable<InputValue>) => Observable<OutputValue>,
+export const useBehaviorSubject = <
+  InputValue,
+  OutputValue,
+  OutputObservable extends Observable<OutputValue>
+>(
+  deriveObservableOnce: (input$: Observable<InputValue>) => OutputObservable,
   createInitialValue: () => InputValue
 ) => {
   const [subject$] = useState(() => new BehaviorSubject<InputValue>(createInitialValue()));
