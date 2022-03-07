@@ -62,6 +62,7 @@ export const singleSearchAfter = async ({
         index,
         from,
         to,
+        runtimeMappings: {},
         filter,
         size: pageSize,
         sortOrder,
@@ -80,6 +81,8 @@ export const singleSearchAfter = async ({
       const searchErrors = createErrorsFromShard({
         errors: nextSearchAfterResult._shards.failures ?? [],
       });
+
+      console.error('SEARCH RESULT', JSON.stringify(nextSearchAfterResult, null, 2));
 
       return {
         searchResult: nextSearchAfterResult,

@@ -7,6 +7,8 @@
 
 import { EuiButtonEmpty, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+
 import styled from 'styled-components';
 import { isEqual } from 'lodash';
 
@@ -17,7 +19,7 @@ import {
 } from '../../../../../common/constants';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -139,16 +141,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   onSubmit,
   setForm,
 }) => {
+  const { pathname } = useLocation();
+
   const {
     // browserFields,
     // docValueFields,
     indexPattern,
-    // runtimeMappings,
+    runtimeMappings,
     selectedPatterns,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
-  } = useSourcererDataView();
-  // console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
+  } = useSourcererDataView(getScopeFromPath(pathname));
+  console.log('INDEX PATTERN', indexPattern);
+  console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
+  console.log('DATA VIEW ID', selectedDataViewId);
   // console.log('docValueFields', JSON.stringify(runtimeMappings, null, 2));
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -213,6 +219,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       // indexPatterns,
     },
   ] = useFetchIndex(index);
+  console.log('BROWSER FIELDS', browserFields);
   const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
     (groupAcc, [groupName, groupValue]) => {
       return {
@@ -413,7 +420,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   },
                 }}
               />
-
+              {console.error('INDEX PATTERN', indexPattern)}
               {isEqlRule(ruleType) ? (
                 <UseField
                   key="EqlQueryBar"

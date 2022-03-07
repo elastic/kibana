@@ -14,6 +14,7 @@ interface BuildEventsSearchQuery {
   from: string;
   to: string;
   filter: estypes.QueryDslQueryContainer;
+  runtimeMappings: estypes.MappingRuntimeField;
   size: number;
   sortOrder?: estypes.SortOrder;
   searchAfterSortIds: estypes.SortResults | undefined;
@@ -28,6 +29,7 @@ export const buildEventsSearchQuery = ({
   to,
   filter,
   size,
+  runtimeMappings,
   searchAfterSortIds,
   sortOrder,
   timestampOverride,
@@ -113,6 +115,14 @@ export const buildEventsSearchQuery = ({
 
   const searchQuery = {
     allow_no_indices: true,
+    runtime_mappings: {
+      'devin-field': {
+        type: 'keyword',
+        script: {
+          source: "emit('devin was here')",
+        },
+      },
+    }, // runtimeMappings,
     index,
     size,
     ignore_unavailable: true,

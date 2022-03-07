@@ -6,6 +6,8 @@
  */
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import {
   RiskScoreMapping,
   ThreatIndex,
@@ -128,6 +130,7 @@ export interface DefineStepRule {
   index: string[];
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
+  runtimeFields: MappingRuntimeFields[];
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;
