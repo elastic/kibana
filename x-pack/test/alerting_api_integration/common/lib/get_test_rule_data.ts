@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function getTestAlertData(overwrites = {}) {
+export function getTestRuleData(overwrites = {}) {
   return {
     enabled: true,
     name: 'abc',
