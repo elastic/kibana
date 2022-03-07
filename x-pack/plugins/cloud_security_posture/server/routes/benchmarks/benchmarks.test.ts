@@ -76,15 +76,15 @@ describe('benchmarks API', () => {
       });
     });
 
-    it('expect to find benchmark_filter', async () => {
+    it('expect to find benchmark_name', async () => {
       const validatedQuery = benchmarksInputSchema.validate({
-        benchmark_filter: 'my_cis_benchmark',
+        benchmark_name: 'my_cis_benchmark',
       });
 
       expect(validatedQuery).toMatchObject({
         page: 1,
         per_page: DEFAULT_BENCHMARKS_PER_PAGE,
-        benchmark_filter: 'my_cis_benchmark',
+        benchmark_name: 'my_cis_benchmark',
       });
     });
 
@@ -137,13 +137,13 @@ describe('benchmarks API', () => {
       });
     });
 
-    it('should format request by benchmark_filter', async () => {
+    it('should format request by benchmark_name', async () => {
       const mockAgentPolicyService = createPackagePolicyServiceMock();
 
       await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
         page: 1,
         per_page: 100,
-        benchmark_filter: 'my_cis_benchmark',
+        benchmark_name: 'my_cis_benchmark',
       });
 
       expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
