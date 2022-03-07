@@ -45,7 +45,7 @@ interface PercentileRankAggProps {
   series: Series;
   dragHandleProps: DragHandleProps;
   onAdd(): void;
-  onChange(): void;
+  onChange(partialModel: Record<string, unknown>): void;
   onDelete(): void;
 }
 
@@ -111,7 +111,11 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
             restrict={RESTRICT_FIELDS}
             indexPattern={indexPattern}
             value={model.field ?? ''}
-            onChange={handleSelectChange('field')}
+            onChange={(value) =>
+              props.onChange({
+                field: value?.[0],
+              })
+            }
           />
         </EuiFlexItem>
 
