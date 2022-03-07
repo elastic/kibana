@@ -425,8 +425,8 @@ x-pack/plugins/session_view @elastic/awp-platform
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
 
-# Cloud Posture Security
-/x-pack/plugins/cloud_security_posture/ @elastic/cloud-posture-security
+# Cloud Security Posture
+/x-pack/plugins/cloud_security_posture/ @elastic/cloud-security-posture-control-plane
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
