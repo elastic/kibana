@@ -179,10 +179,6 @@ const createSetupContractMock = () => {
     csp: CspConfig.DEFAULT,
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
-    auth: {
-      get: internalMock.auth.get,
-      isAuthenticated: internalMock.auth.isAuthenticated,
-    },
     getServerInfo: internalMock.getServerInfo,
   };
 

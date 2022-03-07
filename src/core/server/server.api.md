@@ -1127,8 +1127,6 @@ export interface HttpServicePreboot {
 
 // @public
 export interface HttpServiceSetup {
-    // @deprecated
-    auth: HttpAuth;
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() => IRouter<Context>;
