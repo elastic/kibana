@@ -128,6 +128,7 @@ describe('wrapScopedClusterClient', () => {
   });
 
   test('handles empty search result object', async () => {
+    const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
@@ -140,6 +141,7 @@ describe('wrapScopedClusterClient', () => {
       scopedClusterClient,
       rule,
       logger,
+      abortController,
     });
 
     const wrappedSearchClient = wrappedSearchClientFactory.client();
@@ -194,9 +196,7 @@ describe('wrapScopedClusterClient', () => {
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    (
-      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
-    ).child.mockReturnValue(childClient as unknown as Client);
+    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     childClient.search.mockRejectedValueOnce(new Error('Request has been aborted by the user'));
 
     const abortableSearchClient = createWrappedScopedClusterClientFactory({
