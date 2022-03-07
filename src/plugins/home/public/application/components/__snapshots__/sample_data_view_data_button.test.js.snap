@@ -30,6 +30,7 @@ exports[`should render popover when appLinks is not empty 1`] = `
           "id": 0,
           "items": Array [
             Object {
+              "data-test-subj": "viewSampleDataSetecommerce-dashboard",
               "href": "root/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f",
               "icon": <EuiIcon
                 size="m"
