@@ -10,6 +10,7 @@ import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { DataViewsService } from './data_views';
+import { HasDataService } from '../common/types';
 
 export interface DataViewsPublicSetupDependencies {
   expressions: ExpressionsSetup;
@@ -28,6 +29,7 @@ export interface DataViewsPublicPluginSetup {}
 
 export interface DataViewsServicePublic extends DataViewsService {
   getCanSaveSync: () => boolean;
+  hasData: HasDataService;
 }
 
 export type DataViewsContract = PublicMethodsOf<DataViewsServicePublic>;
