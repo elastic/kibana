@@ -588,7 +588,6 @@ export function copyToSpaceTestSuiteFactory(
                     error: { type: 'conflict', destinationId },
                     type,
                     id: inexactMatchIdA,
-                    title,
                     meta,
                   },
                 ]);
@@ -630,7 +629,6 @@ export function copyToSpaceTestSuiteFactory(
                     error: { type: 'conflict', destinationId },
                     type,
                     id: inexactMatchIdB,
-                    title,
                     meta,
                   },
                 ]);
@@ -672,7 +670,6 @@ export function copyToSpaceTestSuiteFactory(
                     error: { type: 'conflict', destinationId },
                     type,
                     id: inexactMatchIdC,
-                    title,
                     meta,
                   },
                 ]);
