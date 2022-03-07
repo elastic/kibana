@@ -7,8 +7,6 @@
 
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import {
-  ActionsCompletion,
-  AlertAction,
   AlertExecutionStatusErrorReasons,
   AlertExecutionStatusWarningReasons,
   RuleExecutionState,
@@ -21,6 +19,7 @@ import {
 } from './rule_execution_status';
 import { ErrorWithReason } from './error_with_reason';
 import { translations } from '../constants/translations';
+import { ActionsCompletion } from '../task_runner/types';
 
 const MockLogger = loggingSystemMock.create().get();
 const metrics = { numSearches: 1, esSearchDurationMs: 10, totalSearchDurationMs: 20 };
@@ -32,7 +31,13 @@ describe('RuleExecutionStatus', () => {
 
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
-      const status = executionStatusFromState({} as RuleExecutionState);
+      const status = executionStatusFromState({
+        alertExecutionStore: {
+          maxExecutableActions: 1000,
+          total: 0,
+          completion: ActionsCompletion.COMPLETE,
+        },
+      } as RuleExecutionState);
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('ok');
@@ -42,8 +47,11 @@ describe('RuleExecutionStatus', () => {
     test('task state with no instances', () => {
       const status = executionStatusFromState({
         alertInstances: {},
-        triggeredActions: [],
-        alertExecutionResults: [],
+        alertExecutionStore: {
+          maxExecutableActions: 1000,
+          total: 0,
+          completion: ActionsCompletion.COMPLETE,
+        },
         metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
@@ -56,8 +64,11 @@ describe('RuleExecutionStatus', () => {
     test('task state with one instance', () => {
       const status = executionStatusFromState({
         alertInstances: { a: {} },
-        triggeredActions: [],
-        alertExecutionResults: [],
+        alertExecutionStore: {
+          maxExecutableActions: 1000,
+          total: 0,
+          completion: ActionsCompletion.COMPLETE,
+        },
         metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
@@ -69,9 +80,12 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with numberOfTriggeredActions', () => {
       const status = executionStatusFromState({
-        triggeredActions: [{ group: '1' } as AlertAction],
+        alertExecutionStore: {
+          maxExecutableActions: 1000,
+          total: 1,
+          completion: ActionsCompletion.COMPLETE,
+        },
         alertInstances: { a: {} },
-        alertExecutionResults: [],
         metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
@@ -83,13 +97,12 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with warning', () => {
       const status = executionStatusFromState({
-        triggeredActions: [{ group: '1' } as AlertAction],
         alertInstances: { a: {} },
-        alertExecutionResults: [
-          { completion: ActionsCompletion.PARTIAL },
-          { completion: ActionsCompletion.ALL },
-          { completion: ActionsCompletion.ALL },
-        ],
+        alertExecutionStore: {
+          maxExecutableActions: 2,
+          total: 3,
+          completion: ActionsCompletion.PARTIAL,
+        },
         metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
