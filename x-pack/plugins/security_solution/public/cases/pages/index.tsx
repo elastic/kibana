@@ -102,14 +102,7 @@ const CaseContainerComponent: React.FC = () => {
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
-            metrics: [
-              'alerts.count',
-              'alerts.users',
-              'alerts.hosts',
-              'actions.isolateHost',
-              'connectors',
-              'lifespan',
-            ],
+            metrics: ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors', 'lifespan'],
           },
           refreshRef,
           onComponentInitialized,

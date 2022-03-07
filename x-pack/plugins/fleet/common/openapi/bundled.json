@@ -621,6 +621,19 @@
                           "type"
                         ]
                       }
+                    },
+                    "_meta": {
+                      "type": "object",
+                      "properties": {
+                        "install_source": {
+                          "type": "string",
+                          "enum": [
+                            "registry",
+                            "upload",
+                            "bundled"
+                          ]
+                        }
+                      }
                     }
                   },
                   "required": [
@@ -645,6 +658,9 @@
                 "type": "object",
                 "properties": {
                   "force": {
+                    "type": "boolean"
+                  },
+                  "ignore_constraints": {
                     "type": "boolean"
                   }
                 }
@@ -1089,6 +1105,14 @@
               "type": "string"
             },
             "name": "policyId",
+            "in": "query",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "kuery",
             "in": "query",
             "required": false
           }
@@ -2872,6 +2896,35 @@
           }
         ]
       }
+    },
+    "/logstash_api_keys": {
+      "post": {
+        "summary": "Generate Logstash API key",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "api_key": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "generate-logstash-api-key",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -3785,6 +3838,14 @@
                 "logs"
               ]
             }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -3939,6 +4000,12 @@
                 "format": "date-time"
               },
               "updated_by": {
+                "type": "string"
+              },
+              "data_output_id": {
+                "type": "string"
+              },
+              "monitoring_output_id": {
                 "type": "string"
               },
               "revision": {
@@ -4223,14 +4290,28 @@
           "ca_trusted_fingerprint": {
             "type": "string"
           },
-          "api_key": {
-            "type": "string"
-          },
           "config": {
             "type": "object"
           },
           "config_yaml": {
             "type": "string"
+          },
+          "ssl": {
+            "type": "object",
+            "properties": {
+              "certificate": {
+                "type": "string"
+              },
+              "certificate_authorities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "key": {
+                "type": "string"
+              }
+            }
           }
         },
         "required": [

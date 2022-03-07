@@ -15,7 +15,7 @@ import type { FieldFormat } from 'src/plugins/field_formats/common';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { LayerArgs, YConfig } from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
-import { hasIcon } from './xy_config_panel/reference_line_panel';
+import { hasIcon } from './xy_config_panel/shared/icon_select';
 
 export const REFERENCE_LINE_MARKER_SIZE = 20;
 

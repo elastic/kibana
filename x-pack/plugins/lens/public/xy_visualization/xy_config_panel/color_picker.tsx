@@ -12,7 +12,7 @@ import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } 
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State } from '../types';
-import { FormatFactory, layerTypes } from '../../../common';
+import { FormatFactory } from '../../../common';
 import { getSeriesColor } from '../state_helpers';
 import {
   defaultReferenceLineColor,
@@ -22,6 +22,7 @@ import {
 import { getSortedAccessors } from '../to_expression';
 import { updateLayer } from '.';
 import { TooltipWrapper } from '../../shared_components';
+import { isReferenceLayer } from '../visualization_helpers';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
@@ -59,7 +60,7 @@ export const ColorPicker = ({
   const overwriteColor = getSeriesColor(layer, accessor);
   const currentColor = useMemo(() => {
     if (overwriteColor || !frame.activeData) return overwriteColor;
-    if (layer.layerType === layerTypes.REFERENCELINE) {
+    if (isReferenceLayer(layer)) {
       return defaultReferenceLineColor;
     }
 

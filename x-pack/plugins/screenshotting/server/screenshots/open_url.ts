@@ -6,9 +6,9 @@
  */
 
 import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
+import type { Headers, Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
-import type { ConditionalHeaders, Context } from '../browsers';
+import type { Context } from '../browsers';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 
 export const openUrl = async (
@@ -18,7 +18,7 @@ export const openUrl = async (
   index: number,
   url: string,
   context: Context,
-  conditionalHeaders: ConditionalHeaders
+  headers: Headers
 ): Promise<void> => {
   // If we're moving to another page in the app, we'll want to wait for the app to tell us
   // it's loaded the next page.
@@ -27,7 +27,7 @@ export const openUrl = async (
   const span = apm.startSpan('open_url', 'wait');
 
   try {
-    await browser.open(url, { conditionalHeaders, context, waitForSelector, timeout }, logger);
+    await browser.open(url, { context, headers, waitForSelector, timeout }, logger);
   } catch (err) {
     logger.error(err);
     throw new Error(`An error occurred when trying to open the Kibana URL: ${err.message}`);

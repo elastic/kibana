@@ -16,8 +16,6 @@ import semverPatch from 'semver/functions/patch';
 import type { AgentPolicy } from '../../types';
 import { useKibanaVersion } from '../../hooks';
 
-import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
-
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 import { SelectCreateAgentPolicy } from './agent_policy_select_create';
 
@@ -83,7 +81,7 @@ export const AgentPolicySelectionStep = ({
   excludeFleetServer,
   refreshAgentPolicies,
 }: {
-  agentPolicies?: AgentPolicy[];
+  agentPolicies: AgentPolicy[];
   setSelectedPolicyId?: (policyId?: string) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId?: (key?: string) => void;
@@ -93,9 +91,9 @@ export const AgentPolicySelectionStep = ({
   // storing the created agent policy id as the child component is being recreated
   const [policyId, setPolicyId] = useState<string | undefined>(undefined);
   const regularAgentPolicies = useMemo(() => {
-    return (agentPolicies ?? []).filter(
+    return agentPolicies.filter(
       (policy) =>
-        policy && !policy.is_managed && (!excludeFleetServer || !policyHasFleetServer(policy))
+        policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
     );
   }, [agentPolicies, excludeFleetServer]);
 

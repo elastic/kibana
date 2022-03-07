@@ -40,6 +40,13 @@ import {
   isSortableByColumn,
 } from './helpers';
 
+export function supportsRarityRanking(field?: IndexPatternField) {
+  // these es field types can't be sorted by rarity
+  return !field?.esTypes?.some((esType) =>
+    ['double', 'float', 'half_float', 'scaled_float'].includes(esType)
+  );
+}
+
 export type { TermsIndexPatternColumn } from './types';
 
 const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
@@ -144,7 +151,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     return ret;
   },
   canAddNewField: ({ targetColumn, sourceColumn, field, indexPattern }) => {
-    // first step: collect the fields from the targetColumn
+    if (targetColumn.params.orderBy.type === 'rare') {
+      return false;
+    }
+    // collect the fields from the targetColumn
     const originalTerms = new Set([
       targetColumn.sourceField,
       ...(targetColumn.params?.secondaryFields ?? []),
@@ -306,14 +316,19 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       delete newParams.format;
     }
     newParams.parentFormat = getParentFormatter(newParams);
+    if (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare') {
+      newParams.orderBy = { type: 'alphabetical' };
+    }
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(
-        field.displayName,
-        newParams.secondaryFields?.length,
-        newParams.orderBy.type === 'rare'
-      ),
+      label: oldColumn.customLabel
+        ? oldColumn.label
+        : ofName(
+            field.displayName,
+            newParams.secondaryFields?.length,
+            newParams.orderBy.type === 'rare'
+          ),
       sourceField: field.name,
       params: newParams,
     };
@@ -376,6 +391,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         if ('format' in newParams && newDataType !== 'number') {
           delete newParams.format;
         }
+        const mainField = indexPattern.getFieldByName(fields[0]);
+        if (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare') {
+          newParams.orderBy = { type: 'alphabetical' };
+        }
         updateLayer({
           ...layer,
           columns: {
@@ -384,11 +403,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               ...column,
               dataType: newDataType,
               sourceField: fields[0],
-              label: ofName(
-                indexPattern.getFieldByName(fields[0])?.displayName,
-                fields.length - 1,
-                column.params.orderBy.type === 'rare'
-              ),
+              label: column.customLabel
+                ? column.label
+                : ofName(
+                    indexPattern.getFieldByName(fields[0])?.displayName,
+                    fields.length - 1,
+                    newParams.orderBy.type === 'rare'
+                  ),
               params: {
                 ...newParams,
                 secondaryFields,
@@ -494,7 +515,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         defaultMessage: 'Alphabetical',
       }),
     });
-    if (!currentColumn.params.secondaryFields?.length) {
+    if (
+      !currentColumn.params.secondaryFields?.length &&
+      supportsRarityRanking(indexPattern.getFieldByName(currentColumn.sourceField))
+    ) {
       orderOptions.push({
         value: toValue({ type: 'rare', maxDocCount: DEFAULT_MAX_DOC_COUNT }),
         text: i18n.translate('xpack.lens.indexPattern.terms.orderRare', {

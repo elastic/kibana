@@ -698,7 +698,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             'replace_duplicate_incompatible',
             'swap_incompatible',
           ],
-          nextLabel: 'Unique count',
+          nextLabel: 'Minimum',
         });
       });
 
@@ -736,7 +736,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           })
         ).toEqual({
           dropTypes: ['replace_incompatible', 'replace_duplicate_incompatible'],
-          nextLabel: 'Unique count',
+          nextLabel: 'Minimum',
         });
       });
 
@@ -768,6 +768,41 @@ describe('IndexPatternDimensionEditorPanel', () => {
           })
         ).toEqual({
           dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'combine_compatible'],
+        });
+      });
+
+      it('returns no combine_compatible drop type if the target column uses rarity ordering', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                orderBy: { type: 'rare' },
+              },
+            } as TermsIndexPatternColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible'],
         });
       });
 

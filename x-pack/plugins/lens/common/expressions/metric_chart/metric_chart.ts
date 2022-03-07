@@ -35,8 +35,29 @@ export const metricChart: ExpressionFunctionDefinition<
     title: {
       types: ['string'],
       help: i18n.translate('xpack.lens.metric.title.help', {
-        defaultMessage: 'The chart title.',
+        defaultMessage: 'The visualization title.',
       }),
+    },
+    size: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.metric.size.help', {
+        defaultMessage: 'The visualization text size.',
+      }),
+      default: 'xl',
+    },
+    titlePosition: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.metric.titlePosition.help', {
+        defaultMessage: 'The visualization title position.',
+      }),
+      default: 'bottom',
+    },
+    textAlign: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.metric.textAlignPosition.help', {
+        defaultMessage: 'The visualization text alignment position.',
+      }),
+      default: 'center',
     },
     description: {
       types: ['string'],

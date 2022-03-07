@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { ConcreteTaskInstance } from '../../../../task_manager/server';
-import { createMockLevelLogger } from '../../test_helpers';
 import { BasePayload } from '../../types';
 import { Report } from '../store';
 import { ReportingEventLogger, reportingEventLoggerFactory } from './logger';
@@ -21,7 +21,7 @@ describe('Event Logger', () => {
   let factory: ReportingEventLogger;
 
   beforeEach(() => {
-    factory = reportingEventLoggerFactory(createMockLevelLogger());
+    factory = reportingEventLoggerFactory(loggingSystemMock.createLogger());
   });
 
   it(`should construct with an internal seed object`, () => {
@@ -116,7 +116,14 @@ describe('Event Logger', () => {
     jest.spyOn(logger.completionLogger, 'stopTiming');
     logger.logExecutionStart();
 
-    const result = logger.logExecutionComplete({ byteSize: 444, csvRows: 440000 });
+    const result = logger.logExecutionComplete({
+      byteSize: 444,
+      pdf: {
+        cpu: 0.1,
+        memory: 1024,
+        pages: 5,
+      },
+    });
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -125,9 +132,15 @@ describe('Event Logger', () => {
         Object {
           "actionType": "execute-complete",
           "byteSize": 444,
-          "csvRows": 440000,
+          "csv": undefined,
           "id": "12348",
           "jobType": "csv",
+          "pdf": Object {
+            "cpu": 0.1,
+            "memory": 1024,
+            "pages": 5,
+          },
+          "png": undefined,
         },
         "completed csv execution",
       ]

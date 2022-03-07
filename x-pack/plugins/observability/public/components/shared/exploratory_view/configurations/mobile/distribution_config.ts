@@ -17,6 +17,7 @@ import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
+  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -55,16 +56,34 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
         label: RESPONSE_LATENCY,
         field: TRANSACTION_DURATION,
         id: TRANSACTION_DURATION,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: transaction`,
+          },
+        ],
       },
       {
         label: SYSTEM_MEMORY_USAGE,
         field: METRIC_SYSTEM_MEMORY_USAGE,
         id: METRIC_SYSTEM_MEMORY_USAGE,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: metric`,
+          },
+        ],
       },
       {
         label: CPU_USAGE,
         field: METRIC_SYSTEM_CPU_USAGE,
         id: METRIC_SYSTEM_CPU_USAGE,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: metric`,
+          },
+        ],
       },
     ],
   };

@@ -13,7 +13,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiText,
-  EuiToolTip,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -37,11 +37,19 @@ export interface ActionBarProps {
   monitor: SyntheticsMonitor;
   isValid: boolean;
   testRun?: TestRun;
+  isTestRunInProgress: boolean;
   onSave?: () => void;
   onTestNow?: () => void;
 }
 
-export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: ActionBarProps) => {
+export const ActionBar = ({
+  monitor,
+  isValid,
+  onSave,
+  onTestNow,
+  testRun,
+  isTestRunInProgress,
+}: ActionBarProps) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const { basePath } = useContext(UptimeSettingsContext);
   const { locations } = useSelector(monitorManagementListSelector);
@@ -49,6 +57,7 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSuccessful, setIsSuccessful] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean | undefined>(undefined);
 
   const { data, status } = useFetcher(() => {
     if (!isSaving || !isValid) {
@@ -94,7 +103,7 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
       });
       setIsSuccessful(true);
     } else if (hasErrors && !loading) {
-      Object.values(data).forEach((location) => {
+      Object.values(data!).forEach((location) => {
         const { status: responseStatus, reason } = location.error || {};
         kibanaService.toasts.addWarning({
           title: i18n.translate('xpack.uptime.monitorManagement.service.error.title', {
@@ -144,34 +153,50 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s">
-          {onTestNow && (
-            <EuiFlexItem grow={false} style={{ marginRight: 20 }}>
-              <EuiToolTip content={TEST_NOW_DESCRIPTION}>
-                <EuiButton
-                  fill
-                  size="s"
-                  color="success"
-                  iconType="play"
-                  onClick={() => onTestNow()}
-                  disabled={!isValid}
-                  data-test-subj={'monitorTestNowRunBtn'}
-                >
-                  {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="ghost"
               size="s"
-              iconType="cross"
               href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}`}
             >
               {DISCARD_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
+
+          {onTestNow && (
+            <EuiFlexItem grow={false}>
+              {/* Popover is used instead of EuiTooltip until the resolution of https://github.com/elastic/eui/issues/5604 */}
+              <EuiPopover
+                repositionOnScroll={true}
+                initialFocus={false}
+                button={
+                  <EuiButton
+                    css={{ width: '100%' }}
+                    fill
+                    size="s"
+                    color="success"
+                    iconType="play"
+                    disabled={!isValid || isTestRunInProgress}
+                    data-test-subj={'monitorTestNowRunBtn'}
+                    onClick={() => onTestNow()}
+                    onMouseEnter={() => {
+                      setIsPopoverOpen(true);
+                    }}
+                    onMouseLeave={() => {
+                      setIsPopoverOpen(false);
+                    }}
+                  >
+                    {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
+                  </EuiButton>
+                }
+                isOpen={isPopoverOpen}
+              >
+                <EuiText style={{ width: 260, outline: 'none' }}>
+                  <p>{TEST_NOW_DESCRIPTION}</p>
+                </EuiText>
+              </EuiPopover>
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem grow={false}>
             <EuiButton

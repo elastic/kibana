@@ -87,7 +87,7 @@ export function internalMonitoringCheckRoute(server: LegacyServer, npRoute: Rout
           mb_indices: 0,
         };
 
-        const config = server.config();
+        const config = server.config;
         const { ccs } = request.body;
         const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
         const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);

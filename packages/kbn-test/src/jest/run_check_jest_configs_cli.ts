@@ -10,7 +10,7 @@ import { writeFileSync } from 'fs';
 import path from 'path';
 import Mustache from 'mustache';
 
-import { run } from '@kbn/dev-utils';
+import { run, createFailError } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { JestConfigs, CONFIG_NAMES } from './configs';
@@ -72,7 +72,7 @@ export async function runCheckJestConfigsCli() {
             log.info('created %s', file);
           });
         } else {
-          log.info(
+          throw createFailError(
             `Run 'node scripts/check_jest_configs --fix' to create the missing config files`
           );
         }

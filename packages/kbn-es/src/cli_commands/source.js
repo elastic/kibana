@@ -9,6 +9,7 @@
 const dedent = require('dedent');
 const getopts = require('getopts');
 const { Cluster } = require('../cluster');
+const { parseTimeoutToMs } = require('../utils');
 
 exports.description = 'Build and run from source';
 
@@ -27,6 +28,8 @@ exports.help = (defaults = {}) => {
       --password.[user] Sets password for native realm user [default: ${password}]
       --ssl             Sets up SSL on Elasticsearch
       -E                Additional key=value settings to pass to Elasticsearch
+      --skip-ready-check  Disable the ready check,
+      --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
 
     Example:
 
@@ -42,8 +45,13 @@ exports.run = async (defaults = {}) => {
       installPath: 'install-path',
       sourcePath: 'source-path',
       dataArchive: 'data-archive',
+      skipReadyCheck: 'skip-ready-check',
+      readyTimeout: 'ready-timeout',
       esArgs: 'E',
     },
+
+    string: ['ready-timeout'],
+    boolean: ['skip-ready-check'],
 
     default: defaults,
   });
@@ -55,5 +63,8 @@ exports.run = async (defaults = {}) => {
     await cluster.extractDataDirectory(installPath, options.dataArchive);
   }
 
-  await cluster.run(installPath, options);
+  await cluster.run(installPath, {
+    ...options,
+    readyTimeout: parseTimeoutToMs(options.readyTimeout),
+  });
 };

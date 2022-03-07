@@ -44,6 +44,7 @@ import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
+import { getBundledPackages } from './bundled_packages';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -88,7 +89,7 @@ export async function ensureInstalledPackage(options: {
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
     ? { name: pkgName, version: pkgVersion }
-    : await Registry.fetchFindLatestPackage(pkgName);
+    : await Registry.fetchFindLatestPackageOrThrow(pkgName);
 
   const installedPackageResult = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
@@ -205,6 +206,7 @@ interface InstallRegistryPackageParams {
   esClient: ElasticsearchClient;
   spaceId: string;
   force?: boolean;
+  ignoreConstraints?: boolean;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -233,6 +235,7 @@ async function installPackageFromRegistry({
   esClient,
   spaceId,
   force = false,
+  ignoreConstraints = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -249,7 +252,9 @@ async function installPackageFromRegistry({
     installType = getInstallType({ pkgVersion, installedPkg });
 
     // get latest package version
-    const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+    const latestPackage = await Registry.fetchFindLatestPackageOrThrow(pkgName, {
+      ignoreConstraints,
+    });
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
@@ -271,6 +276,7 @@ async function installPackageFromRegistry({
           ],
           status: 'already_installed',
           installType,
+          installSource: 'registry',
         };
       }
     }
@@ -302,7 +308,7 @@ async function installPackageFromRegistry({
         ...telemetryEvent,
         errorMessage: err.message,
       });
-      return { error: err, installType };
+      return { error: err, installType, installSource: 'registry' };
     }
 
     const savedObjectsImporter = appContextService
@@ -333,7 +339,7 @@ async function installPackageFromRegistry({
           ...telemetryEvent,
           status: 'success',
         });
-        return { assets, status: 'installed', installType };
+        return { assets, status: 'installed', installType, installSource: 'registry' };
       })
       .catch(async (err: Error) => {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`);
@@ -350,7 +356,7 @@ async function installPackageFromRegistry({
           ...telemetryEvent,
           errorMessage: err.message,
         });
-        return { error: err, installType };
+        return { error: err, installType, installSource: 'registry' };
       });
   } catch (e) {
     sendEvent({
@@ -360,6 +366,7 @@ async function installPackageFromRegistry({
     return {
       error: e,
       installType,
+      installSource: 'registry',
     };
   }
 }
@@ -449,7 +456,7 @@ async function installPackageByUpload({
       ...telemetryEvent,
       errorMessage: e.message,
     });
-    return { error: e, installType };
+    return { error: e, installType, installSource: 'upload' };
   }
 }
 
@@ -458,9 +465,10 @@ export type InstallPackageParams = {
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
+  | ({ installSource: Extract<InstallSource, 'bundled'> } & InstallUploadedArchiveParams)
 );
 
-export async function installPackage(args: InstallPackageParams) {
+export async function installPackage(args: InstallPackageParams): Promise<InstallResult> {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
   }
@@ -468,20 +476,44 @@ export async function installPackage(args: InstallPackageParams) {
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
 
+  const bundledPackages = await getBundledPackages();
+
   if (args.installSource === 'registry') {
-    const { pkgkey, force, spaceId } = args;
+    const { pkgkey, force, ignoreConstraints, spaceId } = args;
+
+    const matchingBundledPackage = bundledPackages.find(
+      (pkg) => Registry.pkgToPkgKey(pkg) === pkgkey
+    );
+
+    if (matchingBundledPackage) {
+      logger.debug(
+        `found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
+      );
+
+      const response = await installPackageByUpload({
+        savedObjectsClient,
+        esClient,
+        archiveBuffer: matchingBundledPackage.buffer,
+        contentType: 'application/zip',
+        spaceId,
+      });
+
+      return { ...response, installSource: 'bundled' };
+    }
+
     logger.debug(`kicking off install of ${pkgkey} from registry`);
-    const response = installPackageFromRegistry({
+    const response = await installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       esClient,
       spaceId,
       force,
+      ignoreConstraints,
     });
     return response;
   } else if (args.installSource === 'upload') {
     const { archiveBuffer, contentType, spaceId } = args;
-    const response = installPackageByUpload({
+    const response = await installPackageByUpload({
       savedObjectsClient,
       esClient,
       archiveBuffer,
@@ -490,7 +522,6 @@ export async function installPackage(args: InstallPackageParams) {
     });
     return response;
   }
-  // @ts-expect-error s/b impossibe b/c `never` by this point, but just in case
   throw new Error(`Unknown installSource: ${args.installSource}`);
 }
 

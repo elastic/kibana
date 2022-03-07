@@ -12,7 +12,11 @@ import type {
   PluginStats,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common';
+import {
+  ON_PREM_REPOSITORY_TYPES,
+  REPOSITORY_PLUGINS_MAP,
+  MODULE_REPOSITORY_TYPES,
+} from '../../../common';
 import { Repository, RepositoryType } from '../../../common/types';
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
@@ -154,8 +158,11 @@ export function registerRepositoriesRoutes({
     { path: addBasePath('repository_types'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      // In ECE/ESS, do not enable the default types
-      const types: RepositoryType[] = isCloudEnabled ? [] : [...DEFAULT_REPOSITORY_TYPES];
+      // module repo types are available everywhere out of the box
+      // on-prem repo types are not available on Cloud
+      const types: RepositoryType[] = isCloudEnabled
+        ? [...MODULE_REPOSITORY_TYPES]
+        : [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
 
       try {
         const { nodes } = await clusterClient.asCurrentUser.nodes.info({

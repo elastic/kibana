@@ -37,6 +37,7 @@ export enum ConfigKey {
   REQUEST_HEADERS_CHECK = 'check.request.headers',
   REQUEST_METHOD_CHECK = 'check.request.method',
   REQUEST_SEND_CHECK = 'check.send',
+  REVISION = 'revision',
   SCHEDULE = 'schedule',
   SCREENSHOTS = 'screenshots',
   SOURCE_INLINE = 'source.inline.script',

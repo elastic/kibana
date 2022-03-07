@@ -31,7 +31,7 @@ import {
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
-export const activatesRule = () => {
+export const enablesRule = () => {
   cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();

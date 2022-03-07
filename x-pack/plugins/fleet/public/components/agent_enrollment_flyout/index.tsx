@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -26,10 +26,12 @@ import {
   useGetSettings,
   sendGetOneAgentPolicy,
   useFleetStatus,
-  useGetAgentPolicies,
+  useAgentEnrollmentFlyoutData,
 } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy } from '../../types';
+
+import { Loading } from '..';
 
 import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
@@ -64,23 +66,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
 
-  // loading the latest agentPolicies for add agent flyout
   const {
-    data: agentPoliciesData,
-    isLoading: isLoadingAgentPolicies,
-    resendRequest: refreshAgentPolicies,
-  } = useGetAgentPolicies({
-    page: 1,
-    perPage: 1000,
-    full: true,
-  });
-
-  const agentPolicies = useMemo(() => {
-    if (!isLoadingAgentPolicies) {
-      return agentPoliciesData?.items;
-    }
-    return [];
-  }, [isLoadingAgentPolicies, agentPoliciesData?.items]);
+    agentPolicies,
+    isLoadingInitialAgentPolicies,
+    isLoadingAgentPolicies,
+    refreshAgentPolicies,
+  } = useAgentEnrollmentFlyoutData();
 
   useEffect(() => {
     async function checkPolicyIsFleetServer() {
@@ -157,7 +148,9 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           ) : undefined
         }
       >
-        {mode === 'managed' ? (
+        {isLoadingInitialAgentPolicies ? (
+          <Loading />
+        ) : mode === 'managed' ? (
           <ManagedInstructions
             settings={settings.data?.item}
             setSelectedPolicyId={setSelectedPolicyId}
@@ -166,6 +159,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             viewDataStep={viewDataStep}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
             refreshAgentPolicies={refreshAgentPolicies}
+            isLoadingAgentPolicies={isLoadingAgentPolicies}
           />
         ) : (
           <StandaloneInstructions
