@@ -19,15 +19,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EsIndexActionConnector } from '.././types';
 import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
-import {
-  firstFieldOption,
-  getFields,
-  getIndexOptions,
-  getIndexPatterns,
-} from '../../../../common/index_controls';
+import { firstFieldOption, getFields, getIndexOptions } from '../../../../common/index_controls';
 import { useKibana } from '../../../../common/lib/kibana';
 
 interface TimeFieldOptions {
@@ -47,10 +43,9 @@ const IndexActionConnectorFields: React.FunctionComponent<
     executionTimeField != null
   );
 
-  const [indexPatterns, setIndexPatterns] = useState([]);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState<TimeFieldOptions[]>([]);
-  const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
+  const [areIndiciesLoading, setAreIndicesLoading] = useState<boolean>(false);
 
   const setTimeFields = (fields: TimeFieldOptions[]) => {
     if (fields.length > 0) {
@@ -63,9 +58,14 @@ const IndexActionConnectorFields: React.FunctionComponent<
     }
   };
 
+  const loadIndexOptions = debounce(async (search: string) => {
+    setAreIndicesLoading(true);
+    setIndexOptions(await getIndexOptions(http!, search));
+    setAreIndicesLoading(false);
+  }, 250);
+
   useEffect(() => {
     const indexPatternsFunction = async () => {
-      setIndexPatterns(await getIndexPatterns());
       if (index) {
         const currentEsFields = await getFields(http!, [index]);
         setTimeFields(getTimeFieldOptions(currentEsFields as any));
@@ -119,11 +119,12 @@ const IndexActionConnectorFields: React.FunctionComponent<
           fullWidth
           singleSelection={{ asPlainText: true }}
           async
-          isLoading={isIndiciesLoading}
+          isLoading={areIndiciesLoading}
           isInvalid={isIndexInvalid}
           noSuggestions={!indexOptions.length}
           options={indexOptions}
           data-test-subj="connectorIndexesComboBox"
+          data-testid="connectorIndexesComboBox"
           selectedOptions={
             index
               ? [
@@ -147,11 +148,7 @@ const IndexActionConnectorFields: React.FunctionComponent<
             const currentEsFields = await getFields(http!, indices);
             setTimeFields(getTimeFieldOptions(currentEsFields as any));
           }}
-          onSearchChange={async (search) => {
-            setIsIndiciesLoading(true);
-            setIndexOptions(await getIndexOptions(http!, search, indexPatterns));
-            setIsIndiciesLoading(false);
-          }}
+          onSearchChange={loadIndexOptions}
           onBlur={() => {
             if (!index) {
               editActionConfig('index', '');
