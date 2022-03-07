@@ -5,17 +5,13 @@
  * 2.0.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../../';
-import {
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { Report, ReportDocument, ReportingStore, SavedReport } from './';
 
 describe('ReportingStore', () => {
-  const mockLogger = createMockLevelLogger();
+  const mockLogger = loggingSystemMock.createLogger();
   let mockCore: ReportingCore;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
@@ -193,6 +189,14 @@ describe('ReportingStore', () => {
         max_attempts: 1,
         timeout: 30000,
         output: null,
+        metrics: {
+          png: {
+            cpu: 0.02,
+            cpuInPercentage: 2,
+            memory: 1024 * 1024,
+            memoryInMegabytes: 1,
+          },
+        },
       },
     };
     mockEsClient.get.mockResponse(mockReport as any);
@@ -218,6 +222,14 @@ describe('ReportingStore', () => {
         "max_attempts": 1,
         "meta": Object {
           "testMeta": "meta",
+        },
+        "metrics": Object {
+          "png": Object {
+            "cpu": 0.02,
+            "cpuInPercentage": 2,
+            "memory": 1048576,
+            "memoryInMegabytes": 1,
+          },
         },
         "migration_version": "7.14.0",
         "output": null,

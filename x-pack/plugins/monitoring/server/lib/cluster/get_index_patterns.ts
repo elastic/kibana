@@ -26,7 +26,7 @@ export function getIndexPatterns(
   additionalPatterns: Record<string, string> = {},
   ccs: string = '*'
 ) {
-  const config = server.config();
+  const config = server.config;
   const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
   const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
   const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);

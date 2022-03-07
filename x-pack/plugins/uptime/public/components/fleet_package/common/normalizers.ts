@@ -82,4 +82,5 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.TIMEOUT]: getCommonCronToSecondsNormalizer(ConfigKey.TIMEOUT),
   [ConfigKey.NAMESPACE]: (fields) =>
     fields?.[ConfigKey.NAMESPACE]?.value ?? DEFAULT_NAMESPACE_STRING,
+  [ConfigKey.REVISION]: getCommonNormalizer(ConfigKey.REVISION),
 };

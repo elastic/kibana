@@ -263,7 +263,8 @@ function getExpressionForLayer(
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
-        isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
+        isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+        !column.params.ignoreTimeRange
           ? column.sourceField
           : null
       )

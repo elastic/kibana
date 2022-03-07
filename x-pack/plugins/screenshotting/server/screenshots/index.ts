@@ -11,13 +11,14 @@ import {
   catchError,
   concatMap,
   first,
-  mapTo,
+  map,
   mergeMap,
   take,
   takeUntil,
+  tap,
   toArray,
 } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
+import type { KibanaRequest, Logger } from 'src/core/server';
 import { LayoutParams } from '../../common';
 import type { ConfigType } from '../config';
 import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
@@ -29,6 +30,11 @@ import { Semaphore } from './semaphore';
 
 export interface ScreenshotOptions extends ScreenshotObservableOptions {
   layout: LayoutParams;
+
+  /**
+   * Source Kibana request object from where the headers will be extracted.
+   */
+  request?: KibanaRequest;
 }
 
 export interface ScreenshotResult {
@@ -40,7 +46,7 @@ export interface ScreenshotResult {
   /**
    * Collected performance metrics during the screenshotting session.
    */
-  metrics$: Observable<PerformanceMetrics>;
+  metrics?: PerformanceMetrics;
 
   /**
    * Screenshotting results.
@@ -76,6 +82,7 @@ export class Screenshots {
       browserTimezone,
       timeouts: { openUrl: openUrlTimeout },
     } = options;
+    const headers = { ...(options.request?.headers ?? {}), ...(options.headers ?? {}) };
 
     return this.browserDriverFactory
       .createPage(
@@ -88,15 +95,14 @@ export class Screenshots {
       )
       .pipe(
         this.semaphore.acquire(),
-        mergeMap(({ driver, unexpectedExit$, metrics$, close }) => {
+        mergeMap(({ driver, unexpectedExit$, close }) => {
           apmCreatePage?.end();
-          metrics$.subscribe(({ cpu, memory }) => {
-            apmTrans?.setLabel('cpu', cpu, false);
-            apmTrans?.setLabel('memory', memory, false);
-          });
           unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
 
-          const screen = new ScreenshotObservableHandler(driver, this.logger, layout, options);
+          const screen = new ScreenshotObservableHandler(driver, this.logger, layout, {
+            ...options,
+            headers,
+          });
 
           return from(options.urls).pipe(
             concatMap((url, index) =>
@@ -113,10 +119,18 @@ export class Screenshots {
             ),
             take(options.urls.length),
             toArray(),
-            mergeMap((results) => {
+            mergeMap((results) =>
               // At this point we no longer need the page, close it.
-              return close().pipe(mapTo({ layout, metrics$, results }));
-            })
+              close().pipe(
+                tap(({ metrics }) => {
+                  if (metrics) {
+                    apmTrans?.setLabel('cpu', metrics.cpu, false);
+                    apmTrans?.setLabel('memory', metrics.memory, false);
+                  }
+                }),
+                map(({ metrics }) => ({ layout, metrics, results }))
+              )
+            )
           );
         }),
         first()

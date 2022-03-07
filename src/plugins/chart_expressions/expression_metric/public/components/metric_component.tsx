@@ -110,6 +110,10 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     });
   };
 
+  private isAutoScaleWithColorizingContainer = () => {
+    return this.props.visParams.metric.autoScale && this.props.visParams.metric.colorFullBackground;
+  };
+
   private renderMetric = (metric: MetricOptions, index: number) => {
     const MetricComponent = this.props.visParams.metric.autoScale
       ? AutoScaleMetricVisValue
@@ -117,13 +121,26 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
 
     return (
       <MetricComponent
+        autoScaleParams={
+          this.isAutoScaleWithColorizingContainer()
+            ? {
+                containerStyles: {
+                  backgroundColor: metric.bgColor,
+                  minHeight: '100%',
+                  minWidth: '100%',
+                },
+              }
+            : undefined
+        }
         key={index}
         metric={metric}
         style={this.props.visParams.metric.style}
         onFilter={
           this.props.visParams.dimensions.bucket ? () => this.filterBucket(index) : undefined
         }
-        showLabel={this.props.visParams.metric.labels.show}
+        autoScale={this.props.visParams.metric.autoScale}
+        colorFullBackground={this.props.visParams.metric.colorFullBackground}
+        labelConfig={this.props.visParams.metric.labels}
       />
     );
   };

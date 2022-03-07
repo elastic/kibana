@@ -29,26 +29,26 @@ describe('KibanaExecutionContext', () => {
       `);
     });
 
-    it('includes a parent context to string representation', () => {
-      const parentContext: KibanaExecutionContext = {
-        type: 'parent-type',
-        name: 'parent-name',
-        id: '41',
-        description: 'parent-descripton',
+    it('includes a child context to string representation', () => {
+      const childContext: KibanaExecutionContext = {
+        type: 'child-test-type',
+        name: 'child-test-name',
+        id: '42',
+        description: 'child-test-descripton',
       };
 
       const context: KibanaExecutionContext = {
-        type: 'test-type',
-        name: 'test-name',
-        id: '42',
-        description: 'test-descripton',
-        parent: parentContext,
+        type: 'type',
+        name: 'name',
+        id: '41',
+        description: 'descripton',
+        child: childContext,
       };
 
       const value = new ExecutionContextContainer(context).toHeader();
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "x-kbn-context": "%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22id%22%3A%2242%22%2C%22description%22%3A%22test-descripton%22%2C%22parent%22%3A%7B%22type%22%3A%22parent-type%22%2C%22name%22%3A%22parent-name%22%2C%22id%22%3A%2241%22%2C%22description%22%3A%22parent-descripton%22%7D%7D",
+          "x-kbn-context": "%7B%22type%22%3A%22type%22%2C%22name%22%3A%22name%22%2C%22id%22%3A%2241%22%2C%22description%22%3A%22descripton%22%2C%22child%22%3A%7B%22type%22%3A%22child-test-type%22%2C%22name%22%3A%22child-test-name%22%2C%22id%22%3A%2242%22%2C%22description%22%3A%22child-test-descripton%22%7D%7D",
         }
       `);
     });
@@ -103,35 +103,35 @@ describe('KibanaExecutionContext', () => {
     });
 
     it('returns JSON representation when the parent context if provided', () => {
-      const parentAContext: KibanaExecutionContext = {
-        type: 'parent-a-type',
-        name: 'parent-a-name',
-        id: '40',
-        description: 'parent-a-descripton',
+      const childBContext: KibanaExecutionContext = {
+        type: 'child-b-type',
+        name: 'child-b-name',
+        id: '42',
+        description: 'child-b-descripton',
       };
 
-      const parentBContext: KibanaExecutionContext = {
-        type: 'parent-b-type',
-        name: 'parent-b-name',
+      const childAContext: KibanaExecutionContext = {
+        type: 'child-a-type',
+        name: 'child-a-name',
         id: '41',
-        description: 'parent-b-descripton',
-        parent: parentAContext,
+        description: 'child-a-descripton',
+        child: childBContext,
       };
 
       const context: KibanaExecutionContext = {
-        type: 'test-type',
-        name: 'test-name',
-        id: '42',
-        description: 'test-descripton',
-        parent: parentBContext,
+        type: 'type',
+        name: 'name',
+        id: '40',
+        description: 'descripton',
+        child: childAContext,
       };
 
       const value = new ExecutionContextContainer(context).toJSON();
       expect(value).toEqual({
         ...context,
-        parent: {
-          ...parentBContext,
-          parent: parentAContext,
+        child: {
+          ...childAContext,
+          child: childBContext,
         },
       });
     });

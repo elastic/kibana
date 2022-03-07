@@ -42,12 +42,18 @@ import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
+  getDatasourceSuggestionsForVisualizeCharts,
 } from './indexpattern_suggestions';
 
 import { getVisualDefaultsForLayer, isColumnInvalid } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
-import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
+import {
+  DateHistogramIndexPatternColumn,
+  GenericIndexPatternColumn,
+  getErrorMessages,
+  insertNewColumn,
+} from './operations';
 import {
   IndexPatternField,
   IndexPatternPrivateState,
@@ -61,7 +67,7 @@ import {
 import { DataPublicPluginStart, ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { mergeLayer } from './state_helpers';
-import { Datasource, StateSetter } from '../types';
+import { Datasource, StateSetter, VisualizeEditorContext } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
@@ -69,6 +75,7 @@ import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/wor
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
+import { isColumnOfType } from './operations/definitions/helpers';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -131,7 +138,7 @@ export function getIndexPatternDatasource({
   const handleChangeIndexPattern = (
     id: string,
     state: IndexPatternPrivateState,
-    setState: StateSetter<IndexPatternPrivateState>
+    setState: StateSetter<IndexPatternPrivateState, { applyImmediately?: boolean }>
   ) => {
     changeIndexPattern({
       id,
@@ -150,7 +157,7 @@ export function getIndexPatternDatasource({
     async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
-      initialContext?: VisualizeFieldContext,
+      initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       options?: InitializationOptions
     ) {
       return loadInitialState({
@@ -485,6 +492,7 @@ export function getIndexPatternDatasource({
     },
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
+    getDatasourceSuggestionsForVisualizeCharts,
 
     getErrorMessages(state) {
       if (!state) {
@@ -559,7 +567,13 @@ export function getIndexPatternDatasource({
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
           const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
-          return buckets.some((colId) => layer.columns[colId].operationType === 'date_histogram');
+          return buckets.some((colId) => {
+            const column = layer.columns[colId];
+            return (
+              isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+              !column.params.ignoreTimeRange
+            );
+          });
         })
       );
     },

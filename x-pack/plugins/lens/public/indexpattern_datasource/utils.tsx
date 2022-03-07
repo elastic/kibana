@@ -30,7 +30,7 @@ import { isQueryValid } from './operations/definitions/filters';
 import { checkColumnForPrecisionError } from '../../../../../src/plugins/data/common';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
-import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms';
+import { DEFAULT_MAX_DOC_COUNT, supportsRarityRanking } from './operations/definitions/terms';
 
 export function isColumnInvalid(
   layer: IndexPatternLayer,
@@ -117,7 +117,13 @@ export function getPrecisionErrorWarningMessages(
               'count',
               currentLayer.columns[currentColumn.params.orderBy.columnId]
             );
-          if (!isAscendingCountSorting) {
+          const usesFloatingPointField =
+            isColumnOfType<TermsIndexPatternColumn>('terms', currentColumn) &&
+            !supportsRarityRanking(indexPattern.getFieldByName(currentColumn.sourceField));
+          const usesMultipleFields =
+            isColumnOfType<TermsIndexPatternColumn>('terms', currentColumn) &&
+            (currentColumn.params.secondaryFields || []).length > 0;
+          if (!isAscendingCountSorting || usesFloatingPointField || usesMultipleFields) {
             warningMessages.push(
               <FormattedMessage
                 id="xpack.lens.indexPattern.precisionErrorWarning"

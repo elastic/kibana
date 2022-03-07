@@ -50,8 +50,12 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
 
   const formatDate = createDateFormatter(uiSettings.get('dateFormat'), timezone);
 
-  const hasCsvRows = info.csv_rows != null;
+  const cpuInPercentage = info.metrics?.pdf?.cpuInPercentage ?? info.metrics?.png?.cpuInPercentage;
+  const memoryInMegabytes =
+    info.metrics?.pdf?.memoryInMegabytes ?? info.metrics?.png?.memoryInMegabytes;
+  const hasCsvRows = info.metrics?.csv?.rows != null;
   const hasScreenshot = USES_HEADLESS_JOB_TYPES.includes(info.jobtype);
+  const hasPdfPagesMetric = info.metrics?.pdf?.pages != null;
 
   const outputInfo = [
     {
@@ -99,7 +103,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       title: i18n.translate('xpack.reporting.listing.infoPanel.csvRows', {
         defaultMessage: 'CSV rows',
       }),
-      description: info.csv_rows?.toString() || NA,
+      description: info.metrics?.csv?.rows?.toString() || NA,
     },
 
     hasScreenshot && {
@@ -118,6 +122,12 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       description:
         info.layout?.dimensions?.width != null ? Math.ceil(info.layout.dimensions.width) : UNKNOWN,
     },
+    hasPdfPagesMetric && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.pdfPagesInfo', {
+        defaultMessage: 'Pages count',
+      }),
+      description: info.metrics?.pdf?.pages,
+    },
 
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
@@ -131,6 +141,20 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
         defaultMessage: 'Timeout',
       }),
       description: info.prettyTimeout,
+    },
+
+    cpuInPercentage != null && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.cpuInfo', {
+        defaultMessage: 'CPU usage',
+      }),
+      description: `${cpuInPercentage}%`,
+    },
+
+    memoryInMegabytes != null && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.memoryInfo', {
+        defaultMessage: 'RAM usage',
+      }),
+      description: `${memoryInMegabytes}MB`,
     },
   ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 

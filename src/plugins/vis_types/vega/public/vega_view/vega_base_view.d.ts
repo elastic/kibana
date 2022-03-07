@@ -34,6 +34,7 @@ export class VegaBaseView {
   _addDestroyHandler(handler: Function): void;
 
   destroy(): Promise<void>;
+  resize(dimensions?: { height: number; width: number }): Promise<void>;
 
   _$container: any;
   _$controls: any;

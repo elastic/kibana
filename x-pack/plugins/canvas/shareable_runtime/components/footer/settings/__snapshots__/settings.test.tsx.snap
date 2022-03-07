@@ -280,6 +280,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                             <label
                               class="euiFormLabel euiFormRow__label"
                               for="generated-id"
+                              id="generated-id-label"
                             >
                               Set a custom interval
                             </label>

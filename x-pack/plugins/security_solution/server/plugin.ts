@@ -168,10 +168,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
-      kibanaIndex: core.savedObjects.getKibanaIndex(),
       signalsIndex: DEFAULT_ALERTS_INDEX,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
+      logger,
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);

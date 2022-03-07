@@ -90,14 +90,14 @@ export type Tls = t.TypeOf<typeof TlsType>;
 
 export const MonitorType = t.intersection([
   t.type({
-    duration: t.type({
-      us: t.number,
-    }),
     id: t.string,
     status: t.string,
     type: t.string,
   }),
   t.partial({
+    duration: t.type({
+      us: t.number,
+    }),
     check_group: t.string,
     ip: t.string,
     name: t.string,

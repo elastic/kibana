@@ -78,7 +78,7 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
           })}
           options={fittingFunctions}
           paramName="fittingFunction"
-          value={stateParams.fittingFunction}
+          value={stateParams.fittingFunction ?? fittingFunctions[2].value}
           setValue={(paramName, value) => {
             if (trackUiMetric) {
               trackUiMetric(METRIC_TYPE.CLICK, 'fitting_function_selected');

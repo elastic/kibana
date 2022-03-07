@@ -12,8 +12,11 @@ import {
   IndexAutocompleteComponent,
   FieldAutocompleteComponent,
   ListComponent,
-  TemplateAutocompleteComponent,
+  LegacyTemplateAutocompleteComponent,
   UsernameAutocompleteComponent,
+  IndexTemplateAutocompleteComponent,
+  ComponentTemplateAutocompleteComponent,
+  DataStreamAutocompleteComponent,
 } from '../autocomplete/components';
 
 import $ from 'jquery';
@@ -62,7 +65,7 @@ const parametrizedComponentFactories = {
     return new UsernameAutocompleteComponent(name, parent);
   },
   template: function (name, parent) {
-    return new TemplateAutocompleteComponent(name, parent);
+    return new LegacyTemplateAutocompleteComponent(name, parent);
   },
   task_id: function (name, parent) {
     return idAutocompleteComponentFactory(name, parent);
@@ -85,6 +88,15 @@ const parametrizedComponentFactories = {
   },
   node: function (name, parent) {
     return new ListComponent(name, [], parent, false);
+  },
+  index_template: function (name, parent) {
+    return new IndexTemplateAutocompleteComponent(name, parent);
+  },
+  component_template: function (name, parent) {
+    return new ComponentTemplateAutocompleteComponent(name, parent);
+  },
+  data_stream: function (name, parent) {
+    return new DataStreamAutocompleteComponent(name, parent);
   },
 };
 

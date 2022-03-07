@@ -29,6 +29,7 @@ jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  const mockCasesContract = jest.requireActual('../../../../../../cases/public/mocks');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
@@ -40,6 +41,7 @@ jest.mock('../../../../common/lib/kibana', () => {
             siem: { crud_alerts: true, read_alerts: true },
           },
         },
+        cases: mockCasesContract.mockCasesContract(),
         data: {
           search: jest.fn(),
           query: jest.fn(),
@@ -112,7 +114,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
   maxDelay: () => 3000,
 }));
 
-jest.mock('../../create_field_button', () => ({
+jest.mock('../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: () => <></>,
 }));
 
