@@ -21,42 +21,43 @@ previously added one, that connector displays as the default selection.
 Otherwise, the default setting is `No connector selected`.
 
 . After you've completed all of the required fields, click *Create case*.
-////
-[[add-case-lens-visualization]]
-=== Add a Lens visualization
 
-After you create a case, you can optionally add a Lens visualization. For
+[[add-case-visualization]]
+=== Add a visualization
+
+After you create a case, you can optionally add a visualization. For
 example, you can portray event and alert data through charts and graphs.
 
-To add a Lens visualization to a comment within your case:
+[role="screenshot"]
+image::images/cases-visualization.png[Cases page]
 
-. Click the *Visualization* button. The Add visualization dialog appears. 
-. Select an existing visualization from your Visualize Library or create a new visualization.
+To add a visualization to a comment within your case:
 
+. Click the *Visualization* button. The *Add visualization* dialog appears.
+
+. Select an existing visualization from your Visualize Library or create a new
+visualization.
 +
+IMPORTANT: Set an absolute time range for your visualization. This ensures your
+visualization doesn't change over time after you save it to your case and
+provides important context for viewers.
 
-IMPORTANT: Set an absolute time range for your visualization. This ensures your visualization doesn't change over time after you save it to your case, and provides important context for others managing the case.
+. After you've finished creating your visualization, click *Save and return* to
+go back to your case.
 
-+
-. Save the visualization to your Visualize Library by clicking the *Save to library* button (optional).
-.. Enter a title and description for the visualization. 
-.. Choose whether you want to keep the *Update panel on Security* activated. This option is activated by default and automatically adds the visualization to your Visualize Library.
-. After you've finished creating your visualization, click *Save and return* to go back to your case.
 . Click *Preview* to see how the visualization will appear in the case comment.
-. Click *Add Comment* to add the visualization to your case. 
 
-NOTE: Once a visualization has been added to a case, it cannot be modified or deleted. However, you can interact with the visualization by clicking the *Open Visualization* option in the comment menu.
+. Click *Add Comment* to add the visualization to your case.
 
-////
+NOTE: After a visualization has been added to a case, it cannot be modified or
+deleted. However, you can interact with the visualization by clicking the
+*Open Visualization* option in the comment menu.
+
 [[manage-case]]
 === Manage cases
 
 In *Management > {stack-manage-app} > Cases*, you can search cases and filter
 them by tags, reporter.
-
-NOTE: If you create cases in the {observability} or {security-app}, they are not
-visible in *{stack-manage-app}*. Likewise, the cases you create in
-*{stack-manage-app}* are not visible in the {observability} or {security-app}.
 
 To view a case, click on its name. You can then:
 

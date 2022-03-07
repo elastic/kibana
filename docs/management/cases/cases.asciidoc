@@ -10,6 +10,9 @@ You can also send cases to third party systems by configuring external connector
 [role="screenshot"]
 image::images/cases.png[Cases page]
 
+NOTE: If you create cases in the {observability} or {security-app}, they are not
+visible in *{stack-manage-app}*. Likewise, the cases you create in
+*{stack-manage-app}* are not visible in the {observability} or {security-app}.
 
 * <<setup-cases>>
 * <<manage-cases>>
