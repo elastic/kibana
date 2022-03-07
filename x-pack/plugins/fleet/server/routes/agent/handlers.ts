@@ -21,6 +21,7 @@ import type {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   GetAgentStatusRequestSchema,
+  GetAgentDataRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
 } from '../../types';
@@ -212,6 +213,22 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
     );
 
     const body: GetAgentStatusResponse = { results };
+
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getAgentDataHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetAgentDataRequestSchema.query>
+> = async (context, request, response) => {
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  try {
+    const results = await AgentService.getIncomingDataByAgentsId(esClient, request.query.agentsId);
+
+    const body = { results };
 
     return response.ok({ body });
   } catch (error) {

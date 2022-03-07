@@ -111,3 +111,9 @@ export const GetAgentStatusRequestSchema = {
     kuery: schema.maybe(schema.string()),
   }),
 };
+
+export const GetAgentDataRequestSchema = {
+  query: schema.object({
+    agentsId: schema.arrayOf(schema.string()),
+  }),
+};

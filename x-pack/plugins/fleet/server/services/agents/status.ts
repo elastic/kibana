@@ -17,6 +17,8 @@ import { AgentStatusKueryHelper } from '../../../common/services';
 
 import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
 
+const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
+
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
   agentId: string
@@ -91,4 +93,60 @@ export async function getAgentStatusForAgentPolicy(
     /* @deprecated Agent events do not exists anymore */
     events: 0,
   };
+}
+export async function getIncomingDataByAgentsId(esClient: ElasticsearchClient, agentsId: string[]) {
+  try {
+    const searchResult = await esClient.search({
+      index: DATA_STREAM_INDEX_PATTERN,
+      allow_partial_search_results: true,
+      _source: false,
+      timeout: '10s',
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                terms: {
+                  'agent.id': agentsId,
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-10m',
+                    lte: 'now',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          agent_ids: {
+            terms: {
+              field: 'agent.id',
+              size: 5,
+            },
+          },
+        },
+      },
+    });
+
+    if (!searchResult.aggregations?.agent_ids) {
+      return agentsId.map((id) => {
+        return { [id]: { data: false } };
+      });
+    }
+
+    // @ts-expect-error aggregation type is not specified
+    const agentIdsWithData: string[] = searchResult.aggregations.agent_ids.buckets.map(
+      (bucket: any) => bucket.key as string
+    );
+
+    return agentsId.map((id) =>
+      agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }
+    );
+  } catch (e) {
+    throw new Error(e);
+  }
 }
