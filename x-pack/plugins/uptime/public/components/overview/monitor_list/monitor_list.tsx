@@ -135,7 +135,7 @@ export const MonitorListComponent: ({
               timestamp={timestamp}
               summaryPings={summaryPings ?? []}
               monitorType={type}
-              duration={duration!.us}
+              duration={duration?.us}
               monitorId={monitorId}
             />
           );

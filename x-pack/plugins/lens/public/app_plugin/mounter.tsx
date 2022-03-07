@@ -29,6 +29,7 @@ import {
   LensByValueInput,
 } from '../embeddable/embeddable';
 import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public';
+import { ACTION_CONVERT_TO_LENS } from '../../../../../src/plugins/visualizations/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import {
@@ -76,6 +77,7 @@ export async function getLensServices(
     usageCollection,
     savedObjectsTagging,
     attributeService,
+    executionContext: coreStart.executionContext,
     http: coreStart.http,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
@@ -155,28 +157,38 @@ export async function mountApp(
   };
 
   const redirectToOrigin = (props?: RedirectToOriginProps) => {
-    if (!embeddableEditorIncomingState?.originatingApp) {
+    const contextOriginatingApp =
+      initialContext && 'originatingApp' in initialContext ? initialContext.originatingApp : null;
+    const originatingApp = embeddableEditorIncomingState?.originatingApp ?? contextOriginatingApp;
+    if (!originatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
+    }
+    let embeddableId = embeddableEditorIncomingState?.embeddableId;
+    if (initialContext && 'embeddableId' in initialContext) {
+      embeddableId = initialContext.embeddableId;
     }
     if (stateTransfer && props?.input) {
       const { input, isCopied } = props;
-      stateTransfer.navigateToWithEmbeddablePackage(embeddableEditorIncomingState?.originatingApp, {
+      stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
         state: {
-          embeddableId: isCopied ? undefined : embeddableEditorIncomingState.embeddableId,
+          embeddableId: isCopied ? undefined : embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
           input,
           searchSessionId: data.search.session.getSessionId(),
         },
       });
     } else {
-      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp, {
+      coreStart.application.navigateToApp(originatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
       });
     }
   };
+  // get state from location, used for nanigating from Visualize/Discover to Lens
   const initialContext =
-    historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD
+    historyLocationState &&
+    (historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD ||
+      historyLocationState.type === ACTION_CONVERT_TO_LENS)
       ? historyLocationState.payload
       : undefined;
 
@@ -229,8 +241,9 @@ export async function mountApp(
             history={props.history}
             datasourceMap={datasourceMap}
             visualizationMap={visualizationMap}
-            topNavMenuEntryGenerators={topNavMenuEntryGenerators}
             initialContext={initialContext}
+            contextOriginatingApp={historyLocationState?.originatingApp}
+            topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           />
         </Provider>
       );

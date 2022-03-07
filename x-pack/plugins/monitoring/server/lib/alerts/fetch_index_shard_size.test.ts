@@ -161,6 +161,7 @@ describe('fetchIndexShardSize', () => {
                 bool: {
                   should: [
                     { term: { type: 'index_stats' } },
+                    { term: { 'metricset.name': 'index' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.index' } },
                   ],
                   minimum_should_match: 1,
@@ -185,6 +186,8 @@ describe('fetchIndexShardSize', () => {
                           '_index',
                           'index_stats.shards.primaries',
                           'index_stats.primaries.store.size_in_bytes',
+                          'elasticsearch.index.shards.primaries',
+                          'elasticsearch.index.primaries.store.size_in_bytes',
                         ],
                       },
                       size: 1,

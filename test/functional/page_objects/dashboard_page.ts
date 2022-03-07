@@ -291,6 +291,24 @@ export class DashboardPageObject extends FtrService {
     });
   }
 
+  public async clearUnsavedChanges() {
+    this.log.debug('clearUnsavedChanges');
+    let switchMode = false;
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+      switchMode = true;
+    }
+    await this.retry.try(async () => {
+      // avoid flaky test by surrounding in retry
+      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      await this.clickQuickSave();
+      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+    });
+    if (switchMode) {
+      await this.clickCancelOutOfEditMode();
+    }
+  }
+
   public async clickNewDashboard(continueEditing = false) {
     const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
     if (!continueEditing && discardButtonExists) {

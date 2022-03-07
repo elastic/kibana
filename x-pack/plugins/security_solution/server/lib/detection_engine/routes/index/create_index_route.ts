@@ -145,6 +145,10 @@ const addFieldAliasesToIndices = async ({
   const indicesByVersion: Record<number, string[]> = {};
   const versions: Set<number> = new Set();
   for (const [indexName, mapping] of Object.entries(indexMappings)) {
+    // The `version` tells us which set of backwards compatibility mappings to apply: `version` never changes
+    // and represents what was actually shipped. `aliases_version` tells us if the most up to date backwards
+    // compatibility mappings have already been applied to the index. `aliases_version` DOES get updated when we apply
+    // new compatibility mappings like runtime fields and aliases.
     const version: number = get(mapping.mappings?._meta, 'version') ?? 0;
     const aliasesVersion: number = get(mapping.mappings?._meta, ALIAS_VERSION_FIELD) ?? 0;
     // Only attempt to add backwards compatibility mappings to indices whose names start with the alias

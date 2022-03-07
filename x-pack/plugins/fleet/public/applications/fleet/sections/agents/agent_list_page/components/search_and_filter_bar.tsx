@@ -103,10 +103,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
     <>
       {isEnrollmentFlyoutOpen ? (
         <EuiPortal>
-          <AgentEnrollmentFlyout
-            agentPolicies={agentPolicies}
-            onClose={() => setIsEnrollmentFlyoutOpen(false)}
-          />
+          <AgentEnrollmentFlyout onClose={() => setIsEnrollmentFlyoutOpen(false)} />
         </EuiPortal>
       ) : null}
 

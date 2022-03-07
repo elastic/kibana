@@ -59,7 +59,9 @@ describe('<ActionBar /> Service Errors', () => {
       status: FETCH_STATUS.SUCCESS,
       refetch: () => {},
     });
-    render(<ActionBar monitor={monitor} isValid={true} />, { state: mockLocationsState });
+    render(<ActionBar monitor={monitor} isTestRunInProgress={false} isValid={true} />, {
+      state: mockLocationsState,
+    });
     userEvent.click(screen.getByText('Save monitor'));
 
     await waitFor(() => {

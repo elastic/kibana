@@ -11,13 +11,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  useGetOneEnrollmentAPIKey,
-  useLink,
-  useFleetStatus,
-  useGetAgents,
-  useGetAgentPolicies,
-} from '../../hooks';
+import { useGetOneEnrollmentAPIKey, useLink, useFleetStatus, useGetAgents } from '../../hooks';
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
@@ -34,9 +28,7 @@ import { policyHasFleetServer } from '../../applications/fleet/sections/agents/s
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 
 import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
-import type { BaseProps } from './types';
-
-type Props = BaseProps;
+import type { InstructionProps } from './types';
 
 const DefaultMissingRequirements = () => {
   const { getHref } = useLink();
@@ -65,7 +57,7 @@ const FleetServerMissingRequirements = () => {
   return <FleetServerRequirementPage />;
 };
 
-export const ManagedInstructions = React.memo<Props>(
+export const ManagedInstructions = React.memo<InstructionProps>(
   ({
     agentPolicy,
     agentPolicies,
@@ -73,6 +65,8 @@ export const ManagedInstructions = React.memo<Props>(
     setSelectedPolicyId,
     isFleetServerPolicySelected,
     settings,
+    refreshAgentPolicies,
+    isLoadingAgentPolicies,
   }) => {
     const fleetStatus = useFleetStatus();
 
@@ -87,24 +81,14 @@ export const ManagedInstructions = React.memo<Props>(
       showInactive: false,
     });
 
-    const { data: agentPoliciesData, isLoading: isLoadingAgentPolicies } = useGetAgentPolicies({
-      page: 1,
-      perPage: 1000,
-      full: true,
-    });
-
     const fleetServers = useMemo(() => {
-      let policies = agentPolicies;
-      if (!agentPolicies && !isLoadingAgentPolicies) {
-        policies = agentPoliciesData?.items;
-      }
-      const fleetServerAgentPolicies: string[] = (policies ?? [])
+      const fleetServerAgentPolicies: string[] = agentPolicies
         .filter((pol) => policyHasFleetServer(pol))
         .map((pol) => pol.id);
       return (agents?.items ?? []).filter((agent) =>
         fleetServerAgentPolicies.includes(agent.policy_id ?? '')
       );
-    }, [agents, agentPolicies, agentPoliciesData, isLoadingAgentPolicies]);
+    }, [agents, agentPolicies]);
 
     const fleetServerSteps = useMemo(() => {
       const {
@@ -136,7 +120,7 @@ export const ManagedInstructions = React.memo<Props>(
               selectedApiKeyId,
               setSelectedAPIKeyId,
               setSelectedPolicyId,
-              excludeFleetServer: true,
+              refreshAgentPolicies,
             })
           : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
         DownloadStep(isFleetServerPolicySelected || false),
@@ -165,6 +149,7 @@ export const ManagedInstructions = React.memo<Props>(
       setSelectedPolicyId,
       setSelectedAPIKeyId,
       agentPolicies,
+      refreshAgentPolicies,
       apiKey.data,
       fleetServerSteps,
       isFleetServerPolicySelected,
@@ -176,7 +161,10 @@ export const ManagedInstructions = React.memo<Props>(
       return null;
     }
 
-    if (fleetStatus.isReady && (isLoadingAgents || fleetServers.length > 0)) {
+    if (
+      fleetStatus.isReady &&
+      (isLoadingAgents || isLoadingAgentPolicies || fleetServers.length > 0)
+    ) {
       return (
         <>
           <EuiText>

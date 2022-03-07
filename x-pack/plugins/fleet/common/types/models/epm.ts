@@ -43,7 +43,7 @@ export interface DefaultPackagesInstallationError {
 }
 
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
-export type InstallSource = 'registry' | 'upload';
+export type InstallSource = 'registry' | 'upload' | 'bundled';
 
 export type EpmPackageInstallStatus =
   | 'installed'
@@ -107,7 +107,13 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type ArchivePackage = PackageSpecManifest &
   // should an uploaded package be able to specify `internal`?
-  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal'>;
+  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch'>;
+
+export interface BundledPackage {
+  name: string;
+  version: string;
+  buffer: Buffer;
+}
 
 export type RegistryPackage = PackageSpecManifest &
   Partial<RegistryOverridesToOptional> &

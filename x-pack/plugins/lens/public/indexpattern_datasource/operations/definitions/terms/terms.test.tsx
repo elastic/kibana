@@ -1481,6 +1481,59 @@ describe('terms', () => {
         })
       );
     });
+
+    it('should preserve custom label when set by the user', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      layer.columns.col1 = {
+        label: 'MyCustomLabel',
+        customLabel: true,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+          secondaryFields: ['geo.src'],
+        },
+        sourceField: 'source',
+      } as TermsIndexPatternColumn;
+      let instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      // add a new field
+      act(() => {
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
+      });
+      instance = instance.update();
+
+      act(() => {
+        instance.find(EuiComboBox).last().prop('onChange')!([
+          { value: { type: 'field', field: 'bytes' }, label: 'bytes' },
+        ]);
+      });
+
+      expect(updateLayerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: expect.objectContaining({
+            col1: expect.objectContaining({
+              label: 'MyCustomLabel',
+            }),
+          }),
+        })
+      );
+    });
   });
 
   describe('param editor', () => {
@@ -1710,6 +1763,30 @@ describe('terms', () => {
         'column$$$col2',
         'alphabetical',
         'rare',
+      ]);
+    });
+
+    it('should disable rare ordering for floating point types', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={
+            { ...layer.columns.col1, sourceField: 'memory' } as TermsIndexPatternColumn
+          }
+        />
+      );
+
+      const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
+
+      expect(select.prop('value')).toEqual('alphabetical');
+
+      expect(select.prop('options')!.map(({ value }) => value)).toEqual([
+        'column$$$col2',
+        'alphabetical',
       ]);
     });
 

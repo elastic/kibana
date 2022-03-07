@@ -285,7 +285,7 @@ export const getHeatmapVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.heatmap.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];

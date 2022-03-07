@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '../../../../expressions/public';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
+import { prepareLogTable, Dimension } from '../../../../visualizations/common/utils';
 import { HeatmapExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_HEATMAP_NAME,

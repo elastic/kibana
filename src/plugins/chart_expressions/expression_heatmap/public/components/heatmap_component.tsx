@@ -202,9 +202,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         const cell = e[0][0];
         const { x, y } = cell.datum;
 
-        const xAxisFieldName = xAxisColumn?.meta?.field;
-        const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
-
         const points = [
           {
             row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
@@ -229,35 +226,21 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             value: point.value,
             table,
           })),
-          timeFieldName,
         };
         onClickValue(context);
       },
-      [
-        isTimeBasedSwimLane,
-        onClickValue,
-        table,
-        xAxisColumn?.id,
-        xAxisColumn?.meta?.field,
-        xAxisColumnIndex,
-        yAxisColumn,
-        yAxisColumnIndex,
-      ]
+      [onClickValue, table, xAxisColumn?.id, xAxisColumnIndex, yAxisColumn, yAxisColumnIndex]
     );
 
     const onBrushEnd = useCallback(
       (e: HeatmapBrushEvent) => {
         const { x, y } = e;
 
-        const xAxisFieldName = xAxisColumn?.meta?.field;
-        const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
-
         if (isTimeBasedSwimLane) {
           const context: BrushEvent['data'] = {
             range: x as number[],
             table,
             column: xAxisColumnIndex,
-            timeFieldName,
           };
           onSelectRange(context);
         } else {
@@ -289,7 +272,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               value: point.value,
               table,
             })),
-            timeFieldName,
           };
           onClickValue(context);
         }

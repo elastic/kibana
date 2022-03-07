@@ -85,10 +85,11 @@ const createActions = (testBed: TestBed) => {
     },
 
     filterByConfigType: async () => {
-      // We need to read the document "body" as the filter dropdown options are added there and not inside
-      // the component DOM tree. The "Config" option is expected to be the first item.
+      // We need to read the document "body" as the filter dropdown (an EuiSelectable)
+      // is added in a portalled popover and not inside the component DOM tree.
+      // The "Config" option is expected to be the first item.
       const configTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
-        '.euiFilterSelect__items .euiFilterSelectItem'
+        '.euiSelectableList .euiSelectableListItem'
       );
 
       await act(async () => {

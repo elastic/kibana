@@ -167,6 +167,14 @@ export const metricsVisDefinition: VisTypeDefinition<
     }
     return [];
   },
+  navigateToLens: async (params?: VisParams) => {
+    const { triggerTSVBtoLensConfiguration } = await import('./trigger_action');
+
+    const triggerConfiguration = params
+      ? await triggerTSVBtoLensConfiguration(params as Panel)
+      : null;
+    return triggerConfiguration;
+  },
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),
   }),

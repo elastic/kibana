@@ -8,38 +8,17 @@
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
-import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  htmlIdGenerator,
-} from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
-import type {
-  VisualizationLayerWidgetProps,
-  VisualizationToolbarProps,
-  VisualizationDimensionEditorProps,
-  FramePublicAPI,
-} from '../../types';
-import { State, visualizationTypes, XYState } from '../types';
-import { FormatFactory, layerTypes } from '../../../common';
-import {
-  SeriesType,
-  YAxisMode,
-  AxesSettingsConfig,
-  AxisExtentConfig,
-} from '../../../common/expressions';
-import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
-import { trackUiEvent } from '../../lens_ui_telemetry';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
+import { State, XYState } from '../types';
+import { AxesSettingsConfig, AxisExtentConfig } from '../../../common/expressions';
+import { isHorizontalChart } from '../state_helpers';
 import { LegendSettingsPopover } from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { getAxesConfiguration, GroupsConfiguration } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { getScaleType } from '../to_expression';
-import { ColorPicker } from './color_picker';
-import { ReferenceLinePanel } from './reference_line_panel';
-import { PalettePicker, TooltipWrapper } from '../../shared_components';
+import { TooltipWrapper } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -86,52 +65,6 @@ const legendOptions: Array<{
     }),
   },
 ];
-
-export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
-  const { state, layerId } = props;
-  const horizontalOnly = isHorizontalChart(state.layers);
-  const index = state.layers.findIndex((l) => l.layerId === layerId);
-  const layer = state.layers[index];
-
-  if (!layer) {
-    return null;
-  }
-
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
-        defaultMessage: 'Chart type',
-      })}
-    >
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
-          defaultMessage: 'Chart type',
-        })}
-        name="chartType"
-        className="eui-displayInlineBlock lnsLayerChartSwitch"
-        options={visualizationTypes
-          .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
-          .map((t) => ({
-            className: `lnsLayerChartSwitch__item ${
-              layer.seriesType === t.id ? 'lnsLayerChartSwitch__item-isSelected' : ''
-            }`,
-            id: t.id,
-            label: t.label,
-            iconType: t.icon || 'empty',
-            'data-test-subj': `lnsXY_seriesType-${t.id}`,
-          }))}
-        idSelected={layer.seriesType}
-        onChange={(seriesType) => {
-          trackUiEvent('xy_change_layer_display');
-          props.setState(
-            updateLayer(state, { ...layer, seriesType: seriesType as SeriesType }, index)
-          );
-        }}
-        isIconOnly
-      />
-    </EuiFormRow>
-  );
-}
 
 const getDataBounds = function (
   activeData: FramePublicAPI['activeData'],
@@ -565,114 +498,3 @@ export const XyToolbar = memo(function XyToolbar(
     </EuiFlexGroup>
   );
 });
-
-export const idPrefix = htmlIdGenerator()();
-
-export function DimensionEditor(
-  props: VisualizationDimensionEditorProps<State> & {
-    formatFactory: FormatFactory;
-    paletteService: PaletteRegistry;
-  }
-) {
-  const { state, setState, layerId, accessor } = props;
-  const index = state.layers.findIndex((l) => l.layerId === layerId);
-  const layer = state.layers[index];
-  const isHorizontal = isHorizontalChart(state.layers);
-  const axisMode =
-    (layer.yConfig &&
-      layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
-    'auto';
-
-  if (props.groupId === 'breakdown') {
-    return (
-      <>
-        <PalettePicker
-          palettes={props.paletteService}
-          activePalette={layer.palette}
-          setPalette={(newPalette) => {
-            setState(updateLayer(state, { ...layer, palette: newPalette }, index));
-          }}
-        />
-      </>
-    );
-  }
-
-  if (layer.layerType === layerTypes.REFERENCELINE) {
-    return <ReferenceLinePanel {...props} isHorizontal={isHorizontal} />;
-  }
-
-  return (
-    <>
-      <ColorPicker {...props} />
-
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
-          defaultMessage: 'Axis side',
-        })}
-      >
-        <EuiButtonGroup
-          isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
-            defaultMessage: 'Axis side',
-          })}
-          data-test-subj="lnsXY_axisSide_groups"
-          name="axisSide"
-          buttonSize="compressed"
-          options={[
-            {
-              id: `${idPrefix}auto`,
-              label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
-                defaultMessage: 'Auto',
-              }),
-              'data-test-subj': 'lnsXY_axisSide_groups_auto',
-            },
-            {
-              id: `${idPrefix}left`,
-              label: isHorizontal
-                ? i18n.translate('xpack.lens.xyChart.axisSide.bottom', {
-                    defaultMessage: 'Bottom',
-                  })
-                : i18n.translate('xpack.lens.xyChart.axisSide.left', {
-                    defaultMessage: 'Left',
-                  }),
-              'data-test-subj': 'lnsXY_axisSide_groups_left',
-            },
-            {
-              id: `${idPrefix}right`,
-              label: isHorizontal
-                ? i18n.translate('xpack.lens.xyChart.axisSide.top', {
-                    defaultMessage: 'Top',
-                  })
-                : i18n.translate('xpack.lens.xyChart.axisSide.right', {
-                    defaultMessage: 'Right',
-                  }),
-              'data-test-subj': 'lnsXY_axisSide_groups_right',
-            },
-          ]}
-          idSelected={`${idPrefix}${axisMode}`}
-          onChange={(id) => {
-            const newMode = id.replace(idPrefix, '') as YAxisMode;
-            const newYAxisConfigs = [...(layer.yConfig || [])];
-            const existingIndex = newYAxisConfigs.findIndex(
-              (yAxisConfig) => yAxisConfig.forAccessor === accessor
-            );
-            if (existingIndex !== -1) {
-              newYAxisConfigs[existingIndex] = {
-                ...newYAxisConfigs[existingIndex],
-                axisMode: newMode,
-              };
-            } else {
-              newYAxisConfigs.push({
-                forAccessor: accessor,
-                axisMode: newMode,
-              });
-            }
-            setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
-          }}
-        />
-      </EuiFormRow>
-    </>
-  );
-}

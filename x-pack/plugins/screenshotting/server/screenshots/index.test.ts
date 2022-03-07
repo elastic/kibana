@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { of, throwError, NEVER } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import type { Logger } from 'src/core/server';
 import type { ConfigType } from '../config';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
@@ -37,7 +37,7 @@ describe('Screenshot Observable Pipeline', () => {
     } as unknown as jest.Mocked<Logger>;
     options = {
       browserTimezone: 'UTC',
-      conditionalHeaders: {},
+      headers: {},
       layout: {},
       timeouts: {
         loadDelay: 2000,
@@ -356,8 +356,7 @@ describe('Screenshot Observable Pipeline', () => {
         of({
           driver,
           unexpectedExit$: throwError('Instant timeout has fired!'),
-          metrics$: NEVER,
-          close: () => of(undefined),
+          close: () => of({}),
         })
       );
 

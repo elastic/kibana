@@ -11,6 +11,7 @@ import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
+import { sendTelemetryEvents, formatTelemetryEvent } from './telemetry/monitor_upgrade_sender';
 
 export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
@@ -30,10 +31,10 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     }
 
     for (let i = 0; i < 100; i++) {
-      const mon = await savedObjectsClient.create<SyntheticsMonitor>(
-        syntheticsMonitorType,
-        monitor
-      );
+      const mon = await savedObjectsClient.create<SyntheticsMonitor>(syntheticsMonitorType, {
+        ...monitor,
+        revision: 1,
+      });
       monitors.push(mon);
     }
 
@@ -50,6 +51,12 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         fields_under_root: true,
       },
     ]);
+
+    sendTelemetryEvents(
+      server.logger,
+      server.telemetry,
+      formatTelemetryEvent({ monitor: newMonitor, errors, kibanaVersion: server.kibanaVersion })
+    );
 
     if (errors) {
       return errors;

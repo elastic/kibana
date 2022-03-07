@@ -16,7 +16,14 @@ import type {
 import type { IUiSettingsClient } from 'kibana/public';
 import type { SavedObjectReference } from 'kibana/public';
 import type { Document } from './persistence/saved_object_store';
-import type { Datasource, DatasourceMap, Visualization } from './types';
+import type {
+  Datasource,
+  DatasourceMap,
+  LensBrushEvent,
+  LensFilterEvent,
+  Visualization,
+} from './types';
+import { search } from '../../../../src/plugins/data/public';
 import type { DatasourceStates, VisualizationState } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
@@ -106,4 +113,25 @@ export function getRemoveOperation(
   }
   // fallback to generic count check
   return layerCount === 1 ? 'clear' : 'remove';
+}
+
+export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent['data']) {
+  const tablesAndColumns =
+    'table' in context
+      ? [{ table: context.table, column: context.column }]
+      : !context.negate
+      ? context.data
+      : // if it's a negated filter, never respect bound time field
+        [];
+  return tablesAndColumns
+    .map(({ table, column }) => {
+      const tableColumn = table.columns[column];
+      const hasTimeRange = Boolean(
+        tableColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(tableColumn)?.timeRange
+      );
+      if (hasTimeRange) {
+        return tableColumn.meta.field;
+      }
+    })
+    .find(Boolean);
 }

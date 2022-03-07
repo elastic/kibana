@@ -36,6 +36,7 @@ import {
   PreviewRulesSchema,
   ThreatMatchCreateSchema,
   RulePreviewLogs,
+  SavedQueryCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
@@ -131,7 +132,7 @@ export const getSimplePreviewRule = (
 
 /**
  * This is a typical signal testing rule that is easy for most basic testing of output of signals.
- * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
  * creation and testing by getting all the signals at once.
  * @param ruleId The optional ruleId which is rule-1 by default.
  * @param enabled Enables the rule on creation or not. Defaulted to true.
@@ -154,8 +155,25 @@ export const getRuleForSignalTesting = (
 });
 
 /**
+ * This is a typical signal testing rule that is easy for most basic testing of output of Saved Query signals.
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
+ * creation for SavedQuery and testing by getting all the signals at once.
+ * @param ruleId The optional ruleId which is threshold-rule by default.
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
+ */
+export const getSavedQueryRuleForSignalTesting = (
+  index: string[],
+  ruleId = 'saved-query-rule',
+  enabled = true
+): SavedQueryCreateSchema => ({
+  ...getRuleForSignalTesting(index, ruleId, enabled),
+  type: 'saved_query',
+  saved_id: 'abcd',
+});
+
+/**
  * This is a typical signal testing rule that is easy for most basic testing of output of EQL signals.
- * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
  * creation for EQL and testing by getting all the signals at once.
  * @param ruleId The optional ruleId which is eql-rule by default.
  * @param enabled Enables the rule on creation or not. Defaulted to true.
@@ -172,8 +190,40 @@ export const getEqlRuleForSignalTesting = (
 });
 
 /**
+ * This is a typical signal testing rule that is easy for most basic testing of output of Threat Match signals.
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
+ * creation for Threat Match and testing by getting all the signals at once.
+ * @param ruleId The optional ruleId which is threshold-rule by default.
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
+ */
+export const getThreatMatchRuleForSignalTesting = (
+  index: string[],
+  ruleId = 'threat-match-rule',
+  enabled = true
+): ThreatMatchCreateSchema => ({
+  ...getRuleForSignalTesting(index, ruleId, enabled),
+  type: 'threat_match',
+  language: 'kuery',
+  query: '*:*',
+  threat_query: '*:*',
+  threat_mapping: [
+    // We match host.name against host.name
+    {
+      entries: [
+        {
+          field: 'host.name',
+          value: 'host.name',
+          type: 'mapping',
+        },
+      ],
+    },
+  ],
+  threat_index: index, // match against same index for simplicity
+});
+
+/**
  * This is a typical signal testing rule that is easy for most basic testing of output of Threshold signals.
- * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
  * creation for Threshold and testing by getting all the signals at once.
  * @param ruleId The optional ruleId which is threshold-rule by default.
  * @param enabled Enables the rule on creation or not. Defaulted to true.
@@ -993,8 +1043,8 @@ export const countDownTest = async (
  * and error about the race condition.
  * rule a second attempt. It only re-tries adding the rule if it encounters a conflict once.
  * @param supertest The supertest deps
- * @param rule The rule to create
  * @param log The tooling logger
+ * @param rule The rule to create
  */
 export const createRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,

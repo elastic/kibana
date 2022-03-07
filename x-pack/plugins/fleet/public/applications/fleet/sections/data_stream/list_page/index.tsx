@@ -27,9 +27,7 @@ import { DataStreamRowActions } from './components/data_stream_row_actions';
 export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('data_streams');
 
-  const {
-    data: { fieldFormats },
-  } = useStartServices();
+  const { fieldFormats } = useStartServices();
 
   const { pagination, pageSizeOptions } = usePagination();
 

@@ -9,7 +9,8 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('detection engine api security and spaces enabled', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('detection engine api security and spaces enabled', function () {
     describe('', function () {
       this.tags('ciGroup11');
 
@@ -33,6 +34,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./generating_signals'));
       loadTestFile(require.resolve('./get_prepackaged_rules_status'));
       loadTestFile(require.resolve('./import_rules'));
+      loadTestFile(require.resolve('./import_export_rules'));
       loadTestFile(require.resolve('./read_rules'));
       loadTestFile(require.resolve('./resolve_read_rules'));
       loadTestFile(require.resolve('./update_rules'));

@@ -12,6 +12,7 @@ export enum UsersType {
 
 export enum UsersTableType {
   allUsers = 'allUsers',
+  anomalies = 'anomalies',
 }
 
 export type AllUsersTables = UsersTableType;
@@ -32,6 +33,7 @@ export interface TableUpdates {
 
 export interface UsersQueries {
   [UsersTableType.allUsers]: AllUsersQuery;
+  [UsersTableType.anomalies]: null | undefined;
 }
 
 export interface UsersPageModel {
