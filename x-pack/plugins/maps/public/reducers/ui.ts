@@ -20,6 +20,8 @@ import {
   HIDE_TOC_DETAILS,
   SET_DRAW_MODE,
   SET_LAYER_WIZARD_ID,
+  PUSH_DELETED_FEATURE_ID,
+  CLEAR_DELETED_FEATURE_IDS,
 } from '../actions';
 import { DRAW_MODE } from '../../common/constants';
 
@@ -39,6 +41,7 @@ export type MapUiState = {
   isTimesliderOpen: boolean;
   openTOCDetails: string[];
   autoOpenLayerWizardId: string;
+  deletedFeatureIds: string[];
 };
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
@@ -54,6 +57,7 @@ export const DEFAULT_MAP_UI_STATE = {
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
   autoOpenLayerWizardId: '',
+  deletedFeatureIds: [],
 };
 
 // Reducer
@@ -87,6 +91,16 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
       };
     case SET_LAYER_WIZARD_ID:
       return { ...state, autoOpenLayerWizardId: action.autoOpenLayerWizardId };
+    case PUSH_DELETED_FEATURE_ID:
+      return {
+        ...state,
+        deletedFeatureIds: [...state.deletedFeatureIds, action.featureId],
+      };
+    case CLEAR_DELETED_FEATURE_IDS:
+      return {
+        ...state,
+        deletedFeatureIds: [],
+      };
     default:
       return state;
   }

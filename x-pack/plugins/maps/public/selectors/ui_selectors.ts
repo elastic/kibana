@@ -18,3 +18,4 @@ export const getOpenTOCDetails = ({ ui }: MapStoreState): string[] => ui.openTOC
 export const getIsFullScreen = ({ ui }: MapStoreState): boolean => ui.isFullScreen;
 export const getIsReadOnly = ({ ui }: MapStoreState): boolean => ui.isReadOnly;
 export const getAutoOpenLayerWizardId = ({ ui }: MapStoreState): string => ui.autoOpenLayerWizardId;
+export const getDeletedFeatureIds = ({ ui }: MapStoreState): string[] => ui.deletedFeatureIds;

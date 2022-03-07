@@ -43,8 +43,13 @@ export interface Benchmark {
 export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
-const getPackageNameQuery = (packageName: string): string => {
-  return `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
+const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): string => {
+  const integrationNameQuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
+  const kquery = benchmarkFilter
+    ? `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}*`
+    : integrationNameQuery;
+
+  return kquery;
 };
 
 export const getPackagePolicies = async (
@@ -57,7 +62,7 @@ export const getPackagePolicies = async (
     throw new Error('packagePolicyService is undefined');
   }
 
-  const packageNameQuery = getPackageNameQuery(packageName);
+  const packageNameQuery = getPackageNameQuery(packageName, queryParams.benchmark_name);
 
   const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
     kuery: packageNameQuery,
@@ -193,4 +198,8 @@ export const benchmarksInputSchema = rt.object({
    * The number of objects to include in each page
    */
   per_page: rt.number({ defaultValue: DEFAULT_BENCHMARKS_PER_PAGE, min: 0 }),
+  /**
+   * Benchmark filter
+   */
+  benchmark_name: rt.maybe(rt.string()),
 });
