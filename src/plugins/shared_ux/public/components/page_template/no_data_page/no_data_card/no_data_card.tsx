@@ -11,11 +11,11 @@ import React, { FunctionComponent } from 'react';
 import { EuiButton, EuiCard } from '@elastic/eui';
 import { NoDataPageActions } from './types';
 
-const NO_DATA_RECOMMENDED = i18n.translate('sharedUX.noDataPage.noDataPage.recommended', {
+const recommendedLabel = i18n.translate('sharedUX.pageTemplate.noDataPage.recommendedLabel', {
   defaultMessage: 'Recommended',
 });
 
-const defaultDescription = i18n.translate('kibana-react.noDataPage.noDataCard.description', {
+const defaultDescription = i18n.translate('sharedUX.pageTemplate.noDataCard.description', {
   defaultMessage: `Proceed without collecting data`,
 });
 
@@ -32,7 +32,7 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
     }
     return <EuiButton fill>{button || title}</EuiButton>;
   };
-  const label = recommended ? NO_DATA_RECOMMENDED : undefined;
+  const label = recommended ? recommendedLabel : undefined;
   const cardDescription = description || defaultDescription;
 
   return (
