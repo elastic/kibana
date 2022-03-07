@@ -1735,6 +1735,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "continent_code": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "continent_name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -3110,6 +3114,7 @@
             "group.name",
             "host.architecture",
             "host.geo.city_name",
+            "host.geo.continent_code",
             "host.geo.continent_name",
             "host.geo.country_iso_code",
             "host.geo.country_name",
