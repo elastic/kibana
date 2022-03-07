@@ -11,7 +11,7 @@ import { trustedAppsAllHttpMocks } from '../../pages/mocks';
 import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
 import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/trusted_apps_api_client';
 import { artifactListPageLabels } from './translations';
-import { act, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
+import { act, fireEvent, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ArtifactFormComponentProps } from './types';
 import type { HttpFetchOptionsWithPath } from 'kibana/public';
@@ -770,13 +770,81 @@ describe('When using the ArtifactListPage component', () => {
     });
 
     describe('and search bar is used', () => {
-      it.todo('should persist filter to the URL params');
+      const clickSearchButton = () => {
+        act(() => {
+          fireEvent.click(renderResult.getByTestId('searchButton'));
+        });
+      };
 
-      it.todo('should persist policy filter to the URL params');
+      beforeEach(async () => {
+        await renderWithListData();
+      });
 
-      it.todo('should trigger a current page data fetch when Refresh button is clicked');
+      it('should persist filter to the URL params', async () => {
+        act(() => {
+          userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
+        });
+        clickSearchButton();
 
-      it.todo('should show a no results found message if filter did not return any results');
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/fooFooFoo/);
+        });
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              query: expect.objectContaining({
+                filter: expect.stringMatching(/\*fooFooFoo\*/),
+              }),
+            })
+          );
+        });
+      });
+
+      it('should persist policy filter to the URL params', async () => {
+        const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
+        const firstPolicyTestId = `policiesSelector-popover-items-${policyId}`;
+        act(() => {
+          userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
+        });
+        await act(async () => {
+          await waitFor(() => {
+            expect(renderResult.getByTestId(firstPolicyTestId)).toBeTruthy();
+          });
+          userEvent.click(renderResult.getByTestId(firstPolicyTestId));
+        });
+
+        await waitFor(() => {
+          expect(history.location.search).toMatch(new RegExp(`includedPolicies=${policyId}`));
+        });
+      });
+
+      it('should trigger a current page data fetch when Refresh button is clicked', async () => {
+        const currentApiCount = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
+
+        clickSearchButton();
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledTimes(
+            currentApiCount + 1
+          );
+        });
+      });
+
+      it('should show a no results found message if filter did not return any results', async () => {
+        mockedApi.responseProvider.trustedAppsList.mockReturnValueOnce({
+          page: 1,
+          per_page: 10,
+          total: 0,
+          data: [],
+        });
+
+        clickSearchButton();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-list-noResults')).toBeTruthy();
+        });
+      });
     });
   });
 });
