@@ -59,7 +59,10 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
   }
 }
 
+export class KibanaShuttingDownError extends ReportingError {
+  code = 'kibana_shutting_down_error';
+}
+
 // TODO: Add ReportingError for Kibana stopping unexpectedly
-// TODO: Add ReportingError for missing Chromium dependencies
 // TODO: Add ReportingError for missing Chromium dependencies
 // TODO: Add ReportingError for Chromium not starting for an unknown reason
