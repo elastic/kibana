@@ -448,7 +448,7 @@ export class SessionIndex {
     logger.debug(`Running cleanup routine.`);
 
     let error: Error | undefined;
-    let haveDeletedSessions = false;
+    let indexNeedsRefresh = false;
     try {
       for await (const sessionValues of this.getSessionValuesInBatches()) {
         const operations: Array<Required<Pick<BulkOperationContainer, 'delete'>>> = [];
@@ -458,7 +458,6 @@ export class SessionIndex {
           operations.push({ delete: { _id } });
         });
         if (operations.length > 0) {
-          haveDeletedSessions = true;
           const bulkResponse = await elasticsearchClient.bulk(
             {
               index: this.indexName,
@@ -476,6 +475,7 @@ export class SessionIndex {
               logger.warn(
                 `Failed to clean up ${errorCount} of ${bulkResponse.items.length} invalid or expired sessions. The remaining sessions were cleaned up successfully.`
               );
+              indexNeedsRefresh = true;
             } else {
               logger.error(
                 `Failed to clean up ${bulkResponse.items.length} invalid or expired sessions.`
@@ -483,6 +483,7 @@ export class SessionIndex {
             }
           } else {
             logger.debug(`Cleaned up ${bulkResponse.items.length} invalid or expired sessions.`);
+            indexNeedsRefresh = true;
           }
         }
       }
@@ -491,7 +492,9 @@ export class SessionIndex {
       error = err;
     }
 
-    if (haveDeletedSessions) {
+    if (indexNeedsRefresh) {
+      // Only refresh the index if we have actually deleted one or more sessions. The index will auto-refresh eventually anyway, this just
+      // ensures that searches after the cleanup process are accurate, and this only impacts integration tests.
       try {
         await elasticsearchClient.indices.refresh({ index: this.indexName });
         logger.debug(`Refreshed session index.`);
