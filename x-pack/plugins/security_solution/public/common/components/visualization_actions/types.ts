@@ -13,12 +13,11 @@ export type GetLensAttributes = (stackByField?: string) => LensAttributes;
 
 export interface VisualizationActionsProps {
   className?: string;
-  getLensAttributes?: GetLensAttributes;
   inputId?: InputsModelId;
   inspectIndex?: number;
   isInspectButtonDisabled?: boolean;
   isMultipleQuery?: boolean;
-  lensAttributes?: LensAttributes | null;
+  lensAttributes: LensAttributes | GetLensAttributes | null;
   onCloseInspect?: () => void;
   queryId: string;
   stackByField?: string;

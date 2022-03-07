@@ -58,7 +58,7 @@ export const histogramConfigs: MatrixHistogramConfigs = {
   stackByOptions: eventsStackByOptions,
   subtitle: undefined,
   title: i18n.NAVIGATION_EVENTS_TITLE,
-  getLensAttributes: getEventsHistogramCongifs,
+  lensAttributes: getEventsHistogramCongifs,
 };
 
 const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({

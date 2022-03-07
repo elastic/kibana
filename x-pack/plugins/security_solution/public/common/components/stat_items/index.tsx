@@ -303,7 +303,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                   barChart={barChart}
                   configs={barchartConfigs()}
                   visualizationActionsOptions={{
-                    lensAttributes: barChartLensAttributes,
+                    lensAttributes: barChartLensAttributes ?? null,
                     queryId: id,
                     inspectIndex: index,
                     timerange,
@@ -324,7 +324,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                       onBrushEnd: narrowDateRange,
                     })}
                     visualizationActionsOptions={{
-                      lensAttributes: areaChartLensAttributes,
+                      lensAttributes: areaChartLensAttributes ?? null,
                       queryId: id,
                       inspectIndex: index,
                       timerange,

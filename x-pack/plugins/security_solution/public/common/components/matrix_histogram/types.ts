@@ -34,11 +34,10 @@ export type GetTitle = (matrixHistogramOption: MatrixHistogramOption) => string;
 export interface MatrixHistogramConfigs {
   defaultStackByOption: MatrixHistogramOption;
   errorMessage: string;
-  getLensAttributes?: GetLensAttributes;
   hideHistogramIfEmpty?: boolean;
   histogramType: MatrixHistogramType;
   legendPosition?: Position;
-  lensAttributes?: LensAttributes;
+  lensAttributes?: LensAttributes | GetLensAttributes | null;
   mapping?: MatrixHistogramMappingTypes;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;

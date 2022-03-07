@@ -22,11 +22,9 @@ import {
 
 export const useLensAttributes = ({
   lensAttributes,
-  getLensAttributes,
   stackByField,
 }: {
-  lensAttributes?: LensAttributes | null;
-  getLensAttributes?: GetLensAttributes;
+  lensAttributes: LensAttributes | GetLensAttributes | null;
   stackByField?: string;
 }): LensAttributes | null => {
   const { selectedPatterns, dataViewId } = useSourcererDataView();
@@ -64,12 +62,12 @@ export const useLensAttributes = ({
   const indexFilters = useMemo(() => getIndexFilters(selectedPatterns), [selectedPatterns]);
 
   const lensAttrsWithInjectedData = useMemo(() => {
-    if (lensAttributes == null && (getLensAttributes == null || stackByField == null)) {
+    if (lensAttributes == null) {
       return null;
     }
-    const attrs: LensAttributes =
-      lensAttributes ??
-      ((getLensAttributes && stackByField && getLensAttributes(stackByField)) as LensAttributes);
+
+    const attrs =
+      typeof lensAttributes === 'function' ? lensAttributes(stackByField) : lensAttributes;
 
     return {
       ...attrs,
@@ -91,7 +89,6 @@ export const useLensAttributes = ({
     } as LensAttributes;
   }, [
     lensAttributes,
-    getLensAttributes,
     stackByField,
     query,
     filters,

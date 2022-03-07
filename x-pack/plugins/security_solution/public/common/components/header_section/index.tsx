@@ -41,7 +41,6 @@ Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
-  getLensAttributes?: GetLensAttributes;
   growLeftSplit?: boolean;
   headerFilters?: string | React.ReactNode;
   height?: number;
@@ -49,7 +48,7 @@ export interface HeaderSectionProps extends HeaderProps {
   id?: string;
   inspectMultiple?: boolean;
   isInspectDisabled?: boolean;
-  lensAttributes?: LensAttributes | null;
+  lensAttributes?: LensAttributes | GetLensAttributes | null;
   showInspectButton?: boolean;
   split?: boolean;
   stackByField?: string;
@@ -64,7 +63,6 @@ export interface HeaderSectionProps extends HeaderProps {
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   border,
   children,
-  getLensAttributes,
   growLeftSplit = true,
   headerFilters,
   height,
@@ -121,10 +119,9 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                   />
                 </EuiFlexItem>
               )}
-              {(getLensAttributes || lensAttributes) && timerange && (
+              {lensAttributes && timerange && (
                 <EuiFlexItem grow={false}>
                   <VisualizationActions
-                    getLensAttributes={getLensAttributes}
                     isInspectButtonDisabled={isInspectDisabled}
                     isMultipleQuery={inspectMultiple}
                     lensAttributes={lensAttributes}

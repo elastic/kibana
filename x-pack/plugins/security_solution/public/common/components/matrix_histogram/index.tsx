@@ -36,13 +36,12 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
     defaultStackByOption: MatrixHistogramOption;
     errorMessage: string;
-    getLensAttributes?: GetLensAttributes;
     headerChildren?: React.ReactNode;
     hideHistogramIfEmpty?: boolean;
     histogramType: MatrixHistogramType;
     id: string;
     legendPosition?: Position;
-    lensAttributes?: LensAttributes;
+    lensAttributes?: LensAttributes | GetLensAttributes | null;
     mapping?: MatrixHistogramMappingTypes;
     onError?: () => void;
     showSpacer?: boolean;
@@ -75,7 +74,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   endDate,
   errorMessage,
   filterQuery,
-  getLensAttributes,
   headerChildren,
   histogramType,
   hideHistogramIfEmpty = false,
@@ -240,7 +238,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             lensAttributes={lensAttributes}
             stackByField={selectedStackByOption.value}
             timerange={timerange}
-            getLensAttributes={getLensAttributes}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>

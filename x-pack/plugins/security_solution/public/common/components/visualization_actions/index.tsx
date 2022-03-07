@@ -44,7 +44,6 @@ const owner = APP_ID;
 
 const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   className,
-  getLensAttributes,
   inputId = 'global',
   inspectIndex = 0,
   isInspectButtonDisabled,
@@ -79,7 +78,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
 
   const attributes = useLensAttributes({
     lensAttributes,
-    getLensAttributes,
     stackByField,
   });
 

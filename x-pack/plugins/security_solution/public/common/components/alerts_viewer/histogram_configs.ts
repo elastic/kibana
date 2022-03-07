@@ -31,5 +31,5 @@ export const histogramConfigs: MatrixHistogramConfigs = {
   stackByOptions: alertsStackByOptions,
   subtitle: undefined,
   title: i18n.ALERTS_GRAPH_TITLE,
-  getLensAttributes: getExternalAlertConfigs,
+  lensAttributes: getExternalAlertConfigs,
 };
