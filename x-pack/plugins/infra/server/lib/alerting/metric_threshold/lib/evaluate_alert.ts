@@ -139,6 +139,11 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   );
 };
 
+interface TooManyBucketsErrorObject {
+  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION: boolean;
+  maxBuckets: number;
+}
+
 const getMetric: (
   esClient: ElasticsearchClient,
   params: MetricExpressionParams,
@@ -148,7 +153,9 @@ const getMetric: (
   filterQuery: string | undefined,
   timeframe?: { start?: number; end: number },
   shouldDropPartialBuckets?: boolean
-) => Promise<Record<string, Array<{ key: string; value: number }>>> = async function (
+) => Promise<
+  Record<string, ReturnType<typeof getValuesFromAggregations> | null | TooManyBucketsErrorObject>
+> = async function (
   esClient,
   params,
   index,
@@ -194,13 +201,12 @@ const getMetric: (
         (response) => response.aggregations?.groupings?.after_key
       );
       const compositeBuckets = (await getAllCompositeData(
-        // @ts-expect-error @elastic/elasticsearch SearchResponse.body.timeout is not required
         (body) => esClient.search({ body, index }),
         searchBody,
         bucketSelector,
         afterKeyHandler
       )) as Array<Aggregation & { key: Record<string, string>; doc_count: number }>;
-      const groupedResults: Record<string, any> = {};
+      const groupedResults: Record<string, ReturnType<typeof getValuesFromAggregations>> = {};
       for (const bucket of compositeBuckets) {
         const key = Object.values(bucket.key).join(', ');
         const value = getValuesFromAggregations(
@@ -215,7 +221,6 @@ const getMetric: (
       return groupedResults;
     }
     const { body: result } = await esClient.search({
-      // @ts-expect-error buckets_path is not compatible with @elastic/elasticsearch
       body: searchBody,
       index,
     });
