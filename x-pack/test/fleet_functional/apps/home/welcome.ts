@@ -14,8 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const kibanaServer = getService('kibanaServer');
 
-  // flaky https://github.com/elastic/kibana/issues/109017
-  describe.skip('Welcome interstitial', () => {
+  describe.only('Welcome interstitial', () => {
     before(async () => {
       // Need to navigate to page first to clear storage before test can be run
       await PageObjects.common.navigateToUrl('home', undefined);
