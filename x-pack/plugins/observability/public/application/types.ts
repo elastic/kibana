@@ -22,6 +22,7 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { LensPublicStart } from '../../../lens/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 import { CasesUiStart } from '../../../cases/public';
+import { TimelinesUIStart } from '../../../timelines/public';
 
 export interface ObservabilityAppServices {
   application: ApplicationStart;
@@ -37,6 +38,7 @@ export interface ObservabilityAppServices {
   stateTransfer: EmbeddableStateTransfer;
   storage: IStorageWrapper;
   theme: ThemeServiceStart;
+  timelines: TimelinesUIStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiSettings: IUiSettingsClient;
 }
