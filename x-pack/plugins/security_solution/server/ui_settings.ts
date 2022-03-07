@@ -221,11 +221,11 @@ export const initUiSettings = (
     },
     [ENABLE_CCS_READ_WARNING_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
-        defaultMessage: 'CCS Read Warning',
+        defaultMessage: 'CCS Rule Privileges Warning',
       }),
       value: true,
       description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
-        defaultMessage: '<p>Enables cross cluster search read warnings</p>',
+        defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
       }),
       type: 'boolean',
       category: [APP_ID],
