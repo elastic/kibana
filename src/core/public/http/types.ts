@@ -353,10 +353,6 @@ export interface IHttpFetchError<TResponseBody = unknown> extends Error {
    * @deprecated Provided for legacy compatibility. Prefer the `request` property instead.
    */
   readonly req: Request;
-  /**
-   * @deprecated Provided for legacy compatibility. Prefer the `response` property instead.
-   */
-  readonly res?: Response;
   readonly body?: TResponseBody;
 }
 

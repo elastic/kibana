@@ -12,7 +12,6 @@ import { IHttpFetchError } from './types';
 export class HttpFetchError extends Error implements IHttpFetchError {
   public readonly name: string;
   public readonly req: Request;
-  public readonly res?: Response;
 
   constructor(
     message: string,
@@ -24,7 +23,6 @@ export class HttpFetchError extends Error implements IHttpFetchError {
     super(message);
     this.name = name;
     this.req = request;
-    this.res = response;
 
     // captureStackTrace is only available in the V8 engine, so any browser using
     // a different JS engine won't have access to this method.

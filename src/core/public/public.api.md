@@ -559,8 +559,6 @@ export class HttpFetchError extends Error implements IHttpFetchError {
     // (undocumented)
     readonly request: Request;
     // (undocumented)
-    readonly res?: Response;
-    // (undocumented)
     readonly response?: Response | undefined;
 }
 
@@ -728,8 +726,6 @@ export interface IHttpFetchError<TResponseBody = unknown> extends Error {
     readonly req: Request;
     // (undocumented)
     readonly request: Request;
-    // @deprecated (undocumented)
-    readonly res?: Response;
     // (undocumented)
     readonly response?: Response;
 }

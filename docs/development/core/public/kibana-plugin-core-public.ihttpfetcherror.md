@@ -20,6 +20,5 @@ export interface IHttpFetchError<TResponseBody = unknown> extends Error
 |  [name](./kibana-plugin-core-public.ihttpfetcherror.name.md) | string |  |
 |  [req](./kibana-plugin-core-public.ihttpfetcherror.req.md) | Request |  |
 |  [request](./kibana-plugin-core-public.ihttpfetcherror.request.md) | Request |  |
-|  [res?](./kibana-plugin-core-public.ihttpfetcherror.res.md) | Response | <i>(Optional)</i> |
 |  [response?](./kibana-plugin-core-public.ihttpfetcherror.response.md) | Response | <i>(Optional)</i> |
 
