@@ -20,6 +20,7 @@ import {
   updateDatasourceState,
   useLensSelector,
   setState,
+  applyChanges,
   selectExecutionContext,
   selectActiveDatasourceId,
   selectDatasourceStates,
@@ -47,8 +48,8 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     : true;
 
   const dispatchLens = useLensDispatch();
-  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
-    return (updater) => {
+  const setDatasourceState: StateSetter<unknown, { applyImmediately?: boolean }> = useMemo(() => {
+    return (updater: unknown | ((prevState: unknown) => unknown), options) => {
       dispatchLens(
         updateDatasourceState({
           updater,
@@ -56,6 +57,9 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           clearStagedPreview: true,
         })
       );
+      if (options?.applyImmediately) {
+        dispatchLens(applyChanges());
+      }
     };
   }, [activeDatasourceId, dispatchLens]);
 
