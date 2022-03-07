@@ -64,8 +64,7 @@ export function getSuggestions(
                   metricLabel: metric.operation.label.toLowerCase(),
                 },
               }),
-              // To avoid flooding suggestions with choropleth visualizations, lower score after first match
-              score: suggestions.length === 0 ? 0.7 : 0.1,
+              score: 0.7,
               state: {
                 layerId: tableId,
                 emsLayerId: emsSuggestion.layerId,
