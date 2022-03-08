@@ -32,6 +32,7 @@ import {
   EDIT_EXCEPTIONS_BTN,
   EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
   EXCEPTION_FLYOUT_VERSION_CONFLICT,
+  EXCEPTION_FLYOUT_LIST_DELETED_ERROR,
 } from '../../screens/exceptions';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -40,6 +41,7 @@ import {
   createExceptionList,
   createExceptionListItem,
   updateExceptionListItem,
+  deleteExceptionList,
 } from '../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../objects/exception';
 
@@ -51,6 +53,10 @@ import { getExceptionList } from '../../objects/exception';
 describe('Exceptions flyout', () => {
   before(() => {
     cleanKibana();
+    // this is a made-up index that has just the necessary
+    // mappings to conduct tests, avoiding loading large
+    // amounts of data like in auditbeat_exceptions
+    esArchiverLoad('exceptions');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createCustomRule({
@@ -68,14 +74,7 @@ describe('Exceptions flyout', () => {
     );
     reload();
     goToRuleDetails();
-
     cy.get(RULE_STATUS).should('have.text', '—');
-
-    // this is a made-up index that has just the necessary
-    // mappings to conduct tests, avoiding loading large
-    // amounts of data like in auditbeat_exceptions
-    esArchiverLoad('exceptions');
-
     goToExceptionsTab();
   });
 
@@ -83,8 +82,13 @@ describe('Exceptions flyout', () => {
     esArchiverUnload('exceptions');
   });
 
-  it.skip('Does not overwrite values and-ed together', () => {
-    cy.get(ADD_EXCEPTIONS_BTN).click({ force: true });
+  it('Does not overwrite values and-ed together', () => {
+    cy.root()
+      .pipe(($el) => {
+        $el.find(ADD_EXCEPTIONS_BTN).trigger('click');
+        return $el.find(ADD_AND_BTN);
+      })
+      .should('be.visible');
 
     // add multiple entries with invalid field values
     addExceptionEntryFieldValue('agent.name', 0);
@@ -101,9 +105,13 @@ describe('Exceptions flyout', () => {
     closeExceptionBuilderFlyout();
   });
 
-  it.skip('Does not overwrite values or-ed together', () => {
-    cy.get(ADD_EXCEPTIONS_BTN).click({ force: true });
-
+  it('Does not overwrite values or-ed together', () => {
+    cy.root()
+      .pipe(($el) => {
+        $el.find(ADD_EXCEPTIONS_BTN).trigger('click');
+        return $el.find(ADD_AND_BTN);
+      })
+      .should('be.visible');
     // exception item 1
     addExceptionEntryFieldValueOfItemX('agent.name', 0, 0);
     cy.get(ADD_AND_BTN).click();
@@ -154,7 +162,7 @@ describe('Exceptions flyout', () => {
     closeExceptionBuilderFlyout();
   });
 
-  it.skip('Does not overwrite values of nested entry items', () => {
+  it('Does not overwrite values of nested entry items', () => {
     openExceptionFlyoutFromRuleSettings();
     cy.get(LOADING_SPINNER).should('not.exist');
 
@@ -218,17 +226,21 @@ describe('Exceptions flyout', () => {
     closeExceptionBuilderFlyout();
   });
 
-  it.skip('Contains custom index fields', () => {
-    cy.get(ADD_EXCEPTIONS_BTN).click({ force: true });
-
+  it('Contains custom index fields', () => {
+    cy.root()
+      .pipe(($el) => {
+        $el.find(ADD_EXCEPTIONS_BTN).trigger('click');
+        return $el.find(ADD_AND_BTN);
+      })
+      .should('be.visible');
     cy.get(FIELD_INPUT).eq(0).click({ force: true });
     cy.get(EXCEPTION_FIELD_LIST).contains('unique_value.test');
 
     closeExceptionBuilderFlyout();
   });
 
-  context('When updating an item with version conflict', () => {
-    it('Displays version conflict error', () => {
+  describe('flyout errors', () => {
+    before(() => {
       // create exception item via api
       createExceptionListItem(getExceptionList().list_id, {
         list_id: getExceptionList().list_id,
@@ -248,50 +260,56 @@ describe('Exceptions flyout', () => {
         ],
       });
 
-      cy.reload();
-
+      reload();
+      cy.get(RULE_STATUS).should('have.text', '—');
       goToExceptionsTab();
-
-      cy.get(EDIT_EXCEPTIONS_BTN).should('be.visible');
-
-      cy.get(EDIT_EXCEPTIONS_BTN).click({ force: true });
-
-      // update exception item via api
-      updateExceptionListItem('simple_list_item', {
-        name: 'Updated item name',
-        item_id: 'simple_list_item',
-        tags: [],
-        type: 'simple',
-        description: 'Test exception item',
-        namespace_type: 'single',
-        entries: [
-          {
-            field: 'host.name',
-            operator: 'included',
-            type: 'match_any',
-            value: ['some host', 'another host'],
-          },
-        ],
-      });
-
-      // try to save and see version conflict error
-      cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click({ force: true });
-
-      cy.get(EXCEPTION_FLYOUT_VERSION_CONFLICT).should('be.visible');
-
-      closeExceptionBuilderFlyout();
     });
-  });
 
-  context.skip('When updating an item for a list that has since been deleted', () => {
-    it.skip('Displays missing exception list error', () => {
-      cy.get(EDIT_EXCEPTIONS_BTN).click({ force: true });
+    context('When updating an item with version conflict', () => {
+      it('Displays version conflict error', () => {
+        cy.get(EDIT_EXCEPTIONS_BTN).should('be.visible');
+        cy.get(EDIT_EXCEPTIONS_BTN).click({ force: true });
 
-      // delete exception list via api
+        // update exception item via api
+        updateExceptionListItem('simple_list_item', {
+          name: 'Updated item name',
+          item_id: 'simple_list_item',
+          tags: [],
+          type: 'simple',
+          description: 'Test exception item',
+          namespace_type: 'single',
+          entries: [
+            {
+              field: 'host.name',
+              operator: 'included',
+              type: 'match_any',
+              value: ['some host', 'another host'],
+            },
+          ],
+        });
 
-      // try to save and see error
+        // try to save and see version conflict error
+        cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click({ force: true });
 
-      closeExceptionBuilderFlyout();
+        cy.get(EXCEPTION_FLYOUT_VERSION_CONFLICT).should('be.visible');
+
+        closeExceptionBuilderFlyout();
+      });
+    });
+
+    context('When updating an item for a list that has since been deleted', () => {
+      it('Displays missing exception list error', () => {
+        cy.get(EDIT_EXCEPTIONS_BTN).should('be.visible');
+        cy.get(EDIT_EXCEPTIONS_BTN).click({ force: true });
+
+        // delete exception list via api
+        deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);
+
+        // try to save and see error
+        cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click({ force: true });
+
+        cy.get(EXCEPTION_FLYOUT_LIST_DELETED_ERROR).should('be.visible');
+      });
     });
   });
 });

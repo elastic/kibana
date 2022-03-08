@@ -68,3 +68,5 @@ export const EXCEPTION_EDIT_FLYOUT_SAVE_BTN = '[data-test-subj="edit-exception-c
 
 export const EXCEPTION_FLYOUT_VERSION_CONFLICT =
   '[data-test-subj="exceptionsFlyoutVersionConflict"]';
+
+export const EXCEPTION_FLYOUT_LIST_DELETED_ERROR = '[data-test-subj="errorCalloutContainer"]';

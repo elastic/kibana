@@ -70,3 +70,11 @@ export const updateExceptionListItem = (
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
   });
+
+export const deleteExceptionList = (listId: string, namespaceType: string) =>
+  cy.request({
+    method: 'DELETE',
+    url: `/api/exception_lists?list_id=${listId}&namespace_type=${namespaceType}`,
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
