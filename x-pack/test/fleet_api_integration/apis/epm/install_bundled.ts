@@ -25,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   );
 
   const bundlePackage = async (name: string) => {
+    log.info(`Bundling fixture package in ${BUNDLED_PACKAGE_DIR}`);
     try {
       await fs.access(BUNDLED_PACKAGE_DIR);
     } catch (error) {

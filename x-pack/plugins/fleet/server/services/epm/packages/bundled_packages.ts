@@ -20,6 +20,9 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
     : path.join(__dirname, '../../../../target/bundled_packages');
 
   try {
+    const logger = appContextService.getLogger();
+    logger.info(`Reading bundled packages from ${BUNDLED_PACKAGE_DIRECTORY}`);
+
     const dirContents = await fs.readdir(BUNDLED_PACKAGE_DIRECTORY);
     const zipFiles = dirContents.filter((file) => file.endsWith('.zip'));
 
