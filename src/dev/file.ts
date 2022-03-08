@@ -55,7 +55,7 @@ export class File {
       return true;
     }
 
-    const i = parts.indexOf('kbn-generator');
+    const i = parts.indexOf('kbn-generate');
     if (i >= 0 && parts[i + 1] === 'templates') {
       return true;
     }
