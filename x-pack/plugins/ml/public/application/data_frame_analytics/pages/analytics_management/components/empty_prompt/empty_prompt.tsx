@@ -20,13 +20,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dfaImage from './data_frame_analytics_kibana.png';
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { useNavigateToPath } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 interface Props {
   disabled: boolean;
-  onCreateFirstJobClick: () => void;
 }
 
-export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClick }) => {
+export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled }) => {
   const {
     services: {
       docLinks,
@@ -34,6 +35,11 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
     },
   } = useMlKibana();
   const transformsLink = `${basePath.get()}/app/management/data/transform`;
+  const navigateToPath = useNavigateToPath();
+
+  const navigateToSourceSelection = async () => {
+    await navigateToPath(ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION);
+  };
 
   return (
     <EuiEmptyPrompt
@@ -103,7 +109,7 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
       }
       actions={[
         <EuiButton
-          onClick={onCreateFirstJobClick}
+          onClick={navigateToSourceSelection}
           isDisabled={disabled}
           color="primary"
           iconType="plusInCircle"

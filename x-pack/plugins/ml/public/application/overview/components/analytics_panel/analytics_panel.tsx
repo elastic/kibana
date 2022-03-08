@@ -24,7 +24,6 @@ import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/a
 import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
 import { useMlLink } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection';
 import { useRefresh } from '../../../routing/use_refresh';
 import type { GetDataFrameAnalyticsStatsResponseError } from '../../../services/ml_api_service/data_frame_analytics';
 import { AnalyticsEmptyPrompt } from '../../../data_frame_analytics/pages/analytics_management/components/empty_prompt';
@@ -42,7 +41,6 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
   );
   const [errorMessage, setErrorMessage] = useState<GetDataFrameAnalyticsStatsResponseError>();
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
 
   const manageJobsLink = useMlLink({
     page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
@@ -85,10 +83,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
   return (
     <>
       {noDFAJobs ? (
-        <AnalyticsEmptyPrompt
-          disabled={jobCreationDisabled}
-          onCreateFirstJobClick={setIsSourceIndexModalVisible.bind(null, true)}
-        />
+        <AnalyticsEmptyPrompt disabled={jobCreationDisabled} />
       ) : (
         <EuiPanel className={panelClass} hasShadow={false} hasBorder>
           {typeof errorMessage !== 'undefined' ? errorDisplay : null}
@@ -134,10 +129,6 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
           )}
         </EuiPanel>
       )}
-
-      {isSourceIndexModalVisible ? (
-        <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
-      ) : null}
     </>
   );
 };

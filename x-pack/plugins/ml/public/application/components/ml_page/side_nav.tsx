@@ -142,13 +142,13 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             testSubj: 'mlMainTab dataFrameAnalytics',
           },
           {
-            id: 'data_frame_analytics_job_results',
+            id: 'data_frame_analytics_results_explorer',
             pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
-            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsJobResultsText', {
-              defaultMessage: 'Job Results',
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.resultsExplorerText', {
+              defaultMessage: 'Results Explorer',
             }),
             disabled: disableLinks,
-            testSubj: 'mlMainTab dataFrameAnalyticsResults',
+            testSubj: 'mlMainTab dataFrameAnalyticsResultsExplorer',
           },
           {
             id: 'data_frame_analytics_job_map',

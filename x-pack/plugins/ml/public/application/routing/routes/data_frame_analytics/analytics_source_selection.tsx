@@ -14,26 +14,24 @@ import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
+import { Page } from '../../../data_frame_analytics/pages/source_selection';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
-import { useUrlState } from '../../../util/url_state';
 
-export const analyticsJobExplorationRouteFactory = (
+export const analyticsSourceSelectionRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/data_frame_analytics/exploration',
+  path: '/data_frame_analytics/source_selection',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  title: i18n.translate('xpack.ml.dataFrameAnalytics.exploration.docTitle', {
-    defaultMessage: 'Results Explorer',
+  title: i18n.translate('xpack.ml.dataFrameAnalytics.sourceSelection.docTitle', {
+    defaultMessage: 'Source Selection',
   }),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameExplorationLabel', {
-        defaultMessage: 'Results Explorer',
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameSourceSelectionLabel', {
+        defaultMessage: 'Source Selection',
       }),
     },
   ],
@@ -48,13 +46,9 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     basicResolvers(deps)
   );
 
-  const [globalState] = useUrlState('_g');
-  const jobId: string = globalState?.ml.jobId;
-  const analysisType: DataFrameAnalysisConfigType = globalState?.ml.analysisType;
-
   return (
     <PageLoader context={context}>
-      <Page {...{ jobId, analysisType }} />
+      <Page />
     </PageLoader>
   );
 };
