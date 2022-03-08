@@ -79,10 +79,19 @@ find distribution -type f \( -name 'elasticsearch-*-*-*-*.tar.gz' -o -name 'elas
 
 ls -alh "$destination"
 
-echo "--- Create docker image archives"
+echo "--- Create docker default image archives"
 docker images "docker.elastic.co/elasticsearch/elasticsearch"
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 echo 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
+
+echo "--- Create kibana-ci docker cloud image archives"
+ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.ID}}")
+ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.Tag}}")
+KIBANA_ES_CLOUD_TAG="docker.elastic.co/kibana-ci/elasticsearch-cloud:$ES_CLOUD_VERSION-$ELASTICSEARCH_GIT_COMMIT"
+
+docker tag "$ES_CLOUD_ID" "$KIBANA_ES_CLOUD_TAG"
+echo "docker save docker.elastic.co/kibana-ci/elasticsearch-cloud:${0} | gzip > ../es-build/elasticsearch-cloud-$ES_CLOUD_VERSION-docker-image.tar.gz"
+docker save docker.elastic.co/kibana-ci/elasticsearch-cloud:${0} | gzip > ../es-build/elasticsearch-cloud-$ES_CLOUD_VERSION-docker-image.tar.gz
 
 echo "--- Create checksums for snapshot files"
 cd "$destination"
