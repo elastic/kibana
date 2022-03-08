@@ -24,6 +24,7 @@ import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric
 import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { InfraBackendLibs } from '../../infra_types';
+import { LogQueryFields } from '../../metrics/types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
@@ -62,7 +63,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
   >(async ({ services, params }) => {
-    const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
+    const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
@@ -93,18 +94,16 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         return {};
       }
     }
-    const source = await libs.sources.getSourceConfiguration(
-      savedObjectsClient,
-      sourceId || 'default'
-    );
+    const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
 
-    const logQueryFields = await libs
-      .getLogQueryFields(
-        sourceId || 'default',
-        services.savedObjectsClient,
-        services.scopedClusterClient.asCurrentUser
-      )
-      .catch(() => undefined);
+    const [, , { logViews }] = await libs.getStartServices();
+    const logQueryFields: LogQueryFields | undefined = await logViews
+      .getClient(savedObjectsClient, services.scopedClusterClient.asCurrentUser)
+      .getResolvedLogView(sourceId)
+      .then(
+        ({ indices }) => ({ indexPattern: indices }),
+        () => undefined
+      );
 
     const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
     const results = await Promise.all(

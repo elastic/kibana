@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import {
-  CoreSetup,
   CoreStart,
   Plugin,
   PluginConfigDescriptor,
@@ -41,11 +40,11 @@ import { InfraSourceStatus } from './lib/source_status';
 import { initLogViewRoutes } from './routes/log_views';
 import { logViewSavedObjectType } from './saved_objects';
 import { LogEntriesService } from './services/log_entries';
-import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
 import { LogViewsService } from './services/log_views';
 import { RulesService } from './services/rules';
 import {
   InfraConfig,
+  InfraPluginCoreSetup,
   InfraPluginRequestHandlerContext,
   InfraPluginSetup,
   InfraPluginStart,
@@ -128,10 +127,7 @@ export class InfraServerPlugin
     this.logViews = new LogViewsService(this.logger.get('logViews'));
   }
 
-  setup(
-    core: CoreSetup<InfraServerPluginStartDeps, InfraPluginStart>,
-    plugins: InfraServerPluginSetupDeps
-  ) {
+  setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,
@@ -170,10 +166,10 @@ export class InfraServerPlugin
       sources,
       sourceStatus,
       ...domainLibs,
-      getLogQueryFields: createGetLogQueryFields(sources, framework),
       handleEsError,
       logsRules: this.logsRules.setup(core, plugins),
       metricsRules: this.metricsRules.setup(core, plugins),
+      getStartServices: () => core.getStartServices(),
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
