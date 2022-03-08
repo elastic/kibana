@@ -16,22 +16,12 @@ type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
 
-const addPropertiesInMappingIndex = (indexMapping: IndexMapping) => {
-  if (!Object.keys(indexMapping.properties).includes('_id')) {
-    indexMapping.properties = {
-      _id: { type: 'keyword' },
-      ...indexMapping.properties,
-    };
-  }
-};
-
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
   filter: string | KueryNode,
   indexMapping: IndexMapping
 ): KueryNode | undefined => {
   if (filter && indexMapping) {
-    addPropertiesInMappingIndex(indexMapping);
     let filterKueryNode =
       typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : cloneDeep(filter);
 
@@ -64,7 +54,9 @@ export const validateConvertFilterToKueryNode = (
       const existingKueryNode: KueryNode =
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
-        existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
+        const keySavedObjectAttr = existingKueryNode.arguments[0].value.split('.')[1];
+        existingKueryNode.arguments[0].value =
+          keySavedObjectAttr === 'id' ? '_id' : keySavedObjectAttr;
         const itemType = allowedTypes.filter((t) => t === item.type);
         if (itemType.length === 1) {
           const kueryToAdd = esKuery.nodeTypes.function.buildNode('and', [
@@ -182,6 +174,8 @@ export const isSavedObjectAttr = (key: string | null | undefined, indexMapping: 
   const keySplit = key != null ? key.split('.') : [];
   if (keySplit.length === 1 && fieldDefined(indexMapping, keySplit[0])) {
     return true;
+  } else if (keySplit.length === 2 && keySplit[1] === 'id') {
+    return true;
   } else if (keySplit.length === 2 && fieldDefined(indexMapping, keySplit[1])) {
     return true;
   } else {
@@ -227,6 +221,10 @@ export const hasFilterKeyError = (
 export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean => {
   const mappingKey = 'properties.' + key.split('.').join('.properties.');
   if (get(indexMappings, mappingKey) != null) {
+    return true;
+  }
+
+  if (mappingKey === 'properties.id') {
     return true;
   }
 

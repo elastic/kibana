@@ -193,17 +193,17 @@ describe('Filter Utils', () => {
       ).toEqual(esKuery.fromKueryExpression('alert.params.foo:bar'));
     });
 
-    test('Assemble filter with just "_id" and one type', () => {
-      expect(
-        validateConvertFilterToKueryNode(['foo'], 'foo._id: 0123456789', mockMappings)
-      ).toEqual(esKuery.fromKueryExpression('type: foo and _id: 0123456789'));
+    test('Assemble filter with just "id" and one type', () => {
+      expect(validateConvertFilterToKueryNode(['foo'], 'foo.id: 0123456789', mockMappings)).toEqual(
+        esKuery.fromKueryExpression('type: foo and _id: 0123456789')
+      );
     });
 
-    test('Assemble filter with "_id" and one type and more', () => {
+    test('Assemble filter with saved object attribute "id" and one type and more', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo'],
-          'foo._id: 0123456789 and (foo.updated_at: 5678654567 or foo.attributes.bytes > 1000)',
+          'foo.id: 0123456789 and (foo.updated_at: 5678654567 or foo.attributes.bytes > 1000)',
           mockMappings
         )
       ).toEqual(
@@ -213,11 +213,11 @@ describe('Filter Utils', () => {
       );
     });
 
-    test('Assemble filter with "_id" and multi type and more', () => {
+    test('Assemble filter with saved object attribute "id" and multi type and more', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo', 'bar'],
-          'foo._id: 0123456789 and bar._id: 9876543210',
+          'foo.id: 0123456789 and bar.id: 9876543210',
           mockMappings
         )
       ).toEqual(
@@ -227,15 +227,15 @@ describe('Filter Utils', () => {
       );
     });
 
-    test('Lets make sure that we are throwing an exception if we are using _id when it does not belong', () => {
+    test('Lets make sure that we are throwing an exception if we are using id outside of saved object attribute when it does not belong', () => {
       expect(() => {
         validateConvertFilterToKueryNode(
           ['foo'],
-          'foo.attributes._id: 0123456789 and (foo.updated_at: 5678654567 or foo.attributes.bytes > 1000)',
+          'foo.attributes.id: 0123456789 and (foo.updated_at: 5678654567 or foo.attributes.bytes > 1000)',
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"This key 'foo.attributes._id' does NOT exist in foo saved object index patterns: Bad Request"`
+        `"This key 'foo.attributes.id' does NOT exist in foo saved object index patterns: Bad Request"`
       );
     });
 
