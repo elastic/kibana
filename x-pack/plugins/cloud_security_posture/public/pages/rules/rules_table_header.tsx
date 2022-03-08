@@ -96,14 +96,14 @@ const BulkMenu = ({
         {
           icon: 'eye',
           disabled: !selectedRulesCount,
-          text: <ActivateRulesMenuItemText count={selectedRulesCount} />,
+          children: <ActivateRulesMenuItemText count={selectedRulesCount} />,
           'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_ENABLE_BUTTON,
           onClick: bulkEnable,
         },
         {
           icon: 'eyeClosed',
           disabled: !selectedRulesCount,
-          text: <DeactivateRulesMenuItemText count={selectedRulesCount} />,
+          children: <DeactivateRulesMenuItemText count={selectedRulesCount} />,
           'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_DISABLE_BUTTON,
           onClick: bulkDisable,
         },

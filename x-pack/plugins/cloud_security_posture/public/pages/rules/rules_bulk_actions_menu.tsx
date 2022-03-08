@@ -5,18 +5,12 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import {
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiButtonEmpty,
-  type EuiContextMenuItemProps,
-} from '@elastic/eui';
+import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
 
 interface RulesBulkActionsMenuProps {
-  items: ReadonlyArray<EuiContextMenuItemProps & { text: JSX.Element }>;
+  items: ReadonlyArray<React.ComponentProps<typeof EuiContextMenuItem>>;
 }
 
 export const RulesBulkActionsMenu = ({ items }: RulesBulkActionsMenuProps) => {
@@ -28,7 +22,6 @@ export const RulesBulkActionsMenu = ({ items }: RulesBulkActionsMenuProps) => {
     <EuiContextMenuItem
       {...item}
       key={i}
-      children={item.text}
       onClick={(e) => {
         closePopover();
         item.onClick?.(e);
