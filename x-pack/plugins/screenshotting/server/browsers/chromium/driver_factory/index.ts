@@ -101,7 +101,7 @@ const DEFAULT_ARGS = [
 const DIAGNOSTIC_TIME = 5 * 1000;
 
 export class HeadlessChromiumDriverFactory {
-  private userDataDir;
+  private userDataDir: string;
   type = 'chromium';
 
   constructor(
