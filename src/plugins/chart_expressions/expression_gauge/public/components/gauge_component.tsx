@@ -392,7 +392,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           bandFillColor={
             colorMode === GaugeColorModes.PALETTE
               ? (val) => {
-                  const value = getPerviousSectionValue(val.value, bands);
+                  const value = getPreviousSectionValue(val.value, bands);
 
                   const overridedColor = overrideColor(
                     value,
