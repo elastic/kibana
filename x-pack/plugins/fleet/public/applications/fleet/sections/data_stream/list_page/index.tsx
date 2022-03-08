@@ -99,7 +99,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
             <>
               <FormattedDate value={date} year="numeric" month="short" day="numeric" />
               <> @ </>
-              <FormattedTime value={date} hour="numeric" minute="numeric" second="numeric"/>
+              <FormattedTime value={date} hour="numeric" minute="numeric" second="numeric" />
             </>
           );
         },
