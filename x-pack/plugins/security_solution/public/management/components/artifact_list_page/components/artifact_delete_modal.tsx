@@ -90,7 +90,11 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
   ({ apiClient, item, onCancel, onSuccess, 'data-test-subj': dataTestSubj, labels }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const { deleteArtifactItem, isLoading: isDeleting } = useArtifactDeleteItem(apiClient, labels);
+    const { deleteArtifactItem, isLoading: isDeleting } = useArtifactDeleteItem(
+      apiClient,
+      item,
+      labels
+    );
 
     const onConfirm = useCallback(() => {
       deleteArtifactItem(item).then(() => onSuccess());
