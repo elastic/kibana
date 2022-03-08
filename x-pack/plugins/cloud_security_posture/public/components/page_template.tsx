@@ -18,7 +18,6 @@ import type { CspNavigationItem } from '../common/navigation/types';
 import { CLOUD_SECURITY_POSTURE } from '../common/translations';
 import { CspLoadingState } from './csp_loading_state';
 import {
-  ERROR_LOADING_DATA,
   LOADING,
   NO_DATA_CONFIG_BUTTON,
   NO_DATA_CONFIG_DESCRIPTION,
@@ -27,6 +26,9 @@ import {
 } from './translations';
 
 const activeItemStyle = { fontWeight: 700 };
+
+export const ERROR_LOADING_DATA_DEFAULT_MESSAGE =
+  "We couldn't fetch your cloud security posture data";
 
 export const getSideNavItems = (
   navigationItems: Record<string, CspNavigationItem>
@@ -96,7 +98,10 @@ export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({ children, .
             title={
               <EuiTitle>
                 <h2>
-                  <FormattedMessage {...ERROR_LOADING_DATA} />
+                  <FormattedMessage
+                    id="xpack.csp.pageTemplate.loadErrorMessage"
+                    defaultMessage={ERROR_LOADING_DATA_DEFAULT_MESSAGE}
+                  />
                 </h2>
               </EuiTitle>
             }

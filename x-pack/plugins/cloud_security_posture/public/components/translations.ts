@@ -40,11 +40,6 @@ export const CSP_EVALUATION_BADGE_PASSED = i18n.translate(
   }
 );
 
-export const ERROR_LOADING_DATA = {
-  id: 'xpack.csp.pageTemplate.loadErrorMessage',
-  defaultMessage: "We couldn't fetch your cloud security posture data",
-};
-
 export const NO_DATA_CONFIG_TITLE = i18n.translate('xpack.csp.pageTemplate.noDataConfigTitle', {
   defaultMessage: 'Understand your cloud security posture',
 });

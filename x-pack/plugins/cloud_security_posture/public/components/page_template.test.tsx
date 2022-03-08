@@ -14,9 +14,12 @@ import { useKubebeatDataView } from '../common/api/use_kubebeat_data_view';
 import { createNavigationItemFixture } from '../test/fixtures/navigation_item';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
-import { CspPageTemplate, getSideNavItems } from './page_template';
 import {
-  ERROR_LOADING_DATA,
+  CspPageTemplate,
+  getSideNavItems,
+  ERROR_LOADING_DATA_DEFAULT_MESSAGE,
+} from './page_template';
+import {
   LOADING,
   NO_DATA_CONFIG_BUTTON,
   NO_DATA_CONFIG_DESCRIPTION,
@@ -99,7 +102,7 @@ describe('<CspPageTemplate />', () => {
 
     expect(screen.getByText(children)).toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
-    expect(screen.queryByText(ERROR_LOADING_DATA.defaultMessage)).not.toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
     BLANK_PAGE_GRAPHIC_TEXTS.forEach((blankPageGraphicText) =>
       expect(screen.queryByText(blankPageGraphicText)).not.toBeInTheDocument()
     );
@@ -115,7 +118,7 @@ describe('<CspPageTemplate />', () => {
 
     expect(screen.getByText(LOADING)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
-    expect(screen.queryByText(ERROR_LOADING_DATA.defaultMessage)).not.toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
     BLANK_PAGE_GRAPHIC_TEXTS.forEach((blankPageGraphicText) =>
       expect(screen.queryByText(blankPageGraphicText)).not.toBeInTheDocument()
     );
@@ -129,7 +132,7 @@ describe('<CspPageTemplate />', () => {
     const children = chance.sentence();
     renderCspPageTemplate({ children });
 
-    expect(screen.getByText(ERROR_LOADING_DATA.defaultMessage)).toBeInTheDocument();
+    expect(screen.getByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     BLANK_PAGE_GRAPHIC_TEXTS.forEach((blankPageGraphicText) =>
@@ -149,7 +152,7 @@ describe('<CspPageTemplate />', () => {
     renderCspPageTemplate({ children });
 
     BLANK_PAGE_GRAPHIC_TEXTS.forEach((text) => expect(screen.getByText(text)).toBeInTheDocument());
-    expect(screen.queryByText(ERROR_LOADING_DATA.defaultMessage)).not.toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
   });
