@@ -8,7 +8,7 @@
 
 import { sortBy } from 'lodash';
 import { ApmFields } from '../apm_fields';
-import { aggregate } from './aggregate';
+import { aggregate } from '../utils/aggregate';
 
 function sortAndCompressHistogram(histogram?: { values: number[]; counts: number[] }) {
   return sortBy(histogram?.values).reduce(
@@ -34,12 +34,13 @@ export function getTransactionMetrics(events: ApmFields[]) {
     .map((transaction) => {
       return {
         ...transaction,
-        ['trace.root']: transaction['parent.id'] === undefined,
+        ['transaction.root']: transaction['parent.id'] === undefined,
       };
     });
 
   const metricsets = aggregate(transactions, [
     'trace.root',
+    'transaction.root',
     'transaction.name',
     'transaction.type',
     'event.outcome',
@@ -77,7 +78,6 @@ export function getTransactionMetrics(events: ApmFields[]) {
       histogram.counts.push(1);
       histogram.values.push(Number(transaction['transaction.duration.us']));
     }
-
     return {
       ...metricset.key,
       'metricset.name': 'transaction',
