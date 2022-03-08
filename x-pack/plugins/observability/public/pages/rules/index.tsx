@@ -27,7 +27,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 
 import { useKibana } from '../../utils/kibana_react';
 
-// import { loadRules } from '../../../../triggers_actions_ui/public';
+import { loadRules } from '../../../../triggers_actions_ui/public';
 
 const DEFAULT_SEARCH_PAGE_SIZE: number = 25;
 
@@ -52,37 +52,37 @@ export function RulesPage() {
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  // async function loadObservabilityRules() {
-  //   try {
-  //     const response = await loadRules({
-  //       http,
-  //       page: { index: 0, size: DEFAULT_SEARCH_PAGE_SIZE },
-  //       typesFilter: [
-  //         'xpack.uptime.alerts.monitorStatus',
-  //         'xpack.uptime.alerts.tls',
-  //         'xpack.uptime.alerts.tlsCertificate',
-  //         'xpack.uptime.alerts.durationAnomaly',
-  //         'apm.error_rate',
-  //         'apm.transaction_error_rate',
-  //         'apm.transaction_duration',
-  //         'apm.transaction_duration_anomaly',
-  //         'metrics.alert.inventory.threshold',
-  //         'metrics.alert.threshold',
-  //         'logs.alert.document.count',
-  //       ],
-  //     });
-  //     setRules({
-  //       data: response.data as any,
-  //       totalItemsCount: response.total,
-  //     });
-  //   } catch (_e) {
-  //     toasts.addDanger({
-  //       title: i18n.translate('xpack.observability.rules.loadError', {
-  //         defaultMessage: 'Unable to load rules',
-  //       }),
-  //     });
-  //   }
-  // }
+  async function loadObservabilityRules() {
+    try {
+      const response = await loadRules({
+        http,
+        page: { index: 0, size: DEFAULT_SEARCH_PAGE_SIZE },
+        typesFilter: [
+          'xpack.uptime.alerts.monitorStatus',
+          'xpack.uptime.alerts.tls',
+          'xpack.uptime.alerts.tlsCertificate',
+          'xpack.uptime.alerts.durationAnomaly',
+          'apm.error_rate',
+          'apm.transaction_error_rate',
+          'apm.transaction_duration',
+          'apm.transaction_duration_anomaly',
+          'metrics.alert.inventory.threshold',
+          'metrics.alert.threshold',
+          'logs.alert.document.count',
+        ],
+      });
+      setRules({
+        data: response.data as any,
+        totalItemsCount: response.total,
+      });
+    } catch (_e) {
+      toasts.addDanger({
+        title: i18n.translate('xpack.observability.rules.loadError', {
+          defaultMessage: 'Unable to load rules',
+        }),
+      });
+    }
+  }
 
   enum RuleStatus {
     enabled = 'enabled',
@@ -108,9 +108,10 @@ export function RulesPage() {
     </EuiContextMenuItem>
   ));
 
-  // useEffect(() => {
-  //   // loadObservabilityRules();
-  // }, []);
+  useEffect(() => {
+    loadObservabilityRules();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useBreadcrumbs([
     {
@@ -236,7 +237,7 @@ export function RulesPage() {
       <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          {/* <EuiBasicTable
+          <EuiBasicTable
             items={rules.data}
             hasActions={true}
             columns={rulesTableColumns}
@@ -253,7 +254,7 @@ export function RulesPage() {
               selectable: () => true,
               onSelectionChange: (selectedItems) => {},
             }}
-          /> */}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
