@@ -15,6 +15,7 @@ import { waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { AlertsByCategory } from '.';
+import { mockCasesContext } from '../../../../../cases/public/mocks/mock_cases_context';
 
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/components/visualization_actions', () => ({
@@ -26,6 +27,22 @@ jest.mock('../../../common/components/visualization_actions', () => ({
 jest.mock('../../../common/containers/matrix_histogram', () => ({
   useMatrixHistogramCombined: jest.fn(),
 }));
+
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        cases: {
+          getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+        },
+      },
+    }),
+  };
+});
 
 const from = '2020-03-31T06:00:00.000Z';
 const to = '2019-03-31T06:00:00.000Z';

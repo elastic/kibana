@@ -24,6 +24,7 @@ import { State, createStore } from '../../common/store';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { mockCasesContext } from '../../../../cases/public/mocks/mock_cases_context';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -40,6 +41,22 @@ jest.mock('../../common/components/visualization_actions', () => ({
     <div data-test-subj="mock-viz-actions">{'mockVizAction'}</div>
   )),
 }));
+
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        cases: {
+          getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+        },
+      },
+    }),
+  };
+});
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';

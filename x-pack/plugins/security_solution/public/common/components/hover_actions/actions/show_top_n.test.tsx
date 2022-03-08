@@ -7,6 +7,7 @@
 import { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
+import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
 import { TestProviders } from '../../../mock';
 import { ShowTopNButton } from './show_top_n';
 
@@ -15,6 +16,22 @@ jest.mock('../../visualization_actions', () => ({
     <div data-test-subj="mock-viz-actions">{'mockVizAction'}</div>
   )),
 }));
+
+jest.mock('../../../lib/kibana', () => {
+  const original = jest.requireActual('../../../lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        cases: {
+          getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+        },
+      },
+    }),
+  };
+});
 
 describe('show topN button', () => {
   const defaultProps = {

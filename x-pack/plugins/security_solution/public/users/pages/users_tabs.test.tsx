@@ -14,6 +14,7 @@ import { TestProviders } from '../../common/mock';
 import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { Users } from './users';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { mockCasesContext } from '../../../../cases/public/mocks/mock_cases_context';
 
 jest.mock('../../common/containers/sourcerer');
 jest.mock('../../common/components/search_bar', () => ({
@@ -27,7 +28,21 @@ jest.mock('../../common/components/visualization_actions', () => ({
     <div data-test-subj="mock-viz-actions">{'mockVizAction'}</div>
   )),
 }));
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
 
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        cases: {
+          getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+        },
+      },
+    }),
+  };
+});
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 const location = {

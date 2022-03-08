@@ -24,6 +24,7 @@ import { inputsActions } from '../../common/store/inputs';
 
 import { Network } from './network';
 import { NetworkRoutes } from './navigation';
+import { mockCasesContext } from '../../../../cases/public/mocks/mock_cases_context';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -94,6 +95,9 @@ jest.mock('../../common/lib/kibana', () => {
         },
         storage: {
           get: () => true,
+        },
+        cases: {
+          getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
         },
       },
     }),
