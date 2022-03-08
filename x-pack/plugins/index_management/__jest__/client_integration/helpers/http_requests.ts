@@ -107,6 +107,39 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadIndexMappingResponse = (response?: HttpResponse, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ?? response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/mapping/:name`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setLoadIndexStatsResponse = (response?: HttpResponse, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ?? response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/stats/:name`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setLoadIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ?? response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/settings/:name`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   const setUpdateIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ?? response;
@@ -162,6 +195,9 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setLoadTemplateResponse,
     setCreateTemplateResponse,
     setUpdateTemplateResponse,
+    setLoadIndexSettingsResponse,
+    setLoadIndexMappingResponse,
+    setLoadIndexStatsResponse,
     setUpdateIndexSettingsResponse,
     setSimulateTemplateResponse,
     setLoadComponentTemplatesResponse,

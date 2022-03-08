@@ -132,10 +132,6 @@ export interface TestBed<T = string> {
      */
     navigateTo: (url: string) => void;
   };
-  a11y: {
-    getCriticalViolations: (wrapper?: T | ReactWrapper) => Promise<string[]>;
-    assertA11y: () => Promise<void>;
-  };
 }
 
 export interface BaseTestBedConfig {
