@@ -395,7 +395,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
                   const value = getPerviousSectionValue(val.value, bands);
 
                   const overridedColor = overrideColor(
-                    args.percentageMode ? value : val.value,
+                    value,
                     args.percentageMode ? bands : args.palette?.params?.stops ?? [],
                     tickFormatter
                   );
