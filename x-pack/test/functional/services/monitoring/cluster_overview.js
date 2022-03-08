@@ -153,9 +153,6 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.getVisibleText(SUBJ_ES_ML_JOBS);
     }
 
-    doesKbnPanelExist() {
-      return testSubjects.exists(SUBJ_KBN_PANEL);
-    }
     getKbnStatus() {
       return testSubjects.getVisibleText(SUBJ_KBN_STATUS);
     }
@@ -181,9 +178,6 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.click(SUBJ_KBN_INSTANCES);
     }
 
-    doesLsPanelExist() {
-      return testSubjects.exists(SUBJ_LS_PANEL);
-    }
     getLsEventsReceived() {
       return testSubjects.getVisibleText(SUBJ_LS_EVENTS_RECEIVED);
     }
@@ -245,9 +239,6 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.click(SUBJ_BEATS_LISTING);
     }
 
-    doesEntSearchPanelExist() {
-      return testSubjects.exists(SUBJ_ENT_SEARCH_PANEL);
-    }
     getEntSearchTotalNodes() {
       return testSubjects.getVisibleText(SUBJ_ENT_SEARCH_TOTAL_NODES);
     }
