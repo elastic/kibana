@@ -417,9 +417,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowHeightsOptions={{
             defaultHeight: props.args.fitRowToContent
               ? 'auto'
-              : {
+              : props.args.rowHeightLines
+              ? {
                   lineCount: props.args.rowHeightLines,
-                },
+                }
+              : undefined,
           }}
           columns={columns}
           columnVisibility={columnVisibility}
