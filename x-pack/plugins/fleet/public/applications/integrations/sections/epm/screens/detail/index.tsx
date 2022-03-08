@@ -142,12 +142,14 @@ export function Detail() {
     resendRequest: refreshPackageInfo,
   } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
-  // Refresh package info when statu change
+  // Refresh package info when status change
+  const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
   useEffect(() => {
-    if (packageInstallStatus === 'installed') {
+    if (oldPackageInstallStatus === 'not_installed' && packageInstallStatus === 'installed') {
+      setOldPackageStatus(oldPackageInstallStatus);
       refreshPackageInfo();
     }
-  }, [packageInstallStatus, refreshPackageInfo]);
+  }, [packageInstallStatus, oldPackageInstallStatus, refreshPackageInfo]);
 
   const isLoading = (packageInfoLoading && !packageIsInitialRequest) || permissionCheck.isLoading;
 
