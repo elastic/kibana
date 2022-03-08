@@ -7,7 +7,11 @@
 
 import { ROLES } from '../../../common/test';
 import { getNewRule } from '../../objects/rule';
-import { COLLAPSED_ACTION_BTN, RULE_CHECKBOX } from '../../screens/alerts_detection_rules';
+import {
+  COLLAPSED_ACTION_BTN,
+  RULE_CHECKBOX,
+  RULE_NAME,
+} from '../../screens/alerts_detection_rules';
 import { PAGE_TITLE } from '../../screens/common/page';
 import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../screens/lists';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
@@ -25,6 +29,7 @@ describe('All rules - read only', () => {
     createCustomRule(getNewRule(), '1');
     loginAndWaitForPageWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.reader);
     waitForRulesTableToBeLoaded();
+    cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });
 
   it('Does not display select boxes for rules', () => {
