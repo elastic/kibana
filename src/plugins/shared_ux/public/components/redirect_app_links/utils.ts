@@ -19,19 +19,19 @@ export const hasActiveModifierKey = (event: React.MouseEvent): boolean => {
  * Returns the closest anchor (`<a>`) element in the element parents (self included) up to the given container (excluded), or undefined if none is found.
  */
 export const getClosestLink = (
-  element: HTMLElement,
+  element: HTMLElement | null | undefined,
   container?: HTMLElement
 ): HTMLAnchorElement | undefined => {
   let current = element;
-  while (true) {
-    if (current.tagName.toLowerCase() === 'a') {
+  do {
+    if (current?.tagName.toLowerCase() === 'a') {
       return current as HTMLAnchorElement;
     }
-    const parent = current.parentElement;
+    const parent = current?.parentElement;
     if (!parent || parent === document.body || parent === container) {
       break;
     }
     current = parent;
-  }
+  } while (parent || parent !== document.body || parent !== container);
   return undefined;
 };

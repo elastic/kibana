@@ -20,7 +20,7 @@ export const createNavigateToUrlClickHandler = ({
   navigateToUrl,
 }: CreateCrossAppClickHandlerOptions): React.MouseEventHandler<HTMLElement> => {
   return (e) => {
-    if (container == null) {
+    if (container === null) {
       return;
     }
     // see https://github.com/DefinitelyTyped/DefinitelyTyped/pull/12239
@@ -31,12 +31,16 @@ export const createNavigateToUrlClickHandler = ({
       return;
     }
 
+    const isNotEmptyHref = link.href;
+    const hasNoTarget = link.target === '' || link.target === '_self';
+    const isLeftClickOnly = e.button === 0;
+
     if (
-      link.href && // ignore links with empty hrefs
-      (link.target === '' || link.target === '_self') && // ignore links having a target
-      e.button === 0 && // ignore everything but left clicks
-      !e.defaultPrevented && // ignore default prevented events
-      !hasActiveModifierKey(e) // ignore clicks with modifier keys
+      isNotEmptyHref &&
+      hasNoTarget &&
+      isLeftClickOnly &&
+      !e.defaultPrevented &&
+      !hasActiveModifierKey(e)
     ) {
       e.preventDefault();
       navigateToUrl(link.href);
