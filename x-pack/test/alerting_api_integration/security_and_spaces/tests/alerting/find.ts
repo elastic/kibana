@@ -10,7 +10,7 @@ import { SuperTest, Test } from 'supertest';
 import { chunk, omit } from 'lodash';
 import uuid from 'uuid';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 const findTestUtils = (
@@ -29,7 +29,7 @@ const findTestUtils = (
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -94,7 +94,7 @@ const findTestUtils = (
 
         it('should filter out types that the user is not authorized to `get` retaining pagination', async () => {
           async function createNoOpAlert(overrides = {}) {
-            const alert = getTestAlertData(overrides);
+            const alert = getTestRuleData(overrides);
             const { body: createdAlert } = await supertest
               .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
@@ -212,7 +212,7 @@ const findTestUtils = (
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 actions: [
                   {
@@ -297,7 +297,7 @@ const findTestUtils = (
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 tags: [myTag],
                 rule_type_id: 'test.restricted-noop',
@@ -312,7 +312,7 @@ const findTestUtils = (
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 tags: [myTag],
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
@@ -374,7 +374,7 @@ const findTestUtils = (
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 tags: [myTag],
                 rule_type_id: 'test.restricted-noop',
@@ -389,7 +389,7 @@ const findTestUtils = (
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 tags: [myTag],
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
@@ -451,7 +451,7 @@ const findTestUtils = (
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
