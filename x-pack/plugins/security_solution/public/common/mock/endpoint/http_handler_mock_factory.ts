@@ -219,6 +219,9 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
 
           try {
             return thisRouteResponseProvider(fetchOptions);
+          } catch (err) {
+            err.stack += `\n${testContextStackTrace}`;
+            return Promise.reject(err);
           } finally {
             markApiCallAsHandled();
           }
