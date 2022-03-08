@@ -9,7 +9,7 @@ import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState, AlertTypeDisabledError } from '../lib';
 import { verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -31,7 +31,7 @@ export const snoozeRuleRoute = (
 ) => {
   router.post(
     {
-      path: `${BASE_ALERTING_API_PATH}/rule/{id}/_snooze`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_snooze`,
       validate: {
         params: paramSchema,
         body: bodySchema,

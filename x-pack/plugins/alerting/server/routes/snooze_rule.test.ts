@@ -32,7 +32,7 @@ describe('snoozeAlertRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_snooze"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_snooze"`);
 
     rulesClient.snooze.mockResolvedValueOnce();
 
@@ -72,7 +72,7 @@ describe('snoozeAlertRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_snooze"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_snooze"`);
 
     rulesClient.snooze.mockResolvedValueOnce();
 
