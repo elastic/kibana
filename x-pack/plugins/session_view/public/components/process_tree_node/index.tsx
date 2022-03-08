@@ -21,7 +21,7 @@ import React, {
 } from 'react';
 import { EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Process, ProcessEventAlert } from '../../../common/types/process_tree';
+import { Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
 import { SessionLeaderButton, AlertButton, ChildrenProcessesButton } from './buttons';
@@ -32,8 +32,7 @@ interface ProcessDeps {
   depth?: number;
   onProcessSelected?: (process: Process) => void;
   jumpToAlertID?: string;
-  selectedAlert: ProcessEventAlert | null;
-  onAlertSelected: (alert: ProcessEventAlert | null) => void;
+  selectedProcessId?: string;
 }
 
 /**
@@ -44,9 +43,8 @@ export function ProcessTreeNode({
   isSessionLeader = false,
   depth = 0,
   onProcessSelected,
-  selectedAlert,
-  onAlertSelected,
   jumpToAlertID,
+  selectedProcessId,
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
@@ -213,8 +211,8 @@ export function ProcessTreeNode({
         <ProcessTreeAlerts
           alerts={alerts}
           jumpToAlertID={jumpToAlertID}
-          selectedAlert={selectedAlert}
-          onAlertSelected={onAlertSelected}
+          isProcessSelected={selectedProcessId === process.id}
+          onAlertSelected={onProcessClicked}
         />
       )}
 
@@ -228,8 +226,7 @@ export function ProcessTreeNode({
                 depth={childrenTreeDepth}
                 onProcessSelected={onProcessSelected}
                 jumpToAlertID={jumpToAlertID}
-                selectedAlert={selectedAlert}
-                onAlertSelected={onAlertSelected}
+                selectedProcessId={selectedProcessId}
               />
             );
           })}

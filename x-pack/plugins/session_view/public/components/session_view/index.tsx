@@ -15,7 +15,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
-import { Process, ProcessEventAlert } from '../../../common/types/process_tree';
+import { Process } from '../../../common/types/process_tree';
 import { SessionViewDeps } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
@@ -28,18 +28,11 @@ import { useFetchSessionViewProcessEvents } from './hooks';
 export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionViewDeps) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
-  const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(
-    jumpToEvent?.kibana?.alert ?? null
-  );
 
   const styles = useStyles({ height });
 
   const onProcessSelected = useCallback((process: Process) => {
     setSelectedProcess(process);
-  }, []);
-
-  const onAlertSelected = useCallback((alert: ProcessEventAlert | null) => {
-    setSelectedAlert(alert);
   }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -163,8 +156,6 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                     selectedProcess={selectedProcess}
                     onProcessSelected={onProcessSelected}
                     jumpToEvent={jumpToEvent}
-                    onAlertSelected={onAlertSelected}
-                    selectedAlert={selectedAlert}
                     isFetching={isFetching}
                     hasPreviousPage={hasPreviousPage}
                     hasNextPage={hasNextPage}

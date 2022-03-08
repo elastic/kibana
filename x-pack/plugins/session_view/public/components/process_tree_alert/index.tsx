@@ -15,14 +15,14 @@ interface ProcessTreeAlertDeps {
   alert: ProcessEvent;
   isInvestigated: boolean;
   isSelected: boolean;
-  onAlertSelected: (alert: ProcessEventAlert | null) => void;
+  onClick: (alert: ProcessEventAlert | null) => void;
 }
 
 export const ProcessTreeAlert = ({
   alert,
   isInvestigated,
   isSelected,
-  onAlertSelected,
+  onClick,
 }: ProcessTreeAlertDeps) => {
   const styles = useStyles({ isInvestigated, isSelected });
 
@@ -34,7 +34,7 @@ export const ProcessTreeAlert = ({
   const { name } = rule;
 
   const handleClick = () => {
-    onAlertSelected(alert.kibana?.alert ?? null);
+    onClick(alert.kibana?.alert ?? null);
   };
 
   return (

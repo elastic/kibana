@@ -5,29 +5,36 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, MouseEvent } from 'react';
 import { useStyles } from './styles';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { ProcessTreeAlert } from '../process_tree_alert';
+import { MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
 
 interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
   jumpToAlertID?: string;
-  selectedAlert: ProcessEventAlert | null;
-  onAlertSelected: (alert: ProcessEventAlert | null) => void;
+  isProcessSelected: boolean;
+  onAlertSelected: (e: MouseEvent) => void;
 }
 
 export function ProcessTreeAlerts({
   alerts,
   jumpToAlertID,
-  selectedAlert,
+  isProcessSelected,
   onAlertSelected,
 }: ProcessTreeAlertsDeps) {
   const styles = useStyles();
+  const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(null);
 
   if (alerts.length === 0) {
     return null;
   }
+
+  const handleAlertClick = (alert: ProcessEventAlert | null) => {
+    onAlertSelected(MOUSE_EVENT_PLACEHOLDER);
+    setSelectedAlert(alert);
+  };
 
   return (
     <div css={styles.container} data-test-subj="sessionView:sessionViewAlertDetails">
@@ -35,8 +42,12 @@ export function ProcessTreeAlerts({
         <ProcessTreeAlert
           alert={alert}
           isInvestigated={!!jumpToAlertID && jumpToAlertID === alert.kibana?.alert.uuid}
-          isSelected={!!selectedAlert?.uuid && alert.kibana?.alert.uuid === selectedAlert?.uuid}
-          onAlertSelected={onAlertSelected}
+          isSelected={
+            !!selectedAlert?.uuid &&
+            isProcessSelected &&
+            alert.kibana?.alert.uuid === selectedAlert?.uuid
+          }
+          onClick={handleAlertClick}
         />
       ))}
     </div>
