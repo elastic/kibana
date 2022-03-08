@@ -290,7 +290,7 @@ export const emsWorldLayerId = 'world_countries';
 
 export enum WIZARD_ID {
   CHOROPLETH = 'choropleth',
-  GEO_JSON = 'uploadGeoFile',
+  GEO_FILE = 'uploadGeoFile',
   NEW_VECTOR = 'newVectorLayer',
   OBSERVABILITY = 'observabilityLayer',
   SECURITY = 'securityLayer',

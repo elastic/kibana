@@ -44,7 +44,7 @@ export function registerIntegrations(
       defaultMessage: 'Upload GeoJson with Elastic Maps.',
     }),
     uiInternalPath: core.http.basePath.prepend(
-      `${getFullPath('?' + OPEN_LAYER_WIZARD + '=' + WIZARD_ID.GEO_JSON)}`
+      getFullPath(`?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`)
     ),
     icons: [
       {
@@ -68,7 +68,7 @@ export function registerIntegrations(
       }
     ),
     uiInternalPath: core.http.basePath.prepend(
-      `${getFullPath('?' + OPEN_LAYER_WIZARD + '=' + WIZARD_ID.GEO_JSON)}`
+      getFullPath(`?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`)
     ),
     icons: [
       {

@@ -19,7 +19,7 @@ import {
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
   SET_DRAW_MODE,
-  SET_LAYER_WIZARD_ID,
+  SET_AUTO_OPEN_WIZARD_ID,
   PUSH_DELETED_FEATURE_ID,
   CLEAR_DELETED_FEATURE_IDS,
 } from '../actions';
@@ -89,7 +89,7 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
           return layerId !== action.layerId;
         }),
       };
-    case SET_LAYER_WIZARD_ID:
+    case SET_AUTO_OPEN_WIZARD_ID:
       return { ...state, autoOpenLayerWizardId: action.autoOpenLayerWizardId };
     case PUSH_DELETED_FEATURE_ID:
       return {

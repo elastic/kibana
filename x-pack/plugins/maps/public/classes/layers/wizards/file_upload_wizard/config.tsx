@@ -13,7 +13,7 @@ import { getFileUpload } from '../../../../kibana_services';
 import { WIZARD_ID } from '../../../../../common/constants';
 
 export const uploadLayerWizardConfig: LayerWizard = {
-  id: WIZARD_ID.GEO_JSON,
+  id: WIZARD_ID.GEO_FILE,
   order: 10,
   categories: [],
   description: i18n.translate('xpack.maps.fileUploadWizard.description', {

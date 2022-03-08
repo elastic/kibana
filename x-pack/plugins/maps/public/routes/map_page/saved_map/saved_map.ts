@@ -48,7 +48,7 @@ import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
 import { SerializedMapState, SerializedUiState } from './types';
-import { openLayerWizard } from '../../../actions/ui_actions';
+import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
@@ -211,7 +211,7 @@ export class SavedMap {
     this._initialLayerListConfig = copyPersistentState(layerList);
 
     if (this._defaultLayerWizard) {
-      this._store.dispatch<any>(openLayerWizard(this._defaultLayerWizard));
+      this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
     }
   }
 

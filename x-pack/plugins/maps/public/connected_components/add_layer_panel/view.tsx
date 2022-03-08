@@ -36,7 +36,7 @@ export interface Props {
   promotePreviewLayers: () => void;
   enableEditMode: () => void;
   autoOpenLayerWizardId: string;
-  clearLayerWizard: () => void;
+  clearAutoOpenLayerWizardId: () => void;
 }
 
 interface State {
@@ -73,7 +73,7 @@ export class AddLayerPanel extends Component<Props, State> {
 
     if (selectedWizard) {
       this._onWizardSelect(selectedWizard);
-      this.props.clearLayerWizard();
+      this.props.clearAutoOpenLayerWizardId();
     }
   }
 
