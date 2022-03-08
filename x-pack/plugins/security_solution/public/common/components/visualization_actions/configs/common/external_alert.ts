@@ -127,23 +127,23 @@ export const getExternalAlertConfigs: GetLensAttributes = (stackByField = 'event
     references: [
       {
         type: 'index-pattern',
-        id: 'security-solution-default',
+        id: '{dataViewId}',
         name: 'indexpattern-datasource-current-indexpattern',
       },
       {
         type: 'index-pattern',
-        id: 'security-solution-default',
+        id: '{dataViewId}',
         name: 'indexpattern-datasource-layer-a3c54471-615f-4ff9-9fda-69b5b2ea3eef',
       },
       {
         type: 'index-pattern',
         name: '723c4653-681b-4105-956e-abef287bf025',
-        id: 'security-solution-default',
+        id: '{dataViewId}',
       },
       {
         type: 'index-pattern',
         name: 'a04472fc-94a3-4b8d-ae05-9d30ea8fbd6a',
-        id: 'security-solution-default',
+        id: '{dataViewId}',
       },
     ],
   } as LensAttributes;

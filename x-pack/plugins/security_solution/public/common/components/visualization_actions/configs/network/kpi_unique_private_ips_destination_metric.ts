@@ -52,12 +52,12 @@ export const kpiUniquePrivateIpsDestinationMetric: LensAttributes = {
   visualizationType: 'lnsMetric',
   references: [
     {
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
       type: 'index-pattern',
     },
     {
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-cea37c70-8f91-43bf-b9fe-72d8c049f6a3',
       type: 'index-pattern',
     },

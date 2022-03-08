@@ -169,23 +169,23 @@ export const authentication: LensAttributes = {
   references: [
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
     },
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-3fd0c5d5-f762-4a27-8c56-14eee0223e13',
     },
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-bef502be-e5ff-442f-9e3e-229f86ca2afa',
     },
     {
       type: 'index-pattern',
       name: '6f4dbdc7-35b6-4e20-ac53-1272167e3919',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
     },
   ],
 } as LensAttributes;

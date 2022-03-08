@@ -110,12 +110,12 @@ export const getEventsHistogramCongifs: GetLensAttributes = (stackByField = 'eve
     references: [
       {
         type: 'index-pattern',
-        id: 'security-solution-default',
+        id: '{dataViewId}',
         name: 'indexpattern-datasource-current-indexpattern',
       },
       {
         type: 'index-pattern',
-        id: 'security-solution-default',
+        id: '{dataViewId}',
         name: 'indexpattern-datasource-layer-0039eb0c-9a1a-4687-ae54-0f4e239bec75',
       },
     ],

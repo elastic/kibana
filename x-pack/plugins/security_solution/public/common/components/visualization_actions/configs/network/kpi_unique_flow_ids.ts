@@ -80,12 +80,12 @@ export const kpiUniqueFlowIds: LensAttributes = {
   references: [
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
     },
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-5d46d48f-6ce8-46be-a797-17ad50642564',
     },
   ],

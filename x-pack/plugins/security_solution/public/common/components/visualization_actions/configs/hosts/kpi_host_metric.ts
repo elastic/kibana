@@ -43,19 +43,14 @@ export const kpiHostMetric: LensAttributes = {
   visualizationType: 'lnsMetric',
   references: [
     {
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
       type: 'index-pattern',
     },
     {
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30',
       type: 'index-pattern',
-    },
-    {
-      id: '880973d0-89cb-11ec-acbb-112a5cf3323a',
-      name: 'tag-ref-880973d0-89cb-11ec-acbb-112a5cf3323a',
-      type: 'tag',
     },
   ],
 } as LensAttributes;

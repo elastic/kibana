@@ -157,17 +157,17 @@ export const kpiUniquePrivateIpsArea: LensAttributes = {
   references: [
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
     },
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7',
     },
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-72dc4b99-b07d-4dc9-958b-081d259e11fa',
     },
   ],

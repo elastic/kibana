@@ -76,18 +76,13 @@ export const kpiUserAuthenticationsMetricFailure: LensAttributes = {
   references: [
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
     },
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-4590dafb-4ac7-45aa-8641-47a3ff0b817c',
-    },
-    {
-      type: 'tag',
-      id: 'security-solution-default',
-      name: 'tag-ref-security-solution-default',
     },
   ],
 } as LensAttributes;

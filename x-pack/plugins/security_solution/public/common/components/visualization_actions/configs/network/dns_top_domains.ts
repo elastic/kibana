@@ -144,18 +144,18 @@ export const dnsTopDomainsAttrs: LensAttributes = {
   references: [
     {
       type: 'index-pattern',
-      id: 'filebeat-*',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
     },
     {
       type: 'index-pattern',
-      id: 'logs-*',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-b1c3efc6-c886-4fba-978f-3b6bb5e7948a',
     },
     {
       name: 'filter-index-pattern-0',
       type: 'index-pattern',
-      id: 'logs-*',
+      id: '{dataViewId}',
     },
   ],
 } as LensAttributes;

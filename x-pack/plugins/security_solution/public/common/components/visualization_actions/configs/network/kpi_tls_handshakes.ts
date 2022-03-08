@@ -117,12 +117,12 @@ export const kpiTlsHandshakes: LensAttributes = {
   references: [
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
     },
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-1f48a633-8eee-45ae-9471-861227e9ca03',
     },
   ],

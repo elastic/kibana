@@ -109,24 +109,19 @@ export const kpiUniqueIpsBar: LensAttributes = {
   visualizationType: 'lnsXY',
   references: [
     {
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
       type: 'index-pattern',
     },
     {
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69',
       type: 'index-pattern',
     },
     {
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e',
       type: 'index-pattern',
-    },
-    {
-      id: '880973d0-89cb-11ec-acbb-112a5cf3323a',
-      name: 'tag-ref-880973d0-89cb-11ec-acbb-112a5cf3323a',
-      type: 'tag',
     },
   ],
 } as LensAttributes;

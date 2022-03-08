@@ -86,23 +86,23 @@ export const kpiNetworkEvents: LensAttributes = {
   references: [
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
     },
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-eaadfec7-deaa-4aeb-a403-3b4e516416d2',
     },
     {
       type: 'index-pattern',
       name: '861af17d-be25-45a3-a82d-d6e697b76e51',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
     },
     {
       type: 'index-pattern',
       name: '09617767-f732-410e-af53-bebcbd0bf4b9',
-      id: 'security-solution-default',
+      id: '{dataViewId}',
     },
   ],
 } as LensAttributes;
