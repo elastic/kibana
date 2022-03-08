@@ -13,7 +13,7 @@ import { ENVIRONMENT_ALL } from '../../../../../../../common/environment_filter_
 
 interface Props {
   title: string;
-  field: string;
+  fieldName: string;
   description: string;
   fieldLabel: string;
   value?: string;
@@ -23,7 +23,7 @@ interface Props {
 
 export function FormRowSuggestionsSelect({
   title,
-  field,
+  fieldName,
   description,
   fieldLabel,
   value,
@@ -40,7 +40,7 @@ export function FormRowSuggestionsSelect({
         <SuggestionsSelect
           allOption={allowAll ? ENVIRONMENT_ALL : undefined}
           defaultValue={value}
-          field={field}
+          fieldName={fieldName}
           onChange={onChange}
           isClearable={false}
           placeholder={i18n.translate(

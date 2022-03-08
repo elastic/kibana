@@ -119,7 +119,7 @@ export function FiltersSection({
             <EuiFlexItem>
               <SuggestionsSelect
                 dataTestSubj={`${key}.value`}
-                field={key}
+                fieldName={key}
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
