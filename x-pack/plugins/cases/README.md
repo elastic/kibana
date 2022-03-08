@@ -177,7 +177,7 @@ UI component:
 #### getUseCasesAddToNewCaseFlyout
 
 Returns an object containing two methods: `open` and `close` to either open or close the add to new case flyout.
-You can use this hook to prompt the use to create a new case with some attachments directly attached to it. e.g.: alerts or text comments.
+You can use this hook to prompt the user to create a new case with some attachments directly attached to it. e.g.: alerts or text comments.
 
 
 Arguments:
