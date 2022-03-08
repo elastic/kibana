@@ -56,7 +56,7 @@ describe('All rules - read only', () => {
 
       dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
       cy.reload();
-      cy.get(PAGE_TITLE).should('be.visible');
+      cy.get(RULE_NAME).should('have.text', getNewRule().name);
 
       getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
     });

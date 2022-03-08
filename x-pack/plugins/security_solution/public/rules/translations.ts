@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 
 export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.alerts.badge.readOnly.tooltip',
+  'xpack.securitySolution.rules.badge.readOnly.tooltip',
   {
-    defaultMessage: 'Unable to update alerts',
+    defaultMessage: 'Unable to create, edit or delete rules',
   }
 );

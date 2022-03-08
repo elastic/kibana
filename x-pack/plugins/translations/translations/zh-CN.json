@@ -22680,7 +22680,6 @@
     "xpack.securitySolution.alertDetails.summary.readLess": "阅读更少内容",
     "xpack.securitySolution.alertDetails.summary.readMore": "阅读更多内容",
     "xpack.securitySolution.alertDetails.threatIntel": "威胁情报",
-    "xpack.securitySolution.alerts.badge.readOnly.text": "只读",
     "xpack.securitySolution.alerts.badge.readOnly.tooltip": "无法更新告警",
     "xpack.securitySolution.alerts.riskScoreMapping.defaultDescriptionLabel": "选择此规则生成的所有告警的风险分数。",
     "xpack.securitySolution.alerts.riskScoreMapping.defaultRiskScoreTitle": "默认风险分数",
