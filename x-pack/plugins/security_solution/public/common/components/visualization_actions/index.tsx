@@ -140,7 +140,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     vizType,
   });
 
-  const disaledOpenInLens = useMemo(
+  const disabledOpenInLens = useMemo(
     () => !canUseEditor() || attributes == null,
     [attributes, canUseEditor]
   );
@@ -151,7 +151,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         icon="visArea"
         key="visualizationActionsOpenInLens"
         data-test-subj="viz-actions-open-in-lens"
-        disabled={disaledOpenInLens}
+        disabled={disabledOpenInLens}
         onClick={onOpenInLens}
       >
         {OPEN_IN_LENS}
@@ -195,7 +195,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     ],
     [
       disableInspectButton,
-      disaledOpenInLens,
+      disabledOpenInLens,
       handleInspectButtonClick,
       isAddToExistingCaseDisabled,
       isAddToNewCaseDisabled,

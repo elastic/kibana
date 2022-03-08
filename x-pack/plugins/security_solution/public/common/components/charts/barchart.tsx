@@ -182,12 +182,12 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
   const chartWidth = getChartWidth(customWidth, width);
-  const isVlidSeriesExist = useMemo(() => checkIfAnyValidSeriesExist(barChart), [barChart]);
+  const isValidSeriesExist = useMemo(() => checkIfAnyValidSeriesExist(barChart), [barChart]);
 
   return (
     <Wrapper>
       <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
-        {isVlidSeriesExist && barChart && (
+        {isValidSeriesExist && barChart && (
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem grow={true}>
               <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
@@ -207,7 +207,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
             </LegendFlexItem>
           </EuiFlexGroup>
         )}
-        {!isVlidSeriesExist && (
+        {!isValidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
         )}
         {visualizationActionsOptions != null && (

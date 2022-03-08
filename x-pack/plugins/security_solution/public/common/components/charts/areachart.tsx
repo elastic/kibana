@@ -159,12 +159,12 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
   const chartHeight = getChartHeight(customHeight, height);
   const chartWidth = getChartWidth(customWidth, width);
 
-  const isVlidSeriesExist = useMemo(() => checkIfAnyValidSeriesExist(areaChart), [areaChart]);
+  const isValidSeriesExist = useMemo(() => checkIfAnyValidSeriesExist(areaChart), [areaChart]);
 
   return (
     <Wrapper>
       <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
-        {isVlidSeriesExist && areaChart && (
+        {isValidSeriesExist && areaChart && (
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem grow={true}>
               <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
@@ -178,7 +178,7 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        {!isVlidSeriesExist && (
+        {!isValidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={areaChart} />
         )}
         {visualizationActionsOptions != null && (
