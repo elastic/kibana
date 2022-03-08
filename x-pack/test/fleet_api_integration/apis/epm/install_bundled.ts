@@ -22,10 +22,7 @@ export default function (providerContext: FtrProviderContext) {
     path.dirname(__filename),
     '../fixtures/bundled_packages'
   );
-  const BUNDLED_PACKAGES_DIR = path.join(
-    path.dirname(__filename),
-    '../../../../plugins/fleet/target/bundled_packages'
-  );
+  const BUNDLED_PACKAGES_DIR = 'x-pack/plugins/fleet/target/bundled_packages';
 
   const bundlePackage = async (name: string) => {
     log.info(`Bundling package ${name} into ${BUNDLED_PACKAGES_DIR}`);
