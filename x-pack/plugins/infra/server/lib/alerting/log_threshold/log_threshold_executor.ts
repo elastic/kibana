@@ -41,7 +41,6 @@ import {
   UngroupedSearchQueryResponse,
   UngroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold';
-import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
@@ -95,7 +94,6 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     LogThresholdActionGroups
   >(async ({ services, params }) => {
     const { alertWithLifecycle, savedObjectsClient, scopedClusterClient } = services;
-    const { sources } = libs;
     const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold) =>
       alertWithLifecycle({
         id,
@@ -106,14 +104,10 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         },
       });
 
-    const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
-    const { indices, timestampField, runtimeMappings } = await resolveLogSourceConfiguration(
-      sourceConfiguration.configuration,
-      await libs.framework.getIndexPatternsService(
-        savedObjectsClient,
-        scopedClusterClient.asCurrentUser
-      )
-    );
+    const [, , { logViews }] = await libs.getStartServices();
+    const { indices, timestampField, runtimeMappings } = await logViews
+      .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
+      .getResolvedLogView('default'); // TODO: move to params
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
