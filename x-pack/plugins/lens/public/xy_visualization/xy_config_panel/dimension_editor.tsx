@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State } from '../types';
+import { State, XYState } from '../types';
 import { FormatFactory } from '../../../common';
-import { YAxisMode } from '../../../common/expressions';
+import { XYDataLayerConfig, YAxisMode, YConfig } from '../../../common/expressions';
 import { isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
-import { ReferenceLinePanel } from './reference_line_panel';
-import { PalettePicker } from '../../shared_components';
-import { isReferenceLayer } from '../visualization_helpers';
+import { PalettePicker, useDebouncedValue } from '../../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -39,17 +37,40 @@ export const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(
   props: VisualizationDimensionEditorProps<State> & {
+    layer: XYDataLayerConfig;
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
   }
 ) {
-  const { state, setState, layerId, accessor } = props;
-  const index = state.layers.findIndex((l) => l.layerId === layerId);
-  const layer = state.layers[index];
+  const { state, setState, layerId, accessor, layer } = props;
 
-  if (isReferenceLayer(layer)) {
-    return <ReferenceLinePanel {...props} />;
-  }
+  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
+    value: props.state,
+    onChange: props.setState,
+  });
+  const index = localState.layers.findIndex((l) => l.layerId === layerId);
+
+  const setConfig = useCallback(
+    (yConfig: Partial<YConfig> | undefined) => {
+      if (yConfig == null) {
+        return;
+      }
+      const newYConfigs = [...(layer.yConfig || [])];
+      const existingIndex = newYConfigs.findIndex(
+        (yAxisConfig) => yAxisConfig.forAccessor === accessor
+      );
+      if (existingIndex !== -1) {
+        newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
+      } else {
+        newYConfigs.push({
+          forAccessor: accessor,
+          ...yConfig,
+        });
+      }
+      setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));
+    },
+    [accessor, index, localState, layer, setLocalState]
+  );
 
   const axisMode =
     (layer.yConfig &&
@@ -74,7 +95,7 @@ export function DimensionEditor(
 
   return (
     <>
-      <ColorPicker {...props} />
+      <ColorPicker {...props} disabled={Boolean(layer.splitAccessor)} setConfig={setConfig} />
 
       <EuiFormRow
         display="columnCompressed"
@@ -125,22 +146,7 @@ export function DimensionEditor(
           idSelected={`${idPrefix}${axisMode}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as YAxisMode;
-            const newYAxisConfigs = [...(layer.yConfig || [])];
-            const existingIndex = newYAxisConfigs.findIndex(
-              (yAxisConfig) => yAxisConfig.forAccessor === accessor
-            );
-            if (existingIndex !== -1) {
-              newYAxisConfigs[existingIndex] = {
-                ...newYAxisConfigs[existingIndex],
-                axisMode: newMode,
-              };
-            } else {
-              newYAxisConfigs.push({
-                forAccessor: accessor,
-                axisMode: newMode,
-              });
-            }
-            setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
+            setConfig({ axisMode: newMode });
           }}
         />
       </EuiFormRow>

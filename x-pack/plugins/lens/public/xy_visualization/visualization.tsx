@@ -53,6 +53,7 @@ import {
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
 import { XYState } from '..';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
 
 export const getXyVisualization = ({
   paletteService,
@@ -441,15 +442,20 @@ export const getXyVisualization = ({
   },
 
   renderDimensionEditor(domElement, props) {
+    const allProps = {
+      ...props,
+      formatFactory: fieldFormats.deserialize,
+      paletteService,
+    };
+    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+    const dimensionEditor = isReferenceLayer(layer) ? (
+      <ReferenceLinePanel {...allProps} layer={layer} />
+    ) : (
+      <DimensionEditor {...allProps} layer={layer} />
+    );
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <DimensionEditor
-            {...props}
-            formatFactory={fieldFormats.deserialize}
-            paletteService={paletteService}
-          />
-        </I18nProvider>
+        <I18nProvider>{dimensionEditor}</I18nProvider>
       </KibanaThemeProvider>,
       domElement
     );

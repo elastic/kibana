@@ -27,8 +27,10 @@ export const ReferenceLinePanel = (
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
+    layer: XYReferenceLineLayerConfig;
   }
 ) => {
+  const layer = props.layer;
   const { state, setState, layerId, accessor } = props;
 
   const isHorizontal = isHorizontalChart(state.layers);
@@ -39,7 +41,6 @@ export const ReferenceLinePanel = (
   });
 
   const index = localState.layers.findIndex((l) => l.layerId === layerId);
-  const layer = localState.layers[index] as XYReferenceLineLayerConfig;
 
   const setConfig = useCallback(
     (yConfig: Partial<YConfig> | undefined) => {
@@ -69,21 +70,22 @@ export const ReferenceLinePanel = (
     <>
       <MarkerDecorationSettings
         isHorizontal={isHorizontal}
-        setConfig={(config) => setConfig({ forAccessor: accessor, ...config })}
+        setConfig={setConfig}
         currentConfig={currentConfig}
       />
       <LineStyleSettings
         isHorizontal={isHorizontal}
-        setConfig={(config) => setConfig({ forAccessor: accessor, ...config })}
+        setConfig={setConfig}
         currentConfig={currentConfig}
       />
       <FillSetting
         isHorizontal={isHorizontal}
-        setConfig={(config) => setConfig({ forAccessor: accessor, ...config })}
+        setConfig={setConfig}
         currentConfig={currentConfig}
       />
       <ColorPicker
         {...props}
+        setConfig={setConfig}
         disableHelpTooltip
         label={i18n.translate('xpack.lens.xyChart.lineColor.label', {
           defaultMessage: 'Color',
