@@ -9,14 +9,16 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
-import { ViewApiRequest } from './view_api_request';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
+
+import { ViewApiRequest } from './view_api_request';
 
 const payload = {
   title: 'Test title',
   description: 'Test description',
   request: 'Hello world',
   closeFlyout: jest.fn(),
+  navigateToUrl: jest.fn(),
 };
 
 describe('EuiCodeEditor', () => {

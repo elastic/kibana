@@ -9,7 +9,7 @@ import React, { useState, useEffect, FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Pipeline } from '../../../../../common/types';
-import { useFormContext, ViewApiRequest } from '../../../../shared_imports';
+import { useFormContext, ViewApiRequest, useKibana } from '../../../../shared_imports';
 
 import { ReadProcessorsFunction } from '../types';
 
@@ -22,6 +22,7 @@ export const PipelineRequestFlyout: FunctionComponent<Props> = ({
   closeFlyout,
   readProcessors,
 }) => {
+  const { services } = useKibana();
   const form = useFormContext();
   const [formData, setFormData] = useState<Pipeline>({} as Pipeline);
   const pipeline = { ...formData, ...readProcessors() };
@@ -58,6 +59,9 @@ export const PipelineRequestFlyout: FunctionComponent<Props> = ({
       })}
       request={request}
       closeFlyout={closeFlyout}
+      navigateToUrl={services.navigateToUrl}
+      urlService={services.share.url}
+      capabilities={services.capabilities}
     />
   );
 };

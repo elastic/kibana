@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { compressToEncodedURIComponent } from 'lz-string';
 
 import {
   EuiFlyout,
@@ -19,13 +20,21 @@ import {
   EuiText,
   EuiSpacer,
   EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCopy,
 } from '@elastic/eui';
+import { ApplicationStart, Capabilities } from 'src/core/public';
+import type { UrlService } from 'src/plugins/share/common/url_service';
 
 interface Props {
   title: string;
   description: string;
   request: string;
   closeFlyout: () => void;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
+  urlService?: UrlService;
+  capabilities?: Capabilities;
 }
 
 export const ViewApiRequest: React.FunctionComponent<Props> = ({
@@ -33,7 +42,25 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({
   description,
   request,
   closeFlyout,
+  navigateToUrl,
+  urlService,
+  capabilities,
 }) => {
+  let consoleLink: string | undefined;
+
+  if (urlService) {
+    const devToolsDataUri = compressToEncodedURIComponent(request);
+    consoleLink = urlService.locators
+      .get('CONSOLE_APP_LOCATOR')
+      ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
+  }
+  // Check if both the Dev Tools UI and the Console UI are enabled.
+  const shouldShowDevToolsLink = capabilities?.dev_tools.show && consoleLink !== undefined;
+  const consolePreviewClick = useCallback(
+    () => consoleLink && navigateToUrl && navigateToUrl(consoleLink),
+    [consoleLink, navigateToUrl]
+  );
+
   return (
     <EuiFlyout maxWidth={480} onClose={closeFlyout}>
       <EuiFlyoutHeader>
@@ -47,9 +74,50 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({
           <p data-test-subj="apiRequestFlyoutDescription">{description}</p>
         </EuiText>
         <EuiSpacer />
-        <EuiCodeBlock language="json" isCopyable data-test-subj="apiRequestFlyoutBody">
-          {request}
-        </EuiCodeBlock>
+
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          wrap={false}
+          responsive={false}
+          className="insRequestCodeViewer"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="s" />
+            <div className="eui-textRight">
+              <EuiCopy textToCopy={request}>
+                {(copy) => (
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="right"
+                    iconType="copyClipboard"
+                    onClick={copy}
+                    data-test-subj="apiRequestFlyoutCopyClipboardButton"
+                  >
+                    <FormattedMessage id="esUi.viewApiRequest.copyToClipboardButton" defaultMessage="Copy to clipboard" />
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+              {shouldShowDevToolsLink && (
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="right"
+                  iconType="wrench"
+                  href={consoleLink}
+                  onClick={consolePreviewClick}
+                  data-test-subj="apiRequestFlyoutOpenInConsoleButton"
+                >
+                  <FormattedMessage id="esUi.viewApiRequest.openInConsoleButton" defaultMessage="Open in Console" />
+                </EuiButtonEmpty>
+              )}
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiCodeBlock language="json" data-test-subj="apiRequestFlyoutBody">
+              {request}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
