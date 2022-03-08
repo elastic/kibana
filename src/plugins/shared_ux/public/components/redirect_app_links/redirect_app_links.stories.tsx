@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
@@ -26,20 +26,16 @@ export default {
 
 export const Component = () => {
   return (
-    <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        <RedirectAppLinks
-          navigateToUrl={() => Promise.resolve()}
-          currentAppId$={new BehaviorSubject('test')}
-        >
-          <EuiButton data-test-subj="homeAddData" fill iconType="plusInCircle">
-            <FormattedMessage
-              id="sharedUX.addData.addDataButtonLabel"
-              defaultMessage="Add integrations"
-            />
-          </EuiButton>
-        </RedirectAppLinks>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <RedirectAppLinks
+      navigateToUrl={() => Promise.resolve()}
+      currentAppId$={new BehaviorSubject('test')}
+    >
+      <EuiButton data-test-subj="homeAddData" fill iconType="plusInCircle">
+        <FormattedMessage
+          id="sharedUX.addData.addDataButtonLabel"
+          defaultMessage="Add integrations"
+        />
+      </EuiButton>
+    </RedirectAppLinks>
   );
 };

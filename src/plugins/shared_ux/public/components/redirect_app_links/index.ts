@@ -8,7 +8,7 @@
 /* eslint-disable import/no-default-export */
 
 import { RedirectAppLinks } from './redirect_app_links';
-export type { RedirectCrossAppLinksProps } from './redirect_app_links';
+export type { RedirectAppLinksProps } from './redirect_app_links';
 
 export { RedirectAppLinks } from './redirect_app_links';
 

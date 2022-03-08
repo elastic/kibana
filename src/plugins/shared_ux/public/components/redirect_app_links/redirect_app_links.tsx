@@ -11,7 +11,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { ApplicationStart } from 'src/core/public';
 import { createNavigateToUrlClickHandler } from './click_handler';
 
-export interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface RedirectAppLinksProps extends React.HTMLAttributes<HTMLDivElement> {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   currentAppId$: ApplicationStart['currentAppId$'];
   className?: string;
@@ -25,9 +25,9 @@ export interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDiv
  *
  * @example
  * ```tsx
- * <RedirectCrossAppLinks application={application}>
+ * <RedirectAppLinks application={application}>
  *   <a href="/base-path/app/another-app/some-path">Go to another-app</a>
- * </RedirectCrossAppLinks>
+ * </RedirectAppLinks>
  * ```
  *
  * @remarks
@@ -35,7 +35,7 @@ export interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDiv
  * require to handle the links. A good practice is to consider it as a context provider and to use it
  * at the root level of an application or of the page that require the feature.
  */
-export const RedirectAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = ({
+export const RedirectAppLinks: FunctionComponent<RedirectAppLinksProps> = ({
   navigateToUrl,
   currentAppId$,
   children,
