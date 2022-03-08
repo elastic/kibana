@@ -7,7 +7,6 @@
 
 import { ROLES } from '../../../common/test';
 import { getExceptionList } from '../../objects/exception';
-import { PAGE_TITLE } from '../../screens/common/page';
 import { EXCEPTIONS_TABLE_SHOWING_LISTS } from '../../screens/exceptions';
 import { createExceptionList } from '../../tasks/api_calls/exceptions';
 import { cleanKibana } from '../../tasks/common';
