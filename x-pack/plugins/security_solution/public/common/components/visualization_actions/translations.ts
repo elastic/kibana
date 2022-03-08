@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 
 export const INSPECT = i18n.translate('xpack.securitySolution.visualizationActions.inspect', {
-  defaultMessage: 'Inspect',
+  defaultMessage: 'Inspect visualization',
 });
 
 export const SAVE_VISUALIZATION = i18n.translate(
   'xpack.securitySolution.visualizationActions.saveVisualization',
   {
-    defaultMessage: 'Save Visualization',
+    defaultMessage: 'Save visualization',
   }
 );
 
@@ -28,14 +28,14 @@ export const OPEN_IN_LENS = i18n.translate(
 export const ADD_TO_NEW_CASE = i18n.translate(
   'xpack.securitySolution.visualizationActions.addToNewCase',
   {
-    defaultMessage: 'Add to new Case',
+    defaultMessage: 'Add to new case',
   }
 );
 
 export const ADD_TO_EXISTING_CASE = i18n.translate(
   'xpack.securitySolution.visualizationActions.addToExistingCase',
   {
-    defaultMessage: 'Add to Existing Case',
+    defaultMessage: 'Add to existing case',
   }
 );
 

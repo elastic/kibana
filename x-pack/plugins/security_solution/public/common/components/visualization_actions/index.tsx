@@ -178,7 +178,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         {SAVE_VISUALIZATION}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
-        icon="search"
+        icon="inspect"
         key="visualizationActionsInspect"
         onClick={handleInspectButtonClick}
         disabled={disableInspectButton}
