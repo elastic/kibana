@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const MORE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.visualizationActions.moreActions',
+  {
+    defaultMessage: 'More actions',
+  }
+);
+
 export const INSPECT = i18n.translate('xpack.securitySolution.visualizationActions.inspect', {
   defaultMessage: 'Inspect visualization',
 });

@@ -22,6 +22,7 @@ import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
   INSPECT,
+  MORE_ACTIONS,
   OPEN_IN_LENS,
   SAVE_VISUALIZATION,
 } from './translations';
@@ -225,6 +226,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
       iconType="boxesHorizontal"
       onClick={onButtonClick}
       data-test-subj={dataTestSubj}
+      aria-label={MORE_ACTIONS}
     />
   );
 
