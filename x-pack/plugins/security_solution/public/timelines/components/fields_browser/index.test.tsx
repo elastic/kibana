@@ -123,19 +123,6 @@ describe('useFieldBrowserOptions', () => {
     );
   });
 
-  it("should not return the button and action column when user doesn't have write permissions", () => {
-    useKibanaMock().services.application.capabilities = {
-      ...useKibanaMock().services.application.capabilities,
-      indexPatterns: { save: false },
-    };
-    const { result } = renderUseFieldBrowserOptions();
-
-    expect(result.current.createFieldButton).toBeUndefined();
-    expect(result.current.getFieldTableColumns({ highlight: '', onHide: mockOnHide })).toHaveLength(
-      4
-    );
-  });
-
   it('should call onHide when button is pressed', async () => {
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
     const { result } = await renderUpdatedUseFieldBrowserOptions();
