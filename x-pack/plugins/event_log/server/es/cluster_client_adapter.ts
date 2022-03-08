@@ -58,6 +58,10 @@ export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySave
   aggregateOptions: AggregateOptionsType;
 };
 
+export interface AggregateEventsBySavedObjectResult {
+  aggregateResults: Record<string, estypes.AggregationsAggregate> | undefined;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
 
@@ -379,9 +383,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
   public async aggregateEventsBySavedObjects(
     queryOptions: AggregateEventsOptionsBySavedObjectFilter
-  ): Promise<{
-    aggregateResults: Record<string, estypes.AggregationsAggregate> | undefined;
-  }> {
+  ): Promise<AggregateEventsBySavedObjectResult> {
     const { index, type, ids, aggregateOptions } = queryOptions;
     const { aggs } = aggregateOptions;
 
