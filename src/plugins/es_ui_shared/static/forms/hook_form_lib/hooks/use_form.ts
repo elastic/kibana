@@ -224,23 +224,20 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       const validationResultByPath = fieldsToValidate.reduce((acc, field, i) => {
         acc[field.path] = validationResult[i].isValid;
         return acc;
-      }, {} as { [key: string]: boolean });
+      }, {} as { [fieldPath: string]: boolean });
 
       // At this stage we have an updated field validation state inside the "validationResultByPath" object.
-      // The fields we have in our "fieldsRefs.current" have not been updated yet with the new validation state
-      // (isValid, isValidated...) as this will happen _after_, when the "useEffect" triggers and calls "addField()".
-      // This means that we have **stale state value** in our fieldsRefs.
-      // To know the current form validity, we will then merge the "validationResult" _with_ the fieldsRefs object state,
-      // the "validationResult" taking presedence over the fieldsRefs values.
+      // The fields object in "fieldsRefs.current" have not been updated yet with their new validation state
+      // (isValid, isValidated...) as this occurs later, when the "useEffect" kicks in and calls "addField()" on the form.
+      // This means that we have **stale state value** in our fieldsRefs map.
+      // To know the current form validity, we will then merge the "validationResult" with the fieldsRefs object state.
       const formFieldsValidity = fieldsToArray().map((field) => {
         const hasUpdatedValidity = validationResultByPath[field.path] !== undefined;
-        const _isValid = validationResultByPath[field.path] ?? field.isValid;
-        const _isValidated = hasUpdatedValidity ? true : field.isValidated;
-        const _isValidating = hasUpdatedValidity ? false : field.isValidating;
+
         return {
-          isValid: _isValid,
-          isValidated: _isValidated,
-          isValidating: _isValidating,
+          isValid: validationResultByPath[field.path] ?? field.isValid,
+          isValidated: hasUpdatedValidity ? true : field.isValidated,
+          isValidating: hasUpdatedValidity ? false : field.isValidating,
         };
       });
 

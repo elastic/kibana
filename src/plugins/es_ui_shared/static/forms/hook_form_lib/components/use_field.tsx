@@ -83,7 +83,7 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
     // 4. An empty string ("")
 
     if (defaultValue !== undefined) {
-      return defaultValue;
+      return defaultValue; // defaultValue passed through props
     }
 
     let value: T | undefined;
@@ -137,7 +137,7 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
 
   // Children prevails over anything else provided.
   if (children) {
-    return children!(field);
+    return children(field);
   }
 
   if (ComponentToRender === 'input') {

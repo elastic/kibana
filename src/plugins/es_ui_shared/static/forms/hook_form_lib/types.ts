@@ -54,7 +54,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
   readonly __options: Required<FormOptions>;
   __getFormData$: () => Subject<FormData>;
-  __addField: (field: FieldHook) => void;
+  __addField: (field: FieldHook<any>) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
@@ -163,7 +163,7 @@ export interface FieldConfig<T = unknown, FormType extends FormData = FormData, 
   readonly type?: string;
   readonly defaultValue?: T;
   readonly validations?: Array<ValidationConfig<FormType, string, I>>;
-  readonly formatters?: FormatterFunc[];
+  readonly formatters?: Array<FormatterFunc<I>>;
   readonly deserializer?: SerializerFunc<I, T>;
   readonly serializer?: SerializerFunc<T, I>;
   readonly fieldsToValidateOnChange?: string[];
@@ -234,7 +234,7 @@ export interface FormData {
   [key: string]: any;
 }
 
-type FormatterFunc = (value: any, formData: FormData) => unknown;
+type FormatterFunc<I = unknown> = (value: unknown, formData: FormData) => I;
 
 // We set it as unknown as a form field can be any of any type
 // string | number | boolean | string[] ...

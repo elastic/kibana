@@ -44,7 +44,7 @@ export const useField = <T, FormType = FormData, I = T>(
     validations,
     formatters,
     fieldsToValidateOnChange,
-    valueChangeDebounceTime = form.__options.valueChangeDebounceTime,
+    valueChangeDebounceTime = form.__options.valueChangeDebounceTime, // By default 500ms
     serializer,
     deserializer,
   } = config;
@@ -87,8 +87,9 @@ export const useField = <T, FormType = FormData, I = T>(
   const hasBeenReset = useRef<boolean>(false);
   const inflightValidation = useRef<(Promise<any> & { cancel?(): void }) | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-  // Keep a ref of the last state (value and errors) notified to the consumer so he does
-  // not get loads of updates whenever he does not wrap the "onChange()" and "onError()" handlers with a useCallback
+  // Keep a ref of the last state (value and errors) notified to the consumer so they don't get
+  // loads of updates whenever they don't wrap the "onChange()" and "onError()" handlers with a useCallback
+  // e.g. <UseField onChange={() => { // inline code }}
   const lastNotifiedState = useRef<{ value?: I; errors: string[] | null }>({
     value: undefined,
     errors: null,
@@ -130,67 +131,58 @@ export const useField = <T, FormType = FormData, I = T>(
    * updating the "value" state.
    */
   const formatInputValue = useCallback(
-    <U>(inputValue: unknown): U => {
+    (inputValue: unknown): I => {
       const isEmptyString = typeof inputValue === 'string' && inputValue.trim() === '';
 
       if (isEmptyString || !formatters) {
-        return inputValue as U;
+        return inputValue as I;
       }
 
       const formData = __getFormData$().value;
 
-      return formatters.reduce((output, formatter) => formatter(output, formData), inputValue) as U;
+      return formatters.reduce((output, formatter) => formatter(output, formData), inputValue) as I;
     },
     [formatters, __getFormData$]
   );
 
-  const onValueChange = useCallback(async () => {
-    const changeIteration = ++changeCounter.current;
-    const startTime = Date.now();
+  const runValidationsOnValueChange = useCallback(
+    async (done: () => void) => {
+      const changeIteration = ++changeCounter.current;
+      const startTime = Date.now();
 
-    setPristine(false);
-    setIsChangingValue(true);
+      await validateFields(fieldsToValidateOnChange ?? [path]);
 
-    // Update the form data observable
-    __updateFormDataAt(path, value);
-
-    // Validate field(s) (this will update the form.isValid state)
-    await validateFields(fieldsToValidateOnChange ?? [path]);
-
-    if (isMounted.current === false) {
-      return;
-    }
-
-    /**
-     * If we have set a delay to display the error message after the field value has changed,
-     * we first check that this is the last "change iteration" (=== the last keystroke from the user)
-     * and then, we verify how long we've already waited for as form.validateFields() is asynchronous
-     * and might already have taken more than the specified delay)
-     */
-    if (changeIteration === changeCounter.current) {
-      if (valueChangeDebounceTime > 0) {
-        const timeElapsed = Date.now() - startTime;
-
-        if (timeElapsed < valueChangeDebounceTime) {
-          const timeLeftToWait = valueChangeDebounceTime - timeElapsed;
-          debounceTimeout.current = setTimeout(() => {
-            debounceTimeout.current = null;
-            setIsChangingValue(false);
-          }, timeLeftToWait);
-          return;
-        }
+      if (!isMounted.current) {
+        return;
       }
 
-      setIsChangingValue(false);
-    }
-  }, [
-    path,
-    value,
-    valueChangeDebounceTime,
-    fieldsToValidateOnChange,
-    __updateFormDataAt,
-    validateFields,
-  ]);
+      /**
+       * If we have set a delay to display possible validation error message after the field value has changed we
+       * 1. check that this is the last "change iteration" (--> the last keystroke from the user)
+       * 2. verify how long we've already waited for to run the validations (those can be async and make HTTP requests).
+       * 3. (if needed) add a timeout to set the "isChangingValue" state back to "false".
+       */
+      if (changeIteration === changeCounter.current) {
+        if (valueChangeDebounceTime > 0) {
+          const timeElapsed = Date.now() - startTime;
+
+          if (timeElapsed < valueChangeDebounceTime) {
+            const timeLeftToWait = valueChangeDebounceTime - timeElapsed;
+
+            debounceTimeout.current = setTimeout(() => {
+              debounceTimeout.current = null;
+              done();
+            }, timeLeftToWait);
+
+            return;
+          }
+        }
+
+        done();
+      }
+    },
+    [path, valueChangeDebounceTime, fieldsToValidateOnChange, validateFields]
+  );
 
   // Cancel any inflight validation (e.g an HTTP Request)
   const cancelInflightValidation = useCallback(() => {
@@ -442,13 +434,13 @@ export const useField = <T, FormType = FormData, I = T>(
   const setValue: FieldHook<T, I>['setValue'] = useCallback(
     (newValue) => {
       setStateValue((prev) => {
-        let formattedValue: I;
-        if (typeof newValue === 'function') {
-          formattedValue = formatInputValue<I>((newValue as Function)(prev));
-        } else {
-          formattedValue = formatInputValue<I>(newValue);
+        let _newValue = newValue;
+
+        if (typeof _newValue === 'function') {
+          _newValue = (_newValue as Function)(prev);
         }
-        return formattedValue;
+
+        return formatInputValue(_newValue);
       });
     },
     [formatInputValue]
@@ -589,18 +581,21 @@ export const useField = <T, FormType = FormData, I = T>(
   // ----------------------------------
   useEffect(() => {
     // Add the fieldHook object to the form "fieldsRefs" map
-    __addField(field as FieldHook<any>);
+    __addField(field);
   }, [field, __addField]);
 
   useEffect(() => {
     return () => {
-      // We only remove the field from the "fieldsRefs" object when its path
+      // We only remove the field from the form "fieldsRefs" map when its path
       // changes (which in practice never occurs) or whenever the <UseField /> unmounts
       __removeField(path);
     };
   }, [path, __removeField]);
 
-  // Notify listener whenever the value changes
+  // Value change: notify prop listener (<UseField onChange={() => {...}})
+  // We have a separate useEffect for this as the "onChange" handler pass through prop
+  // might not be wrapped inside a "useCallback" and that would trigger a possible infinite
+  // amount of effect executions.
   useEffect(() => {
     if (!isMounted.current) {
       return;
@@ -612,20 +607,34 @@ export const useField = <T, FormType = FormData, I = T>(
     }
   }, [value, valueChangeListener]);
 
+  // Value change: update state and run validations
   useEffect(() => {
-    // If the field value has been reset, we don't want to call the "onValueChange()"
-    // as it will set the "isPristine" state to true and validate the field (which we don't want
-    // to occur right after resetting the field).
-    if (hasBeenReset.current) {
-      hasBeenReset.current = false;
-      return;
-    }
-
     if (!isMounted.current) {
       return;
     }
 
-    onValueChange();
+    if (hasBeenReset.current) {
+      // If the field value has just been reset (triggering this useEffect)
+      // we don't want to set the "isPristine" state to true and validate the field
+      hasBeenReset.current = false;
+    } else {
+      setPristine(false);
+      setIsChangingValue(true);
+
+      runValidationsOnValueChange(() => {
+        if (!isMounted.current) {
+          return;
+        }
+        setIsChangingValue(false);
+      });
+    }
+
+    setIsModified(() => {
+      if (typeof value === 'object') {
+        return JSON.stringify(value) !== JSON.stringify(initialValueDeserialized);
+      }
+      return value !== initialValueDeserialized;
+    });
 
     return () => {
       if (debounceTimeout.current) {
@@ -633,17 +642,9 @@ export const useField = <T, FormType = FormData, I = T>(
         debounceTimeout.current = null;
       }
     };
-  }, [onValueChange]);
+  }, [value, runValidationsOnValueChange, initialValueDeserialized]);
 
-  useEffect(() => {
-    setIsModified(() => {
-      if (typeof value === 'object') {
-        return JSON.stringify(value) !== JSON.stringify(initialValueDeserialized);
-      }
-      return value !== initialValueDeserialized;
-    });
-  }, [value, initialValueDeserialized]);
-
+  // Errors change: notify prop listener (<UseField onError={() => {...}} />)
   useEffect(() => {
     if (!isMounted.current) {
       return;
