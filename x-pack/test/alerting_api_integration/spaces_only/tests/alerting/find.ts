@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 async function createAlert(
@@ -19,7 +19,7 @@ async function createAlert(
   const { body: createdAlert } = await supertest
     .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
-    .send(getTestAlertData(overwrites))
+    .send(getTestRuleData(overwrites))
     .expect(200);
   objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
   return createdAlert;
@@ -36,7 +36,7 @@ const findTestUtils = (
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -82,7 +82,7 @@ const findTestUtils = (
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -266,7 +266,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData())
+          .send(getTestRuleData())
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
