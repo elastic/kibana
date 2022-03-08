@@ -234,8 +234,8 @@ export class KbnClientSavedObjects {
       'url',
       'canvas-workpad',
     ];
-    const options = { types, space: options?.space };
-    await this.clean(options);
+    const newOptions = { types, space: options?.space };
+    await this.clean(newOptions);
   }
 
   public async bulkDelete(options: DeleteObjectsOptions) {
