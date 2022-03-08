@@ -21,9 +21,7 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   } catch (err) {
     throw new Error(`Error while compiling agent template: ${err.message}`);
   }
-
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-
   const yamlFromCompiledTemplate = safeLoad(compiledTemplate, {});
 
   // Hack to keep empty string ('') values around in the end yaml because
@@ -118,10 +116,20 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
     patchedTemplate = patchedTemplate.replace(
-      new RegExp(`^"${key}"`, 'gm'),
-      val ? safeDump(val) : ''
+      new RegExp(`^([\\s]*)"${key}"`, 'gm'),
+      (_, spaceMatche): string => {
+        return val ? indent(safeDump(val), spaceMatche.length) : '';
+      }
     );
   });
 
   return patchedTemplate;
+}
+
+function indent(text: string, n: number) {
+  const indentation = [...Array(n).keys()].map(() => ' ').join('');
+  return text
+    .split('\n')
+    .map((a) => indentation + a)
+    .join('\n');
 }

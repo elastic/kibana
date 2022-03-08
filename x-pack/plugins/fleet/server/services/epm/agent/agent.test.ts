@@ -273,4 +273,32 @@ paths:
       'Error while compiling agent template: options.inverse is not a function'
     );
   });
+
+  it('should support yaml extra key', () => {
+    const streamTemplate = `
+    config_version: 2
+    data_stream: test
+    request:
+      url: {{request_url}}
+    {{#if request_custom}}
+      {{request_custom}}
+    {{/if}}
+      `;
+    const vars = {
+      oauth_custom: { value: '#test\n tata: 123', type: 'yaml' },
+      request_custom: { value: '#test\n tata: 123', type: 'yaml' },
+    };
+
+    const output = compileTemplate(vars, streamTemplate);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "config_version": 2,
+        "data_stream": "test",
+        "request": Object {
+          "tata": 123,
+          "url": null,
+        },
+      }
+    `);
+  });
 });
