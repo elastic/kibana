@@ -9,6 +9,8 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
@@ -128,4 +130,6 @@ module.exports = {
 
   // A custom resolver to preserve symlinks by default
   resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
+
+  watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 };

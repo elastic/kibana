@@ -19,6 +19,8 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
+import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../common/constants';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
@@ -33,8 +35,8 @@ import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
-import { HostRisk } from '../../../../common/containers/hosts_risk/types';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
+import { useHostRiskScore, HostRisk } from '../../../../risk_score/containers';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -94,6 +96,13 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     'isolateHost'
   );
 
+  const {
+    services: { cases },
+  } = useKibana();
+
+  const CasesContext = cases.getCasesContext();
+  const casesPermissions = useGetUserCasesPermissions();
+
   const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
     useState(false);
 
@@ -127,7 +136,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   );
 
   const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    hostName,
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     pagination: {
       cursorStart: 0,
       querySize: 1,
@@ -239,7 +248,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       />
     </>
   ) : (
-    <>
+    <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
       <ExpandableEventTitle
         isAlert={isAlert}
         loading={loading}
@@ -260,7 +269,17 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         hostRisk={hostRisk}
         handleOnEventClosed={handleOnEventClosed}
       />
-    </>
+      <EventDetailsFooter
+        detailsData={detailsData}
+        detailsEcsData={ecsData}
+        expandedEvent={expandedEvent}
+        handleOnEventClosed={handleOnEventClosed}
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        loadingEventDetails={loading}
+        onAddIsolationStatusClick={showHostIsolationPanel}
+        timelineId={timelineId}
+      />
+    </CasesContext>
   );
 };
 

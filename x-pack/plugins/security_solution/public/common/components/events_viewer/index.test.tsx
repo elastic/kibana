@@ -34,7 +34,7 @@ jest.mock('../../../timelines/containers', () => ({
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
 const mockUseCreateFieldButton = jest.fn().mockReturnValue(<></>);
-jest.mock('../../../timelines/components/create_field_button', () => ({
+jest.mock('../../../timelines/components/fields_browser/create_field_button', () => ({
   useCreateFieldButton: (...params: unknown[]) => mockUseCreateFieldButton(...params),
 }));
 
