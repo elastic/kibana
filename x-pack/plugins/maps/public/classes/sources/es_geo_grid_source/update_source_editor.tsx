@@ -11,7 +11,7 @@ import uuid from 'uuid/v4';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
-import { AGG_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
+import { AGG_TYPE, ES_GEO_FIELD_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
@@ -24,6 +24,7 @@ import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
 
 interface Props {
   currentLayerType?: string;
+  geoFieldName: string;
   indexPatternId: string;
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
   metrics: AggDescriptor[];
@@ -32,6 +33,7 @@ interface Props {
 }
 
 interface State {
+  geoFieldType?: ES_GEO_FIELD_TYPE;
   metricsEditorKey: string;
   fields: IndexPatternField[];
   loadError?: string;
@@ -70,8 +72,11 @@ export class UpdateSourceEditor extends Component<Props, State> {
       return;
     }
 
+    const geoField = indexPattern.fields.getByName(this.props.geoFieldName);
+
     this.setState({
       fields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
+      geoFieldType: geoField ? geoField.type : undefined,
     });
   }
 
@@ -163,6 +168,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           />
           <RenderAsSelect
             isColumnCompressed
+            geoFieldType={this.state.geoFieldType}
             renderAs={this.props.renderAs}
             onChange={this._onRequestTypeSelect}
           />

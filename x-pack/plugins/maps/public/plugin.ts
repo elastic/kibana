@@ -73,6 +73,7 @@ import {
 } from './legacy_visualizations';
 import type { SecurityPluginStart } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
+import type { CloudStart } from '../../cloud/public';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
@@ -87,6 +88,7 @@ export interface MapsPluginSetupDependencies {
 
 export interface MapsPluginStartDependencies {
   charts: ChartsPluginStart;
+  cloud?: CloudStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   fileUpload: FileUploadPluginStart;

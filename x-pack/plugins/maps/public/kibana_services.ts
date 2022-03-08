@@ -57,6 +57,7 @@ export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getUsageCollection = () => pluginsStart.usageCollection;
+export const getIsCloud = () => !!pluginsStart.cloud?.cloudId;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;

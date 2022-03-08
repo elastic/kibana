@@ -51,7 +51,7 @@ type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | '
 const MAX_GEOTILE_LEVEL = 29;
 
 export const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
-  defaultMessage: 'Clusters, grids, and hexes',
+  defaultMessage: 'Clusters',
 });
 
 export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle', {
@@ -87,6 +87,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return (
       <UpdateSourceEditor
         currentLayerType={sourceEditorArgs.currentLayerType}
+        geoFieldName={this.getGeoFieldName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={sourceEditorArgs.onChange}
         metrics={this._descriptor.metrics}

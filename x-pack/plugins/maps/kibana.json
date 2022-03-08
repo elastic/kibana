@@ -25,6 +25,7 @@
     "presentationUtil"
   ],
   "optionalPlugins": [
+    "cloud",
     "customIntegrations",
     "home",
     "savedObjectsTagging",

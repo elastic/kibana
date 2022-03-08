@@ -6,42 +6,62 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RENDER_AS } from '../../../../common/constants';
+import { ES_GEO_FIELD_TYPE, RENDER_AS } from '../../../../common/constants';
+import { getIsCloud } from '../../../kibana_services';
+import { getIsGoldPlus } from '../../../licensed_features';
 
-const options = [
-  {
-    id: RENDER_AS.POINT,
-    label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
-      defaultMessage: 'clusters',
-    }),
-    value: RENDER_AS.POINT,
-  },
-  {
-    id: RENDER_AS.GRID,
-    label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
-      defaultMessage: 'grids',
-    }),
-    value: RENDER_AS.GRID,
-  },
-  {
-    id: RENDER_AS.HEX,
-    label: i18n.translate('xpack.maps.source.esGeoGrid.hexDropdownOption', {
-      defaultMessage: 'hexes',
-    }),
-    value: RENDER_AS.HEX,
-  },
-];
-
-export function RenderAsSelect(props: {
+interface Props {
+  geoFieldType?: ES_GEO_FIELD_TYPE;
   renderAs: RENDER_AS;
   onChange: (newValue: RENDER_AS) => void;
   isColumnCompressed?: boolean;
-}) {
+}
+
+export function RenderAsSelect(props: Props) {
   if (props.renderAs === RENDER_AS.HEATMAP) {
     return null;
   }
+
+  let isHexDisabled = false;
+  let hexDisabledReason = '';
+  if (!getIsCloud() && !getIsGoldPlus()) {
+    isHexDisabled = true;
+    hexDisabledReason = i18n.translate('xpack.maps.hexbin.license.disabledReason', {
+      defaultMessage: 'Hexbins require a Gold license.',
+    });
+  } else if (props.geoFieldType !== ES_GEO_FIELD_TYPE.GEO_POINT) {
+    isHexDisabled = true;
+    hexDisabledReason = i18n.translate('xpack.maps.hexbin.geoShape.disabledReason', {
+      defaultMessage: `Hexbins require 'geo_point' clustering field.`,
+    });
+  }
+
+  const options = [
+    {
+      id: RENDER_AS.POINT,
+      label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
+        defaultMessage: 'clusters',
+      }),
+      value: RENDER_AS.POINT,
+    },
+    {
+      id: RENDER_AS.GRID,
+      label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
+        defaultMessage: 'grids',
+      }),
+      value: RENDER_AS.GRID,
+    },
+    {
+      id: RENDER_AS.HEX,
+      label: i18n.translate('xpack.maps.source.esGeoGrid.hexDropdownOption', {
+        defaultMessage: 'hexbins',
+      }),
+      value: RENDER_AS.HEX,
+      isDisabled: isHexDisabled,
+    },
+  ];
 
   function onChange(id: string) {
     const data = options.find((option) => option.id === id);
@@ -57,6 +77,7 @@ export function RenderAsSelect(props: {
       label={i18n.translate('xpack.maps.source.esGeoGrid.showAsLabel', {
         defaultMessage: 'Show as',
       })}
+      helpText={hexDisabledReason}
       display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
     >
       <EuiButtonGroup
