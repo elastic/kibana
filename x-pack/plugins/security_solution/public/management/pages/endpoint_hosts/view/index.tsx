@@ -664,7 +664,7 @@ export const EndpointList = () => {
           defaultMessage="Hosts running endpoint security"
         />
       }
-      headerBackComponent={backToPolicyList}
+      headerBackComponent={routeState.backLink && backToPolicyList}
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
