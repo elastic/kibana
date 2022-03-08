@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiSpacer, EuiFieldSearch, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldSearch, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -46,24 +46,21 @@ export const RulesTableHeader = ({
   searchValue,
   isSearching,
 }: RulesTableToolbarProps) => (
-  <div>
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
-      <Counters total={totalRulesCount} selected={selectedRulesCount} />
-      <SelectAllToggle
-        isSelectAll={selectedRulesCount === totalRulesCount}
-        clear={clearSelection}
-        select={selectAll}
-      />
-      <BulkMenu
-        bulkEnable={bulkEnable}
-        bulkDisable={bulkDisable}
-        selectedRulesCount={selectedRulesCount}
-      />
-      <RefreshButton onClick={refresh} />
-      <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
-    </EuiFlexGroup>
-    <EuiSpacer />
-  </div>
+  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
+    <Counters total={totalRulesCount} selected={selectedRulesCount} />
+    <SelectAllToggle
+      isSelectAll={selectedRulesCount === totalRulesCount}
+      clear={clearSelection}
+      select={selectAll}
+    />
+    <BulkMenu
+      bulkEnable={bulkEnable}
+      bulkDisable={bulkDisable}
+      selectedRulesCount={selectedRulesCount}
+    />
+    <RefreshButton onClick={refresh} />
+    <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
+  </EuiFlexGroup>
 );
 
 const Counters = ({ total, selected }: { total: number; selected: number }) => (
@@ -115,6 +112,8 @@ const BulkMenu = ({
   </EuiFlexItem>
 );
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 const SearchField = ({
   search,
   isSearching,
@@ -122,7 +121,7 @@ const SearchField = ({
 }: Pick<RulesTableToolbarProps, 'isSearching' | 'searchValue' | 'search'>) => {
   const [localValue, setLocalValue] = useState(searchValue);
 
-  useDebounce(() => search(localValue), 300, [localValue]);
+  useDebounce(() => search(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
 
   return (
     <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>

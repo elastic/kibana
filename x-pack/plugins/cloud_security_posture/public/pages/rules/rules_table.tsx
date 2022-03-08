@@ -27,7 +27,7 @@ type RulesTableProps = Pick<
   setSelectedRules(rules: RuleSavedObject[]): void;
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   // ForwardRef makes this ref not available in parent callbacks
-  tableRef: React.RefObject<EuiBasicTable<any>>;
+  tableRef: React.RefObject<EuiBasicTable<RuleSavedObject>>;
 };
 
 export const RulesTable = ({
@@ -94,7 +94,7 @@ interface GetColumnProps {
 
 const createRuleEnabledSwitchRenderer =
   ({ toggleRule }: GetColumnProps) =>
-  (value: any, rule: RuleSavedObject) =>
+  (value: boolean, rule: RuleSavedObject) =>
     (
       <EuiSwitch
         showLabel={false}

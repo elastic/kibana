@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { type EuiBasicTable, EuiPanel } from '@elastic/eui';
+import { type EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesBottomBar } from './rules_bottom_bar';
@@ -161,6 +161,7 @@ export const RulesContainer = () => {
           totalRulesCount={rulesPageData.all_rules.length}
           isSearching={status === 'loading'}
         />
+        <EuiSpacer />
         <RulesTable
           rules_page={rulesPageData.rules_page}
           total={rulesPageData.total}

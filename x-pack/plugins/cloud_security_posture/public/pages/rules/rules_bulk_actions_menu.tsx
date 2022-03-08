@@ -9,7 +9,6 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
-  useGeneratedHtmlId,
   EuiButtonEmpty,
   type EuiContextMenuItemProps,
 } from '@elastic/eui';
@@ -22,10 +21,6 @@ interface RulesBulkActionsMenuProps {
 
 export const RulesBulkActionsMenu = ({ items }: RulesBulkActionsMenuProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const smallContextMenuPopoverId = useGeneratedHtmlId({
-    prefix: 'smallContextMenuPopover',
-  });
-
   const onButtonClick = () => setPopover(!isPopoverOpen);
   const closePopover = () => setPopover(false);
 
@@ -53,7 +48,6 @@ export const RulesBulkActionsMenu = ({ items }: RulesBulkActionsMenuProps) => {
 
   return (
     <EuiPopover
-      id={smallContextMenuPopoverId}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
