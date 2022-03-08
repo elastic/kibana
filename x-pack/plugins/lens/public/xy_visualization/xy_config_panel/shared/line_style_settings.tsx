@@ -21,12 +21,10 @@ import { idPrefix } from '../dimension_editor';
 export const LineStyleSettings = ({
   currentConfig,
   setConfig,
-  accessor,
   isHorizontal,
 }: {
   currentConfig?: Pick<YConfig, 'lineStyle' | 'lineWidth'>;
   setConfig: (yConfig: Partial<YConfig> | undefined) => void;
-  accessor: string;
   isHorizontal: boolean;
 }) => {
   return (
@@ -43,7 +41,7 @@ export const LineStyleSettings = ({
             <LineThicknessSlider
               value={currentConfig?.lineWidth || 1}
               onChange={(value) => {
-                setConfig({ forAccessor: accessor, lineWidth: value });
+                setConfig({ lineWidth: value });
               }}
             />
           </EuiFlexItem>
@@ -85,7 +83,7 @@ export const LineStyleSettings = ({
               idSelected={`${idPrefix}${currentConfig?.lineStyle || 'solid'}`}
               onChange={(id) => {
                 const newMode = id.replace(idPrefix, '') as LineStyle;
-                setConfig({ forAccessor: accessor, lineStyle: newMode });
+                setConfig({ lineStyle: newMode });
               }}
               isIconOnly
             />

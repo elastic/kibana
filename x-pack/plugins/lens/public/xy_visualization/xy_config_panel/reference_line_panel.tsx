@@ -13,7 +13,7 @@ import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState } from '../types';
 import { FormatFactory } from '../../../common';
 import { YConfig } from '../../../common/expressions';
-import { FillStyle } from '../../../common/expressions/xy_chart';
+import { FillStyle, XYReferenceLineLayerConfig } from '../../../common/expressions/xy_chart';
 
 import { ColorPicker } from './color_picker';
 import { updateLayer } from '.';
@@ -39,7 +39,7 @@ export const ReferenceLinePanel = (
   });
 
   const index = localState.layers.findIndex((l) => l.layerId === layerId);
-  const layer = localState.layers[index];
+  const layer = localState.layers[index] as XYReferenceLineLayerConfig;
 
   const setConfig = useCallback(
     (yConfig: Partial<YConfig> | undefined) => {
@@ -68,21 +68,18 @@ export const ReferenceLinePanel = (
   return (
     <>
       <MarkerDecorationSettings
-        accessor={accessor}
         isHorizontal={isHorizontal}
-        setConfig={setConfig}
+        setConfig={(config) => setConfig({ forAccessor: accessor, ...config })}
         currentConfig={currentConfig}
       />
       <LineStyleSettings
-        accessor={accessor}
         isHorizontal={isHorizontal}
-        setConfig={setConfig}
+        setConfig={(config) => setConfig({ forAccessor: accessor, ...config })}
         currentConfig={currentConfig}
       />
       <FillSetting
-        accessor={accessor}
         isHorizontal={isHorizontal}
-        setConfig={setConfig}
+        setConfig={(config) => setConfig({ forAccessor: accessor, ...config })}
         currentConfig={currentConfig}
       />
       <ColorPicker
@@ -142,12 +139,10 @@ function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
 export const FillSetting = ({
   currentConfig,
   setConfig,
-  accessor,
   isHorizontal,
 }: {
   currentConfig?: YConfig;
   setConfig: (yConfig: Partial<YConfig> | undefined) => void;
-  accessor: string;
   isHorizontal: boolean;
 }) => {
   return (
@@ -170,7 +165,7 @@ export const FillSetting = ({
         idSelected={`${idPrefix}${currentConfig?.fill || 'none'}`}
         onChange={(id) => {
           const newMode = id.replace(idPrefix, '') as FillStyle;
-          setConfig({ forAccessor: accessor, fill: newMode });
+          setConfig({ fill: newMode });
         }}
       />
     </EuiFormRow>

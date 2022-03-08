@@ -74,12 +74,10 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
 export const MarkerDecorationSettings = ({
   currentConfig,
   setConfig,
-  accessor,
   isHorizontal,
 }: {
   currentConfig?: Pick<YConfig, 'textVisibility' | 'icon' | 'iconPosition' | 'axisMode'>;
   setConfig: (yConfig: Partial<YConfig> | undefined) => void;
-  accessor: string;
   isHorizontal: boolean;
 }) => {
   return (
@@ -116,7 +114,7 @@ export const MarkerDecorationSettings = ({
           ]}
           idSelected={`${idPrefix}${Boolean(currentConfig?.textVisibility) ? 'name' : 'none'}`}
           onChange={(id) => {
-            setConfig({ forAccessor: accessor, textVisibility: id === `${idPrefix}name` });
+            setConfig({ textVisibility: id === `${idPrefix}name` });
           }}
           isFullWidth
         />
@@ -131,7 +129,7 @@ export const MarkerDecorationSettings = ({
         <IconSelect
           value={currentConfig?.icon}
           onChange={(newIcon) => {
-            setConfig({ forAccessor: accessor, icon: newIcon });
+            setConfig({ icon: newIcon });
           }}
         />
       </EuiFormRow>
@@ -170,7 +168,7 @@ export const MarkerDecorationSettings = ({
               idSelected={`${idPrefix}${currentConfig?.iconPosition || 'auto'}`}
               onChange={(id) => {
                 const newMode = id.replace(idPrefix, '') as IconPosition;
-                setConfig({ forAccessor: accessor, iconPosition: newMode });
+                setConfig({ iconPosition: newMode });
               }}
             />
           </TooltipWrapper>

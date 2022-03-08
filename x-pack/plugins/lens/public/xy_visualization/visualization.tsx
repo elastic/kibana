@@ -94,7 +94,11 @@ export const getXyVisualization = ({
       ...state,
       layers: [
         ...state.layers,
-        newLayerState(firstUsedSeriesType || state.preferredSeriesType, layerId, layerType),
+        newLayerState({
+          seriesType: firstUsedSeriesType || state.preferredSeriesType,
+          layerId,
+          layerType,
+        }),
       ],
     };
   },
@@ -103,7 +107,9 @@ export const getXyVisualization = ({
     return {
       ...state,
       layers: state.layers.map((l) =>
-        l.layerId !== layerId ? l : newLayerState(state.preferredSeriesType, layerId)
+        l.layerId !== layerId
+          ? l
+          : newLayerState({ seriesType: state.preferredSeriesType, layerId })
       ),
     };
   },

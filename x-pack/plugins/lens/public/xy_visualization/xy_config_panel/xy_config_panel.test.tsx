@@ -64,7 +64,12 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'bar' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'bar' }],
+              } as XYDataLayerConfig,
+            ],
           }}
         />
       );
@@ -80,7 +85,12 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
+              } as XYDataLayerConfig,
+            ],
           }}
         />
       );
@@ -100,7 +110,12 @@ describe('XY Config panels', () => {
           state={{
             ...state,
             hideEndzones: true,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
+              } as XYDataLayerConfig,
+            ],
           }}
         />
       );
