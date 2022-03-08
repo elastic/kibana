@@ -60,9 +60,9 @@ export const Example: Story<Args> = ({
 }) => {
   return (
     <SuggestionsSelect
-      allOption={allOption}
+      customOptions={[allOption]}
       customOptionText={customOptionText}
-      field={field}
+      fieldName={field}
       onChange={() => {}}
       placeholder={placeholder}
     />

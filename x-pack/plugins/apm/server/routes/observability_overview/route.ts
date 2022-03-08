@@ -11,6 +11,7 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceCount } from './get_service_count';
 import { getTransactionsPerMinute } from './get_transactions_per_minute';
 import { getHasData } from './has_data';
+import { getHasNotDefinedEnvironment } from './has_not_defined_environment';
 import { rangeRt } from '../default_api_types';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -29,6 +30,36 @@ const observabilityOverviewHasDataRoute = createApmServerRoute({
     return await getHasData({ setup });
   },
 });
+
+const observabilityOverviewHasNotDefinedEnvironmentRoute = createApmServerRoute(
+  {
+    endpoint:
+      'GET /internal/apm/observability_overview/has_not_defined_environment',
+    options: { tags: ['access:apm'] },
+    params: t.type({
+      query: t.intersection([
+        t.partial({
+          serviceName: t.string,
+        }),
+        t.partial(rangeRt.props),
+      ]),
+    }),
+    handler: async (
+      resources
+    ): Promise<{
+      hasNotDefinedEnvironment: boolean;
+    }> => {
+      const { serviceName, start, end } = resources.params.query;
+      const setup = await setupRequest(resources);
+      return await getHasNotDefinedEnvironment({
+        setup,
+        serviceName,
+        start,
+        end,
+      });
+    },
+  }
+);
 
 const observabilityOverviewRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/observability_overview',
@@ -94,4 +125,5 @@ const observabilityOverviewRoute = createApmServerRoute({
 export const observabilityOverviewRouteRepository = {
   ...observabilityOverviewRoute,
   ...observabilityOverviewHasDataRoute,
+  ...observabilityOverviewHasNotDefinedEnvironmentRoute,
 };
