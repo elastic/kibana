@@ -77,7 +77,6 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
-      showInspectButton={false}
     />
   );
 };

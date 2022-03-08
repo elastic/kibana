@@ -38,18 +38,8 @@ export const NetworkKpiBaseComponent = React.memo<{
   from: string;
   to: string;
   narrowDateRange: UpdateDateRange;
-  showInspectButton?: boolean;
 }>(
-  ({
-    fieldsMapping,
-    data,
-    id,
-    loading = false,
-    from,
-    to,
-    narrowDateRange,
-    showInspectButton = true,
-  }) => {
+  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange }) => {
     const { cases } = useKibana().services;
     const CasesContext = cases.getCasesContext();
     const userPermissions = useGetUserCasesPermissions();
@@ -78,7 +68,7 @@ export const NetworkKpiBaseComponent = React.memo<{
       <EuiFlexGroup wrap>
         <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
           {statItemsProps.map((mappedStatItemProps) => (
-            <StatItemsComponent {...mappedStatItemProps} showInspectButton={showInspectButton} />
+            <StatItemsComponent {...mappedStatItemProps} showInspectButton={false} />
           ))}
         </CasesContext>
       </EuiFlexGroup>

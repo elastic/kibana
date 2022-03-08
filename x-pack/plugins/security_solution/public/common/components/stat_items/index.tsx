@@ -213,7 +213,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     from,
     grow,
     id,
-    showInspectButton = true,
+    showInspectButton,
     index,
     narrowDateRange,
     statKey = 'item',

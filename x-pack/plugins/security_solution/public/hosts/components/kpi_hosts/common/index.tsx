@@ -38,11 +38,10 @@ interface HostsKpiBaseComponentProps {
   from: string;
   to: string;
   narrowDateRange: UpdateDateRange;
-  showInspectButton?: boolean;
 }
 
 export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
-  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange, showInspectButton }) => {
+  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange }) => {
     const { cases } = useKibana().services;
     const CasesContext = cases.getCasesContext();
     const userPermissions = useGetUserCasesPermissions();
@@ -65,7 +64,7 @@ export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
       <EuiFlexGroup wrap>
         <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
           {statItemsProps.map((mappedStatItemProps) => (
-            <StatItemsComponent {...mappedStatItemProps} showInspectButton={showInspectButton} />
+            <StatItemsComponent {...mappedStatItemProps} showInspectButton={false} />
           ))}
         </CasesContext>
       </EuiFlexGroup>

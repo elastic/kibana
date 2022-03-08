@@ -57,7 +57,6 @@ const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
-      showInspectButton={false}
     />
   );
 };
