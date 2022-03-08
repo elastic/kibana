@@ -15,6 +15,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBatchResponse,
   ApplicationStart,
+  DocLinksStart,
 } from 'src/core/public';
 
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
@@ -110,6 +111,12 @@ export interface TelemetryPluginConfig {
   userCanChangeSettings?: boolean;
 }
 
+function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
+  return {
+    getPrivacyStatementUrl: () => docLinks.links.legal.privacyStatement,
+  };
+}
+
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
   private readonly currentKibanaVersion: string;
   private readonly config: TelemetryPluginConfig;
@@ -124,7 +131,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { http, notifications }: CoreSetup,
+    { http, notifications, getStartServices }: CoreSetup,
     { screenshotMode, home }: TelemetryPluginSetupDependencies
   ): TelemetryPluginSetup {
     const config = this.config;
@@ -137,6 +144,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       currentKibanaVersion,
     });
 
+    let telemetryConstants: TelemetryConstants;
+
+    getStartServices().then(([{ docLinks }]) => {
+      telemetryConstants = getTelemetryConstants(docLinks);
+    });
+
     this.telemetrySender = new TelemetrySender(this.telemetryService);
 
     if (home) {
@@ -147,7 +160,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       });
 
       home.welcomeScreen.registerTelemetryNoticeRenderer(() =>
-        renderWelcomeTelemetryNotice(this.telemetryService!, http.basePath.prepend)
+        renderWelcomeTelemetryNotice(
+          this.telemetryService!,
+          http.basePath.prepend,
+          telemetryConstants
+        )
       );
     }
 
@@ -169,9 +186,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     this.canUserChangeSettings = this.getCanUserChangeSettings(application);
     this.telemetryService.userCanChangeSettings = this.canUserChangeSettings;
-    const telemetryConstants = {
-      getPrivacyStatementUrl: () => docLinks.links.legal.privacyStatement,
-    };
+    const telemetryConstants = getTelemetryConstants(docLinks);
 
     const telemetryNotifications = new TelemetryNotifications({
       http,

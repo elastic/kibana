@@ -371,6 +371,13 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
 </mockConstructor>
 `;
 
+exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
+<Welcome
+  onSkip={[Function]}
+  urlBasePath="goober"
+/>
+`;
+
 exports[`home should render home component 1`] = `
 <mockConstructor
   data-test-subj="homeApp"
