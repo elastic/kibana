@@ -32,6 +32,7 @@ const testProps = {
   browserFields: mockBrowserFields,
   filteredBrowserFields: mockBrowserFields,
   searchInput: '',
+  appliedFilterInput: '',
   isSearching: false,
   onCategorySelected: jest.fn(),
   onHide,
@@ -84,6 +85,7 @@ describe('FieldsBrowser', () => {
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           searchInput={''}
+          appliedFilterInput={''}
           isSearching={false}
           onCategorySelected={jest.fn()}
           onHide={jest.fn()}

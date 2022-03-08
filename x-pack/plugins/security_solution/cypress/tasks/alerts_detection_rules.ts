@@ -233,7 +233,7 @@ export const changeRowsPerPageTo = (rowsCount: number) => {
   cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
   cy.get(rowsPerPageSelector(rowsCount))
     .pipe(($el) => $el.trigger('click'))
-    .should('not.be.visible');
+    .should('not.exist');
 };
 
 export const changeRowsPerPageTo100 = () => {
