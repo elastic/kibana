@@ -26,7 +26,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     testFiles,
     services,
     pageObjects,
-    servicesRequiredForTestAnalysis: ['playwright'],
+    servicesRequiredForTestAnalysis: ['performance'],
     servers: functionalConfig.get('servers'),
     esTestCluster: functionalConfig.get('esTestCluster'),
     apps: functionalConfig.get('apps'),
