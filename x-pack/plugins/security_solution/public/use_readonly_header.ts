@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import * as i18n from './translations';
 import { useKibana } from './common/lib/kibana';
-import { useUserInfo } from './detections/components/user_info';
+import { useAlertsPrivileges } from './detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 /**
  * This component places a read-only icon badge in the header
@@ -17,26 +17,21 @@ import { useUserInfo } from './detections/components/user_info';
  * privileges
  */
 export function useReadonlyHeader(tooltip: string) {
-  const { canUserREAD, canUserCRUD } = useUserInfo();
+  const { hasKibanaREAD, hasKibanaCRUD } = useAlertsPrivileges();
   const chrome = useKibana().services.chrome;
 
-  // if the user is read only then display the glasses badge in the global navigation header
-  const setBadge = useCallback(() => {
-    if (canUserREAD && !canUserCRUD) {
+  useEffect(() => {
+    if (hasKibanaREAD && !hasKibanaCRUD) {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
         tooltip,
         iconType: 'glasses',
       });
     }
-  }, [chrome, canUserREAD, canUserCRUD, tooltip]);
-
-  useEffect(() => {
-    setBadge();
 
     // remove the icon after the component unmounts
     return () => {
       chrome.setBadge();
     };
-  }, [setBadge, chrome]);
+  }, [chrome, hasKibanaREAD, hasKibanaCRUD, tooltip]);
 }
