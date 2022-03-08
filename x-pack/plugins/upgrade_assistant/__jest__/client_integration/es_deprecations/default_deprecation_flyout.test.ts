@@ -13,21 +13,19 @@ import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './moc
 
 describe('Default deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
-
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
-    httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+    mockEnvironment = setupEnvironment();
+    mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
+      esDeprecationsMockResponse
+    );
+    mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
       snapshotId: MOCK_SNAPSHOT_ID,
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
-    httpRequestsMockHelpers.setReindexStatusResponse({
+    mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
       reindexOp: null,
       warnings: [],
       hasRequiredPrivileges: true,
@@ -39,7 +37,9 @@ describe('Default deprecation flyout', () => {
     });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, {
+        isReadOnlyMode: false,
+      });
     });
 
     testBed.component.update();

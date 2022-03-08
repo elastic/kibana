@@ -15,21 +15,22 @@ import { esCriticalAndWarningDeprecations, esNoDeprecations } from './mock_es_is
 
 describe('Overview - Fix deprecation issues step', () => {
   let testBed: OverviewTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  beforeEach(async () => {
+    mockEnvironment = setupEnvironment();
   });
 
   describe('when there are critical issues in one panel', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esCriticalAndWarningDeprecations);
+      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
+        esCriticalAndWarningDeprecations
+      );
 
       await act(async () => {
         const deprecationService = deprecationsServiceMock.createStartContract();
         kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
 
-        testBed = await setupOverviewPage({
+        testBed = await setupOverviewPage(mockEnvironment.httpSetup, {
           services: {
             core: {
               deprecations: deprecationService,
@@ -49,13 +50,13 @@ describe('Overview - Fix deprecation issues step', () => {
 
   describe('when there are no critical issues for either panel', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esNoDeprecations);
+      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esNoDeprecations);
 
       await act(async () => {
         const deprecationService = deprecationsServiceMock.createStartContract();
         kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
 
-        testBed = await setupOverviewPage({
+        testBed = await setupOverviewPage(mockEnvironment.httpSetup, {
           services: {
             core: {
               deprecations: deprecationService,

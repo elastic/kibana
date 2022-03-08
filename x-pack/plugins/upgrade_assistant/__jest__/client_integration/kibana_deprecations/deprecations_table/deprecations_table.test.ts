@@ -17,7 +17,6 @@ describe('Kibana deprecations - Deprecations table', () => {
   let testBed: KibanaTestBed;
   let deprecationService: jest.Mocked<DeprecationsServiceStart>;
 
-  const { server } = setupEnvironment();
   const {
     mockedKibanaDeprecations,
     mockedCriticalKibanaDeprecations,
@@ -25,17 +24,15 @@ describe('Kibana deprecations - Deprecations table', () => {
     mockedConfigKibanaDeprecations,
   } = kibanaDeprecationsServiceHelpers.defaultMockedResponses;
 
-  afterAll(() => {
-    server.restore();
-  });
-
+  let mockEnvironment: ReturnType<typeof setupEnvironment>;
   beforeEach(async () => {
+    mockEnvironment = setupEnvironment();
     deprecationService = deprecationsServiceMock.createStartContract();
 
     await act(async () => {
       kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService });
 
-      testBed = await setupKibanaPage({
+      testBed = await setupKibanaPage(mockEnvironment.httpSetup, {
         services: {
           core: {
             deprecations: deprecationService,
@@ -108,7 +105,7 @@ describe('Kibana deprecations - Deprecations table', () => {
   describe('No deprecations', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setupKibanaPage({ isReadOnlyMode: false });
+        testBed = await setupKibanaPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
       });
 
       const { component } = testBed;
