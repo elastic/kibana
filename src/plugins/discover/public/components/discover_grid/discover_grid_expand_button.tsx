@@ -15,7 +15,10 @@ import { EsHitRecord } from '../../application/types';
 /**
  * Button to expand a given row
  */
-export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
+export const ExpandButton = ({
+  rowIndex,
+  setCellProps,
+}: Omit<EuiDataGridCellValueElementProps, 'schema'>) => {
   const { expanded, setExpanded, rows, isDarkMode } = useContext(DiscoverGridContext);
   const current = rows[rowIndex];
   useEffect(() => {

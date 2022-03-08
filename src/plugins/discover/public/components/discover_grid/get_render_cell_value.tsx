@@ -36,7 +36,12 @@ export const getRenderCellValueFn =
     fieldsToShow: string[],
     maxDocFieldsDisplayed: number
   ) =>
-  ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
+  ({
+    rowIndex,
+    columnId,
+    isDetails,
+    setCellProps,
+  }: Omit<EuiDataGridCellValueElementProps, 'schema'>) => {
     const { uiSettings, fieldFormats } = useDiscoverServices();
 
     const maxEntries = useMemo(() => uiSettings.get(MAX_DOC_FIELDS_DISPLAYED), [uiSettings]);
