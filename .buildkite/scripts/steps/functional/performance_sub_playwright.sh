@@ -13,29 +13,43 @@ node scripts/es snapshot&
 
 esPid=$!
 
-export TEST_PERFORMANCE_PHASE=WARMUP
 export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export TEST_ES_DISABLE_STARTUP=true
-export ELASTIC_APM_ACTIVE=false
 
 sleep 120
 
 cd "$XPACK_DIR"
 
-# warmup round 1
-checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Phase: WARMUP)" \
-  node scripts/functional_tests \
-    --debug --bail \
-    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config "test/performance/config.playwright.ts";
+jobId=$(npx uuid)
+export TEST_JOB_ID="$jobId"
 
-export TEST_PERFORMANCE_PHASE=TEST
-export ELASTIC_APM_ACTIVE=true
+journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard")
 
-checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Phase: TEST)" \
-  node scripts/functional_tests \
-    --debug --bail \
-    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config "test/performance/config.playwright.ts";
+for i in "${journeys[@]}"; do
+    echo "JOURNEY[${i}] is running"
+
+    export TEST_PERFORMANCE_PHASE=WARMUP
+    export ELASTIC_APM_ACTIVE=false
+    export JOURNEY_NAME="${i}"
+    
+    checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: WARMUP)" \
+      node scripts/functional_tests \
+      --config test/performance/config.playwright.ts \
+      --include "test/performance/tests/playwright/${i}.ts" \
+      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+      --debug \
+      --bail
+
+    export TEST_PERFORMANCE_PHASE=TEST
+    export ELASTIC_APM_ACTIVE=true
+
+    checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: TEST)" \
+      node scripts/functional_tests \
+      --config test/performance/config.playwright.ts \
+      --include "test/performance/tests/playwright/${i}.ts" \
+      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+      --debug \
+      --bail
+done
 
 kill "$esPid"
