@@ -14,45 +14,30 @@ import {
   useEuiTheme,
   IconType,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-
-const strings = {
-  getAriaButtonLabel: (createType: string) =>
-    i18n.translate('sharedUX.solutionToolbar.quickButton.ariaButtonLabel', {
-      defaultMessage: `Create new {createType}`,
-      values: {
-        createType,
-      },
-    }),
-  getLegend: () =>
-    i18n.translate('sharedUX.solutionToolbar.quickButton.legendLabel', {
-      defaultMessage: 'Quick create',
-    }),
-};
-
-export interface QuickButtonProps {
-  createType: string;
+export interface QuickButton {
+  label: string;
+  title?: string;
   onClick: () => void;
   iconType: IconType;
+  getLegend: string;
 }
 
 export interface Props {
-  buttons: QuickButtonProps[];
+  buttons: QuickButton[];
 }
 
-type Option = EuiButtonGroupOptionProps & Omit<QuickButtonProps, 'createType'>;
+type Option = EuiButtonGroupOptionProps & Omit<QuickButton, 'label'>;
 
 export const QuickButtonGroup = ({ buttons }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const buttonGroupOptions: Option[] = buttons.map((button: QuickButtonProps, index) => {
-    const { createType: label, ...rest } = button;
-    const title = strings.getAriaButtonLabel(label);
+  const buttonGroupOptions: Option[] = buttons.map((button: QuickButton, index) => {
+    const { label, title = label, ...rest } = button;
 
     return {
       ...rest,
-      'aria-label': title,
+      'aria-label': title ?? label,
       id: `${htmlIdGenerator()()}${index}`,
       label,
       title,
@@ -87,7 +72,8 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
   return (
     <EuiButtonGroup
       buttonSize="m"
-      legend={strings.getLegend()}
+      // set this as a constant?
+      legend={buttonGroupOptions[0].getLegend}
       options={buttonGroupOptions}
       onChange={onChangeIconsMulti}
       type="multi"
