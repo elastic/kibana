@@ -49,8 +49,9 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
     buttons={
       Array [
         Object {
-          "createType": "Text",
+          "getLegend": "",
           "iconType": "visText",
+          "label": "Text",
           "onClick": [MockFunction],
         },
       ]
@@ -86,18 +87,19 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
         }
       }
       isIconOnly={true}
-      legend="Quick create"
+      legend=""
       onChange={[Function]}
       options={
         Array [
           Object {
-            "aria-label": "Create new Text",
+            "aria-label": "Text",
             "className": "quickButtonGroup__button",
+            "getLegend": "",
             "iconType": "visText",
             "id": "generated-id0",
             "label": "Text",
             "onClick": [MockFunction],
-            "title": "Create new Text",
+            "title": "Text",
           },
         ]
       }
@@ -114,18 +116,17 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
           <EuiScreenReaderOnly>
             <legend
               className="euiScreenReaderOnly"
-            >
-              Quick create
-            </legend>
+            />
           </EuiScreenReaderOnly>
           <div
             className="euiButtonGroup__buttons"
           >
             <EuiButtonGroupButton
-              aria-label="Create new Text"
+              aria-label="Text"
               className="quickButtonGroup__button"
               color="text"
               element="button"
+              getLegend=""
               iconType="visText"
               id="generated-id0"
               isDisabled={false}
@@ -136,16 +137,17 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
               onChange={[Function]}
               onClick={[MockFunction]}
               size="m"
-              title="Create new Text"
+              title="Text"
             >
               <EuiButtonDisplay
-                aria-label="Create new Text"
+                aria-label="Text"
                 baseClassName="euiButtonGroupButton"
                 className="euiButtonGroupButton-isIconOnly quickButtonGroup__button"
                 color="text"
                 data-test-subj="generated-id0"
                 element="button"
                 fill={false}
+                getLegend=""
                 iconType="visText"
                 id="generated-id"
                 isDisabled={false}
@@ -159,15 +161,16 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
                     "ref": [Function],
                   }
                 }
-                title="Create new Text"
+                title="Text"
                 type="button"
               >
                 <button
-                  aria-label="Create new Text"
+                  aria-label="Text"
                   aria-pressed={false}
                   className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton-isIconOnly quickButtonGroup__button"
                   data-test-subj="generated-id0"
                   disabled={false}
+                  getLegend=""
                   id="generated-id"
                   onClick={[MockFunction]}
                   style={
@@ -175,7 +178,7 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
                       "minWidth": undefined,
                     }
                   }
-                  title="Create new Text"
+                  title="Text"
                   type="button"
                 >
                   <EuiButtonContent

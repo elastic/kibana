@@ -24,27 +24,32 @@ export default {
 
 const quickButtons = [
   {
-    createType: 'Text',
+    label: 'Text',
+    getLegend: '',
     onClick: action('onTextClick'),
     iconType: 'visText',
   },
   {
-    createType: 'Control',
+    label: 'Control',
+    getLegend: '',
     onClick: action('onControlClick'),
     iconType: 'controlsHorizontal',
   },
   {
-    createType: 'Link',
+    label: 'Link',
+    getLegend: '',
     onClick: action('onLinkClick'),
     iconType: 'link',
   },
   {
-    createType: 'Image',
+    label: 'Image',
+    getLegend: '',
     onClick: action('onImageClick'),
     iconType: 'image',
   },
   {
-    createType: 'Markup',
+    label: 'Markup',
+    getLegend: '',
     onClick: action('onMarkupClick'),
     iconType: 'visVega',
   },

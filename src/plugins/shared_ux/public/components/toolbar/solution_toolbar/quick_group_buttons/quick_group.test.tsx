@@ -32,7 +32,8 @@ describe('<QuickButtonGroup />', () => {
       <QuickButtonGroup
         buttons={[
           {
-            createType: 'Text',
+            label: 'Text',
+            getLegend: '',
             onClick: jest.fn(),
             iconType: 'visText',
           },
