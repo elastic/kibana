@@ -18,16 +18,12 @@ import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_d
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useComparison } from '../../../hooks/use_comparison';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../shared/time_comparison/get_time_range_comparison';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -48,11 +44,7 @@ export function ServiceOverviewThroughputChart({
   transactionName?: string;
 }) {
   const {
-    urlParams: { comparisonEnabled, comparisonType },
-  } = useLegacyUrlParams();
-
-  const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, comparisonEnabled },
   } = useApmParams('/services/{serviceName}');
 
   const { environment } = useEnvironmentsContext();
@@ -65,13 +57,8 @@ export function ServiceOverviewThroughputChart({
 
   const { transactionType, serviceName } = useApmServiceContext();
 
-  const comparisonChartTheme = getComparisonChartTheme();
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
+  const { comparisonStart, comparisonEnd, comparisonChartTheme } =
+    useComparison();
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {

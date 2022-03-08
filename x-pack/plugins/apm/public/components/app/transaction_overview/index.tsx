@@ -26,7 +26,6 @@ export function TransactionOverview() {
       rangeTo,
       transactionType: transactionTypeFromUrl,
       comparisonEnabled,
-      comparisonType,
     },
   } = useApmParams('/services/{serviceName}/transactions');
 
@@ -69,7 +68,6 @@ export function TransactionOverview() {
         end={end}
         isServerlessContext={isServerless}
         comparisonEnabled={comparisonEnabled}
-        comparisonType={comparisonType}
       />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>

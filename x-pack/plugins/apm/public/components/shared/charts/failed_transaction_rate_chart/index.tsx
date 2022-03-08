@@ -16,12 +16,9 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimeseriesChart } from '../timeseries_chart';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../time_comparison/get_time_range_comparison';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useComparison } from '../../../../hooks/use_comparison';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
@@ -57,11 +54,11 @@ export function FailedTransactionRateChart({
   kuery,
 }: Props) {
   const {
-    urlParams: { transactionName, comparisonEnabled, comparisonType },
+    urlParams: { transactionName },
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, comparisonEnabled },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -74,13 +71,8 @@ export function FailedTransactionRateChart({
 
   const { serviceName, transactionType, alerts } = useApmServiceContext();
 
-  const comparisonChartThem = getComparisonChartTheme();
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
+  const { comparisonChartTheme, comparisonStart, comparisonEnd } =
+    useComparison();
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -165,7 +157,7 @@ export function FailedTransactionRateChart({
         timeseries={timeseries}
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
-        customTheme={comparisonChartThem}
+        customTheme={comparisonChartTheme}
         anomalyTimeseries={preferredAnomalyTimeseries}
         alerts={alerts.filter(
           (alert) =>

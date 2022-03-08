@@ -10,9 +10,9 @@ import { useFetcher } from './use_fetcher';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
-import { getTimeRangeComparison } from '../components/shared/time_comparison/get_time_range_comparison';
 import { useTimeRange } from './use_time_range';
 import { useApmParams } from './use_apm_params';
+import { useComparison } from './use_comparison';
 
 export function useTransactionLatencyChartsFetcher({
   kuery,
@@ -23,12 +23,7 @@ export function useTransactionLatencyChartsFetcher({
 }) {
   const { transactionType, serviceName } = useApmServiceContext();
   const {
-    urlParams: {
-      transactionName,
-      latencyAggregationType,
-      comparisonType,
-      comparisonEnabled,
-    },
+    urlParams: { transactionName, latencyAggregationType },
   } = useLegacyUrlParams();
 
   const {
@@ -37,12 +32,7 @@ export function useTransactionLatencyChartsFetcher({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
+  const { comparisonStart, comparisonEnd } = useComparison();
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {

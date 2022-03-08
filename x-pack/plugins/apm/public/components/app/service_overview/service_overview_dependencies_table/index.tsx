@@ -11,14 +11,13 @@ import React, { ReactNode } from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/service_link';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
+import { useComparison } from '../../../../hooks/use_comparison';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
@@ -34,21 +33,20 @@ export function ServiceOverviewDependenciesTable({
   hidePerPageOptions = false,
 }: ServiceOverviewDependenciesTableProps) {
   const {
-    urlParams: { comparisonEnabled, comparisonType, latencyAggregationType },
-  } = useLegacyUrlParams();
-
-  const {
-    query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      comparisonEnabled,
+      comparisonType,
+      latencyAggregationType,
+    },
   } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
+  const { offset } = useComparison();
 
   const { serviceName, transactionType } = useApmServiceContext();
 

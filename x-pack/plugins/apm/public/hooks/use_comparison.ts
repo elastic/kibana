@@ -30,7 +30,7 @@ export function useComparison() {
     urlParams: { comparisonType, comparisonEnabled },
   } = useLegacyUrlParams();
 
-  const { offset } = getTimeRangeComparison({
+  const { comparisonStart, comparisonEnd, offset } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
@@ -38,6 +38,8 @@ export function useComparison() {
   });
 
   return {
+    comparisonStart,
+    comparisonEnd,
     offset,
     comparisonChartTheme,
   };
