@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { CoreStart } from 'kibana/public';
 import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { coreMock } from 'src/core/public/mocks';
 import { registerDataHandler, unregisterDataHandler } from '../data_handler';
 import { useHasData } from '../hooks/use_has_data';
 import * as routeParams from '../hooks/use_route_params';
 import * as timeRange from '../hooks/use_time_range';
 import { HasData, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { HasDataContextProvider } from './has_data_context';
-import * as pluginContext from '../hooks/use_plugin_context';
-import { PluginContextValue } from './plugin_context';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ApmIndicesConfig } from '../../common/typings';
@@ -26,12 +25,16 @@ const relativeEnd = '2020-10-08T07:00:00.000Z';
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
+const core = coreMock.createStart();
+
 function wrapper({ children }: { children: React.ReactElement }) {
   const history = createMemoryHistory();
   return (
-    <Router history={history}>
-      <HasDataContextProvider>{children}</HasDataContextProvider>
-    </Router>
+    <KibanaContextProvider services={{ ...core }}>
+      <Router history={history}>
+        <HasDataContextProvider>{children}</HasDataContextProvider>
+      </Router>
+    </KibanaContextProvider>
   );
 }
 
@@ -70,9 +73,6 @@ describe('HasDataContextProvider', () => {
       absoluteStart: new Date(relativeStart).valueOf(),
       absoluteEnd: new Date(relativeEnd).valueOf(),
     }));
-    jest.spyOn(pluginContext, 'usePluginContext').mockReturnValue({
-      core: { http: { get: jest.fn() } } as unknown as CoreStart,
-    } as PluginContextValue);
   });
 
   describe('when no plugin has registered', () => {
@@ -105,6 +105,7 @@ describe('HasDataContextProvider', () => {
       });
     });
   });
+
   describe('when plugins have registered', () => {
     describe('all apps return false', () => {
       beforeAll(() => {
@@ -127,6 +128,7 @@ describe('HasDataContextProvider', () => {
 
       it('hasAnyData returns false and all apps return false', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
+
         expect(result.current).toEqual({
           hasDataMap: {},
           hasAnyData: undefined,
@@ -520,20 +522,16 @@ describe('HasDataContextProvider', () => {
 
   describe('with alerts', () => {
     beforeAll(() => {
-      jest.spyOn(pluginContext, 'usePluginContext').mockReturnValue({
-        core: {
-          http: {
-            get: async () => {
-              return {
-                data: [
-                  { id: 2, consumer: 'apm' },
-                  { id: 3, consumer: 'uptime' },
-                ],
-              };
-            },
-          },
-        } as unknown as CoreStart,
-      } as PluginContextValue);
+      core.http.get.mockResolvedValue({
+        data: [
+          { id: 2, consumer: 'apm' },
+          { id: 3, consumer: 'uptime' },
+        ],
+      });
+    });
+
+    afterAll(() => {
+      core.http.get.mockReset();
     });
 
     it('returns if alerts are available', async () => {
