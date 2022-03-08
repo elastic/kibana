@@ -15,8 +15,9 @@ a|
 * `All` for the *Cases* feature under *Management*.
 * `All` for the *Actions and Connectors* feature under *Management*.
 
-NOTE: Roles without `All` *Actions and Connectors* feature privileges cannot
-create, add, delete, or modify case connectors.
+NOTE: The `All` *Actions and Connectors* feature privilege is required to
+create, add, delete, and modify case connectors and to send updates to external
+systems.
 
 | Give view-only access for cases | `Read` for the *Cases* feature under *Management*.
 
