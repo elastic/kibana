@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -16,9 +16,10 @@ import { ClassificationExploration } from './components/classification_explorati
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
 import { AnalyticsIdSelector } from '../components/analytics_selector';
+import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 
 export const Page: FC<{
   jobId: string;
@@ -26,12 +27,53 @@ export const Page: FC<{
 }> = ({ jobId, analysisType }) => {
   const [analyticsId, setAnalyticsId] =
     useState<{ model_id?: string; job_id?: string; analysis_type?: string }>();
+  const [jobsExist, setJobsExist] = useState(true);
   const {
     services: { docLinks },
   } = useMlKibana();
+  const {
+    dataFrameAnalytics: { getDataFrameAnalytics },
+  } = useMlApiContext();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
   const jobIdToUse = jobId || analyticsId?.job_id;
   const analysisTypeToUse = analysisType || analyticsId?.analysis_type;
+
+  const checkJobsExist = async () => {
+    try {
+      const { count } = await getDataFrameAnalytics(undefined, undefined, 0);
+      setJobsExist(count > 0);
+    } catch (e) {
+      // Swallow the error and just show the empty table in the analytics id selector
+      console.error('Error checking analytics jobs exist', e); // eslint-disable-line
+    }
+  };
+
+  useEffect(function checkJobs() {
+    checkJobsExist();
+  }, []);
+
+  const getEmptyState = () => {
+    if (jobsExist === false) {
+      return <AnalyticsEmptyPrompt />;
+    }
+    return (
+      <>
+        <AnalyticsIdSelector setAnalyticsId={setAnalyticsId} />
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.noJobSelectedLabel"
+                defaultMessage="No Analytics ID selected"
+              />
+            </h2>
+          }
+          data-test-subj="mlNoAnalyticsFound"
+        />
+      </>
+    );
+  };
 
   return (
     <>
@@ -55,21 +97,7 @@ export const Page: FC<{
           )}
         </div>
       ) : (
-        <>
-          <AnalyticsIdSelector setAnalyticsId={setAnalyticsId} jobsOnly={true} />
-          <EuiEmptyPrompt
-            iconType="alert"
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsMap.noJobSelectedLabel"
-                  defaultMessage="No Analytics ID selected"
-                />
-              </h2>
-            }
-            data-test-subj="mlNoAnalyticsFound"
-          />
-        </>
+        getEmptyState()
       )}
       <HelpMenu docLink={helpLink} />
     </>

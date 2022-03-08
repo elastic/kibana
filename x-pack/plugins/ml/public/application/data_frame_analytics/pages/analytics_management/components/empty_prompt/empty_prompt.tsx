@@ -19,21 +19,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dfaImage from './data_frame_analytics_kibana.png';
+import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
-interface Props {
-  disabled: boolean;
-}
-
-export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled }) => {
+export const AnalyticsEmptyPrompt: FC = () => {
   const {
     services: {
       docLinks,
       http: { basePath },
     },
   } = useMlKibana();
+  const disabled =
+    !mlNodesAvailable() ||
+    !checkPermission('canCreateDataFrameAnalytics') ||
+    !checkPermission('canStartStopDataFrameAnalytics');
+
   const transformsLink = `${basePath.get()}/app/management/data/transform`;
   const navigateToPath = useNavigateToPath();
 

@@ -21,15 +21,16 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ml } from '../../../../services/ml_api_service';
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
+import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from '../../../../trained_models/models_management';
 import {
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
 } from '../../analytics_management/components/analytics_list/common';
-import { useNotifications } from '../../../../contexts/kibana';
+import { useMlApiContext } from '../../../../contexts/kibana';
 
 const columns = [
   {
@@ -43,7 +44,7 @@ const columns = [
     scope: 'row',
   },
   {
-    field: DataFrameAnalyticsListColumn.description,
+    field: 'description',
     name: i18n.translate('xpack.ml.analyticsSelector.description', {
       defaultMessage: 'Description',
     }),
@@ -106,8 +107,11 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   const [trainedModels, setTrainedModels] = useState<any[]>([]);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { toasts } = useNotifications();
+  const { displayErrorToast } = useToastNotificationService();
   const trainedModelsApiService = useTrainedModelsApiService();
+  const {
+    dataFrameAnalytics: { getDataFrameAnalytics },
+  } = useMlApiContext();
 
   function renderTabs() {
     return <EuiTabbedContent size="s" tabs={tabs} initialSelectedTab={tabs[0]} />;
@@ -116,16 +120,16 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   async function fetchAnalyticsJobs() {
     setIsLoading(true);
     try {
-      const { data_frame_analytics: dataFrameAnalytics } =
-        await ml.dataFrameAnalytics.getDataFrameAnalytics();
+      const { data_frame_analytics: dataFrameAnalytics } = await getDataFrameAnalytics();
       setAnalyticsJobs(dataFrameAnalytics);
     } catch (e) {
       console.error('Error fetching analytics', e); // eslint-disable-line
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.analyticsSelector.analyticsFetchErrorMessage', {
+      displayErrorToast(
+        e,
+        i18n.translate('xpack.ml.analyticsSelector.analyticsFetchErrorMessage', {
           defaultMessage: 'An error occurred fetching analytics jobs. Refresh and try again.',
-        }),
-      });
+        })
+      );
     }
     setIsLoading(false);
   }
@@ -139,11 +143,12 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
       setTrainedModels(response);
     } catch (e) {
       console.error('Error fetching trained models', e); // eslint-disable-line
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.analyticsSelector.trainedModelsFetchErrorMessage', {
+      displayErrorToast(
+        e,
+        i18n.translate('xpack.ml.analyticsSelector.trainedModelsFetchErrorMessage', {
           defaultMessage: 'An error occurred fetching trained models. Refresh and try again.',
-        }),
-      });
+        })
+      );
     }
     setIsLoading(false);
   }
@@ -245,9 +250,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody className="mlJobSelectorFlyoutBody" data-test-subj={'mlJobSelectorFlyoutBody'}>
-        {renderTabs()}
-      </EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>{renderTabs()}</EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
@@ -257,9 +260,10 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
               isDisabled={selected === undefined}
               data-test-subj="mlFlyoutAnalyticsSelectorButtonApply"
             >
-              {i18n.translate('xpack.ml.analyticsSelector.applyFlyoutButton', {
-                defaultMessage: 'Apply',
-              })}
+              <FormattedMessage
+                id="xpack.ml.analyticsSelector.applyFlyoutButton"
+                defaultMessage="Apply"
+              />
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

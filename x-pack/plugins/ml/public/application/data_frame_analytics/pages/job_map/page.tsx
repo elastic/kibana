@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,14 +15,16 @@ import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { JobMap } from '../job_map';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
 import { AnalyticsIdSelector } from '../components/analytics_selector';
+import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 
 export const Page: FC = () => {
   const [globalState] = useUrlState('_g');
   const [isLoading, setIsLoading] = useState(false);
+  const [jobsExist, setJobsExist] = useState(true);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   const mapJobId = globalState?.ml?.jobId;
   const mapModelId = globalState?.ml?.modelId;
@@ -30,7 +32,48 @@ export const Page: FC = () => {
   const {
     services: { docLinks },
   } = useMlKibana();
+  const {
+    dataFrameAnalytics: { getDataFrameAnalytics },
+  } = useMlApiContext();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
+
+  const checkJobsExist = async () => {
+    try {
+      const { count } = await getDataFrameAnalytics(undefined, undefined, 0);
+      setJobsExist(count > 0);
+    } catch (e) {
+      // Swallow the error and just show the empty table in the analytics id selector
+      console.error('Error checking analytics jobs exist', e); // eslint-disable-line
+    }
+  };
+
+  useEffect(function checkJobs() {
+    checkJobsExist();
+  }, []);
+
+  const getEmptyState = () => {
+    if (jobsExist === false) {
+      return <AnalyticsEmptyPrompt />;
+    }
+    return (
+      <>
+        <AnalyticsIdSelector setAnalyticsId={setAnalyticsId} />
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.noJobSelectedLabel"
+                defaultMessage="No Analytics ID selected"
+              />
+            </h2>
+          }
+          data-test-subj="mlNoAnalyticsFound"
+        />
+      </>
+    );
+  };
+
   return (
     <>
       <MlPageHeader>
@@ -55,21 +98,7 @@ export const Page: FC = () => {
           modelId={mapModelId || analyticsId?.model_id}
         />
       ) : (
-        <>
-          <AnalyticsIdSelector setAnalyticsId={setAnalyticsId} />
-          <EuiEmptyPrompt
-            iconType="alert"
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsMap.noJobSelectedLabel"
-                  defaultMessage="No Analytics ID selected"
-                />
-              </h2>
-            }
-            data-test-subj="mlNoAnalyticsFound"
-          />
-        </>
+        getEmptyState()
       )}
       <HelpMenu docLink={helpLink} />
     </>

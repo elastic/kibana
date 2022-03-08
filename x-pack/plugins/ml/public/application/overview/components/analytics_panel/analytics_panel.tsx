@@ -29,10 +29,9 @@ import type { GetDataFrameAnalyticsStatsResponseError } from '../../../services/
 import { AnalyticsEmptyPrompt } from '../../../data_frame_analytics/pages/analytics_management/components/empty_prompt';
 
 interface Props {
-  jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
-export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
+export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
   const refresh = useRefresh();
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
@@ -41,6 +40,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
   );
   const [errorMessage, setErrorMessage] = useState<GetDataFrameAnalyticsStatsResponseError>();
   const [isInitialized, setIsInitialized] = useState(false);
+  // const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
 
   const manageJobsLink = useMlLink({
     page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
@@ -83,7 +83,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
   return (
     <>
       {noDFAJobs ? (
-        <AnalyticsEmptyPrompt disabled={jobCreationDisabled} />
+        <AnalyticsEmptyPrompt />
       ) : (
         <EuiPanel className={panelClass} hasShadow={false} hasBorder>
           {typeof errorMessage !== 'undefined' ? errorDisplay : null}
