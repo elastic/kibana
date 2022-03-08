@@ -214,19 +214,6 @@ in layer settings if you prefer the previous approach.
 === {ml-cap}
 
 [float]
-==== Deploy DGA and Living-off-the-land supervised models in Fleet
-
-Incorporating supervised models into integration packages provides you a more 
-seamless experience to install package artifacts inside {kib} with a single 
-click. Now you can deploy 
-https://www.elastic.co/blog/supervised-and-unsupervised-machine-learning-for-dga-detection[DGA] 
-and https://www.elastic.co/blog/problemchild-detecting-living-off-the-land-attacks[Living-off-the-land (LotL)] 
-detection packages within Fleet.
-
-[role="screenshot"]
-image::images/highlights-dga-lotl.png[DGA integration card]
-
-[float]
 ==== {ml-cap} UI enhancements: easier anomaly investigation, new side navigation
 
 8.1 contains a couple of enhancements on the {ml} UI.
