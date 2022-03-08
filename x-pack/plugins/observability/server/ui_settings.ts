@@ -58,7 +58,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
     name: i18n.translate('xpack.observability.enableInfrastructureView', {
       defaultMessage: 'Infrastructure feature',
     }),
-    value: true,
+    value: false,
     description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
       defaultMessage: 'Enable the Infrastruture view feature in APM app',
     }),
