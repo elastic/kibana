@@ -26,7 +26,7 @@ import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import { EndpointPrivileges } from '../../../common/endpoint/types';
-import { useHostRiskScore } from '../../hosts/containers/host_risk_score';
+import { useHostRiskScore } from '../../risk_score/containers';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -75,7 +75,7 @@ jest.mock('../containers/overview_cti_links/use_all_ti_data_sources');
 const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
 useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../../hosts/containers/host_risk_score');
+jest.mock('../../risk_score/containers');
 const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 useHostRiskScoreMock.mockReturnValue([false, { data: [], isModuleEnabled: false }]);
 
