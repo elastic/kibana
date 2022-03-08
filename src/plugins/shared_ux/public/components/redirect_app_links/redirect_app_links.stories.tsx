@@ -11,8 +11,9 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
 
+import { action } from '@storybook/addon-actions';
 import { RedirectAppLinks } from './redirect_app_links';
-import mdx from './redirect_app_link.mdx';
+import mdx from './redirect_app_links.mdx';
 
 export default {
   title: 'Redirect App Links',
@@ -30,7 +31,12 @@ export const Component = () => {
       navigateToUrl={() => Promise.resolve()}
       currentAppId$={new BehaviorSubject('test')}
     >
-      <EuiButton data-test-subj="homeAddData" fill iconType="plusInCircle">
+      <EuiButton
+        data-test-subj="homeAddData"
+        fill
+        iconType="plusInCircle"
+        onClick={action('button pressed')}
+      >
         <FormattedMessage
           id="sharedUX.addData.addDataButtonLabel"
           defaultMessage="Add integrations"
