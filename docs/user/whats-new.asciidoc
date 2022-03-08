@@ -258,7 +258,7 @@ created by the transform it will also be deleted.
 Other features previously only available to API users are also added to the UI 
 for 8.1: the ability to configure an ingest pipeline to enrich the data 
 persisted to the destination index, and the terms aggregation is available in 
-the list of options when building the aggregations in the Pivot {transform} 
+the list of options when building the aggregations in the pivot {transform} 
 wizard.
 
 [role="screenshot"]
