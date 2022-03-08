@@ -82,7 +82,6 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
         <EuiToolTip position="top" content={ANOMALY_DETECTION_TOOLTIP}>
           <EuiIcon type="iInCircle" color="subdued" />
         </EuiToolTip>
-        {/* <EuiIconTip type="iInCircle" content={ANOMALY_DETECTION_TOOLTIP} /> */}
         {!mlJobId && <EnableText>{ANOMALY_DETECTION_DISABLED_TEXT}</EnableText>}
       </section>
       {hasAnomalyDetectionScore && (
