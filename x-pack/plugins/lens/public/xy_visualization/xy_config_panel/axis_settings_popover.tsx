@@ -272,40 +272,57 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         isAxisTitleVisible={isAxisTitleVisible}
         toggleAxisTitleVisibility={toggleAxisTitleVisibility}
       />
-      <EuiSwitch
-        compressed
-        data-test-subj={`lnsshow${axis}AxisGridlines`}
+      <EuiFormRow
+        display="columnCompressedSwitch"
         label={i18n.translate('xpack.lens.xyChart.Gridlines', {
           defaultMessage: 'Gridlines',
         })}
-        onChange={() => toggleGridlinesVisibility(axis)}
-        checked={areGridlinesVisible}
-      />
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        compressed
-        data-test-subj={`lnsshow${axis}AxisTickLabels`}
+        fullWidth
+      >
+        <EuiSwitch
+          compressed
+          data-test-subj={`lnsshow${axis}AxisGridlines`}
+          label={i18n.translate('xpack.lens.xyChart.Gridlines', {
+            defaultMessage: 'Gridlines',
+          })}
+          onChange={() => toggleGridlinesVisibility(axis)}
+          checked={areGridlinesVisible}
+          showLabel={false}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        display="columnCompressedSwitch"
         label={i18n.translate('xpack.lens.xyChart.tickLabels', {
           defaultMessage: 'Tick labels',
         })}
-        onChange={() => toggleTickLabelsVisibility(axis)}
-        checked={areTickLabelsVisible}
-      />
-      <EuiSpacer size="s" />
-      <TooltipWrapper
-        tooltipContent={i18n.translate('xpack.lens.xyChart.axisOrientationMultilayer.disabled', {
-          defaultMessage: 'These options can be configured only with non-time-based axes',
-        })}
-        condition={Boolean(useMultilayerTimeAxis)}
-        display="block"
+        fullWidth
       >
-        <EuiFormRow
-          display="rowCompressed"
-          fullWidth
-          isDisabled={useMultilayerTimeAxis}
-          label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
-            defaultMessage: 'Orientation',
+        <EuiSwitch
+          compressed
+          data-test-subj={`lnsshow${axis}AxisTickLabels`}
+          label={i18n.translate('xpack.lens.xyChart.tickLabels', {
+            defaultMessage: 'Tick labels',
           })}
+          onChange={() => toggleTickLabelsVisibility(axis)}
+          checked={areTickLabelsVisible}
+          showLabel={false}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        isDisabled={useMultilayerTimeAxis}
+        label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+          defaultMessage: 'Orientation',
+        })}
+      >
+        <TooltipWrapper
+          tooltipContent={i18n.translate('xpack.lens.xyChart.axisOrientationMultilayer.disabled', {
+            defaultMessage: 'These options can be configured only with non-time-based axes',
+          })}
+          condition={Boolean(useMultilayerTimeAxis)}
+          display="block"
         >
           <EuiButtonGroup
             isFullWidth
@@ -325,11 +342,16 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
               setOrientation(axis, newOrientation);
             }}
           />
-        </EuiFormRow>
-      </TooltipWrapper>
+        </TooltipWrapper>
+      </EuiFormRow>
       {setEndzoneVisibility && (
-        <>
-          <EuiSpacer size="m" />
+        <EuiFormRow
+          display="columnCompressedSwitch"
+          label={i18n.translate('xpack.lens.xyChart.showEnzones', {
+            defaultMessage: 'Show partial data markers',
+          })}
+          fullWidth
+        >
           <EuiSwitch
             compressed
             data-test-subj={`lnsshowEndzones`}
@@ -338,14 +360,14 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             })}
             onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
             checked={Boolean(endzonesVisible)}
+            showLabel={false}
           />
-        </>
+        </EuiFormRow>
       )}
       {localExtent && setExtent && (
         <>
-          <EuiSpacer size="s" />
           <EuiFormRow
-            display="rowCompressed"
+            display="columnCompressed"
             fullWidth
             label={i18n.translate('xpack.lens.xyChart.axisExtent.label', {
               defaultMessage: 'Bounds',
