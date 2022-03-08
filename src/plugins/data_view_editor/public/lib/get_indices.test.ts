@@ -61,8 +61,7 @@ describe('getIndices', () => {
     expect(result.length).toBe(3);
     expect(result[0].name).toBe('f-alias');
     expect(result[1].name).toBe('foo');
-    expect(result[2].name).toBe('kibana_sample_data_ecommerce');
-    expect(result[3].name).toBe('remoteCluster1:bar-01');
+    expect(result[2].name).toBe('remoteCluster1:bar-01');
   });
 
   it('should ignore ccs query-all', async () => {
