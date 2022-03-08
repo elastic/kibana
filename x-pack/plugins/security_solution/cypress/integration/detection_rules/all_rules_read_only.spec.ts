@@ -12,7 +12,6 @@ import {
   RULE_CHECKBOX,
   RULE_NAME,
 } from '../../screens/alerts_detection_rules';
-import { PAGE_TITLE } from '../../screens/common/page';
 import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../screens/lists';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
