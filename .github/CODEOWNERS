@@ -72,8 +72,6 @@
 /src/plugins/field_formats/ @elastic/kibana-app-services
 /src/plugins/data_view_editor/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
-/src/plugins/kibana_react/ @elastic/kibana-app-services
-/src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
 /src/plugins/kibana_utils/ @elastic/kibana-app-services
 /src/plugins/navigation/ @elastic/kibana-app-services
 /src/plugins/share/ @elastic/kibana-app-services
@@ -467,9 +465,11 @@ x-pack/plugins/session_view @elastic/awp-platform
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
 # EUI design
-/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services
+/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/shared-ux
 
 # Application Experience
 
 ## Shared UX
-/src/plugins/shared_ux @elastic/shared-ux
+/src/plugins/shared_ux/ @elastic/shared-ux
+/src/plugins/kibana_react/ @elastic/shared-ux
+/src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
