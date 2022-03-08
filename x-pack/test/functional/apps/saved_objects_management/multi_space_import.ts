@@ -15,22 +15,16 @@ import path from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects([
     'common',
-    'security',
     'settings',
-    'header',
-    'spaceSelector',
     'savedObjects',
     'copySavedObjectsToSpace',
     'dashboard',
-    'timePicker',
   ]);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const toasts = getService('toasts');
   const spacesService = getService('spaces');
 
   const getExportCount = async () => {
@@ -47,12 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return count;
     });
   };
-
-  // const setTimeRange = async () => {
-  //   const fromTime = 'Apr 27, 2015 @ 00:00:00.000';
-  //   const toTime = 'June 25, 2015 @ 00:00:00.000';
-  //   await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings(fromTime, toTime);
-  // };
 
   describe('should be able to handle multi-space imports correctly', function () {
     before(async function () {
@@ -148,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(errorEmbeddables.length).to.be(0);
     });
 
-    it('should be able to copy the dashboard into third space in saved objects table', async () => {
+    it('should be able to copy the dashboard into third space in saved objects table using copy to space', async () => {
       const destinationSpaceId = 'third_space';
       const getSpacePrefix = (spaceId: string) => {
         return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
