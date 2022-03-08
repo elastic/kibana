@@ -42,7 +42,10 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
       .filter((filename) => !filename.match(/.sha512$/))
       .filter((filename) => !filename.match(/.json$/))
       .map((filename) => {
-        const parts = filename.replace('elasticsearch-oss', 'oss').split('-');
+        const parts = filename
+          .replace('elasticsearch-cloud', 'cloud')
+          .replace('elasticsearch-oss', 'oss')
+          .split('-');
 
         VERSION = VERSION || parts[1];
         SNAPSHOT_ID = SNAPSHOT_ID || `${date}_${GIT_COMMIT_SHORT}`;
