@@ -210,6 +210,17 @@ Arguments:
 | onClose?        | `() => void` called when the modal is closed without selecting a case                             |
 | attachments?    | `CaseAttachments`; array of `SupportedCaseAttachment` (see types) that will be attached to the newly created case  |
 
+### helpers
+
+#### getRuleIdFromEvent
+
+Returns an object with a rule `id` and `name` of the event passed. This helper method is necessary to bridge the gap between previous events schema and new ones.
+
+Arguments:
+
+| property | description                                                                                  |
+|----------|----------------------------------------------------------------------------------------------|
+| event    | Event containing an `ecs` attribute with ecs data and a `data` attribute with `nonEcs` data. |
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
