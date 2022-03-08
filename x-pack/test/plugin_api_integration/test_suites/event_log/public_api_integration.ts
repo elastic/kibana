@@ -243,7 +243,9 @@ export default function ({ getService }: FtrProviderContext) {
       isEmpty(query)
         ? ''
         : `?${Object.entries(query)
-            .map(([key, val]) => `${key}=${val}`)
+            .map(([key, val]) =>
+              typeof val === 'object' ? `${key}=${JSON.stringify(val)}` : `${key}=${val}`
+            )
             .join('&')}`
     }`;
     await delay(1000); // wait for buffer to be written
