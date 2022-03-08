@@ -514,7 +514,7 @@ describe('terms', () => {
         })
       );
     });
-    it('should set alphabetical order type if metric column is of type last value', () => {
+    it('should set alphabetical order type if metric column is of type last value and using top hit agg', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
         layer: {
@@ -527,6 +527,7 @@ describe('terms', () => {
               operationType: 'last_value',
               params: {
                 sortField: 'datefield',
+                useTopHit: true,
               },
             } as LastValueIndexPatternColumn,
           },
@@ -543,6 +544,38 @@ describe('terms', () => {
       });
       expect(termsColumn.params).toEqual(
         expect.objectContaining({ orderBy: { type: 'alphabetical', fallback: true } })
+      );
+    });
+    it('should NOT set alphabetical order type if metric column is of type last value and NOT using top hit agg', () => {
+      const termsColumn = termsOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        layer: {
+          columns: {
+            col1: {
+              label: 'Last value of a',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'a',
+              operationType: 'last_value',
+              params: {
+                sortField: 'datefield',
+                useTopHit: false,
+              },
+            } as LastValueIndexPatternColumn,
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+      });
+      expect(termsColumn.params).toEqual(
+        expect.objectContaining({ orderBy: { type: 'column', columnId: 'col1' } })
       );
     });
 
@@ -632,7 +665,7 @@ describe('terms', () => {
       expect(updatedColumn).toBe(initialColumn);
     });
 
-    it('should switch to alphabetical ordering if metric is of type last_value', () => {
+    it('should switch to alphabetical ordering if metric is of type last_value and using top hit agg', () => {
       const initialColumn: TermsIndexPatternColumn = {
         label: 'Top value of category',
         dataType: 'string',
@@ -659,6 +692,7 @@ describe('terms', () => {
               operationType: 'last_value',
               params: {
                 sortField: 'time',
+                useTopHit: true,
               },
             } as LastValueIndexPatternColumn,
           },
