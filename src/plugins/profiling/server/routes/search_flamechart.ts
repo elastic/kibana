@@ -77,6 +77,27 @@ export function getSampledTraceEventsIndex(
   return { name: downsampledIndex + initialExp, sampleRate: 1 / samplingFactor ** initialExp };
 }
 
+function downsampleEventsRandomly(stackTraceEvents: Map<StackTraceID, number>, p: number): number {
+  let totalCount = 0;
+
+  for (const [id, count] of stackTraceEvents) {
+    let newCount = 0;
+    for (let i = 0; i < count; i++) {
+      if (Math.random() < p) {
+        newCount++;
+      }
+    }
+    if (newCount) {
+      stackTraceEvents.set(id, newCount);
+      totalCount += newCount;
+    } else {
+      stackTraceEvents.delete(id);
+    }
+  }
+
+  return totalCount;
+}
+
 async function queryFlameGraph(
   logger: Logger,
   client: ElasticsearchClient,
@@ -152,25 +173,31 @@ async function queryFlameGraph(
     }
   );
 
-  const totalCount: number = resEvents.body.aggregations?.total_count.value;
-  const stackTraceEvents = new Map<StackTraceID, number>();
-
+  let totalCount: number = resEvents.body.aggregations?.total_count.value;
   let docCount = 0;
-  let bucketCount = 0;
+
+  const stackTraceEvents = new Map<StackTraceID, number>();
   resEvents.body.aggregations?.group_by.buckets.forEach((item: any) => {
     const traceid: StackTraceID = item.key.traceid;
     stackTraceEvents.set(traceid, item.sum_count.value);
-    docCount += item.doc_count;
-    bucketCount++;
+    docCount++;
   });
-  logger.info('query time registered by ES: ' + resEvents.body.took + 'ms');
   logger.info('events fetched: ' + docCount);
   logger.info('total count: ' + totalCount);
-  logger.info('unique stacktraces: ' + bucketCount);
+  logger.info('unique stacktraces: ' + stackTraceEvents.size);
+
+  // Manual downsampling if totalCount exceeds sampleSize by 10%.
+  if (totalCount > sampleSize * 1.1) {
+    const p = sampleSize / totalCount;
+    logger.info('downsampling events with p=' + p);
+    totalCount = downsampleEventsRandomly(stackTraceEvents, p);
+    logger.info('downsampled total count: ' + totalCount);
+    logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
+  }
 
   const resStackTraces = await logExecutionLatency(
     logger,
-    'mget query for ' + bucketCount + ' stacktraces',
+    'mget query for ' + stackTraceEvents.size + ' stacktraces',
     async () => {
       return await client.mget({
         index: 'profiling-stacktraces',
@@ -195,9 +222,11 @@ async function queryFlameGraph(
       });
     }
   }
-  if (stackTraces.size < bucketCount) {
+  if (stackTraces.size < stackTraceEvents.size) {
     logger.info(
-      'failed to find ' + (bucketCount - stackTraces.size) + ' stacktraces (todo: find out why)'
+      'failed to find ' +
+        (stackTraceEvents.size - stackTraces.size) +
+        ' stacktraces (todo: find out why)'
     );
   }
 
