@@ -22845,7 +22845,6 @@
     "xpack.securitySolution.alertDetails.summary.readLess": "表示を減らす",
     "xpack.securitySolution.alertDetails.summary.readMore": "続きを読む",
     "xpack.securitySolution.alertDetails.threatIntel": "Threat Intel",
-    "xpack.securitySolution.alerts.badge.readOnly.text": "読み取り専用",
     "xpack.securitySolution.alerts.badge.readOnly.tooltip": "アラートを更新できません",
     "xpack.securitySolution.alerts.riskScoreMapping.defaultDescriptionLabel": "このルールで生成されたすべてのアラートのリスクスコアを選択します。",
     "xpack.securitySolution.alerts.riskScoreMapping.defaultRiskScoreTitle": "デフォルトリスクスコア",
