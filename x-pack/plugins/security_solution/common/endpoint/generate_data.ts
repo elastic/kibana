@@ -614,6 +614,18 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
         entry_leader: {
           entity_id: sessionEntryLeader,
+          name: 'fake entry',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        session_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake session',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        group_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake leader',
+          pid: Math.floor(Math.random() * 1000),
         },
         Ext: {
           ancestry,
@@ -712,6 +724,18 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
         entry_leader: {
           entity_id: sessionEntryLeader,
+          name: 'fake entry',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        session_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake session',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        group_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake leader',
+          pid: Math.floor(Math.random() * 1000),
         },
         Ext: {
           ancestry,
@@ -899,6 +923,18 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
         entry_leader: {
           entity_id: sessionEntryLeader,
+          name: 'fake entry',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        session_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake session',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        group_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake leader',
+          pid: Math.floor(Math.random() * 1000),
         },
         parent: parentEntityID
           ? {
@@ -975,6 +1011,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     const sessionEntryLeader = options.sessionEntryLeader
       ? options.sessionEntryLeader
       : this.randomString(10);
+    const userName = this.randomString(10);
     const detailRecordForEventType =
       options.extensions ||
       ((eventCategory) => {
@@ -1017,7 +1054,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         pid:
           'pid' in options && typeof options.pid !== 'undefined' ? options.pid : this.randomN(5000),
         executable: `C:\\${processName}`,
-        args: `"C:\\${processName}" \\${this.randomString(3)}`,
+        args: [`"C:\\${processName}"`, `--${this.randomString(3)}`],
+        working_directory: `/home/${userName}/`,
         code_signature: {
           status: 'trusted',
           subject_name: 'Microsoft',
@@ -1026,6 +1064,18 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         entity_id: options.entityID ? options.entityID : this.randomString(10),
         entry_leader: {
           entity_id: sessionEntryLeader,
+          name: 'fake entry',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        session_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake session',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        group_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake leader',
+          pid: Math.floor(Math.random() * 1000),
         },
         parent: options.parentEntityID
           ? {
@@ -1045,7 +1095,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       },
       user: {
         domain: this.randomString(10),
-        name: this.randomString(10),
+        name: userName,
       },
     };
   }
@@ -1255,6 +1305,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
     const root = this.generateEvent({
       timestamp: startDate + 1000,
+      entityID: opts.sessionEntryLeader,
       sessionEntryLeader: opts.sessionEntryLeader,
       eventsDataStream: opts.eventsDataStream,
     });

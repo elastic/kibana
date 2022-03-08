@@ -352,6 +352,7 @@ export type AlertEvent = Partial<{
     // Using ECSField as the outer because the object is expected to be an array
     thread: ECSField<ThreadFields>;
     uptime: ECSField<number>;
+    working_directory: ECSField<string>;
     Ext: Partial<{
       // Using ECSField as the outer because the object is expected to be an array
       code_signature: ECSField<
@@ -740,6 +741,21 @@ export type SafeEndpointEvent = Partial<{
     pid: ECSField<number>;
     hash: Hashes;
     parent: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    session_leader: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    entry_leader: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    group_leader: Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
       pid: ECSField<number>;

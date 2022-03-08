@@ -106,21 +106,23 @@ export function ProcessTreeNode({
 
   const id = process.id;
   const { user } = processDetails;
+
   const {
-    args,
+    args = [],
     name,
     tty,
     parent,
     working_directory: workingDirectory,
     exit_code: exitCode,
   } = processDetails.process;
+  console.log({ args, workingDirectory });
 
   const children = process.getChildren(!showGroupLeadersOnly);
   const childCount = process.getChildren(true).length;
   const shouldRenderChildren = childrenExpanded && children && children.length > 0;
   const childrenTreeDepth = depth + 1;
 
-  const showRootEscalation = user.name === 'root' && user.id !== parent.user.id;
+  const showRootEscalation = user?.name === 'root' && user.id && user?.id !== parent.user.id;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'consoleApp' : 'compute';
   const hasExec = process.hasExec();
@@ -161,7 +163,7 @@ export function ProcessTreeNode({
               <span ref={textRef}>
                 <span css={styles.workingDir}>{workingDirectory}</span>&nbsp;
                 <span css={styles.darkText}>{args[0]}</span>&nbsp;
-                {args.slice(1).join(' ')}
+                {typeof args === 'object' ? args.slice(1).join(' ') : args}
                 {exitCode !== undefined && (
                   <small data-test-subj="sessionView:processTreeNodeExitCode">
                     {' '}

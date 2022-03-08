@@ -70,10 +70,10 @@ export interface ProcessFields {
 }
 
 export interface ProcessSelf extends Omit<ProcessFields, 'user'> {
-  parent: ProcessFields;
-  session_leader: ProcessFields;
-  entry_leader: ProcessFields;
-  group_leader: ProcessFields;
+  parent?: ProcessFields;
+  session_leader?: ProcessFields;
+  entry_leader?: ProcessFields;
+  group_leader?: ProcessFields;
 }
 
 export interface ProcessEventHost {

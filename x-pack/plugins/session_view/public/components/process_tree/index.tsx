@@ -58,6 +58,7 @@ export const ProcessTree = ({
     data,
     searchQuery,
   });
+  console.log(sessionLeader);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const selectionAreaRef = useRef<HTMLDivElement>(null);

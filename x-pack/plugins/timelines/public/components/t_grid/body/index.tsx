@@ -342,7 +342,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
-    console.log(sort);
 
     const alertCountText = useMemo(
       () => `${totalItems.toLocaleString()} ${unit(totalItems)}`,

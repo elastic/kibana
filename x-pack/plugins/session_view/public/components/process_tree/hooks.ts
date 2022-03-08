@@ -6,7 +6,7 @@
  */
 import _ from 'lodash';
 import memoizeOne from 'memoize-one';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   EventAction,
   EventKind,
@@ -76,7 +76,7 @@ export class ProcessImpl implements Process {
         // Hide processes that have their session leader as their process group leader.
         // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
         // other shell startup activities (e.g bashrc .profile etc)
-        if (groupLeader.pid === sessionLeader.pid) {
+        if (groupLeader?.pid === sessionLeader?.pid) {
           return false;
         }
 
@@ -137,12 +137,12 @@ export class ProcessImpl implements Process {
       session_leader: sessionLeader,
       group_leader: groupLeader,
     } = event.process;
-
-    const parentIsASessionLeader = parent.pid === sessionLeader.pid; // possibly bash, zsh or some other shell
-    const processIsAGroupLeader = pid === groupLeader.pid;
+    console.log(event);
+    const parentIsASessionLeader = parent && sessionLeader && parent.pid === sessionLeader.pid; // possibly bash, zsh or some other shell
+    const processIsAGroupLeader = groupLeader && pid === groupLeader.pid;
     const sessionIsInteractive = !!tty;
 
-    return sessionIsInteractive && parentIsASessionLeader && processIsAGroupLeader;
+    return !!(sessionIsInteractive && parentIsASessionLeader && processIsAGroupLeader);
   }
 
   getMaxAlertLevel() {
@@ -172,13 +172,14 @@ export class ProcessImpl implements Process {
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
     const actionsToFind = [EventAction.fork, EventAction.exec, EventAction.end];
     const filtered = events.filter((processEvent) => {
-      return actionsToFind.includes(processEvent.event.action);
+      // return actionsToFind.includes(processEvent.event.action);
+      return true;
     });
 
     // because events is already ordered by @timestamp we take the last event
     // which could be a fork (w no exec or exit), most recent exec event (there can be multiple), or end event.
     // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
-    return filtered[filtered.length - 1] || ({} as ProcessEvent);
+    return filtered[filtered.length - 1];
   });
 }
 
@@ -251,5 +252,7 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
 
   sessionLeader.orphans = orphans;
 
-  return { sessionLeader: processMap[sessionEntityId], processMap, searchResults };
+  return useMemo(() => {
+    return { sessionLeader: processMap[sessionEntityId], processMap, searchResults };
+  }, [processMap, searchResults, sessionEntityId]);
 };
