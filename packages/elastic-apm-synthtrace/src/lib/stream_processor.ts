@@ -45,8 +45,8 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
       ? parseInterval(this.options.flushInterval)
       : parseInterval('1m');
     this.name = this.options?.name ?? 'StreamProcessor';
-    this.version =  this.options.version ?? "8.0.0";
-    this.versionMajor =  Number.parseInt(this.version.split('.')[0]);
+    this.version = this.options.version ?? '8.0.0';
+    this.versionMajor = Number.parseInt(this.version.split('.')[0], 10);
   }
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
@@ -55,7 +55,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   private readonly versionMajor: number;
 
   // TODO move away from chunking and feed this data one by one to processors
-  *stream(...eventSources: Array<EntityIterable<TFields>>) : Generator<ApmFields, any, any> {
+  *stream(...eventSources: Array<EntityIterable<TFields>>): Generator<ApmFields, any, any> {
     const maxBufferSize = this.options.maxBufferSize ?? StreamProcessor.defaultFlushInterval;
     const maxSourceEvents = this.options.maxSourceEvents;
     let localBuffer = [];
@@ -97,7 +97,9 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
             `${this.name} flush ${localBuffer.length} documents ${order}: ${e} => ${f}`
           );
           for (const processor of this.options.processors) {
-            yield* processor(localBuffer).map((d) => StreamProcessor.enrich(d, this.version, this.versionMajor));
+            yield* processor(localBuffer).map((d) =>
+              StreamProcessor.enrich(d, this.version, this.versionMajor)
+            );
           }
           localBuffer = [];
           flushAfter = this.calculateFlushAfter(flushAfter, order);
@@ -115,7 +117,9 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
         `${this.name} processing remaining buffer: ${localBuffer.length} items left`
       );
       for (const processor of this.options.processors) {
-        yield* processor(localBuffer).map((d) => StreamProcessor.enrich(d, this.version, this.versionMajor));
+        yield* processor(localBuffer).map((d) =>
+          StreamProcessor.enrich(d, this.version, this.versionMajor)
+        );
       }
       this.options.processedCallback?.apply(this, [localBuffer.length]);
     }
@@ -153,11 +157,11 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     return Array.from<ApmFields>(this.stream(...eventSources));
   }
 
-  private static enrich(document: ApmFields, version: string, versionMajor:number): ApmFields {
+  private static enrich(document: ApmFields, version: string, versionMajor: number): ApmFields {
     // see https://github.com/elastic/apm-server/issues/7088 can not be provided as flat key/values
     document.observer = {
       version: version ?? '8.2.0',
-      version_major:  versionMajor,
+      version_major: versionMajor,
     };
     document['service.node.name'] =
       document['service.node.name'] || document['container.id'] || document['host.name'];

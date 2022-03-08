@@ -15,9 +15,10 @@ import { ApmFields } from '../../lib/apm/apm_fields';
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
 
-  if (!runOptions.writeTarget) {
-    throw new Error('Write target is not defined');
-  }
+  // TODO reintroduce overwrite
+  // if (!runOptions.writeTarget) {
+  //  throw new Error('Write target is not defined');
+  // }
 
   return {
     generate: ({ from, to }) => {

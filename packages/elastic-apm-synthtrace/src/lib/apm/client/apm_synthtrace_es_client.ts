@@ -40,9 +40,7 @@ export class ApmSynthtraceEsClient {
 
   async runningVersion() {
     const info = await this.client.info();
-    console.log(info.version);
     return info.version.number;
-
   }
 
   async clean() {
@@ -90,33 +88,35 @@ export class ApmSynthtraceEsClient {
 
   async registerGcpRepository(connectionString: string) {
     // <client_name>:<bucket>[:base_path]
-    let [clientName, bucket, basePath] = connectionString.split(':');
-    if (!clientName) throw new Error(`client name is mandatory for gcp repostitory registration: ${connectionString}`)
-    if (!bucket) throw new Error(`bucket is mandatory for gcp repostitory registration: ${connectionString}`)
+    const [clientName, bucket, basePath] = connectionString.split(':');
+    if (!clientName)
+      throw new Error(
+        `client name is mandatory for gcp repostitory registration: ${connectionString}`
+      );
+    if (!bucket)
+      throw new Error(`bucket is mandatory for gcp repostitory registration: ${connectionString}`);
 
     const name = `gcp-repository-${clientName}`;
-    this.logger.info(`Registering gcp repository ${name}`)
+    this.logger.info(`Registering gcp repository ${name}`);
     const putRepository = await this.client.snapshot.createRepository({
-      name: name,
+      name,
       type: 'gcs',
       settings: {
         // @ts-ignore
         // missing from es types
-        'bucket': bucket,
+        bucket,
         client: clientName,
-        base_path: basePath
-      }
-    })
+        base_path: basePath,
+      },
+    });
     this.logger.info(putRepository);
 
-    this.logger.info(`Verifying gcp repository ${name}`)
-    const verifyRepository = await this.client.snapshot.verifyRepository({ name: name })
+    this.logger.info(`Verifying gcp repository ${name}`);
+    const verifyRepository = await this.client.snapshot.verifyRepository({ name });
     this.logger.info(verifyRepository);
   }
 
-
   async refresh() {
-
     const writeTargets = await this.getWriteTargets();
 
     const indices = Object.values(writeTargets);

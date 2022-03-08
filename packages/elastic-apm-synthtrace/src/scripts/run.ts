@@ -43,12 +43,12 @@ function options(y: Argv) {
     .option('username', {
       describe: 'Basic authentication username',
       string: true,
-      default: "elastic",
+      default: 'elastic',
     })
     .option('password', {
       describe: 'Basic authentication password',
       string: true,
-      default: "changeme",
+      default: 'changeme',
     })
     .option('from', {
       description: 'The start of the time window',
@@ -107,7 +107,8 @@ function options(y: Argv) {
       },
     })
     .option('gcpRepository', {
-      describe: 'Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format',
+      describe:
+        'Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format',
       string: true,
     })
 
@@ -122,82 +123,92 @@ function options(y: Argv) {
 export type RunCliFlags = ReturnType<typeof options>['argv'];
 
 yargs(process.argv.slice(2))
-  .command('*', 'Generate data and index into Elasticsearch', options, async (argv: RunCliFlags) => {
-    if (argv.local) {
-      argv.target = "http://localhost:9200";
-    }
+  .command(
+    '*',
+    'Generate data and index into Elasticsearch',
+    options,
+    async (argv: RunCliFlags) => {
+      if (argv.local) {
+        argv.target = 'http://localhost:9200';
+      }
 
-    const runOptions = parseRunCliFlags(argv);
+      const runOptions = parseRunCliFlags(argv);
 
-    const { logger, apmEsClient } = getCommonServices(runOptions);
+      const { logger, apmEsClient } = getCommonServices(runOptions);
 
-    const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
-    const to = new Date(toMs);
-    const defaultTimeRange = !runOptions.maxDocs ? '15m' : '520w';
-    const fromMs = argv.from
-      ? datemath.parse(String(argv.from))!.valueOf()
-      : toMs - intervalToMs(defaultTimeRange);
-    const from = new Date(fromMs);
+      const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
+      const to = new Date(toMs);
+      const defaultTimeRange = !runOptions.maxDocs ? '15m' : '520w';
+      const fromMs = argv.from
+        ? datemath.parse(String(argv.from))!.valueOf()
+        : toMs - intervalToMs(defaultTimeRange);
+      const from = new Date(fromMs);
 
-    const live = argv.live;
+      const live = argv.live;
 
-    if (runOptions.dryRun) {
-      await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, "8.0.0");
-      return;
-    }
+      if (runOptions.dryRun) {
+        await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, '8.0.0');
+        return;
+      }
 
-    // we need to know the running version to generate events that satisfy the min version requirements
-    let version = await apmEsClient.runningVersion();
-    logger.info(`Discovered Elasticsearch running version: ${version}`);
-    version = version.replace("-SNAPSHOT", "");
+      // we need to know the running version to generate events that satisfy the min version requirements
+      let version = await apmEsClient.runningVersion();
+      logger.info(`Discovered Elasticsearch running version: ${version}`);
+      version = version.replace('-SNAPSHOT', '');
 
-    // We automatically set up managed APM either by migrating on cloud or installing the package locally
-    if (runOptions.cloudId || argv.local || argv.kibana) {
-      const kibanaClient = new ApmSynthtraceKibanaClient(logger);
-      if (runOptions.cloudId) {
-        await kibanaClient.migrateCloudToManagedApm(
-          runOptions.cloudId,
-          runOptions.username,
-          runOptions.password
-        );
-      } else {
-        let kibanaUrl: string | null = argv.kibana ?? null;
-        if (argv.local) {
-          kibanaUrl = await kibanaClient.discoverLocalKibana();
+      // We automatically set up managed APM either by migrating on cloud or installing the package locally
+      if (runOptions.cloudId || argv.local || argv.kibana) {
+        const kibanaClient = new ApmSynthtraceKibanaClient(logger);
+        if (runOptions.cloudId) {
+          await kibanaClient.migrateCloudToManagedApm(
+            runOptions.cloudId,
+            runOptions.username,
+            runOptions.password
+          );
+        } else {
+          let kibanaUrl: string | null = argv.kibana ?? null;
+          if (argv.local) {
+            kibanaUrl = await kibanaClient.discoverLocalKibana();
+          }
+          if (!kibanaUrl) throw Error('kibanaUrl could not be determined');
+          await kibanaClient.installApmPackage(
+            kibanaUrl,
+            version,
+            runOptions.username,
+            runOptions.password
+          );
         }
-        if (!kibanaUrl) throw Error("kibanaUrl could not be determined")
-        await kibanaClient.installApmPackage(kibanaUrl, version, runOptions.username, runOptions.password);
+      }
+
+      if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
+        await apmEsClient.updateComponentTemplates(runOptions.numShards);
+      }
+
+      if (argv.clean) {
+        await apmEsClient.clean();
+      }
+      if (runOptions.gcpRepository) {
+        await apmEsClient.registerGcpRepository(runOptions.gcpRepository);
+      }
+
+      logger.info(
+        `Starting data generation\n: ${JSON.stringify(
+          {
+            ...runOptions,
+            from: from.toISOString(),
+            to: to.toISOString(),
+          },
+          null,
+          2
+        )}`
+      );
+
+      if (runOptions.maxDocs !== 0)
+        await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, version);
+
+      if (live) {
+        await startLiveDataUpload(apmEsClient, logger, runOptions, to, version);
       }
     }
-
-    if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
-      await apmEsClient.updateComponentTemplates(runOptions.numShards);
-    }
-
-    if (argv.clean) {
-      await apmEsClient.clean();
-    }
-    if (runOptions.gcpRepository) {
-      await apmEsClient.registerGcpRepository(runOptions.gcpRepository);
-    }
-
-    logger.info(
-      `Starting data generation\n: ${JSON.stringify(
-        {
-          ...runOptions,
-          from: from.toISOString(),
-          to: to.toISOString(),
-        },
-        null,
-        2
-      )}`
-    );
-
-    if (runOptions.maxDocs !== 0)
-      await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, version);
-
-    if (live) {
-      await startLiveDataUpload(apmEsClient, logger, runOptions, to, version);
-    }
-  })
+  )
   .parse();

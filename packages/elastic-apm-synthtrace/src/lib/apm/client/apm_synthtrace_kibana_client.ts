@@ -42,35 +42,34 @@ export class ApmSynthtraceKibanaClient {
   }
 
   async discoverLocalKibana() {
-    return await fetch("http://localhost:5601", { method: "HEAD", follow: 1, redirect: "manual"})
-      .then((res) => {
-        const kibanaUrl = res.headers.get('location');
-        this.logger.info(`Discovered local kibana running at: ${kibanaUrl}`);
-        return kibanaUrl;
-      })
+    return await fetch('http://localhost:5601', {
+      method: 'HEAD',
+      follow: 1,
+      redirect: 'manual',
+    }).then((res) => {
+      const kibanaUrl = res.headers.get('location');
+      this.logger.info(`Discovered local kibana running at: ${kibanaUrl}`);
+      return kibanaUrl;
+    });
   }
 
-  async installApmPackage(kibanaUrl: string, version:string, username: string, password: string) {
-    const response = await fetch(
-      kibanaUrl + '/api/fleet/epm/packages/apm/' + version,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'kbn-xsrf': 'kibana',
-        },
-        body: '{"force":true}'
-      }
-    );
+  async installApmPackage(kibanaUrl: string, version: string, username: string, password: string) {
+    const response = await fetch(kibanaUrl + '/api/fleet/epm/packages/apm/' + version, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'kbn-xsrf': 'kibana',
+      },
+      body: '{"force":true}',
+    });
     const responseJson = await response.json();
     if (responseJson.statusCode) {
-      throw Error(`unable to install apm package ${version}`)
+      throw Error(`unable to install apm package ${version}`);
     }
     if (responseJson.items) {
       this.logger.info(`Installed apm package ${version}`);
-    }
-    else this.logger.error(responseJson)
+    } else this.logger.error(responseJson);
   }
 }
