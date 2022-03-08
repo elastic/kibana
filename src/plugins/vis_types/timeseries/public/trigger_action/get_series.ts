@@ -23,7 +23,7 @@ import {
 
 export const getSeries = (
   metrics: Metric[],
-  seriesNum: number
+  totalSeriesNum: number
 ): VisualizeEditorLayersContext['metrics'] | null => {
   const metricIdx = metrics.length - 1;
   const aggregation = metrics[metricIdx].type;
@@ -187,7 +187,7 @@ export const getSeries = (
     }
     case 'static': {
       // Lens support reference lines only when at least one layer data exists
-      if (seriesNum === 1) {
+      if (totalSeriesNum === 1) {
         return null;
       }
       const staticValue = metrics[metricIdx].value;

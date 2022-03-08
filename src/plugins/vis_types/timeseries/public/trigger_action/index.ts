@@ -37,6 +37,7 @@ export const triggerTSVBtoLensConfiguration = async (
     return null;
   }
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
+  // get the active series number
   let seriesNum = 0;
   model.series.forEach((series) => {
     if (!series.hidden) seriesNum++;

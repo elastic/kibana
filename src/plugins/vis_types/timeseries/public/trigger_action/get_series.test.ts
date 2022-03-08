@@ -361,6 +361,39 @@ describe('getSeries', () => {
     expect(config).toBeNull();
   });
 
+  test('should return null for a static aggregation with 1 layer', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'static',
+        value: '10',
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 1);
+    expect(config).toBeNull();
+  });
+
+  test('should return the correct config for a static aggregation with 2 layers', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'static',
+        value: '10',
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 2);
+    expect(config).toStrictEqual([
+      {
+        agg: 'static_value',
+        fieldName: 'document',
+        isFullReference: true,
+        params: {
+          value: '10',
+        },
+      },
+    ]);
+  });
+
   test('should return the correct formula for the math aggregation with percentiles as variables', () => {
     const metric = [
       {
