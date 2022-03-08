@@ -8908,9 +8908,23 @@ const BootstrapCommand = {
     const kibanaProjectPath = ((_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path) || '';
     const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true;
     const reporter = _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_1__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"]);
-    const timings = []; // Force install is set in case a flag is passed or
+    const timings = [];
+
+    const time = async (id, body) => {
+      const start = Date.now();
+
+      try {
+        return await body();
+      } finally {
+        timings.push({
+          id,
+          ms: Date.now() - start
+        });
+      }
+    }; // Force install is set in case a flag is passed or
     // if the `.yarn-integrity` file is not found which
     // will be indicated by the return of yarnIntegrityFileExists.
+
 
     const forceInstall = !!options && options['force-install'] === true || !(await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["yarnIntegrityFileExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules'))); // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
     // for bazel to know it has to re-install the node_modules after a reset or a clean
@@ -8930,20 +8944,14 @@ const BootstrapCommand = {
     //
 
     if (forceInstall) {
-      const forceInstallStartTime = Date.now();
-      await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
-      timings.push({
-        id: 'force install dependencies',
-        ms: Date.now() - forceInstallStartTime
+      await time('force install dependencies', async () => {
+        await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
       });
     } // build packages
 
 
-    const packageStartTime = Date.now();
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['build', '//packages:build', '--show_result=1'], runOffline);
-    timings.push({
-      id: 'build packages',
-      ms: Date.now() - packageStartTime
+    await time('build packages', async () => {
+      await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['build', '//packages:build', '--show_result=1'], runOffline);
     }); // Install monorepo npm dependencies outside of the Bazel managed ones
 
     for (const batch of batchedNonBazelProjects) {
@@ -8965,25 +8973,33 @@ const BootstrapCommand = {
       }
     }
 
-    await Object(_utils_sort_package_json__WEBPACK_IMPORTED_MODULE_7__["sortPackageJson"])(kbn);
-    const yarnLock = await Object(_utils_yarn_lock__WEBPACK_IMPORTED_MODULE_6__["readYarnLock"])(kbn);
+    await time('sort package json', async () => {
+      await Object(_utils_sort_package_json__WEBPACK_IMPORTED_MODULE_7__["sortPackageJson"])(kbn);
+    });
+    const yarnLock = await time('read yarn.lock', async () => await Object(_utils_yarn_lock__WEBPACK_IMPORTED_MODULE_6__["readYarnLock"])(kbn));
 
     if (options.validate) {
-      await Object(_utils_validate_dependencies__WEBPACK_IMPORTED_MODULE_8__["validateDependencies"])(kbn, yarnLock);
+      await time('validate dependencies', async () => {
+        await Object(_utils_validate_dependencies__WEBPACK_IMPORTED_MODULE_8__["validateDependencies"])(kbn, yarnLock);
+      });
     } // Assure all kbn projects with bin defined scripts
     // copy those scripts into the top level node_modules folder
     //
     // NOTE: We don't probably need this anymore, is actually not being used
 
 
-    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_4__["linkProjectExecutables"])(projects, projectGraph); // Update vscode settings
-
-    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_3__["spawnStreaming"])(process.execPath, ['scripts/update_vscode_config'], {
-      cwd: kbn.getAbsolute(),
-      env: process.env
-    }, {
-      prefix: '[vscode]',
-      debug: false
+    await time('link project executables', async () => {
+      await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_4__["linkProjectExecutables"])(projects, projectGraph);
+    });
+    await time('update vscode config', async () => {
+      // Update vscode settings
+      await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_3__["spawnStreaming"])(process.execPath, ['scripts/update_vscode_config'], {
+        cwd: kbn.getAbsolute(),
+        env: process.env
+      }, {
+        prefix: '[vscode]',
+        debug: false
+      });
     }); // send timings
 
     await reporter.timings({
