@@ -65,9 +65,9 @@ export const DocumentCreationButtons: React.FC<Props> = ({
 
   const crawlerLink = generateEnginePath(ENGINE_CRAWLER_PATH);
 
-  const helerText = (
+  const helperText = (
     <p>
-      {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.helerText', {
+      {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.helperText', {
         defaultMessage:
           'There are four ways to send documents to your engine for indexing. You can paste or upload a JSON file, POST to the documents API endpoint, connect to an existing Elasticsearch index, or use the  Elastic Web Crawler to automatically index documents from a URL.',
       })}
@@ -89,7 +89,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({
         layout="horizontal"
         hasBorder
         color="plain"
-        body={helerText}
+        body={helperText}
         footer={
           <>
             <EuiTitle size="xxs">
@@ -114,7 +114,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({
 
   const flyoutHeader = (
     <>
-      <EuiText color="subdued">{helerText}</EuiText>
+      <EuiText color="subdued">{helperText}</EuiText>
       <EuiSpacer />
     </>
   );
