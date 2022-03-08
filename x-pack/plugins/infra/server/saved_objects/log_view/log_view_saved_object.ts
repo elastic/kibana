@@ -14,6 +14,8 @@ export const logViewSavedObjectType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple',
   management: {
+    defaultSearchField: 'name',
+    icon: 'logsApp',
     importableAndExportable: true,
   },
   mappings: {
