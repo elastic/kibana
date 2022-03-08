@@ -77,7 +77,16 @@ export const DocumentCreationButtons: React.FC<Props> = ({
   const emptyState = (
     <EuiFlexItem>
       <EuiEmptyPrompt
-        icon={<EuiImage size="fullWidth" src={illustration} alt="" />}
+        icon={
+          <EuiImage
+            size="fullWidth"
+            src={illustration}
+            alt={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.emptyStateIllustrationAltText',
+              { defaultMessage: 'Illustration' }
+            )}
+          />
+        }
         title={
           <h2>
             {i18n.translate(
@@ -123,7 +132,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({
     <>
       {isFlyout && flyoutHeader}
       <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={isFlyout}>
+        <EuiFlexItem grow>
           <EuiCardTo
             hasBorder
             layout="horizontal"
