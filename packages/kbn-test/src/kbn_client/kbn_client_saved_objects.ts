@@ -219,7 +219,7 @@ export class KbnClientSavedObjects {
     this.log.success('deleted', deleted, 'objects');
   }
 
-  public async cleanStandardList(space: string = '') {
+  public async cleanStandardList(options?: { space?: string }) {
     // add types here
     const types = [
       'search',
@@ -234,7 +234,7 @@ export class KbnClientSavedObjects {
       'url',
       'canvas-workpad',
     ];
-    const options = { types, space };
+    const options = { types, space: options?.space };
     await this.clean(options);
   }
 
