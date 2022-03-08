@@ -16,7 +16,17 @@ const paramSchema = schema.object({
 });
 
 const bodySchema = schema.object({
-  snooze_end_time: schema.oneOf([schema.string(), schema.literal(-1)]),
+  snooze_end_time: schema.oneOf([
+    schema.string({
+      validate: (value) => {
+        const parsedValue = Date.parse(value);
+        if (isNaN(parsedValue)) return 'Invalid date';
+        if (parsedValue <= Date.now()) return 'Date cannot be in the past';
+        return undefined;
+      },
+    }),
+    schema.literal(-1),
+  ]),
 });
 
 const rewriteBodyReq: (body: { snooze_end_time: string | -1 }) => { snoozeEndTime?: string } = ({
