@@ -267,9 +267,11 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         ...(ruleType === 'query' &&
           ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
       };
+  console.error('FORMATTING DEFINE STEP RULE', JSON.stringify(ruleFields, null, 2));
   return {
     ...baseFields,
     ...typeFields,
+    data_view_id: ruleFields.dataViewId,
   };
 };
 

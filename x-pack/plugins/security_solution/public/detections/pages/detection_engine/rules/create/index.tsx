@@ -194,6 +194,7 @@ const CreateRulePageComponent: React.FC = () => {
             stepIsValid(scheduleStep) &&
             stepIsValid(actionsStep)
           ) {
+            console.error('DEFINE STEP DATA', JSON.stringify(defineStep.data, null, 2));
             setRule(
               formatRule<CreateRulesSchema>(
                 defineStep.data,
@@ -222,6 +223,7 @@ const CreateRulePageComponent: React.FC = () => {
   );
 
   const submitStepDefineRule = useCallback(() => {
+    console.error('SUBMITTING DEFINE RULE STEP', RuleStep.defineRule);
     submitStep(RuleStep.defineRule);
   }, [submitStep]);
 
@@ -319,6 +321,10 @@ const CreateRulePageComponent: React.FC = () => {
                 }
               >
                 <EuiHorizontalRule margin="m" />
+                {console.error(
+                  'DEFAULT VALUES',
+                  JSON.stringify(stepsData.current[RuleStep.defineRule].data, null, 2)
+                )}
                 <StepDefineRule
                   addPadding={true}
                   defaultValues={stepsData.current[RuleStep.defineRule].data}

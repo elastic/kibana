@@ -33,6 +33,7 @@ export const searchAfterAndBulkCreate = async ({
   exceptionsList,
   filter,
   inputIndexPattern,
+  dataViewId,
   listClient,
   logger,
   pageSize,
@@ -61,6 +62,8 @@ export const searchAfterAndBulkCreate = async ({
         errors: ['malformed date tuple'],
       });
     }
+    const kibanaIndexPattern = await services.savedObjectsClient.get('index-pattern', dataViewId);
+    const runtimeMappings = kibanaIndexPattern.runtimeFieldMap;
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
       try {
@@ -73,6 +76,7 @@ export const searchAfterAndBulkCreate = async ({
             buildRuleMessage,
             searchAfterSortIds: sortIds,
             index: inputIndexPattern,
+            runtimeMappings,
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,

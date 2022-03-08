@@ -75,6 +75,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
   machineLearningJobId: [],
   ruleType: 'query',
   threatIndex: [],
+  dataViewId: 'security-solution-default',
   queryBar: {
     query: { query: '', language: 'kuery' },
     filters: [],
@@ -155,7 +156,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   console.log('INDEX PATTERN', indexPattern);
   console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
   console.log('DATA VIEW ID', selectedDataViewId);
-  // console.log('docValueFields', JSON.stringify(runtimeMappings, null, 2));
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -166,7 +166,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ...stepDefineDefaultValue,
     index: indicesConfig,
     threatIndex: threatIndicesConfig,
+    dataViewId: selectedDataViewId ?? 'security-solution-default',
   };
+  console.error('initial state', JSON.stringify(initialState, null, 2));
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
@@ -178,6 +180,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       index: formIndex,
       ruleType: formRuleType,
       queryBar: formQuery,
+      dataViewId: formDataViewId,
       threatIndex: formThreatIndex,
       threatQueryBar: formThreatQuery,
       threshold: formThreshold,
@@ -192,6 +195,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'ruleType',
       'queryBar',
       'threshold',
+      'dataViewId',
       'threshold.field',
       'threshold.value',
       'threshold.cardinality.field',
@@ -202,7 +206,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'anomalyThreshold',
     ],
   });
-  const thing = indexPattern;
 
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
@@ -294,6 +297,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       onSubmit();
     }
   }, [onSubmit]);
+
+  console.error('FORM DATA', JSON.stringify(getFormData(), null, 2));
 
   const getData = useCallback(async () => {
     const result = await submit();
@@ -401,6 +406,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           />
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
+              <CommonUseField path="dataViewId" />
               <CommonUseField
                 path="index"
                 config={{

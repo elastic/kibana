@@ -317,6 +317,7 @@ export interface SearchAfterAndBulkCreateParams {
   eventsTelemetry: ITelemetryEventsSender | undefined;
   id: string;
   inputIndexPattern: string[];
+  dataViewId: string;
   signalsIndex: string;
   pageSize: number;
   filter: unknown;

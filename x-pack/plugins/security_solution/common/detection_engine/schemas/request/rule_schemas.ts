@@ -32,6 +32,7 @@ import { version } from '@kbn/securitysolution-io-ts-types';
 import {
   id,
   index,
+  data_view_id,
   filters,
   event_category_override,
   building_block_type,
@@ -166,6 +167,7 @@ const baseParams = {
     author,
     false_positives,
     from,
+    data_view_id,
     // maxSignals not used in ML rules but probably should be used
     max_signals,
     risk_score_mapping,

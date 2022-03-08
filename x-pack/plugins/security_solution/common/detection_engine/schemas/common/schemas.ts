@@ -105,6 +105,9 @@ export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
 export const index = t.array(t.string);
 export type Index = t.TypeOf<typeof index>;
 
+export const data_view_id = t.string;
+export type DataViewId = t.TypeOf<typeof data_view_id>;
+
 export const indexOrUndefined = t.union([index, t.undefined]);
 export type IndexOrUndefined = t.TypeOf<typeof indexOrUndefined>;
 

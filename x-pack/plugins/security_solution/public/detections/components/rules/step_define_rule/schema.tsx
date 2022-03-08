@@ -77,6 +77,15 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
+  dataViewId: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
+      {
+        defaultMessage: 'Data Views',
+      }
+    ),
+    validations: [],
+  },
   queryBar: {
     validations: [
       {
