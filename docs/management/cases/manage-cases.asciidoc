@@ -49,9 +49,8 @@ go back to your case.
 
 . Click *Add Comment* to add the visualization to your case.
 
-NOTE: After a visualization has been added to a case, it cannot be modified or
-deleted. However, you can interact with the visualization by clicking the
-*Open Visualization* option in the comment menu.
+After a visualization has been added to a case, you can modify or interact with
+it by clicking the *Open Visualization* option in the comment menu.
 
 [[manage-case]]
 === Manage cases
@@ -63,7 +62,7 @@ To view a case, click on its name. You can then:
 
 * Add a new comment.
 * Edit existing comments and the description.
-* Add a connector (if you did not select one while creating the case).
+* Add a connector.
 * Send updates to external systems (if external connections are configured).
 * Edit tags.
 * Refresh the case to retrieve the latest updates.
