@@ -8,7 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { PNG_JOB_TYPE_V2, REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
+import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders, generatePngObservable } from '../common';
@@ -25,7 +25,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
       const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePng: { end: () => void } | null | undefined;
 
-      const jobLogger = parentLogger.clone([PNG_JOB_TYPE_V2, 'execute', jobId]);
+      const jobLogger = parentLogger.get(`execute:${jobId}`);
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
         mergeMap((headers) => {
