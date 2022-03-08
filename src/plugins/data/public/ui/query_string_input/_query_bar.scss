@@ -3,12 +3,6 @@
   z-index: $euiZContentMenu;
 }
 
-// Uses the append style, but no bordering
-.kqlQueryBar__languageSwitcherButton {
-  border-right: none !important;
-  border-left: $euiFormInputGroupBorder;
-}
-
 .kbnQueryBar__textareaWrap {
   overflow: visible !important; // Override EUI form control
   display: flex;
@@ -69,6 +63,7 @@
   }
 
   @include euiFormControlWithIcon($isIconOptional: true);
+
   ~ .euiFormControlLayoutIcons {
     // By default form control layout icon is vertically centered, but our textarea
     // can expand to be multi-line, so we position it with padding that matches
@@ -89,35 +84,6 @@
       color: $euiTextColor;
       background-color: $euiFormBackgroundColor;
       background-image: euiFormControlGradient($euiColorPrimary);
-    }
-  }
-}
-
-@include euiBreakpoint('xs', 's') {
-  .kbnQueryBar--withDatePicker {
-    > :first-child {
-      // Change the order of the query bar and date picker so that the date picker is top and the query bar still aligns with filters
-      order: 1;
-      // EUI Flexbox adds too much margin between responded items, this just moves it up
-      margin-top: $euiSizeS * -1;
-    }
-  }
-}
-
-// IE specific fix for the datepicker to not collapse
-@include euiBreakpoint('m', 'l', 'xl') {
-  .kbnQueryBar__datePickerWrapper {
-    max-width: 40vw;
-    // sass-lint:disable-block no-important
-    flex-grow: 0 !important;
-    flex-basis: auto !important;
-
-    &.kbnQueryBar__datePickerWrapper-isHidden {
-      // sass-lint:disable-block no-important
-      margin-right: -$euiSizeXS !important;
-      width: 0;
-      overflow: hidden;
-      max-width: 0;
     }
   }
 }
