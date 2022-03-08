@@ -157,7 +157,7 @@ Object.keys(configuration).forEach((type) => {
 journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page; params: any }) => {
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const defaultMonitorDetails = {
-    name: 'Sample monitor',
+    name: `Sample monitor ${uuid.v4()}`,
     location: 'US Central',
     schedule: '3',
     apmServiceName: 'service',
