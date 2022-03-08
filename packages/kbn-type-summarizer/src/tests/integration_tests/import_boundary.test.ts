@@ -52,7 +52,7 @@ it('output type links to named import from node modules', async () => {
     }
   `);
   expect(output.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/tests/__tmp__/dist_dts/index.d.ts' ]
+    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
     "
   `);
 });
@@ -84,7 +84,7 @@ it('output type links to default import from node modules', async () => {
     }
   `);
   expect(output.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/tests/__tmp__/dist_dts/index.d.ts' ]
+    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
     "
   `);
 });

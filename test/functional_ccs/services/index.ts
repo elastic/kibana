@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import isPathInside from 'is-path-inside';
+import { services as functionalServices } from '../../functional/services';
+import { RemoteEsProvider } from './remote_es';
+import { RemoteEsArchiverProvider } from './remote_es_archiver';
 
-import * as Path from './path';
-
-export function isNodeModule(dtsDir: string, path: string) {
-  return (isPathInside(path, dtsDir) ? Path.relative(dtsDir, path) : path)
-    .split('/')
-    .includes('node_modules');
-}
+export const services = {
+  ...functionalServices,
+  remoteEs: RemoteEsProvider,
+  remoteEsArchiver: RemoteEsArchiverProvider,
+};
