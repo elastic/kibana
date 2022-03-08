@@ -246,8 +246,10 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       [paletteService]
     );
 
+    // Legacy chart was not formatting numbers, when was forming overrideColors.
+    // To support the behavior of the color overriding, it is required to skip all the formatting, except percent.
     const overrideColor = useCallback(
-      (value: number, bands: number[], formatter: FieldFormat) => {
+      (value: number, bands: number[], formatter?: FieldFormat) => {
         const overrideColors = uiState?.get('vis.colors') ?? {};
         const valueIndex = bands.findIndex((band, index, allBands) => {
           if (index === allBands.length - 1) {
@@ -260,11 +262,14 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
         if (valueIndex < 0 || valueIndex === bands.length - 1) {
           return undefined;
         }
-
         const curValue = bands[valueIndex];
         const nextValue = bands[valueIndex + 1];
 
-        return overrideColors[`${formatter.convert(curValue)} - ${formatter.convert(nextValue)}`];
+        return overrideColors[
+          `${formatter?.convert(curValue) ?? curValue} - ${
+            formatter?.convert(nextValue) ?? nextValue
+          }`
+        ];
       },
       [uiState]
     );
@@ -397,7 +402,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
                   const overridedColor = overrideColor(
                     value,
                     args.percentageMode ? bands : args.palette?.params?.stops ?? [],
-                    tickFormatter
+                    args.percentageMode ? tickFormatter : undefined
                   );
 
                   if (overridedColor) {
