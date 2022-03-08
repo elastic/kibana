@@ -47,7 +47,7 @@ export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       );
 
       if (errors && errors.length > 0) {
-        return response.badRequest({
+        return response.ok({
           body: { message: 'error pushing monitor to the service', attributes: { errors } },
         });
       }
