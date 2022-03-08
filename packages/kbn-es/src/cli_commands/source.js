@@ -70,7 +70,6 @@ exports.run = async (defaults = {}) => {
   }
   if (options.secureFiles) {
     const pairs = options.secureFiles.split(',').map((kv) => kv.split('=').map((v) => v.trim()));
-    console.log(pairs);
     await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
   }
 

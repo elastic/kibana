@@ -326,7 +326,7 @@ exports.Cluster = class Cluster {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-        ES_JAVA_OPTS: esJavaOpts.trim(),
+        ES_JAVA_OPTS: esJavaOpts,
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
