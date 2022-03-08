@@ -129,7 +129,10 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
 
   const onCloseInspectModal = useCallback(() => {
     setIsInspectModalOpen(false);
-  }, []);
+    if (onCloseInspect) {
+      onCloseInspect();
+    }
+  }, [onCloseInspect]);
 
   const {
     additionalRequests,
