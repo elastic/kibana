@@ -14,17 +14,21 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
-import { YConfig } from '../../../../common/expressions';
 import { LineStyle } from '../../../../common/expressions/xy_chart';
 import { idPrefix } from '../dimension_editor';
+
+interface LineStyleConfig {
+  lineStyle?: LineStyle;
+  lineWidth?: number;
+}
 
 export const LineStyleSettings = ({
   currentConfig,
   setConfig,
   isHorizontal,
 }: {
-  currentConfig?: Pick<YConfig, 'lineStyle' | 'lineWidth'>;
-  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
+  currentConfig?: LineStyleConfig;
+  setConfig: (config: LineStyleConfig) => void;
   isHorizontal: boolean;
 }) => {
   return (

@@ -8,8 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { YConfig } from '../../../../common/expressions';
-import { IconPosition } from '../../../../common/expressions/xy_chart';
+import { IconPosition, YAxisMode } from '../../../../common/expressions/xy_chart';
 
 import { TooltipWrapper } from '../../../shared_components';
 import { hasIcon, IconSelect } from './icon_select';
@@ -17,7 +16,7 @@ import { idPrefix } from '../dimension_editor';
 
 interface LabelConfigurationOptions {
   isHorizontal: boolean;
-  axisMode: YConfig['axisMode'];
+  axisMode?: YAxisMode;
 }
 
 function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
@@ -71,13 +70,20 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
   ];
 }
 
+interface MarkerDecorationConfig {
+  axisMode?: YAxisMode;
+  icon?: string;
+  iconPosition?: IconPosition;
+  textVisibility?: boolean;
+}
+
 export const MarkerDecorationSettings = ({
   currentConfig,
   setConfig,
   isHorizontal,
 }: {
-  currentConfig?: Pick<YConfig, 'textVisibility' | 'icon' | 'iconPosition' | 'axisMode'>;
-  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
+  currentConfig?: MarkerDecorationConfig;
+  setConfig: (config: MarkerDecorationConfig) => void;
   isHorizontal: boolean;
 }) => {
   return (
