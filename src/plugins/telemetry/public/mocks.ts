@@ -12,7 +12,7 @@ import { notificationServiceMock } from '../../../core/public/mocks';
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
 import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
-import { docLinksServiceMock } from '../../../core/public/mocks';
+import { TelemetryConstants } from '.';
 
 // The following is to be able to access private methods
 /* eslint-disable dot-notation */
@@ -59,6 +59,12 @@ export function mockTelemetryService({
   return telemetryService;
 }
 
+export function mockTelemetryConstants(): TelemetryConstants {
+  return {
+    getPrivacyStatementUrl: () => 'https://some-host/some-url',
+  };
+}
+
 export function mockTelemetryNotifications({
   telemetryService,
 }: {
@@ -67,8 +73,8 @@ export function mockTelemetryNotifications({
   return new TelemetryNotifications({
     http: httpServiceMock.createSetupContract(),
     overlays: overlayServiceMock.createStartContract(),
-    docLinks: docLinksServiceMock.createStartContract(),
     telemetryService,
+    telemetryConstants: mockTelemetryConstants(),
   });
 }
 
@@ -93,13 +99,12 @@ function createSetupContract(): Setup {
 function createStartContract(): Start {
   const telemetryService = mockTelemetryService();
   const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
+  const telemetryConstants = mockTelemetryConstants();
 
   const startContract: Start = {
     telemetryService,
     telemetryNotifications,
-    telemetryConstants: {
-      getPrivacyStatementUrl: jest.fn(),
-    },
+    telemetryConstants,
   };
 
   return startContract;

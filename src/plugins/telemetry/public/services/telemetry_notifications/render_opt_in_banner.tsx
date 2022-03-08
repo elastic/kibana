@@ -7,18 +7,21 @@
  */
 
 import React from 'react';
-import { OverlayStart, DocLinksStart } from 'kibana/public';
+import { OverlayStart } from 'kibana/public';
 import { OptInBanner } from '../../components/opt_in_banner';
 import { toMountPoint } from '../../../../kibana_react/public';
+import { TelemetryConstants } from '../..';
 
 interface RenderBannerConfig {
   overlays: OverlayStart;
   setOptIn: (isOptIn: boolean) => Promise<unknown>;
-  docLinks: DocLinksStart;
+  telemetryConstants: TelemetryConstants;
 }
 
-export function renderOptInBanner({ setOptIn, overlays, docLinks }: RenderBannerConfig) {
-  const mount = toMountPoint(<OptInBanner onChangeOptInClick={setOptIn} docLinks={docLinks} />);
+export function renderOptInBanner({ setOptIn, overlays, telemetryConstants }: RenderBannerConfig) {
+  const mount = toMountPoint(
+    <OptInBanner onChangeOptInClick={setOptIn} telemetryConstants={telemetryConstants} />
+  );
   const bannerId = overlays.banners.add(mount, 10000);
 
   return bannerId;

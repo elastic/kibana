@@ -239,10 +239,16 @@ describe('home', () => {
     test('should set isNewKibanaInstance to true when there are no index patterns', async () => {
       const hasUserDataView = jest.fn(async () => false);
       const component = await renderHome({ hasUserDataView });
+      const props = component.props();
 
       expect(component.state().isNewKibanaInstance).toBe(true);
-
-      expect(component).toMatchSnapshot();
+      expect(component.name()).toEqual('Welcome');
+      expect(typeof props.onSkip).toBe('function');
+      expect(props.telemetry).toBeDefined();
+      expect(props.telemetry.telemetryConstants).toBeDefined();
+      expect(props.telemetry.telemetryNotifications).toBeDefined();
+      expect(props.telemetry.telemetryService).toBeDefined();
+      expect(props.urlBasePath).toEqual('goober');
     });
 
     test('should set isNewKibanaInstance to false when there are index patterns', async () => {

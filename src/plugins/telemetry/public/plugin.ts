@@ -64,6 +64,11 @@ export interface TelemetryPluginSetup {
 /**
  * Public's start exposed APIs by the telemetry plugin
  */
+export interface TelemetryConstants {
+  /** Elastic's privacy statement url **/
+  getPrivacyStatementUrl: () => string;
+}
+
 export interface TelemetryPluginStart {
   /** {@link TelemetryServicePublicApis} **/
   telemetryService: TelemetryServicePublicApis;
@@ -73,10 +78,7 @@ export interface TelemetryPluginStart {
     setOptedInNoticeSeen: () => Promise<void>;
   };
   /** Set of publicly exposed telemetry constants **/
-  telemetryConstants: {
-    /** Elastic's privacy statement url **/
-    getPrivacyStatementUrl: () => string;
-  };
+  telemetryConstants: TelemetryConstants;
 }
 
 interface TelemetryPluginSetupDependencies {
@@ -152,12 +154,15 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     this.canUserChangeSettings = this.getCanUserChangeSettings(application);
     this.telemetryService.userCanChangeSettings = this.canUserChangeSettings;
+    const telemetryConstants = {
+      getPrivacyStatementUrl: () => docLinks.links.legal.privacyStatement,
+    };
 
     const telemetryNotifications = new TelemetryNotifications({
       http,
-      docLinks,
       overlays,
       telemetryService: this.telemetryService,
+      telemetryConstants,
     });
     this.telemetryNotifications = telemetryNotifications;
 
@@ -186,9 +191,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetryNotifications: {
         setOptedInNoticeSeen: () => telemetryNotifications.setOptedInNoticeSeen(),
       },
-      telemetryConstants: {
-        getPrivacyStatementUrl: () => docLinks.links.legal.privacyStatement,
-      },
+      telemetryConstants,
     };
   }
 

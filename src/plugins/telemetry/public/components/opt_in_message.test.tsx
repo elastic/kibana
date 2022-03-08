@@ -9,13 +9,14 @@
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { OptInMessage } from './opt_in_message';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { docLinksServiceMock } from '../../../../core/public/doc_links/doc_links_service.mock';
+import { mockTelemetryConstants } from '../mocks';
 
-const mockDocLinks = docLinksServiceMock.createStartContract();
+const telemetryConstants = mockTelemetryConstants();
 
 describe('OptInMessage', () => {
   it('renders as expected', () => {
-    expect(shallowWithIntl(<OptInMessage docLinks={mockDocLinks} />)).toMatchSnapshot();
+    expect(
+      shallowWithIntl(<OptInMessage telemetryConstants={telemetryConstants} />)
+    ).toMatchSnapshot();
   });
 });

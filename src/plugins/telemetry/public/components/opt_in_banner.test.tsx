@@ -10,22 +10,23 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { OptInBanner } from './opt_in_banner';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { docLinksServiceMock } from '../../../../core/public/doc_links/doc_links_service.mock';
-
-const mockDocLinks = docLinksServiceMock.createStartContract();
+import { mockTelemetryConstants } from '../mocks';
 
 describe('OptInDetailsComponent', () => {
+  const telemetryConstants = mockTelemetryConstants();
+
   it('renders as expected', () => {
     expect(
-      shallowWithIntl(<OptInBanner onChangeOptInClick={() => {}} docLinks={mockDocLinks} />)
+      shallowWithIntl(
+        <OptInBanner onChangeOptInClick={() => {}} telemetryConstants={telemetryConstants} />
+      )
     ).toMatchSnapshot();
   });
 
   it('fires the "onChangeOptInClick" prop with true when a enable is clicked', () => {
     const onClick = jest.fn();
     const component = shallowWithIntl(
-      <OptInBanner onChangeOptInClick={onClick} docLinks={mockDocLinks} />
+      <OptInBanner onChangeOptInClick={onClick} telemetryConstants={telemetryConstants} />
     );
 
     const enableButton = component.findWhere((n) => {
@@ -45,7 +46,7 @@ describe('OptInDetailsComponent', () => {
   it('fires the "onChangeOptInClick" with false when a disable is clicked', () => {
     const onClick = jest.fn();
     const component = shallowWithIntl(
-      <OptInBanner onChangeOptInClick={onClick} docLinks={mockDocLinks} />
+      <OptInBanner onChangeOptInClick={onClick} telemetryConstants={telemetryConstants} />
     );
 
     const disableButton = component.findWhere((n) => {

@@ -50,7 +50,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           docLinks={
             Object {
               "legal": Object {
-                "privacyStatement": "https://some/url",
+                "privacyStatement": "https://some-host/some-url",
               },
             }
           }
@@ -70,7 +70,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                     values={
                       Object {
                         "privacyStatementLink": <EuiLink
-                          href="https://some/url"
+                          href="https://some-host/some-url"
                           target="_blank"
                         >
                           <FormattedMessage
@@ -148,7 +148,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
   docLinks={
     Object {
       "legal": Object {
-        "privacyStatement": "https://some/url",
+        "privacyStatement": "https://some-host/some-url",
       },
     }
   }

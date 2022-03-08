@@ -12,18 +12,19 @@ import * as React from 'react';
 import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DocLinksStart, HttpSetup } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import { PATH_TO_ADVANCED_SETTINGS } from '../../common/constants';
+import { TelemetryConstants } from '..';
 
 interface Props {
   http: HttpSetup;
-  docLinks: DocLinksStart;
   onSeenBanner: () => unknown;
+  telemetryConstants: TelemetryConstants;
 }
 
 export class OptedInNoticeBanner extends React.PureComponent<Props> {
   render() {
-    const { onSeenBanner, http, docLinks } = this.props;
+    const { onSeenBanner, http, telemetryConstants } = this.props;
     const basePath = http.basePath.get();
 
     const bannerTitle = i18n.translate('telemetry.telemetryOptedInNoticeTitle', {
@@ -39,7 +40,7 @@ export class OptedInNoticeBanner extends React.PureComponent<Props> {
             privacyStatementLink: (
               <EuiLink
                 onClick={onSeenBanner}
-                href={docLinks.links.legal.privacyStatement}
+                href={telemetryConstants.getPrivacyStatementUrl()}
                 target="_blank"
                 rel="noopener"
               >

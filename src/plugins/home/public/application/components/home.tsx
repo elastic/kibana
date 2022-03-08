@@ -31,6 +31,7 @@ export interface HomeProps {
   urlBasePath: string;
   telemetry: TelemetryPluginStart;
   hasUserDataView: () => Promise<boolean>;
+  onSkip?: () => void;
 }
 
 interface State {

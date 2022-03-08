@@ -7,24 +7,29 @@
  */
 
 import React from 'react';
-import { HttpStart, DocLinksStart, OverlayStart } from 'kibana/public';
+import { HttpStart, OverlayStart } from 'kibana/public';
 import { OptedInNoticeBanner } from '../../components/opted_in_notice_banner';
 import { toMountPoint } from '../../../../kibana_react/public';
+import { TelemetryConstants } from '../..';
 
 interface RenderBannerConfig {
   http: HttpStart;
-  docLinks: DocLinksStart;
   overlays: OverlayStart;
   onSeen: () => void;
+  telemetryConstants: TelemetryConstants;
 }
 export function renderOptedInNoticeBanner({
   onSeen,
   overlays,
   http,
-  docLinks,
+  telemetryConstants,
 }: RenderBannerConfig) {
   const mount = toMountPoint(
-    <OptedInNoticeBanner onSeenBanner={onSeen} http={http} docLinks={docLinks} />
+    <OptedInNoticeBanner
+      onSeenBanner={onSeen}
+      http={http}
+      telemetryConstants={telemetryConstants}
+    />
   );
   const bannerId = overlays.banners.add(mount, 10000);
 

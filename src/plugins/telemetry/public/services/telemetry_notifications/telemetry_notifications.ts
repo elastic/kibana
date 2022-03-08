@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { DocLinksStart, HttpStart, OverlayStart } from 'kibana/public';
+import { HttpStart, OverlayStart } from 'kibana/public';
 import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
 import { renderOptInBanner } from './render_opt_in_banner';
 import { TelemetryService } from '../telemetry_service';
+import { TelemetryConstants } from '../..';
 
 interface TelemetryNotificationsConstructor {
   http: HttpStart;
   overlays: OverlayStart;
   telemetryService: TelemetryService;
-  docLinks: DocLinksStart;
+  telemetryConstants: TelemetryConstants;
 }
 
 /**
@@ -24,16 +25,21 @@ interface TelemetryNotificationsConstructor {
 export class TelemetryNotifications {
   private readonly http: HttpStart;
   private readonly overlays: OverlayStart;
-  private readonly docLinks: DocLinksStart;
+  private readonly telemetryConstants: TelemetryConstants;
   private readonly telemetryService: TelemetryService;
   private optedInNoticeBannerId?: string;
   private optInBannerId?: string;
 
-  constructor({ http, overlays, telemetryService, docLinks }: TelemetryNotificationsConstructor) {
+  constructor({
+    http,
+    overlays,
+    telemetryService,
+    telemetryConstants,
+  }: TelemetryNotificationsConstructor) {
     this.telemetryService = telemetryService;
     this.http = http;
     this.overlays = overlays;
-    this.docLinks = docLinks;
+    this.telemetryConstants = telemetryConstants;
   }
 
   /**
@@ -51,9 +57,9 @@ export class TelemetryNotifications {
   public renderOptedInNoticeBanner = (): void => {
     const bannerId = renderOptedInNoticeBanner({
       http: this.http,
-      docLinks: this.docLinks,
       onSeen: this.setOptedInNoticeSeen,
       overlays: this.overlays,
+      telemetryConstants: this.telemetryConstants,
     });
 
     this.optedInNoticeBannerId = bannerId;
@@ -75,7 +81,7 @@ export class TelemetryNotifications {
     const bannerId = renderOptInBanner({
       setOptIn: this.onSetOptInClick,
       overlays: this.overlays,
-      docLinks: this.docLinks,
+      telemetryConstants: this.telemetryConstants,
     });
 
     this.optInBannerId = bannerId;
