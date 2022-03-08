@@ -8,7 +8,6 @@ import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } fr
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { LensEmbeddableInput } from '../../../../../lens/public';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { ModalInspectQuery } from '../inspect/modal';
 
@@ -64,9 +63,9 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   const [isPopoverOpen, setPopover] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
 
-  const onButtonClick = () => {
+  const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
-  };
+  }, [isPopoverOpen]);
 
   const closePopover = () => {
     setPopover(false);
@@ -220,23 +219,34 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     ]
   );
 
-  const button = (
-    <EuiButtonIcon
-      className={HISTOGRAM_ACTIONS_BUTTON_CLASS}
-      iconType="boxesHorizontal"
-      onClick={onButtonClick}
-      data-test-subj={dataTestSubj}
-      aria-label={MORE_ACTIONS}
-    />
+  const button = useMemo(
+    () => (
+      <EuiButtonIcon
+        className={HISTOGRAM_ACTIONS_BUTTON_CLASS}
+        iconType="boxesHorizontal"
+        onClick={onButtonClick}
+        data-test-subj={dataTestSubj}
+        aria-label={MORE_ACTIONS}
+      />
+    ),
+    [dataTestSubj, onButtonClick]
+  );
+
+  const initialInput = useMemo(
+    () =>
+      attributes != null
+        ? {
+            id: 'saveVisualizationModal',
+            attributes,
+          }
+        : null,
+    [attributes]
   );
 
   return (
     <Wrapper className={className} data-test-subj={`${dataTestSubj}-wrapper`}>
-      {isSaveModalVisible && (
-        <LensSaveModalComponent
-          initialInput={attributes as unknown as LensEmbeddableInput}
-          onClose={closeSaveModalVisible}
-        />
+      {isSaveModalVisible && initialInput != null && (
+        <LensSaveModalComponent initialInput={initialInput} onClose={closeSaveModalVisible} />
       )}
       {request !== null && response !== null && (
         <EuiPopover
