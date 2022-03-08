@@ -180,7 +180,7 @@ export const useHostRiskScore = ({
           factoryQueryType: HostsQueries.hostsRiskScore,
           filterQuery: createFilter(filterQuery),
           pagination:
-            cursorStart && querySize
+            cursorStart !== undefined && querySize !== undefined
               ? {
                   cursorStart,
                   querySize,
