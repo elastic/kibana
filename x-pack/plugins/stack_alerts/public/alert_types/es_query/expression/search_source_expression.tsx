@@ -136,21 +136,25 @@ export const SearchSourceExpression = ({
         isActive={true}
         display="columns"
       />
-      <EuiExpression
-        className="dscExpressionParam"
-        description={'Query'}
-        value={query.query}
-        isActive={true}
-        display="columns"
-      />
-      <EuiExpression
-        className="dscExpressionParam searchSourceAlertFilters"
-        title={'sas'}
-        description={'Filter'}
-        value={<ReadOnlyFilterItems filters={filters} indexPatterns={indexPatterns} />}
-        isActive={true}
-        display="columns"
-      />
+      {query.query !== '' && (
+        <EuiExpression
+          className="dscExpressionParam"
+          description={'Query'}
+          value={query.query}
+          isActive={true}
+          display="columns"
+        />
+      )}
+      {filters.length > 0 && (
+        <EuiExpression
+          className="dscExpressionParam searchSourceAlertFilters"
+          title={'sas'}
+          description={'Filter'}
+          value={<ReadOnlyFilterItems filters={filters} indexPatterns={indexPatterns} />}
+          isActive={true}
+          display="columns"
+        />
+      )}
 
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
