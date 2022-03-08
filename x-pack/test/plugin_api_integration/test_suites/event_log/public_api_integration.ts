@@ -97,7 +97,9 @@ export default function ({ getService }: FtrProviderContext) {
           await retry.try(async () => {
             const {
               body: { data: foundEvents },
-            } = await findEvents(namespace, id, { sort_field: 'event.end', sort_order: 'desc' });
+            } = await findEvents(namespace, id, {
+              sort: [{ sort_field: 'event.end', sort_order: 'desc' }],
+            });
 
             expect(foundEvents.length).to.be(expectedEvents.length);
             assertEventsFromApiMatchCreatedEvents(foundEvents, expectedEvents.reverse());
