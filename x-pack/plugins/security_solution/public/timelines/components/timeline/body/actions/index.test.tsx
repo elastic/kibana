@@ -12,6 +12,7 @@ import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../
 import { Actions } from '.';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { mockCasesContract } from '../../../../../../../cases/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('../../../../../detections/components/user_info', () => ({
@@ -44,6 +45,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
           siem: { crud_alerts: true, read_alerts: true },
         },
       },
+      cases: mockCasesContract(),
       uiSettings: {
         get: jest.fn(),
       },

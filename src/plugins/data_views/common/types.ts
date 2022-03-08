@@ -283,6 +283,7 @@ export interface DataViewSpec {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
+  namespaces?: string[];
 }
 
 export interface SourceFilter {

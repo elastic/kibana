@@ -23,6 +23,7 @@ describe('getRoleAbilities', () => {
       // Has access
       canViewAccountCredentials: true,
       canManageEngines: true,
+      canManageMetaEngines: true,
       // Does not have access
       canViewMetaEngines: false,
       canViewEngineAnalytics: false,
@@ -35,7 +36,6 @@ describe('getRoleAbilities', () => {
       canViewMetaEngineSourceEngines: false,
       canViewSettings: false,
       canViewRoleMappings: false,
-      canManageMetaEngines: false,
       canManageLogSettings: false,
       canManageSettings: false,
       canManageEngineCrawler: false,
@@ -81,10 +81,10 @@ describe('getRoleAbilities', () => {
       expect(myRole.canManageMetaEngines).toEqual(true);
     });
 
-    it('returns false when the user can manage any engines but the account does not have a platinum license', () => {
+    it('returns true when the user can manage any engines but the account does not have a platinum license', () => {
       const myRole = getRoleAbilities({ ...mockRole, ...canManageEngines }, false);
 
-      expect(myRole.canManageMetaEngines).toEqual(false);
+      expect(myRole.canManageMetaEngines).toEqual(true);
     });
 
     it('returns false when has a platinum license but the user cannot manage any engines', () => {

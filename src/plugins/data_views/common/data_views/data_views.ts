@@ -48,6 +48,7 @@ export type IndexPatternListSavedObjectAttrs = Pick<
 
 export interface DataViewListItem {
   id: string;
+  namespaces?: string[];
   title: string;
   type?: string;
   typeMeta?: TypeMeta;
@@ -176,6 +177,7 @@ export class DataViewsService {
     }
     return this.savedObjectsCache.map((obj) => ({
       id: obj?.id,
+      namespaces: obj?.namespaces,
       title: obj?.attributes?.title,
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
@@ -374,6 +376,7 @@ export class DataViewsService {
     const {
       id,
       version,
+      namespaces,
       attributes: {
         title,
         timeFieldName,
@@ -400,6 +403,7 @@ export class DataViewsService {
     return {
       id,
       version,
+      namespaces,
       title,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
@@ -420,7 +424,7 @@ export class DataViewsService {
     );
 
     if (!savedObject.version) {
-      throw new SavedObjectNotFound(DATA_VIEW_SAVED_OBJECT_TYPE, id, 'management/kibana/dataViews');
+      throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
     }
 
     return this.initFromSavedObject(savedObject);

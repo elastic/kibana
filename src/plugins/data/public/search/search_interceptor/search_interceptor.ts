@@ -61,6 +61,7 @@ import { SearchAbortController } from './search_abort_controller';
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
   http: CoreSetup['http'];
+  executionContext: CoreSetup['executionContext'];
   uiSettings: CoreSetup['uiSettings'];
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
@@ -297,10 +298,14 @@ export class SearchInterceptor {
           }
         }) as Promise<IKibanaSearchResponse>;
     } else {
+      const { executionContext, ...rest } = options || {};
       return this.batchedFetch(
         {
           request,
-          options: this.getSerializableOptions(options),
+          options: this.getSerializableOptions({
+            ...rest,
+            executionContext: this.deps.executionContext.withGlobalContext(executionContext),
+          }),
         },
         abortSignal
       );

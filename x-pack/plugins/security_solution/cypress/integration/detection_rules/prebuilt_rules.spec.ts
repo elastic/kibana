@@ -27,9 +27,9 @@ import {
   waitForPrebuiltDetectionRulesToBeLoaded,
   selectAllRules,
   confirmRulesDelete,
-  activateSelectedRules,
+  enableSelectedRules,
   waitForRuleToChangeStatus,
-  deactivateSelectedRules,
+  disableSelectedRules,
   changeRowsPerPageTo,
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -77,14 +77,14 @@ describe('Actions with prebuilt rules', () => {
   });
 
   context('Rules table', () => {
-    it('Allows to activate/deactivate all rules at once', () => {
+    it('Allows to enable/disable all rules at once', () => {
       selectAllRules();
-      activateSelectedRules();
+      enableSelectedRules();
       waitForRuleToChangeStatus();
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
       selectAllRules();
-      deactivateSelectedRules();
+      disableSelectedRules();
       waitForRuleToChangeStatus();
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
     });
@@ -174,16 +174,16 @@ describe('Actions with prebuilt rules', () => {
   });
 
   context('Rule monitoring table', () => {
-    it('Allows to activate/deactivate all rules at once', () => {
+    it('Allows to enable/disable all rules at once', () => {
       cy.get(RULES_MONITORING_TABLE).click();
 
       cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-      activateSelectedRules();
+      enableSelectedRules();
       waitForRuleToChangeStatus();
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
       selectAllRules();
-      deactivateSelectedRules();
+      disableSelectedRules();
       waitForRuleToChangeStatus();
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
     });

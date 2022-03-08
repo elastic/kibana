@@ -17,6 +17,7 @@ import {
 } from './actions';
 import { setUsersPageQueriesActivePageToZero } from './helpers';
 import { UsersTableType, UsersModel } from './model';
+import { HostsTableType } from '../../hosts/store/model';
 
 export const initialUsersState: UsersModel = {
   page: {
@@ -24,12 +25,8 @@ export const initialUsersState: UsersModel = {
       [UsersTableType.allUsers]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        // TODO Fix me
-        // sort: {
-        //   field: AllUsersFields.allUsers,
-        //   direction: Direction.desc,
-        // },
       },
+      [HostsTableType.anomalies]: null,
     },
   },
   details: {
@@ -37,12 +34,8 @@ export const initialUsersState: UsersModel = {
       [UsersTableType.allUsers]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        // TODO Fix me
-        // sort: {
-        //   field: HostRulesFields.riskScore,
-        //   direction: Direction.desc,
-        // },
       },
+      [HostsTableType.anomalies]: null,
     },
   },
 };
@@ -75,7 +68,6 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
       queries: {
         ...state[usersType].queries,
         [tableType]: {
-          // TODO: Steph/users fix active page/limit on users tables. is broken because multiple UsersTableType.userRules tables
           ...state[usersType].queries[tableType],
           activePage,
         },
@@ -89,7 +81,6 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
       queries: {
         ...state[usersType].queries,
         [tableType]: {
-          // TODO: Steph/users fix active page/limit on users tables. is broken because multiple UsersTableType.userRules tables
           ...state[usersType].queries[tableType],
           limit,
         },

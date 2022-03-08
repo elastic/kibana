@@ -17,7 +17,7 @@ export const navTabsUsersDetails = (hostName: string): UsersDetailsNavTab => {
   return {
     [UsersTableType.allUsers]: {
       id: UsersTableType.allUsers,
-      name: i18n.ALL_USERS_TITLE,
+      name: i18n.NAVIGATION_ALL_USERS_TITLE,
       href: getTabsOnUsersDetailsUrl(hostName, UsersTableType.allUsers),
       disabled: false,
     },

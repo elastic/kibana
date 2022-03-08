@@ -17,7 +17,7 @@ import { observabilityFeatureId } from '../../../../../common';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
+import { loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
 import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
@@ -107,13 +107,12 @@ function AlertsPage() {
       const response = await loadRuleAggregations({
         http,
       });
-      // Note that the API uses the semantics of 'alerts' instead of 'rules'
-      const { alertExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
-      if (alertExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
-        const total = Object.values(alertExecutionStatus).reduce((acc, value) => acc + value, 0);
+      const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
+      if (ruleExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
+        const total = Object.values(ruleExecutionStatus).reduce((acc, value) => acc + value, 0);
         const { disabled } = ruleEnabledStatus;
         const { muted } = ruleMutedStatus;
-        const { error } = alertExecutionStatus;
+        const { error } = ruleExecutionStatus;
         setRuleStats({
           ...ruleStats,
           total,

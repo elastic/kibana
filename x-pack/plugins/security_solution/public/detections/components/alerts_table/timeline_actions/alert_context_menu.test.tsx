@@ -12,6 +12,7 @@ import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
+import { mockCasesContract } from '../../../../../../cases/public/mocks';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/components/user_privileges');
@@ -54,6 +55,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
       application: {
         capabilities: { siem: { crud_alerts: true, read_alerts: true } },
       },
+      cases: mockCasesContract(),
     },
   }),
   useGetUserCasesPermissions: jest.fn().mockReturnValue({

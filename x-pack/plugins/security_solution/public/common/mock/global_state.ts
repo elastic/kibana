@@ -205,6 +205,7 @@ export const mockGlobalState: State = {
           limit: 10,
           // TODO sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
         },
+        [usersModel.UsersTableType.anomalies]: null,
       },
     },
     details: {
@@ -214,6 +215,7 @@ export const mockGlobalState: State = {
           limit: 10,
           // TODO sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
         },
+        [usersModel.UsersTableType.anomalies]: null,
       },
     },
   },
