@@ -35,10 +35,11 @@ export_events() {
   local from=$2
   local to=$3
 
-  docker run --rm -ti --net=host -v "$PWD:/data" -w /data elasticdump/elasticsearch-dump:latest \
+  docker run --rm -ti --net=host -v "$PWD:/data" -w /data -e "NODE_OPTIONS=--max_old_space_size=8192" \
+    elasticdump/elasticsearch-dump:latest \
     --input="https://""${ELASTIC_TESTING_CREDENTIALS}""@profiling-es.35.240.6.93.ip.es.io/${index}" \
     --output="${index}-data_${from}_${to}.json.gz" \
-    --type=data  --fsCompress --noRefresh --limit=10000 --support-big-int \
+    --type=data  --fsCompress --noRefresh --limit=100000 --support-big-int \
     --searchBody='
 {
   "query": {
@@ -67,10 +68,11 @@ export_events() {
 export_index() {
   local index=$1
 
-  docker run --rm -ti --net=host -v "$PWD:/data" -w /data elasticdump/elasticsearch-dump:latest \
+  docker run --rm -ti --net=host -v "$PWD:/data" -w /data -e "NODE_OPTIONS=--max_old_space_size=8192" \
+    elasticdump/elasticsearch-dump:latest \
     --input="https://""${ELASTIC_TESTING_CREDENTIALS}""@profiling-es.35.240.6.93.ip.es.io/${index}" \
     --output="${index}-data.json.gz" \
-    --type=data  --fsCompress --noRefresh --limit=10000 --support-big-int
+    --type=data  --fsCompress --noRefresh --limit=100000 --support-big-int
 }
 
 if [[ "$ELASTIC_TESTING_CREDENTIALS" == "" ]]; then
