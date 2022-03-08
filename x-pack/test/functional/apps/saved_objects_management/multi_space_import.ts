@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'spaceSelector',
     'savedObjects',
+    'copySavedObjectsToSpace',
     'dashboard',
     'timePicker',
   ]);
@@ -47,11 +48,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  const setTimeRange = async () => {
-    const fromTime = 'Apr 27, 2015 @ 00:00:00.000';
-    const toTime = 'June 25, 2015 @ 00:00:00.000';
-    await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings(fromTime, toTime);
-  };
+  // const setTimeRange = async () => {
+  //   const fromTime = 'Apr 27, 2015 @ 00:00:00.000';
+  //   const toTime = 'June 25, 2015 @ 00:00:00.000';
+  //   await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings(fromTime, toTime);
+  // };
 
   describe('should be able to handle multi-space imports correctly', function () {
     before(async function () {
@@ -60,13 +61,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         name: 'another_space',
         disabledFeatures: [],
       });
+      await spacesService.create({
+        id: 'third_space',
+        name: 'third_space',
+        disabledFeatures: [],
+      });
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await setTimeRange();
+      // await setTimeRange();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await spacesService.delete('another_space');
+      await spacesService.delete('third_space');
     });
 
     it('should be able to import saved objects into default space', async function () {
@@ -88,9 +95,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render all panels on the dashboard', async () => {
       await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0');
+      await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
       // dashboard should load properly
-      await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0');
+      await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
       await PageObjects.dashboard.waitForRenderComplete();
       // There should be 0 error embeddables on the dashboard
       const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
@@ -130,10 +137,65 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         basePath: getSpacePrefix(spaceId),
         shouldUseHashForSubUrl: false,
       });
-      await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0');
+      await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
 
       // dashboard should load properly
-      await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0');
+      await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      // There should be 0 error embeddables on the dashboard
+      const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
+      expect(errorEmbeddables.length).to.be(0);
+    });
+
+    it('should be able to copy the dashboard into third space in saved objects table', async () => {
+      const destinationSpaceId = 'third_space';
+      const getSpacePrefix = (spaceId: string) => {
+        return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
+      };
+      const spaceId = 'another_space';
+      await PageObjects.common.navigateToUrl('settings', 'kibana/objects', {
+        basePath: getSpacePrefix(spaceId),
+        shouldUseHashForSubUrl: false,
+      });
+      await PageObjects.savedObjects.waitTableIsLoaded();
+      await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject(
+        'multi_space_import_8.0.0_export'
+      );
+      await PageObjects.copySavedObjectsToSpace.setupForm({
+        createNewCopies: true,
+        overwrite: false,
+        destinationSpaceId,
+      });
+      await PageObjects.copySavedObjectsToSpace.startCopy();
+      // Wait for successful copy
+      await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
+      await testSubjects.existOrFail(`cts-summary-indicator-success-${destinationSpaceId}`);
+
+      const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
+
+      expect(summaryCounts).to.eql({
+        success: 6,
+        pending: 0,
+        skipped: 0,
+        errors: 0,
+      });
+      await PageObjects.copySavedObjectsToSpace.finishCopy();
+    });
+
+    it('should render all panels on the copied dashboard in third space', async () => {
+      const getSpacePrefix = (spaceId: string) => {
+        return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
+      };
+      const spaceId = 'third_space';
+      await PageObjects.common.navigateToUrl('dashboard', undefined, {
+        basePath: getSpacePrefix(spaceId),
+        shouldUseHashForSubUrl: false,
+      });
+      await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
+
+      // dashboard should load properly
+      await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
       await PageObjects.dashboard.waitForRenderComplete();
 
       // There should be 0 error embeddables on the dashboard
