@@ -109,7 +109,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
  */
 export const REMOVE_EXTENSION = [
   'packages/kbn-plugin-generator/template/**/*.ejs',
-  'packages/kbn-generate/template/**/*.ejs',
+  'packages/kbn-generate/templates/**/*.ejs',
 ];
 
 /**

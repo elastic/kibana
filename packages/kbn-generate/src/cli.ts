@@ -23,7 +23,7 @@ import { discoverPackages, generatePackagesBuildBazelFile } from '@kbn/packages'
 import normalizePath from 'normalize-path';
 
 const ROOT_PKG_DIR = Path.resolve(REPO_ROOT, 'packages');
-const TEMPLATE_DIR = Path.resolve(__dirname, '../template');
+const TEMPLATE_DIR = Path.resolve(__dirname, '../templates/package');
 
 const jsonHelper = (arg: any) => JSON.stringify(arg, null, 2);
 const jsHelper = (arg: string) => {
