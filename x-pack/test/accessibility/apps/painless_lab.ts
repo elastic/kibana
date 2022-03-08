@@ -50,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('click on the Basic button', async () => {
       await testSubjects.click('painlessContextDropDown');
+      await find.byCssSelector('.euiFormLabel-isFocused');
       await a11y.testAppSnapshot();
       await testSubjects.click('basicButtonDropdown');
       await find.byCssSelector('.euiFormLabel-isFocused');
@@ -58,6 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('click on the Filter button', async () => {
       await testSubjects.click('painlessContextDropDown');
+      await find.byCssSelector('.euiFormLabel-isFocused');
       await a11y.testAppSnapshot();
       await testSubjects.click('filterButtonDropdown');
       await find.byCssSelector('.euiFormLabel-isFocused');
@@ -66,6 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('click on the Score button', async () => {
       await testSubjects.click('painlessContextDropDown');
+      await find.byCssSelector('.euiFormLabel-isFocused');
       await a11y.testAppSnapshot();
       await testSubjects.click('scoreButtonDropdown');
       await find.byCssSelector('.euiFormLabel-isFocused');
