@@ -29,7 +29,7 @@ import {
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { cleanKibana, reload } from '../../tasks/common';
 
-describe('From alert', () => {
+describe.skip('From alert', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
 
   beforeEach(() => {
