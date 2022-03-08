@@ -14,7 +14,6 @@ import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { OverviewPage } from './';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
