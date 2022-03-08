@@ -16,13 +16,10 @@ import {
   getViewBySwimlaneOptions,
 } from '../../explorer_utils';
 
-import { checkSelectedCells } from './check_selected_cells';
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
 import { jobSelectionChange } from './job_selection_change';
 import { ExplorerState, getExplorerDefaultState } from './state';
-import { setInfluencerFilterSettings } from './set_influencer_filter_settings';
 import { setKqlQueryBarPlaceholder } from './set_kql_query_bar_placeholder';
-import { getTimeBoundsFromSelection } from '../../hooks/use_selected_cells';
 
 export const explorerReducer = (state: ExplorerState, nextAction: Action): ExplorerState => {
   const { type, payload } = nextAction;
@@ -73,12 +70,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       };
       break;
 
-    case EXPLORER_ACTION.SET_INFLUENCER_FILTER_SETTINGS:
-      nextState = setInfluencerFilterSettings(state, payload);
-      break;
-
     case EXPLORER_ACTION.SET_EXPLORER_DATA:
-    case EXPLORER_ACTION.SET_FILTER_DATA:
       nextState = { ...state, ...payload };
       break;
 
@@ -144,9 +136,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     //       timeRange.latestMs
     //     )}`
     //   : null,
-    viewBySwimlaneFieldName,
-    viewBySwimlaneOptions,
-    ...checkSelectedCells(nextState),
+    // ...checkSelectedCells(nextState),
     ...setKqlQueryBarPlaceholder(nextState),
   };
 };

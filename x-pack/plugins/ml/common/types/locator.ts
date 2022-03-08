@@ -75,6 +75,8 @@ export type AnomalyDetectionUrlState = MLPageState<
 
 export type AnomalyExplorerSwimLaneUrlState = ExplorerAppState['mlExplorerSwimlane'];
 
+export type AnomalyExplorerFilterUrlState = ExplorerAppState['mlExplorerFilter'];
+
 export interface ExplorerAppState {
   mlExplorerSwimlane: {
     selectedType?: 'overall' | 'viewBy';
@@ -103,7 +105,7 @@ export interface ExplorerAppState {
   mlExplorerFilter: {
     influencersFilterQuery?: InfluencersFilterQuery;
     filterActive?: boolean;
-    filteredFields?: Array<string | number>;
+    filteredFields?: string[];
     queryString?: string;
   };
   query?: any;

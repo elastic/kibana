@@ -201,11 +201,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
    * URL state should be the only source of truth for related props.
    */
   useEffect(() => {
-    const filterData = explorerUrlState?.mlExplorerFilter;
-    if (filterData !== undefined) {
-      explorerService.setFilterData(filterData);
-    }
-
     const { viewByFieldName } = explorerUrlState?.mlExplorerSwimlane ?? {};
 
     if (viewByFieldName !== undefined) {
@@ -237,6 +232,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     anomalyExplorerContext.anomalyTimelineStateService.getContainerWidth()
   );
 
+  const viewByFieldName = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getViewBySwimlaneFieldName$()
+  );
+
   const swimLaneSeverity = useObservable(
     anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity$(),
     anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity()
@@ -257,7 +256,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
           tableInterval: tableInterval.val,
           tableSeverity: tableSeverity.val,
-          viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
+          viewBySwimlaneFieldName: viewByFieldName,
           swimlaneContainerWidth,
         }
       : undefined;
@@ -276,20 +275,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       loadExplorerData(loadExplorerDataConfig);
     }
   }, [JSON.stringify(loadExplorerDataConfig)]);
-
-  /** Sync URL state with {@link explorerAppState} state */
-  useEffect(() => {
-    const replaceState = explorerUrlState?.mlExplorerSwimlane?.viewByFieldName === undefined;
-    if (explorerAppState?.mlExplorerSwimlane?.viewByFieldName !== undefined) {
-      const r = {
-        ...explorerUrlState,
-        ...explorerAppState,
-      };
-      r.mlExplorerSwimlane = explorerUrlState.mlExplorerSwimlane;
-
-      setExplorerUrlState(r, replaceState);
-    }
-  }, [JSON.stringify(explorerAppState), JSON.stringify(explorerUrlState), selectedCells]);
 
   const overallSwimlaneData = useObservable(
     anomalyExplorerContext.anomalyTimelineStateService.getOverallSwimLaneData$(),

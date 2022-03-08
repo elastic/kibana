@@ -11,10 +11,14 @@ import { isEqual } from 'lodash';
 import type { ExplorerJob } from './explorer_utils';
 import type { InfluencersFilterQuery } from '../../../common/types/es_client';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
+import type { AnomalyExplorerFilterUrlState } from '../../../common/types/locator';
+import type { KQLFilterSettings } from './components/explorer_query_bar/explorer_query_bar';
 
 export interface AnomalyExplorerState {
   selectedJobs: ExplorerJob[];
 }
+
+type FilterSettings = Required<AnomalyExplorerFilterUrlState>;
 
 /**
  * Anomaly Explorer common state.
@@ -22,9 +26,17 @@ export interface AnomalyExplorerState {
  */
 export class AnomalyExplorerCommonStateService {
   private _selectedJobs$ = new BehaviorSubject<ExplorerJob[] | undefined>(undefined);
-  private _influencersFilterQuery$ = new BehaviorSubject<InfluencersFilterQuery | undefined>(
-    undefined
-  );
+
+  private _filterSettings$ = new BehaviorSubject<FilterSettings>(this._getDefaultFilterSettings());
+
+  private _getDefaultFilterSettings(): FilterSettings {
+    return {
+      filterActive: false,
+      filteredFields: [],
+      queryString: '',
+      influencersFilterQuery: undefined,
+    };
+  }
 
   constructor(private anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService) {
     this._init();
@@ -34,10 +46,16 @@ export class AnomalyExplorerCommonStateService {
     this.anomalyExplorerUrlStateService
       .getPageUrlState$()
       .pipe(
-        map((urlState) => urlState?.mlExplorerFilter?.influencersFilterQuery)
-        // distinctUntilChanged(isEqual)
+        map((urlState) => urlState?.mlExplorerFilter),
+        distinctUntilChanged(isEqual)
       )
-      .subscribe(this._influencersFilterQuery$);
+      .subscribe((v) => {
+        const result = {
+          ...this._getDefaultFilterSettings(),
+          ...v,
+        };
+        this._filterSettings$.next(result);
+      });
   }
 
   public setSelectedJobs(explorerJobs: ExplorerJob[] | undefined) {
@@ -51,7 +69,37 @@ export class AnomalyExplorerCommonStateService {
     );
   }
 
+  public getSelectedJobs(): ExplorerJob[] | undefined {
+    return this._selectedJobs$.getValue();
+  }
+
   public getInfluencerFilterQuery$(): Observable<InfluencersFilterQuery | undefined> {
-    return this._influencersFilterQuery$.pipe(distinctUntilChanged(isEqual));
+    return this._filterSettings$.pipe(
+      map((v) => v?.influencersFilterQuery),
+      distinctUntilChanged(isEqual)
+    );
+  }
+
+  public getFilterSettings$(): Observable<FilterSettings> {
+    return this._filterSettings$.asObservable();
+  }
+
+  public getFilterSettings(): FilterSettings {
+    return this._filterSettings$.getValue();
+  }
+
+  public setFilterSettings(update: KQLFilterSettings) {
+    this.anomalyExplorerUrlStateService.updateUrlState({
+      mlExplorerFilter: {
+        influencersFilterQuery: update.filterQuery,
+        filterActive: true,
+        filteredFields: update.filteredFields,
+        queryString: update.queryString,
+      },
+    });
+  }
+
+  public clearFilterSettings() {
+    this.anomalyExplorerUrlStateService.updateUrlState({ mlExplorerFilter: {} });
   }
 }

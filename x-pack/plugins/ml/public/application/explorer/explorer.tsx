@@ -150,15 +150,29 @@ export const Explorer: FC<ExplorerUIProps> = ({
   overallSwimlaneData,
 }) => {
   const { displayWarningToast, displayDangerToast } = useToastNotificationService();
-  const { anomalyTimelineStateService } = useAnomalyExplorerContext();
+  const { anomalyTimelineStateService, anomalyExplorerCommonStateService } =
+    useAnomalyExplorerContext();
 
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
   const [language, updateLanguage] = useState<string>(DEFAULT_QUERY_LANG);
 
+  const filterSettings = useObservable(
+    anomalyExplorerCommonStateService.getFilterSettings$(),
+    anomalyExplorerCommonStateService.getFilterSettings()
+  );
+
+  const selectedJobs = useObservable(
+    anomalyExplorerCommonStateService.getSelectedJobs$(),
+    anomalyExplorerCommonStateService.getSelectedJobs()
+  );
+
   const applyFilter = useCallback(
     (fieldName: string, fieldValue: string, action: FilterAction) => {
-      const { filterActive, indexPattern, queryString } = explorerState;
+      const { filterActive, queryString } = filterSettings;
+
+      const indexPattern = explorerState.indexPattern;
+
       let newQueryString = '';
       const operator = 'and ';
       const sanitizedFieldName = escapeParens(fieldName);
@@ -194,8 +208,10 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
         if (clearSettings === true) {
           explorerService.clearInfluencerFilterSettings();
+          anomalyExplorerCommonStateService.clearFilterSettings();
         } else {
           explorerService.setInfluencerFilterSettings(settings);
+          anomalyExplorerCommonStateService.setFilterSettings(settings);
         }
       } catch (e) {
         console.log('Invalid query syntax from table', e); // eslint-disable-line no-console
@@ -208,7 +224,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         );
       }
     },
-    [explorerState, language]
+    [explorerState, language, filterSettings]
   );
 
   useEffect(() => {
@@ -234,16 +250,15 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const {
     annotations,
     chartsData,
-    filterActive,
     filterPlaceHolder,
     indexPattern,
     influencers,
     loading,
     noInfluencersConfigured,
-    queryString,
-    selectedJobs,
     tableData,
   } = explorerState;
+
+  const { filterActive, queryString } = filterSettings;
 
   const isOverallSwimLaneLoading = useObservable(
     anomalyTimelineStateService.isOverallSwimLaneLoading$(),
@@ -282,7 +297,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     dateFormatTz: getDateFormatTz(),
   } as JobSelectorProps;
 
-  const noJobsSelected = selectedJobs === null || selectedJobs.length === 0;
+  const noJobsSelected = !selectedJobs || selectedJobs.length === 0;
   const hasResults: boolean =
     !!overallSwimlaneData?.points && overallSwimlaneData.points.length > 0;
   const hasResultsWithAnomalies =

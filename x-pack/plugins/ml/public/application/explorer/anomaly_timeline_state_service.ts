@@ -305,12 +305,13 @@ export class AnomalyTimelineStateService {
         distinctUntilChanged()
       ),
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this.anomalyExplorerCommonStateService.getFilterSettings$(),
       this._selectedCells$,
-    ]).subscribe(([currentlySelected, selectedJobs, selectedCells]) => {
+    ]).subscribe(([currentlySelected, selectedJobs, filterSettings, selectedCells]) => {
       const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
         currentlySelected,
-        false,
-        [],
+        filterSettings.filterActive,
+        filterSettings.filteredFields,
         false,
         selectedCells,
         selectedJobs
