@@ -8,7 +8,7 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState, AlertTypeDisabledError } from '../lib';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
@@ -16,13 +16,13 @@ const paramSchema = schema.object({
 });
 
 const bodySchema = schema.object({
-  snooze_end_time: schema.maybe(schema.string()),
+  snooze_end_time: schema.oneOf([schema.string(), schema.literal(-1)]),
 });
 
-const rewriteBodyReq: RewriteRequestCase<{
-  snoozeEndTime?: string;
-}> = ({ snooze_end_time: snoozeEndTime }) => ({
-  snoozeEndTime,
+const rewriteBodyReq: (body: { snooze_end_time: string | -1 }) => { snoozeEndTime?: string } = ({
+  snooze_end_time: snoozeEndTime,
+}) => ({
+  snoozeEndTime: typeof snoozeEndTime === 'string' ? snoozeEndTime : undefined,
 });
 
 export const snoozeRuleRoute = (

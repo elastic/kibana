@@ -41,6 +41,8 @@ describe('snoozeAlertRoute', () => {
       {
         params: {
           id: '1',
+        },
+        body: {
           snooze_end_time: SNOOZE_END_TIME,
         },
       },
@@ -62,7 +64,7 @@ describe('snoozeAlertRoute', () => {
     expect(res.noContent).toHaveBeenCalled();
   });
 
-  it('also snoozes an alert when passed no snoozeEndTime', async () => {
+  it('also snoozes an alert when passed snoozeEndTime of -1', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -79,6 +81,9 @@ describe('snoozeAlertRoute', () => {
       {
         params: {
           id: '1',
+        },
+        body: {
+          snoozeEndTime: -1,
         },
       },
       ['noContent']
