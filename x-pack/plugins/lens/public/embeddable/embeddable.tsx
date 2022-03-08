@@ -157,7 +157,7 @@ const getExpressionFromDocument = async (
   };
 };
 
-async function getViewUnderlyingDataArgs({
+function getViewUnderlyingDataArgs({
   activeDatasource,
   activeDatasourceState,
   activeData,
@@ -715,7 +715,7 @@ export class Embeddable
         );
     }
 
-    const viewUnderlyingDataArgs = await getViewUnderlyingDataArgs({
+    const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
       activeDatasource: this.activeDataInfo.activeDatasource!,
       activeDatasourceState: this.activeDataInfo.activeDatasourceState,
       activeData: this.activeDataInfo.activeData,
