@@ -46,9 +46,8 @@ export async function getSuggestionsByServiceName({
               ...termQuery(SERVICE_NAME, serviceName),
               ...(start && end ? rangeQuery(start, end) : []),
               {
-                query_string: {
-                  fields: [fieldName],
-                  query: `*${fieldValue}*`,
+                wildcard: {
+                  [fieldName]: `*${fieldValue}*`,
                 },
               },
             ],
