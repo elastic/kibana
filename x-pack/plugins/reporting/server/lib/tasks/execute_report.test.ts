@@ -5,20 +5,17 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../..';
 import { RunContext } from '../../../../task_manager/server';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { KibanaShuttingDownError } from '../../../common/errors';
 import type { SavedReport } from '../store';
 import { ReportingConfigType } from '../../config';
-import {
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { ExecuteReportTask } from './';
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
 describe('Execute Report Task', () => {
   let mockReporting: ReportingCore;

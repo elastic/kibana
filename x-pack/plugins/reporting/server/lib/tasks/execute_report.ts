@@ -6,14 +6,15 @@
  */
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger } from 'kibana/server';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { finished, Writable } from 'stream';
 import { promisify } from 'util';
-import { getContentStream, LevelLogger } from '../';
-import { ReportingCore } from '../../';
-import {
+import { getContentStream } from '../';
+import type { ReportingCore } from '../../';
+import type {
   RunContext,
   TaskManagerStartContract,
   TaskRunCreatorFunction,
@@ -65,7 +66,7 @@ function reportFromTask(task: ReportTaskParams) {
 export class ExecuteReportTask implements ReportingTask {
   public TYPE = REPORTING_EXECUTE_TYPE;
 
-  private logger: LevelLogger;
+  private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
   private taskExecutors?: Map<string, TaskExecutor>;
   private kibanaId?: string;
@@ -75,9 +76,9 @@ export class ExecuteReportTask implements ReportingTask {
   constructor(
     private reporting: ReportingCore,
     private config: ReportingConfigType,
-    logger: LevelLogger
+    logger: Logger
   ) {
-    this.logger = logger.clone(['runTask']);
+    this.logger = logger.get('runTask');
   }
 
   /*
@@ -91,7 +92,7 @@ export class ExecuteReportTask implements ReportingTask {
     const exportTypesRegistry = reporting.getExportTypesRegistry();
     const executors = new Map<string, TaskExecutor>();
     for (const exportType of exportTypesRegistry.getAll()) {
-      const exportTypeLogger = this.logger.clone([exportType.id]);
+      const exportTypeLogger = this.logger.get(exportType.jobType);
       const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
       // The task will run the function with the job type as a param.
       // This allows us to retrieve the specific export type runFn when called to run an export
@@ -490,7 +491,7 @@ export class ExecuteReportTask implements ReportingTask {
     return await this.getTaskManagerStart().schedule(taskInstance);
   }
 
-  private async rescheduleTask(task: ReportTaskParams, logger: LevelLogger) {
+  private async rescheduleTask(task: ReportTaskParams, logger: Logger) {
     logger.info(`Rescheduling task:${task.id} to retry after error.`);
 
     const oldTaskInstance: ReportingExecuteTaskInstance = {
