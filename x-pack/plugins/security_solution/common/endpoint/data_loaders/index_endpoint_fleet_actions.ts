@@ -43,8 +43,7 @@ export interface IndexedEndpointAndFleetActionsForHostResponse {
 export const indexEndpointAndFleetActionsForHost = async (
   esClient: Client,
   endpointHost: HostMetadata,
-  fleetActionGenerator: FleetActionGenerator = defaultFleetActionGenerator,
-  addEndpointActions = false
+  fleetActionGenerator: FleetActionGenerator = defaultFleetActionGenerator
 ): Promise<IndexedEndpointAndFleetActionsForHostResponse> => {
   const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
   const agentId = endpointHost.elastic.agent.id;
@@ -77,7 +76,7 @@ export const indexEndpointAndFleetActionsForHost = async (
       )
       .catch(wrapErrorAndRejectPromise);
 
-    if (addEndpointActions) {
+    if (fleetActionGenerator.randomFloat() < 0.4) {
       const endpointActionsBody = {
         EndpointActions: {
           ...action,
@@ -107,7 +106,6 @@ export const indexEndpointAndFleetActionsForHost = async (
     }
 
     const randomFloat = fleetActionGenerator.randomFloat();
-
     // Create an action response for the above
     const actionResponse = fleetActionGenerator.generateResponse({
       action_id: action.action_id,
@@ -132,7 +130,7 @@ export const indexEndpointAndFleetActionsForHost = async (
       )
       .catch(wrapErrorAndRejectPromise);
 
-    if (addEndpointActions) {
+    if (randomFloat < 0.4) {
       const endpointActionResponseBody = {
         EndpointActions: {
           ...actionResponse,

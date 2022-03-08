@@ -83,7 +83,6 @@ export async function indexEndpointHostDocs({
   metadataIndex,
   policyResponseIndex,
   enrollFleet,
-  addEndpointActions,
   generator,
 }: {
   numDocs: number;
@@ -94,7 +93,6 @@ export async function indexEndpointHostDocs({
   metadataIndex: string;
   policyResponseIndex: string;
   enrollFleet: boolean;
-  addEndpointActions: boolean;
   generator: EndpointDocGenerator;
 }): Promise<IndexedHostsResponse> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
@@ -187,12 +185,7 @@ export async function indexEndpointHostDocs({
       };
 
       // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-      await indexEndpointAndFleetActionsForHost(
-        client,
-        hostMetadata,
-        undefined,
-        addEndpointActions
-      );
+      await indexEndpointAndFleetActionsForHost(client, hostMetadata, undefined);
     }
 
     hostMetadata = {
