@@ -68,6 +68,13 @@ export class ControlGroupContainer extends Container<
     return Promise.resolve();
   };
 
+  /**
+   * Returns a button that allows controls to be created externally using the embeddable
+   * @param buttonType Controls the button styling
+   * @param closePopover Closes the create control menu popover when flyout opens - only necessary if `buttonType === 'toolbar'`
+   * @return If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.
+   *         Otherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types.
+   */
   public getCreateControlButton = (
     buttonType: CreateControlButtonTypes,
     closePopover?: () => void
@@ -102,6 +109,10 @@ export class ControlGroupContainer extends Container<
     );
   };
 
+  /**
+   * Returns the toolbar button that is used for creating controls and managing control settings
+   * @return `SolutionToolbarPopover` button for input controls
+   */
   public getToolbarButtons = () => {
     return (
       <SolutionToolbarPopover

@@ -51,9 +51,7 @@ export const ControlsCallout = ({ getCreateControlButton }: CalloutProps) => {
             </EuiFlexItem>
             {getCreateControlButton ? (
               <EuiFlexItem grow={false}>{getCreateControlButton()}</EuiFlexItem>
-            ) : (
-              <></>
-            )}
+            ) : null}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="s" onClick={dismissControls}>
                 {ControlGroupStrings.emptyState.getDismissButton()}
