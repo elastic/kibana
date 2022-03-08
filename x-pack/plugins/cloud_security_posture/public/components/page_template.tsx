@@ -4,20 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiErrorBoundary, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   KibanaPageTemplate,
-  KibanaPageTemplateProps,
+  type KibanaPageTemplateProps,
 } from '../../../../../src/plugins/kibana_react/public';
+import { useKubebeatDataView } from '../common/api/use_kubebeat_data_view';
 import { allNavigationItems } from '../common/navigation/constants';
 import type { CspNavigationItem } from '../common/navigation/types';
 import { CLOUD_SECURITY_POSTURE } from '../common/translations';
 import { CspLoadingState } from './csp_loading_state';
-import { LOADING } from './translations';
+import {
+  LOADING,
+  NO_DATA_CONFIG_BUTTON,
+  NO_DATA_CONFIG_DESCRIPTION,
+  NO_DATA_CONFIG_SOLUTION_NAME,
+  NO_DATA_CONFIG_TITLE,
+} from './translations';
 
 const activeItemStyle = { fontWeight: 700 };
 
@@ -36,37 +42,69 @@ export const getSideNavItems = (
       ),
     }));
 
-const defaultProps: KibanaPageTemplateProps = {
+const DEFAULT_PROPS: KibanaPageTemplateProps = {
   solutionNav: {
     name: CLOUD_SECURITY_POSTURE,
     items: getSideNavItems(allNavigationItems),
   },
   restrictWidth: false,
-  template: 'default',
 };
 
-interface CspPageTemplateProps extends KibanaPageTemplateProps {
-  isLoading?: boolean;
-  loadingText?: string;
-}
+const NO_DATA_CONFIG: KibanaPageTemplateProps['noDataConfig'] = {
+  pageTitle: NO_DATA_CONFIG_TITLE,
+  solution: NO_DATA_CONFIG_SOLUTION_NAME,
+  // TODO: Add real docs link once we have it
+  docsLink: 'https://www.elastic.co/guide/index.html',
+  logo: 'logoSecurity',
+  actions: {
+    elasticAgent: {
+      // TODO: Use `href` prop to link to our own integration once we have it
+      title: NO_DATA_CONFIG_BUTTON,
+      description: NO_DATA_CONFIG_DESCRIPTION,
+    },
+  },
+};
 
-export const CspPageTemplate: React.FC<CspPageTemplateProps> = ({
-  children,
-  isLoading,
-  loadingText = LOADING,
-  ...props
-}) => {
+export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({ children, ...props }) => {
+  // TODO: Consider using more sophisticated logic to find out if our integration is installed
+  const kubeBeatQuery = useKubebeatDataView();
+
+  let noDataConfig: KibanaPageTemplateProps['noDataConfig'];
+  if (kubeBeatQuery.status === 'success' && !kubeBeatQuery.data) {
+    noDataConfig = NO_DATA_CONFIG;
+  }
+
+  let template: KibanaPageTemplateProps['template'] = 'default';
+  if (kubeBeatQuery.status === 'error' || kubeBeatQuery.status === 'loading') {
+    template = 'centeredContent';
+  }
+
   return (
-    <KibanaPageTemplate {...defaultProps} {...props}>
+    <KibanaPageTemplate
+      {...DEFAULT_PROPS}
+      {...props}
+      template={template}
+      noDataConfig={noDataConfig}
+    >
       <EuiErrorBoundary>
-        {isLoading ? (
-          <>
-            <EuiSpacer size="xxl" />
-            <CspLoadingState>{loadingText}</CspLoadingState>
-          </>
-        ) : (
-          children
+        {kubeBeatQuery.status === 'loading' && <CspLoadingState>{LOADING}</CspLoadingState>}
+        {kubeBeatQuery.status === 'error' && (
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="alert"
+            title={
+              <EuiTitle>
+                <h2>
+                  <FormattedMessage
+                    id="xpack.csp.pageTemplate.loadErrorMessage"
+                    defaultMessage="We couldn't fetch your cloud security posture data"
+                  />
+                </h2>
+              </EuiTitle>
+            }
+          />
         )}
+        {kubeBeatQuery.status === 'success' && children}
       </EuiErrorBoundary>
     </KibanaPageTemplate>
   );
