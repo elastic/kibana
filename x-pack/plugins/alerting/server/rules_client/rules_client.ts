@@ -229,6 +229,22 @@ export interface GetAlertSummaryParams {
   numberOfExecutions?: number;
 }
 
+export interface GetExecutionLogByIdParams {
+  id: string;
+  dateStart?: string;
+  // dateEnd?
+}
+
+export interface ExecutionLog {
+  count: number;
+  values: Array<{
+    timestamp: number;
+    duration: number;
+    status: 'failed' | 'succeeded';
+    message: string;
+  }>;
+}
+
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 
@@ -629,6 +645,76 @@ export class RulesClient {
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });
+  }
+
+  public async getExecutionLogForRule({
+    id,
+    dateStart,
+  }: // dateEnd?
+  GetExecutionLogByIdParams): Promise<ExecutionLog> {
+    this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+
+    // Make sure user has access to this rule
+    await this.authorization.ensureAuthorized({
+      ruleTypeId: rule.alertTypeId,
+      consumer: rule.consumer,
+      operation: ReadOperations.GetAlertSummary,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const durationMillis = parseDuration(rule.schedule.interval) * (numberOfExecutions ?? 60);
+    const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
+    const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    let events: IEvent[];
+    let executionEvents: IEvent[];
+
+    try {
+      const results = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {},
+        rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+      );
+    }
+
+    // desired output
+    // {
+    //   count: number;
+    //   values: [
+    //     {
+    //       // this is shown in the screenshot
+    //       executionTime: timestamp,
+    //       duration: millis,
+    //       status: failed/succeeded,
+    //       message: log message - execution timeout is separate event log entry
+
+    //       // other stuff that might be useful that we could probably get
+    //       number of active alerts
+    //       number of new alerts
+    //       number of recovered alerts
+    //       number of triggered actions
+    //       any errors in the actions
+
+    //       es search duration
+    //       total search duration
+
+    //     }
+    //   ]
+    // }
+    return {
+      count: 0,
+      values: [],
+    };
   }
 
   public async find<Params extends RuleTypeParams = never>({
