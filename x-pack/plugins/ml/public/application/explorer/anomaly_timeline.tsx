@@ -84,7 +84,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const loading = useObservable(anomalyTimelineStateService.isOverallSwimLaneLoading$(), true);
 
-    const swimlaneContainerWidth = useObservable(anomalyTimelineStateService.getContainerWidth$());
+    const swimlaneContainerWidth = useObservable(
+      anomalyTimelineStateService.getContainerWidth$(),
+      anomalyTimelineStateService.getContainerWidth()
+    );
     const viewBySwimlaneDataLoading = useObservable(
       anomalyTimelineStateService.isViewBySwimLaneLoading$(),
       true
@@ -171,7 +174,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     );
 
     const onResize = useCallback((value: number) => {
-      explorerService.setSwimlaneContainerWidth(value);
       anomalyTimelineStateService.setContainerWidth(value);
     }, []);
 
@@ -299,7 +301,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               <MlTooltipComponent>
                 {(tooltipService) => (
                   <SwimlaneAnnotationContainer
-                    chartWidth={swimlaneContainerWidth}
+                    chartWidth={swimlaneContainerWidth!}
                     domain={annotationXDomain}
                     annotationsData={annotations}
                     tooltipService={tooltipService}

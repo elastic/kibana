@@ -24,6 +24,7 @@ import {
   EuiAccordion,
   EuiBadge,
 } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -58,7 +59,6 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 // Anomalies Map
 import { AnomaliesMap } from './anomalies_map';
-import { getToastNotifications } from '../util/dependency_cache';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import { isDefined } from '../../../common/types/guards';
@@ -69,6 +69,7 @@ import type { TimefilterContract } from '../../../../../../src/plugins/data/publ
 import type { TimeBuckets } from '../util/time_buckets';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
+import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
@@ -148,6 +149,9 @@ export const Explorer: FC<ExplorerUIProps> = ({
   explorerState,
   overallSwimlaneData,
 }) => {
+  const { displayWarningToast, displayDangerToast } = useToastNotificationService();
+  const { anomalyTimelineStateService } = useAnomalyExplorerContext();
+
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
   const [language, updateLanguage] = useState<string>(DEFAULT_QUERY_LANG);
@@ -196,8 +200,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
       } catch (e) {
         console.log('Invalid query syntax from table', e); // eslint-disable-line no-console
 
-        const toastNotifications = getToastNotifications();
-        toastNotifications.addDanger(
+        displayDangerToast(
           i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessageFromTable', {
             defaultMessage:
               'Invalid syntax in query bar. The input must be valid Kibana Query Language (KQL)',
@@ -205,10 +208,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
         );
       }
     },
-    [explorerState]
+    [explorerState, language]
   );
-
-  const { displayWarningToast } = useToastNotificationService();
 
   useEffect(() => {
     if (invalidTimeRangeError) {
@@ -243,6 +244,17 @@ export const Explorer: FC<ExplorerUIProps> = ({
     selectedJobs,
     tableData,
   } = explorerState;
+
+  const isOverallSwimLaneLoading = useObservable(
+    anomalyTimelineStateService.isOverallSwimLaneLoading$(),
+    true
+  );
+  const isViewBySwimLaneLoading = useObservable(
+    anomalyTimelineStateService.isViewBySwimLaneLoading$(),
+    true
+  );
+
+  const isDataLoading = loading || isOverallSwimLaneLoading || isViewBySwimLaneLoading;
 
   const { annotationsData, totalCount: allAnnotationsCnt, error: annotationsError } = annotations;
 
@@ -279,7 +291,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   const hasActiveFilter = isDefined(swimLaneSeverity);
 
-  if (noJobsSelected && !loading) {
+  if (noJobsSelected && !isDataLoading) {
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps}>
         <ExplorerNoJobsSelected />
@@ -287,7 +299,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     );
   }
 
-  if (!hasResultsWithAnomalies && !loading && !hasActiveFilter) {
+  if (!hasResultsWithAnomalies && !isDataLoading && !hasActiveFilter) {
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps}>
         <ExplorerNoResultsFound hasResults={hasResults} selectedJobsRunning={selectedJobsRunning} />
@@ -299,6 +311,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   const bounds = timefilter.getActiveBounds();
   const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
+
   return (
     <ExplorerPage
       jobSelectorProps={jobSelectorProps}

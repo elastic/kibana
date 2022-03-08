@@ -12,7 +12,6 @@ import { EXPLORER_ACTION, VIEW_BY_JOB_LABEL } from '../../explorer_constants';
 import { Action } from '../../explorer_dashboard_service';
 import {
   getClearedSelectedAnomaliesState,
-  getDefaultSwimlaneData,
   getSwimlaneBucketInterval,
   getViewBySwimlaneOptions,
 } from '../../explorer_utils';
@@ -44,7 +43,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
         ...state,
         ...getClearedSelectedAnomaliesState(),
         loading: false,
-        viewByFromPage: 1,
         selectedJobs: [],
       };
       break;
@@ -79,21 +77,9 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = setInfluencerFilterSettings(state, payload);
       break;
 
-    // case EXPLORER_ACTION.SET_SELECTED_CELLS:
-    //   const selectedCells = payload;
-    //   nextState = {
-    //     ...state,
-    //     selectedCells,
-    //   };
-    //   break;
-
     case EXPLORER_ACTION.SET_EXPLORER_DATA:
     case EXPLORER_ACTION.SET_FILTER_DATA:
       nextState = { ...state, ...payload };
-      break;
-
-    case EXPLORER_ACTION.SET_SWIMLANE_CONTAINER_WIDTH:
-      nextState = { ...state, swimlaneContainerWidth: payload };
       break;
 
     case EXPLORER_ACTION.SET_VIEW_BY_SWIMLANE_FIELD_NAME:
@@ -113,23 +99,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
         ...getClearedSelectedAnomaliesState(),
         maskAll,
         viewBySwimlaneFieldName,
-        viewBySwimlaneData: getDefaultSwimlaneData(),
-        viewByFromPage: 1,
-        viewBySwimlaneDataLoading: true,
-      };
-      break;
-
-    case EXPLORER_ACTION.SET_VIEW_BY_SWIMLANE_LOADING:
-      const { annotationsData, overallState, tableData } = payload;
-      nextState = {
-        ...state,
-        annotations: annotationsData,
-        overallSwimlaneData: overallState,
-        tableData,
-        viewBySwimlaneData: {
-          ...getDefaultSwimlaneData(),
-        },
-        viewBySwimlaneDataLoading: true,
       };
       break;
 
@@ -161,21 +130,20 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     filteredFields: nextState.filteredFields,
     isAndOperator: nextState.isAndOperator,
     selectedJobs: nextState.selectedJobs,
-    selectedCells: nextState.selectedCells!,
   });
 
-  const { selectedCells } = nextState;
+  // const { selectedCells } = nextState;
 
-  const timeRange = getTimeBoundsFromSelection(selectedCells);
+  // const timeRange = getTimeBoundsFromSelection(selectedCells);
 
   return {
     ...nextState,
     swimlaneBucketInterval,
-    viewByLoadedForTimeFormatted: timeRange
-      ? `${formatHumanReadableDateTime(timeRange.earliestMs)} - ${formatHumanReadableDateTime(
-          timeRange.latestMs
-        )}`
-      : null,
+    // viewByLoadedForTimeFormatted: timeRange
+    //   ? `${formatHumanReadableDateTime(timeRange.earliestMs)} - ${formatHumanReadableDateTime(
+    //       timeRange.latestMs
+    //     )}`
+    //   : null,
     viewBySwimlaneFieldName,
     viewBySwimlaneOptions,
     ...checkSelectedCells(nextState),

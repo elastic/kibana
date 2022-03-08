@@ -58,7 +58,7 @@ export class AnomalyTimelineStateService {
     AnomalyExplorerSwimLaneUrlState | undefined | null
   >(null);
 
-  private _containerWidth$ = new Subject<number>();
+  private _containerWidth$ = new BehaviorSubject<number>(0);
   private _selectedCells$ = new BehaviorSubject<AppStateSelectedCells | undefined>(undefined);
   private _swimLaneSeverity$ = new BehaviorSubject<number | undefined>(undefined);
   private _swimLanePaginations$ = new BehaviorSubject<SwimLanePagination>({
@@ -71,8 +71,8 @@ export class AnomalyTimelineStateService {
 
   private _topFieldValues$ = new BehaviorSubject<string[]>([]);
 
-  private _isOverallSwimLaneLoading$ = new BehaviorSubject(false);
-  private _isViewBySwimLaneLoading$ = new BehaviorSubject(false);
+  private _isOverallSwimLaneLoading$ = new BehaviorSubject(true);
+  private _isViewBySwimLaneLoading$ = new BehaviorSubject(true);
 
   constructor(
     private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
@@ -490,8 +490,20 @@ export class AnomalyTimelineStateService {
     return this._viewBySwimLaneData$.asObservable();
   }
 
-  public getContainerWidth$(): Observable<number> {
-    return this._containerWidth$.pipe(debounceTime(500), distinctUntilChanged());
+  public getContainerWidth$(): Observable<number | undefined> {
+    return this._containerWidth$.pipe(
+      debounceTime(500),
+      distinctUntilChanged((prev, curr) => {
+        const delta = Math.abs(prev - curr);
+        // Scrollbar appears during the page rendering,
+        // it causes small width change that we want to ignore.
+        return delta < 20;
+      })
+    );
+  }
+
+  public getContainerWidth(): number | undefined {
+    return this._containerWidth$.getValue();
   }
 
   /**

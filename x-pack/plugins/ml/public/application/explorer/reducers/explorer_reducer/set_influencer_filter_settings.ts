@@ -58,6 +58,5 @@ export function setInfluencerFilterSettings(
       filteredFields.includes(selectedViewByFieldName) === false,
     viewBySwimlaneFieldName: selectedViewByFieldName,
     viewBySwimlaneOptions: filteredViewBySwimlaneOptions,
-    viewByFromPage: 1,
   };
 }

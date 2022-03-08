@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 
 import { forkJoin, of, Observable, Subject } from 'rxjs';
-import { mergeMap, switchMap, tap, map } from 'rxjs/operators';
+import { switchMap, tap, map } from 'rxjs/operators';
 
 import { useCallback, useMemo } from 'react';
 import { explorerService } from '../explorer_dashboard_service';
@@ -51,18 +51,20 @@ const wrapWithLastRefreshArg = <T extends (...a: any[]) => any>(func: T, context
   };
 };
 const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
-  return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual);
+  return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual) as (
+    lastRefresh: number,
+    ...args: Parameters<T>
+  ) => ReturnType<T>;
 };
 
-const memoizedLoadOverallAnnotations =
-  memoize<typeof loadOverallAnnotations>(loadOverallAnnotations);
+const memoizedLoadOverallAnnotations = memoize(loadOverallAnnotations);
 
-const memoizedLoadAnnotationsTableData =
-  memoize<typeof loadAnnotationsTableData>(loadAnnotationsTableData);
-const memoizedLoadFilteredTopInfluencers = memoize<typeof loadFilteredTopInfluencers>(
-  loadFilteredTopInfluencers
-);
+const memoizedLoadAnnotationsTableData = memoize(loadAnnotationsTableData);
+
+const memoizedLoadFilteredTopInfluencers = memoize(loadFilteredTopInfluencers);
+
 const memoizedLoadTopInfluencers = memoize(loadTopInfluencers);
+
 const memoizedLoadAnomaliesTableData = memoize(loadAnomaliesTableData);
 
 export interface LoadExplorerDataConfig {
@@ -138,8 +140,9 @@ const loadExplorerDataProvider = (
     const dateFormatTz = getDateFormatTz();
 
     const interval = swimlaneBucketInterval.asSeconds();
+
     // First get the data where we have all necessary args at hand using forkJoin:
-    // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues
+    // annotationsData, anomalyChartRecords, influencers, overallState, tableData
     return forkJoin({
       overallAnnotations: memoizedLoadOverallAnnotations(
         lastRefresh,
@@ -188,9 +191,6 @@ const loadExplorerDataProvider = (
         influencersFilterQuery
       ),
     }).pipe(
-      // Trigger a side-effect action to reset view-by swimlane,
-      // show the view-by loading indicator
-      // and pass on the data we already fetched.
       tap(({ anomalyChartRecords }) => {
         memoizedAnomalyDataChange(
           lastRefresh,
@@ -206,16 +206,8 @@ const loadExplorerDataProvider = (
           tableSeverity
         );
       }),
-      tap(explorerService.setViewBySwimlaneLoading),
-      mergeMap(
-        ({
-          overallAnnotations,
-          anomalyChartRecords,
-          influencers,
-          topFieldValues,
-          annotationsData,
-          tableData,
-        }) =>
+      switchMap(
+        ({ overallAnnotations, anomalyChartRecords, influencers, annotationsData, tableData }) =>
           forkJoin({
             filteredTopInfluencers:
               (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
@@ -249,6 +241,7 @@ const loadExplorerDataProvider = (
     );
   };
 };
+
 export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
   const timefilter = useTimefilter();
 

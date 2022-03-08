@@ -117,17 +117,8 @@ export const explorerService = {
   setChartsDataLoading: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS_DATA_LOADING });
   },
-  setSwimlaneContainerWidth: (payload: number) => {
-    explorerAction$.next({
-      type: EXPLORER_ACTION.SET_SWIMLANE_CONTAINER_WIDTH,
-      payload,
-    });
-  },
   setViewBySwimlaneFieldName: (payload: string) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_SWIMLANE_FIELD_NAME, payload });
-  },
-  setViewBySwimlaneLoading: (payload: any) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_SWIMLANE_LOADING, payload });
   },
   setShowCharts: (payload: boolean) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_SHOW_CHARTS, payload });
