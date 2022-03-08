@@ -6,10 +6,6 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { LensAttributes } from './types';
-
-import { HttpSetup } from '../../../../../../../src/core/public';
-import { Case } from '../../../../../cases/common';
 
 export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
   hostName
@@ -145,26 +141,3 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
         },
       ]
     : [];
-
-export const addToCase = async (
-  http: HttpSetup,
-  theCase: Case,
-  attributes: LensAttributes,
-  timeRange?: { from: string; to: string },
-  owner?: string
-) => {
-  const apiPath = `/api/cases/${theCase?.id}/comments`;
-
-  const vizPayload = {
-    attributes,
-    timeRange,
-  };
-
-  const payload = {
-    comment: `!{lens${JSON.stringify(vizPayload)}}`,
-    type: 'user',
-    owner: owner ?? 'security_solution',
-  };
-
-  return http.post(apiPath, { body: JSON.stringify(payload) });
-};

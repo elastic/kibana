@@ -7,29 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ADD_TO_CASE_SUCCESS = (caseTitle: string) =>
-  i18n.translate(
-    'xpack.securitySolution.components.visualizationActions.addToCase.notificationSuccess',
-    {
-      defaultMessage: 'Successfully added visualization to the case: {caseTitle}',
-      values: { caseTitle },
-    }
-  );
-
-export const ADD_TO_CASE_FAILURE = i18n.translate(
-  'xpack.securitySolution.components.visualizationActions.addToCase.notificationFailure',
-  {
-    defaultMessage: 'Failed to add visualization to the selected case.',
-  }
-);
-
-export const VIEW_CASE = i18n.translate(
-  'xpack.securitySolution.components.visualizationActions.addToCase.notification.viewCase',
-  {
-    defaultMessage: 'View case',
-  }
-);
-
 export const INSPECT = i18n.translate('xpack.securitySolution.visualizationActions.inspect', {
   defaultMessage: 'Inspect',
 });
