@@ -414,13 +414,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         <EuiDataGrid
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
-          rowHeightsOptions={
-            props.args.fitRowToContent
-              ? {
-                  defaultHeight: 'auto',
-                }
-              : undefined
-          }
+          rowHeightsOptions={{
+            defaultHeight: props.args.fitRowToContent
+              ? 'auto'
+              : {
+                  lineCount: props.args.rowHeightLines,
+                },
+          }}
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}
