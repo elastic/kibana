@@ -21,7 +21,8 @@ interface Props {
 
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
 
@@ -36,8 +37,18 @@ export function UXSection({ bucketSize }: Props) {
         });
       }
     },
+    // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, serviceName]
+    [
+      bucketSize,
+      relativeStart,
+      relativeEnd,
+      absoluteStart,
+      absoluteEnd,
+      forceUpdate,
+      serviceName,
+      lastUpdated,
+    ]
   );
 
   if (!uxHasDataResponse?.hasData) {

@@ -57,7 +57,8 @@ export function LogsSection({ bucketSize }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
 
   const { data, status } = useFetcher(
     () => {
@@ -69,8 +70,10 @@ export function LogsSection({ bucketSize }: Props) {
         });
       }
     },
+
+    // `forceUpdate` and `lastUpdated` trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate]
+    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
   );
 
   if (!hasDataMap.infra_logs?.hasData) {

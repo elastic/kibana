@@ -51,7 +51,8 @@ const bytesPerSecondFormatter = (value: NumberOrNull) =>
 
 export function MetricsSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   const [sortField, setSortField] = useState<keyof MetricsFetchDataSeries>('uptime');
   const [sortedData, setSortedData] = useState<MetricsFetchDataResponse | null>(null);
@@ -64,8 +65,17 @@ export function MetricsSection({ bucketSize }: Props) {
         ...bucketSize,
       });
     }
+    // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate]);
+  }, [
+    bucketSize,
+    relativeStart,
+    relativeEnd,
+    absoluteStart,
+    absoluteEnd,
+    forceUpdate,
+    lastUpdated,
+  ]);
 
   const handleTableChange = useCallback(
     ({ sort }: Criteria<MetricsFetchDataSeries>) => {

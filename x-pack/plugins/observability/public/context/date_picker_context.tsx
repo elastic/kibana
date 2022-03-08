@@ -22,6 +22,7 @@ export interface DatePickerContextValue {
   refreshPaused: boolean;
   updateTimeRange: (params: { start: string; end: string }) => void;
   updateRefreshInterval: (params: { interval: number; isPaused: boolean }) => void;
+  lastUpdated: number;
 }
 
 /**
@@ -121,6 +122,7 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
         refreshPaused: parseRefreshPaused(refreshPaused),
         updateTimeRange,
         updateRefreshInterval,
+        lastUpdated,
       }}
     >
       {children}

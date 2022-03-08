@@ -43,7 +43,8 @@ export function UptimeSection({ bucketSize }: Props) {
   const chartTheme = useChartTheme();
   const history = useHistory();
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
 
   const { data, status } = useFetcher(
     () => {
@@ -55,8 +56,9 @@ export function UptimeSection({ bucketSize }: Props) {
         });
       }
     },
+    // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate]
+    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
   );
 
   if (!hasDataMap.synthetics?.hasData) {
