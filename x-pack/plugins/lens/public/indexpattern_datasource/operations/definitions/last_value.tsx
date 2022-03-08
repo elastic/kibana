@@ -212,7 +212,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     } as const;
 
     return (
-      column.params.useTopHit || isScriptedField(column.sourceField, indexPattern)
+      column.params.useTopHit
         ? buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
             ...initialArgs,
             aggregate: 'concat',
