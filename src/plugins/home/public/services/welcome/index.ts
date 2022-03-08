@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import { services } from '../../../functional/services';
-import { pageObjects } from '../../../functional/page_objects';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export type { WelcomeServiceSetup, WelcomeRenderTelemetryNotice } from './welcome_service';
+export { WelcomeService } from './welcome_service';
