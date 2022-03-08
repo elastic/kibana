@@ -68,13 +68,6 @@ export function getTileMetaFeatures(mbMap: MbMap, mbSourceId: string): TileMetaF
     sourceLayer: ES_MVT_META_LAYER_NAME,
   });
 
-  const aggFeatures = mbMap.querySourceFeatures(mbSourceId, {
-    sourceLayer: 'aggs',
-  });
-
-  console.log('mbFeatures', mbFeatures);
-  console.log('aggFeatures', aggFeatures);
-
   return mbFeatures
     .map((mbFeature) => {
       try {
