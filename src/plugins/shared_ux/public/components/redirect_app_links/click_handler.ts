@@ -20,7 +20,7 @@ export const createNavigateToUrlClickHandler = ({
   navigateToUrl,
 }: CreateCrossAppClickHandlerOptions): React.MouseEventHandler<HTMLElement> => {
   return (e) => {
-    if (container === null) {
+    if (!container) {
       return;
     }
     // see https://github.com/DefinitelyTyped/DefinitelyTyped/pull/12239
