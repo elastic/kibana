@@ -50,11 +50,8 @@ export class DataViewsPublicPlugin
     { fieldFormats }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, theme, overlays, application } = core;
-    const hasDataStart = this.hasData.start(core);
-    console.log(core);
-    console.log({ hasDataStart });
     return new DataViewsServicePublic({
-      hasData: { ...hasDataStart },
+      hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
       apiClient: new DataViewsApiClient(http),

@@ -52,6 +52,7 @@ export type {
   DataViewFieldMap,
   DataViewSpec,
   SourceFilter,
+  HasDataService,
 } from './types';
 export { DataViewType } from './types';
 export type { IndexPatternsContract, DataViewsContract } from './data_views';

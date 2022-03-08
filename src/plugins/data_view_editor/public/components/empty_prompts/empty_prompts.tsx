@@ -20,8 +20,7 @@ import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { PromptFooter } from './prompt_footer';
 import { FLEET_ASSETS_TO_IGNORE } from '../../../../data/common';
 
-const removeAliases = (item: MatchedItem) =>
-  !(item as unknown as ResolveIndexResponseItemAlias).indices;
+const removeAliases = (mItem: MatchedItem) => !mItem.item.indices;
 
 interface Props {
   onCancel: () => void;

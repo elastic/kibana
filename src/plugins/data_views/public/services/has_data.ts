@@ -6,33 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, HttpSetup } from 'kibana/public';
-import {
-  MatchedItem,
-  ResolveIndexResponseItemAlias,
-} from 'src/plugins/data_view_editor/public/types';
-import { getIndices } from '../../../data_view_editor/public/lib';
-
-const FLEET_ASSETS_TO_IGNORE = {
-  LOGS_INDEX_PATTERN: 'logs-*',
-  METRICS_INDEX_PATTERN: 'metrics-*',
-  LOGS_DATA_STREAM_TO_IGNORE: 'logs-elastic_agent', // ignore ds created by Fleet server itself
-  METRICS_DATA_STREAM_TO_IGNORE: 'metrics-elastic_agent', // ignore ds created by Fleet server itself
-  METRICS_ENDPOINT_INDEX_TO_IGNORE: 'metrics-endpoint.metadata_current_default', // ignore index created by Fleet endpoint package installed by default in Cloud
-};
+import { CoreStart, HttpStart } from 'kibana/public';
+import { FLEET_ASSETS_TO_IGNORE } from '../../common';
+import { HasDataViewsResponse, IndicesResponse, IndicesResponseModified } from '../';
 
 export class HasData {
-  private removeAliases = (item: MatchedItem) =>
-    !(item as unknown as ResolveIndexResponseItemAlias).indices;
+  private removeAliases = (source: IndicesResponseModified): boolean => !source.item.indices;
 
-  private isUserDataIndex = (source: MatchedItem) => {
+  private isUserDataIndex = (source: IndicesResponseModified): boolean => {
     // filter out indices that start with `.`
     if (source.name.startsWith('.')) return false;
 
     // filter out sources from FLEET_ASSETS_TO_IGNORE
-    if (source.name === FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
-    if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
-    if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
+    for (const key in FLEET_ASSETS_TO_IGNORE) {
+      if (source.name === (FLEET_ASSETS_TO_IGNORE as any)[key]) return false;
+    }
 
     // filter out empty sources created by apm server
     if (source.name.startsWith('apm-')) return false;
@@ -46,7 +34,7 @@ export class HasData {
       /**
        * Check to see if ES data exists
        */
-      hasESData: async () => {
+      hasESData: async (): Promise<boolean> => {
         const hasLocalESData = await this.checkLocalESData(http);
         if (!hasLocalESData) {
           const hasRemoteESData = await this.checkRemoteESData(http);
@@ -55,55 +43,95 @@ export class HasData {
         return hasLocalESData;
       },
       /**
-       * Check to see if user created data views exist
-       */
-      hasUserDataView: async () => {
-        const hasLocalESData = await this.findUserDataViews();
-        return hasLocalESData;
-      },
-      /**
        * Check to see if any data view exists
        */
-      hasDataView: async () => {
-        const hasLocalESData = await this.findDataViews();
-        return hasLocalESData;
+      hasDataView: async (): Promise<boolean> => {
+        const dataViewsCheck = await this.findDataViews(http);
+        return dataViewsCheck;
+      },
+      /**
+       * Check to see if user created data views exist
+       */
+      hasUserDataView: async (): Promise<boolean> => {
+        const userDataViewsCheck = await this.findUserDataViews(http);
+        return userDataViewsCheck;
       },
     };
   }
 
-  private checkLocalESData = (http: HttpSetup) => {
-    return getIndices({
+  // ES Data
+
+  private responseToItemArray = (response: IndicesResponse): IndicesResponseModified[] => {
+    const { indices = [], aliases = [] } = response;
+    const source: IndicesResponseModified[] = [];
+
+    [...indices, ...aliases, ...(response.data_streams || [])].forEach((item) => {
+      source.push({
+        name: item.name,
+        item,
+      });
+    });
+
+    return source;
+  };
+
+  private getIndices = async ({
+    http,
+    pattern,
+    showAllIndices,
+  }: {
+    http: HttpStart;
+    pattern: string;
+    showAllIndices: boolean;
+  }): Promise<IndicesResponseModified[]> =>
+    http
+      .get<IndicesResponse>(`/internal/index-pattern-management/resolve_index/${pattern}`, {
+        query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
+      })
+      .then((response) => {
+        if (!response) {
+          return [];
+        } else {
+          return this.responseToItemArray(response);
+        }
+      });
+
+  private checkLocalESData = (http: HttpStart): Promise<boolean> =>
+    this.getIndices({
       http,
-      isRollupIndex: () => false,
       pattern: '*',
       showAllIndices: false,
-      searchClient: data.search.search,
-    }).then((dataSources) => {
+    }).then((dataSources: IndicesResponseModified[]) => {
       return dataSources.some(this.isUserDataIndex);
     });
-  };
 
-  private checkRemoteESData = (http: HttpSetup) => {
-    return getIndices({
+  private checkRemoteESData = (http: HttpStart): Promise<boolean> =>
+    this.getIndices({
       http,
-      isRollupIndex: () => false,
       pattern: '*:*',
       showAllIndices: false,
-      searchClient: data.search.search,
-    }).then((dataSources) => {
+    }).then((dataSources: IndicesResponseModified[]) => {
       return !!dataSources.filter(this.removeAliases).length;
+    });
+
+  // Data Views
+
+  private getHasDataViews = async ({ http }: { http: HttpStart }): Promise<HasDataViewsResponse> =>
+    http.get<HasDataViewsResponse>(`/internal/index_patterns/has_data_views`);
+
+  private findDataViews = (http: HttpStart): Promise<boolean> => {
+    return this.getHasDataViews({ http }).then((response: HasDataViewsResponse) => {
+      const { hasDataView } = response;
+      return hasDataView;
     });
   };
 
-  private findDataViews = () => {
-    return Promise.resolve(true);
-  };
-
-  private findUserDataViews = () => {
-    return Promise.resolve(true);
+  private findUserDataViews = (http: HttpStart): Promise<boolean> => {
+    return this.getHasDataViews({ http }).then((response: HasDataViewsResponse) => {
+      const { hasUserDataView } = response;
+      return hasUserDataView;
+    });
   };
 }
 
 export type HasDataStart = ReturnType<HasData['start']>;
-
-// searchClient: data.search.search,

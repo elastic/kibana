@@ -51,6 +51,9 @@ export type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
   DataViewsContract,
+  HasDataViewsResponse,
+  IndicesResponse,
+  IndicesResponseModified,
 } from './types';
 
 // Export plugin after all other imports

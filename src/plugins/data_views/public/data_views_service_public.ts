@@ -9,7 +9,7 @@
 import { DataViewsService } from '.';
 
 import { DataViewsServiceDeps } from '../common/data_views/data_views';
-import { HasDataService } from '../common/types';
+import { HasDataService } from '../common';
 
 interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
   getCanSaveSync: () => boolean;
