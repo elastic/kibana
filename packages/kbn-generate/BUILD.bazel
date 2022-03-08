@@ -21,7 +21,7 @@ filegroup(
   srcs = SRCS,
 )
 
-NPM_MODULE_EXTRA_FILES = glob(["template/**/*"]) + [
+NPM_MODULE_EXTRA_FILES = glob(["templates/**/*"]) + [
   "package.json",
 ]
 

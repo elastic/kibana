@@ -96,7 +96,7 @@ export function runGenerateCli() {
           }
         }
 
-        const templateFiles = await globby('.', {
+        const templateFiles = await globby('**/*', {
           cwd: TEMPLATE_DIR,
           absolute: false,
           dot: true,
