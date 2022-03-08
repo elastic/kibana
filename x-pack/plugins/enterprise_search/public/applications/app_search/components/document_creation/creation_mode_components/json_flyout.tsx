@@ -40,12 +40,22 @@ export const JsonFlyout: React.FC = () => {
   const tabs = [
     {
       id: 'uploadTab',
-      name: 'Upload',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.documentCreation.jsonFlyout.uploadTabName',
+        {
+          defaultMessage: 'Upload',
+        }
+      ),
       content: <UploadJsonFileTabContent />,
     },
     {
       id: 'pasteTab',
-      name: 'Paste',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.documentCreation.jsonFlyout.pasteTabName',
+        {
+          defaultMessage: 'Paste',
+        }
+      ),
       content: <PasteJsonTextTabContent />,
     },
   ];
