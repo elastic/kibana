@@ -7,22 +7,27 @@
 
 import { maybe } from '../../../common/utils/maybe';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../observability/server';
+import { rangeQuery, termQuery } from '../../../../observability/server';
 import { Setup } from '../../lib/helpers/setup_request';
 
 export async function getMetadataForBackend({
   setup,
-  backendName,
+  resourceIdentifierFields,
   start,
   end,
 }: {
   setup: Setup;
-  backendName: string;
+  resourceIdentifierFields: Record<string, string>;
   start: number;
   end: number;
 }) {
   const { apmEventClient } = setup;
+
+  const resourceIdentifierTerms = Object.entries(resourceIdentifierFields).map(
+    (x) => {
+      return termQuery(x[0], x[1])[0];
+    }
+  );
 
   const sampleResponse = await apmEventClient.search('get_backend_sample', {
     apm: {
@@ -32,14 +37,7 @@ export async function getMetadataForBackend({
       size: 1,
       query: {
         bool: {
-          filter: [
-            {
-              term: {
-                [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName,
-              },
-            },
-            ...rangeQuery(start, end),
-          ],
+          filter: [...resourceIdentifierTerms, ...rangeQuery(start, end)],
         },
       },
       sort: {

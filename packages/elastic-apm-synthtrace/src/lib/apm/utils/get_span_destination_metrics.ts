@@ -10,7 +10,10 @@ import { ApmFields } from '../apm_fields';
 import { aggregate } from './aggregate';
 
 export function getSpanDestinationMetrics(events: ApmFields[]) {
-  const exitSpans = events.filter((event) => !!event['span.destination.service.resource']);
+  const exitSpans = events.filter(
+    (event) =>
+      !!event['span.destination.service.resource'] || !!event['test.span.service.target.name']
+  );
 
   const metricsets = aggregate(exitSpans, [
     'event.outcome',
@@ -18,6 +21,8 @@ export function getSpanDestinationMetrics(events: ApmFields[]) {
     'service.environment',
     'service.name',
     'span.destination.service.resource',
+    'test.span.service.target.type',
+    'test.span.service.target.name',
   ]);
 
   return metricsets.map((metricset) => {

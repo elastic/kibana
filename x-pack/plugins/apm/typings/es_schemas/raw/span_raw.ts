@@ -71,4 +71,14 @@ export interface SpanRaw extends APMBaseDoc {
   child?: { id: string[] };
   http?: Http;
   url?: Url;
+  test?: {
+    span?: {
+      service?: {
+        target?: {
+          type?: string;
+          name?: string;
+        };
+      };
+    };
+  };
 }

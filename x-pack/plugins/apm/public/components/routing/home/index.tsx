@@ -131,9 +131,10 @@ export const home = {
           '/backends/overview': {
             element: <BackendDetailOverview />,
             params: t.type({
-              query: t.type({
-                backendName: t.string,
-              }),
+              query: t.intersection([
+                t.type({ resourceIdentifierFields: t.string }),
+                t.type({ displayName: t.string }),
+              ]),
             }),
           },
           ...page({

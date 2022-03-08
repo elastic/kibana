@@ -127,7 +127,7 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
   params: t.intersection([
     t.type({
       query: t.intersection([
-        t.type({ backendName: t.string }),
+        t.type({ resourceIdentifierFields: t.string }),
         rangeRt,
         t.type({ numBuckets: toNumberRt }),
       ]),
@@ -195,7 +195,7 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const {
       query: {
-        backendName,
+        resourceIdentifierFields,
         environment,
         offset,
         numBuckets,
@@ -205,8 +205,10 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
       },
     } = resources.params;
 
+    const parsedResourceIdentifierFields = JSON.parse(resourceIdentifierFields);
+
     const opts = {
-      backendName,
+      resourceIdentifierFields: parsedResourceIdentifierFields,
       setup,
       start,
       end,
@@ -248,7 +250,10 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
 const backendMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/metadata',
   params: t.type({
-    query: t.intersection([t.type({ backendName: t.string }), rangeRt]),
+    query: t.intersection([
+      t.type({ resourceIdentifierFields: t.string }),
+      rangeRt,
+    ]),
   }),
   options: {
     tags: ['access:apm'],
@@ -261,10 +266,11 @@ const backendMetadataRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
 
-    const { backendName, start, end } = params.query;
+    const { resourceIdentifierFields, start, end } = params.query;
+    const parsedResourceIdentifierFields = JSON.parse(resourceIdentifierFields);
 
     const metadata = await getMetadataForBackend({
-      backendName,
+      resourceIdentifierFields: parsedResourceIdentifierFields,
       setup,
       start,
       end,
@@ -278,7 +284,7 @@ const backendLatencyChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/charts/latency',
   params: t.type({
     query: t.intersection([
-      t.type({ backendName: t.string }),
+      t.type({ resourceIdentifierFields: t.string }),
       rangeRt,
       kueryRt,
       environmentRt,
@@ -296,12 +302,14 @@ const backendLatencyChartsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { backendName, kuery, environment, offset, start, end } =
+    const { resourceIdentifierFields, kuery, environment, offset, start, end } =
       params.query;
+
+    const parsedResourceIdentifierFields = JSON.parse(resourceIdentifierFields);
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getLatencyChartsForBackend({
-        backendName,
+        resourceIdentifierFields: parsedResourceIdentifierFields,
         setup,
         start,
         end,
@@ -310,7 +318,7 @@ const backendLatencyChartsRoute = createApmServerRoute({
       }),
       offset
         ? getLatencyChartsForBackend({
-            backendName,
+            resourceIdentifierFields: parsedResourceIdentifierFields,
             setup,
             start,
             end,
@@ -329,7 +337,7 @@ const backendThroughputChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/charts/throughput',
   params: t.type({
     query: t.intersection([
-      t.type({ backendName: t.string }),
+      t.type({ resourceIdentifierFields: t.string }),
       rangeRt,
       kueryRt,
       environmentRt,
@@ -347,12 +355,14 @@ const backendThroughputChartsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { backendName, kuery, environment, offset, start, end } =
+    const { resourceIdentifierFields, kuery, environment, offset, start, end } =
       params.query;
+
+    const parsedResourceIdentifierFields = JSON.parse(resourceIdentifierFields);
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getThroughputChartsForBackend({
-        backendName,
+        resourceIdentifierFields: parsedResourceIdentifierFields,
         setup,
         start,
         end,
@@ -361,7 +371,7 @@ const backendThroughputChartsRoute = createApmServerRoute({
       }),
       offset
         ? getThroughputChartsForBackend({
-            backendName,
+            resourceIdentifierFields: parsedResourceIdentifierFields,
             setup,
             start,
             end,
@@ -380,7 +390,7 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/charts/error_rate',
   params: t.type({
     query: t.intersection([
-      t.type({ backendName: t.string }),
+      t.type({ resourceIdentifierFields: t.string }),
       rangeRt,
       kueryRt,
       environmentRt,
@@ -398,12 +408,14 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { backendName, kuery, environment, offset, start, end } =
+    const { resourceIdentifierFields, kuery, environment, offset, start, end } =
       params.query;
+
+    const parsedResourceIdentifierFields = JSON.parse(resourceIdentifierFields);
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getErrorRateChartsForBackend({
-        backendName,
+        resourceIdentifierFields: parsedResourceIdentifierFields,
         setup,
         start,
         end,
@@ -412,7 +424,7 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
       }),
       offset
         ? getErrorRateChartsForBackend({
-            backendName,
+            resourceIdentifierFields: parsedResourceIdentifierFields,
             setup,
             start,
             end,

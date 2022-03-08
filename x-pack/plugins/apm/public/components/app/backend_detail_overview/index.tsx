@@ -31,7 +31,8 @@ import { useBreakpoints } from '../../../hooks/use_breakpoints';
 export function BackendDetailOverview() {
   const {
     query: {
-      backendName,
+      displayName,
+      resourceIdentifierFields,
       rangeFrom,
       rangeTo,
       refreshInterval,
@@ -58,10 +59,11 @@ export function BackendDetailOverview() {
       }),
     },
     {
-      title: backendName,
+      title: displayName,
       href: apmRouter.link('/backends/overview', {
         query: {
-          backendName,
+          displayName,
+          resourceIdentifierFields,
           rangeFrom,
           rangeTo,
           refreshInterval,
@@ -75,13 +77,14 @@ export function BackendDetailOverview() {
 
   const kueryBarBoolFilter = getKueryBarBoolFilter({
     environment,
-    backendName,
+
+    backendName: 'targetType',
   });
 
   const largeScreenOrSmaller = useBreakpoints().isLarge;
 
   return (
-    <BackendDetailTemplate title={backendName}>
+    <BackendDetailTemplate title={displayName}>
       <SearchBar
         showTimeComparison
         kueryBarPlaceholder={kueryBarPlaceholder}

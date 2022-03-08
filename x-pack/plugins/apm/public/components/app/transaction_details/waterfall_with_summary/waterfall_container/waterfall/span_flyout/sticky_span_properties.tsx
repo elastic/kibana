@@ -26,6 +26,7 @@ import { BackendLink } from '../../../../../../shared/backend_link';
 import { TransactionDetailLink } from '../../../../../../shared/links/apm/transaction_detail_link';
 import { ServiceLink } from '../../../../../../shared/service_link';
 import { StickyProperties } from '../../../../../../shared/sticky_properties';
+// import { empty } from 'lodash';
 
 interface Props {
   span: Span;
@@ -49,7 +50,9 @@ export function StickySpanProperties({ span, transaction }: Props) {
   });
 
   const spanName = span.span.name;
-  const dependencyName = span.span.destination?.service.resource;
+  // const dependencyName = span.span.destination?.service.resource;
+  const targetType = span.test?.span?.service?.target?.type || '';
+  const targetName = span.test?.span?.service?.target?.name || '';
 
   const transactionStickyProperties = transaction
     ? [
@@ -98,7 +101,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
       ]
     : [];
 
-  const dependencyStickyProperties = dependencyName
+  const dependencyStickyProperties = targetType
     ? [
         {
           label: i18n.translate(
@@ -112,7 +115,8 @@ export function StickySpanProperties({ span, transaction }: Props) {
             <BackendLink
               query={{
                 ...query,
-                backendName: dependencyName,
+                displayName: targetName,
+                resourceIdentifierFields: JSON.stringify({}),
               }}
               subtype={span.span.subtype}
               type={span.span.type}

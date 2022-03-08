@@ -42,7 +42,7 @@ export function BackendLink({
         <EuiFlexItem grow={false}>
           <SpanIcon type={type} subtype={subtype} />
         </EuiFlexItem>
-        <EuiFlexItem>{query.backendName}</EuiFlexItem>
+        <EuiFlexItem>{query.displayName}</EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>
   );

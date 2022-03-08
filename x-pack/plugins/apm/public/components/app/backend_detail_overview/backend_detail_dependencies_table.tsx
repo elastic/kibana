@@ -22,7 +22,7 @@ export function BackendDetailDependenciesTable() {
   } = useLegacyUrlParams();
 
   const {
-    query: { backendName, rangeFrom, rangeTo, kuery, environment },
+    query: { resourceIdentifierFields, rangeFrom, rangeTo, kuery, environment },
   } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -43,7 +43,7 @@ export function BackendDetailDependenciesTable() {
       return callApmApi('GET /internal/apm/backends/upstream_services', {
         params: {
           query: {
-            backendName,
+            resourceIdentifierFields,
             start,
             end,
             environment,
@@ -54,7 +54,7 @@ export function BackendDetailDependenciesTable() {
         },
       });
     },
-    [start, end, environment, offset, backendName, kuery]
+    [start, end, environment, offset, resourceIdentifierFields, kuery]
   );
 
   const dependencies =

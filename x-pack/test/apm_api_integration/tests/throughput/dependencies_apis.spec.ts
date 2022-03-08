@@ -42,7 +42,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...commonQuery,
-              backendName: overrides?.backendName || 'elasticsearch',
+              resourceIdentifierFields: JSON.stringify({
+                'span.destination.service.resource': overrides?.backendName || 'elasticsearch',
+              }),
               kuery: '',
             },
           },
@@ -52,7 +54,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...commonQuery,
-              backendName: overrides?.backendName || 'elasticsearch',
+              resourceIdentifierFields: JSON.stringify({
+                'span.destination.service.resource': overrides?.backendName || 'elasticsearch',
+              }),
               numBuckets: 20,
               offset: '1d',
               kuery: '',
@@ -75,7 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     return {
       topBackends: topBackendsAPIResponse.body.backends.map((item) => [
-        (item.location as BackendNode).backendName,
+        (item.location as BackendNode).displayName,
         roundNumber(item.currentStats.throughput.value),
       ]),
       backendThroughputChartMean,

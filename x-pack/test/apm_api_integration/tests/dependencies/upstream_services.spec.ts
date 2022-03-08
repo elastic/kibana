@@ -22,7 +22,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       endpoint: 'GET /internal/apm/backends/upstream_services',
       params: {
         query: {
-          backendName,
+          resourceIdentifierFields: JSON.stringify({
+            'span.destination.service.resource': backendName,
+          }),
           environment: 'production',
           kuery: '',
           numBuckets: 20,

@@ -24,7 +24,7 @@ import {
 
 export function BackendLatencyChart({ height }: { height: number }) {
   const {
-    query: { backendName, rangeFrom, rangeTo, kuery, environment },
+    query: { resourceIdentifierFields, rangeFrom, rangeTo, kuery, environment },
   } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -40,7 +40,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
       return callApmApi('GET /internal/apm/backends/charts/latency', {
         params: {
           query: {
-            backendName,
+            resourceIdentifierFields,
             start,
             end,
             offset,
@@ -50,7 +50,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
         },
       });
     },
-    [backendName, start, end, offset, kuery, environment]
+    [resourceIdentifierFields, start, end, offset, kuery, environment]
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(

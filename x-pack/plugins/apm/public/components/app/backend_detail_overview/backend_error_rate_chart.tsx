@@ -28,7 +28,7 @@ export function BackendFailedTransactionRateChart({
   height: number;
 }) {
   const {
-    query: { backendName, kuery, environment, rangeFrom, rangeTo },
+    query: { resourceIdentifierFields, kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -44,7 +44,7 @@ export function BackendFailedTransactionRateChart({
       return callApmApi('GET /internal/apm/backends/charts/error_rate', {
         params: {
           query: {
-            backendName,
+            resourceIdentifierFields,
             start,
             end,
             offset,
@@ -54,7 +54,7 @@ export function BackendFailedTransactionRateChart({
         },
       });
     },
-    [backendName, start, end, offset, kuery, environment]
+    [resourceIdentifierFields, start, end, offset, kuery, environment]
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(

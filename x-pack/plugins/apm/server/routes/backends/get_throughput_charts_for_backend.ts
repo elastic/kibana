@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import {
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-} from '../../../common/elasticsearch_fieldnames';
+import { SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 
 export async function getThroughputChartsForBackend({
-  backendName,
+  resourceIdentifierFields,
   setup,
   start,
   end,
@@ -25,7 +26,7 @@ export async function getThroughputChartsForBackend({
   kuery,
   offset,
 }: {
-  backendName: string;
+  resourceIdentifierFields: Record<string, string>;
   setup: Setup;
   start: number;
   end: number;
@@ -47,6 +48,12 @@ export async function getThroughputChartsForBackend({
     minBucketSize: 60,
   });
 
+  const resourceIdentifierTerms = Object.entries(resourceIdentifierFields).map(
+    (x) => {
+      return termQuery(x[0], x[1])[0];
+    }
+  );
+
   const response = await apmEventClient.search('get_throughput_for_backend', {
     apm: {
       events: [ProcessorEvent.metric],
@@ -59,7 +66,7 @@ export async function getThroughputChartsForBackend({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...rangeQuery(startWithOffset, endWithOffset),
-            { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
+            ...resourceIdentifierTerms,
           ],
         },
       },
