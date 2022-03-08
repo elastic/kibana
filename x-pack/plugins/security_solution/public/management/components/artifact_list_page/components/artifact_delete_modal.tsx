@@ -27,8 +27,8 @@ import {
 } from '../../../../../common/endpoint/service/artifacts';
 import {
   ARTIFACT_DELETE_ACTION_LABELS,
-  useArtifactDeleteItem,
-} from '../hooks/use_artifact_delete_item';
+  useWithArtifactDeleteItem,
+} from '../hooks/use_with_artifact_delete_item';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
 export const ARTIFACT_DELETE_LABELS = Object.freeze({
@@ -90,7 +90,7 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
   ({ apiClient, item, onCancel, onSuccess, 'data-test-subj': dataTestSubj, labels }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const { deleteArtifactItem, isLoading: isDeleting } = useArtifactDeleteItem(
+    const { deleteArtifactItem, isLoading: isDeleting } = useWithArtifactDeleteItem(
       apiClient,
       item,
       labels

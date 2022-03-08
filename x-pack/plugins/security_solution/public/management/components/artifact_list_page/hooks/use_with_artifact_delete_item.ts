@@ -54,7 +54,7 @@ export type UseArtifactDeleteItemInterface = UseArtifactDeleteItemMutationResult
   deleteArtifactItem: UseArtifactDeleteItemMutationResult['mutateAsync'];
 };
 
-export const useArtifactDeleteItem = (
+export const useWithArtifactDeleteItem = (
   apiClient: ExceptionsListApiClient,
   item: ExceptionListItemSchema,
   labels: typeof ARTIFACT_DELETE_ACTION_LABELS
