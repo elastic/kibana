@@ -6,9 +6,9 @@
 # used for the 'team' designator within Kibana Stats
 
 # Tech leads
-/dev_docs @elastic/kibana-tech-leads
-/src/dev/license_checker/config.ts @elastic/kibana-tech-leads
-/packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
+/dev_docs @kibana-tech-leads
+/src/dev/license_checker/config.ts @kibana-tech-leads
+/packages/kbn-docs-utils/ @kibana-tech-leads @elastic/kibana-operations
 
 # Virtual teams
 /x-pack/plugins/rule_registry/ @elastic/rac @elastic/response-ops
