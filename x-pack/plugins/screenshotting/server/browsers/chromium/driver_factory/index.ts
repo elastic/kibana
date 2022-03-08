@@ -162,7 +162,9 @@ export class HeadlessChromiumDriverFactory {
           },
         });
       } catch (err) {
-        observer.error(new errors.FailedToSpawnBrowserError(err.message));
+        observer.error(
+          new errors.FailedToSpawnBrowserError(`Error spawning Chromium browser! ${err}`)
+        );
         return;
       }
 
