@@ -449,6 +449,10 @@ describe('last_value', () => {
         this.useTopHitSwitch.prop('onChange')({} as EuiSwitchEvent);
       }
 
+      public get useTopHitSwitchDisabled() {
+        return this.useTopHitSwitch.prop('disabled');
+      }
+
       changeSortFieldOptions(options: Array<{ label: string; value: string }>) {
         this.sortField.find(EuiComboBox).prop('onChange')!([
           { label: 'datefield2', value: 'datefield2' },
@@ -536,12 +540,37 @@ describe('last_value', () => {
         });
       });
 
-      it('should adjust column references when param is toggled', () => {});
+      it('should set useTopHit and disable switch when scripted field', () => {
+        (layer.columns.col2 as LastValueIndexPatternColumn).sourceField = 'scripted';
 
-      it('should set useTopHit and disable switch when scripted field', () => {});
+        const updateLayerSpy = jest.fn();
+        const instance = shallow(
+          <InlineOptions
+            {...defaultProps}
+            layer={layer}
+            updateLayer={updateLayerSpy}
+            columnId="col2"
+            currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
+          />
+        );
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col2: {
+              ...layer.columns.col2,
+              params: {
+                ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
+                useTopHit: true,
+              },
+            },
+          },
+        });
+
+        expect(new Harness(instance).useTopHitSwitchDisabled).toBeTruthy();
+      });
     });
-
-    it('should toggle using top-hit agg', () => {});
   });
 
   describe('getErrorMessage', () => {
