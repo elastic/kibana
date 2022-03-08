@@ -20,6 +20,7 @@ import {
   COLOR_MAP_TYPE,
   VECTOR_STYLES,
 } from '../../../common';
+import { emsWorldLayerId } from '../../../common/constants';
 import { ChoroplethChartProps } from './types';
 import { getEmsSuggestion } from './get_ems_suggestion';
 import { PassiveMap } from '../passive_map';
@@ -46,7 +47,7 @@ export function ChoroplethChart({
 
   const table = data.tables[args.layerId];
 
-  let emsLayerId = args.emsLayerId ? args.emsLayerId : 'world_countries';
+  let emsLayerId = args.emsLayerId ? args.emsLayerId : emsWorldLayerId;
   let emsField = args.emsField ? args.emsField : 'iso2';
   if (!args.emsLayerId || !args.emsField) {
     const emsSuggestion = getEmsSuggestion(emsFileLayers, table, args.regionAccessor);
