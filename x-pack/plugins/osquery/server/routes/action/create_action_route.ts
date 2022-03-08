@@ -47,9 +47,8 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         osquery: { writeLiveQueries, runSavedQueries },
       } = await coreStartServices.capabilities.resolveCapabilities(request);
 
-      const isInvalid =
-        (!writeLiveQueries && !runSavedQueries) ||
-        (request.body.saved_query_id && !runSavedQueries);
+      const isInvalid = !(writeLiveQueries || (runSavedQueries && request.body.saved_query_id));
+
       if (isInvalid) {
         return response.forbidden();
       }
