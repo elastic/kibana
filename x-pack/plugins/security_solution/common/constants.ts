@@ -364,6 +364,8 @@ export const ELASTIC_NAME = 'estc' as const;
 
 export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
 
+export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
+
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',
   FAILED: 'failed',
