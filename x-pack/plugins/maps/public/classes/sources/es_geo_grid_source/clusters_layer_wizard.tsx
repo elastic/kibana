@@ -57,8 +57,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
         [VECTOR_STYLES.FILL_COLOR]: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
-            ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!
-              .options as ColorDynamicOptions),
+            ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
             field: {
               name: COUNT_PROP_NAME,
               origin: FIELD_ORIGIN.SOURCE,
@@ -102,15 +101,16 @@ export const clustersLayerWizardConfig: LayerWizard = {
         },
       });
 
-      const layerDescriptor = sourceDescriptor.requestType === RENDER_AS.HEX
-        ? MvtVectorLayer.createDescriptor({
-            sourceDescriptor,
-            style,
-          })
-        : GeoJsonVectorLayer.createDescriptor({
-            sourceDescriptor,
-            style,
-          });
+      const layerDescriptor =
+        sourceDescriptor.requestType === RENDER_AS.HEX
+          ? MvtVectorLayer.createDescriptor({
+              sourceDescriptor,
+              style,
+            })
+          : GeoJsonVectorLayer.createDescriptor({
+              sourceDescriptor,
+              style,
+            });
       previewLayers([layerDescriptor]);
     };
 

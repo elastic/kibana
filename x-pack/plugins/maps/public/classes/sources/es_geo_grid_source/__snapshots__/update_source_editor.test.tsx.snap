@@ -92,7 +92,7 @@ exports[`source editor geo_grid_source should render editor 1`] = `
       size="xs"
     >
       <h6>
-        Clusters and grids
+        Clusters
       </h6>
     </EuiTitle>
     <EuiSpacer

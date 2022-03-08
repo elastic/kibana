@@ -484,7 +484,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
-    if (this._descriptor.requestType === RENDER_AS.GRID || this._descriptor.requestType === RENDER_AS.HEX) {
+    if (
+      this._descriptor.requestType === RENDER_AS.GRID ||
+      this._descriptor.requestType === RENDER_AS.HEX
+    ) {
       return [VECTOR_SHAPE_TYPE.POLYGON];
     }
 

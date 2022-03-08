@@ -11,7 +11,13 @@ import uuid from 'uuid/v4';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
-import { AGG_TYPE, ES_GEO_FIELD_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
+import {
+  AGG_TYPE,
+  ES_GEO_FIELD_TYPE,
+  GRID_RESOLUTION,
+  LAYER_TYPE,
+  RENDER_AS,
+} from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
@@ -76,7 +82,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
 
     this.setState({
       fields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
-      geoFieldType: geoField ? geoField.type : undefined,
+      geoFieldType: geoField ? (geoField.type as ES_GEO_FIELD_TYPE) : undefined,
     });
   }
 
@@ -86,7 +92,10 @@ export class UpdateSourceEditor extends Component<Props, State> {
 
   _onResolutionChange = async (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => {
     let newLayerType;
-    if (this.props.currentLayerType !== LAYER_TYPE.HEATMAP && this.props.renderAs !== RENDER_AS.HEX) {
+    if (
+      this.props.currentLayerType !== LAYER_TYPE.HEATMAP &&
+      this.props.renderAs !== RENDER_AS.HEX
+    ) {
       newLayerType =
         resolution === GRID_RESOLUTION.SUPER_FINE
           ? LAYER_TYPE.MVT_VECTOR
@@ -105,9 +114,10 @@ export class UpdateSourceEditor extends Component<Props, State> {
 
   _onRequestTypeSelect = (requestType: RENDER_AS) => {
     this.props.onChange({
-      propName: 'requestType', 
+      propName: 'requestType',
       value: requestType,
-      newLayerType: requestType === RENDER_AS.HEX ? LAYER_TYPE.MVT_VECTOR : LAYER_TYPE.GEOJSON_VECTOR,
+      newLayerType:
+        requestType === RENDER_AS.HEX ? LAYER_TYPE.MVT_VECTOR : LAYER_TYPE.GEOJSON_VECTOR,
     });
   };
 

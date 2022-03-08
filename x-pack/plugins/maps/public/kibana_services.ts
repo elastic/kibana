@@ -23,6 +23,12 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
   emsSettings = mapsEms.createEMSSettings();
 }
 
+let isCloudEnabled = false;
+export function setIsCloudEnabled(enabled: boolean) {
+  isCloudEnabled = enabled;
+}
+export const getIsCloud = () => isCloudEnabled;
+
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
@@ -57,7 +63,6 @@ export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getUsageCollection = () => pluginsStart.usageCollection;
-export const getIsCloud = () => !!pluginsStart.cloud?.cloudId;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;

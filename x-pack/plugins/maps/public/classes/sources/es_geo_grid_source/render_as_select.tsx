@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiButtonGroup, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_GEO_FIELD_TYPE, RENDER_AS } from '../../../../common/constants';
 import { getIsCloud } from '../../../kibana_services';

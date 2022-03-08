@@ -21,7 +21,7 @@ import type {
 } from '../../../../src/core/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MapInspectorView } from './inspector/map_inspector_view';
-import { setMapAppConfig, setStartServices } from './kibana_services';
+import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -73,9 +73,10 @@ import {
 } from './legacy_visualizations';
 import type { SecurityPluginStart } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
-import type { CloudStart } from '../../cloud/public';
+import type { CloudSetup } from '../../cloud/public';
 
 export interface MapsPluginSetupDependencies {
+  cloud?: CloudSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
@@ -88,7 +89,6 @@ export interface MapsPluginSetupDependencies {
 
 export interface MapsPluginStartDependencies {
   charts: ChartsPluginStart;
-  cloud?: CloudStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   fileUpload: FileUploadPluginStart;
@@ -183,6 +183,8 @@ export class MapsPlugin
     plugins.expressions.registerFunction(createTileMapFn);
     plugins.expressions.registerRenderer(tileMapRenderer);
     plugins.visualizations.createBaseVisualization(tileMapVisType);
+
+    setIsCloudEnabled(!!plugins.cloud?.isCloudEnabled);
 
     return {
       registerLayerWizard: registerLayerWizardExternal,
