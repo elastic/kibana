@@ -14,7 +14,10 @@ export { EventSchema, ECS_VERSION } from '../generated/schemas';
 import { IEvent } from '../generated/schemas';
 import { AggregateOptionsType, FindOptionsType } from './event_log_client';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-export type { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+export type {
+  QueryEventsBySavedObjectResult,
+  AggregateEventsBySavedObjectResult,
+} from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
 
 export const SAVED_OBJECT_REL_PRIMARY = 'primary';
