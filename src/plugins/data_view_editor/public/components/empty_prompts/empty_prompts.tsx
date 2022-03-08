@@ -11,7 +11,7 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { useKibana } from '../../shared_imports';
 
-import { MatchedItem, ResolveIndexResponseItemAlias, DataViewEditorContext } from '../../types';
+import { MatchedItem, DataViewEditorContext } from '../../types';
 
 import { getIndices } from '../../lib';
 
