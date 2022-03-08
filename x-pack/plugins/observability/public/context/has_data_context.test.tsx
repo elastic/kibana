@@ -11,7 +11,6 @@ import React from 'react';
 import { registerDataHandler, unregisterDataHandler } from '../data_handler';
 import { useHasData } from '../hooks/use_has_data';
 import * as routeParams from '../hooks/use_route_params';
-import * as timeRange from '../hooks/use_time_range';
 import { HasData, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { HasDataContextProvider } from './has_data_context';
 import * as pluginContext from '../hooks/use_plugin_context';
@@ -57,19 +56,6 @@ function registerApps<T extends ObservabilityFetchDataPlugins>(
 
 describe('HasDataContextProvider', () => {
   beforeAll(() => {
-    jest.spyOn(routeParams, 'useRouteParams').mockImplementation(() => ({
-      query: {
-        from: relativeStart,
-        to: relativeEnd,
-      },
-      path: {},
-    }));
-    jest.spyOn(timeRange, 'useTimeRange').mockImplementation(() => ({
-      relativeStart,
-      relativeEnd,
-      absoluteStart: new Date(relativeStart).valueOf(),
-      absoluteEnd: new Date(relativeEnd).valueOf(),
-    }));
     jest.spyOn(pluginContext, 'usePluginContext').mockReturnValue({
       core: { http: { get: jest.fn() } } as unknown as CoreStart,
     } as PluginContextValue);
