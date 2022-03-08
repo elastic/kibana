@@ -303,7 +303,7 @@ export const getXyVisualization = ({
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],
         ...(axisMode && { axisMode }),
-        ...(isReferenceLine && { fill: 'below' as FillStyle }),
+        ...(isReferenceLine && { fill: chartType === 'area' ? 'below' : ('none' as FillStyle) }),
       };
     });
     const newLayer = {
