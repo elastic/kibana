@@ -125,6 +125,17 @@ export class DataRecognizer {
   private _calculateModelMemoryLimit: ReturnType<typeof calculateModelMemoryLimitProvider>;
 
   /**
+   * A temporary cache of configs loaded from disk and from save object service.
+   * The configs from disk will not change while kibana is running.
+   * The configs from saved objects could potentially change while an instance of
+   * DataRecognizer exists, if a fleet package containing modules is installed.
+   * However the chance of this happening is very low and so the benefit of using
+   * this cache outweighs the risk of the cache being out of date during the short
+   * existence of a DataRecognizer instance.
+   */
+  private _configCache: Config[] | null = null;
+
+  /**
    * List of the module jobs that require model memory estimation
    */
   private _jobsForModelMemoryEstimation: Array<{ job: ModuleJob; query: any }> = [];
@@ -181,6 +192,10 @@ export class DataRecognizer {
   }
 
   private async _loadConfigs(): Promise<Config[]> {
+    if (this._configCache !== null) {
+      return this._configCache;
+    }
+
     const configs: Config[] = [];
     const dirs = await this._listDirs(this._modulesDir);
     await Promise.all(
@@ -211,7 +226,9 @@ export class DataRecognizer {
       isSavedObject: true,
     }));
 
-    return [...configs, ...savedObjectConfigs];
+    this._configCache = [...configs, ...savedObjectConfigs];
+
+    return this._configCache;
   }
 
   private async _loadSavedObjectModules() {
