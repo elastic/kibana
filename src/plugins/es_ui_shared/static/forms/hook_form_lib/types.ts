@@ -63,7 +63,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
     FormType = FormData,
     InternalFieldType = FieldType
   >(
-    field: string
+    fieldPath: string
   ) => FieldConfig<FieldType, FormType, InternalFieldType> | undefined;
   __getFormDefaultValue: () => I | undefined;
   __getFieldsRemoved: () => FieldsMap;
@@ -234,7 +234,7 @@ export interface FormData {
   [key: string]: any;
 }
 
-type FormatterFunc<I = unknown> = (value: unknown, formData: FormData) => I;
+type FormatterFunc<I = unknown> = (value: any, formData: FormData) => I;
 
 // We set it as unknown as a form field can be any of any type
 // string | number | boolean | string[] ...
