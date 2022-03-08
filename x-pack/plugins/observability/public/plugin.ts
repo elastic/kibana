@@ -46,6 +46,7 @@ import { createNavigationRegistry, NavigationEntry } from './services/navigation
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+import { createUseRulesLink } from './hooks/create_use_rules_link';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -124,12 +125,10 @@ export class Plugin
     this.initializerContext = initializerContext;
   }
 
-  public async setup(
+  public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
-    const { createUseRulesLink } = await import('./hooks/create_use_rules_link');
-
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initializerContext.config.get();
@@ -257,9 +256,8 @@ export class Plugin
     };
   }
 
-  public async start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
+  public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
-    const { createUseRulesLink } = await import('./hooks/create_use_rules_link');
 
     const config = this.initializerContext.config.get();
 
