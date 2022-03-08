@@ -127,6 +127,7 @@ describe('datatable cell renderer', () => {
         ],
         sortingColumnId: '',
         sortingDirection: 'none',
+        rowHeightLines: 1,
       };
     }
 
