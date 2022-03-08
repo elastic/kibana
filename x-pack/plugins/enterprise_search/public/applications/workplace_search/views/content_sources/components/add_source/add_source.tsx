@@ -21,9 +21,12 @@ import {
 import { NAV } from '../../../../constants';
 import { SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
 
+import { hasMultipleConnectorOptions } from '../../../../utils';
+
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
+import { ConfigurationChoice } from './configuration_choice';
 import { ConfigurationIntro } from './configuration_intro';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
@@ -51,6 +54,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
   const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);
+  const goToChoice = () => setAddSourceStep(AddSourceSteps.ChoiceStep);
   const FORM_SOURCE_ADDED_SUCCESS_MESSAGE = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.contentSource.formSourceAddedSuccessMessage',
     {
@@ -75,7 +79,11 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
       {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
-        <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
+        <ConfigurationIntro
+          name={name}
+          advanceStep={hasMultipleConnectorOptions(props.sourceData) ? goToChoice : goToSaveConfig}
+          header={header}
+        />
       )}
       {addSourceCurrentStep === AddSourceSteps.SaveConfigStep && (
         <SaveConfig
@@ -112,6 +120,9 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
       )}
       {addSourceCurrentStep === AddSourceSteps.ReauthenticateStep && (
         <Reauthenticate name={name} header={header} />
+      )}
+      {addSourceCurrentStep === AddSourceSteps.ChoiceStep && (
+        <ConfigurationChoice sourceData={props.sourceData} goToInternalStep={goToSaveConfig} />
       )}
     </Layout>
   );
