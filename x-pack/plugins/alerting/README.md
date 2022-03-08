@@ -100,7 +100,6 @@ The following table describes the properties of the `options` object.
 |useSavedObjectReferences.injectReferences|(Optional) When developing a rule type, you can choose to implement hooks for injecting saved object references into rule parameters. This hook will be invoked when a rule is retrieved (get or find). Implementing this hook is optional, but if an inject hook is implemented, an extract hook must also be implemented.|Function
 |isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
 |defaultScheduleInterval|The default interval that will show up in the UI when creating a rule of this rule type.|boolean|
-|minimumScheduleInterval|The minimum interval that will be allowed for all rules of this rule type.|boolean|
 |doesSetRecoveryContext|Whether the rule type will set context variables for recovered alerts. Defaults to `false`. If this is set to true, context variables are made available for the recovery action group and executors will be provided with the ability to set recovery context.|boolean|
 
 ### Executor

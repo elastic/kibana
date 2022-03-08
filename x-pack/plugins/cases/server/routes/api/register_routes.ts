@@ -6,10 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteRegistrar } from 'kibana/server';
+import { Headers, RouteRegistrar } from 'kibana/server';
 import { CasesRequestHandlerContext } from '../../types';
-import { CaseRoute, RegisterRoutesDeps } from './types';
-import { escapeHatch, getIsKibanaRequest, wrapError } from './utils';
+import { RegisterRoutesDeps } from './types';
+import {
+  escapeHatch,
+  getIsKibanaRequest,
+  getWarningHeader,
+  logDeprecatedEndpoint,
+  wrapError,
+} from './utils';
+
+const getEndpoint = (method: string, path: string): string => `${method.toUpperCase()} ${path}`;
 
 const increaseTelemetryCounters = ({
   telemetryUsageCounter,
@@ -24,7 +32,7 @@ const increaseTelemetryCounters = ({
   isKibanaRequest: boolean;
   isError?: boolean;
 }) => {
-  const counterName = `${method.toUpperCase()} ${path}`;
+  const counterName = getEndpoint(method, path);
 
   telemetryUsageCounter.incrementCounter({
     counterName,
@@ -37,11 +45,36 @@ const increaseTelemetryCounters = ({
   });
 };
 
+const logAndIncreaseDeprecationTelemetryCounters = ({
+  logger,
+  headers,
+  method,
+  path,
+  telemetryUsageCounter,
+}: {
+  logger: RegisterRoutesDeps['logger'];
+  headers: Headers;
+  method: string;
+  path: string;
+  telemetryUsageCounter?: Exclude<RegisterRoutesDeps['telemetryUsageCounter'], undefined>;
+}) => {
+  const endpoint = getEndpoint(method, path);
+
+  logDeprecatedEndpoint(logger, headers, `The endpoint ${endpoint} is deprecated.`);
+
+  if (telemetryUsageCounter) {
+    telemetryUsageCounter.incrementCounter({
+      counterName: endpoint,
+      counterType: 'deprecated',
+    });
+  }
+};
+
 export const registerRoutes = (deps: RegisterRoutesDeps) => {
   const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
 
   routes.forEach((route) => {
-    const { method, path, params, handler } = route as CaseRoute;
+    const { method, path, params, options, handler } = route;
 
     (router[method] as RouteRegistrar<typeof method, CasesRequestHandlerContext>)(
       {
@@ -53,6 +86,7 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
         },
       },
       async (context, request, response) => {
+        let responseHeaders = {};
         const isKibanaRequest = getIsKibanaRequest(request.headers);
 
         if (!context.cases) {
@@ -60,11 +94,31 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
         }
 
         try {
+          if (options?.deprecated) {
+            logAndIncreaseDeprecationTelemetryCounters({
+              telemetryUsageCounter,
+              logger,
+              path,
+              method,
+              headers: request.headers,
+            });
+
+            responseHeaders = {
+              ...responseHeaders,
+              ...getWarningHeader(kibanaVersion),
+            };
+          }
+
           const res = await handler({ logger, context, request, response, kibanaVersion });
 
           if (telemetryUsageCounter) {
             increaseTelemetryCounters({ telemetryUsageCounter, method, path, isKibanaRequest });
           }
+
+          res.options.headers = {
+            ...res.options.headers,
+            ...responseHeaders,
+          };
 
           return res;
         } catch (error) {

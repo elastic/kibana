@@ -322,11 +322,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(
-        field.displayName,
-        newParams.secondaryFields?.length,
-        newParams.orderBy.type === 'rare'
-      ),
+      label: oldColumn.customLabel
+        ? oldColumn.label
+        : ofName(
+            field.displayName,
+            newParams.secondaryFields?.length,
+            newParams.orderBy.type === 'rare'
+          ),
       sourceField: field.name,
       params: newParams,
     };
@@ -401,11 +403,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               ...column,
               dataType: newDataType,
               sourceField: fields[0],
-              label: ofName(
-                indexPattern.getFieldByName(fields[0])?.displayName,
-                fields.length - 1,
-                newParams.orderBy.type === 'rare'
-              ),
+              label: column.customLabel
+                ? column.label
+                : ofName(
+                    indexPattern.getFieldByName(fields[0])?.displayName,
+                    fields.length - 1,
+                    newParams.orderBy.type === 'rare'
+                  ),
               params: {
                 ...newParams,
                 secondaryFields,

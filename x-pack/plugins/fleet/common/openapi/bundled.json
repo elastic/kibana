@@ -621,6 +621,19 @@
                           "type"
                         ]
                       }
+                    },
+                    "_meta": {
+                      "type": "object",
+                      "properties": {
+                        "install_source": {
+                          "type": "string",
+                          "enum": [
+                            "registry",
+                            "upload",
+                            "bundled"
+                          ]
+                        }
+                      }
                     }
                   },
                   "required": [
@@ -3825,6 +3838,14 @@
                 "logs"
               ]
             }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -3979,6 +4000,12 @@
                 "format": "date-time"
               },
               "updated_by": {
+                "type": "string"
+              },
+              "data_output_id": {
+                "type": "string"
+              },
+              "monitoring_output_id": {
                 "type": "string"
               },
               "revision": {
@@ -4268,6 +4295,23 @@
           },
           "config_yaml": {
             "type": "string"
+          },
+          "ssl": {
+            "type": "object",
+            "properties": {
+              "certificate": {
+                "type": "string"
+              },
+              "certificate_authorities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "key": {
+                "type": "string"
+              }
+            }
           }
         },
         "required": [

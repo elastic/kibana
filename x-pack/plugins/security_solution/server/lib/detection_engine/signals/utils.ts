@@ -143,7 +143,7 @@ export const hasTimestampFields = async (args: {
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
-    )} was found. This warning will continue to appear until a matching index is created or this rule is de-activated. ${
+    )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
       ruleName === 'Endpoint Security'
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''

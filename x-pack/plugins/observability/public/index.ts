@@ -27,6 +27,7 @@ export {
   enableInspectEsQueries,
   enableComparisonByDefault,
   enableInfrastructureView,
+  defaultApmServiceEnvironment,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 

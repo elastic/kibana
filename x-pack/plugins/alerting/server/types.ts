@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
 import type {
   IRouter,
   RequestHandlerContext,
   SavedObjectReference,
-  ElasticsearchClient,
+  IUiSettingsClient,
 } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
@@ -39,16 +38,13 @@ import {
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
+  MappedParams,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-
-export interface ElasticsearchClientWithChild extends ElasticsearchClient {
-  child: Client['child'];
-}
 
 /**
  * @public
@@ -78,6 +74,7 @@ export interface AlertServices<
   ActionGroupIds extends string = never
 > {
   savedObjectsClient: SavedObjectsClientContract;
+  uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
   alertFactory: {
     create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
@@ -170,7 +167,6 @@ export interface RuleType<
   };
   isExportable: boolean;
   defaultScheduleInterval?: string;
-  minimumScheduleInterval?: string;
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
@@ -235,6 +231,7 @@ export interface RawRule extends SavedObjectAttributes {
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
+  mapped_params?: MappedParams;
   scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
@@ -249,6 +246,7 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
+  snoozeEndTime?: string;
 }
 
 export type AlertInfoParams = Pick<
