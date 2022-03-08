@@ -117,6 +117,7 @@ const getSavedObjectTypes = (
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
+        ssl: { type: 'flattened', index: false },
       },
     },
     migrations: {

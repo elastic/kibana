@@ -16,6 +16,7 @@ import {
   ExternalServiceResponse,
   CasesConfigureAttributes,
   ActionTypes,
+  OWNER_FIELD,
 } from '../../../common/api';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
@@ -25,6 +26,7 @@ import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
+import { buildFilter } from '../utils';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
@@ -139,12 +141,19 @@ export const push = async (
 
     /* End of push to external service */
 
+    const ownerFilter = buildFilter({
+      filters: theCase.owner,
+      field: OWNER_FIELD,
+      operator: 'or',
+      type: Operations.findConfigurations.savedObjectType,
+    });
+
     /* Start of update case with push information */
     const [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
         id: caseId,
       }),
-      caseConfigureService.find({ unsecuredSavedObjectsClient }),
+      caseConfigureService.find({ unsecuredSavedObjectsClient, options: { filter: ownerFilter } }),
       caseService.getAllCaseComments({
         id: caseId,
         options: {

@@ -508,12 +508,9 @@ async function deleteTransforms(
             transform_id: transformId,
           });
           const transformConfig = body.transforms[0];
-          // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
           destinationIndex = Array.isArray(transformConfig.dest.index)
-            ? // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
-              transformConfig.dest.index[0]
-            : // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
-              transformConfig.dest.index;
+            ? transformConfig.dest.index[0]
+            : transformConfig.dest.index;
         } catch (getTransformConfigError) {
           transformDeleted.error = getTransformConfigError.meta.body.error;
           results[transformId] = {

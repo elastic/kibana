@@ -12,7 +12,7 @@ import type { BundledPackage } from '../../../types';
 import { appContextService } from '../../app_context';
 import { splitPkgKey } from '../registry';
 
-const BUNDLED_PACKAGE_DIRECTORY = path.join(__dirname, '../../../bundled_packages');
+const BUNDLED_PACKAGE_DIRECTORY = path.join(__dirname, '../../../../target/bundled_packages');
 
 export async function getBundledPackages(): Promise<BundledPackage[]> {
   try {
