@@ -26,7 +26,7 @@ get_timestamp() {
   if [[ "${date_input}" =~ ^[0-9]+$ ]]; then
     echo "${date_input}"
   else
-    echo $(date +%s "${date_input}")
+    echo $(date +%s --date="${date_input}")
   fi
 }
 
