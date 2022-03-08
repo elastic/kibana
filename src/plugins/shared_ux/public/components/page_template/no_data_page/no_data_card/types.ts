@@ -9,7 +9,7 @@
 import { EuiCardProps } from '@elastic/eui';
 import { MouseEventHandler, ReactNode } from 'react';
 
-export type NoDataCardProps = Partial<EuiCardProps> & {
+export type NoDataCardProps = Partial<Omit<EuiCardProps, 'layout'>> & {
   /**
    * Applies the `Recommended` beta badge and makes the button `fill`
    */
@@ -26,9 +26,4 @@ export type NoDataCardProps = Partial<EuiCardProps> & {
    * Description for the card. If not provided, the default will be used.
    */
   description?: string;
-  /**
-   * Layout direction of the card; needed for EuiCardPropsLayout:
-   * https://github.com/elastic/eui/blob/main/src/components/card/card.tsx#L57
-   */
-  layout?: 'vertical';
 };
