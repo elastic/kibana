@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from 'kibana/server';
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
+import { ReportingCore } from '../../../';
 import { ScreenshotResult } from '../../../../../screenshotting/server';
 import type { PdfMetrics } from '../../../../common/types';
-import { ReportingCore } from '../../../';
-import { LevelLogger } from '../../../lib';
 import { ScreenshotOptions } from '../../../types';
 import { PdfMaker } from '../../common/pdf';
 import { getTracker } from './tracker';
@@ -34,7 +34,7 @@ interface PdfResult {
 
 export function generatePdfObservable(
   reporting: ReportingCore,
-  logger: LevelLogger,
+  logger: Logger,
   title: string,
   options: ScreenshotOptions,
   logo?: string

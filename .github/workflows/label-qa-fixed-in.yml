@@ -66,11 +66,16 @@ jobs:
   label_issues:
     needs: fetch_issues_to_label
     runs-on: ubuntu-latest
+
     # For each issue closed by the PR x each label to apply, run this job
+    if: |
+      fromJSON(needs.fetch_issues_to_label.outputs.issue_ids).length > 0 &&
+      fromJSON(needs.fetch_issues_to_label.outputs.label_ids).length > 0
     strategy:
       matrix:
-        issueId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.issue_ids) || [] }}
-        labelId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.label_ids) || [] }}
+        issueId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.issue_ids) }}
+        labelId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.label_ids) }}
+
     name: Label issue ${{ matrix.issueId }} with ${{ matrix.labelId }}
     steps:
       - uses: octokit/graphql-action@v2.x
