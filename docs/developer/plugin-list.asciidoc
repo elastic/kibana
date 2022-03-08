@@ -160,6 +160,10 @@ for use in their own application.
 |Expression Tagcloud plugin adds a tagcloud renderer and function to the expression plugin. The renderer will display the Wordcloud chart.
 
 
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_xy/README.md[expressionXY]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]
 |Index pattern fields formatters
 
