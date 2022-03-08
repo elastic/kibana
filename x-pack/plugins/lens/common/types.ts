@@ -79,7 +79,7 @@ export type RequiredPaletteParamTypes = Required<CustomPaletteParams> & {
   maxSteps?: number;
 };
 
-export type LayerType = typeof layerTypes['DATA' | 'REFERENCELINE'];
+export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 
 // Shared by XY Chart and Heatmap as for now
 export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
