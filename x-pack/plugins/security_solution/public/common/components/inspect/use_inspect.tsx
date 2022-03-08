@@ -20,7 +20,6 @@ interface UseInspectModalProps {
   onClick?: () => void;
   onCloseInspect?: () => void;
   queryId: string;
-  vizType?: string | null;
 }
 
 export const useInspect = ({
@@ -31,16 +30,14 @@ export const useInspect = ({
   onClick,
   onCloseInspect,
   queryId,
-  vizType = null,
 }: UseInspectModalProps) => {
   const dispatch = useDispatch();
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const { loading, inspect, selectedInspectIndex, isInspected, inspectedVizType } =
-    useDeepEqualSelector((state) =>
-      inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId)
-    );
+  const { loading, inspect, selectedInspectIndex, isInspected } = useDeepEqualSelector((state) =>
+    inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId)
+  );
 
   const handleClick = useCallback(() => {
     if (onClick) {
@@ -52,10 +49,9 @@ export const useInspect = ({
         inputId,
         isInspected: true,
         selectedInspectIndex: inspectIndex,
-        inspectedVizType: vizType,
       })
     );
-  }, [onClick, dispatch, queryId, inputId, inspectIndex, vizType]);
+  }, [onClick, dispatch, queryId, inputId, inspectIndex]);
 
   const handleCloseModal = useCallback(() => {
     if (onCloseInspect != null) {
@@ -67,7 +63,6 @@ export const useInspect = ({
         inputId,
         isInspected: false,
         selectedInspectIndex: inspectIndex,
-        inspectedVizType: null,
       })
     );
   }, [onCloseInspect, dispatch, queryId, inputId, inspectIndex]);
@@ -93,12 +88,8 @@ export const useInspect = ({
   }
 
   const isShowingModal = useMemo(
-    () =>
-      !loading &&
-      selectedInspectIndex === inspectIndex &&
-      isInspected &&
-      inspectedVizType === vizType,
-    [inspectedVizType, vizType, inspectIndex, isInspected, loading, selectedInspectIndex]
+    () => !loading && selectedInspectIndex === inspectIndex && isInspected,
+    [inspectIndex, isInspected, loading, selectedInspectIndex]
   );
 
   const isButtonDisabled = useMemo(

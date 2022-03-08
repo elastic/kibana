@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set: 
+exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set:
         <DetailsPanel
           browserFields={Object {}}
           docValueFields={Array []}
@@ -282,7 +282,6 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
           Object {
             "id": "",
             "inspect": null,
-            "inspectedVizType": null,
             "isInspected": false,
             "loading": false,
             "refetch": null,
@@ -579,8 +578,7 @@ Array [
               Object {
                 "id": "",
                 "inspect": null,
-                "inspectedVizType": null,
-                "isInspected": false,
+                  "isInspected": false,
                 "loading": false,
                 "refetch": null,
                 "selectedInspectIndex": 0,
@@ -867,7 +865,6 @@ Array [
             Object {
               "id": "",
               "inspect": null,
-              "inspectedVizType": null,
               "isInspected": false,
               "loading": false,
               "refetch": null,

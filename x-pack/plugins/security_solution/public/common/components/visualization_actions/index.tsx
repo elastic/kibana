@@ -120,13 +120,23 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     closePopover();
   }, []);
 
+  const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
+
+  const onOpenInspectModal = useCallback(() => {
+    closePopover();
+    setIsInspectModalOpen(true);
+  }, []);
+
+  const onCloseInspectModal = useCallback(() => {
+    setIsInspectModalOpen(false);
+  }, []);
+
   const {
     additionalRequests,
     additionalResponses,
     handleClick: handleInspectButtonClick,
     handleCloseModal: handleCloseInspectModal,
     isButtonDisabled: disableInspectButton,
-    isShowingModal,
     request,
     response,
   } = useInspect({
@@ -134,10 +144,9 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     inspectIndex,
     isDisabled: isInspectButtonDisabled,
     multiple: isMultipleQuery,
-    onCloseInspect,
-    onClick: closePopover,
+    onCloseInspect: onCloseInspectModal,
+    onClick: onOpenInspectModal,
     queryId,
-    vizType,
   });
 
   const disabledOpenInLens = useMemo(
@@ -236,7 +245,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
           <EuiContextMenuPanel data-test-subj="viz-actions-panel" size="s" items={items} />
         </EuiPopover>
       )}
-      {isShowingModal && request !== null && response !== null && (
+      {isInspectModalOpen && request !== null && response !== null && (
         <ModalInspectQuery
           additionalRequests={additionalRequests}
           additionalResponses={additionalResponses}
