@@ -34,8 +34,6 @@ import { InspectButton } from '../inspect';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { LensAttributes } from '../visualization_actions/types';
-import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
-import { APP_ID } from '../../../../common/constants';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -223,10 +221,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     barChartLensAttributes,
     areaChartLensAttributes,
   }) => {
-    const { cases } = useKibana().services;
-    const CasesContext = cases.getCasesContext();
-    const userPermissions = useGetUserCasesPermissions();
-    const userCanCrud = userPermissions?.crud ?? false;
     const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
@@ -246,107 +240,103 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
 
     return (
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
-        <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
-          <EuiPanel hasBorder>
-            <EuiFlexGroup gutterSize={'none'}>
-              <EuiFlexItem>
-                <EuiTitle size="xxxs">
-                  <h6>{description}</h6>
-                </EuiTitle>
+        <EuiPanel hasBorder>
+          <EuiFlexGroup gutterSize={'none'}>
+            <EuiFlexItem>
+              <EuiTitle size="xxxs">
+                <h6>{description}</h6>
+              </EuiTitle>
+            </EuiFlexItem>
+            {showInspectButton && (
+              <EuiFlexItem grow={false}>
+                <InspectButton queryId={id} title={`KPI ${description}`} inspectIndex={index} />
               </EuiFlexItem>
-              {showInspectButton && (
-                <EuiFlexItem grow={false}>
-                  <InspectButton queryId={id} title={`KPI ${description}`} inspectIndex={index} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            )}
+          </EuiFlexGroup>
 
-            <EuiFlexGroup>
-              {fields.map((field) => (
-                <FlexItem key={`stat-items-field-${field.key}`}>
-                  <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                    {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
-                      <FlexItem grow={false}>
-                        <EuiIcon
-                          type={field.icon}
-                          color={field.color}
-                          size="l"
-                          data-test-subj="stat-icon"
-                        />
-                      </FlexItem>
-                    )}
-
-                    <FlexItem>
-                      <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
-                        <StatValue>
-                          <p data-test-subj="stat-title">
-                            {field.value != null
-                              ? field.value.toLocaleString()
-                              : getEmptyTagValue()}{' '}
-                            {field.description}
-                          </p>
-                        </StatValue>
-                        {field.lensAttributes && timerange && (
-                          <VisualizationActions
-                            vizType={`${field.key}-metric`}
-                            lensAttributes={field.lensAttributes}
-                            queryId={id}
-                            inspectIndex={index}
-                            timerange={timerange}
-                            title={`KPI ${description}`}
-                            className="viz-actions"
-                          />
-                        )}
-                      </HoverVisibilityContainer>
+          <EuiFlexGroup>
+            {fields.map((field) => (
+              <FlexItem key={`stat-items-field-${field.key}`}>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
+                    <FlexItem grow={false}>
+                      <EuiIcon
+                        type={field.icon}
+                        color={field.color}
+                        size="l"
+                        data-test-subj="stat-icon"
+                      />
                     </FlexItem>
-                  </EuiFlexGroup>
-                </FlexItem>
-              ))}
-            </EuiFlexGroup>
+                  )}
 
-            {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
-            <EuiFlexGroup>
-              {enableBarChart && (
+                  <FlexItem>
+                    <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
+                      <StatValue>
+                        <p data-test-subj="stat-title">
+                          {field.value != null ? field.value.toLocaleString() : getEmptyTagValue()}{' '}
+                          {field.description}
+                        </p>
+                      </StatValue>
+                      {field.lensAttributes && timerange && (
+                        <VisualizationActions
+                          vizType={`${field.key}-metric`}
+                          lensAttributes={field.lensAttributes}
+                          queryId={id}
+                          inspectIndex={index}
+                          timerange={timerange}
+                          title={`KPI ${description}`}
+                          className="viz-actions"
+                        />
+                      )}
+                    </HoverVisibilityContainer>
+                  </FlexItem>
+                </EuiFlexGroup>
+              </FlexItem>
+            ))}
+          </EuiFlexGroup>
+
+          {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
+          <EuiFlexGroup>
+            {enableBarChart && (
+              <FlexItem>
+                <BarChart
+                  barChart={barChart}
+                  configs={barchartConfigs()}
+                  visualizationActionsOptions={{
+                    lensAttributes: barChartLensAttributes,
+                    queryId: id,
+                    inspectIndex: index,
+                    timerange,
+                    title: `KPI ${description}`,
+                    vizType: 'bar_horizontal_stacked',
+                  }}
+                />
+              </FlexItem>
+            )}
+
+            {enableAreaChart && from != null && to != null && (
+              <>
                 <FlexItem>
-                  <BarChart
-                    barChart={barChart}
-                    configs={barchartConfigs()}
+                  <AreaChart
+                    areaChart={areaChart}
+                    configs={areachartConfigs({
+                      xTickFormatter: histogramDateTimeFormatter([from, to]),
+                      onBrushEnd: narrowDateRange,
+                    })}
                     visualizationActionsOptions={{
-                      lensAttributes: barChartLensAttributes,
+                      lensAttributes: areaChartLensAttributes,
                       queryId: id,
                       inspectIndex: index,
                       timerange,
                       title: `KPI ${description}`,
-                      vizType: 'bar_horizontal_stacked',
+                      vizType: 'area',
                     }}
                   />
                 </FlexItem>
-              )}
-
-              {enableAreaChart && from != null && to != null && (
-                <>
-                  <FlexItem>
-                    <AreaChart
-                      areaChart={areaChart}
-                      configs={areachartConfigs({
-                        xTickFormatter: histogramDateTimeFormatter([from, to]),
-                        onBrushEnd: narrowDateRange,
-                      })}
-                      visualizationActionsOptions={{
-                        lensAttributes: areaChartLensAttributes,
-                        queryId: id,
-                        inspectIndex: index,
-                        timerange,
-                        title: `KPI ${description}`,
-                        vizType: 'area',
-                      }}
-                    />
-                  </FlexItem>
-                </>
-              )}
-            </EuiFlexGroup>
-          </EuiPanel>
-        </CasesContext>
+              </>
+            )}
+          </EuiFlexGroup>
+        </EuiPanel>
       </FlexItem>
     );
   },

@@ -29,8 +29,10 @@ import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
-import { HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { HISTOGRAM_ACTIONS_BUTTON_CLASS, VisualizationActions } from '../visualization_actions';
 import { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
+import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
+import { APP_ID } from '../../../../common/constants';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -104,6 +106,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   skip,
 }) => {
   const dispatch = useDispatch();
+  const { cases } = useKibana().services;
+  const CasesContext = cases.getCasesContext();
+  const userPermissions = useGetUserCasesPermissions();
+  const userCanCrud = userPermissions?.crud ?? false;
+
   const handleBrushEnd = useCallback(
     ({ x }) => {
       if (!x) {
@@ -237,12 +244,19 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             inspectMultiple
             showInspectButton={showInspectButton}
             isInspectDisabled={filterQuery === undefined}
-            lensAttributes={lensAttributes}
-            stackByField={selectedStackByOption.value}
-            timerange={timerange}
-            getLensAttributes={getLensAttributes}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
+              <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
+                <VisualizationActions
+                  getLensAttributes={getLensAttributes}
+                  isInspectButtonDisabled={filterQuery === undefined}
+                  lensAttributes={lensAttributes}
+                  queryId={id}
+                  stackByField={selectedStackByOption.value}
+                  timerange={timerange}
+                  title={title}
+                />
+              </CasesContext>
               <EuiFlexItem grow={false}>
                 {stackByOptions.length > 1 && (
                   <EuiSelect
