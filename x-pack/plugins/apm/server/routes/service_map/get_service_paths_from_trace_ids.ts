@@ -20,11 +20,30 @@ import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { ServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
-interface EventsById {
-  [id: string]: (Span | Transaction) & { path?: Location[] };
+type DocType = keyof Pick<typeof ProcessorEvent, 'span' | 'transaction'>;
+
+interface Location {
+  [SERVICE_NAME]: string;
+  [SERVICE_ENVIRONMENT]?: string;
+  [AGENT_NAME]: string;
 }
 
-interface Context {
+interface EventBase<TDocument, TDocType extends DocType> {
+  doc: TDocument;
+  docType: TDocType;
+  path?: Location[];
+}
+
+export type EventSpan = EventBase<Span, 'span'>;
+export type EventTransaction = EventBase<Transaction, 'transaction'>;
+
+type Event = EventSpan | EventTransaction;
+
+interface EventsById {
+  [id: string]: Event;
+}
+
+export interface Context {
   processedEvents: EventsById;
   eventsById: EventsById;
   paths: Record<string, unknown>;
@@ -35,20 +54,43 @@ interface Context {
   locationsToRemove: Record<string, unknown>;
 }
 
+export function getEventsByIdMap(
+  servicePathsFromTraceIds: ServicePathsFromTraceIds
+) {
+  return servicePathsFromTraceIds.reduce((acc, { _source: source }) => {
+    // Only spans or transactions events
+    if ('processor' in source) {
+      if (source.processor.event === ProcessorEvent.transaction) {
+        const transaction = source as Transaction;
+        const eventTransaction: EventTransaction = {
+          doc: transaction,
+          docType: 'transaction',
+        };
+        return { ...acc, [transaction.transaction.id]: eventTransaction };
+      }
+
+      if (source.processor.event === ProcessorEvent.span) {
+        const span = source as Span;
+        const eventSpan: EventSpan = {
+          doc: span,
+          docType: 'span',
+        };
+
+        return { ...acc, [span.span.id]: eventSpan };
+      }
+    }
+
+    return acc;
+  }, {} as EventsById);
+}
+
 export function getServicePathsFromTraceIds({
   servicePathsFromTraceIds,
 }: {
   servicePathsFromTraceIds: ServicePathsFromTraceIds;
 }) {
   return withApmSpan('get_service_paths_fromt_trace_ids', async () => {
-    const eventsByIdMap = servicePathsFromTraceIds.reduce((acc, doc) => {
-      const source = doc._source as Transaction | Span;
-      const id =
-        source.processor.event === ProcessorEvent.transaction
-          ? (source as Transaction).transaction?.id
-          : (source as Span).span.id;
-      return { ...acc, [id]: source };
-    }, {} as EventsById);
+    const eventsByIdMap = getEventsByIdMap(servicePathsFromTraceIds);
 
     const context: Context = {
       processedEvents: {},
@@ -57,6 +99,7 @@ export function getServicePathsFromTraceIds({
       externalToServiceMap: {},
       locationsToRemove: {},
     };
+
     Object.keys(eventsByIdMap).forEach((id) => {
       return processAndReturnEvent({ context, id });
     });
@@ -84,13 +127,7 @@ function getSpanDestination(span: Span) {
   };
 }
 
-interface Location {
-  [SERVICE_NAME]: string;
-  [SERVICE_ENVIRONMENT]?: string;
-  [AGENT_NAME]: string;
-}
-
-function processAndReturnEvent({
+export function processAndReturnEvent({
   context,
   id,
 }: {
@@ -107,30 +144,35 @@ function processAndReturnEvent({
   }
 
   const eventLocation: Location = {
-    [SERVICE_NAME]: event.service.name,
-    [SERVICE_ENVIRONMENT]: event.service.environment,
-    [AGENT_NAME]: event.agent.name,
+    [SERVICE_NAME]: event.doc.service.name,
+    [SERVICE_ENVIRONMENT]: event.doc.service.environment,
+    [AGENT_NAME]: event.doc.agent.name,
   };
 
   const basePath: Location[] = [];
-  const parentId = event.parent?.id;
-  let parent;
+  const parentId = event.doc.parent?.id;
+  let parentEvent;
 
   if (parentId && parentId !== id) {
-    parent = processAndReturnEvent({ context, id: parentId });
-    if (parent) {
-      if (parent.path) {
-        basePath.push(...parent.path);
-        context.locationsToRemove[JSON.stringify(parent.path)] = parent.path;
+    parentEvent = processAndReturnEvent({ context, id: parentId });
+    if (parentEvent) {
+      if (parentEvent.path) {
+        // copy the path from the parent
+        basePath.push(...parentEvent.path);
+        // flag parent path for removal, as it has children
+        context.locationsToRemove[JSON.stringify(parentEvent.path)] =
+          parentEvent.path;
       }
 
+      /* if the parent has 'span.destination.service.resource' set, 
+         and the service is different, we've discovered a service */
       if (
-        parent.processor.event === ProcessorEvent.span &&
-        (parent as Span).span.destination?.service.resource &&
-        (parent.service.name !== event.service.name ||
-          parent.service.environment !== event.service.environment)
+        parentEvent.docType === ProcessorEvent.span &&
+        parentEvent.doc.span.destination?.service.resource &&
+        (parentEvent.doc.service.name !== event.doc.service.name ||
+          parentEvent.doc.service.environment !== event.doc.service.environment)
       ) {
-        const parentDestination = getSpanDestination(parent as Span);
+        const parentDestination = getSpanDestination(parentEvent.doc);
         const destination = { from: parentDestination, to: eventLocation };
         context.externalToServiceMap[JSON.stringify(destination)] = destination;
       }
@@ -138,16 +180,16 @@ function processAndReturnEvent({
   }
 
   const lastLocation = last(basePath);
-
+  // only add the current location to the path if it's different from the last one
   if (lastLocation === undefined || !isEqual(eventLocation, lastLocation)) {
     basePath.push(eventLocation);
   }
-
+  // if there is an outgoing span, create a new path
   if (
-    event.processor.event === ProcessorEvent.span &&
-    (event as Span).span.destination?.service.resource
+    event.docType === ProcessorEvent.span &&
+    event.doc.span.destination?.service.resource
   ) {
-    const outgoingLocation = getSpanDestination(event as Span);
+    const outgoingLocation = getSpanDestination(event.doc);
     const outgoingPath = [...basePath, outgoingLocation];
     context.paths[JSON.stringify(outgoingPath)] = outgoingPath;
   }
