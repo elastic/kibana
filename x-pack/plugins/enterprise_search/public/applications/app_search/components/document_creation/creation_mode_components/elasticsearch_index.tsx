@@ -63,16 +63,9 @@ export const FlyoutBody: React.FC = () => {
     <EuiFlyoutBody banner={<Errors />}>
       <EuiText color="subdued">
         <p>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.description',
-            {
-              defaultMessage:
-                'You can now connect directly to an existing Elasticsearch index to make its data searchable and tunable through Enterprise Search Uls.',
-            }
-          )}
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.description"
-            defaultMessage=" {learnMoreLink}"
+            defaultMessage="'You can now connect directly to an existing Elasticsearch index to make its data searchable and tunable through Enterprise Search Uls. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink target="_blank" href={'TODO'}>
