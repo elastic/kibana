@@ -13,7 +13,7 @@ import {
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
@@ -50,19 +50,34 @@ export function ApmMainTemplate({
 
   const ObservabilityPageTemplate = observability.navigation.PageTemplate;
 
-  const { data } = useFetcher((callApmApi) => {
+  const { data, status } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/has_data');
   }, []);
-
-  const noDataConfig = getNoDataConfig({
-    basePath,
-    docsLink: docLinks!.links.observability.guide,
-    hasData: data?.hasData,
-  });
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
     location.pathname.includes(path)
   );
+
+  const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (!data?.hasData && !shouldBypassNoDataScreen) {
+          return callApmApi('GET /internal/apm/fleet/has_apm_policies');
+        }
+      },
+      [shouldBypassNoDataScreen, data?.hasData]
+    );
+
+  const noDataConfig = getNoDataConfig({
+    basePath,
+    docsLink: docLinks!.links.observability.guide,
+    hasApmData: data?.hasData,
+    hasApmIntegrations: fleetApmPoliciesData?.hasApmPolicies,
+    shouldBypassNoDataScreen,
+    loading:
+      status === FETCH_STATUS.LOADING ||
+      fleetApmPoliciesStatus === FETCH_STATUS.LOADING,
+  });
 
   const rightSideItems = environmentFilter ? [<ApmEnvironmentFilter />] : [];
 

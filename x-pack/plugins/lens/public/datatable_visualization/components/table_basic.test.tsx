@@ -210,7 +210,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: true,
-        timeFieldName: 'a',
       },
     });
   });
@@ -256,7 +255,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'b',
       },
     });
   });
@@ -341,7 +339,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'a',
       },
     });
   });

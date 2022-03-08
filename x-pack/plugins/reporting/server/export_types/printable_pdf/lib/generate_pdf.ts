@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from 'kibana/server';
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
+import { ReportingCore } from '../../../';
 import { ScreenshotResult } from '../../../../../screenshotting/server';
 import type { PdfMetrics } from '../../../../common/types';
-import { ReportingCore } from '../../../';
-import { LevelLogger } from '../../../lib';
 import { ScreenshotOptions } from '../../../types';
 import { PdfMaker } from '../../common/pdf';
 import { getTracker } from './tracker';
@@ -27,14 +27,14 @@ const getTimeRange = (urlScreenshots: ScreenshotResult['results']) => {
 };
 
 interface PdfResult {
-  buffer: Buffer | null;
+  buffer: Uint8Array | null;
   metrics?: PdfMetrics;
   warnings: string[];
 }
 
 export function generatePdfObservable(
   reporting: ReportingCore,
-  logger: LevelLogger,
+  logger: Logger,
   title: string,
   options: ScreenshotOptions,
   logo?: string
@@ -72,44 +72,42 @@ export function generatePdfObservable(
         });
       });
 
-      let buffer: Buffer | null = null;
+      const warnings = results.reduce<string[]>((found, current) => {
+        if (current.error) {
+          found.push(current.error.message);
+        }
+        if (current.renderErrors) {
+          found.push(...current.renderErrors);
+        }
+        return found;
+      }, []);
+
+      let buffer: Uint8Array | null = null;
       try {
         tracker.startCompile();
         logger.info(`Compiling PDF using "${layout.id}" layout...`);
-        pdfOutput.generate();
+        buffer = await pdfOutput.generate();
         tracker.endCompile();
 
-        tracker.startGetBuffer();
         logger.debug(`Generating PDF Buffer...`);
-        buffer = await pdfOutput.getBuffer();
 
         const byteLength = buffer?.byteLength ?? 0;
         logger.debug(`PDF buffer byte length: ${byteLength}`);
         tracker.setByteLength(byteLength);
-
-        tracker.endGetBuffer();
       } catch (err) {
         logger.error(`Could not generate the PDF buffer!`);
-        logger.error(err);
+        throw err;
       }
 
       tracker.end();
 
       return {
         buffer,
+        warnings,
         metrics: {
           ...metrics,
           pages: pdfOutput.getPageCount(),
         },
-        warnings: results.reduce((found, current) => {
-          if (current.error) {
-            found.push(current.error.message);
-          }
-          if (current.renderErrors) {
-            found.push(...current.renderErrors);
-          }
-          return found;
-        }, [] as string[]),
       };
     })
   );

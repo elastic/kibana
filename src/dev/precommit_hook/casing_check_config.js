@@ -39,7 +39,7 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
-  'packages/kbn-test/jest_integration/jest-preset.js',
+  'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
@@ -60,9 +60,6 @@ export const IGNORE_FILE_GLOBS = [
   'packages/elastic-safer-lodash-set/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
-
-  // Bundled package names typically use a format like ${pkgName}-${pkgVersion}, so don't lint them
-  'x-pack/plugins/fleet/server/bundled_packages/**/*',
 
   // Bazel default files
   '**/WORKSPACE.bazel',

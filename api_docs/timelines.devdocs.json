@@ -4732,7 +4732,9 @@
             "signature": [
               "{ [x: string]: ",
               "MappingRuntimeField",
-              "; }"
+              " | ",
+              "MappingRuntimeField",
+              "[]; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
@@ -5498,7 +5500,9 @@
             "signature": [
               "{ [x: string]: ",
               "MappingRuntimeField",
-              "; }"
+              " | ",
+              "MappingRuntimeField",
+              "[]; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false

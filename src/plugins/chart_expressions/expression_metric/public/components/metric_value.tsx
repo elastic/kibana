@@ -15,18 +15,33 @@ interface MetricVisValueProps {
   onFilter?: () => void;
   style: MetricStyle;
   labelConfig: MetricVisParam['labels'];
+  colorFullBackground: boolean;
+  autoScale?: boolean;
 }
 
-export const MetricVisValue = ({ style, metric, onFilter, labelConfig }: MetricVisValueProps) => {
+export const MetricVisValue = ({
+  style,
+  metric,
+  onFilter,
+  labelConfig,
+  colorFullBackground,
+  autoScale,
+}: MetricVisValueProps) => {
   const containerClassName = classNames('mtrVis__container', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'mtrVis__container--light': metric.lightText,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'mtrVis__container-isfilterable': onFilter,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    'mtrVis__container-isfull': !autoScale && colorFullBackground,
   });
 
+  // for autoScale true we should add background to upper level so that correct colorize full container
   const metricComponent = (
-    <div className={containerClassName} style={{ backgroundColor: metric.bgColor }}>
+    <div
+      className={containerClassName}
+      style={autoScale && colorFullBackground ? {} : { backgroundColor: metric.bgColor }}
+    >
       <div
         className="mtrVis__value"
         style={{
