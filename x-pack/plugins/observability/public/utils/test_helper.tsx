@@ -17,11 +17,14 @@ import {
 import translations from '../../../translations/translations/ja-JP.json';
 import { PluginContext } from '../context/plugin_context';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
 
 export const core = coreMock.createStart();
+export const data = dataPluginMock.createStartContract();
+
 const config = {
   unsafe: {
     alertingExperience: { enabled: true },
@@ -35,7 +38,7 @@ const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
-      <KibanaContextProvider services={{ ...core }}>
+      <KibanaContextProvider services={{ ...core, data }}>
         <PluginContext.Provider
           value={{
             appMountParameters,
