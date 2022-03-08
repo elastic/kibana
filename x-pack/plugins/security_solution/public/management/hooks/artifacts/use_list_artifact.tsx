@@ -21,7 +21,7 @@ export function useListArtifact(
     policies: string[];
   } = {
     filter: '',
-    page: MANAGEMENT_DEFAULT_PAGE,
+    page: MANAGEMENT_DEFAULT_PAGE + 1,
     perPage: MANAGEMENT_DEFAULT_PAGE_SIZE,
     policies: [],
   },
