@@ -331,7 +331,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
             checked={Boolean(currentColumn.params.useTopHit)}
             // TODO - add disabled tooltip
             disabled={sourceIsScripted}
-            onChange={() => setUseTopHit(!currentColumn.params.useTopHit)}
+            onChange={() => {
+              setUseTopHit(!currentColumn.params.useTopHit);
+            }}
+            data-test-subj="lns-indexPattern-lastValue-useTopHit"
           />
         </EuiFormRow>
       </>

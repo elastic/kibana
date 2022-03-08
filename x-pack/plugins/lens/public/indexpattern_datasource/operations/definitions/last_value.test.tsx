@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiComboBox } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -16,6 +16,7 @@ import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from './index';
 import type { IndexPattern, IndexPatternLayer } from '../../types';
 import { TermsIndexPatternColumn } from './terms';
+import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -85,10 +86,34 @@ describe('last_value', () => {
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
+          function: 'aggTopMetrics',
           arguments: expect.objectContaining({
-            aggregate: ['concat'],
             field: ['a'],
             size: [1],
+            sortField: ['datefield'],
+            sortOrder: ['desc'],
+          }),
+        })
+      );
+    });
+
+    it('should use top-hit agg when param is set', () => {
+      const lastValueColumn = layer.columns.col2 as LastValueIndexPatternColumn;
+      const esAggsFn = lastValueOperation.toEsAggsFn(
+        { ...lastValueColumn, params: { ...lastValueColumn.params, useTopHit: true } },
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggTopHit',
+          arguments: expect.objectContaining({
+            field: ['a'],
+            size: [1],
+            aggregate: ['concat'], // aggregate should only be present when using aggTopHit
             sortField: ['datefield'],
             sortOrder: ['desc'],
           }),
@@ -403,6 +428,38 @@ describe('last_value', () => {
   });
 
   describe('param editor', () => {
+    class Harness {
+      private _instance: ShallowWrapper;
+
+      constructor(instance: ShallowWrapper) {
+        this._instance = instance;
+      }
+
+      private get sortField() {
+        return this._instance.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]');
+      }
+
+      private get useTopHitSwitch() {
+        return this._instance
+          .find('[data-test-subj="lns-indexPattern-lastValue-useTopHit"]')
+          .find(EuiSwitch);
+      }
+
+      toggleUseTopHit() {
+        this.useTopHitSwitch.prop('onChange')({} as EuiSwitchEvent);
+      }
+
+      changeSortFieldOptions(options: Array<{ label: string; value: string }>) {
+        this.sortField.find(EuiComboBox).prop('onChange')!([
+          { label: 'datefield2', value: 'datefield2' },
+        ]);
+      }
+
+      public get currentSortFieldOptions() {
+        return this.sortField.prop('selectedOptions');
+      }
+    }
+
     it('should render current sortField', () => {
       const updateLayerSpy = jest.fn();
       const instance = shallow(
@@ -415,9 +472,9 @@ describe('last_value', () => {
         />
       );
 
-      const select = instance.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]');
+      const harness = new Harness(instance);
 
-      expect(select.prop('selectedOptions')).toEqual([{ label: 'datefield', value: 'datefield' }]);
+      expect(harness.currentSortFieldOptions).toEqual([{ label: 'datefield', value: 'datefield' }]);
     });
 
     it('should update state when changing sortField', () => {
@@ -432,10 +489,7 @@ describe('last_value', () => {
         />
       );
 
-      instance
-        .find('[data-test-subj="lns-indexPattern-lastValue-sortField"]')
-        .find(EuiComboBox)
-        .prop('onChange')!([{ label: 'datefield2', value: 'datefield2' }]);
+      new Harness(instance).changeSortFieldOptions([{ label: 'datefield2', value: 'datefield2' }]);
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -451,6 +505,43 @@ describe('last_value', () => {
         },
       });
     });
+
+    describe('toggling using top-hit agg', () => {
+      it('should toggle param when switch clicked', () => {
+        const updateLayerSpy = jest.fn();
+        const instance = shallow(
+          <InlineOptions
+            {...defaultProps}
+            layer={layer}
+            updateLayer={updateLayerSpy}
+            columnId="col2"
+            currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
+          />
+        );
+
+        new Harness(instance).toggleUseTopHit();
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col2: {
+              ...layer.columns.col2,
+              params: {
+                ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
+                useTopHit: true,
+              },
+            },
+          },
+        });
+      });
+
+      it('should adjust column references when param is toggled', () => {});
+
+      it('should set useTopHit and disable switch when scripted field', () => {});
+    });
+
+    it('should toggle using top-hit agg', () => {});
   });
 
   describe('getErrorMessage', () => {
