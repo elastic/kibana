@@ -28,7 +28,7 @@ export const getPushedTelemetryData = async ({
     aggs: { ...getMaxBucketOnCaseAggregationQuery(CASE_USER_ACTION_SAVED_OBJECT) },
   });
 
-  const maxOnACase = res.aggregations?.references?.cases.max.value ?? 0;
+  const maxOnACase = res.aggregations?.references?.cases?.max?.value ?? 0;
 
   return {
     all: { total: res.total, maxOnACase },

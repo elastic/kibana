@@ -128,7 +128,7 @@ export const getCountsAndMaxData = async ({
   });
 
   const countsBuckets = res.aggregations?.counts?.buckets ?? [];
-  const maxOnACase = res.aggregations?.references?.cases.max.value ?? 0;
+  const maxOnACase = res.aggregations?.references?.cases?.max?.value ?? 0;
 
   return {
     all: {

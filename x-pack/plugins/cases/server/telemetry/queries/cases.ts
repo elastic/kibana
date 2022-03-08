@@ -128,11 +128,6 @@ export const getCasesTelemetryData = async ({
           field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_by.username`,
         },
       },
-      ...getReferencesAggregationQuery({
-        savedObjectType: CASE_COMMENT_SAVED_OBJECT,
-        referenceType: 'cases',
-        agg: 'cardinality',
-      }),
     },
   });
 
