@@ -77,7 +77,8 @@ export interface SearchBarOwnProps {
   iconType?: EuiIconProps['type'];
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
-  // defines padding; use 'inPage' to avoid extra padding; use 'detached' if the searchBar appears at the very top of the view, without any wrapper
+  // defines padding; use 'inPage' to avoid extra padding;
+  // use 'detached' if the searchBar appears at the very top of the view, without any wrapper
   displayStyle?: 'inPage' | 'detached';
   // super update button background fill control
   fillSubmitButton?: boolean;
@@ -439,7 +440,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       });
 
       filterBar = (
-        <div id="GlobalFilterGroup" className={filterGroupClasses}>
+        <div id="globalFilterGroup" className={filterGroupClasses}>
           <FilterBar
             className="globalFilterGroup__filterBar"
             filters={this.props.filters!}
