@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from 'src/core/server';
+import {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import { LogView, LogViewAttributes } from '../../../common/log_views';
 import { LogViewsClient } from './log_views_client';
 import { LogViewsServiceSetup, LogViewsServiceStart, LogViewsServiceStartDeps } from './types';
@@ -40,10 +45,11 @@ export class LogViewsService {
     const { internalLogViews, logger } = this;
 
     return {
-      getScopedClient(request: KibanaRequest) {
-        const savedObjectsClient = savedObjects.getScopedClient(request);
-        const elasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
-
+      getClient(
+        savedObjectsClient: SavedObjectsClientContract,
+        elasticsearchClient: ElasticsearchClient,
+        request?: KibanaRequest
+      ) {
         return new LogViewsClient(
           logger,
           dataViews.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient, request),
@@ -52,6 +58,12 @@ export class LogViewsService {
           internalLogViews,
           config
         );
+      },
+      getScopedClient(request: KibanaRequest) {
+        const savedObjectsClient = savedObjects.getScopedClient(request);
+        const elasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
+
+        return this.getClient(savedObjectsClient, elasticsearchClient, request);
       },
     };
   }

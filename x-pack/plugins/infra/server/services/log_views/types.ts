@@ -6,8 +6,10 @@
  */
 
 import {
+  ElasticsearchClient,
   ElasticsearchServiceStart,
   KibanaRequest,
+  SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from 'src/core/server';
 import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
@@ -32,6 +34,11 @@ export interface LogViewsServiceSetup {
 }
 
 export interface LogViewsServiceStart {
+  getClient(
+    savedObjectsClient: SavedObjectsClientContract,
+    elasticsearchClient: ElasticsearchClient,
+    request?: KibanaRequest
+  ): ILogViewsClient;
   getScopedClient(request: KibanaRequest): ILogViewsClient;
 }
 
