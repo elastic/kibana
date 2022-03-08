@@ -65,7 +65,7 @@ interface SavedObjectFinderState {
   query: string;
   isFetchingItems: boolean;
   page: number;
-  perPage: number | 'all';
+  perPage: number;
   sortDirection?: Direction;
   sortOpen: boolean;
   filterOpen: boolean;
@@ -213,9 +213,6 @@ class SavedObjectFinderUi extends React.Component<
   }
 
   private getPageCount() {
-    if (this.state.perPage === 'all') {
-      return 1;
-    }
     return Math.ceil(
       (this.state.filteredTypes.length === 0
         ? this.state.items.length
@@ -247,9 +244,9 @@ class SavedObjectFinderUi extends React.Component<
     }
 
     // If begin is greater than the length of the sequence, an empty array is returned.
-    const startIndex = this.state.perPage === 'all' ? 1 : this.state.page * this.state.perPage;
+    const startIndex = this.state.page * this.state.perPage;
     // If end is greater than the length of the sequence, slice extracts through to the end of the sequence (arr.length).
-    const lastIndex = this.state.perPage === 'all' ? items.length : startIndex + this.state.perPage;
+    const lastIndex = startIndex + this.state.perPage;
     return items
       .filter(
         (item) =>
