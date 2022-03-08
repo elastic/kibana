@@ -97,7 +97,9 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         render: (date: DataStream['last_activity_ms']) => {
           return (
             <>
-              <FormattedDate value={date} year="numeric" month="short" day="numeric" /> @ <FormattedTime value={date} />
+              <FormattedDate value={date} year="numeric" month="short" day="numeric" />
+              <> @ </>
+              <FormattedTime value={date} hour="numeric" minute="numeric" second="numeric"/>
             </>
           );
         },
