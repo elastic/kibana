@@ -10,7 +10,6 @@ import { validateDurationSchema } from './lib';
 
 const ruleTypeConfig = schema.object({
   id: schema.string(),
-  actions: schema.maybe(schema.object({ max: schema.maybe(schema.number()) })),
 });
 
 const ruleExecutionSchema = schema.object({
