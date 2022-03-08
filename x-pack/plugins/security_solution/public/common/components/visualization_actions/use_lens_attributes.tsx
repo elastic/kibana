@@ -6,12 +6,12 @@
  */
 
 import { useMemo } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
 import { SecurityPageName } from '../../../../common/constants';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { LensAttributes, GetLensAttributes } from './types';
 import {
   getHostDetailsPageFilter,
@@ -37,29 +37,26 @@ export const useLensAttributes = ({
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { detailName, tabName } = useParams<{ detailName: string | undefined; tabName: string }>();
-  const location = useLocation();
+  const [{ detailName, pageName, tabName }] = useRouteSpy();
+
   const tabsFilters = useMemo(() => {
-    if (location.pathname.includes(SecurityPageName.hosts) && tabName === 'externalAlerts') {
+    if (pageName === SecurityPageName.hosts && tabName === 'externalAlerts') {
       return filterHostExternalAlertData;
     }
 
-    if (
-      location.pathname.includes(SecurityPageName.network) &&
-      tabName === NetworkRouteType.alerts
-    ) {
+    if (pageName === SecurityPageName.network && tabName === NetworkRouteType.alerts) {
       return filterNetworkExternalAlertData;
     }
 
     return [];
-  }, [tabName, location.pathname]);
+  }, [pageName, tabName]);
 
   const pageFilters = useMemo(() => {
     if (location.pathname.includes(SecurityPageName.hosts) && detailName != null) {
       return getHostDetailsPageFilter(detailName);
     }
     return [];
-  }, [location.pathname, detailName]);
+  }, [detailName]);
 
   const indexFilters = useMemo(() => getIndexFilters(selectedPatterns), [selectedPatterns]);
 
