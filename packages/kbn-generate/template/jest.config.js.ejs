@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs/promises';
-import { sortPackageJson as sort } from '@kbn/dev-utils/sort_package_json';
-import { Kibana } from './kibana';
-
-export async function sortPackageJson(kbn: Kibana) {
-  const packageJsonPath = kbn.getAbsolute('package.json');
-  await Fs.writeFile(packageJsonPath, sort(await Fs.readFile(packageJsonPath, 'utf-8')));
-}
+module.exports = {
+  preset: <%- js(pkg.web ? '@kbn/test' : '@kbn/test/jest_node') %>,
+  rootDir: '../..',
+  roots: [<%- js(`<rootDir>/${pkg.repoRelativeDir}`) %>],
+};
