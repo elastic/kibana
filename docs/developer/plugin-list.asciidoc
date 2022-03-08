@@ -584,6 +584,10 @@ Kibana.
 |Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]
+|Session View is meant to provide a visualization into what is going on in a particular Linux environment where the agent is running. It looks likes a terminal emulator; however, it is a tool for introspecting process activity and understanding user and service behaviour in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/snapshot_restore/README.md[snapshotRestore]
 |or
 

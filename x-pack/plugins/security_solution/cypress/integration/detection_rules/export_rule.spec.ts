@@ -13,7 +13,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-describe('Export rules', () => {
+// Flaky https://github.com/elastic/kibana/issues/69849
+describe.skip('Export rules', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept(
