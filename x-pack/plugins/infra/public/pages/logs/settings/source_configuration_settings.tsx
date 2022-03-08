@@ -17,18 +17,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { useTrackPageview } from '../../../../../observability/public';
-import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
+import { Prompt, useTrackPageview } from '../../../../../observability/public';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { Prompt } from '../../../../../observability/public';
+import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
+import { useLogViewContext } from '../../../hooks/use_log_view';
+import { settingsTitle } from '../../../translations';
+import { LogsPageTemplate } from '../page_template';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogSourceConfigurationFormErrors } from './source_configuration_form_errors';
 import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
-import { LogsPageTemplate } from '../page_template';
-import { settingsTitle } from '../../../translations';
 
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -48,13 +47,13 @@ export const LogsSettingsPage = () => {
   ]);
 
   const {
-    sourceConfiguration: source,
+    logView: source,
     hasFailedLoadingSource,
     isLoading,
     isUninitialized,
-    updateSource,
-    resolvedSourceConfiguration,
-  } = useLogSourceContext();
+    update: updateSource,
+    resolvedLogView: resolvedSourceConfiguration,
+  } = useLogViewContext();
 
   const availableFields = useMemo(
     () => resolvedSourceConfiguration?.fields.map((field) => field.name) ?? [],
@@ -67,7 +66,7 @@ export const LogsSettingsPage = () => {
     logIndicesFormElement,
     logColumnsFormElement,
     nameFormElement,
-  } = useLogSourceConfigurationFormState(source?.configuration);
+  } = useLogSourceConfigurationFormState(source?.attributes);
 
   const persistUpdates = useCallback(async () => {
     await updateSource(formState);

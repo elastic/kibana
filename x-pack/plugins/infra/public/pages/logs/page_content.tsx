@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import { EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
+import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
-
-import { AlertDropdown } from '../../alerting/log_threshold';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { HeaderMenuPortal, useLinkProps } from '../../../../observability/public';
+import { AlertDropdown } from '../../alerting/log_threshold';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { useLogSourceContext } from '../../containers/logs/log_source';
+import { useLogViewContext } from '../../hooks/use_log_view';
+import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
+import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
-import { HeaderMenuPortal } from '../../../../observability/public';
-import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { useLinkProps } from '../../../../observability/public';
-import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
-  const { initialize } = useLogSourceContext();
+  const { initialize } = useLogViewContext();
 
   const kibana = useKibana();
 
