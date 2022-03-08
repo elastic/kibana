@@ -126,14 +126,13 @@ export const SearchSourceExpression = ({
             defaultMessage="The data view, query, and filter are initialized in Discover cannot be edited subsequently."
           />
         }
-        iconType="questionInCircle"
+        iconType="iInCircle"
       />
       <EuiSpacer size="s" />
       <EuiExpression
         className="dscExpressionParam"
         description={'Data view'}
         value={dataView.title}
-        isActive={true}
         display="columns"
       />
       {query.query !== '' && (
@@ -141,7 +140,6 @@ export const SearchSourceExpression = ({
           className="dscExpressionParam"
           description={'Query'}
           value={query.query}
-          isActive={true}
           display="columns"
         />
       )}
@@ -151,7 +149,6 @@ export const SearchSourceExpression = ({
           title={'sas'}
           description={'Filter'}
           value={<ReadOnlyFilterItems filters={filters} indexPatterns={indexPatterns} />}
-          isActive={true}
           display="columns"
         />
       )}
