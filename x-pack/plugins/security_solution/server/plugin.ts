@@ -22,7 +22,7 @@ import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
 
 import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { FieldMap } from '../../rule_registry/common/field_map';
-import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps';
+import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { IRuleDataClient, Dataset } from '../../rule_registry/server';
 import { ListPluginSetup } from '../../lists/server';
