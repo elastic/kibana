@@ -13,7 +13,7 @@ import { useKibana } from '../../lib/kibana/kibana_react';
 import { LensAttributes } from './types';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 import { CasesDeepLinkId, generateCaseViewPath } from '../../../../../cases/public';
-import { ToaseText } from './toast_text';
+import { ToastText } from './toast_text';
 
 export interface UseAddToNewCaseProps {
   onClick?: () => void;
@@ -50,7 +50,7 @@ export const useAddToNewCase = ({
   const getToastText = useCallback(
     (theCase) =>
       toMountPoint(
-        <ToaseText
+        <ToastText
           caseId={theCase.id}
           href={getUrlForApp(appId, {
             deepLinkId: CasesDeepLinkId.cases,

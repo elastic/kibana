@@ -14,7 +14,7 @@ interface ToaseTextProps {
   href: string;
 }
 
-const ToaseTextComponent: React.FC<ToaseTextProps> = ({ caseId, href }) => {
+const ToastTextComponent: React.FC<ToaseTextProps> = ({ caseId, href }) => {
   return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem>
@@ -25,5 +25,5 @@ const ToaseTextComponent: React.FC<ToaseTextProps> = ({ caseId, href }) => {
     </EuiFlexGroup>
   );
 };
-ToaseTextComponent.displayName = 'ToaseTextComponent';
-export const ToaseText = React.memo(ToaseTextComponent);
+ToastTextComponent.displayName = 'ToastTextComponent';
+export const ToastText = React.memo(ToastTextComponent);

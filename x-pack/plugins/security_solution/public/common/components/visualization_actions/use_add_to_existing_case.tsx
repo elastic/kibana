@@ -18,7 +18,7 @@ import { ADD_TO_CASE_FAILURE, ADD_TO_CASE_SUCCESS } from './translations';
 
 import { LensAttributes } from './types';
 import { addToCase } from './utils';
-import { ToaseText } from './toast_text';
+import { ToastText } from './toast_text';
 
 const appId = 'securitySolutionUI';
 const owner = APP_ID;
@@ -57,7 +57,7 @@ export const useAddToExistingCase = ({
   const getToastText = useCallback(
     (theCase: Case) =>
       toMountPoint(
-        <ToaseText
+        <ToastText
           caseId={theCase.id}
           href={getUrlForApp(appId, {
             deepLinkId: CasesDeepLinkId.cases,
