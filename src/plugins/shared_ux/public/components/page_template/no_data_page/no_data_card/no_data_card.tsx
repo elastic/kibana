@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiButton, EuiCard } from '@elastic/eui';
-import { NoDataPageActions } from './types';
+import type { NoDataCardProps } from './types';
 
 const recommendedLabel = i18n.translate('sharedUX.pageTemplate.noDataPage.recommendedLabel', {
   defaultMessage: 'Recommended',
@@ -19,7 +19,7 @@ const defaultDescription = i18n.translate('sharedUX.pageTemplate.noDataCard.desc
   defaultMessage: `Proceed without collecting data`,
 });
 
-export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
+export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
   recommended,
   title,
   button,

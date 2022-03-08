@@ -23,17 +23,12 @@ export type NoDataCardProps = Partial<EuiCardProps> & {
    */
   onClick?: MouseEventHandler<HTMLElement>;
   /**
-   * Category to auto-select within Fleet
-   */
-  category?: string;
-
-  /**
    * Description for the card. If not provided, the default will be used.
    */
   description?: string;
-
   /**
-   * Layout direction of the card
+   * Layout direction of the card; needed for EuiCardPropsLayout:
+   * https://github.com/elastic/eui/blob/main/src/components/card/card.tsx#L57
    */
   layout?: 'vertical';
 };

@@ -8,14 +8,14 @@
 
 import React from 'react';
 import { NoDataCard } from './no_data_card';
-import { NoDataPageActions } from './types';
+import type { NoDataCardProps } from './types';
 
 export default {
   title: 'No Data Card',
   description: 'A wrapper around EuiCard, to be used on NoData page',
 };
 
-type Params = Pick<NoDataPageActions, 'recommended' | 'button' | 'description'>;
+type Params = Pick<NoDataCardProps, 'recommended' | 'button' | 'description'>;
 
 export const PureComponent = (params: Params) => {
   return (
