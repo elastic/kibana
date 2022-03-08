@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { Breadcrumb } from '../app/breadcrumb';
 import { TraceLink } from '../app/trace_link';
 import { TransactionLink } from '../app/transaction_link';
@@ -18,7 +19,6 @@ import { settings } from './settings';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { ServiceGroupsRedirect } from './service_groups_redirect';
-import { toBooleanRt } from '@kbn/io-ts-utils';
 import { comparisonTypeRt } from '../../../common/runtime_types/comparison_type_rt';
 
 const ServiceGroupsBreadcrumnbLabel = i18n.translate(
