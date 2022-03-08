@@ -228,8 +228,7 @@ export async function fetchServicePathsFromTraceIds(
     },
   };
 
-  // TODO: caue : change name
-  const hitsResponse = await fetchServicePathsFromTraceIdsHits({
+  const response = await fetchServicePathsFromTraceIdsHits({
     setup,
     traceIds,
     startRange,
@@ -237,10 +236,10 @@ export async function fetchServicePathsFromTraceIds(
   });
 
   const servicePaths = await getServicePathsFromTraceIds({
-    servicePathsFromTraceIds: hitsResponse,
+    servicePathsFromTraceIds: response,
   });
 
-  const response = {
+  return {
     aggregations: {
       service_map: {
         value: servicePaths,
@@ -259,7 +258,6 @@ export async function fetchServicePathsFromTraceIds(
       };
     };
   };
-  return response;
 
   //   const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
   //     'get_service_paths_from_trace_ids_scripted_metrics',
@@ -296,46 +294,63 @@ async function fetchServicePathsFromTraceIdsHits({
   endRange: number;
 }) {
   const { apmEventClient } = setup;
-  const hitsParams = {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    body: {
-      // TODO: caue check if this number is correct
-      size: 1000,
-      _source: [
-        PARENT_ID,
-        SERVICE_NAME,
-        SERVICE_ENVIRONMENT,
-        TRACE_ID,
-        PROCESSOR_EVENT,
-        SPAN_ID,
-        SPAN_TYPE,
-        SPAN_SUBTYPE,
-        SPAN_DESTINATION_SERVICE_RESOURCE,
-        AGENT_NAME,
-        TRANSACTION_ID,
-      ],
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [TRACE_ID]: traceIds,
-              },
-            },
-            ...rangeQuery(startRange, endRange),
-          ],
+
+  async function fetch({ from, size }: { from: number; size: number }) {
+    const hitsParams = {
+      apm: {
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
+      },
+      body: {
+        from,
+        size,
+        _source: [
+          PARENT_ID,
+          SERVICE_NAME,
+          SERVICE_ENVIRONMENT,
+          TRACE_ID,
+          PROCESSOR_EVENT,
+          SPAN_ID,
+          SPAN_TYPE,
+          SPAN_SUBTYPE,
+          SPAN_DESTINATION_SERVICE_RESOURCE,
+          AGENT_NAME,
+          TRANSACTION_ID,
+        ],
+        query: {
+          bool: {
+            filter: [
+              { terms: { [TRACE_ID]: traceIds } },
+              ...rangeQuery(startRange, endRange),
+            ],
+          },
         },
       },
-    },
-  };
+    };
 
-  // TODO: caue : change name
-  const hitsResponse = await apmEventClient.search(
-    'fetch_service_paths_from_trace_ids_hitsParams',
-    hitsParams
-  );
+    return await apmEventClient.search(
+      'fetch_service_paths_from_trace_ids_hitsParams',
+      hitsParams
+    );
+  }
 
-  return hitsResponse.hits.hits;
+  const hits = [];
+  let pageIndex = 0;
+  const pageSize = 1000;
+  let hasNext = true;
+  while (hasNext) {
+    const response = await fetch({
+      from: pageIndex * pageSize,
+      size: pageSize,
+    });
+    hits.push(...response.hits.hits);
+    // Round up to guarantee all items will be fetched and minus 1 because we've already fetched the first page
+    const totalPagesAvailable =
+      Math.ceil(response.hits.total.value / pageSize) - 1;
+    hasNext = pageIndex < totalPagesAvailable;
+    if (hasNext) {
+      pageIndex++;
+    }
+  }
+
+  return hits;
 }
