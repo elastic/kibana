@@ -17,6 +17,8 @@ import { defineDockerServersConfig } from '@kbn/test';
 export const dockerImage =
   'docker.elastic.co/package-registry/distribution@sha256:b3dfc6a11ff7dce82ba8689ea9eeb54e353c6b4bfd2d28127b20ef72fd8883e9';
 
+export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
@@ -63,6 +65,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
+        `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
       ],
     },
   };

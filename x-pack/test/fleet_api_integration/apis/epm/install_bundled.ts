@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import fs from 'fs/promises';
 import path from 'path';
 
+import { BUNDLED_PACKAGE_DIR } from '../../config';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -23,35 +24,29 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/bundled_packages'
   );
 
-  // Detect location of built Kibana in CI if possible
-  const { KIBANA_BUILD_LOCATION } = process.env;
-  const BUNDLED_PACKAGES_DIR = KIBANA_BUILD_LOCATION
-    ? `${KIBANA_BUILD_LOCATION}/x-pack/plugins/fleet/target/bundled_packages`
-    : path.join(path.dirname(__filename), '../../../../plugins/fleet/target/bundled_packages');
-
   const bundlePackage = async (name: string) => {
     try {
-      await fs.access(BUNDLED_PACKAGES_DIR);
+      await fs.access(BUNDLED_PACKAGE_DIR);
     } catch (error) {
-      await fs.mkdir(BUNDLED_PACKAGES_DIR);
+      await fs.mkdir(BUNDLED_PACKAGE_DIR);
     }
 
     await fs.copyFile(
       path.join(BUNDLED_PACKAGE_FIXTURES_DIR, `${name}.zip`),
-      path.join(BUNDLED_PACKAGES_DIR, `${name}.zip`)
+      path.join(BUNDLED_PACKAGE_DIR, `${name}.zip`)
     );
   };
 
   const removeBundledPackages = async () => {
     try {
-      const files = await fs.readdir(BUNDLED_PACKAGES_DIR);
+      const files = await fs.readdir(BUNDLED_PACKAGE_DIR);
 
       for (const file of files) {
         const isFixtureFile = !!(await fs.readFile(path.join(BUNDLED_PACKAGE_FIXTURES_DIR, file)));
 
         // Only remove fixture files - leave normal bundled packages in place
         if (isFixtureFile) {
-          await fs.unlink(path.join(BUNDLED_PACKAGES_DIR, file));
+          await fs.unlink(path.join(BUNDLED_PACKAGE_DIR, file));
         }
       }
     } catch (error) {
