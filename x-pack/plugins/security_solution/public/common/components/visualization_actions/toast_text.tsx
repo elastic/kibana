@@ -13,11 +13,11 @@ interface ToaseTextProps {
   href: string;
 }
 
-const ToastTextComponent: React.FC<ToaseTextProps> = ({ href }) => {
+const ToaseTextComponent: React.FC<ToaseTextProps> = ({ href }) => {
   return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem>
-        <EuiLink href={href} target="_blank">
+        <EuiLink href={href} target="_blank" data-test-subj="viz-action-view-case">
           {VIEW_CASE}
         </EuiLink>
       </EuiFlexItem>
