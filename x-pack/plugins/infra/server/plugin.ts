@@ -49,7 +49,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         group_by_page_size: schema.number({ defaultValue: 5_000 }),
       }),
       metric_threshold: schema.object({
-        group_by_page_size: schema.number({ defaultValue: 5_000 }),
+        group_by_page_size: schema.number({ defaultValue: 10_000 }),
       }),
     }),
     inventory: schema.object({
