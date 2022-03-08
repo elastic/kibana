@@ -21,6 +21,14 @@ export interface EuiTabProps {
   prepend?: ReactNode;
 }
 
+export interface SessionViewTableProcessTreeProps {
+  // expects an ISO 8601 string
+  start: string;
+  // expects an ISO 8601 string
+  end: string;
+  kuery?: string;
+}
+
 export interface DetailPanelProcess {
   id: string;
   start: string;

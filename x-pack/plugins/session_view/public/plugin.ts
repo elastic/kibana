@@ -7,13 +7,14 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../src/core/public';
 import { SessionViewServices } from './types';
-import { getSessionViewLazy } from './methods';
+import { getSessionViewTableProcessTreeLazy, getSessionViewLazy } from './methods';
 
 export class SessionViewPlugin implements Plugin {
   public setup(core: CoreSetup<SessionViewServices, void>) {}
 
   public start(core: CoreStart) {
     return {
+      getSessionViewTableProcessTree: getSessionViewTableProcessTreeLazy,
       getSessionView: (sessionEntityId: string) => getSessionViewLazy(sessionEntityId),
     };
   }
