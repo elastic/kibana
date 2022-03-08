@@ -6,10 +6,16 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
+import {
+  DataView,
+  DataViewsContract,
+  FieldSpec,
+} from '../../../../../src/plugins/data_views/common';
 import { TIEBREAKER_FIELD, TIMESTAMP_FIELD } from '../constants';
 import { ResolveLogViewError } from './errors';
 import { LogViewAttributes, LogViewColumnConfiguration, LogViewsStaticConfig } from './types';
+
+export type ResolvedLogViewField = FieldSpec;
 
 export interface ResolvedLogView {
   name: string;
@@ -18,7 +24,7 @@ export interface ResolvedLogView {
   timestampField: string;
   tiebreakerField: string;
   messageField: string[];
-  fields: DataView['fields'];
+  fields: ResolvedLogViewField[];
   runtimeMappings: estypes.MappingRuntimeFields;
   columns: LogViewColumnConfiguration[];
 }
@@ -63,7 +69,6 @@ const resolveLegacyReference = async (
     timestampField: TIMESTAMP_FIELD,
     tiebreakerField: TIEBREAKER_FIELD,
     messageField: config.messageFields,
-    // @ts-expect-error TODO align field types
     fields,
     runtimeMappings: {},
     columns: logViewAttributes.logColumns,

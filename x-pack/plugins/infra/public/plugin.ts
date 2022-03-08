@@ -50,7 +50,9 @@ export class Plugin implements InfraClientPluginClass {
       createInventoryMetricRuleType()
     );
 
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(createLogThresholdRuleType());
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createLogThresholdRuleType(core)
+    );
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createMetricThresholdRuleType()
     );

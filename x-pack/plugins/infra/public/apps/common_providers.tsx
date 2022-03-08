@@ -6,7 +6,7 @@
  */
 
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
@@ -14,11 +14,11 @@ import {
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { NavigationWarningPromptProvider } from '../../../observability/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
-import { createKibanaContextForPlugin } from '../hooks/use_kibana';
+import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
-import { NavigationWarningPromptProvider } from '../../../observability/public';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 
 export const CommonInfraProviders: React.FC<{
@@ -49,9 +49,10 @@ export const CoreProviders: React.FC<{
   plugins: InfraClientStartDeps;
   theme$: AppMountParameters['theme$'];
 }> = ({ children, core, pluginStart, plugins, theme$ }) => {
-  const { Provider: KibanaContextProviderForPlugin } = useMemo(
-    () => createKibanaContextForPlugin(core, plugins, pluginStart),
-    [core, pluginStart, plugins]
+  const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
+    core,
+    plugins,
+    pluginStart
   );
 
   return (

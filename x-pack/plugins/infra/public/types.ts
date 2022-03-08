@@ -67,6 +67,7 @@ export type InfraClientPluginClass = PluginClass<
   InfraClientSetupDeps,
   InfraClientStartDeps
 >;
+export type InfraClientStartServicesAccessor = InfraClientCoreSetup['getStartServices'];
 
 export interface InfraHttpError extends IHttpFetchError {
   readonly body?: {

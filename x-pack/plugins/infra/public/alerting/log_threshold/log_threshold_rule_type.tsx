@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsOf } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
@@ -12,10 +13,21 @@ import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   PartialRuleParams,
 } from '../../../common/alerting/logs/log_threshold';
+import { createAsyncKibanaContextForPluginProvider } from '../../hooks/use_kibana';
+import { InfraClientCoreSetup } from '../../types';
 import { formatRuleData } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
-export function createLogThresholdRuleType(): ObservabilityRuleTypeModel<PartialRuleParams> {
+export function createLogThresholdRuleType(
+  core: InfraClientCoreSetup
+): ObservabilityRuleTypeModel<PartialRuleParams> {
+  const KibanaContextForPluginProvider = createAsyncKibanaContextForPluginProvider(core);
+  const ruleParamsExpression = (props: PropsOf<typeof LazyExpressionEditor>) => (
+    <KibanaContextForPluginProvider>
+      <LazyExpressionEditor {...props} />
+    </KibanaContextForPluginProvider>
+  );
+
   return {
     id: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
     description: i18n.translate('xpack.infra.logs.alertFlyout.alertDescription', {
@@ -25,7 +37,7 @@ export function createLogThresholdRuleType(): ObservabilityRuleTypeModel<Partial
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.logsThreshold}`;
     },
-    ruleParamsExpression: React.lazy(() => import('./components/expression_editor/editor')),
+    ruleParamsExpression,
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
       'xpack.infra.logs.alerting.threshold.defaultActionMessage',
@@ -37,3 +49,7 @@ export function createLogThresholdRuleType(): ObservabilityRuleTypeModel<Partial
     format: formatRuleData,
   };
 }
+
+const LazyExpressionEditor = React.lazy(
+  async () => import('./components/expression_editor/editor')
+);
