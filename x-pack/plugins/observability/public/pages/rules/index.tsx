@@ -27,8 +27,6 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 
 import { useKibana } from '../../utils/kibana_react';
 
-import { loadRules } from '../../../../triggers_actions_ui/public';
-
 const DEFAULT_SEARCH_PAGE_SIZE: number = 25;
 
 interface RuleState {
@@ -53,6 +51,7 @@ export function RulesPage() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   async function loadObservabilityRules() {
+    const { loadRules } = await import('../../../../triggers_actions_ui/public');
     try {
       const response = await loadRules({
         http,
