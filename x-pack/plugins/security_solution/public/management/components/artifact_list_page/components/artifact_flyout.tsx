@@ -220,7 +220,11 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
       isLoading: isLoadingItemForEdit,
       error,
       refetch: fetchItemForEdit,
-    } = useGetArtifact(apiClient, urlParams.itemId ?? '');
+    } = useGetArtifact(apiClient, urlParams.itemId ?? '', undefined, {
+      // We don't want to run this at soon as the component is rendered. `refetch` is called
+      // a little later if determined we're in `edit` mode
+      enabled: false,
+    });
 
     const [formState, setFormState] = useState<ArtifactFormComponentOnChangeCallbackProps>(
       createFormInitialState.bind(null, apiClient.listId, item)
