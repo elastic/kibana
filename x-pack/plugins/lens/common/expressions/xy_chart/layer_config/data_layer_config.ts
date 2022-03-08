@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
-import type { LayerType } from '../../types';
-import { layerTypes } from '../../constants';
-import { axisConfig, YConfig } from './axis_config';
-import type { SeriesType } from './series_type';
+import { layerTypes } from '../../../constants';
+import type { PaletteOutput } from '../../../../../../../src/plugins/charts/common';
+import type { ExpressionFunctionDefinition } from '../../../../../../../src/plugins/expressions/common';
+import { axisConfig, YConfig } from '../axis_config';
+import type { SeriesType } from '../series_type';
 
-export interface XYLayerConfig {
-  hide?: boolean;
+export interface XYDataLayerConfig {
   layerId: string;
-  xAccessor?: string;
+  layerType: typeof layerTypes.DATA;
   accessors: string[];
-  yConfig?: YConfig[];
   seriesType: SeriesType;
+  xAccessor?: string;
+  hide?: boolean;
+  yConfig?: YConfig[];
   splitAccessor?: string;
   palette?: PaletteOutput;
-  layerType: LayerType;
+}
+export interface ValidLayer extends XYDataLayerConfig {
+  xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
 }
 
-export interface ValidLayer extends XYLayerConfig {
-  xAccessor: NonNullable<XYLayerConfig['xAccessor']>;
-}
-
-export type LayerArgs = XYLayerConfig & {
+export type DataLayerArgs = XYDataLayerConfig & {
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: 'time' | 'linear' | 'log' | 'sqrt';
   xScaleType: 'time' | 'linear' | 'ordinal';
@@ -37,17 +35,17 @@ export type LayerArgs = XYLayerConfig & {
   palette: PaletteOutput;
 };
 
-export type LayerConfigResult = LayerArgs & { type: 'lens_xy_layer' };
+export type DataLayerConfigResult = DataLayerArgs & { type: 'lens_xy_data_layer' };
 
-export const layerConfig: ExpressionFunctionDefinition<
-  'lens_xy_layer',
+export const dataLayerConfig: ExpressionFunctionDefinition<
+  'lens_xy_data_layer',
   null,
-  LayerArgs,
-  LayerConfigResult
+  DataLayerArgs,
+  DataLayerConfigResult
 > = {
-  name: 'lens_xy_layer',
+  name: 'lens_xy_data_layer',
   aliases: [],
-  type: 'lens_xy_layer',
+  type: 'lens_xy_data_layer',
   help: `Configure a layer in the xy chart`,
   inputTypes: ['null'],
   args: {
@@ -60,7 +58,7 @@ export const layerConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: '',
     },
-    layerType: { types: ['string'], options: Object.values(layerTypes), help: '' },
+    layerType: { types: ['string'], options: [layerTypes.DATA], help: '' },
     seriesType: {
       types: ['string'],
       options: [
@@ -115,9 +113,9 @@ export const layerConfig: ExpressionFunctionDefinition<
       types: ['palette'],
     },
   },
-  fn: function fn(input: unknown, args: LayerArgs) {
+  fn: function fn(input: unknown, args: DataLayerArgs) {
     return {
-      type: 'lens_xy_layer',
+      type: 'lens_xy_data_layer',
       ...args,
     };
   },
