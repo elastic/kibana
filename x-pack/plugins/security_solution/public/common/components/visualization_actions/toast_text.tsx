@@ -10,11 +10,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { VIEW_CASE } from './translations';
 
 interface ToaseTextProps {
-  caseId: string;
   href: string;
 }
 
-const ToastTextComponent: React.FC<ToaseTextProps> = ({ caseId, href }) => {
+const ToastTextComponent: React.FC<ToaseTextProps> = ({ href }) => {
   return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem>
