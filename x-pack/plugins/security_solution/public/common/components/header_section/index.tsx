@@ -13,6 +13,8 @@ import { InspectButton } from '../inspect';
 import { VisualizationActions } from '../visualization_actions';
 import { LensAttributes, GetLensAttributes } from '../visualization_actions/types';
 import { Subtitle } from '../subtitle';
+import { APP_ID } from '../../../../common/constants';
+import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
 
 interface HeaderProps {
   border?: boolean;
@@ -82,73 +84,81 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   title,
   titleSize = 'm',
   tooltip,
-}) => (
-  <Header data-test-subj="header-section" border={border} height={height}>
-    <EuiFlexGroup
-      alignItems={stackHeader ? undefined : 'center'}
-      direction={stackHeader ? 'column' : 'row'}
-      gutterSize="s"
-    >
-      <EuiFlexItem grow={growLeftSplit}>
-        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-          <EuiFlexItem>
-            <EuiTitle size={titleSize}>
-              <h4 data-test-subj="header-section-title">
-                <span className="eui-textBreakNormal">{title}</span>
-                {tooltip && (
-                  <>
-                    {' '}
-                    <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
-                  </>
+}) => {
+  const { cases } = useKibana().services;
+  const CasesContext = cases.getCasesContext();
+  const userPermissions = useGetUserCasesPermissions();
+  const userCanCrud = userPermissions?.crud ?? false;
+  return (
+    <Header data-test-subj="header-section" border={border} height={height}>
+      <EuiFlexGroup
+        alignItems={stackHeader ? undefined : 'center'}
+        direction={stackHeader ? 'column' : 'row'}
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={growLeftSplit}>
+          <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+            <EuiFlexItem>
+              <EuiTitle size={titleSize}>
+                <h4 data-test-subj="header-section-title">
+                  <span className="eui-textBreakNormal">{title}</span>
+                  {tooltip && (
+                    <>
+                      {' '}
+                      <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
+                    </>
+                  )}
+                </h4>
+              </EuiTitle>
+
+              {!hideSubtitle && (
+                <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
+              )}
+            </EuiFlexItem>
+
+            {id && (
+              <>
+                {showInspectButton && (
+                  <EuiFlexItem grow={false}>
+                    <InspectButton
+                      isDisabled={isInspectDisabled}
+                      queryId={id}
+                      multiple={inspectMultiple}
+                      title={title}
+                    />
+                  </EuiFlexItem>
                 )}
-              </h4>
-            </EuiTitle>
-
-            {!hideSubtitle && (
-              <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
+                {(getLensAttributes || lensAttributes) && timerange && (
+                  <EuiFlexItem grow={false}>
+                    <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
+                      <VisualizationActions
+                        getLensAttributes={getLensAttributes}
+                        isInspectButtonDisabled={isInspectDisabled}
+                        isMultipleQuery={inspectMultiple}
+                        lensAttributes={lensAttributes}
+                        queryId={id}
+                        stackByField={stackByField}
+                        timerange={timerange}
+                        title={title}
+                      />
+                    </CasesContext>
+                  </EuiFlexItem>
+                )}
+              </>
             )}
-          </EuiFlexItem>
 
-          {id && (
-            <>
-              {showInspectButton && (
-                <EuiFlexItem grow={false}>
-                  <InspectButton
-                    isDisabled={isInspectDisabled}
-                    queryId={id}
-                    multiple={inspectMultiple}
-                    title={title}
-                  />
-                </EuiFlexItem>
-              )}
-              {(getLensAttributes || lensAttributes) && timerange && (
-                <EuiFlexItem grow={false}>
-                  <VisualizationActions
-                    getLensAttributes={getLensAttributes}
-                    isInspectButtonDisabled={isInspectDisabled}
-                    isMultipleQuery={inspectMultiple}
-                    lensAttributes={lensAttributes}
-                    queryId={id}
-                    stackByField={stackByField}
-                    timerange={timerange}
-                    title={title}
-                  />
-                </EuiFlexItem>
-              )}
-            </>
-          )}
-
-          {headerFilters && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      {children && (
-        <EuiFlexItem data-test-subj="header-section-supplements" grow={split ? true : false}>
-          {children}
+            {headerFilters && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}
+          </EuiFlexGroup>
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  </Header>
-);
+
+        {children && (
+          <EuiFlexItem data-test-subj="header-section-supplements" grow={split ? true : false}>
+            {children}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </Header>
+  );
+};
 
 export const HeaderSection = React.memo(HeaderSectionComponent);

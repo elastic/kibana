@@ -7,12 +7,8 @@
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import {
-  GetAllCasesSelectorModalProps,
-  GetCreateCaseFlyoutProps,
-} from '../../../../../cases/public';
+
 import { LensEmbeddableInput } from '../../../../../lens/public';
-import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { ModalInspectQuery } from '../inspect/modal';
 
@@ -40,8 +36,6 @@ const Wrapper = styled.div`
 
 export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
 
-const owner = APP_ID;
-
 const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   className,
   getLensAttributes,
@@ -57,7 +51,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   title,
   stackByField,
 }) => {
-  const { lens, cases } = useKibana().services;
+  const { lens } = useKibana().services;
   const userPermissions = useGetUserCasesPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
 
@@ -85,49 +79,20 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
 
   const dataTestSubj = ['stat', queryId, vizType].filter((i) => i != null).join('-');
 
-  const {
-    disabled: isAddToExistingCaseDisabled,
-    closeAllCaseModal,
-    isAllCaseModalOpen,
-    onCaseClicked,
-    onAddToExistingCaseClicked,
-  } = useAddToExistingCase({
-    onAddToCaseClicked: closePopover,
-    lensAttributes: attributes,
-    timeRange: timerange,
-    userCanCrud,
-  });
+  const { disabled: isAddToExistingCaseDisabled, onAddToExistingCaseClicked } =
+    useAddToExistingCase({
+      onAddToCaseClicked: closePopover,
+      lensAttributes: attributes,
+      timeRange: timerange,
+      userCanCrud,
+    });
 
-  const {
-    onClose: closeCreateCaseFlyout,
-    onSuccess: onCreateCaseSuccess,
-    attachments: chartAddedToCase,
-    onAddToNewCaseClicked,
-    isCreateCaseFlyoutOpen,
-    disabled: isAddToNewCaseDisabled,
-  } = useAddToNewCase({
+  const { onAddToNewCaseClicked, disabled: isAddToNewCaseDisabled } = useAddToNewCase({
     onClick: closePopover,
     timeRange: timerange,
     lensAttributes: attributes,
     userCanCrud,
   });
-
-  const allCasesSelectorModalProps: GetAllCasesSelectorModalProps = {
-    onRowClick: onCaseClicked,
-    userCanCrud,
-    owner: [owner],
-    onClose: closeAllCaseModal,
-  };
-
-  const createCaseFlyoutProps: GetCreateCaseFlyoutProps = useMemo(() => {
-    return {
-      onClose: closeCreateCaseFlyout,
-      onSuccess: onCreateCaseSuccess,
-      owner: [owner],
-      userCanCrud,
-      attachments: chartAddedToCase,
-    };
-  }, [closeCreateCaseFlyout, onCreateCaseSuccess, userCanCrud, chartAddedToCase]);
 
   const onOpenInLens = useCallback(() => {
     closePopover();
@@ -282,8 +247,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
           title={title}
         />
       )}
-      {isCreateCaseFlyoutOpen && cases.getCreateCaseFlyout(createCaseFlyoutProps)}
-      {isAllCaseModalOpen && cases.getAllCasesSelectorModal(allCasesSelectorModalProps)}
     </Wrapper>
   );
 };
