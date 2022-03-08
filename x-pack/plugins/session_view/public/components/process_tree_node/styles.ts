@@ -97,6 +97,12 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       color: colors.successText,
     };
 
+    const timeStamp: CSSObject = {
+      float: 'right',
+      position: 'relative',
+      paddingRight: size.base,
+    };
+
     const alertDetails: CSSObject = {
       padding: size.s,
       border: border.editable,
@@ -110,6 +116,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       processNode,
       wrapper,
       workingDir,
+      timeStamp,
       alertDetails,
     };
   }, [depth, euiTheme, hasAlerts]);

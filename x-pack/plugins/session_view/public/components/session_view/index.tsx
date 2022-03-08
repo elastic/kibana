@@ -8,9 +8,14 @@ import React, { useState, useCallback } from 'react';
 import {
   EuiEmptyPrompt,
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiResizableContainer,
+  EuiPopover,
+  EuiSelectable,
+  EuiPopoverTitle,
+  EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
@@ -28,6 +33,12 @@ interface SessionViewDeps {
   jumpToEvent?: ProcessEvent;
 }
 
+interface optionsField {
+  label: string;
+  value: string;
+  checked: 'on' | 'off' | undefined;
+}
+
 /**
  * The main wrapper component for the session view.
  */
@@ -43,6 +54,22 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
+
+  const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
+
+  const optionsList: optionsField[] = [
+    {
+      label: 'Timestamp',
+      value: 'Timestamp',
+      checked: 'on',
+    },
+    {
+      label: 'Verbose mode',
+      value: 'Verbose mode',
+      checked: 'on',
+    },
+  ];
+  const [options, setOptions] = useState(optionsList);
 
   const {
     data,
@@ -85,34 +112,89 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     );
   }
 
+  const renderOptionToggleDropDown = () => {
+    return (
+      <>
+        <EuiPopover
+          button={OptionButton}
+          isOpen={isOptionDropdownOpen}
+          closePopover={closeOptionButton}
+        >
+          <EuiSelectable
+            options={options}
+            onChange={(newOptions) => handleOptionChange(newOptions)}
+          >
+            {(list) => (
+              <div style={{ width: 240 }}>
+                <EuiPopoverTitle>Display options</EuiPopoverTitle>
+                {list}
+              </div>
+            )}
+          </EuiSelectable>
+        </EuiPopover>
+      </>
+    );
+  };
+
+  const handleOptionChange = (value: optionsField[]) => {
+    setOptions(value);
+  };
+
+  const toggleOptionButton = () => {
+    setOptionDropdownOpen(!isOptionDropdownOpen);
+  };
+
+  const closeOptionButton = () => {
+    setOptionDropdownOpen(false);
+  };
+
+  const OptionButton = (
+    <EuiFlexItem grow={false}>
+      <EuiButtonIcon
+        iconType="eye"
+        display={isOptionDropdownOpen ? 'base' : 'empty'}
+        onClick={toggleOptionButton}
+        size="m"
+        aria-label="Option"
+        data-test-subj="sessionViewOptionButton"
+      />
+    </EuiFlexItem>
+  );
+
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem
-          data-test-subj="sessionView:sessionViewProcessEventsSearch"
-          css={{ position: 'relative' }}
-        >
-          <SessionViewSearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            onProcessSelected={onProcessSelected}
-            searchResults={searchResults}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={toggleDetailPanel}
-            iconType="list"
-            fill
-            data-test-subj="sessionViewDetailPanelToggle"
+      <EuiPanel color={'subdued'}>
+        <EuiFlexGroup>
+          <EuiFlexItem
+            data-test-subj="sessionView:sessionViewProcessEventsSearch"
+            css={styles.searchBar}
           >
-            <FormattedMessage
-              id="xpack.sessionView.buttonOpenDetailPanel"
-              defaultMessage="Detail panel"
+            <SessionViewSearchBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              onProcessSelected={onProcessSelected}
+              searchResults={searchResults}
             />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
+            {renderOptionToggleDropDown()}
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
+            <EuiButton
+              onClick={toggleDetailPanel}
+              iconType="list"
+              data-test-subj="sessionViewDetailPanelToggle"
+            >
+              <FormattedMessage
+                id="xpack.sessionView.buttonOpenDetailPanel"
+                defaultMessage="Detail panel"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
       <EuiResizableContainer>
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
@@ -168,6 +250,8 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                     fetchNextPage={fetchNextPage}
                     fetchPreviousPage={fetchPreviousPage}
                     setSearchResults={setSearchResults}
+                    timeStampOn={options[0].checked === 'on'}
+                    verboseModeOn={options[1].checked === 'on'}
                   />
                 </div>
               )}
@@ -200,6 +284,5 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     </>
   );
 };
-
 // eslint-disable-next-line import/no-default-export
 export { SessionView as default };

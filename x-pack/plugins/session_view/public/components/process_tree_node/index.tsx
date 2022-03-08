@@ -19,18 +19,20 @@ import React, {
   MouseEvent,
   useCallback,
 } from 'react';
-import { EuiButton, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiIcon, formatDate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
-import { SessionLeaderButton, AlertButton, ChildrenProcessesButton } from './buttons';
+import { AlertButton, ChildrenProcessesButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
 interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
   depth?: number;
   onProcessSelected?: (process: Process) => void;
+  timeStampOn?: boolean;
+  verboseModeOn?: boolean;
 }
 
 /**
@@ -41,12 +43,13 @@ export function ProcessTreeNode({
   isSessionLeader = false,
   depth = 0,
   onProcessSelected,
+  timeStampOn,
+  verboseModeOn = true,
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
-  const [showGroupLeadersOnly, setShowGroupLeadersOnly] = useState(isSessionLeader);
   const { searchMatched } = process;
 
   useEffect(() => {
@@ -72,10 +75,6 @@ export function ProcessTreeNode({
       }
     }
   }, [searchMatched, styles.searchHighlight]);
-
-  const onShowGroupLeaderOnlyClick = useCallback(() => {
-    setShowGroupLeadersOnly(!showGroupLeadersOnly);
-  }, [showGroupLeadersOnly]);
 
   const onChildrenToggle = useCallback(() => {
     setChildrenExpanded(!childrenExpanded);
@@ -115,7 +114,7 @@ export function ProcessTreeNode({
     exit_code: exitCode,
   } = processDetails.process;
 
-  const children = process.getChildren(!showGroupLeadersOnly);
+  const children = process.getChildren(verboseModeOn);
   const childCount = process.getChildren(true).length;
   const shouldRenderChildren = childrenExpanded && children && children.length > 0;
   const childrenTreeDepth = depth + 1;
@@ -128,6 +127,8 @@ export function ProcessTreeNode({
     ? 'sessionView:processTreeNodeExecIcon'
     : 'sessionView:processTreeNodeForkIcon';
   const processIcon = hasExec ? 'console' : 'branch';
+
+  const timeStampsNormal = formatDate(process.getDetails().process.start, 'MMM DD, YYYY @ hh:mm:ss.SSS')
 
   return (
     <div>
@@ -148,12 +149,6 @@ export function ProcessTreeNode({
               <EuiIcon type={sessionIcon} /> <b css={styles.darkText}>{name || args[0]}</b>{' '}
               <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
               <EuiIcon type="user" /> <b css={styles.darkText}>{user.name}</b>
-              <SessionLeaderButton
-                process={process}
-                childCount={childCount}
-                onClick={onShowGroupLeaderOnlyClick}
-                showGroupLeadersOnly={showGroupLeadersOnly}
-              />
             </>
           ) : (
             <span>
@@ -168,6 +163,7 @@ export function ProcessTreeNode({
                     [exit_code: {exitCode}]
                   </small>
                 )}
+                {timeStampOn ? <span css={styles.timeStamp}>{timeStampsNormal}</span> : null}&nbsp;
               </span>
             </span>
           )}
@@ -203,6 +199,8 @@ export function ProcessTreeNode({
                 process={child}
                 depth={childrenTreeDepth}
                 onProcessSelected={onProcessSelected}
+                timeStampOn={timeStampOn}
+                verboseModeOn={verboseModeOn}
               />
             );
           })}

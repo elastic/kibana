@@ -35,6 +35,9 @@ interface ProcessTreeDeps {
   selectedProcess?: Process | null;
   onProcessSelected: (process: Process) => void;
   setSearchResults?: (results: Process[]) => void;
+
+  timeStampOn?: boolean;
+  verboseModeOn?: boolean;
 }
 
 export const ProcessTree = ({
@@ -50,6 +53,8 @@ export const ProcessTree = ({
   selectedProcess,
   onProcessSelected,
   setSearchResults,
+  timeStampOn,
+  verboseModeOn,
 }: ProcessTreeDeps) => {
   const styles = useStyles();
 
@@ -162,6 +167,8 @@ export const ProcessTree = ({
           isSessionLeader
           process={sessionLeader}
           onProcessSelected={onProcessSelected}
+          timeStampOn={timeStampOn}
+          verboseModeOn={verboseModeOn}
         />
       )}
       <div
