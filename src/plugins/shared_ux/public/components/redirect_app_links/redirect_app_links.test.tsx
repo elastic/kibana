@@ -9,7 +9,7 @@
 import React, { MouseEvent } from 'react';
 import { mount } from 'enzyme';
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import { RedirectAppLinks } from './redirect_app_link';
+import { RedirectAppLinks } from './redirect_app_links';
 import { BehaviorSubject } from 'rxjs';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */

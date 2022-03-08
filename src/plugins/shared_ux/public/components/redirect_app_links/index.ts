@@ -7,10 +7,10 @@
  */
 /* eslint-disable import/no-default-export */
 
-import { RedirectAppLinks } from './redirect_app_link';
-export type { RedirectCrossAppLinksProps } from './redirect_app_link';
+import { RedirectAppLinks } from './redirect_app_links';
+export type { RedirectCrossAppLinksProps } from './redirect_app_links';
 
-export { RedirectAppLinks } from './redirect_app_link';
+export { RedirectAppLinks } from './redirect_app_links';
 
 /**
  * Exporting the RedirectAppLinks component as a default export so it can be

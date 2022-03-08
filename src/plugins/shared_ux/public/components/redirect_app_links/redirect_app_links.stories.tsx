@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
 
-import { RedirectAppLinks } from './redirect_app_link';
+import { RedirectAppLinks } from './redirect_app_links';
 import mdx from './redirect_app_link.mdx';
 
 export default {
