@@ -43,7 +43,7 @@ describe('All exception lists - read only', () => {
 
       dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
       cy.reload();
-      cy.get(PAGE_TITLE).should('be.visible');
+      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
 
       getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
     });
