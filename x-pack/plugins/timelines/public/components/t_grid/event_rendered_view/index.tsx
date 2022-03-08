@@ -127,7 +127,7 @@ const EventRenderedViewComponent = ({
               {leadingControlColumns.length > 0
                 ? leadingControlColumns.map((action) => {
                     const getActions = action.rowCellRender as (
-                      props: Omit<EuiDataGridCellValueElementProps, 'colIndex'>
+                      props: Omit<EuiDataGridCellValueElementProps, 'colIndex' | 'schema'>
                     ) => React.ReactNode;
                     return getActions({
                       columnId: 'actions',

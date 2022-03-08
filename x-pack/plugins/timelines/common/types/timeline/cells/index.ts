@@ -13,7 +13,7 @@ import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 import { ColumnHeaderOptions } from '../columns';
 
 /** The following props are provided to the function called by `renderCellValue` */
-export type CellValueElementProps = EuiDataGridCellValueElementProps & {
+export type CellValueElementProps = Omit<EuiDataGridCellValueElementProps, 'schema'> & {
   asPlainText?: boolean;
   browserFields?: BrowserFields;
   data: TimelineNonEcsData[];
