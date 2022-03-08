@@ -5,12 +5,13 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { get } from 'lodash';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  RuleRegistrySearchRequestPagination,
+  RuleRegistrySearchRequestSort,
+} from '../../../../../../rule_registry/common';
 import { AlertsTable, AlertsData } from '../alerts_table';
-import { useFetchAlertsData } from '../hooks/alerts_data';
-// import { mockAlertData } from './alerts_page.mock.data';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
@@ -20,9 +21,24 @@ const consumers = [
   AlertConsumers.LOGS,
   AlertConsumers.UPTIME,
   AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.SIEM,
 ];
 const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
   const [showCheckboxes] = useState(false);
+
+  const useFetchAlertsData = () => {
+    return {
+      activePage: 1,
+      alerts: {} as AlertsData,
+      isInitializing: false,
+      isLoading: false,
+      getInspectQuery: () => ({ request: {}, response: {} }),
+      onColumnsChange: (columns: EuiDataGridControlColumn[]) => {},
+      onPageChange: (pagination: RuleRegistrySearchRequestPagination) => {},
+      onSortChange: (sort: RuleRegistrySearchRequestSort[]) => {},
+      refresh: () => {},
+    };
+  };
 
   const tableProps = {
     consumers,
@@ -39,21 +55,10 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
     ],
     deletedEventIds: [],
     disabledCellActions: [],
-    pageSize: 2,
+    pageSize: 20,
     pageSizeOptions: [2, 5, 10, 20, 50, 100],
     leadingControlColumns: [],
-    renderCellValue: (
-      alerts: AlertsData,
-      offset: number,
-      cellProps: EuiDataGridCellValueElementProps
-    ) => {
-      const row = alerts[cellProps.rowIndex - offset];
-      if (row) {
-        const val = get(row, cellProps.columnId);
-        if (val.length === 1) {
-          return val[0];
-        }
-      }
+    renderCellValue: (cellProps: EuiDataGridCellValueElementProps) => {
       return 'N/A';
     },
     showCheckboxes,

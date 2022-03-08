@@ -6,8 +6,8 @@
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Capabilities } from 'src/core/public';
-import { KibanaFeature } from '../../../../../features/public';
-import { Consumer } from './types';
+import { KibanaFeature } from '../../../../../../features/public';
+import { Consumer } from '../types';
 
 function mapAlertConsumerToKibanaFeature(consumers: AlertConsumers[]) {
   return consumers.reduce((accum: AlertConsumers[], consumer) => {
