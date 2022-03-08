@@ -7,10 +7,11 @@
 
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
+import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues, set, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import pMap from 'p-map';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SpanOptions, withSpan } from '@kbn/apm-utils';
+import { withSpan } from '@kbn/apm-utils';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -19,6 +20,7 @@ import {
   PluginInitializerContext,
   SavedObjectsUtils,
   SavedObjectAttributes,
+  SavedObjectsBulkUpdateObject,
 } from '../../../../../src/core/server';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
@@ -114,6 +116,15 @@ export interface RuleAggregation {
   };
 }
 
+export interface RuleBulkUpdateAggregation {
+  alertTypeId: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}
+
 export interface ConstructorOptions {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -154,9 +165,38 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
-export interface BulkUpateOptions<Params extends AlertTypeParams> {
+export type BulkUpdateAction =
+  | {
+      action: 'add' | 'delete' | 'set';
+      field: 'tags';
+      value: string[];
+    }
+  | {
+      action: 'add' | 'delete' | 'set';
+      field: 'params.index';
+      value: string[];
+    };
+
+export interface BulkUpdateOptions {
   filter?: string;
-  modifier: (p: RawRule) => RawRule;
+  // modifier: (p: RawRule) => RawRule;
+  actions: BulkUpdateAction[];
+  data: {
+    name?: string;
+    schedule?: IntervalSchedule;
+    actions?: NormalizedAlertAction[];
+    params?: RuleTypeParams;
+    throttle?: string | null;
+    notifyWhen?: RuleNotifyWhenType | null;
+  };
+}
+
+export interface BulkUpdateError {
+  message: string;
+  rule: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface AggregateOptions extends IndexType {
@@ -1069,33 +1109,214 @@ export class RulesClient {
     );
   }
 
-  public async bulkUpdate<Params extends AlertTypeParams>({
-    filter,
-    modifier,
-  }: BulkUpateOptions<Params>) {
-    // const { data: rules } = await this.find({
-    //   options: {
-    //     filter,
-    //     page: 1,
-    //     per_page: 10000,
-    //   },
-    // });
+  public async bulkUpdate({ filter, actions, data = {} }: BulkUpdateOptions) {
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Rule,
+        alertingAuthorizationFilterOpts
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.BULK_UPDATE,
+          error,
+        })
+      );
+      throw error;
+    }
+    const { filter: authorizationFilter } = authorizationTuple;
+    const qNodeFilter =
+      (authorizationFilter && filter
+        ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter as KueryNode])
+        : authorizationFilter) ?? filter;
 
-    const { saved_objects: savedObjects } = await this.unsecuredSavedObjectsClient.find<RawRule>({
-      filter,
+    const { aggregations } = await this.unsecuredSavedObjectsClient.find<
+      RawRule,
+      RuleBulkUpdateAggregation
+    >({
+      filter: qNodeFilter,
+      page: 1,
+      perPage: 0,
       type: 'alert',
-      perPage: 10_000,
+      aggs: {
+        alertTypeId: {
+          terms: { field: 'alert.attributes.alertTypeId' },
+        },
+      },
     });
 
-    const results = await this.unsecuredSavedObjectsClient.bulkUpdate(
-      savedObjects.map((so) => ({
-        id: so.id,
-        type: so.type,
-        attributes: { ...so.attributes, ...modifier(so.attributes) },
-      }))
+    const buckets = aggregations?.alertTypeId.buckets;
+
+    if (buckets === undefined) {
+      throw Error('Aggregation by alertTypeId is empty');
+    }
+
+    await pMap(buckets, async ({ key }) => {
+      this.ruleTypeRegistry.ensureRuleTypeEnabled(key);
+
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: key,
+        // TODO: need multi aggregation for alertTypeId & consumer?
+        consumer: 'siem',
+        operation: WriteOperations.Update,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    });
+
+    const rulesFinder = await this.unsecuredSavedObjectsClient.createPointInTimeFinder<RawRule>({
+      filter,
+      type: 'alert',
+      perPage: 1000,
+    });
+
+    const applyActionToRule = (action: BulkUpdateAction, rule: RawRule): RawRule => {
+      const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
+        Array.from(new Set([...arr, ...items]));
+
+      const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
+        const itemsSet = new Set(items);
+        return arr.filter((item) => !itemsSet.has(item));
+      };
+
+      switch (action.action) {
+        case 'set':
+          set(rule, action.field, action.value);
+          break;
+
+        case 'add':
+          if (get(rule, action.field)) {
+            set(
+              rule,
+              action.field,
+              addItemsToArray(get(rule, action.field) as typeof action.value, action.value)
+            );
+          }
+          break;
+
+        case 'delete':
+          if (get(rule, action.field)) {
+            set(
+              rule,
+              action.field,
+              deleteItemsFromArray(get(rule, action.field) as typeof action.value, action.value)
+            );
+          }
+          break;
+      }
+
+      return rule;
+    };
+
+    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+    const errors: BulkUpdateError[] = [];
+    const apiKeysToInvalidate: string[] = [];
+
+    for await (const response of rulesFinder.find()) {
+      await pMap(
+        response.saved_objects,
+        async (rule) => {
+          try {
+            if (rule.attributes.apiKey) {
+              apiKeysToInvalidate.push(rule.attributes.apiKey);
+            }
+
+            const attributes = actions.reduce(
+              (acc, action) => applyActionToRule(action, acc),
+              rule.attributes
+            );
+
+            const ruleType = this.ruleTypeRegistry.get(attributes.alertTypeId);
+
+            if (ruleType.minimumScheduleInterval && data?.schedule?.interval) {
+              const intervalInMs = parseDuration(data.schedule.interval);
+              const minimumScheduleIntervalInMs = parseDuration(ruleType.minimumScheduleInterval);
+              if (intervalInMs < minimumScheduleIntervalInMs) {
+                throw Error(
+                  `Error updating rule: the interval is less than the minimum interval of ${ruleType.minimumScheduleInterval}`
+                );
+              }
+            }
+            const validatedAlertTypeParams = validateRuleTypeParams(
+              attributes.params,
+              ruleType.validate?.params
+            );
+
+            let ruleActions = attributes.actions;
+            let references = rule.references;
+            if (data.actions) {
+              await this.validateActions(ruleType, data.actions ?? []);
+
+              const refs = await this.extractReferences(
+                ruleType,
+                data.actions,
+                validatedAlertTypeParams
+              );
+
+              ruleActions = refs.actions;
+              references = refs.references;
+            }
+
+            const username = await this.getUserName();
+
+            let createdAPIKey = null;
+            try {
+              createdAPIKey = attributes.enabled
+                ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, attributes.name))
+                : null;
+            } catch (error) {
+              throw Error(`Error updating rule: could not create API key - ${error.message}`);
+            }
+
+            const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
+            const notifyWhen = getAlertNotifyWhenType(attributes.notifyWhen, attributes.throttle);
+
+            const updatedAttributes = this.updateMeta({
+              ...attributes,
+              ...data,
+              ...apiKeyAttributes,
+              params: attributes.params,
+              actions: ruleActions,
+              notifyWhen,
+              updatedBy: username,
+              updatedAt: new Date().toISOString(),
+            });
+
+            rules.push({
+              ...rule,
+              references,
+              attributes: updatedAttributes,
+            });
+          } catch (error) {
+            errors.push({
+              message: error.message,
+              rule: {
+                id: rule.id,
+                name: rule.attributes.name,
+              },
+            });
+            this.auditLogger?.log(
+              ruleAuditEvent({
+                action: RuleAuditAction.BULK_UPDATE,
+                error,
+              })
+            );
+          }
+        },
+        { concurrency: 50 }
+      );
+    }
+
+    const results = await this.unsecuredSavedObjectsClient.bulkUpdate(rules);
+
+    await pMap(
+      apiKeysToInvalidate,
+      (apiKey) =>
+        markApiKeyForInvalidation({ apiKey }, this.logger, this.unsecuredSavedObjectsClient),
+      { concurrency: 50 }
     );
 
-    return results;
+    return { rules: results.saved_objects, errors };
   }
 
   private apiKeyAsAlertAttributes(

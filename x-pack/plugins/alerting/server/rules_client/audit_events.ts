@@ -23,6 +23,7 @@ export enum RuleAuditAction {
   MUTE_ALERT = 'rule_alert_mute',
   UNMUTE_ALERT = 'rule_alert_unmute',
   AGGREGATE = 'rule_aggregate',
+  BULK_UPDATE = 'rule_bulk_update',
 }
 
 type VerbsTuple = [string, string, string];

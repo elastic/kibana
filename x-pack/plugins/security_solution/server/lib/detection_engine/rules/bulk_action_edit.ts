@@ -87,3 +87,74 @@ export const applyBulkActionEditToRule = (
 
   return rule;
 };
+
+const actionAdapter = (action: BulkActionEditPayload, payload) => {
+  switch (action.type) {
+    // tags actions
+    case BulkActionEditType.add_tags:
+      payload.actions.push({
+        field: 'tags',
+        action: 'add',
+        value: action.value,
+      });
+      break;
+
+    case BulkActionEditType.delete_tags:
+      payload.actions.push({
+        field: 'tags',
+        action: 'delete',
+        value: action.value,
+      });
+      break;
+
+    case BulkActionEditType.set_tags:
+      payload.actions.push({
+        field: 'tags',
+        action: 'set',
+        value: action.value,
+      });
+      break;
+
+    // index_patterns actions
+    case BulkActionEditType.add_index_patterns:
+      payload.actions.push({
+        field: 'params.index',
+        action: 'add',
+        value: action.value,
+      });
+      break;
+
+    case BulkActionEditType.delete_index_patterns:
+      payload.actions.push({
+        field: 'params.index',
+        action: 'delete',
+        value: action.value,
+      });
+      break;
+
+    case BulkActionEditType.set_index_patterns:
+      payload.actions.push({
+        field: 'params.index',
+        action: 'set',
+        value: action.value,
+      });
+      break;
+
+    case BulkActionEditType.set_timeline:
+      payload.data.params = {
+        timelineId: action.value.timeline_id,
+        timelineTitle: action.value.timeline_title,
+      };
+  }
+
+  return payload;
+};
+
+export const preparePayload = (actions: BulkActionEditPayload[]) => {
+  const payload = {
+    data: {},
+    actions: [],
+  };
+
+  return actions.reduce((acc, action) => actionAdapter(action, acc), payload);
+};
