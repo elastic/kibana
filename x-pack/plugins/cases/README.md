@@ -44,7 +44,7 @@ To use any of the Cases UI hooks you must first initialize `CasesContext` in you
 
 Without a `CasesContext` the hooks won't work and won't be able to render.
 
-`CasesContext` works a bridge between your plugin and the Cases UI. It effectively it renders
+`CasesContext` works a bridge between your plugin and the Cases UI. It effectively renders
 the Cases UI.
 
 To initialize the `CasesContext` you can use this code:
@@ -65,7 +65,7 @@ props:
 
 | prop                  | type            | description                                                    |
 |-----------------------|-----------------|----------------------------------------------------------------|
-| PLUGIN_CASES_OWNER_ID | `string`        | the owner string for your plugin. e.g: security_solution       |
+| PLUGIN_CASES_OWNER_ID | `string`        | The owner string for your plugin. e.g: securitySolution        |
 | CASES_USER_CAN_CRUD   | `boolean`       | Defines if the user has access to cases to CRUD                |
 | CASES_FEATURES        | `CasesFeatures` | `CasesFeatures` object defining the features to enable/disable |
 
@@ -198,7 +198,7 @@ returns: an object with `open` and `close` methods to open or close the flyout.
 
 Returns an object containing two methods: `open` and `close` to either open or close the  case selector modal.
 
-You can use this hook to prompt the use to select a case and get the selected case. you can also pass attachments directly  and have them attached to the selected case after selection. e.g.: alerts or text comments.
+You can use this hook to prompt the user to select a case and get the selected case. You can also pass attachments directly  and have them attached to the selected case after selection. e.g.: alerts or text comments.
 
 
 Arguments:
