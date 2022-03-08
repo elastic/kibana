@@ -27,9 +27,6 @@ import {
 
 const activeItemStyle = { fontWeight: 700 };
 
-export const ERROR_LOADING_DATA_DEFAULT_MESSAGE =
-  "We couldn't fetch your cloud security posture data";
-
 export const getSideNavItems = (
   navigationItems: Record<string, CspNavigationItem>
 ): NonNullable<KibanaPageTemplateProps['solutionNav']>['items'] =>
@@ -100,7 +97,7 @@ export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({ children, .
                 <h2>
                   <FormattedMessage
                     id="xpack.csp.pageTemplate.loadErrorMessage"
-                    defaultMessage={ERROR_LOADING_DATA_DEFAULT_MESSAGE}
+                    defaultMessage="We couldn't fetch your cloud security posture data"
                   />
                 </h2>
               </EuiTitle>

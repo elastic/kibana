@@ -14,11 +14,7 @@ import { useKubebeatDataView } from '../common/api/use_kubebeat_data_view';
 import { createNavigationItemFixture } from '../test/fixtures/navigation_item';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
-import {
-  CspPageTemplate,
-  getSideNavItems,
-  ERROR_LOADING_DATA_DEFAULT_MESSAGE,
-} from './page_template';
+import { CspPageTemplate, getSideNavItems } from './page_template';
 import {
   LOADING,
   NO_DATA_CONFIG_BUTTON,
@@ -33,6 +29,9 @@ const BLANK_PAGE_GRAPHIC_TEXTS = [
   NO_DATA_CONFIG_DESCRIPTION,
   NO_DATA_CONFIG_BUTTON,
 ];
+
+// Synchronized to the error message in the formatted message in `page_template.tsx`
+const ERROR_LOADING_DATA_DEFAULT_MESSAGE = "We couldn't fetch your cloud security posture data";
 
 jest.mock('../common/api/use_kubebeat_data_view');
 
