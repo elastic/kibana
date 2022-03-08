@@ -62,6 +62,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   } = lens;
   const [isPopoverOpen, setPopover] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+  const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -119,8 +120,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     setIsSaveModalVisible(true);
     closePopover();
   }, []);
-
-  const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
 
   const onOpenInspectModal = useCallback(() => {
     closePopover();
