@@ -38,7 +38,7 @@ export function ServiceField({
       })}
     >
       <SuggestionsSelect
-        allOption={allowAll ? ENVIRONMENT_ALL : undefined}
+        customOptions={allowAll ? [ENVIRONMENT_ALL] : undefined}
         customOptionText={i18n.translate(
           'xpack.apm.serviceNamesSelectCustomOptionText',
           {
@@ -71,7 +71,7 @@ export function EnvironmentField({
       })}
     >
       <SuggestionsSelect
-        allOption={ENVIRONMENT_ALL}
+        customOptions={[ENVIRONMENT_ALL]}
         customOptionText={i18n.translate(
           'xpack.apm.environmentsSelectCustomOptionText',
           {
@@ -102,7 +102,7 @@ export function TransactionTypeField({
   return (
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
-        allOption={ENVIRONMENT_ALL}
+        customOptions={[ENVIRONMENT_ALL]}
         customOptionText={i18n.translate(
           'xpack.apm.transactionTypesSelectCustomOptionText',
           {

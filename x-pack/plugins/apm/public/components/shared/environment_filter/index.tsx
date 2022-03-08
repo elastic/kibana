@@ -9,116 +9,56 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  ENVIRONMENT_ALL,
-  getEnvironmentLabel,
-} from '../../../../common/environment_filter_values';
-import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
 import { fromQuery, toQuery } from '../links/url_helpers';
-import { Environment } from '../../../../common/environment_rt';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
-import { SuggestionsSelect } from '../suggestions_select';
-import { ServiceEnvironmentSuggestionsSelect } from '../service_environment_suggestions_select';
+import { EnvironmentSelect } from '../environment_select';
+import { ServiceEnvironmentSelect } from '../service_environment_select';
 
 function updateEnvironmentUrl(
   history: History,
   location: ReturnType<typeof useLocation>,
-  environment: string
+  environment?: string
 ) {
   const nextEnvironmentQueryParam = environment;
   history.push({
     ...location,
     search: fromQuery({
       ...toQuery(location.search),
-      environment: nextEnvironmentQueryParam,
+      ...(environment &&
+        environment.length > 0 && { environment: nextEnvironmentQueryParam }),
     }),
   });
 }
 
-// #NOTE do we want ENVIRONMENT_NOT_DEFINED with suggestionSelect
-
 export function ApmEnvironmentFilter() {
   const { environment, serviceName, start, end } = useEnvironmentsContext();
+  const history = useHistory();
+  const location = useLocation();
+
+  const prepend = i18n.translate('xpack.apm.filter.environment.label', {
+    defaultMessage: 'Environment',
+  });
 
   return serviceName ? (
-    <ServiceEnvironmentFilter
+    <ServiceEnvironmentSelect
+      prepend={prepend}
+      onChange={(changeValue) =>
+        updateEnvironmentUrl(history, location, changeValue)
+      }
       start={start}
       end={end}
       environment={environment}
       serviceName={serviceName}
     />
   ) : (
-    <EnvironmentFilter start={start} end={end} environment={environment} />
-  );
-}
-
-export function EnvironmentFilter({
-  environment,
-  start,
-  end,
-}: {
-  environment: Environment;
-  start?: string;
-  end?: string;
-}) {
-  const history = useHistory();
-  const location = useLocation();
-
-  return (
-    <SuggestionsSelect
-      isClearable={false}
-      allOption={ENVIRONMENT_ALL}
-      placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
-        defaultMessage: 'Select environment',
-      })}
-      prepend={i18n.translate('xpack.apm.filter.environment.label', {
-        defaultMessage: 'Environment',
-      })}
+    <EnvironmentSelect
+      prepend={prepend}
       onChange={(changeValue) =>
-        updateEnvironmentUrl(history, location, changeValue as string)
+        updateEnvironmentUrl(history, location, changeValue)
       }
-      defaultValue={getEnvironmentLabel(environment)}
-      fieldName={SERVICE_ENVIRONMENT}
       start={start}
       end={end}
-      data-test-subj="environmentFilter"
-    />
-  );
-}
-
-export function ServiceEnvironmentFilter({
-  environment,
-  start,
-  end,
-  serviceName,
-}: {
-  environment: Environment;
-  start?: string;
-  end?: string;
-  serviceName: string;
-}) {
-  const history = useHistory();
-  const location = useLocation();
-
-  return (
-    <ServiceEnvironmentSuggestionsSelect
-      isClearable={false}
-      allOption={ENVIRONMENT_ALL}
-      placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
-        defaultMessage: 'Select environment',
-      })}
-      prepend={i18n.translate('xpack.apm.filter.environment.label', {
-        defaultMessage: 'Environment',
-      })}
-      onChange={(changeValue) =>
-        updateEnvironmentUrl(history, location, changeValue as string)
-      }
-      defaultValue={getEnvironmentLabel(environment)}
-      fieldName={SERVICE_ENVIRONMENT}
-      serviceName={serviceName}
-      start={start}
-      end={end}
-      data-test-subj="environmentFilter"
+      environment={environment}
     />
   );
 }

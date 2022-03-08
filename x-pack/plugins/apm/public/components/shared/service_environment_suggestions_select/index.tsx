@@ -11,13 +11,13 @@ import React, { useCallback, useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 interface ServiceEnvironmentSuggestionsSelectProps {
-  allOption?: EuiComboBoxOptionOption<string>;
+  customOptions?: Array<EuiComboBoxOptionOption<string>>;
   customOptionText?: string;
   defaultValue?: string;
   fieldName: string;
   serviceName: string;
-  start?: string;
-  end?: string;
+  start?: number;
+  end?: number;
   onChange: (value?: string) => void;
   isClearable?: boolean;
   placeholder: string;
@@ -25,7 +25,7 @@ interface ServiceEnvironmentSuggestionsSelectProps {
 }
 
 export function ServiceEnvironmentSuggestionsSelect({
-  allOption,
+  customOptions,
   customOptionText,
   defaultValue,
   fieldName,
@@ -37,12 +37,8 @@ export function ServiceEnvironmentSuggestionsSelect({
   placeholder,
   prepend,
 }: ServiceEnvironmentSuggestionsSelectProps) {
-  const allowAll = !!allOption;
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
-  if (allowAll && !defaultValue) {
-    defaultOption = allOption;
-  }
   if (defaultValue) {
     defaultOption = { label: defaultValue, value: defaultValue };
   }
@@ -94,11 +90,7 @@ export function ServiceEnvironmentSuggestionsSelect({
   const terms = data?.terms ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
-    ...(allOption &&
-    (searchValue === '' ||
-      searchValue.toLowerCase() === allOption.label.toLowerCase())
-      ? [allOption]
-      : []),
+    ...(customOptions ? customOptions : []),
     ...terms.map((name) => {
       return { label: name, value: name };
     }),

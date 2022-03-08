@@ -38,7 +38,7 @@ export function FormRowSuggestionsSelect({
     >
       <EuiFormRow label={fieldLabel}>
         <SuggestionsSelect
-          allOption={allowAll ? ENVIRONMENT_ALL : undefined}
+          customOptions={allowAll ? [ENVIRONMENT_ALL] : undefined}
           defaultValue={value}
           fieldName={fieldName}
           onChange={onChange}

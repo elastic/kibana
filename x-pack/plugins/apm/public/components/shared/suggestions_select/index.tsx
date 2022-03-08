@@ -11,12 +11,12 @@ import React, { useCallback, useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 interface SuggestionsSelectProps {
-  allOption?: EuiComboBoxOptionOption<string>;
+  customOptions?: Array<EuiComboBoxOptionOption<string>>;
   customOptionText?: string;
   defaultValue?: string;
   fieldName: string;
-  start?: string;
-  end?: string;
+  start?: number;
+  end?: number;
   onChange: (value?: string) => void;
   isClearable?: boolean;
   isInvalid?: boolean;
@@ -26,7 +26,7 @@ interface SuggestionsSelectProps {
 }
 
 export function SuggestionsSelect({
-  allOption,
+  customOptions,
   customOptionText,
   defaultValue,
   fieldName,
@@ -91,11 +91,7 @@ export function SuggestionsSelect({
   const terms = data?.terms ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
-    ...(allOption &&
-    (searchValue === '' ||
-      searchValue.toLowerCase() === allOption.label.toLowerCase())
-      ? [allOption]
-      : []),
+    ...(customOptions ? customOptions : []),
     ...terms.map((name) => {
       return { label: name, value: name };
     }),
