@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { CasesTelemetrySchema, Long, CountSchema, StatusSchema } from './types';
+import {
+  CasesTelemetrySchema,
+  TypeLong,
+  CountSchema,
+  StatusSchema,
+  LatestDatesSchema,
+  TypeString,
+} from './types';
 
-const long: Long = { type: 'long' };
+const long: TypeLong = { type: 'long' };
+const string: TypeString = { type: 'keyword' };
 
 const countSchema: CountSchema = {
   total: long,
@@ -22,6 +30,12 @@ const statusSchema: StatusSchema = {
   closed: long,
 };
 
+const latestDatesSchema: LatestDatesSchema = {
+  createdAt: string,
+  updatedAt: string,
+  closedAt: string,
+};
+
 export const casesSchema: CasesTelemetrySchema = {
   cases: {
     all: {
@@ -34,6 +48,7 @@ export const casesSchema: CasesTelemetrySchema = {
       totalTags: long,
       totalWithAlerts: long,
       totalWithConnectors: long,
+      latestDates: latestDatesSchema,
     },
     sec: countSchema,
     obs: countSchema,

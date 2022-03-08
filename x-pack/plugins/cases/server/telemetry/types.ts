@@ -31,8 +31,12 @@ export interface CollectTelemetryDataParams {
   savedObjectsClient: ISavedObjectsRepository;
 }
 
-export interface Long {
+export interface TypeLong {
   type: 'long';
+}
+
+export interface TypeString {
+  type: 'keyword';
 }
 
 export interface Count {
@@ -48,6 +52,12 @@ export interface Status {
   closed: number;
 }
 
+export interface LatestDates {
+  createdAt: string | null;
+  updatedAt: string | null;
+  closedAt: string | null;
+}
+
 export interface CasesTelemetry {
   cases: {
     all: Count & {
@@ -59,6 +69,7 @@ export interface CasesTelemetry {
       totalTags: number;
       totalWithAlerts: number;
       totalWithConnectors: number;
+      latestDates: LatestDates;
     };
     sec: Count;
     obs: Count;
@@ -93,4 +104,5 @@ export interface CasesTelemetry {
 
 export type CountSchema = MakeSchemaFrom<Count>;
 export type StatusSchema = MakeSchemaFrom<Status>;
+export type LatestDatesSchema = MakeSchemaFrom<LatestDates>;
 export type CasesTelemetrySchema = MakeSchemaFrom<CasesTelemetry>;

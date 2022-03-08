@@ -10,12 +10,14 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../../common/constants';
+import { ESCaseAttributes } from '../../services/cases/types';
 import {
   CollectTelemetryDataParams,
   Buckets,
   CasesTelemetry,
   Cardinality,
   ReferencesAggregation,
+  LatestDates,
 } from '../types';
 import {
   findValueInBuckets,
@@ -26,6 +28,31 @@ import {
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
 } from './utils';
+
+export const getLatestCasesDates = async ({
+  savedObjectsClient,
+}: CollectTelemetryDataParams): Promise<LatestDates> => {
+  const find = async (sortField: string) =>
+    savedObjectsClient.find<ESCaseAttributes>({
+      page: 1,
+      perPage: 1,
+      sortField,
+      sortOrder: 'desc',
+      type: CASE_SAVED_OBJECT,
+    });
+
+  const savedObjects = await Promise.all([
+    find('created_at'),
+    find('updated_at'),
+    find('closed_at'),
+  ]);
+
+  return {
+    createdAt: savedObjects?.[0].saved_objects?.[0].attributes?.created_at ?? null,
+    updatedAt: savedObjects?.[1].saved_objects?.[0].attributes?.updated_at ?? null,
+    closedAt: savedObjects?.[2].saved_objects?.[0].attributes?.closed_at ?? null,
+  };
+};
 
 export const getCasesTelemetryData = async ({
   savedObjectsClient,
@@ -137,6 +164,8 @@ export const getCasesTelemetryData = async ({
     },
   });
 
+  const latestDates = await getLatestCasesDates({ savedObjectsClient });
+
   const aggregationsBuckets = getAggregationsBuckets({
     aggs: casesRes.aggregations,
     keys: [
@@ -168,6 +197,7 @@ export const getCasesTelemetryData = async ({
         totalAlertsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
       totalWithConnectors:
         totalConnectorsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
+      latestDates,
     },
     sec: {
       total: findValueInBuckets(aggregationsBuckets.totalsByOwner, 'securitySolution'),
