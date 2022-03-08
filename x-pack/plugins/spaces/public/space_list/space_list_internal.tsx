@@ -43,6 +43,7 @@ export const SpaceListInternal = ({
   namespaces,
   displayLimit = DEFAULT_DISPLAY_LIMIT,
   behaviorContext,
+  listOnClick = () => {},
 }: SpaceListProps) => {
   const { spacesDataPromise } = useSpaces();
 
@@ -143,15 +144,17 @@ export const SpaceListInternal = ({
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-        {displayedSpaces.map((space) => {
-          const isDisabled = space.isFeatureDisabled;
-          return (
-            <EuiFlexItem grow={false} key={space.id}>
-              <LazySpaceAvatar space={space} isDisabled={isDisabled} size={'s'} />
-            </EuiFlexItem>
-          );
-        })}
-        {unauthorizedSpacesCountBadge}
+        <span onClick={listOnClick} onKeyPress={listOnClick} data-test-subj="spacesListClickTarget">
+          {displayedSpaces.map((space) => {
+            const isDisabled = space.isFeatureDisabled;
+            return (
+              <EuiFlexItem grow={false} key={space.id}>
+                <LazySpaceAvatar space={space} isDisabled={isDisabled} size={'s'} />
+              </EuiFlexItem>
+            );
+          })}
+          {unauthorizedSpacesCountBadge}
+        </span>
         {button}
       </EuiFlexGroup>
     </Suspense>
