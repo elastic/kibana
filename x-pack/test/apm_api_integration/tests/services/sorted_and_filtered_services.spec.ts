@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const eventsWithinTimerange = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('15m')
           .rate(1)
-          .flatMap((timestamp) => {
+          .spans((timestamp) => {
             const isInSpike = spikeStart <= timestamp && spikeEnd >= timestamp;
             return [
               ...serviceA
@@ -89,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )
           .interval('15m')
           .rate(1)
-          .flatMap((timestamp) => {
+          .spans((timestamp) => {
             return serviceC
               .transaction('GET /api', 'custom')
               .duration(1000)
