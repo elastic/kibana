@@ -1,6 +1,7 @@
 // SASSTODO: Probably not the right file for this selector, but temporary until the files get re-organized
 .globalQueryBar {
   padding: 0 $euiSizeS $euiSizeS $euiSizeS;
+  border-bottom: $euiBorderThin;
 }
 
 .globalQueryBar:first-child {
