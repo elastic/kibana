@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useState, useMemo, useCallback } from 'react';
+import useMount from 'react-use/lib/useMount';
 import { useLocation, useHistory } from 'react-router-dom';
 import { parse } from 'query-string';
 import { fromQuery, ObservabilityPublicPluginsStart, toQuery } from '..';
@@ -104,6 +105,10 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
     },
     [data.query.timefilter.timefilter, updateUrl]
   );
+
+  useMount(() => {
+    updateUrl({ rangeFrom: relativeStart, rangeTo: relativeEnd });
+  });
 
   return (
     <DatePickerContext.Provider
