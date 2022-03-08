@@ -23,7 +23,7 @@ export const esCriticalAndWarningDeprecations: ESUpgradeStatus = {
       isCritical: false,
       type: 'index_settings',
       resolveDuringUpgrade: false,
-      message: 'translog retention settings are ignored',
+      message: 'Translog retention settings are deprecated',
       url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
       details:
         'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',

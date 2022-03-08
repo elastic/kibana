@@ -14,7 +14,7 @@ import { RuleParams } from '../../schemas/rule_schemas';
 import { createPreviewRuleExecutionLogger } from '../../signals/preview/preview_rule_execution_logger';
 import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -34,7 +34,7 @@ import {
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '../../../../../../alerting/server/types';
-import { AlertInstance } from '../../../../../../alerting/server';
+import { Alert, createAbortableEsClientFactory } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
@@ -106,7 +106,7 @@ export const previewRulesRoute = async (
           request,
           savedObjectsClient,
         });
-        throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+        throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
         await context.lists?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
@@ -140,12 +140,21 @@ export const previewRulesRoute = async (
           ruleTypeName: string,
           params: TParams,
           shouldWriteAlerts: () => boolean,
-          alertInstanceFactory: (
-            id: string
-          ) => Pick<
-            AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>,
-            'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
-          >
+          alertFactory: {
+            create: (
+              id: string
+            ) => Pick<
+              Alert<TInstanceState, TInstanceContext, TActionGroupIds>,
+              | 'getState'
+              | 'replaceState'
+              | 'scheduleActions'
+              | 'scheduleActionsWithSubGroup'
+              | 'setContext'
+              | 'getContext'
+              | 'hasContext'
+            >;
+            done: () => { getRecoveredAlerts: () => [] };
+          }
         ) => {
           let statePreview = runState as TState;
 
@@ -178,11 +187,15 @@ export const previewRulesRoute = async (
               services: {
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
-                alertInstanceFactory,
+                alertFactory,
                 // Just use es client always for preview
-                search: context.core.elasticsearch.client,
+                search: createAbortableEsClientFactory({
+                  scopedClusterClient: context.core.elasticsearch.client,
+                  abortController: new AbortController(),
+                }),
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
+                uiSettingsClient: context.core.uiSettings.client,
               },
               spaceId,
               startedAt: startedAt.toDate(),
@@ -197,11 +210,7 @@ export const previewRulesRoute = async (
               .map((item) => item.message ?? 'Unkown Error');
 
             const warnings = previewRuleExecutionLogger.logged.statusChanges
-              .filter(
-                (item) =>
-                  item.newStatus === RuleExecutionStatus['partial failure'] ||
-                  item.newStatus === RuleExecutionStatus.warning
-              )
+              .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
               .map((item) => item.message ?? 'Unknown Warning');
 
             logs.push({
@@ -227,7 +236,7 @@ export const previewRulesRoute = async (
               queryAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'threshold':
@@ -240,7 +249,7 @@ export const previewRulesRoute = async (
               thresholdAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'threat_match':
@@ -253,7 +262,7 @@ export const previewRulesRoute = async (
               threatMatchAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'eql':
@@ -264,7 +273,7 @@ export const previewRulesRoute = async (
               eqlAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'machine_learning':
@@ -275,7 +284,7 @@ export const previewRulesRoute = async (
               mlAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
         }

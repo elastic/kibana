@@ -26,6 +26,7 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
 import * as helpers from '../helpers';
+import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -52,9 +53,15 @@ jest.mock('../../../../common/lib/kibana', () => {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
       services: {
+        theme: {
+          theme$: {},
+        },
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
+        },
+        cases: {
+          getCasesContext: () => mockCasesContext,
         },
         uiSettings: {
           get: jest.fn(),

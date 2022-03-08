@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { pick, sortBy } from 'lodash';
 import moment from 'moment';
 import { apm, timerange } from '@elastic/apm-synthtrace';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';

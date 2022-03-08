@@ -109,21 +109,7 @@ describe('Policy details host isolation exceptions tab', () => {
     render();
     expect(
       await renderResult.findByTestId('policyHostIsolationExceptionsTabSubtitle')
-    ).toHaveTextContent('There are 4 exceptions associated with this policy');
-  });
-
-  it('should apply a filter when requested from location search params', async () => {
-    history.push(getPolicyHostIsolationExceptionsPath(policyId, { filter: 'my filter' }));
-    getHostIsolationExceptionItemsMock.mockImplementation(() => {
-      return getFoundExceptionListItemSchemaMock(4);
-    });
-    render();
-    expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
-      filter: `((exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.item_id:(*my*filter*) OR exception-list-agnostic.attributes.name:(*my*filter*) OR exception-list-agnostic.attributes.description:(*my*filter*) OR exception-list-agnostic.attributes.entries.value:(*my*filter*)))`,
-      http: mockedContext.coreStart.http,
-      page: 1,
-      perPage: 10,
-    });
+    ).toHaveTextContent('There are 4 host isolation exceptions associated with this policy');
   });
 
   describe('and the user is trying to assign policies', () => {
@@ -153,7 +139,7 @@ describe('Policy details host isolation exceptions tab', () => {
       });
       render();
       await waitFor(() => {
-        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledTimes(2);
+        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledTimes(3);
       });
       expect(await renderResult.findByTestId('hostIsolationExceptions-assign-flyout')).toBeTruthy();
     });

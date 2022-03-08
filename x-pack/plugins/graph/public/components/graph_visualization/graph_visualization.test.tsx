@@ -202,7 +202,7 @@ describe('graph_visualization', () => {
       />
     );
 
-    instance.find('.gphEdge').first().simulate('click');
+    instance.find('.gphEdge').at(1).simulate('click');
 
     expect(workspace.getAllIntersections).toHaveBeenCalled();
     expect(edges[0].topSrc).toEqual(workspace.getAllIntersections.mock.calls[0][1][0]);

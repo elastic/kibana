@@ -7,12 +7,14 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+
+import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
   ElasticsearchServiceStart,
   Logger,
-  AsyncPlugin,
+  Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
@@ -31,7 +33,7 @@ import {
   ServiceStatusLevels,
 } from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
-import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import type { LicensingPluginStart } from '../../licensing/server';
 import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
@@ -91,7 +93,6 @@ import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
 
 export interface FleetSetupDeps {
-  licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
@@ -103,6 +104,7 @@ export interface FleetSetupDeps {
 
 export interface FleetStartDeps {
   data: DataPluginStart;
+  licensing: LicensingPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
@@ -173,9 +175,8 @@ export interface FleetStartContract {
 }
 
 export class FleetPlugin
-  implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps>
+  implements Plugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps>
 {
-  private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
   private configInitialValue: FleetConfigType;
   private cloud?: CloudSetup;
@@ -210,7 +211,6 @@ export class FleetPlugin
 
   public setup(core: CoreSetup, deps: FleetSetupDeps) {
     this.httpSetup = core.http;
-    this.licensing$ = deps.licensing.license$;
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
     this.securitySetup = deps.security;
@@ -222,14 +222,16 @@ export class FleetPlugin
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
-    // TODO: Flesh out privileges
     if (deps.features) {
       deps.features.registerKibanaFeature({
-        id: PLUGIN_ID,
-        name: 'Fleet and Integrations',
+        id: `fleetv2`,
+        name: 'Fleet',
         category: DEFAULT_APP_CATEGORIES.management,
-        app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
+        app: [PLUGIN_ID],
         catalogue: ['fleet'],
+        privilegesTooltip: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
+          defaultMessage: 'All Spaces is required for Fleet access.',
+        }),
         reserved: {
           description:
             'Privilege to setup Fleet packages and configured policies. Intended for use by the elastic/fleet-server service account only.',
@@ -250,24 +252,64 @@ export class FleetPlugin
         },
         privileges: {
           all: {
-            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`, `integrations-all`, `integrations-read`],
-            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
+            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
+            app: [PLUGIN_ID],
+            requireAllSpaces: true,
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
             },
-            ui: ['show', 'read', 'write'],
+            ui: ['read', 'all'],
           },
           read: {
-            api: [`${PLUGIN_ID}-read`, `integrations-read`],
-            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
-            catalogue: ['fleet'], // TODO: check if this is actually available to read user
+            api: [`${PLUGIN_ID}-read`],
+            app: [PLUGIN_ID],
+            catalogue: ['fleet'],
+            requireAllSpaces: true,
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
             },
-            ui: ['show', 'read'],
+            ui: ['read'],
+            disabled: true,
+          },
+        },
+      });
+
+      deps.features.registerKibanaFeature({
+        id: 'fleet', // for BWC
+        name: 'Integrations',
+        category: DEFAULT_APP_CATEGORIES.management,
+        app: [INTEGRATIONS_PLUGIN_ID],
+        catalogue: ['fleet'],
+        privilegesTooltip: i18n.translate(
+          'xpack.fleet.serverPlugin.integrationsPrivilegesTooltip',
+          {
+            defaultMessage: 'All Spaces is required for All Integrations access.',
+          }
+        ),
+        privileges: {
+          all: {
+            api: [`${INTEGRATIONS_PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-all`],
+            app: [INTEGRATIONS_PLUGIN_ID],
+            catalogue: ['fleet'],
+            requireAllSpaces: true,
+            savedObject: {
+              all: allSavedObjectTypes,
+              read: [],
+            },
+            ui: ['read', 'all'],
+          },
+          read: {
+            api: [`${INTEGRATIONS_PLUGIN_ID}-read`],
+            app: [INTEGRATIONS_PLUGIN_ID],
+            catalogue: ['fleet'],
+            savedObject: {
+              all: [],
+              read: allSavedObjectTypes,
+            },
+            ui: ['read'],
           },
         },
       });
@@ -340,7 +382,6 @@ export class FleetPlugin
 
     this.telemetryEventsSender.setup(deps.telemetry);
   }
-
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
     appContextService.start({
       elasticsearch: core.elasticsearch,
@@ -360,7 +401,7 @@ export class FleetPlugin
       logger: this.logger,
       telemetryEventsSender: this.telemetryEventsSender,
     });
-    licenseService.start(this.licensing$);
+    licenseService.start(plugins.licensing.license$);
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
 
@@ -414,7 +455,6 @@ export class FleetPlugin
       agentPolicyService: {
         get: agentPolicyService.get,
         list: agentPolicyService.list,
-        getDefaultAgentPolicyId: agentPolicyService.getDefaultAgentPolicyId,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
         getByIds: agentPolicyService.getByIDs,
       },

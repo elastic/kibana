@@ -9,9 +9,7 @@ import React from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
-import { normalizeRuleExecutionStatus } from './utils';
 
 import * as i18n from './translations';
 
@@ -26,10 +24,8 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   message,
   status,
 }) => {
-  // TODO: https://github.com/elastic/kibana/pull/121644 clean up
-  const props = getPropsByStatus(status);
-  if (!props) {
-    // we will not show this callout for this status
+  const { shouldBeDisplayed, color, title } = getPropsByStatus(status);
+  if (!shouldBeDisplayed) {
     return null;
   }
 
@@ -37,14 +33,15 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
     <EuiCallOut
       title={
         <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
-          <EuiFlexItem grow={false}>{props.title}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{title}</EuiFlexItem>
           <EuiFlexItem grow={true}>
             <FormattedDate value={date} fieldName="execution_summary.last_execution.date" />
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      color={props.color}
+      color={color}
       iconType="alert"
+      data-test-subj="ruleStatusFailedCallOut"
     >
       <p>{message}</p>
     </EuiCallOut>
@@ -54,28 +51,31 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
 export const RuleStatusFailedCallOut = React.memo(RuleStatusFailedCallOutComponent);
 RuleStatusFailedCallOut.displayName = 'RuleStatusFailedCallOut';
 
-// -------------------------------------------------------------------------------------------------
-// Helpers
-
 interface HelperProps {
+  shouldBeDisplayed: boolean;
   color: 'danger' | 'warning';
   title: string;
 }
 
-const getPropsByStatus = (status: RuleExecutionStatus | null | undefined): HelperProps | null => {
-  const normalizedStatus = normalizeRuleExecutionStatus(status);
-  switch (normalizedStatus) {
+const getPropsByStatus = (status: RuleExecutionStatus | null | undefined): HelperProps => {
+  switch (status) {
     case RuleExecutionStatus.failed:
       return {
+        shouldBeDisplayed: true,
         color: 'danger',
         title: i18n.ERROR_CALLOUT_TITLE,
       };
-    case RuleExecutionStatus.warning:
+    case RuleExecutionStatus['partial failure']:
       return {
+        shouldBeDisplayed: true,
         color: 'warning',
         title: i18n.PARTIAL_FAILURE_CALLOUT_TITLE,
       };
     default:
-      return null;
+      return {
+        shouldBeDisplayed: false,
+        color: 'warning',
+        title: '',
+      };
   }
 };

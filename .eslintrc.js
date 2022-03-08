@@ -104,6 +104,7 @@ const DEV_PACKAGES = [
   'kbn-storybook',
   'kbn-telemetry-tools',
   'kbn-test',
+  'kbn-type-summarizer',
 ];
 
 /** Directories (at any depth) which include dev-only code. */
@@ -853,12 +854,13 @@ module.exports = {
     },
 
     /**
-     * APM and Observability overrides
+     * APM, UX and Observability overrides
      */
     {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -881,6 +883,18 @@ module.exports = {
           {
             namedComponents: 'function-declaration',
             unnamedComponents: 'arrow-function',
+          },
+        ],
+      },
+    },
+    {
+      // require explicit return types in route handlers for performance reasons
+      files: ['x-pack/plugins/apm/server/**/route.ts'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': [
+          'error',
+          {
+            allowTypedFunctionExpressions: false,
           },
         ],
       },
@@ -1068,6 +1082,13 @@ module.exports = {
         'symbol-description': 'error',
         'vars-on-top': 'error',
         '@typescript-eslint/no-duplicate-imports': ['error'],
+      },
+    },
+    {
+      files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      rules: {
+        'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
     },
 
@@ -1613,28 +1634,6 @@ module.exports = {
     },
 
     /**
-     * Prettier disables all conflicting rules, listing as last override so it takes precedence
-     */
-    {
-      files: ['**/*'],
-      rules: {
-        ...require('eslint-config-prettier').rules,
-        ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
-      },
-    },
-    /**
-     * Enterprise Search Prettier override
-     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
-     */
-    {
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      rules: {
-        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
-      },
-    },
-
-    /**
      * Platform Security Team overrides
      */
     {
@@ -1746,6 +1745,35 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/no_export_all': 'error',
+      },
+    },
+
+    {
+      files: ['packages/kbn-type-summarizer/**/*.ts'],
+      rules: {
+        'no-bitwise': 'off',
+      },
+    },
+
+    /**
+     * Prettier disables all conflicting rules, listing as last override so it takes precedence
+     */
+    {
+      files: ['**/*'],
+      rules: {
+        ...require('eslint-config-prettier').rules,
+        ...require('eslint-config-prettier/react').rules,
+        ...require('eslint-config-prettier/@typescript-eslint').rules,
+      },
+    },
+    /**
+     * Enterprise Search Prettier override
+     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
     },
   ],

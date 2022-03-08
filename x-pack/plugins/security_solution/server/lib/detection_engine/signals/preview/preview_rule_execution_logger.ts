@@ -6,13 +6,13 @@
  */
 
 import {
-  RuleExecutionLoggerFactory,
+  RuleExecutionLogForExecutorsFactory,
   RuleExecutionContext,
   StatusChangeArgs,
 } from '../../rule_execution_log';
 
 export interface IPreviewRuleExecutionLogger {
-  factory: RuleExecutionLoggerFactory;
+  factory: RuleExecutionLogForExecutorsFactory;
 
   logged: {
     statusChanges: Array<RuleExecutionContext & StatusChangeArgs>;
@@ -26,7 +26,7 @@ export const createPreviewRuleExecutionLogger = () => {
     statusChanges: [],
   };
 
-  const factory: RuleExecutionLoggerFactory = (
+  const factory: RuleExecutionLogForExecutorsFactory = (
     savedObjectsClient,
     eventLogService,
     logger,

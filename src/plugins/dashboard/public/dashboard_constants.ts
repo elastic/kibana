@@ -9,6 +9,7 @@
 import type { ControlStyle } from '../../controls/public';
 
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';
+export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 export const DashboardConstants = {
   LANDING_PAGE_PATH: '/list',

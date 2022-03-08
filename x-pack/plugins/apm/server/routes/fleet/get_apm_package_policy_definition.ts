@@ -279,4 +279,16 @@ export const apmConfigMapping: Record<
     name: 'anonymous_rate_limit_event_limit',
     type: 'integer',
   },
+  'apm-server.sampling.tail.enabled': {
+    name: 'tail_sampling_enabled',
+    type: 'bool',
+  },
+  'apm-server.sampling.tail.interval': {
+    name: 'tail_sampling_interval',
+    type: 'text',
+  },
+  'apm-server.sampling.tail.policies': {
+    name: 'tail_sampling_policies',
+    type: 'yaml',
+  },
 };

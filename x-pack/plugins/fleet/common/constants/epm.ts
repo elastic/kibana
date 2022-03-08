@@ -23,16 +23,9 @@ export const STANDALONE_RUN_INSTRUCTIONS_WINDOWS = '.\\elastic-agent.exe install
 
 /*
  Package rules:
-|               | unremovablePackages | defaultPackages | autoUpdatePackages |
-|---------------|:---------------------:|:---------------:|:------------------:|
-| Removable     |         ❌             |        ✔️        |          ✔️         |
-| Auto-installs |         ❌             |        ✔️        |          ❌         |
-| Auto-updates  |         ❌             |        ✔️        |          ✔️         |
-
-`endpoint` is a special package. It needs to autoupdate, it needs to _not_ be
-removable, but it doesn't install by default. Following the table, it needs to
-be in `unremovablePackages` and in `autoUpdatePackages`, but not in
-`defaultPackages`.
+|               | autoUpdatePackages |
+|---------------|:------------------:|
+| Auto-updates  |          ✔️         |
 
 
 We also define "auto upgrade policies" packages below. These are packages that are considered "stack-aligned"
@@ -41,15 +34,6 @@ editor UI's in the Kibana codebase will be included in this set of packages to a
 in their custom policy editor implementations.
 
 */
-
-export const unremovablePackages = [
-  FLEET_SYSTEM_PACKAGE,
-  FLEET_ELASTIC_AGENT_PACKAGE,
-  FLEET_SERVER_PACKAGE,
-  FLEET_ENDPOINT_PACKAGE,
-];
-
-export const defaultPackages = unremovablePackages.filter((p) => p !== FLEET_ENDPOINT_PACKAGE);
 
 export const autoUpdatePackages = [
   FLEET_ENDPOINT_PACKAGE,
@@ -76,4 +60,5 @@ export const installationStatuses = {
   Installing: 'installing',
   InstallFailed: 'install_failed',
   NotInstalled: 'not_installed',
+  InstalledBundled: 'installed_bundled',
 } as const;

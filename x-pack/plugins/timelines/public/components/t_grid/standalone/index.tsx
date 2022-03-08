@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
@@ -36,19 +36,20 @@ import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { LastUpdatedAt } from '../..';
-import {
-  SELECTOR_TIMELINE_GLOBAL_CONTAINER,
-  UpdatedFlexItem,
-  UpdatedFlexGroup,
-  FullWidthFlexGroup,
-} from '../styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
 
+const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+`;
+
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const STANDALONE_ID = 'standalone-t-grid';
+export const STANDALONE_ID = 'standalone-t-grid';
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
 
 const TitleText = styled.span`
@@ -86,6 +87,7 @@ export interface TGridStandaloneProps {
   } | null;
   afterCaseSelection?: Function;
   columns: ColumnHeaderOptions[];
+  dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   disabledCellActions: string[];
@@ -121,6 +123,7 @@ export interface TGridStandaloneProps {
   data?: DataPublicPluginStart;
   unit?: (total: number) => React.ReactNode;
   showCheckboxes?: boolean;
+  queryFields?: string[];
 }
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
@@ -129,6 +132,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   casesOwner,
   casePermissions,
   columns,
+  dataViewId = null,
   defaultCellActions,
   deletedEventIds,
   disabledCellActions,
@@ -155,6 +159,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   data,
   unit,
   showCheckboxes = true,
+  queryFields = [],
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -166,7 +171,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const {
     itemsPerPage: itemsPerPageStore,
     itemsPerPageOptions: itemsPerPageOptionsStore,
-    queryFields,
+    queryFields: queryFieldsFromState,
     sort: sortStore,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
@@ -203,9 +208,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         (acc, c) => (c.linkField != null ? [...acc, c.id, c.linkField] : [...acc, c.id]),
         []
       ),
-      ...(queryFields ?? []),
+      ...(queryFieldsFromState ?? []),
     ],
-    [columnsHeader, queryFields]
+    [columnsHeader, queryFieldsFromState]
   );
 
   const sortField = useMemo(
@@ -222,6 +227,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { consumers, events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    dataViewId,
     docValueFields: [],
     entityType,
     excludeEcsData: true,
@@ -335,6 +341,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         sort,
         loadingText,
         unit,
+        queryFields,
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

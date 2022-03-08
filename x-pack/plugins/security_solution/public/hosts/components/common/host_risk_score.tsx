@@ -12,13 +12,14 @@ import { EuiHealth, transparentize } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
+import { WithHoverActions } from '../../../common/components/with_hover_actions';
 
-const HOST_RISK_SEVERITY_COLOUR = {
-  Unknown: euiLightVars.euiColorMediumShade,
-  Low: euiLightVars.euiColorVis0,
-  Moderate: euiLightVars.euiColorWarning,
-  High: euiLightVars.euiColorVis9_behindText,
-  Critical: euiLightVars.euiColorDanger,
+export const HOST_RISK_SEVERITY_COLOUR: { [k in HostRiskSeverity]: string } = {
+  [HostRiskSeverity.unknown]: euiLightVars.euiColorMediumShade,
+  [HostRiskSeverity.low]: euiLightVars.euiColorVis0,
+  [HostRiskSeverity.moderate]: euiLightVars.euiColorWarning,
+  [HostRiskSeverity.high]: euiLightVars.euiColorVis9_behindText,
+  [HostRiskSeverity.critical]: euiLightVars.euiColorDanger,
 };
 
 const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity; $hideBackgroundColor: boolean }>`
@@ -35,19 +36,34 @@ const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity; $hideBackgroundC
     `};
   `}
 `;
-
+const TooltipContainer = styled.div`
+  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
 export const HostRiskScore: React.FC<{
   severity: HostRiskSeverity;
   hideBackgroundColor?: boolean;
-}> = ({ severity, hideBackgroundColor = false }) => (
-  <HostRiskBadge
-    color={euiLightVars.euiColorDanger}
-    $severity={severity}
-    $hideBackgroundColor={hideBackgroundColor}
-    data-test-subj="host-risk-score"
-  >
-    <EuiHealth className="eui-alignMiddle" color={HOST_RISK_SEVERITY_COLOUR[severity]}>
-      {severity}
-    </EuiHealth>
-  </HostRiskBadge>
-);
+  toolTipContent?: JSX.Element;
+}> = ({ severity, hideBackgroundColor = false, toolTipContent }) => {
+  const badge = (
+    <HostRiskBadge
+      color={euiLightVars.euiColorDanger}
+      $severity={severity}
+      $hideBackgroundColor={hideBackgroundColor}
+      data-test-subj="host-risk-score"
+    >
+      <EuiHealth className="eui-alignMiddle" color={HOST_RISK_SEVERITY_COLOUR[severity]}>
+        {severity}
+      </EuiHealth>
+    </HostRiskBadge>
+  );
+
+  if (toolTipContent != null) {
+    return (
+      <WithHoverActions
+        hoverContent={<TooltipContainer>{toolTipContent}</TooltipContainer>}
+        render={() => badge}
+      />
+    );
+  }
+  return badge;
+};

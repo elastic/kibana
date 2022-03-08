@@ -47,15 +47,16 @@ describe('mark_available_tasks_as_claimed', () => {
         // status running or claiming with a retryAt <= now.
         shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
       ),
-      script: updateFieldsAndMarkAsFailed(
+      script: updateFieldsAndMarkAsFailed({
         fieldUpdates,
-        claimTasksById || [],
-        definitions.getAllTypes(),
-        [],
-        Array.from(definitions).reduce((accumulator, [type, { maxAttempts }]) => {
+        claimTasksById: claimTasksById || [],
+        claimableTaskTypes: definitions.getAllTypes(),
+        skippedTaskTypes: [],
+        unusedTaskTypes: [],
+        taskMaxAttempts: Array.from(definitions).reduce((accumulator, [type, { maxAttempts }]) => {
           return { ...accumulator, [type]: maxAttempts || defaultMaxAttempts };
-        }, {})
-      ),
+        }, {}),
+      }),
       sort: SortByRunAtAndRetryAt,
     }).toEqual({
       query: {
@@ -126,7 +127,7 @@ if (doc['task.runAt'].size()!=0) {
       ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
         .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
         .join(' ')}
-    } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
+    } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
     } else {
       ctx.op = "noop";
@@ -140,6 +141,7 @@ if (doc['task.runAt'].size()!=0) {
           claimTasksById: [],
           claimableTaskTypes: ['sampleTask', 'otherTask'],
           skippedTaskTypes: [],
+          unusedTaskTypes: [],
           taskMaxAttempts: {
             sampleTask: 5,
             otherTask: 1,
@@ -164,9 +166,16 @@ if (doc['task.runAt'].size()!=0) {
       ];
 
       expect(
-        updateFieldsAndMarkAsFailed(fieldUpdates, claimTasksById, ['foo', 'bar'], [], {
-          foo: 5,
-          bar: 2,
+        updateFieldsAndMarkAsFailed({
+          fieldUpdates,
+          claimTasksById,
+          claimableTaskTypes: ['foo', 'bar'],
+          skippedTaskTypes: [],
+          unusedTaskTypes: [],
+          taskMaxAttempts: {
+            foo: 5,
+            bar: 2,
+          },
         })
       ).toMatchObject({
         source: `
@@ -182,7 +191,7 @@ if (doc['task.runAt'].size()!=0) {
       ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
         .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
         .join(' ')}
-    } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
+    } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
     } else {
       ctx.op = "noop";
@@ -196,6 +205,7 @@ if (doc['task.runAt'].size()!=0) {
           ],
           claimableTaskTypes: ['foo', 'bar'],
           skippedTaskTypes: [],
+          unusedTaskTypes: [],
           taskMaxAttempts: {
             foo: 5,
             bar: 2,
@@ -213,9 +223,16 @@ if (doc['task.runAt'].size()!=0) {
       };
 
       expect(
-        updateFieldsAndMarkAsFailed(fieldUpdates, [], ['foo', 'bar'], [], {
-          foo: 5,
-          bar: 2,
+        updateFieldsAndMarkAsFailed({
+          fieldUpdates,
+          claimTasksById: [],
+          claimableTaskTypes: ['foo', 'bar'],
+          skippedTaskTypes: [],
+          unusedTaskTypes: [],
+          taskMaxAttempts: {
+            foo: 5,
+            bar: 2,
+          },
         }).source
       ).toMatch(/ctx.op = "noop"/);
     });

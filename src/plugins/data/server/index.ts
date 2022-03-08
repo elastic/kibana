@@ -106,7 +106,7 @@ export const search = {
  */
 
 export type { TimeRange } from '../common';
-export { castEsToKbnFieldTypeName, getTime, parseInterval } from '../common';
+export { getTime, parseInterval } from '../common';
 
 /**
  * Static code to be shared externally

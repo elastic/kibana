@@ -33,6 +33,7 @@ class DocLinks {
   public enterpriseSearchConfig: string;
   public enterpriseSearchMailService: string;
   public enterpriseSearchUsersAccess: string;
+  public kibanaSecurity: string;
   public licenseManagement: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
@@ -86,6 +87,7 @@ class DocLinks {
     this.enterpriseSearchConfig = '';
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchUsersAccess = '';
+    this.kibanaSecurity = '';
     this.licenseManagement = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
@@ -140,6 +142,7 @@ class DocLinks {
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
+    this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;

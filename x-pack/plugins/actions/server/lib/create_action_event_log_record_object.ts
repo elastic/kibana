@@ -20,6 +20,7 @@ interface CreateActionEventLogRecordParams {
     scheduled?: string;
     scheduleDelay?: number;
   };
+  executionId?: string;
   savedObjects: Array<{
     type: string;
     id: string;
@@ -29,7 +30,7 @@ interface CreateActionEventLogRecordParams {
 }
 
 export function createActionEventLogRecordObject(params: CreateActionEventLogRecordParams): Event {
-  const { action, message, task, namespace } = params;
+  const { action, message, task, namespace, executionId } = params;
 
   const event: Event = {
     ...(params.timestamp ? { '@timestamp': params.timestamp } : {}),
@@ -38,6 +39,17 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
       kind: 'action',
     },
     kibana: {
+      ...(executionId
+        ? {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: executionId,
+                },
+              },
+            },
+          }
+        : {}),
       saved_objects: params.savedObjects.map((so) => ({
         ...(so.relation ? { rel: so.relation } : {}),
         type: so.type,

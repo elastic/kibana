@@ -48,6 +48,7 @@ import {
 import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
 import { Start as InspectorPluginStart } from '../../../../../src/plugins/inspector/public';
 import { UptimeUiConfig } from '../../common/config';
+import { CasesUiStart } from '../../../cases/public';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -65,6 +66,7 @@ export interface ClientPluginsStart {
   observability: ObservabilityPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  cases: CasesUiStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {

@@ -68,7 +68,7 @@ export class EventFiltersHttpService implements EventFiltersService {
     return deleteOne(this.http, id);
   }
 
-  async getSummary(): Promise<ExceptionListSummarySchema> {
-    return getSummary(this.http);
+  async getSummary(filter?: string): Promise<ExceptionListSummarySchema> {
+    return getSummary({ http: this.http, filter });
   }
 }

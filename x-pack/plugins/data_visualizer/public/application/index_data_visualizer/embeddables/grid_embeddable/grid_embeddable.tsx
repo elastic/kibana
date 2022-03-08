@@ -53,11 +53,13 @@ export interface DataVisualizerGridInput {
   filters?: Filter[];
   showPreviewByDefault?: boolean;
   allowEditDataView?: boolean;
+  id?: string;
   /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
+  fieldsToFetch?: string[];
 }
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;

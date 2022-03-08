@@ -85,7 +85,6 @@ describe('useUserActionsHandler', () => {
       commentId: 'test-id',
       commentUpdate: 'a comment',
       fetchUserActions,
-      subCaseId: undefined,
       updateCase,
       version: 'test-version',
     });

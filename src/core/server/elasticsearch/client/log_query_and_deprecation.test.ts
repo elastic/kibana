@@ -540,14 +540,13 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-      // One debug log entry from 'elasticsearch.query' context
-      expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
+      // Test debug[1] since theree is one log entry from 'elasticsearch.query' context
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch('Origin:kibana');
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(/Stack trace:\n.*at/);
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch('Origin:kibana');
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(/Stack trace:\n.*at/);
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         /Query:\n.*400\n.*GET \/_path\?hello\=dolly \[illegal_argument_exception\]: request \[\/_path\] contains unrecognized parameter: \[name\]/
       );
     });
@@ -573,7 +572,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', null, response);
 
-      expect(loggingSystemMock.collect(logger).info).toEqual([]);
       // Test debug[1] since theree is one log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
@@ -608,14 +606,13 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', null, response);
 
-      // One debug log entry from 'elasticsearch.query' context
-      expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
+      // Test debug[1] since theree is one log entry from 'elasticsearch.query' context
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch('Origin:kibana');
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(/Stack trace:\n.*at/);
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch('Origin:kibana');
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(/Stack trace:\n.*at/);
+      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         /Query:\n.*200\n.*GET \/_path\?hello\=dolly/
       );
     });

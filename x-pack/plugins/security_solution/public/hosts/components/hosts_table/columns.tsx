@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import {
   DragEffects,
@@ -23,8 +23,12 @@ import { HostsTableColumns } from './';
 import * as i18n from './translations';
 import { HostRiskSeverity, Maybe } from '../../../../common/search_strategy';
 import { HostRiskScore } from '../common/host_risk_score';
+import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
 
-export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
+export const getHostsColumns = (
+  showRiskColumn: boolean,
+  dispatchSeverityUpdate: (s: HostRiskSeverity) => void
+): HostsTableColumns => {
   const columns: HostsTableColumns = [
     {
       field: 'node.host.name',
@@ -153,7 +157,16 @@ export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
       sortable: false,
       render: (riskScore: HostRiskSeverity) => {
         if (riskScore != null) {
-          return <HostRiskScore severity={riskScore} />;
+          return (
+            <HostRiskScore
+              toolTipContent={
+                <EuiLink onClick={() => dispatchSeverityUpdate(riskScore)}>
+                  <EuiText size="xs">{VIEW_HOSTS_BY_SEVERITY(riskScore.toLowerCase())}</EuiText>
+                </EuiLink>
+              }
+              severity={riskScore}
+            />
+          );
         }
         return getEmptyTagValue();
       },

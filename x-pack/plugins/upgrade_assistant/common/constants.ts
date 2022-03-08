@@ -17,7 +17,7 @@ export const MAJOR_VERSION = '8.0.0';
  */
 export const indexSettingDeprecations = {
   translog: {
-    deprecationMessage: 'translog retention settings are ignored', // expected message from ES deprecation info API
+    deprecationMessage: 'Translog retention settings are deprecated', // expected message from ES deprecation info API
     settings: ['translog.retention.size', 'translog.retention.age'],
   },
 };

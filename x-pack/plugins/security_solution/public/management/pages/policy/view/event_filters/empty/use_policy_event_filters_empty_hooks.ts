@@ -11,16 +11,21 @@ import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/end
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { getPolicyEventFiltersPath, getEventFiltersListPath } from '../../../../../common/routing';
 import { APP_UI_ID } from '../../../../../../../common/constants';
+import { EventFiltersPageLocation } from '../../../../event_filters/types';
 
-export const useGetLinkTo = (policyId: string, policyName: string) => {
+export const useGetLinkTo = (
+  policyId: string,
+  policyName: string,
+  location?: Partial<EventFiltersPageLocation>
+) => {
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
-    const path = getEventFiltersListPath();
+    const path = getEventFiltersListPath(location);
     return {
       toRoutePath: path,
       toRouteUrl: getAppUrl({ path }),
     };
-  }, [getAppUrl]);
+  }, [getAppUrl, location]);
 
   const policyEventFiltersPath = useMemo(() => getPolicyEventFiltersPath(policyId), [policyId]);
   const policyEventFilterRouteState = useMemo(() => {
@@ -55,5 +60,6 @@ export const useGetLinkTo = (policyId: string, policyName: string) => {
   return {
     onClickHandler,
     toRouteUrl,
+    state: policyEventFilterRouteState,
   };
 };

@@ -394,7 +394,7 @@ describe('Lens Attribute', () => {
             label: 'Part of count() / overall_sum(count())',
             operationType: 'count',
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X1': {
             customLabel: true,
@@ -408,7 +408,7 @@ describe('Lens Attribute', () => {
             label: 'Part of count() / overall_sum(count())',
             operationType: 'count',
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X2': {
             customLabel: true,
@@ -609,7 +609,7 @@ describe('Lens Attribute', () => {
             label: 'Part of count() / overall_sum(count())',
             operationType: 'count',
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X1': {
             customLabel: true,
@@ -623,7 +623,7 @@ describe('Lens Attribute', () => {
             label: 'Part of count() / overall_sum(count())',
             operationType: 'count',
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X2': {
             customLabel: true,

@@ -18,7 +18,7 @@ export interface HostsKpiRiskyHostsStrategyResponse extends IEsSearchResponse {
   };
 }
 
-export enum HostRiskSeverity {
+export const enum HostRiskSeverity {
   unknown = 'Unknown',
   low = 'Low',
   moderate = 'Moderate',

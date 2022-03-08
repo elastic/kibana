@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import type {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectsClosePointInTimeResponse,
+  SavedObjectsOpenPointInTimeResponse,
+} from 'kibana/server';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -17,13 +22,15 @@ import {
   updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import type {
   ExtensionPointStorageClientInterface,
   ServerExtensionCallbackContext,
 } from '../extension_points';
 
-import {
+import type {
+  ClosePointInTimeOptions,
   ConstructorOptions,
   CreateEndpointListItemOptions,
   CreateExceptionListItemOptions,
@@ -35,15 +42,20 @@ import {
   ExportExceptionListAndItemsOptions,
   FindEndpointListItemOptions,
   FindExceptionListItemOptions,
+  FindExceptionListItemPointInTimeFinderOptions,
+  FindExceptionListItemsPointInTimeFinderOptions,
   FindExceptionListOptions,
+  FindExceptionListPointInTimeFinderOptions,
   FindExceptionListsItemOptions,
   FindValueListExceptionListsItems,
+  FindValueListExceptionListsItemsPointInTimeFinder,
   GetEndpointListItemOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
   GetExceptionListSummaryOptions,
   ImportExceptionListAndItemsAsArrayOptions,
   ImportExceptionListAndItemsOptions,
+  OpenPointInTimeOptions,
   UpdateEndpointListItemOptions,
   UpdateExceptionListItemOptions,
   UpdateExceptionListOptions,
@@ -63,21 +75,26 @@ import { deleteExceptionList } from './delete_exception_list';
 import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
-import {
-  findExceptionListsItem,
-  findValueListExceptionListItems,
-} from './find_exception_list_items';
+import { findExceptionListsItem } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
-import {
-  importExceptionsAsArray,
-  importExceptionsAsStream,
-} from './import_exception_list_and_items';
+import { PromiseFromStreams, importExceptions } from './import_exception_list_and_items';
 import {
   transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema,
   transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema,
   validateData,
 } from './utils';
+import {
+  createExceptionsStreamFromNdjson,
+  exceptionsChecksFromArray,
+} from './utils/import/create_exceptions_stream_logic';
+import { openPointInTime } from './open_point_in_time';
+import { closePointInTime } from './close_point_in_time';
+import { findExceptionListPointInTimeFinder } from './find_exception_list_point_in_time_finder';
+import { findValueListExceptionListItems } from './find_value_list_exception_list_items';
+import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
+import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_list_exception_list_items_point_in_time_finder';
+import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -101,7 +118,24 @@ export class ExceptionListClient {
   }
 
   private getServerExtensionCallbackContext(): ServerExtensionCallbackContext {
+    const { user, serverExtensionsClient, savedObjectsClient, request } = this;
+    let exceptionListClient: undefined | ExceptionListClient;
+
     return {
+      // Lazy getter so that we only initialize a new instance of the class if needed
+      get exceptionListClient(): ExceptionListClient {
+        if (!exceptionListClient) {
+          exceptionListClient = new ExceptionListClient({
+            enableServerExtensionPoints: false,
+            request,
+            savedObjectsClient,
+            serverExtensionsClient,
+            user,
+          });
+        }
+
+        return exceptionListClient;
+      },
       request: this.request,
     };
   }
@@ -124,12 +158,14 @@ export class ExceptionListClient {
 
   /**
    * Fetch an exception list parent container
+   * @params filter {sting | undefined} kql "filter" expression
    * @params listId {string | undefined} the "list_id" of an exception list
    * @params id {string | undefined} the "id" of an exception list
    * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
    * @return {ExceptionListSummarySchema | null} summary of exception list item os types
    */
   public getExceptionListSummary = async ({
+    filter,
     listId,
     id,
     namespaceType,
@@ -140,6 +176,7 @@ export class ExceptionListClient {
       await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreSummary',
         {
+          filter,
           id,
           listId,
           namespaceType,
@@ -148,7 +185,7 @@ export class ExceptionListClient {
       );
     }
 
-    return getExceptionListSummary({ id, listId, namespaceType, savedObjectsClient });
+    return getExceptionListSummary({ filter, id, listId, namespaceType, savedObjectsClient });
   };
 
   /**
@@ -599,7 +636,9 @@ export class ExceptionListClient {
     listId,
     filter,
     perPage,
+    pit,
     page,
+    searchAfter,
     sortField,
     sortOrder,
     namespaceType,
@@ -615,6 +654,8 @@ export class ExceptionListClient {
           namespaceType,
           page,
           perPage,
+          pit,
+          searchAfter,
           sortField,
           sortOrder,
         },
@@ -628,7 +669,9 @@ export class ExceptionListClient {
       namespaceType,
       page,
       perPage,
+      pit,
       savedObjectsClient,
+      searchAfter,
       sortField,
       sortOrder,
     });
@@ -638,7 +681,9 @@ export class ExceptionListClient {
     listId,
     filter,
     perPage,
+    pit,
     page,
+    searchAfter,
     sortField,
     sortOrder,
     namespaceType,
@@ -654,6 +699,8 @@ export class ExceptionListClient {
           namespaceType,
           page,
           perPage,
+          pit,
+          searchAfter,
           sortField,
           sortOrder,
         },
@@ -667,7 +714,9 @@ export class ExceptionListClient {
       namespaceType,
       page,
       perPage,
+      pit,
       savedObjectsClient,
+      searchAfter,
       sortField,
       sortOrder,
     });
@@ -675,7 +724,9 @@ export class ExceptionListClient {
 
   public findValueListExceptionListItems = async ({
     perPage,
+    pit,
     page,
+    searchAfter,
     sortField,
     sortOrder,
     valueListId,
@@ -684,7 +735,9 @@ export class ExceptionListClient {
     return findValueListExceptionListItems({
       page,
       perPage,
+      pit,
       savedObjectsClient,
+      searchAfter,
       sortField,
       sortOrder,
       valueListId,
@@ -695,6 +748,8 @@ export class ExceptionListClient {
     filter,
     perPage,
     page,
+    pit,
+    searchAfter,
     sortField,
     sortOrder,
     namespaceType,
@@ -705,7 +760,9 @@ export class ExceptionListClient {
       namespaceType,
       page,
       perPage,
+      pit,
       savedObjectsClient,
+      searchAfter,
       sortField,
       sortOrder,
     });
@@ -723,6 +780,8 @@ export class ExceptionListClient {
     filter,
     perPage,
     page,
+    pit,
+    searchAfter,
     sortField,
     sortOrder,
   }: FindEndpointListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
@@ -734,7 +793,9 @@ export class ExceptionListClient {
       namespaceType: 'agnostic',
       page,
       perPage,
+      pit,
       savedObjectsClient,
+      searchAfter,
       sortField,
       sortOrder,
     });
@@ -788,9 +849,23 @@ export class ExceptionListClient {
   }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
-    return importExceptionsAsStream({
+    // validation of import and sorting of lists and items
+    const readStream = createExceptionsStreamFromNdjson(maxExceptionsImportSize);
+    const [parsedObjects] = await createPromiseFromStreams<PromiseFromStreams[]>([
       exceptionsToImport,
-      maxExceptionsImportSize,
+      ...readStream,
+    ]);
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreImport',
+        parsedObjects,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return importExceptions({
+      exceptions: parsedObjects,
       overwrite,
       savedObjectsClient,
       user,
@@ -799,7 +874,7 @@ export class ExceptionListClient {
 
   /**
    * Import exception lists parent containers and items as array
-   * @params exceptionsToImport {stream} array of lists and items
+   * @params exceptionsToImport {array} array of lists and items
    * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
    * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
    * @return {ImportExceptionsResponseSchema} summary of imported count and errors
@@ -811,12 +886,275 @@ export class ExceptionListClient {
   }: ImportExceptionListAndItemsAsArrayOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
-    return importExceptionsAsArray({
-      exceptionsToImport,
-      maxExceptionsImportSize,
+    // validation of import and sorting of lists and items
+    const parsedObjects = exceptionsChecksFromArray(exceptionsToImport, maxExceptionsImportSize);
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreImport',
+        parsedObjects,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return importExceptions({
+      exceptions: parsedObjects,
       overwrite,
       savedObjectsClient,
       user,
+    });
+  };
+
+  /**
+   * Opens a point in time (PIT) for either exception lists or exception list items.
+   * See: https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
+   * @params namespaceType {string} "agnostic" or "single" depending on which namespace you are targeting
+   * @params options {Object} The saved object PIT options
+   * @return {SavedObjectsOpenPointInTimeResponse} The point in time (PIT)
+   */
+  public openPointInTime = async ({
+    namespaceType,
+    options,
+  }: OpenPointInTimeOptions): Promise<SavedObjectsOpenPointInTimeResponse> => {
+    const { savedObjectsClient } = this;
+    return openPointInTime({
+      namespaceType,
+      options,
+      savedObjectsClient,
+    });
+  };
+
+  /**
+   * Closes a point in time (PIT) for either exception lists or exception list items.
+   * See: https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
+   * @params pit {string} The point in time to close
+   * @return {SavedObjectsOpenPointInTimeResponse} The point in time (PIT)
+   */
+  public closePointInTime = async ({
+    pit,
+  }: ClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse> => {
+    const { savedObjectsClient } = this;
+    return closePointInTime({
+      pit,
+      savedObjectsClient,
+    });
+  };
+
+  /**
+   * Finds an exception list item within a point in time (PIT) and then calls the function
+   * `executeFunctionOnStream` until the maxPerPage is reached and stops.
+   * NOTE: This is slightly different from the saved objects version in that it takes
+   * an injected function, so that we avoid doing additional plumbing with generators
+   * to try to keep the maintenance of this machinery simpler for now.
+   *
+   * If you want to stream all results up to 10k into memory for correlation this would be:
+   * @example
+   * ```ts
+   * const exceptionList: ExceptionListItemSchema[] = [];
+   * const executeFunctionOnStream = (response: FoundExceptionListItemSchema) => {
+   *   exceptionList = [...exceptionList, ...response.data];
+   * }
+   * await client.findExceptionListItemPointInTimeFinder({
+   *   filter,
+   *   executeFunctionOnStream,
+   *   namespaceType,
+   *   maxSize: 10_000, // NOTE: This is unbounded if it is "undefined"
+   *   perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+   *   sortField,
+   *   sortOrder,
+   *   exe
+   * });
+   * ```
+   * @param filter {string} Your filter
+   * @param namespaceType {string} "agnostic" | "single" of your namespace
+   * @param perPage {number} The number of items per page. Typical value should be 1_000 here. Never go above 10_000
+   * @param maxSize {number of undefined} If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
+   * @param sortField {string} String of the field to sort against
+   * @param sortOrder "asc" | "desc" The order to sort against
+   */
+  public findExceptionListItemPointInTimeFinder = async ({
+    executeFunctionOnStream,
+    filter,
+    listId,
+    maxSize,
+    namespaceType,
+    perPage,
+    sortField,
+    sortOrder,
+  }: FindExceptionListItemPointInTimeFinderOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return findExceptionListItemPointInTimeFinder({
+      executeFunctionOnStream,
+      filter,
+      listId,
+      maxSize,
+      namespaceType,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  /**
+   * Finds an exception list within a point in time (PIT) and then calls the function
+   * `executeFunctionOnStream` until the maxPerPage is reached and stops.
+   * NOTE: This is slightly different from the saved objects version in that it takes
+   * an injected function, so that we avoid doing additional plumbing with generators
+   * to try to keep the maintenance of this machinery simpler for now.
+   *
+   * If you want to stream all results up to 10k into memory for correlation this would be:
+   * @example
+   * ```ts
+   * const exceptionList: ExceptionListSchema[] = [];
+   * const executeFunctionOnStream = (response: FoundExceptionListSchema) => {
+   *   exceptionList = [...exceptionList, ...response.data];
+   * }
+   * await client.findExceptionListPointInTimeFinder({
+   *   filter,
+   *   executeFunctionOnStream,
+   *   namespaceType,
+   *   maxSize: 10_000, // NOTE: This is unbounded if it is "undefined"
+   *   perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+   *   sortField,
+   *   sortOrder,
+   *   exe
+   * });
+   * ```
+   * @param filter {string} Your filter
+   * @param namespaceType {string} "agnostic" | "single" of your namespace
+   * @param perPage {number} The number of items per page. Typical value should be 1_000 here. Never go above 10_000
+   * @param maxSize {number of undefined} If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
+   * @param sortField {string} String of the field to sort against
+   * @param sortOrder "asc" | "desc" The order to sort against
+   */
+  public findExceptionListPointInTimeFinder = async ({
+    executeFunctionOnStream,
+    filter,
+    maxSize,
+    namespaceType,
+    perPage,
+    sortField,
+    sortOrder,
+  }: FindExceptionListPointInTimeFinderOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return findExceptionListPointInTimeFinder({
+      executeFunctionOnStream,
+      filter,
+      maxSize,
+      namespaceType,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  /**
+   * Finds exception list items within a point in time (PIT) and then calls the function
+   * `executeFunctionOnStream` until the maxPerPage is reached and stops.
+   * NOTE: This is slightly different from the saved objects version in that it takes
+   * an injected function, so that we avoid doing additional plumbing with generators
+   * to try to keep the maintenance of this machinery simpler for now.
+   *
+   * If you want to stream all results up to 10k into memory for correlation this would be:
+   * @example
+   * ```ts
+   * const exceptionList: ExceptionListItemSchema[] = [];
+   * const executeFunctionOnStream = (response: FoundExceptionListItemSchema) => {
+   *   exceptionList = [...exceptionList, ...response.data];
+   * }
+   * await client.findExceptionListsItemPointInTimeFinder({
+   *   filter,
+   *   executeFunctionOnStream,
+   *   namespaceType,
+   *   maxSize: 10_000, // NOTE: This is unbounded if it is "undefined"
+   *   perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+   *   sortField,
+   *   sortOrder,
+   *   exe
+   * });
+   * ```
+   * @param filter {string} Your filter
+   * @param namespaceType {string} "agnostic" | "single" of your namespace
+   * @param perPage {number} The number of items per page. Typical value should be 1_000 here. Never go above 10_000
+   * @param maxSize {number of undefined} If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
+   * @param sortField {string} String of the field to sort against
+   * @param sortOrder "asc" | "desc" The order to sort against
+   */
+  public findExceptionListsItemPointInTimeFinder = async ({
+    listId,
+    namespaceType,
+    executeFunctionOnStream,
+    maxSize,
+    filter,
+    perPage,
+    sortField,
+    sortOrder,
+  }: FindExceptionListItemsPointInTimeFinderOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return findExceptionListsItemPointInTimeFinder({
+      executeFunctionOnStream,
+      filter,
+      listId,
+      maxSize,
+      namespaceType,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  /**
+   * Finds value lists within exception lists within a point in time (PIT) and then calls the function
+   * `executeFunctionOnStream` until the maxPerPage is reached and stops.
+   * NOTE: This is slightly different from the saved objects version in that it takes
+   * an injected function, so that we avoid doing additional plumbing with generators
+   * to try to keep the maintenance of this machinery simpler for now.
+   *
+   * If you want to stream all results up to 10k into memory for correlation this would be:
+   * @example
+   * ```ts
+   * const exceptionList: ExceptionListItemSchema[] = [];
+   * const executeFunctionOnStream = (response: FoundExceptionListItemSchema) => {
+   *   exceptionList = [...exceptionList, ...response.data];
+   * }
+   * await client.findValueListExceptionListItemsPointInTimeFinder({
+   *   valueListId,
+   *   executeFunctionOnStream,
+   *   namespaceType,
+   *   maxSize: 10_000, // NOTE: This is unbounded if it is "undefined"
+   *   perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+   *   sortField,
+   *   sortOrder,
+   *   exe
+   * });
+   * ```
+   * @param valueListId {string} Your value list id
+   * @param namespaceType {string} "agnostic" | "single" of your namespace
+   * @param perPage {number} The number of items per page. Typical value should be 1_000 here. Never go above 10_000
+   * @param maxSize {number of undefined} If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
+   * @param sortField {string} String of the field to sort against
+   * @param sortOrder "asc" | "desc" The order to sort against
+   */
+  public findValueListExceptionListItemsPointInTimeFinder = async ({
+    valueListId,
+    executeFunctionOnStream,
+    perPage,
+    maxSize,
+    sortField,
+    sortOrder,
+  }: FindValueListExceptionListsItemsPointInTimeFinder): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return findValueListExceptionListItemsPointInTimeFinder({
+      executeFunctionOnStream,
+      maxSize,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+      valueListId,
     });
   };
 }

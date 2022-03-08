@@ -16,6 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
+  const retry = getService('retry');
 
   const jobId = `bm_${Date.now()}`;
 
@@ -271,6 +272,39 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.error).to.eql(`No known job with id '${jobId}_fake'`);
 
         expect(body).to.have.keys('elements', 'details', 'error');
+      });
+    });
+
+    describe('GetDataFrameAnalyticsMessages', () => {
+      it('should fetch single analytics job messages by id', async () => {
+        await retry.tryForTime(5000, async () => {
+          const { body } = await supertest
+            .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
+            .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+            .set(COMMON_REQUEST_HEADERS)
+            .expect(200);
+
+          expect(body.length).to.eql(1);
+          expect(body[0].job_id).to.eql(`${jobId}_1`);
+          expect(body[0]).to.have.keys(
+            'job_id',
+            'message',
+            'level',
+            'timestamp',
+            'node_name',
+            'job_type'
+          );
+        });
+      });
+
+      it('should not allow to retrieve job messages without required permissions', async () => {
+        const { body } = await supertest
+          .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
+          .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(403);
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
       });
     });
   });

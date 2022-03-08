@@ -6,52 +6,59 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 import { RuleStatusFailedCallOut } from './rule_status_failed_callout';
 
-// TODO: https://github.com/elastic/kibana/pull/121644 clean up
-// - switch to react testing library
-// - test actual content being rendered
+jest.mock('../../../../common/lib/kibana');
+
+const TEST_ID = 'ruleStatusFailedCallOut';
+const DATE = '2022-01-27T15:03:31.176Z';
+const MESSAGE = 'This rule is attempting to query data but...';
+
 describe('RuleStatusFailedCallOut', () => {
-  describe('Visibility conditions', () => {
-    const renderWith = (status: RuleExecutionStatus | null | undefined) =>
-      shallow(<RuleStatusFailedCallOut status={status} date="some date" message="some message" />);
+  const renderWith = (status: RuleExecutionStatus | null | undefined) =>
+    render(<RuleStatusFailedCallOut status={status} date={DATE} message={MESSAGE} />);
 
-    it('is hidden if status is undefined', () => {
-      const wrapper = renderWith(undefined);
-      expect(wrapper.find('EuiCallOut')).toHaveLength(0);
-    });
+  it('is hidden if status is undefined', () => {
+    const result = renderWith(undefined);
+    expect(result.queryByTestId(TEST_ID)).toBe(null);
+  });
 
-    it('is hidden if status is null', () => {
-      const wrapper = renderWith(null);
-      expect(wrapper.find('EuiCallOut')).toHaveLength(0);
-    });
+  it('is hidden if status is null', () => {
+    const result = renderWith(null);
+    expect(result.queryByTestId(TEST_ID)).toBe(null);
+  });
 
-    it('is hidden if status is "going to run"', () => {
-      const wrapper = renderWith(RuleExecutionStatus['going to run']);
-      expect(wrapper.find('EuiCallOut')).toHaveLength(0);
-    });
+  it('is hidden if status is "going to run"', () => {
+    const result = renderWith(RuleExecutionStatus['going to run']);
+    expect(result.queryByTestId(TEST_ID)).toBe(null);
+  });
 
-    it('is hidden if status is "succeeded"', () => {
-      const wrapper = renderWith(RuleExecutionStatus.succeeded);
-      expect(wrapper.find('EuiCallOut')).toHaveLength(0);
-    });
+  it('is hidden if status is "running"', () => {
+    const result = renderWith(RuleExecutionStatus.running);
+    expect(result.queryByTestId(TEST_ID)).toBe(null);
+  });
 
-    it('is visible if status is "warning"', () => {
-      const wrapper = renderWith(RuleExecutionStatus.warning);
-      expect(wrapper.find('EuiCallOut')).toHaveLength(1);
-    });
+  it('is hidden if status is "succeeded"', () => {
+    const result = renderWith(RuleExecutionStatus.succeeded);
+    expect(result.queryByTestId(TEST_ID)).toBe(null);
+  });
 
-    it('is visible if status is "partial failure"', () => {
-      const wrapper = renderWith(RuleExecutionStatus['partial failure']);
-      expect(wrapper.find('EuiCallOut')).toHaveLength(1);
-    });
+  it('is visible if status is "partial failure"', () => {
+    const result = renderWith(RuleExecutionStatus['partial failure']);
+    result.getByTestId(TEST_ID);
+    result.getByText('Warning at');
+    result.getByText('Jan 27, 2022 @ 15:03:31.176');
+    result.getByText(MESSAGE);
+  });
 
-    it('is visible if status is "failed"', () => {
-      const wrapper = renderWith(RuleExecutionStatus.failed);
-      expect(wrapper.find('EuiCallOut')).toHaveLength(1);
-    });
+  it('is visible if status is "failed"', () => {
+    const result = renderWith(RuleExecutionStatus.failed);
+    result.getByTestId(TEST_ID);
+    result.getByText('Rule failure at');
+    result.getByText('Jan 27, 2022 @ 15:03:31.176');
+    result.getByText(MESSAGE);
   });
 });

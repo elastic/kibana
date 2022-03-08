@@ -7,15 +7,34 @@
 
 import { uniq } from 'lodash';
 import React from 'react';
+import moment from 'moment';
 import { Endzones } from '../../../../../src/plugins/charts/public';
 import type { LensMultiTable } from '../../common';
 import type { LayerArgs } from '../../common/expressions';
+import { search } from '../../../../../src/plugins/data/public';
 
 export interface XDomain {
   min?: number;
   max?: number;
   minInterval?: number;
 }
+
+export const getAppliedTimeRange = (layers: LayerArgs[], data: LensMultiTable) => {
+  return Object.entries(data.tables)
+    .map(([tableId, table]) => {
+      const layer = layers.find((l) => l.layerId === tableId);
+      const xColumn = table.columns.find((col) => col.id === layer?.xAccessor);
+      const timeRange =
+        xColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.timeRange;
+      if (timeRange) {
+        return {
+          timeRange,
+          field: xColumn.meta.field,
+        };
+      }
+    })
+    .find(Boolean);
+};
 
 export const getXDomain = (
   layers: LayerArgs[],
@@ -24,10 +43,13 @@ export const getXDomain = (
   isTimeViz: boolean,
   isHistogram: boolean
 ) => {
+  const appliedTimeRange = getAppliedTimeRange(layers, data)?.timeRange;
+  const from = appliedTimeRange?.from;
+  const to = appliedTimeRange?.to;
   const baseDomain = isTimeViz
     ? {
-        min: data.dateRange?.fromDate.getTime() ?? NaN,
-        max: data.dateRange?.toDate.getTime() ?? NaN,
+        min: from ? moment(from).valueOf() : NaN,
+        max: to ? moment(to).valueOf() : NaN,
         minInterval,
       }
     : isHistogram

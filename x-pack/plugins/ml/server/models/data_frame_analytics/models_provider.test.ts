@@ -17,83 +17,81 @@ describe('Model service', () => {
       nodes: {
         stats: jest.fn(() => {
           return Promise.resolve({
-            body: {
-              _nodes: {
-                total: 3,
-                successful: 3,
-                failed: 0,
+            _nodes: {
+              total: 3,
+              successful: 3,
+              failed: 0,
+            },
+            cluster_name: 'test_cluster',
+            nodes: {
+              '3qIoLFnbSi-DwVrYioUCdw': {
+                timestamp: 1635167166946,
+                name: 'node3',
+                transport_address: '10.10.10.2:9353',
+                host: '10.10.10.2',
+                ip: '10.10.10.2:9353',
+                roles: ['data', 'ingest', 'master', 'ml', 'transform'],
+                attributes: {
+                  'ml.machine_memory': '15599742976',
+                  'xpack.installed': 'true',
+                  'ml.max_jvm_size': '1073741824',
+                },
+                os: {
+                  mem: {
+                    total_in_bytes: 15599742976,
+                    adjusted_total_in_bytes: 15599742976,
+                    free_in_bytes: 376324096,
+                    used_in_bytes: 15223418880,
+                    free_percent: 2,
+                    used_percent: 98,
+                  },
+                },
               },
-              cluster_name: 'test_cluster',
-              nodes: {
-                '3qIoLFnbSi-DwVrYioUCdw': {
-                  timestamp: 1635167166946,
-                  name: 'node3',
-                  transport_address: '10.10.10.2:9353',
-                  host: '10.10.10.2',
-                  ip: '10.10.10.2:9353',
-                  roles: ['data', 'ingest', 'master', 'ml', 'transform'],
-                  attributes: {
-                    'ml.machine_memory': '15599742976',
-                    'xpack.installed': 'true',
-                    'ml.max_jvm_size': '1073741824',
-                  },
-                  os: {
-                    mem: {
-                      total_in_bytes: 15599742976,
-                      adjusted_total_in_bytes: 15599742976,
-                      free_in_bytes: 376324096,
-                      used_in_bytes: 15223418880,
-                      free_percent: 2,
-                      used_percent: 98,
-                    },
+              'DpCy7SOBQla3pu0Dq-tnYw': {
+                timestamp: 1635167166946,
+                name: 'node2',
+                transport_address: '10.10.10.2:9352',
+                host: '10.10.10.2',
+                ip: '10.10.10.2:9352',
+                roles: ['data', 'master', 'ml', 'transform'],
+                attributes: {
+                  'ml.machine_memory': '15599742976',
+                  'xpack.installed': 'true',
+                  'ml.max_jvm_size': '1073741824',
+                },
+                os: {
+                  timestamp: 1635167166959,
+                  mem: {
+                    total_in_bytes: 15599742976,
+                    adjusted_total_in_bytes: 15599742976,
+                    free_in_bytes: 376324096,
+                    used_in_bytes: 15223418880,
+                    free_percent: 2,
+                    used_percent: 98,
                   },
                 },
-                'DpCy7SOBQla3pu0Dq-tnYw': {
-                  timestamp: 1635167166946,
-                  name: 'node2',
-                  transport_address: '10.10.10.2:9352',
-                  host: '10.10.10.2',
-                  ip: '10.10.10.2:9352',
-                  roles: ['data', 'master', 'ml', 'transform'],
-                  attributes: {
-                    'ml.machine_memory': '15599742976',
-                    'xpack.installed': 'true',
-                    'ml.max_jvm_size': '1073741824',
-                  },
-                  os: {
-                    timestamp: 1635167166959,
-                    mem: {
-                      total_in_bytes: 15599742976,
-                      adjusted_total_in_bytes: 15599742976,
-                      free_in_bytes: 376324096,
-                      used_in_bytes: 15223418880,
-                      free_percent: 2,
-                      used_percent: 98,
-                    },
-                  },
+              },
+              'pt7s6lKHQJaP4QHKtU-Q0Q': {
+                timestamp: 1635167166945,
+                name: 'node1',
+                transport_address: '10.10.10.2:9351',
+                host: '10.10.10.2',
+                ip: '10.10.10.2:9351',
+                roles: ['data', 'master', 'ml'],
+                attributes: {
+                  'ml.machine_memory': '15599742976',
+                  'xpack.installed': 'true',
+                  'ml.max_jvm_size': '1073741824',
                 },
-                'pt7s6lKHQJaP4QHKtU-Q0Q': {
-                  timestamp: 1635167166945,
-                  name: 'node1',
-                  transport_address: '10.10.10.2:9351',
-                  host: '10.10.10.2',
-                  ip: '10.10.10.2:9351',
-                  roles: ['data', 'master', 'ml'],
-                  attributes: {
-                    'ml.machine_memory': '15599742976',
-                    'xpack.installed': 'true',
-                    'ml.max_jvm_size': '1073741824',
-                  },
-                  os: {
-                    timestamp: 1635167166959,
-                    mem: {
-                      total_in_bytes: 15599742976,
-                      adjusted_total_in_bytes: 15599742976,
-                      free_in_bytes: 376324096,
-                      used_in_bytes: 15223418880,
-                      free_percent: 2,
-                      used_percent: 98,
-                    },
+                os: {
+                  timestamp: 1635167166959,
+                  mem: {
+                    total_in_bytes: 15599742976,
+                    adjusted_total_in_bytes: 15599742976,
+                    free_in_bytes: 376324096,
+                    used_in_bytes: 15223418880,
+                    free_percent: 2,
+                    used_percent: 98,
                   },
                 },
               },
@@ -106,9 +104,7 @@ describe('Model service', () => {
   const mlClient = {
     getTrainedModelsStats: jest.fn(() => {
       return Promise.resolve({
-        body: {
-          trained_model_stats: mockResponse,
-        },
+        trained_model_stats: mockResponse,
       });
     }),
   } as unknown as jest.Mocked<MlClient>;

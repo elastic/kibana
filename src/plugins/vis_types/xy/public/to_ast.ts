@@ -34,6 +34,7 @@ import { XyVisType } from '../common';
 import { getEsaggsFn } from './to_ast_esaggs';
 import { TimeRangeBounds } from '../../../data/common';
 import { getSeriesParams } from './utils/get_series_params';
+import { getSafeId } from './utils/accessors';
 
 const prepareLabel = (data: Labels) => {
   const label = buildExpressionFunction('label', {
@@ -189,8 +190,9 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   (dimensions.y || []).forEach((yDimension) => {
     const yAgg = responseAggs[yDimension.accessor];
+    const aggId = getSafeId(yAgg.id);
     const seriesParam = (vis.params.seriesParams || []).find(
-      (param: any) => param.data.id === yAgg.id
+      (param: any) => param.data.id === aggId
     );
     if (seriesParam) {
       const usedValueAxis = (vis.params.valueAxes || []).find(

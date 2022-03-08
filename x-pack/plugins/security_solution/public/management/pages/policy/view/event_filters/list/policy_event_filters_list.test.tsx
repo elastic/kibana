@@ -66,7 +66,7 @@ describe('Policy details event filters list', () => {
     );
     await render();
     expect(renderResult.getByTestId('policyDetailsEventFiltersSearchCount')).toHaveTextContent(
-      'Showing 0 exceptions'
+      'Showing 0 event filters'
     );
     expect(renderResult.getByTestId('searchField')).toBeTruthy();
   });

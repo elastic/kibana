@@ -14,6 +14,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
@@ -27,12 +28,12 @@ import { useColumns } from '../../../../utils/use_data_grid_columns';
 import { DataView } from '../../../../../../data/common';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
-import { DiscoverServices } from '../../../../build_services';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../../types';
+import { DocumentExplorerCallout } from '../document_explorer_callout';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -43,7 +44,6 @@ function DiscoverDocumentsComponent({
   indexPattern,
   onAddFilter,
   savedSearch,
-  services,
   setExpandedDoc,
   state,
   stateContainer,
@@ -54,12 +54,11 @@ function DiscoverDocumentsComponent({
   navigateTo: (url: string) => void;
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
-  services: DiscoverServices;
   setExpandedDoc: (doc?: ElasticSearchHit) => void;
   state: AppState;
   stateContainer: GetStateReturn;
 }) {
-  const { capabilities, indexPatterns, uiSettings } = services;
+  const { capabilities, indexPatterns, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -100,6 +99,13 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  const onUpdateRowHeight = useCallback(
+    (newRowHeight: number) => {
+      stateContainer.setAppState({ rowHeight: newRowHeight });
+    },
+    [stateContainer]
+  );
+
   const showTimeCol = useMemo(
     () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
     [uiSettings, indexPattern.timeFieldName]
@@ -128,22 +134,25 @@ function DiscoverDocumentsComponent({
         </h2>
       </EuiScreenReaderOnly>
       {isLegacy && rows && rows.length && (
-        <DocTableInfiniteMemoized
-          columns={columns}
-          indexPattern={indexPattern}
-          rows={rows}
-          sort={state.sort || []}
-          isLoading={isLoading}
-          searchDescription={savedSearch.description}
-          sharedItemTitle={savedSearch.title}
-          onAddColumn={onAddColumn}
-          onFilter={onAddFilter as DocViewFilterFn}
-          onMoveColumn={onMoveColumn}
-          onRemoveColumn={onRemoveColumn}
-          onSort={onSort}
-          useNewFieldsApi={useNewFieldsApi}
-          dataTestSubj="discoverDocTable"
-        />
+        <>
+          <DocumentExplorerCallout />
+          <DocTableInfiniteMemoized
+            columns={columns}
+            indexPattern={indexPattern}
+            rows={rows}
+            sort={state.sort || []}
+            isLoading={isLoading}
+            searchDescription={savedSearch.description}
+            sharedItemTitle={savedSearch.title}
+            onAddColumn={onAddColumn}
+            onFilter={onAddFilter as DocViewFilterFn}
+            onMoveColumn={onMoveColumn}
+            onRemoveColumn={onRemoveColumn}
+            onSort={onSort}
+            useNewFieldsApi={useNewFieldsApi}
+            dataTestSubj="discoverDocTable"
+          />
+        </>
       )}
       {!isLegacy && (
         <div className="dscDiscoverGrid">
@@ -160,7 +169,6 @@ function DiscoverDocumentsComponent({
             searchTitle={savedSearch.title}
             setExpandedDoc={setExpandedDoc}
             showTimeCol={showTimeCol}
-            services={services}
             settings={state.grid}
             onAddColumn={onAddColumn}
             onFilter={onAddFilter as DocViewFilterFn}
@@ -169,6 +177,8 @@ function DiscoverDocumentsComponent({
             onSort={onSort}
             onResize={onResize}
             useNewFieldsApi={useNewFieldsApi}
+            rowHeightState={state.rowHeight}
+            onUpdateRowHeight={onUpdateRowHeight}
           />
         </div>
       )}

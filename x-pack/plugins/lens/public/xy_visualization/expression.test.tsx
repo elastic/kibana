@@ -43,7 +43,7 @@ import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/
 import React from 'react';
 import { shallow } from 'enzyme';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { XyEndzones } from './x_domain';
@@ -134,6 +134,10 @@ const dateHistogramData: LensMultiTable = {
             sourceParams: {
               indexPatternId: 'indexPatternId',
               type: 'date_histogram',
+              appliedTimeRange: {
+                from: '2020-04-01T16:14:16.246Z',
+                to: '2020-04-01T17:15:41.263Z',
+              },
               params: {
                 field: 'order_date',
                 timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
@@ -582,9 +586,29 @@ describe('xy_expression', () => {
             {...defaultProps}
             data={{
               ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
+              tables: {
+                first: {
+                  ...data.tables.first,
+                  columns: data.tables.first.columns.map((c) =>
+                    c.id !== 'c'
+                      ? c
+                      : {
+                          ...c,
+                          meta: {
+                            type: 'date',
+                            source: 'esaggs',
+                            sourceParams: {
+                              type: 'date_histogram',
+                              params: {},
+                              appliedTimeRange: {
+                                from: '2019-01-02T05:00:00.000Z',
+                                to: '2019-01-03T05:00:00.000Z',
+                              },
+                            },
+                          },
+                        }
+                  ),
+                },
               },
             }}
             args={{
@@ -612,25 +636,13 @@ describe('xy_expression', () => {
           },
         };
 
-        const component = shallow(
-          <XYChart
-            {...defaultProps}
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
-            }}
-            args={multiLayerArgs}
-          />
-        );
+        const component = shallow(<XYChart {...defaultProps} data={data} args={multiLayerArgs} />);
 
         // real auto interval is 30mins = 1800000
         expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
           Object {
-            "max": 1546491600000,
-            "min": 1546405200000,
+            "max": NaN,
+            "min": NaN,
             "minInterval": 50,
           }
         `);
@@ -749,14 +761,36 @@ describe('xy_expression', () => {
       });
       describe('endzones', () => {
         const { args } = sampleArgs();
+        const table = createSampleDatatableWithRows([
+          { a: 1, b: 2, c: new Date('2021-04-22').valueOf(), d: 'Foo' },
+          { a: 1, b: 2, c: new Date('2021-04-23').valueOf(), d: 'Foo' },
+          { a: 1, b: 2, c: new Date('2021-04-24').valueOf(), d: 'Foo' },
+        ]);
         const data: LensMultiTable = {
           type: 'lens_multitable',
           tables: {
-            first: createSampleDatatableWithRows([
-              { a: 1, b: 2, c: new Date('2021-04-22').valueOf(), d: 'Foo' },
-              { a: 1, b: 2, c: new Date('2021-04-23').valueOf(), d: 'Foo' },
-              { a: 1, b: 2, c: new Date('2021-04-24').valueOf(), d: 'Foo' },
-            ]),
+            first: {
+              ...table,
+              columns: table.columns.map((c) =>
+                c.id !== 'c'
+                  ? c
+                  : {
+                      ...c,
+                      meta: {
+                        type: 'date',
+                        source: 'esaggs',
+                        sourceParams: {
+                          type: 'date_histogram',
+                          params: {},
+                          appliedTimeRange: {
+                            from: '2021-04-22T12:00:00.000Z',
+                            to: '2021-04-24T12:00:00.000Z',
+                          },
+                        },
+                      },
+                    }
+              ),
+            },
           },
           dateRange: {
             // first and last bucket are partial
@@ -1187,7 +1221,6 @@ describe('xy_expression', () => {
         column: 0,
         table: dateHistogramData.tables.timeLayer,
         range: [1585757732783, 1585758880838],
-        timeFieldName: 'order_date',
       });
     });
 
@@ -1267,7 +1300,6 @@ describe('xy_expression', () => {
         column: 0,
         table: numberHistogramData.tables.numberLayer,
         range: [5, 8],
-        timeFieldName: undefined,
       });
     });
 
@@ -1398,7 +1430,6 @@ describe('xy_expression', () => {
             value: 1585758120000,
           },
         ],
-        timeFieldName: 'order_date',
       });
     });
 

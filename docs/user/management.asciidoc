@@ -167,10 +167,6 @@ set the timespan for notification messages, and much more.
 the full list of features that are included in your license,
 see the https://www.elastic.co/subscriptions[subscription page].
 
-| <<upgrade-assistant, Upgrade Assistant>>
-| Identify the issues that you need to address before upgrading to the
-next major version of {es}, and then reindex, if needed.
-
 |===
 
 
@@ -196,7 +192,5 @@ include::security/index.asciidoc[]
 include::{kib-repo-dir}/spaces/index.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-tags.asciidoc[]
-
-include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
 
 include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]

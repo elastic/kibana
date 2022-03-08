@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Section } from './section';
-import { expectTextsInDocument } from '../../../utils/testHelpers';
+import { expectTextsInDocument } from '../../../utils/test_helpers';
 
 describe('Section', () => {
   it('shows "empty state message" if no data is available', () => {

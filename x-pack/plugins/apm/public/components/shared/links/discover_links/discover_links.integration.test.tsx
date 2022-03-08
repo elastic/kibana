@@ -10,7 +10,7 @@ import React from 'react';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { getRenderedHref } from '../../../../utils/testHelpers';
+import { getRenderedHref } from '../../../../utils/test_helpers';
 import { DiscoverErrorLink } from './discover_error_link';
 import { DiscoverSpanLink } from './discover_span_link';
 import { DiscoverTransactionLink } from './discover_transaction_link';

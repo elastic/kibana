@@ -78,7 +78,7 @@ describe('UXSection', () => {
     );
 
     expect(getByText('User Experience')).toBeInTheDocument();
-    expect(getByText('View in app')).toBeInTheDocument();
+    expect(getByText('Show dashboard')).toBeInTheDocument();
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
     expect(getByText('Largest contentful paint')).toBeInTheDocument();
     expect(getByText('1.94 s')).toBeInTheDocument();
@@ -113,7 +113,7 @@ describe('UXSection', () => {
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getAllByText('--')).toHaveLength(3);
-    expect(queryAllByText('View in app')).toEqual([]);
+    expect(queryAllByText('Show dashboard')).toEqual([]);
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
   });
   it('shows empty state', () => {
@@ -128,7 +128,7 @@ describe('UXSection', () => {
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getAllByText('No data is available.')).toHaveLength(3);
-    expect(queryAllByText('View in app')).toEqual([]);
+    expect(queryAllByText('Show dashboard')).toEqual([]);
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
   });
 });

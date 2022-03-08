@@ -118,7 +118,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
     const lensAttributes = new LensAttributes(layerConfigs);
 
-    return lensAttributes.getJSON(lastRefresh);
+    return lensAttributes.getJSON();
     // we also want to check the state on allSeries changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPatterns, reportType, storage, theme, lastRefresh, allSeries]);

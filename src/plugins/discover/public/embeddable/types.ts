@@ -12,7 +12,8 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from 'src/plugins/embeddable/public';
-import { Filter, DataView, TimeRange, Query } from '../../../data/common';
+import type { Filter } from '@kbn/es-query';
+import { DataView, TimeRange, Query } from '../../../data/common';
 import { SavedSearch } from '../services/saved_searches';
 import { SortOrder } from '../components/doc_table/components/table_header/helpers';
 
@@ -23,6 +24,7 @@ export interface SearchInput extends EmbeddableInput {
   hidePanelTitles?: boolean;
   columns?: string[];
   sort?: SortOrder[];
+  rowHeight?: number;
 }
 
 export interface SearchOutput extends EmbeddableOutput {

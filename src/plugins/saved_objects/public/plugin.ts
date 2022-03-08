@@ -15,6 +15,7 @@ import {
   SavedObjectDecoratorConfig,
 } from './saved_object';
 import { DataPublicPluginStart } from '../../data/public';
+import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
 
@@ -36,6 +37,7 @@ export interface SavedObjectsStart {
 
 export interface SavedObjectsStartDeps {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export class SavedObjectsPublicPlugin
@@ -48,11 +50,11 @@ export class SavedObjectsPublicPlugin
       registerDecorator: (config) => this.decoratorRegistry.register(config),
     };
   }
-  public start(core: CoreStart, { data }: SavedObjectsStartDeps) {
+  public start(core: CoreStart, { data, dataViews }: SavedObjectsStartDeps) {
     return {
       SavedObjectClass: createSavedObjectClass(
         {
-          indexPatterns: data.indexPatterns,
+          dataViews,
           savedObjectsClient: core.savedObjects.client,
           search: data.search,
           chrome: core.chrome,

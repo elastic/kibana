@@ -7,7 +7,7 @@
 
 import { Location } from 'history';
 import React from 'react';
-import { getRenderedHref } from '../../../../utils/testHelpers';
+import { getRenderedHref } from '../../../../utils/test_helpers';
 import { MLManageJobsLink } from './mlmanage_jobs_link';
 
 test('MLManageJobsLink', async () => {

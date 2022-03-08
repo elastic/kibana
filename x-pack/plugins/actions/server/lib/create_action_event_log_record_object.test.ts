@@ -18,6 +18,7 @@ describe('createActionEventLogRecordObject', () => {
           scheduled: '1970-01-01T00:00:00.000Z',
           scheduleDelay: 0,
         },
+        executionId: '123abc',
         savedObjects: [
           {
             id: '1',
@@ -34,6 +35,13 @@ describe('createActionEventLogRecordObject', () => {
         kind: 'action',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -58,6 +66,7 @@ describe('createActionEventLogRecordObject', () => {
         action: 'execute',
         message: 'action execution start',
         namespace: 'default',
+        executionId: '123abc',
         savedObjects: [
           {
             id: '2',
@@ -73,6 +82,13 @@ describe('createActionEventLogRecordObject', () => {
         kind: 'action',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '2',
@@ -95,6 +111,7 @@ describe('createActionEventLogRecordObject', () => {
         task: {
           scheduled: '1970-01-01T00:00:00.000Z',
         },
+        executionId: '123abc',
         savedObjects: [
           {
             id: '1',
@@ -110,6 +127,13 @@ describe('createActionEventLogRecordObject', () => {
         kind: 'action',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',

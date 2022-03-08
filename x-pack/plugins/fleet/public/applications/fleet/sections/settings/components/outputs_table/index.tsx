@@ -128,6 +128,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
                   title={i18n.translate('xpack.fleet.settings.outputSection.editButtonTitle', {
                     defaultMessage: 'Edit',
                   })}
+                  data-test-subj="editOutputBtn"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

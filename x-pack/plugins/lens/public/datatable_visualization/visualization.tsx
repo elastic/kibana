@@ -22,9 +22,9 @@ import type {
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
-import { getStopsForFixedMode } from '../shared_components';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import type { ColumnState, SortingState } from '../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 export interface DatatableVisualizationState {
@@ -84,6 +84,8 @@ export const getDatatableVisualization = ({
   },
 
   switchVisualizationType: (_, state) => state,
+
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
 
   initialize(addNewLayer, state) {
     return (
@@ -241,9 +243,9 @@ export const getDatatableVisualization = ({
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
-              const hasColoring = Boolean(
-                columnConfig.colorMode !== 'none' && columnConfig.palette?.params?.stops
-              );
+              const stops = columnConfig.palette?.params?.stops;
+              const hasColoring = Boolean(columnConfig.colorMode !== 'none' && stops);
+
               return {
                 columnId: accessor,
                 triggerIcon: columnConfig.hidden
@@ -251,12 +253,7 @@ export const getDatatableVisualization = ({
                   : hasColoring
                   ? 'colorBy'
                   : undefined,
-                palette: hasColoring
-                  ? getStopsForFixedMode(
-                      columnConfig.palette?.params?.stops || [],
-                      columnConfig.palette?.params?.colorStops
-                    )
-                  : undefined,
+                palette: hasColoring && stops ? stops.map(({ color }) => color) : undefined,
               };
             }),
           supportsMoreColumns: true,
@@ -314,7 +311,7 @@ export const getDatatableVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.datatable.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];
@@ -366,8 +363,12 @@ export const getDatatableVisualization = ({
                     : [],
                 reverse: false, // managed at UI level
               };
+              const sortingHint = datasource!.getOperationForColumnId(column.columnId)!.sortingHint;
 
               const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
+
+              const canColor =
+                datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
 
               return {
                 type: 'expression',
@@ -385,12 +386,13 @@ export const getDatatableVisualization = ({
                         !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
                       ],
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
-                      colorMode: [column.colorMode ?? 'none'],
+                      colorMode: [canColor && column.colorMode ? column.colorMode : 'none'],
                       palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
                       summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
                       summaryLabel: hasNoSummaryRow
                         ? []
                         : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
+                      sortingHint: sortingHint ? [sortingHint] : [],
                     },
                   },
                 ],

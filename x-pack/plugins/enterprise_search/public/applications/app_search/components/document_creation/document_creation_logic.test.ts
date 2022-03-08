@@ -9,7 +9,7 @@ import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import dedent from 'dedent';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },

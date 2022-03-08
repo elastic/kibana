@@ -18,7 +18,7 @@ import { FleetIntegrationEventFiltersCard } from './fleet_integration_event_filt
 import { EndpointDocGenerator } from '../../../../../../../../common/endpoint/generate_data';
 import { getPolicyEventFiltersPath } from '../../../../../../common/routing';
 import { PolicyData } from '../../../../../../../../common/endpoint/types';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getSummaryExceptionListSchemaMock } from '../../../../../../../../../lists/common/schemas/response/exception_list_summary_schema.mock';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 
@@ -40,7 +40,9 @@ describe('Fleet integration policy endpoint security event filters card', () => 
         renderResult = mockedContext.render(
           <FleetIntegrationEventFiltersCard policyId={policy.id} />
         );
-        await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());
+        await waitFor(() =>
+          expect(mockedApi.responseProvider.eventFiltersGetSummary).toHaveBeenCalled()
+        );
       });
       return renderResult;
     };
@@ -51,8 +53,8 @@ describe('Fleet integration policy endpoint security event filters card', () => 
   afterEach(() => reactTestingLibrary.cleanup());
 
   it('should call the API and render the card correctly', async () => {
-    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
-      getFoundExceptionListItemSchemaMock(3)
+    mockedApi.responseProvider.eventFiltersGetSummary.mockReturnValue(
+      getSummaryExceptionListSchemaMock({ total: 3 })
     );
 
     await render();
@@ -62,8 +64,8 @@ describe('Fleet integration policy endpoint security event filters card', () => 
   });
 
   it('should show the card even when no event filters associated with the policy', async () => {
-    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
-      getFoundExceptionListItemSchemaMock(0)
+    mockedApi.responseProvider.eventFiltersGetSummary.mockReturnValue(
+      getSummaryExceptionListSchemaMock({ total: 0 })
     );
 
     await render();
@@ -71,8 +73,8 @@ describe('Fleet integration policy endpoint security event filters card', () => 
   });
 
   it('should have the correct manage event filters link', async () => {
-    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
-      getFoundExceptionListItemSchemaMock(1)
+    mockedApi.responseProvider.eventFiltersGetSummary.mockReturnValue(
+      getSummaryExceptionListSchemaMock({ total: 1 })
     );
 
     await render();
@@ -84,7 +86,7 @@ describe('Fleet integration policy endpoint security event filters card', () => 
 
   it('should show an error toast when API request fails', async () => {
     const error = new Error('Uh oh! API error!');
-    mockedApi.responseProvider.eventFiltersList.mockImplementation(() => {
+    mockedApi.responseProvider.eventFiltersGetSummary.mockImplementation(() => {
       throw error;
     });
 

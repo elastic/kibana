@@ -318,6 +318,52 @@ describe('embeddable', () => {
     expect(spacesPluginStart.ui.components.getEmbeddableLegacyUrlConflict).toHaveBeenCalled();
   });
 
+  it('should not render if timeRange prop is not passed when a referenced data view is time based', async () => {
+    attributeService = attributeServiceMockFromSavedVis({
+      ...savedVis,
+      references: [
+        { type: 'index-pattern', id: '123', name: 'abc' },
+        { type: 'index-pattern', id: '123', name: 'def' },
+        { type: 'index-pattern', id: '456', name: 'ghi' },
+      ],
+    });
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        inspector: inspectorPluginMock.createStartContract(),
+        indexPatternService: {
+          get: (id: string) => Promise.resolve({ id, isTimeBased: jest.fn(() => true) }),
+        } as unknown as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
+        theme: themeServiceMock.createStartContract(),
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      {} as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+    expect(expressionRenderer).toHaveBeenCalledTimes(0);
+  });
+
   it('should initialize output with deduped list of index patterns', async () => {
     attributeService = attributeServiceMockFromSavedVis({
       ...savedVis,
@@ -335,7 +381,7 @@ describe('embeddable', () => {
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {
-          get: (id: string) => Promise.resolve({ id }),
+          get: (id: string) => Promise.resolve({ id, isTimeBased: () => false }),
         } as unknown as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -775,12 +821,15 @@ describe('embeddable', () => {
 
     const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
 
-    const eventData = {};
+    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
     onEvent({ name: 'brush', data: eventData });
 
     expect(getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
     expect(trigger.exec).toHaveBeenCalledWith(
-      expect.objectContaining({ data: eventData, embeddable: expect.anything() })
+      expect.objectContaining({
+        data: { ...eventData, timeFieldName: undefined },
+        embeddable: expect.anything(),
+      })
     );
   });
 
@@ -960,7 +1009,10 @@ describe('embeddable', () => {
 
     expressionRenderer = jest.fn(({ onEvent }) => {
       setTimeout(() => {
-        onEvent?.({ name: 'filter', data: { pings: false } });
+        onEvent?.({
+          name: 'filter',
+          data: { pings: false, table: { rows: [], columns: [] }, column: 0 },
+        });
       }, 10);
 
       return null;
@@ -1002,7 +1054,7 @@ describe('embeddable', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 20));
 
-    expect(onFilter).toHaveBeenCalledWith({ pings: false });
+    expect(onFilter).toHaveBeenCalledWith(expect.objectContaining({ pings: false }));
     expect(onFilter).toHaveBeenCalledTimes(1);
   });
 
@@ -1011,7 +1063,10 @@ describe('embeddable', () => {
 
     expressionRenderer = jest.fn(({ onEvent }) => {
       setTimeout(() => {
-        onEvent?.({ name: 'brush', data: { range: [0, 1] } });
+        onEvent?.({
+          name: 'brush',
+          data: { range: [0, 1], table: { rows: [], columns: [] }, column: 0 },
+        });
       }, 10);
 
       return null;
@@ -1053,7 +1108,7 @@ describe('embeddable', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 20));
 
-    expect(onBrushEnd).toHaveBeenCalledWith({ range: [0, 1] });
+    expect(onBrushEnd).toHaveBeenCalledWith(expect.objectContaining({ range: [0, 1] }));
     expect(onBrushEnd).toHaveBeenCalledTimes(1);
   });
 

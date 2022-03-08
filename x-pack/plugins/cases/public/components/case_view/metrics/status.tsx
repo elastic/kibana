@@ -18,7 +18,7 @@ import {
   CASE_REOPENED_ON,
 } from './translations';
 import { getMaybeDate } from '../../formatted_date/maybe_date';
-import { FormattedDate, FormattedRelativePreferenceDate } from '../../formatted_date';
+import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { getEmptyTagValue } from '../../empty_value';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { CaseViewMetricsProps } from './types';
@@ -118,6 +118,7 @@ const CreationDate: React.FC<{ date: string }> = React.memo(({ date }) => {
     <FormattedRelativePreferenceDate
       data-test-subj={'case-metrics-lifespan-creation-date'}
       value={date}
+      stripMs={true}
     />
   );
 });
@@ -210,9 +211,10 @@ const ValueWithExplanationIcon: React.FC<{
       {explanationValues.map((explanationValue, index) => {
         return (
           <React.Fragment key={`explanation-value-${index}`}>
-            <FormattedDate
+            <FormattedRelativePreferenceDate
               data-test-subj={`case-metrics-lifespan-reopen-${index}`}
               value={explanationValue}
+              stripMs={true}
             />
             {isNotLastItem(index, explanationValues.length) ? <EuiSpacer size="xs" /> : null}
           </React.Fragment>

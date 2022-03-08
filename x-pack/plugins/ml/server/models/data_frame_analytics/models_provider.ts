@@ -34,6 +34,7 @@ const NODE_FIELDS = ['attributes', 'name', 'roles', 'version'] as const;
 
 export type RequiredNodeFields = Pick<NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
 
+// @ts-expect-error TrainedModelDeploymentStatsResponse missing properties from MlTrainedModelDeploymentStats
 interface TrainedModelStatsResponse extends MlTrainedModelStats {
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
   model_size_stats?: TrainedModelModelSizeStats;
@@ -55,7 +56,7 @@ export function modelsProvider(
       );
 
       try {
-        const { body } = await client.asCurrentUser.ingest.getPipeline();
+        const body = await client.asCurrentUser.ingest.getPipeline();
 
         for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
           const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
@@ -92,16 +93,12 @@ export function modelsProvider(
         throw new Error('Memory overview service is not provided');
       }
 
-      const {
-        body: { trained_model_stats: trainedModelStats },
-      } = await mlClient.getTrainedModelsStats({
+      const { trained_model_stats: trainedModelStats } = await mlClient.getTrainedModelsStats({
         model_id: '_all',
         size: 10000,
       });
 
-      const {
-        body: { nodes: clusterNodes },
-      } = await client.asInternalUser.nodes.stats();
+      const { nodes: clusterNodes } = await client.asInternalUser.nodes.stats();
 
       const mlNodes = Object.entries(clusterNodes).filter(([, node]) => node.roles?.includes('ml'));
 

@@ -57,22 +57,8 @@ export const fetchRuleById = jest.fn(
   async ({ id, signal }: FetchRuleProps): Promise<Rule> => savedRuleMock
 );
 
-export const fetchRules = async ({
-  filterOptions = {
-    filter: '',
-    sortField: 'enabled',
-    sortOrder: 'desc',
-    showCustomRules: false,
-    showElasticRules: false,
-    tags: [],
-  },
-  pagination = {
-    page: 1,
-    perPage: 20,
-    total: 0,
-  },
-  signal,
-}: FetchRulesProps): Promise<FetchRulesResponse> => Promise.resolve(rulesMock);
+export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>
+  Promise.resolve(rulesMock);
 
 export const fetchRuleExecutionEvents = async ({
   ruleId,

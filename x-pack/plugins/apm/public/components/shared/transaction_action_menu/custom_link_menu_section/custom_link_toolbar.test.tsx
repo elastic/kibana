@@ -16,7 +16,7 @@ import {
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-} from '../../../../utils/testHelpers';
+} from '../../../../utils/test_helpers';
 import { CustomLinkToolbar } from './custom_link_toolbar';
 
 function getMockAPMContext({ canSave }: { canSave: boolean }) {

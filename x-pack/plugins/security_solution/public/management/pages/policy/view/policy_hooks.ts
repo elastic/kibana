@@ -18,6 +18,7 @@ import {
 import {
   getPolicyDetailsArtifactsListPath,
   getPolicyEventFiltersPath,
+  getPolicyHostIsolationExceptionsPath,
 } from '../../../common/routing';
 import {
   getCurrentArtifactsLocation,
@@ -74,6 +75,23 @@ export function usePolicyDetailsEventFiltersNavigateCallback() {
     (args: Partial<PolicyDetailsArtifactsPageLocation>) =>
       history.push(
         getPolicyEventFiltersPath(policyId, {
+          ...location,
+          ...args,
+        })
+      ),
+    [history, location, policyId]
+  );
+}
+
+export function usePolicyDetailsHostIsolationExceptionsNavigateCallback() {
+  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+  const history = useHistory();
+  const policyId = usePolicyDetailsSelector(policyIdFromParams);
+
+  return useCallback(
+    (args: Partial<PolicyDetailsArtifactsPageLocation>) =>
+      history.push(
+        getPolicyHostIsolationExceptionsPath(policyId, {
           ...location,
           ...args,
         })

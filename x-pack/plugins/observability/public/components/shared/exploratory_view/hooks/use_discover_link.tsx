@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { Filter } from '@kbn/es-query';
 import { useKibana } from '../../../../utils/kibana_react';
 import { SeriesConfig, SeriesUrl } from '../types';
 import { useAppIndexPatternContext } from './use_app_index_pattern';
@@ -26,7 +27,7 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
 
   const { indexPatterns } = useAppIndexPatternContext();
 
-  const urlGenerator = kServices.discover?.urlGenerator;
+  const locator = kServices.discover?.locator;
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
         indexPattern,
         urlFilters,
         initFilters: seriesConfig?.baseFilters,
-      });
+      }) as Filter[];
 
       const selectedMetricField = series.selectedMetricField;
 
@@ -54,9 +55,9 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
       }
 
       const getDiscoverUrl = async () => {
-        if (!urlGenerator?.createUrl) return;
+        if (!locator) return;
 
-        const newUrl = await urlGenerator.createUrl({
+        const newUrl = await locator.getUrl({
           filters,
           indexPatternId: indexPattern?.id,
         });
@@ -71,7 +72,7 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
     series.reportDefinitions,
     series.selectedMetricField,
     seriesConfig?.baseFilters,
-    urlGenerator,
+    locator,
   ]);
 
   const onClick = useCallback(

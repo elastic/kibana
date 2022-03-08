@@ -17,8 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
-import { useLinkProps } from '../../../hooks/use_link_props';
-
+import { useRulesLink } from '../../../../../observability/public';
 type VisibleFlyoutType = 'inventory' | 'threshold' | null;
 
 export const MetricsAlertDropdown = () => {
@@ -84,10 +83,7 @@ export const MetricsAlertDropdown = () => {
     [setVisibleFlyoutType, closePopover]
   );
 
-  const manageAlertsLinkProps = useLinkProps({
-    app: 'management',
-    pathname: '/insightsAndAlerting/triggersActions/alerts',
-  });
+  const manageRulesLinkProps = useRulesLink();
 
   const manageAlertsMenuItem = useMemo(
     () => ({
@@ -95,9 +91,9 @@ export const MetricsAlertDropdown = () => {
         defaultMessage: 'Manage rules',
       }),
       icon: 'tableOfContents',
-      onClick: manageAlertsLinkProps.onClick,
+      onClick: manageRulesLinkProps.onClick,
     }),
-    [manageAlertsLinkProps]
+    [manageRulesLinkProps]
   );
 
   const firstPanelMenuItems: EuiContextMenuPanelDescriptor['items'] = useMemo(

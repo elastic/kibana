@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export type { Context } from './context';
 export type { LayoutParams } from './layout';
 export { LayoutTypes } from './layout';

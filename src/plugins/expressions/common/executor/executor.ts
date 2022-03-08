@@ -352,11 +352,13 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   private migrate(ast: SerializableRecord, version: string) {
     return this.walkAstAndTransform(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
-      if (!fn.migrations[version]) {
+      const migrations =
+        typeof fn.migrations === 'function' ? fn.migrations() : fn.migrations || {};
+      if (!migrations[version]) {
         return link;
       }
 
-      return fn.migrations[version](link) as ExpressionAstExpression;
+      return migrations[version](link) as ExpressionAstExpression;
     });
   }
 

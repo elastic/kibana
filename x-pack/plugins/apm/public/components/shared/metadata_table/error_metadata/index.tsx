@@ -19,15 +19,17 @@ interface Props {
 export function ErrorMetadata({ error }: Props) {
   const { data: errorEvent, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi({
-        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
-        params: {
-          path: {
-            processorEvent: ProcessorEvent.error,
-            id: error.error.id,
+      return callApmApi(
+        'GET /internal/apm/event_metadata/{processorEvent}/{id}',
+        {
+          params: {
+            path: {
+              processorEvent: ProcessorEvent.error,
+              id: error.error.id,
+            },
           },
-        },
-      });
+        }
+      );
     },
     [error.error.id]
   );

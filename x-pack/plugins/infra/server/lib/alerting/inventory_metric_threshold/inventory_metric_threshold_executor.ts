@@ -7,34 +7,30 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import moment from 'moment';
 import { first, get, last } from 'lodash';
-import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
-import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { AlertStates } from './types';
+import moment from 'moment';
 import {
-  ActionGroupIdsOf,
   ActionGroup,
+  ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import {
-  AlertInstance as Alert,
-  AlertTypeState as RuleTypeState,
-} from '../../../../../alerting/server';
-import { SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { InfraBackendLibs } from '../../infra_types';
-import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
+import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
+import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
-import { InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
+import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
+import { SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
+import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
+  buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
-  buildInvalidQueryAlertReason,
 } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
 
@@ -217,6 +213,21 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     }
   });
 
+const formatThreshold = (metric: SnapshotMetricType, value: number) => {
+  const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
+  const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
+
+  const threshold = Array.isArray(value)
+    ? value.map((v: number) => {
+        if (metricFormatter.formatter === 'percent') {
+          v = Number(v) / 100;
+        }
+        return formatter(v);
+      })
+    : value;
+  return threshold;
+};
+
 const buildReasonWithVerboseMetricName = (
   group: string,
   resultItem: any,
@@ -224,6 +235,10 @@ const buildReasonWithVerboseMetricName = (
   useWarningThreshold?: boolean
 ) => {
   if (!resultItem) return '';
+
+  const thresholdToFormat = useWarningThreshold
+    ? resultItem.warningThreshold!
+    : resultItem.threshold;
   const resultWithVerboseMetricName = {
     ...resultItem,
     group,
@@ -233,7 +248,7 @@ const buildReasonWithVerboseMetricName = (
         ? getCustomMetricLabel(resultItem.customMetric)
         : resultItem.metric),
     currentValue: formatMetric(resultItem.metric, resultItem.currentValue),
-    threshold: useWarningThreshold ? resultItem.warningThreshold! : resultItem.threshold,
+    threshold: formatThreshold(resultItem.metric, thresholdToFormat),
     comparator: useWarningThreshold ? resultItem.warningComparator! : resultItem.comparator,
   };
   return buildReason(resultWithVerboseMetricName);

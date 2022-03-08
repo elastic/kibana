@@ -11,11 +11,8 @@ import { TrustedAppsPage } from './trusted_apps_page';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { fireEvent } from '@testing-library/dom';
 import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
-import {
-  ConditionEntryField,
-  OperatingSystem,
-  TrustedApp,
-} from '../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { TrustedApp } from '../../../../../common/endpoint/types';
 import { HttpFetchOptions, HttpFetchOptionsWithPath } from 'kibana/public';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from '../../../components/effected_policy_select/test_utils';
@@ -219,7 +216,7 @@ describe('When on the Trusted Apps Page', () => {
 
         it('should persist edit params to url', () => {
           expect(history.location.search).toEqual(
-            '?show=edit&id=2d95bec3-b48f-4db7-9622-a2b061cc031d'
+            '?show=edit&id=bec3b48f-ddb7-4622-a2b0-61cc031d17eb'
           );
         });
 
@@ -251,7 +248,7 @@ describe('When on the Trusted Apps Page', () => {
             'addTrustedAppFlyout-createForm-descriptionField'
           ) as HTMLTextAreaElement;
 
-          expect(formNameInput.value).toEqual('Generated Exception (3xnng)');
+          expect(formNameInput.value).toEqual('Generated Exception (nng74)');
           expect(formDescriptionInput.value).toEqual('created by ExceptionListItemGenerator');
         });
 
@@ -276,8 +273,8 @@ describe('When on the Trusted Apps Page', () => {
             expect(lastCallToPut[0]).toEqual('/api/exception_lists/items');
 
             expect(JSON.parse(lastCallToPut[1].body as string)).toEqual({
-              _version: '3o9za',
-              name: 'Generated Exception (3xnng)',
+              _version: '9zawi',
+              name: 'Generated Exception (nng74)',
               description: 'created by ExceptionListItemGenerator',
               entries: [
                 {
@@ -300,7 +297,7 @@ describe('When on the Trusted Apps Page', () => {
               ],
               id: '05b5e350-0cad-4dc3-a61d-6e6796b0af39',
               comments: [],
-              item_id: '2d95bec3-b48f-4db7-9622-a2b061cc031d',
+              item_id: 'bec3b48f-ddb7-4622-a2b0-61cc031d17eb',
               namespace_type: 'agnostic',
               type: 'simple',
             });
@@ -595,7 +592,7 @@ describe('When on the Trusted Apps Page', () => {
 
           it('should show success toast notification', () => {
             expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual({
-              text: '"Generated Exception (3xnng)" has been added to the Trusted Applications list.',
+              text: '"Generated Exception (3xnng)" has been added to the trusted applications list.',
               title: 'Success!',
             });
           });

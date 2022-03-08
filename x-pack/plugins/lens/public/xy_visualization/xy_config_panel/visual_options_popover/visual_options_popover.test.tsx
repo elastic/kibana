@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { Position } from '@elastic/charts';
 import type { FramePublicAPI } from '../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';

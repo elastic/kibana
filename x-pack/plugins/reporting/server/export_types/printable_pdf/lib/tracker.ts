@@ -20,8 +20,6 @@ interface PdfTracker {
   endAddImage: () => void;
   startCompile: () => void;
   endCompile: () => void;
-  startGetBuffer: () => void;
-  endGetBuffer: () => void;
   end: () => void;
 }
 
@@ -39,7 +37,6 @@ export function getTracker(): PdfTracker {
   let apmSetup: ApmSpan | null = null;
   let apmAddImage: ApmSpan | null = null;
   let apmCompilePdf: ApmSpan | null = null;
-  let apmGetBuffer: ApmSpan | null = null;
 
   return {
     startScreenshots() {
@@ -65,12 +62,6 @@ export function getTracker(): PdfTracker {
     },
     endCompile() {
       if (apmCompilePdf) apmCompilePdf.end();
-    },
-    startGetBuffer() {
-      apmGetBuffer = apmTrans?.startSpan('get-buffer', SPANTYPE_OUTPUT) || null;
-    },
-    endGetBuffer() {
-      if (apmGetBuffer) apmGetBuffer.end();
     },
     setByteLength(byteLength: number) {
       apmTrans?.setLabel('byte-length', byteLength, false);

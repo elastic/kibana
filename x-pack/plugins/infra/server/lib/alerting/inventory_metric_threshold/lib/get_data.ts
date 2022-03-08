@@ -84,7 +84,7 @@ export const getData = async (
     filterQuery,
     customMetric
   );
-  const { body } = await esClient.search<undefined, ResponseAggregations>(request);
+  const body = await esClient.search<undefined, ResponseAggregations>(request);
   if (body.aggregations) {
     return handleResponse(body.aggregations, previousNodes);
   }

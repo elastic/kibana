@@ -13,7 +13,7 @@ import {
   Rendering,
   Rotation,
   ScaleType,
-  SettingsSpecProps,
+  SettingsProps,
   TickFormatter,
   Position,
   BrushEndListener,
@@ -52,7 +52,7 @@ export interface ChartSeriesConfigs {
     tickSize?: number | undefined;
   };
   yAxisTitle?: string | undefined;
-  settings?: Partial<SettingsSpecProps>;
+  settings?: SettingsProps;
 }
 
 export interface ChartSeriesData {

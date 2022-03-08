@@ -26,6 +26,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/__mocks__/**/*',
@@ -38,7 +39,7 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
-  'packages/kbn-test/jest_integration/jest-preset.js',
+  'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
@@ -57,9 +58,6 @@ export const IGNORE_FILE_GLOBS = [
 
   // filename must match upstream filenames from lodash
   'packages/elastic-safer-lodash-set/**/*',
-
-  // TODO fix file names in APM to remove these
-  'x-pack/plugins/apm/public/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
