@@ -217,7 +217,6 @@ const {
   patch: eqlPatchParams,
   response: eqlResponseParams,
 } = buildAPISchemas(eqlRuleParams);
-export type EqlResponseParams = t.TypeOf<typeof eqlResponseParams>;
 export { eqlCreateParams, eqlResponseParams };
 
 const threatMatchRuleParams = {
