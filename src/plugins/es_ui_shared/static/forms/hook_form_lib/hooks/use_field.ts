@@ -49,15 +49,8 @@ export const useField = <T, FormType = FormData, I = T>(
     deserializer,
   } = config;
 
-  const {
-    getFormData,
-    getFields,
-    validateFields,
-    __addField,
-    __removeField,
-    __updateFormDataAt,
-    __getFormData$,
-  } = form;
+  const { getFormData, getFields, validateFields, __addField, __removeField, __getFormData$ } =
+    form;
 
   const deserializeValue = useCallback(
     (rawValue: T): I => {
