@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -48,6 +48,7 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
   params: {
     interval: string;
     ignoreTimeRange?: boolean;
+    dropPartials?: boolean;
   };
 }
 
@@ -142,6 +143,7 @@ export const dateHistogramOperation: OperationDefinition<
     const usedField = indexPattern.getFieldByName(column.sourceField);
     let timeZone: string | undefined;
     let interval = column.params?.interval ?? autoInterval;
+    const dropPartials = Boolean(column.params?.dropPartials);
     if (
       usedField &&
       usedField.aggregationRestrictions &&
@@ -158,7 +160,7 @@ export const dateHistogramOperation: OperationDefinition<
       time_zone: timeZone,
       useNormalizedEsInterval: !usedField?.aggregationRestrictions?.date_histogram,
       interval,
-      drop_partials: false,
+      drop_partials: dropPartials,
       min_doc_count: 0,
       extended_bounds: extendedBoundsToAst({}),
     }).toAst();
@@ -186,20 +188,37 @@ export const dateHistogramOperation: OperationDefinition<
       restrictedInterval(field!.aggregationRestrictions)
     );
 
-    function onChangeAutoInterval(ev: EuiSwitchEvent) {
-      const { fromDate, toDate } = dateRange;
-      const value = ev.target.checked
-        ? data.search.aggs.calculateAutoTimeExpression({ from: fromDate, to: toDate }) || '1h'
-        : autoInterval;
-      updateLayer(
-        updateColumnParam({
-          layer: updateColumnParam({ layer, columnId, paramName: 'interval', value }),
-          columnId,
-          paramName: 'ignoreTimeRange',
-          value: false,
-        })
-      );
-    }
+    const onChangeAutoInterval = useCallback(
+      (ev: EuiSwitchEvent) => {
+        const { fromDate, toDate } = dateRange;
+        const value = ev.target.checked
+          ? data.search.aggs.calculateAutoTimeExpression({ from: fromDate, to: toDate }) || '1h'
+          : autoInterval;
+        updateLayer(
+          updateColumnParam({
+            layer: updateColumnParam({ layer, columnId, paramName: 'interval', value }),
+            columnId,
+            paramName: 'ignoreTimeRange',
+            value: false,
+          })
+        );
+      },
+      [dateRange, data.search.aggs, updateLayer, layer, columnId]
+    );
+
+    const onChangeDropPartialBuckets = useCallback(
+      (ev: EuiSwitchEvent) => {
+        updateLayer(
+          updateColumnParam({
+            layer,
+            columnId,
+            paramName: 'dropPartials',
+            value: ev.target.checked,
+          })
+        );
+      },
+      [columnId, layer, updateLayer]
+    );
 
     const setInterval = (newInterval: typeof interval) => {
       const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
@@ -222,6 +241,16 @@ export const dateHistogramOperation: OperationDefinition<
             />
           </EuiFormRow>
         )}
+        <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.dropPArtialBuckets', {
+              defaultMessage: 'Drop partial buckets',
+            })}
+            checked={Boolean(currentColumn.params.dropPartials)}
+            onChange={onChangeDropPartialBuckets}
+            compressed
+          />
+        </EuiFormRow>
         {currentColumn.params.interval !== autoInterval && (
           <>
             <EuiFormRow
