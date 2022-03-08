@@ -87,11 +87,16 @@ docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}
 echo "--- Create kibana-ci docker cloud image archives"
 ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.ID}}")
 ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.Tag}}")
-KIBANA_ES_CLOUD_TAG="docker.elastic.co/kibana-ci/elasticsearch-cloud:$ES_CLOUD_VERSION-$ELASTICSEARCH_GIT_COMMIT"
+KIBANA_ES_CLOUD_VERSION="$ES_CLOUD_VERSION-$ELASTICSEARCH_GIT_COMMIT"
+KIBANA_ES_CLOUD_TAG="docker.elastic.co/kibana-ci/elasticsearch-cloud:$KIBANA_ES_CLOUD_VERSION"
 
 docker tag "$ES_CLOUD_ID" "$KIBANA_ES_CLOUD_TAG"
-echo "docker save docker.elastic.co/kibana-ci/elasticsearch-cloud:${0} | gzip > ../es-build/elasticsearch-cloud-$ES_CLOUD_VERSION-docker-image.tar.gz"
-docker save docker.elastic.co/kibana-ci/elasticsearch-cloud:${0} | gzip > ../es-build/elasticsearch-cloud-$ES_CLOUD_VERSION-docker-image.tar.gz
+echo "docker save docker.elastic.co/kibana-ci/elasticsearch-cloud:$KIBANA_ES_CLOUD_VERSION | gzip > ../es-build/elasticsearch-cloud-$KIBANA_ES_CLOUD_VERSION-docker-image.tar.gz"
+docker save "docker.elastic.co/kibana-ci/elasticsearch-cloud:$KIBANA_ES_CLOUD_VERSION"  | gzip > ../es-build/elasticsearch-cloud-$KIBANA_ES_CLOUD_VERSION-docker-image.tar.gz
+
+echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+trap 'docker logout docker.elastic.co' EXIT
+docker image push "$KIBANA_ES_CLOUD_TAG"
 
 echo "--- Create checksums for snapshot files"
 cd "$destination"
