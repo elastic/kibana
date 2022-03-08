@@ -22,16 +22,16 @@ import {
 } from '@elastic/eui';
 
 interface Props {
-  request: string;
   title: string;
   description: string;
+  request: string;
   closeFlyout: () => void;
 }
 
 export const ViewApiRequest: React.FunctionComponent<Props> = ({
-  request,
   title,
   description,
+  request,
   closeFlyout,
 }) => {
   return (
