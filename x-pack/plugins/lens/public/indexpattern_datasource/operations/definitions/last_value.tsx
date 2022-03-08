@@ -13,7 +13,7 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
-import { updateColumnParam } from '../layer_helpers';
+import { adjustColumnReferencesForChangedColumn, updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
 import {
   getFormatFromPreviousColumn,
@@ -244,16 +244,25 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     );
     const sourceIsScripted = isScriptedField(currentColumn.sourceField, indexPattern);
 
+    const setUseTopHit = (use: boolean) => {
+      let updatedLayer = updateColumnParam({
+        layer,
+        columnId,
+        paramName: 'useTopHit',
+        value: use,
+      });
+
+      updatedLayer = {
+        ...updatedLayer,
+        columns: adjustColumnReferencesForChangedColumn(updatedLayer, columnId),
+      };
+
+      updateLayer(updatedLayer);
+    };
+
     if (sourceIsScripted && !currentColumn.params.useTopHit) {
       // actively set this so that other places in the code know that we're using top-hit
-      updateLayer(
-        updateColumnParam({
-          layer,
-          columnId,
-          paramName: 'useTopHit',
-          value: true,
-        })
-      );
+      setUseTopHit(true);
     }
 
     return (
@@ -322,16 +331,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
             checked={Boolean(currentColumn.params.useTopHit)}
             // TODO - add disabled tooltip
             disabled={sourceIsScripted}
-            onChange={() => {
-              updateLayer(
-                updateColumnParam({
-                  layer,
-                  columnId,
-                  paramName: 'useTopHit',
-                  value: !currentColumn.params.useTopHit,
-                })
-              );
-            }}
+            onChange={() => setUseTopHit(!currentColumn.params.useTopHit)}
           />
         </EuiFormRow>
       </>
