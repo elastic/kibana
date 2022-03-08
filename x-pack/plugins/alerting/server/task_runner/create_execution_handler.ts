@@ -20,6 +20,7 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { ActionsCompletion, CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
+import { getFormattedExecutionConfig } from '../lib/get_formatted_execution_config';
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
   options: ExecutionHandlerOptions<ActionGroupIds>
@@ -75,6 +76,12 @@ export function createExecutionHandler<
       alertExecutionStore.completion = ActionsCompletion.PARTIAL;
       return;
     }
+
+    const formattedExecutionConfig = getFormattedExecutionConfig({
+      executionConfig: ruleType.executionConfig!,
+      ruleTypeId: ruleType.id,
+    });
+
     const actions = ruleActions
       .filter(({ group }) => group === actionGroup)
       .map((action) => {
@@ -117,7 +124,7 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (alertExecutionStore.total >= alertExecutionStore.maxExecutableActions) {
+      if (alertExecutionStore.numberOfTriggeredActions >= formattedExecutionConfig.actions.max) {
         alertExecutionStore.completion = ActionsCompletion.PARTIAL;
         break;
       }
@@ -163,11 +170,11 @@ export function createExecutionHandler<
             await actionsClient.enqueueExecution(enqueueOptions);
           }
         } finally {
-          alertExecutionStore.total++;
+          alertExecutionStore.numberOfTriggeredActions++;
         }
       } else {
         await actionsClient.enqueueExecution(enqueueOptions);
-        alertExecutionStore.total++;
+        alertExecutionStore.numberOfTriggeredActions++;
       }
 
       const event = createAlertEventLogRecordObject({

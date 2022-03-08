@@ -54,8 +54,8 @@ const ruleType: NormalizedRuleType<
   },
   executor: jest.fn(),
   producer: 'alerts',
-  config: {
-    maxExecutableActions: 1000,
+  executionConfig: {
+    actions: { max: 1000 },
   },
 };
 
@@ -124,8 +124,7 @@ describe('Create Execution Handler', () => {
       renderActionParameterTemplatesDefault
     );
     alertExecutionStore = {
-      total: 0,
-      maxExecutableActions: 1000,
+      numberOfTriggeredActions: 0,
       completion: ActionsCompletion.COMPLETE,
     };
   });
@@ -139,7 +138,7 @@ describe('Create Execution Handler', () => {
       alertId: '2',
       alertExecutionStore,
     });
-    expect(alertExecutionStore.total).toBe(1);
+    expect(alertExecutionStore.numberOfTriggeredActions).toBe(1);
     expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(
       createExecutionHandlerParams.request
     );
@@ -272,7 +271,7 @@ describe('Create Execution Handler', () => {
       alertId: '2',
       alertExecutionStore,
     });
-    expect(alertExecutionStore.total).toBe(1);
+    expect(alertExecutionStore.numberOfTriggeredActions).toBe(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
       id: '2',
@@ -369,7 +368,7 @@ describe('Create Execution Handler', () => {
       alertId: '2',
       alertExecutionStore,
     });
-    expect(alertExecutionStore.total).toBe(1);
+    expect(alertExecutionStore.numberOfTriggeredActions).toBe(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
@@ -462,13 +461,17 @@ describe('Create Execution Handler', () => {
       'Invalid action group "invalid-group" for rule "test".'
     );
 
-    expect(alertExecutionStore.total).toBe(0);
+    expect(alertExecutionStore.numberOfTriggeredActions).toBe(0);
     expect(alertExecutionStore.completion).toBe(ActionsCompletion.PARTIAL);
   });
 
   test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions', async () => {
     const executionHandler = createExecutionHandler({
       ...createExecutionHandlerParams,
+      ruleType: {
+        ...ruleType,
+        executionConfig: { actions: { max: 2 } },
+      },
       actions: [
         ...createExecutionHandlerParams.actions,
         {
@@ -495,8 +498,7 @@ describe('Create Execution Handler', () => {
     });
 
     alertExecutionStore = {
-      total: 0,
-      maxExecutableActions: 2,
+      numberOfTriggeredActions: 0,
       completion: ActionsCompletion.COMPLETE,
     };
 
@@ -508,7 +510,7 @@ describe('Create Execution Handler', () => {
       alertExecutionStore,
     });
 
-    expect(alertExecutionStore.total).toBe(2);
+    expect(alertExecutionStore.numberOfTriggeredActions).toBe(2);
     expect(alertExecutionStore.completion).toBe(ActionsCompletion.PARTIAL);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
   });

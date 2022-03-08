@@ -2459,8 +2459,8 @@ describe('Task Runner', () => {
   test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {
     const ruleTypeWithConfig = {
       ...ruleType,
-      config: {
-        maxExecutableActions: 3,
+      executionConfig: {
+        actions: { max: 3 },
       },
     };
 
@@ -2528,7 +2528,7 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
 
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(
-      ruleTypeWithConfig.config.maxExecutableActions
+      ruleTypeWithConfig.executionConfig.actions.max
     );
 
     expect(
@@ -2622,7 +2622,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.execute,
         outcome: 'success',
         status: 'warning',
-        numberOfTriggeredActions: ruleTypeWithConfig.config.maxExecutableActions,
+        numberOfTriggeredActions: ruleTypeWithConfig.executionConfig.actions.max,
         reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
         task: true,
       })

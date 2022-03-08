@@ -10,7 +10,14 @@ import { validateDurationSchema } from './lib';
 
 const ruleTypeConfig = schema.object({
   id: schema.string(),
-  maxExecutableActions: schema.maybe(schema.number()),
+  actions: schema.maybe(schema.object({ max: schema.maybe(schema.number()) })),
+});
+
+const ruleExecutionSchema = schema.object({
+  actions: schema.object({
+    max: schema.number({ defaultValue: 100000 }),
+  }),
+  ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeConfig)),
 });
 
 export const DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT = 10;
@@ -29,10 +36,11 @@ export const configSchema = schema.object({
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   minimumScheduleInterval: schema.string({ validate: validateDurationSchema, defaultValue: '1m' }),
   rules: schema.object({
-    default: schema.object({ maxExecutableActions: schema.number({ defaultValue: 100000 }) }),
-    ruleTypes: schema.maybe(schema.arrayOf(ruleTypeConfig)),
+    execution: ruleExecutionSchema,
   }),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;
 export type PublicAlertingConfig = Pick<AlertingConfig, 'minimumScheduleInterval'>;
+export type RuleExecutionConfig = TypeOf<typeof ruleExecutionSchema>;
+export type RuleTypeConfig = Omit<RuleExecutionConfig, 'ruleTypeOverrides'>;

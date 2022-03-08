@@ -476,9 +476,8 @@ export class TaskRunner<
     }
 
     const alertExecutionStore: AlertExecutionStore = {
-      total: 0,
+      numberOfTriggeredActions: 0,
       completion: ActionsCompletion.COMPLETE,
-      maxExecutableActions: ruleType.config!.maxExecutableActions,
     };
 
     if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {

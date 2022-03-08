@@ -33,8 +33,7 @@ describe('RuleExecutionStatus', () => {
     test('empty task state', () => {
       const status = executionStatusFromState({
         alertExecutionStore: {
-          maxExecutableActions: 1000,
-          total: 0,
+          numberOfTriggeredActions: 0,
           completion: ActionsCompletion.COMPLETE,
         },
       } as RuleExecutionState);
@@ -48,8 +47,7 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         alertInstances: {},
         alertExecutionStore: {
-          maxExecutableActions: 1000,
-          total: 0,
+          numberOfTriggeredActions: 0,
           completion: ActionsCompletion.COMPLETE,
         },
         metrics,
@@ -65,8 +63,7 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         alertInstances: { a: {} },
         alertExecutionStore: {
-          maxExecutableActions: 1000,
-          total: 0,
+          numberOfTriggeredActions: 0,
           completion: ActionsCompletion.COMPLETE,
         },
         metrics,
@@ -81,8 +78,7 @@ describe('RuleExecutionStatus', () => {
     test('task state with numberOfTriggeredActions', () => {
       const status = executionStatusFromState({
         alertExecutionStore: {
-          maxExecutableActions: 1000,
-          total: 1,
+          numberOfTriggeredActions: 1,
           completion: ActionsCompletion.COMPLETE,
         },
         alertInstances: { a: {} },
@@ -99,8 +95,7 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         alertInstances: { a: {} },
         alertExecutionStore: {
-          maxExecutableActions: 2,
-          total: 3,
+          numberOfTriggeredActions: 3,
           completion: ActionsCompletion.PARTIAL,
         },
         metrics,

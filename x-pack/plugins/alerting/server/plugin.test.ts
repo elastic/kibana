@@ -33,8 +33,10 @@ const generateAlertConfig = (): AlertingConfig => ({
   cancelAlertsOnRuleTimeout: true,
   minimumScheduleInterval: '1m',
   rules: {
-    default: {
-      maxExecutableActions: 1000,
+    execution: {
+      actions: {
+        max: 1000,
+      },
     },
   },
 });
@@ -47,8 +49,10 @@ const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
   actionGroups: [],
   defaultActionGroupId: 'default',
   producer: 'test',
-  config: {
-    maxExecutableActions: 1000,
+  executionConfig: {
+    actions: {
+      max: 1000,
+    },
   },
   async executor() {},
 };
@@ -116,8 +120,10 @@ describe('Alerting Plugin', () => {
       const context = coreMock.createPluginInitializerContext<AlertingConfig>({
         ...generateAlertConfig(),
         rules: {
-          default: {
-            maxExecutableActions: 123,
+          execution: {
+            actions: {
+              max: 123,
+            },
           },
         },
       });
@@ -128,31 +134,8 @@ describe('Alerting Plugin', () => {
       const ruleType = { ...sampleRuleType };
       setupContract.registerType(ruleType);
 
-      expect(ruleType.config).toEqual({
-        maxExecutableActions: 123,
-      });
-    });
-
-    it(`applies rule type specific config if defined in config`, async () => {
-      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
-        ...generateAlertConfig(),
-        rules: {
-          default: {
-            maxExecutableActions: 123,
-          },
-          ruleTypes: [{ id: sampleRuleType.id, maxExecutableActions: 22 }],
-        },
-      });
-      plugin = new AlertingPlugin(context);
-
-      const setupContract = await plugin.setup(setupMocks, mockPlugins);
-
-      const ruleType = { ...sampleRuleType };
-      setupContract.registerType(ruleType);
-
-      expect(ruleType.config).toEqual({
-        id: sampleRuleType.id,
-        maxExecutableActions: 22,
+      expect(ruleType.executionConfig).toEqual({
+        actions: { max: 123 },
       });
     });
 

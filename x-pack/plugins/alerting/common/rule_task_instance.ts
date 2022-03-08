@@ -23,8 +23,7 @@ const ruleExecutionMetricsSchema = t.partial({
 });
 
 const alertExecutionStore = t.partial({
-  total: t.number,
-  maxExecutableActions: t.number,
+  numberOfTriggeredActions: t.number,
   completion: t.string,
 });
 

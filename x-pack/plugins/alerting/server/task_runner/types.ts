@@ -164,7 +164,6 @@ export interface AlertExecutionResult {
 }
 
 export interface AlertExecutionStore {
-  total: number;
-  maxExecutableActions: number;
+  numberOfTriggeredActions: number;
   completion: ActionsCompletion;
 }
