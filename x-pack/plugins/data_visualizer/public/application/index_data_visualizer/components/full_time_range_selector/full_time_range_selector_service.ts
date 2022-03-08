@@ -9,6 +9,7 @@ import moment from 'moment';
 import { TimefilterContract } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { getTimeFieldRange } from '../../services/time_field_range';
@@ -27,16 +28,27 @@ export async function setFullTimeRange(
   excludeFrozenData?: boolean
 ): Promise<GetTimeFieldRangeResponse> {
   const runtimeMappings = indexPattern.getRuntimeMappings();
+
   const resp = await getTimeFieldRange({
     index: indexPattern.title,
     timeFieldName: indexPattern.timeFieldName,
     query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
     ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
   });
-  timefilter.setTime({
-    from: moment(resp.start.epoch).toISOString(),
-    to: moment(resp.end.epoch).toISOString(),
-  });
+
+  if (resp.start.epoch && resp.end.epoch) {
+    timefilter.setTime({
+      from: moment(resp.start.epoch).toISOString(),
+      to: moment(resp.end.epoch).toISOString(),
+    });
+  } else {
+    throw Error(
+      i18n.translate('xpack.dataVisualizer.index.fullTimeRangeSelector.unpopulatedTimeField', {
+        defaultMessage: `No data found for time field {timeFieldName}`,
+        values: { timeFieldName: indexPattern.timeFieldName },
+      })
+    );
+  }
   return resp;
 }
 

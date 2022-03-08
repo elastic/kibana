@@ -61,24 +61,30 @@ export const FullTimeRangeSelector: FC<Props> = ({
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(
-    async (i: DataView, q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
+    async (q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
       try {
-        const fullTimeRange = await setFullTimeRange(timefilter, i, q, excludeFrozenData);
+        const fullTimeRange = await setFullTimeRange(
+          timefilter,
+          indexPattern,
+          q,
+          excludeFrozenData
+        );
         if (typeof callback === 'function') {
           callback(fullTimeRange);
         }
       } catch (e) {
-        toasts.addDanger(
-          i18n.translate(
+        toasts.addError(e, {
+          title: i18n.translate(
             'xpack.dataVisualizer.index.fullTimeRangeSelector.errorSettingTimeRangeNotification',
             {
               defaultMessage: 'An error occurred setting the time range.',
             }
-          )
-        );
+          ),
+        });
       }
     },
-    [callback, timefilter, toasts]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [callback, timefilter, toasts, indexPattern.id]
   );
 
   const [isPopoverOpen, setPopover] = useState(false);
@@ -92,10 +98,10 @@ export const FullTimeRangeSelector: FC<Props> = ({
   const setPreference = useCallback(
     (id: string) => {
       setFrozenDataPreference(id as FrozenTierPreference);
-      setRange(indexPattern, query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
+      setRange(query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
       closePopover();
     },
-    [indexPattern, query, setFrozenDataPreference, setRange]
+    [query, setFrozenDataPreference, setRange]
   );
 
   const onButtonClick = () => {
@@ -164,7 +170,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
       <EuiToolTip content={buttonTooltip}>
         <EuiButton
           isDisabled={disabled}
-          onClick={() => setRange(indexPattern, query, true)}
+          onClick={() => setRange(query, true)}
           data-test-subj="dataVisualizerButtonUseFullData"
         >
           <FormattedMessage
