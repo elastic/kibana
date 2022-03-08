@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { HttpFetchError } from 'kibana/public';
-import { useUrlParams } from '../hooks/use_url_params';
+import { useUrlParams } from '../../hooks/use_url_params';
 import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useSetUrlParams } from '../hooks/use_set_url_params';

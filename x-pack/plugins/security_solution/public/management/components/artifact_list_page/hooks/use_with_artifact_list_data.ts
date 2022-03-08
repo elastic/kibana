@@ -14,7 +14,7 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../common/constants';
-import { useUrlParams } from './use_url_params';
+import { useUrlParams } from '../../hooks/use_url_params';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { ArtifactListPageUrlParams } from '../types';
 import { MaybeImmutable } from '../../../../../common/endpoint/types';
