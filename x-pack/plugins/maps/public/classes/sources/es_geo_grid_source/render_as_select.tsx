@@ -25,6 +25,13 @@ const options = [
     }),
     value: RENDER_AS.GRID,
   },
+  {
+    id: RENDER_AS.HEX,
+    label: i18n.translate('xpack.maps.source.esGeoGrid.hexDropdownOption', {
+      defaultMessage: 'hexes',
+    }),
+    value: RENDER_AS.HEX,
+  },
 ];
 
 export function RenderAsSelect(props: {
@@ -32,8 +39,6 @@ export function RenderAsSelect(props: {
   onChange: (newValue: RENDER_AS) => void;
   isColumnCompressed?: boolean;
 }) {
-  const currentOption = options.find((option) => option.value === props.renderAs) || options[0];
-
   if (props.renderAs === RENDER_AS.HEATMAP) {
     return null;
   }
@@ -44,6 +49,8 @@ export function RenderAsSelect(props: {
       props.onChange(data.value as RENDER_AS);
     }
   }
+
+  const currentOption = options.find((option) => option.value === props.renderAs) || options[0];
 
   return (
     <EuiFormRow

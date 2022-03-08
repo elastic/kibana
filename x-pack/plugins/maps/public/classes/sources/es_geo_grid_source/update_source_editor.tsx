@@ -81,10 +81,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
 
   _onResolutionChange = async (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => {
     let newLayerType;
-    if (
-      this.props.currentLayerType === LAYER_TYPE.GEOJSON_VECTOR ||
-      this.props.currentLayerType === LAYER_TYPE.MVT_VECTOR
-    ) {
+    if (this.props.currentLayerType !== LAYER_TYPE.HEATMAP && this.props.renderAs !== RENDER_AS.HEX) {
       newLayerType =
         resolution === GRID_RESOLUTION.SUPER_FINE
           ? LAYER_TYPE.MVT_VECTOR
@@ -102,7 +99,11 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _onRequestTypeSelect = (requestType: RENDER_AS) => {
-    this.props.onChange({ propName: 'requestType', value: requestType });
+    this.props.onChange({
+      propName: 'requestType', 
+      value: requestType,
+      newLayerType: requestType === RENDER_AS.HEX ? LAYER_TYPE.MVT_VECTOR : LAYER_TYPE.GEOJSON_VECTOR,
+    });
   };
 
   _getMetricsFilter() {

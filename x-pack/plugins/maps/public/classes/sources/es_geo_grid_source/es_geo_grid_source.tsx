@@ -51,7 +51,7 @@ type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | '
 const MAX_GEOTILE_LEVEL = 29;
 
 export const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
-  defaultMessage: 'Clusters and grids',
+  defaultMessage: 'Clusters, grids, and hexes',
 });
 
 export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle', {
@@ -135,6 +135,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
       return true;
     }
+
+    // hex uses MVT regardless of resolution because hex never supported "top terms" metric
+    if (this._descriptor.requestType === RENDER_AS.HEX) {
+      return true;
+    }
+
+    // point and grid only use mvt at high resolution because lower resolutions may contain mvt unsupported "top terms" metric
     return this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE;
   }
 
@@ -452,15 +459,12 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const requestType =
-      this._descriptor.requestType === RENDER_AS.GRID ? RENDER_AS.GRID : RENDER_AS.POINT;
-
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
 &requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
-&requestType=${requestType}\
+&renderAs=${this._descriptor.requestType}\
 &token=${refreshToken}`;
   }
 
@@ -479,7 +483,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
-    if (this._descriptor.requestType === RENDER_AS.GRID) {
+    if (this._descriptor.requestType === RENDER_AS.GRID || this._descriptor.requestType === RENDER_AS.HEX) {
       return [VECTOR_SHAPE_TYPE.POLYGON];
     }
 
