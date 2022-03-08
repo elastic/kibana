@@ -184,7 +184,7 @@ const calculateRealRangeValueMax = (
   return max;
 };
 
-const getPerviousSectionValue = (value: number, bands: number[]) => {
+const getPreviousSectionValue = (value: number, bands: number[]) => {
   // bands value is equal to the stop. The purpose of this value is coloring the previous section, which is smaller, then the band.
   // So, the smaller value should be taken. For the first element -1, for the next - middle value of the previous section.
 
