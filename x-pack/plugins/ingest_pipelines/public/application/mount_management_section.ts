@@ -27,7 +27,7 @@ export async function mountManagementSection(
   const {
     docLinks,
     i18n: { Context: I18nContext },
-    application: { navigateToUrl, capabilities }
+    application: { navigateToUrl, capabilities },
   } = coreStart;
 
   documentationService.setup(docLinks);

@@ -94,7 +94,10 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({
                     onClick={copy}
                     data-test-subj="apiRequestFlyoutCopyClipboardButton"
                   >
-                    <FormattedMessage id="esUi.viewApiRequest.copyToClipboardButton" defaultMessage="Copy to clipboard" />
+                    <FormattedMessage
+                      id="esUi.viewApiRequest.copyToClipboardButton"
+                      defaultMessage="Copy to clipboard"
+                    />
                   </EuiButtonEmpty>
                 )}
               </EuiCopy>
@@ -107,7 +110,10 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({
                   onClick={consolePreviewClick}
                   data-test-subj="apiRequestFlyoutOpenInConsoleButton"
                 >
-                  <FormattedMessage id="esUi.viewApiRequest.openInConsoleButton" defaultMessage="Open in Console" />
+                  <FormattedMessage
+                    id="esUi.viewApiRequest.openInConsoleButton"
+                    defaultMessage="Open in Console"
+                  />
                 </EuiButtonEmpty>
               )}
             </div>
