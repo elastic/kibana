@@ -53,7 +53,8 @@ export const hasUserIndexPattern = async ({ esClient, soClient }: Deps): Promise
   const hasAnyNonDefaultFleetDataStreams = resolveResponse.data_streams.some(
     (ds) =>
       ds.name !== FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE &&
-      ds.name !== FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE
+      ds.name !== FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE &&
+      ds.name !== FLEET_ASSETS_TO_IGNORE.ENTERPRISE_SEARCH_DATA_STREAM_TO_IGNORE
   );
 
   if (hasAnyNonDefaultFleetDataStreams) return true;
