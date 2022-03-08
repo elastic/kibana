@@ -7,4 +7,4 @@
 
 export { DocumentCreationButtons } from './document_creation_buttons';
 export { DocumentCreationFlyout } from './document_creation_flyout';
-export { DocumentCreationLogic } from './document_creation_logic';
+export { DocumentCreationLogic, ActiveJsonTab } from './document_creation_logic';
