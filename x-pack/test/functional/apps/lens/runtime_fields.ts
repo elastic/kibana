@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.enableValue();
       await fieldEditor.typeScript("emit('abc')");
       await fieldEditor.save();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.searchField('runtime');
       await PageObjects.lens.waitForField('runtimefield');
       await PageObjects.lens.dragFieldToWorkspace('runtimefield');
