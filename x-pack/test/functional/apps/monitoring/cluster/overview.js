@@ -152,10 +152,8 @@ export default function ({ getService, getPageObjects }) {
         expect(await overview.getEsReplicaShards()).to.be('0');
       });
 
-      it('shows no other component panels', async () => {
-        expect(await overview.doesKbnPanelExist()).to.be(false);
-        expect(await overview.doesLsPanelExist()).to.be(false);
-        expect(await overview.doesEntSearchPanelExist()).to.be(false);
+      it('shows only elasticsearch panel', async () => {
+        expect(await overview.getPresentPanels()).to.eql(['Elasticsearch']);
       });
     });
 
