@@ -94,26 +94,29 @@ export async function getAgentStatusForAgentPolicy(
     events: 0,
   };
 }
-export async function getIncomingDataByAgentsId(esClient: ElasticsearchClient, agentsId: string[]) {
+export async function getIncomingDataByAgentsId(
+  esClient: ElasticsearchClient,
+  agentsIds: string[]
+) {
   try {
     const searchResult = await esClient.search({
       index: DATA_STREAM_INDEX_PATTERN,
       allow_partial_search_results: true,
       _source: false,
-      timeout: '10s',
+      timeout: '5s',
       body: {
         query: {
           bool: {
             must: [
               {
                 terms: {
-                  'agent.id': agentsId,
+                  'agent.id': agentsIds,
                 },
               },
               {
                 range: {
                   '@timestamp': {
-                    gte: 'now-10m',
+                    gte: 'now-5m',
                     lte: 'now',
                   },
                 },
@@ -125,7 +128,7 @@ export async function getIncomingDataByAgentsId(esClient: ElasticsearchClient, a
           agent_ids: {
             terms: {
               field: 'agent.id',
-              size: 5,
+              size: 10,
             },
           },
         },
@@ -133,7 +136,7 @@ export async function getIncomingDataByAgentsId(esClient: ElasticsearchClient, a
     });
 
     if (!searchResult.aggregations?.agent_ids) {
-      return agentsId.map((id) => {
+      return agentsIds.map((id) => {
         return { [id]: { data: false } };
       });
     }
@@ -143,7 +146,7 @@ export async function getIncomingDataByAgentsId(esClient: ElasticsearchClient, a
       (bucket: any) => bucket.key as string
     );
 
-    return agentsId.map((id) =>
+    return agentsIds.map((id) =>
       agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }
     );
   } catch (e) {
