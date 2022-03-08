@@ -232,6 +232,9 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.click(SUBJ_BEATS_LISTING);
     }
 
+    doesEntSearchPanelExist() {
+      return testSubjects.exists(SUBJ_ENT_SEARCH_PANEL);
+    }
     getEntSearchTotalNodes() {
       return testSubjects.getVisibleText(SUBJ_ENT_SEARCH_TOTAL_NODES);
     }
