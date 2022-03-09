@@ -19,7 +19,7 @@ describe('getDefaultSort function', function () {
 
   test('should return default sort for an index pattern with timeFieldName', function () {
     expect(getDefaultSort(stubDataView, 'desc')).toEqual([['@timestamp', 'desc']]);
-    expect(getDefaultSort(stubDataViewWithoutTimeField, 'asc')).toEqual([['@timestamp', 'asc']]);
+    expect(getDefaultSort(stubDataView, 'asc')).toEqual([['@timestamp', 'asc']]);
   });
 
   test('should return default sort for an index pattern without timeFieldName', function () {
