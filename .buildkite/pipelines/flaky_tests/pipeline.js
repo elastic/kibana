@@ -29,12 +29,14 @@ const inputs = [
   },
 ];
 
+const cypressSuites = ['security_solution', 'osquery_cypress', 'fleet_cypress'];
+
 for (const group of groups) {
   if (!group.ciGroups) {
     inputs.push(stepInput(group.key, group.name));
-  } else if (Array.isArray(group.ciGroups)) {
+  } else if (group.key === 'xpack/cypress') {
     for (let i = 1; i <= group.ciGroups.length; i++) {
-      const testSuite = group.ciGroups[i];
+      const testSuite = cypressSuites[i];
       inputs.push(stepInput(`${group.key}/${testSuite}`, `${group.name} ${testSuite}`));
     }
   } else {
