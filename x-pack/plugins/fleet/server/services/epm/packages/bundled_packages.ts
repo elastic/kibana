@@ -40,6 +40,10 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
       })
     );
 
+    logger.info(
+      `Found bundled packages: ${result.map((pkg) => `${pkg.name}-${pkg.version}`).join(', ')}`
+    );
+
     return result;
   } catch (err) {
     const logger = appContextService.getLogger();
