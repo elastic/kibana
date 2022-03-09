@@ -128,8 +128,8 @@ export function QueryBarMenu({
   useEffect(() => {
     const hasFilters = Boolean(filters && filters.length > 0);
     const hasQuery = Boolean(query && query.query);
-    setHasFiltersOrQuery(hasFilters || hasQuery);
-  }, [filters, query]);
+    setHasFiltersOrQuery(hasFilters || hasQuery || Boolean(savedQuery));
+  }, [filters, query, savedQuery]);
 
   useEffect(() => {
     if (openQueryBarMenu) {
