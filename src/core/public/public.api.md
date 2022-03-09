@@ -1389,7 +1389,7 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History_2<
 
 // @public
 export class SimpleSavedObject<T = unknown> {
-    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, }: SavedObject<T>);
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, updated_at: updatedAt, }: SavedObject<T>);
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -1415,6 +1415,8 @@ export class SimpleSavedObject<T = unknown> {
     set(key: string, value: any): T;
     // (undocumented)
     type: SavedObject<T>['type'];
+    // (undocumented)
+    updatedAt: SavedObject<T>['updated_at'];
     // (undocumented)
     _version?: SavedObject<T>['version'];
 }
