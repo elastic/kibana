@@ -3878,6 +3878,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/generate@link:bazel-bin/packages/kbn-generate":
+  version "0.0.0"
+  uid ""
+
 "@kbn/i18n-react@link:bazel-bin/packages/kbn-i18n-react":
   version "0.0.0"
   uid ""
@@ -3907,6 +3911,10 @@
   uid ""
 
 "@kbn/optimizer@link:bazel-bin/packages/kbn-optimizer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/packages@link:bazel-bin/packages/kbn-packages":
   version "0.0.0"
   uid ""
 
@@ -6831,6 +6839,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__generate@link:bazel-bin/packages/kbn-generate/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__i18n-react@link:bazel-bin/packages/kbn-i18n-react/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6856,6 +6868,10 @@
   uid ""
 
 "@types/kbn__optimizer@link:bazel-bin/packages/kbn-optimizer/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__packages@link:bazel-bin/packages/kbn-packages/npm_module_types":
   version "0.0.0"
   uid ""
 
