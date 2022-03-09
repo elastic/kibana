@@ -14,7 +14,6 @@ export type {
 export type { XYState } from './xy_visualization/types';
 export type { DataType, OperationMetadata, Visualization } from './types';
 export type {
-  MetricState,
   AxesSettingsConfig,
   XYLayerConfig,
   LegendConfig,
