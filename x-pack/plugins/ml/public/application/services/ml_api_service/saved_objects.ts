@@ -7,16 +7,21 @@
 
 // Service for managing job saved objects
 
+import { useMemo } from 'react';
+import { useMlKibana } from '../../contexts/kibana';
+
 import { HttpService } from '../http_service';
 
 import { basePath } from './index';
 import {
   JobType,
+  TrainedModelType,
   CanDeleteJobResponse,
   SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
   SavedObjectResult,
   JobsSpacesResponse,
+  TrainedModelsSpacesResponse,
   SyncCheckResponse,
 } from '../../../../common/types/saved_objects';
 
@@ -62,7 +67,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       query: { simulate },
     });
   },
-  syncCheck(jobType?: JobType) {
+  syncCheck(jobType?: JobType | TrainedModelType) {
     const body = JSON.stringify({ jobType });
     return httpService.http<SyncCheckResponse>({
       path: `${basePath()}/saved_objects/sync_check`,
@@ -78,4 +83,32 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+  trainedModelsSpaces() {
+    return httpService.http<TrainedModelsSpacesResponse>({
+      path: `${basePath()}/saved_objects/trained_models_spaces`,
+      method: 'GET',
+    });
+  },
+  updateModelsSpaces(modelIds: string[], spacesToAdd: string[], spacesToRemove: string[]) {
+    const body = JSON.stringify({ modelIds, spacesToAdd, spacesToRemove });
+    return httpService.http<SavedObjectResult>({
+      path: `${basePath()}/saved_objects/update_trained_models_spaces`,
+      method: 'POST',
+      body,
+    });
+  },
 });
+
+type SavedObjectsApiService = ReturnType<typeof savedObjectsApiProvider>;
+
+/**
+ * Hooks for accessing {@link TrainedModelsApiService} in React components.
+ */
+export function useSavedObjectsApiService(): SavedObjectsApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => savedObjectsApiProvider(httpService), [httpService]);
+}
