@@ -622,20 +622,23 @@ export const useField = <T, FormType = FormData, I = T>(
       });
     }
 
-    setIsModified(() => {
-      if (typeof value === 'object') {
-        return JSON.stringify(value) !== JSON.stringify(initialValueDeserialized);
-      }
-      return value !== initialValueDeserialized;
-    });
-
     return () => {
       if (debounceTimeout.current) {
         clearTimeout(debounceTimeout.current);
         debounceTimeout.current = null;
       }
     };
-  }, [value, runValidationsOnValueChange, initialValueDeserialized]);
+  }, [value, runValidationsOnValueChange]);
+
+  // Value change: set "isModified" state
+  useEffect(() => {
+    setIsModified(() => {
+      if (typeof value === 'object') {
+        return JSON.stringify(value) !== JSON.stringify(initialValueDeserialized);
+      }
+      return value !== initialValueDeserialized;
+    });
+  }, [value, initialValueDeserialized]);
 
   // Errors change: notify prop listener (<UseField onError={() => {...}} />)
   useEffect(() => {
