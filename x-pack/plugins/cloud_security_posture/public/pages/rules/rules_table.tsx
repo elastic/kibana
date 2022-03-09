@@ -13,7 +13,7 @@ import {
   EuiBasicTable,
   EuiBasicTableProps,
 } from '@elastic/eui';
-// import moment from 'moment';
+import moment from 'moment';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
@@ -85,8 +85,8 @@ const ruleNameRenderer = (name: string) => (
   </EuiLink>
 );
 
-// const timestampRenderer = (timestamp: string) =>
-//   moment.duration(moment().diff(timestamp)).humanize();
+const timestampRenderer = (timestamp: string) =>
+  moment.duration(moment().diff(timestamp)).humanize();
 
 interface GetColumnProps {
   toggleRule: (rule: RuleSavedObject) => void;
@@ -121,12 +121,10 @@ const getColumns = ({
     width: '15%',
   },
   {
-    // TODO: get timestamp value
-    // add SavedObject["updated_at"] to SimpleSavedObject?
-    field: 'updated_at',
+    field: 'updatedAt',
     name: TEXT.UPDATED_AT,
     width: '15%',
-    // render: timestampRenderer,
+    render: timestampRenderer,
   },
   {
     field: 'attributes.enabled',

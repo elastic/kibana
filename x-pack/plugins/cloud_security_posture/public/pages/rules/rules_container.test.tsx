@@ -35,7 +35,7 @@ const getWrapper =
 const getRuleMock = ({ id = chance.guid(), enabled }: { id?: string; enabled: boolean }) =>
   ({
     id,
-    updated_at: chance.date().toISOString(),
+    updatedAt: chance.date().toISOString(),
     attributes: {
       id,
       name: chance.word(),

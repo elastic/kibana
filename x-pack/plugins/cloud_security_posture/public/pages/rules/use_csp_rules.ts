@@ -5,12 +5,17 @@
  * 2.0.
  */
 import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { FunctionKeys } from 'utility-types';
 import { cspRuleAssetSavedObjectType, type CspRuleSchema } from '../../../common/schemas/csp_rule';
-import type { SavedObject, SavedObjectsFindOptions } from '../../../../../../src/core/public';
+import type { SavedObjectsFindOptions, SimpleSavedObject } from '../../../../../../src/core/public';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { UPDATE_FAILED } from './translations';
 
-export type RuleSavedObject = SavedObject<CspRuleSchema>; // SimpleSavedObject
+export type RuleSavedObject = Omit<
+  SimpleSavedObject<CspRuleSchema>,
+  FunctionKeys<SimpleSavedObject>
+>;
+
 export type RulesQuery = Required<Pick<SavedObjectsFindOptions, 'search' | 'page' | 'perPage'>>;
 export type RulesQueryResult = ReturnType<typeof useFindCspRules>;
 
