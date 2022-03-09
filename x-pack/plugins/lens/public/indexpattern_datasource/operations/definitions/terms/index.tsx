@@ -46,7 +46,6 @@ import {
   MAXIMUM_MAX_DOC_COUNT,
   supportedTypes,
 } from './constants';
-import { IndexPattern } from '../../..';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
