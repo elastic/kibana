@@ -95,7 +95,7 @@ export const EnginesOverview: React.FC = () => {
           loading={enginesLoading}
           pagination={{
             ...convertMetaToPagination(enginesMeta),
-            hidePerPageOptions: true,
+            showPerPageOptions: false,
           }}
           onChange={handlePageChange(onEnginesPagination)}
         />
@@ -127,7 +127,7 @@ export const EnginesOverview: React.FC = () => {
             loading={metaEnginesLoading}
             pagination={{
               ...convertMetaToPagination(metaEnginesMeta),
-              hidePerPageOptions: true,
+              showPerPageOptions: false,
             }}
             noItemsMessage={<EmptyMetaEnginesState />}
             onChange={handlePageChange(onMetaEnginesPagination)}
