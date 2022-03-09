@@ -132,6 +132,7 @@ describe('last_value', () => {
         dataType: 'string',
         params: {
           sortField: 'datefield',
+          showArrayValues: false,
         },
       };
       const indexPattern = createMockedIndexPattern();

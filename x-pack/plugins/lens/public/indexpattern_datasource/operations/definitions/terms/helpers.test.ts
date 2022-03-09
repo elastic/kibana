@@ -15,9 +15,9 @@ import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
   isSortableByColumn,
-  MULTI_KEY_VISUAL_SEPARATOR,
 } from './helpers';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
 
 const indexPattern = createMockedIndexPattern();
 

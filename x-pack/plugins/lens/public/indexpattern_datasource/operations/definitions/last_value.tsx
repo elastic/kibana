@@ -29,7 +29,7 @@ import {
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
-import { isScriptedField } from './terms';
+import { isScriptedField } from './terms/helpers';
 
 function ofName(name: string, timeShift: string | undefined) {
   return adjustTimeScaleLabelSuffix(
