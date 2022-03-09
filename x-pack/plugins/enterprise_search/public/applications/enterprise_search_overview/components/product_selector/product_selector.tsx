@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import {
   KibanaPageTemplate,
   KibanaPageTemplateSolutionNavAvatar,
-  NO_DATA_PAGE_TEMPLATE_PROPS,
 } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Chat } from '../../../../../../cloud/public';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
@@ -34,8 +33,6 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-import AppSearchImage from '../../assets/app_search.png';
-import WorkplaceSearchImage from '../../assets/workplace_search.png';
 import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
@@ -75,16 +72,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       <EuiFlexGroup justifyContent="center" gutterSize="xl">
         {shouldShowAppSearchCard && (
           <EuiFlexItem grow={false}>
-            <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
+            <ProductCard product={APP_SEARCH_PLUGIN} />
           </EuiFlexItem>
         )}
         {shouldShowWorkplaceSearchCard && (
           <EuiFlexItem grow={false}>
-            <ProductCard
-              product={WORKPLACE_SEARCH_PLUGIN}
-              url={WORKPLACE_SEARCH_URL}
-              image={WorkplaceSearchImage}
-            />
+            <ProductCard product={WORKPLACE_SEARCH_PLUGIN} url={WORKPLACE_SEARCH_URL} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -146,7 +139,10 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     />
   );
   return (
-    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
+    <KibanaPageTemplate
+      restrictWidth={950}
+      pageContentProps={{ hasShadow: false, color: 'transparent' }}
+    >
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
       <TrialCallout />
@@ -156,9 +152,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
           iconType="logoEnterpriseSearch"
           size="xxl"
         />
-
         <EuiSpacer />
-
         <h1>
           {i18n.translate('xpack.enterpriseSearch.overview.heading', {
             defaultMessage: 'Welcome to Elastic Enterprise Search',
@@ -174,6 +168,38 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
               })}
         </p>
       </EuiText>
+      <EuiSpacer size="xxl" />
+      {/* TODO: Replace the illustration with the proper one from the designs */}
+      <EuiEmptyPrompt
+        title={<h2>Create your first search index</h2>}
+        layout="horizontal"
+        color="plain"
+        icon={<EuiImage size="fullWidth" src={illustration} alt="" />}
+        body={
+          <p>
+            {i18n.translate('xpack.enterpriseSearch.emptyState.description', {
+              defaultMessage:
+                'Use Enterprise Search to build search experiences for all your content. Crawl your websites, connect to a third party, or connect to an existing Elasticsearch index.',
+            })}
+          </p>
+        }
+        actions={
+          <EuiButton color="primary" fill>
+            Create search index
+          </EuiButton>
+        }
+        footer={
+          <>
+            <EuiTitle size="xxs">
+              <span>Want to learn more?</span>
+            </EuiTitle>
+            &nbsp;
+            <EuiLink href="#" target="_blank">
+              Read the docs
+            </EuiLink>
+          </>
+        }
+      />
       <EuiSpacer size="xxl" />
       {shouldShowEnterpriseSearchCards ? productCards : insufficientAccessMessage}
       <Chat />
