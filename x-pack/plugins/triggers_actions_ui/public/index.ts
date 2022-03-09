@@ -11,19 +11,19 @@
 import { Plugin } from './plugin';
 
 export type {
-  AlertAction,
-  Alert,
-  AlertTypeModel,
+  RuleAction,
+  Rule,
+  RuleTypeModel,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
   ValidationResult,
   ActionVariables,
   ActionConnector,
   IErrorObject,
-  AlertFlyoutCloseReason,
-  AlertTypeParams,
+  RuleFlyoutCloseReason,
+  RuleTypeParams,
   AsApiContract,
 } from './types';
 
@@ -45,6 +45,9 @@ export function plugin() {
 
 export { Plugin };
 export * from './plugin';
+// TODO remove this import when we expose the Rules tables as a component
+export { loadRules } from './application/lib/rule_api/rules';
+export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
 
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 

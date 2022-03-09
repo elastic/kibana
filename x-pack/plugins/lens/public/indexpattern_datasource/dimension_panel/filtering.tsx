@@ -16,9 +16,10 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiPopoverProps,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { Query } from 'src/plugins/data/public';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
+import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import { validateQuery } from '../operations/definitions/filters';
 import { QueryInput } from '../query_input';
 import type { IndexPattern, IndexPatternLayer } from '../types';
@@ -53,13 +54,15 @@ export function Filtering({
   updateLayer,
   indexPattern,
   isInitiallyOpen,
+  helpMessage,
 }: {
-  selectedColumn: IndexPatternColumn;
+  selectedColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
   columnId: string;
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
   isInitiallyOpen: boolean;
+  helpMessage: string | null;
 }) {
   const inputFilter = selectedColumn.filter;
   const [queryInput, setQueryInput] = useState(inputFilter ?? defaultFilter);
@@ -92,13 +95,26 @@ export function Filtering({
     indexPattern
   );
 
+  const labelNode = helpMessage ? (
+    <>
+      {filterByLabel}{' '}
+      <EuiIconTip
+        color="subdued"
+        content={helpMessage}
+        iconProps={{
+          className: 'eui-alignTop',
+        }}
+        position="top"
+        size="s"
+        type="questionInCircle"
+      />
+    </>
+  ) : (
+    filterByLabel
+  );
+
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      label={filterByLabel}
-      fullWidth
-      isInvalid={!isInputFilterValid}
-    >
+    <EuiFormRow display="rowCompressed" label={labelNode} fullWidth isInvalid={!isInputFilterValid}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
           <EuiPopover
@@ -150,10 +166,10 @@ export function Filtering({
               isInvalid={!isQueryInputValid}
               error={queryInputError}
               fullWidth={true}
+              data-test-subj="indexPattern-filter-by-input"
             >
               <QueryInput
                 indexPatternTitle={indexPattern.title}
-                data-test-subj="indexPattern-filter-by-input"
                 value={queryInput}
                 onChange={setQueryInput}
                 isInvalid={!isQueryInputValid}

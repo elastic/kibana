@@ -29,6 +29,7 @@ function getDescription() {
 }
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const emsSettings = getEMSSettings();

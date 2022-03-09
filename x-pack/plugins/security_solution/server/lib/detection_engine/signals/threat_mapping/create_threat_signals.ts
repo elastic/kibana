@@ -13,6 +13,7 @@ import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
+import { getEventCount } from './get_event_count';
 
 export const createThreatSignals = async ({
   alertId,
@@ -62,6 +63,23 @@ export const createThreatSignals = async ({
     warningMessages: [],
   };
 
+  const eventCount = await getEventCount({
+    esClient: services.scopedClusterClient.asCurrentUser,
+    index: inputIndex,
+    exceptionItems,
+    tuple,
+    query,
+    language,
+    filters,
+  });
+
+  logger.debug(`Total event count: ${eventCount}`);
+
+  if (eventCount === 0) {
+    logger.debug(buildRuleMessage('Indicator matching rule has completed'));
+    return results;
+  }
+
   let threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
@@ -70,7 +88,13 @@ export const createThreatSignals = async ({
     language: threatLanguage,
     index: threatIndex,
   });
+
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
+
+  const threatListConfig = {
+    fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
+    _source: false,
+  };
 
   let threatList = await getThreatList({
     esClient: services.scopedClusterClient.asCurrentUser,
@@ -79,19 +103,16 @@ export const createThreatSignals = async ({
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
-    listClient,
     searchAfter: undefined,
-    sortField: undefined,
-    sortOrder: undefined,
     logger,
     buildRuleMessage,
     perPage,
+    threatListConfig,
   });
 
   const threatEnrichment = buildThreatEnrichment({
     buildRuleMessage,
     exceptionItems,
-    listClient,
     logger,
     services,
     threatFilters,
@@ -161,14 +182,11 @@ export const createThreatSignals = async ({
       language: threatLanguage,
       threatFilters,
       index: threatIndex,
-      // @ts-expect-error@elastic/elasticsearch SearchSortResults might contain null
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
-      sortField: undefined,
-      sortOrder: undefined,
-      listClient,
       buildRuleMessage,
       logger,
       perPage,
+      threatListConfig,
     });
   }
 

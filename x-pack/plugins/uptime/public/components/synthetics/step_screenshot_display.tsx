@@ -15,14 +15,14 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useContext, useEffect, useMemo, useRef, useState, FC } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import {
   isScreenshotRef as isAScreenshotRef,
   ScreenshotRefImageData,
 } from '../../../common/runtime_types';
-import { UptimeSettingsContext, UptimeThemeContext } from '../../contexts';
+import { UptimeRefreshContext, UptimeSettingsContext, UptimeThemeContext } from '../../contexts';
 import { useFetcher } from '../../../../observability/public';
 import { getJourneyScreenshot } from '../../state/api/journey';
 import { useCompositeImage } from '../../hooks';
@@ -114,6 +114,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
     rootMargin: '0px',
     threshold: 1,
   });
+  const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const [hasIntersected, setHasIntersected] = useState<boolean>(false);
   const isIntersecting = intersection?.isIntersecting;
@@ -134,7 +135,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
     if (isScreenshotRef) {
       return getJourneyScreenshot(imgSrc);
     }
-  }, [basePath, checkGroup, imgSrc, stepIndex, isScreenshotRef]);
+  }, [basePath, checkGroup, imgSrc, stepIndex, isScreenshotRef, lastRefresh]);
 
   const refDimensions = useMemo(() => {
     if (isAScreenshotRef(screenshotRef)) {

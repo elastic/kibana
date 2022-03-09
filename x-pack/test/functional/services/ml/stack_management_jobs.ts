@@ -99,7 +99,7 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertADJobRowSpaces(adJobId: string, expectedSpaces: string[]) {
-      await mlADJobTable.refreshJobList();
+      await mlADJobTable.refreshJobList('stackMgmtJobList');
       const rows = await mlADJobTable.parseJobTable('stackMgmtJobList');
       const jobRow = rows.filter((row) => row.id === adJobId)[0];
       expect(jobRow).to.have.property('spaces');
@@ -112,7 +112,7 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertDFAJobRowSpaces(dfaJobId: string, expectedSpaces: string[]) {
-      await mlDFAJobTable.refreshAnalyticsTable();
+      await mlDFAJobTable.refreshAnalyticsTable('stackMgmtJobList');
       const rows = await mlDFAJobTable.parseAnalyticsTable('stackMgmtJobList');
       const jobRow = rows.filter((row) => row.id === dfaJobId)[0];
       expect(jobRow).to.have.property('spaces');
@@ -182,7 +182,7 @@ export function MachineLearningStackManagementJobsProvider(
     async isSpaceSelectionRowSelected(spaceId: string): Promise<boolean> {
       const state = await testSubjects.getAttribute(
         `sts-space-selector-row-${spaceId}`,
-        'aria-selected',
+        'data-test-selected',
         1000
       );
       return state === 'true';

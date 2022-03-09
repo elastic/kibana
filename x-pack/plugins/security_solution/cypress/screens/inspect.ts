@@ -21,10 +21,6 @@ export const INSPECT_HOSTS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
     title: 'Hosts Stat',
   },
   {
-    id: '[data-test-subj="stat-authentication"]',
-    title: 'User Authentications Stat',
-  },
-  {
     id: '[data-test-subj="stat-uniqueIps"]',
     title: 'Unique IPs Stat',
   },

@@ -23,7 +23,7 @@ const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
 const mockSingleSearchAfter = jest.fn();
 
 // Failing with rule registry enabled
-describe.skip('findThresholdSignals', () => {
+describe('findThresholdSignals', () => {
   let mockService: AlertServicesMock;
 
   beforeEach(() => {
@@ -64,6 +64,11 @@ describe.skip('findThresholdSignals', () => {
                   field: '@timestamp',
                 },
               },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
+                },
+              },
             },
           },
         },
@@ -98,6 +103,11 @@ describe.skip('findThresholdSignals', () => {
             aggs: {
               max_timestamp: {
                 max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
                   field: '@timestamp',
                 },
               },
@@ -143,6 +153,11 @@ describe.skip('findThresholdSignals', () => {
                 aggs: {
                   max_timestamp: {
                     max: {
+                      field: '@timestamp',
+                    },
+                  },
+                  min_timestamp: {
+                    min: {
                       field: '@timestamp',
                     },
                   },
@@ -212,6 +227,11 @@ describe.skip('findThresholdSignals', () => {
                       field: '@timestamp',
                     },
                   },
+                  min_timestamp: {
+                    min: {
+                      field: '@timestamp',
+                    },
+                  },
                 },
               },
             },
@@ -270,6 +290,11 @@ describe.skip('findThresholdSignals', () => {
               },
               max_timestamp: {
                 max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
                   field: '@timestamp',
                 },
               },

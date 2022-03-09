@@ -21,6 +21,7 @@ import { DataPanel } from '../data_panel';
 import { AppSearchPageTemplate } from '../layout';
 
 import { EmptyState, EmptyMetaEnginesState } from './components';
+import { AuditLogsModal } from './components/audit_logs_modal/audit_logs_modal';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
@@ -66,7 +67,7 @@ export const EnginesOverview: React.FC = () => {
       pageChrome={[ENGINES_TITLE]}
       pageHeader={{ pageTitle: ENGINES_OVERVIEW_TITLE }}
       isLoading={dataLoading}
-      isEmptyState={!engines.length}
+      isEmptyState={!engines.length && !metaEngines.length}
       emptyState={<EmptyState />}
     >
       <DataPanel
@@ -77,7 +78,7 @@ export const EnginesOverview: React.FC = () => {
         action={
           canManageEngines && (
             <EuiButtonTo
-              color="secondary"
+              color="success"
               size="s"
               iconType="plusInCircle"
               data-test-subj="appSearchEnginesEngineCreationButton"
@@ -109,7 +110,7 @@ export const EnginesOverview: React.FC = () => {
           action={
             canManageMetaEngines && (
               <EuiButtonTo
-                color="secondary"
+                color="success"
                 size="s"
                 iconType="plusInCircle"
                 data-test-subj="appSearchEnginesMetaEngineCreationButton"
@@ -144,6 +145,7 @@ export const EnginesOverview: React.FC = () => {
           data-test-subj="metaEnginesLicenseCTA"
         />
       )}
+      <AuditLogsModal />
     </AppSearchPageTemplate>
   );
 };

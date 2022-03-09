@@ -6,17 +6,25 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { migrations, LensDocShape } from './saved_object_migrations';
+import { getAllMigrations, LensDocShape } from './saved_object_migrations';
 import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
-import { LensDocShape715, VisState716, VisStatePost715, VisStatePre715 } from './types';
+import {
+  LensDocShape715,
+  LensDocShape810,
+  VisState716,
+  VisStatePost715,
+  VisStatePre715,
+} from './types';
 import { CustomPaletteParams, layerTypes } from '../../common';
 import { PaletteOutput } from 'src/plugins/charts/common';
+import { Filter } from '@kbn/es-query';
 
 describe('Lens migrations', () => {
+  const migrations = getAllMigrations({}, {});
   describe('7.7.0 missing dimensions in XY', () => {
     const context = {} as SavedObjectMigrationContext;
 
@@ -1402,6 +1410,373 @@ describe('Lens migrations', () => {
         { color: 'green', stop: 60 },
         { color: 'yellow', stop: 80 },
       ]);
+    });
+  });
+
+  describe('8.1.0 update filter reference schema', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto', timeZone: 'Europe/Berlin' },
+                    },
+                    '4': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto' },
+                    },
+                    '5': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'my_unexpected_operation',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { timeZone: 'do not delete' },
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [
+            {
+              meta: {
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'geo.src',
+                params: { query: 'US' },
+                indexRefName: 'filter-index-pattern-0',
+              },
+              query: { match_phrase: { 'geo.src': 'US' } },
+              $state: { store: 'appState' },
+            },
+            {
+              meta: {
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'client_ip',
+                params: { query: '1234.5344.2243.3245' },
+                indexRefName: 'filter-index-pattern-2',
+              },
+              query: { match_phrase: { client_ip: '1234.5344.2243.3245' } },
+              $state: { store: 'appState' },
+            },
+          ],
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape715<VisState716>>;
+
+    it('should rename indexRefName to index in filters metadata', () => {
+      const expectedFilters = example.attributes.state.filters.map((filter) => {
+        return {
+          ...filter,
+          meta: {
+            ...filter.meta,
+            index: filter.meta.indexRefName,
+            indexRefName: undefined,
+          },
+        };
+      });
+
+      const result = migrations['8.1.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+
+      expect(result.attributes.state.filters).toEqual(expectedFilters);
+    });
+  });
+
+  describe('8.1.0 rename records field', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto', timeZone: 'Europe/Berlin' },
+                    },
+                    '4': {
+                      label: 'Anzahl der Aufnahmen',
+                      dataType: 'number',
+                      operationType: 'count',
+                      sourceField: 'Aufnahmen',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                    '5': {
+                      label: 'Sum of bytes',
+                      dataType: 'numver',
+                      operationType: 'sum',
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('should change field for count operations but not for others, not changing the vis', () => {
+      const result = migrations['8.1.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+
+      expect(
+        Object.values(
+          result.attributes.state.datasourceStates.indexpattern.layers['2'].columns
+        ).map((column) => column.sourceField)
+      ).toEqual(['@timestamp', '___records___', 'bytes']);
+      expect(example.attributes.state.visualization).toEqual(result.attributes.state.visualization);
+    });
+  });
+
+  test('should properly apply a filter migration within a lens visualization', () => {
+    const migrationVersion = 'some-version';
+
+    const lensVisualizationDoc = {
+      attributes: {
+        state: {
+          filters: [
+            {
+              filter: 1,
+              migrated: false,
+            },
+            {
+              filter: 2,
+              migrated: false,
+            },
+          ],
+        },
+      },
+    };
+
+    const migrationFunctionsObject = getAllMigrations(
+      {
+        [migrationVersion]: (filters: Filter[]) => {
+          return filters.map((filterState) => ({
+            ...filterState,
+            migrated: true,
+          }));
+        },
+      },
+      {}
+    );
+
+    const migratedLensDoc = migrationFunctionsObject[migrationVersion](
+      lensVisualizationDoc as SavedObjectUnsanitizedDoc,
+      {} as SavedObjectMigrationContext
+    );
+
+    expect(migratedLensDoc).toEqual({
+      attributes: {
+        state: {
+          filters: [
+            {
+              filter: 1,
+              migrated: true,
+            },
+            {
+              filter: 2,
+              migrated: true,
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  test('should properly apply a custom visualization migration', () => {
+    const migrationVersion = 'some-version';
+
+    const lensVisualizationDoc = {
+      attributes: {
+        visualizationType: 'abc',
+        state: {
+          visualization: { oldState: true },
+        },
+      },
+    };
+
+    const migrationFn = jest.fn((oldState: { oldState: boolean }) => ({
+      newState: oldState.oldState,
+    }));
+
+    const migrationFunctionsObject = getAllMigrations(
+      {},
+      {
+        abc: () => ({
+          [migrationVersion]: migrationFn,
+        }),
+      }
+    );
+    const migratedLensDoc = migrationFunctionsObject[migrationVersion](
+      lensVisualizationDoc as SavedObjectUnsanitizedDoc,
+      {} as SavedObjectMigrationContext
+    );
+    const otherLensDoc = migrationFunctionsObject[migrationVersion](
+      {
+        ...lensVisualizationDoc,
+        attributes: {
+          ...lensVisualizationDoc.attributes,
+          visualizationType: 'def',
+        },
+      } as SavedObjectUnsanitizedDoc,
+      {} as SavedObjectMigrationContext
+    );
+
+    expect(migrationFn).toHaveBeenCalledTimes(1);
+
+    expect(migratedLensDoc).toEqual({
+      attributes: {
+        visualizationType: 'abc',
+        state: {
+          visualization: { newState: true },
+        },
+      },
+    });
+    expect(otherLensDoc).toEqual({
+      attributes: {
+        visualizationType: 'def',
+        state: {
+          visualization: { oldState: true },
+        },
+      },
+    });
+  });
+
+  describe('8.1.0 add parentFormat to terms operation', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      dataType: 'string',
+                      isBucketed: true,
+                      label: 'Top values of geoip.country_iso_code',
+                      operationType: 'terms',
+                      params: {},
+                      scale: 'ordinal',
+                      sourceField: 'geoip.country_iso_code',
+                    },
+                    '4': {
+                      label: 'Anzahl der Aufnahmen',
+                      dataType: 'number',
+                      operationType: 'count',
+                      sourceField: 'Aufnahmen',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                    '5': {
+                      label: 'Sum of bytes',
+                      dataType: 'numver',
+                      operationType: 'sum',
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('should change field for count operations but not for others, not changing the vis', () => {
+      const result = migrations['8.1.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+
+      expect(
+        Object.values(
+          result.attributes.state.datasourceStates.indexpattern.layers['2'].columns
+        ).find(({ operationType }) => operationType === 'terms')
+      ).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({ parentFormat: { id: 'terms' } }),
+        })
+      );
     });
   });
 });

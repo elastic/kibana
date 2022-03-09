@@ -7,7 +7,6 @@
  */
 
 import { Assign } from '@kbn/utility-types';
-import { DatatableColumn } from 'src/plugins/expressions';
 import { IndexPattern } from '../..';
 import {
   aggAvg,
@@ -67,6 +66,8 @@ import {
   AggParamsStdDeviation,
   AggParamsSum,
   AggParamsTerms,
+  AggParamsMultiTerms,
+  AggParamsRareTerms,
   AggParamsTopHit,
   aggPercentileRanks,
   aggPercentiles,
@@ -76,6 +77,8 @@ import {
   aggStdDeviation,
   aggSum,
   aggTerms,
+  aggMultiTerms,
+  aggRareTerms,
   aggTopHit,
   AggTypesRegistry,
   AggTypesRegistrySetup,
@@ -84,10 +87,14 @@ import {
   CreateAggConfigParams,
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
-  AggConfig,
   aggFilteredMetric,
   aggSinglePercentile,
 } from './';
+import { AggParamsSampler } from './buckets/sampler';
+import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
+import { AggParamsSignificantText } from './buckets/significant_text';
+import { AggParamsTopMetrics } from './metrics/top_metrics';
+import { aggTopMetrics } from './metrics/top_metrics_fn';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
 export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
@@ -98,19 +105,12 @@ export type { IMetricAggType } from './metrics/metric_agg_type';
 export type { IpRangeKey } from './buckets/lib/ip_range';
 export type { OptionedValueProp } from './param_types/optioned';
 
-/** @internal */
 export interface AggsCommonSetup {
   types: AggTypesRegistrySetup;
 }
 
-/** @internal */
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
-  datatableUtilities: {
-    getIndexPattern: (column: DatatableColumn) => Promise<IndexPattern | undefined>;
-    getAggConfig: (column: DatatableColumn) => Promise<AggConfig | undefined>;
-    isFilterable: (column: DatatableColumn) => boolean;
-  };
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[]
@@ -127,14 +127,12 @@ export interface AggsCommonStart {
  */
 export type AggsStart = Assign<AggsCommonStart, { types: AggTypesRegistryStart }>;
 
-/** @internal */
 export interface BaseAggParams {
   json?: string;
   customLabel?: string;
   timeShift?: string;
 }
 
-/** @internal */
 export interface AggExpressionType {
   type: 'agg_type';
   value: AggConfigSerialized;
@@ -158,11 +156,16 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.FILTER]: AggParamsFilter;
   [BUCKET_TYPES.FILTERS]: AggParamsFilters;
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
+  [BUCKET_TYPES.SIGNIFICANT_TEXT]: AggParamsSignificantText;
   [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;
   [BUCKET_TYPES.GEOHASH_GRID]: AggParamsGeoHash;
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
+  [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
+  [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
+  [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
+  [BUCKET_TYPES.DIVERSIFIED_SAMPLER]: AggParamsDiversifiedSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
   [METRIC_TYPES.COUNT]: BaseAggParams;
@@ -186,6 +189,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
   [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiff;
   [METRIC_TYPES.TOP_HITS]: AggParamsTopHit;
+  [METRIC_TYPES.TOP_METRICS]: AggParamsTopMetrics;
 }
 
 /**
@@ -203,6 +207,8 @@ export interface AggFunctionsMapping {
   aggHistogram: ReturnType<typeof aggHistogram>;
   aggDateHistogram: ReturnType<typeof aggDateHistogram>;
   aggTerms: ReturnType<typeof aggTerms>;
+  aggMultiTerms: ReturnType<typeof aggMultiTerms>;
+  aggRareTerms: ReturnType<typeof aggRareTerms>;
   aggAvg: ReturnType<typeof aggAvg>;
   aggBucketAvg: ReturnType<typeof aggBucketAvg>;
   aggBucketMax: ReturnType<typeof aggBucketMax>;
@@ -226,4 +232,5 @@ export interface AggFunctionsMapping {
   aggStdDeviation: ReturnType<typeof aggStdDeviation>;
   aggSum: ReturnType<typeof aggSum>;
   aggTopHit: ReturnType<typeof aggTopHit>;
+  aggTopMetrics: ReturnType<typeof aggTopMetrics>;
 }

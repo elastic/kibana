@@ -22,10 +22,10 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.over
   defaultMessage: 'Overview',
 });
 
-export const DUCOMENT_SUMMARY = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.documentSummary',
+export const HIGHLIGHTES_FIELDS = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields',
   {
-    defaultMessage: 'Document Summary',
+    defaultMessage: 'Highlighted fields',
   }
 );
 
@@ -84,6 +84,10 @@ export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.al
   defaultMessage: 'Agent status',
 });
 
+export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
+  defaultMessage: 'Rule type',
+});
+
 export const MULTI_FIELD_TOOLTIP = i18n.translate(
   'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
   {
@@ -112,3 +116,7 @@ export const VIEW_RULE_DETAIL_PAGE = i18n.translate(
     defaultMessage: 'View Rule detail page',
   }
 );
+
+export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
+  defaultMessage: 'View all fields in table',
+});

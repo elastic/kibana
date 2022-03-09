@@ -5,32 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect } from 'react';
-import { History } from 'history';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './utils/use_discover_state';
 import { useUrl } from './utils/use_url';
 import { IndexPatternAttributes, SavedObject } from '../../../../data/common';
-import { DiscoverServices } from '../../build_services';
 import { SavedSearch } from '../../services/saved_searches';
+import { ElasticSearchHit } from '../../types';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
   /**
-   * Instance of browser history
-   */
-  history: History;
-  /**
    * List of available index patterns
    */
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-  /**
-   * Kibana core services used by discover
-   */
-  services: DiscoverServices;
   /**
    * Current instance of SavedSearch
    */
@@ -38,8 +31,11 @@ export interface DiscoverMainProps {
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { savedSearch, services, history, indexPatternList } = props;
+  const { savedSearch, indexPatternList } = props;
+  const services = useDiscoverServices();
   const { chrome, docLinks, uiSettings: config, data } = services;
+  const history = useHistory();
+  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const navigateTo = useCallback(
     (path: string) => {
       history.push(path);
@@ -65,6 +61,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     services,
     history,
     savedSearch,
+    setExpandedDoc,
   });
 
   /**
@@ -100,15 +97,16 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       indexPattern={indexPattern}
       indexPatternList={indexPatternList}
       inspectorAdapters={inspectorAdapters}
+      expandedDoc={expandedDoc}
       onChangeIndexPattern={onChangeIndexPattern}
       onUpdateQuery={onUpdateQuery}
       resetSavedSearch={resetCurrentSavedSearch}
+      setExpandedDoc={setExpandedDoc}
       navigateTo={navigateTo}
       savedSearch={savedSearch}
       savedSearchData$={data$}
       savedSearchRefetch$={refetch$}
       searchSource={searchSource}
-      services={services}
       state={state}
       stateContainer={stateContainer}
     />

@@ -34,6 +34,7 @@ export interface FleetConfigType {
   agentIdVerificationEnabled?: boolean;
   developer?: {
     disableRegistryVersionCheck?: boolean;
+    allowAgentUpgradeSourceUri?: boolean;
   };
 }
 

@@ -134,13 +134,13 @@ describe('alertType', () => {
     const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
     const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
-    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible agregations type
+    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
     );
 
     const result = await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as AlertServices<
@@ -178,7 +178,7 @@ describe('alertType', () => {
       },
     });
 
-    expect(alertServices.alertInstanceFactory).not.toHaveBeenCalled();
+    expect(alertServices.alertFactory.create).not.toHaveBeenCalled();
 
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -213,13 +213,13 @@ describe('alertType', () => {
         'time-field': newestDocumentTimestamp - 2000,
       },
     ]);
-    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
+    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
     );
 
     const result = await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as AlertServices<
@@ -257,8 +257,8 @@ describe('alertType', () => {
       },
     });
 
-    expect(alertServices.alertInstanceFactory).toHaveBeenCalledWith(ConditionMetAlertInstanceId);
-    const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
+    expect(alertServices.alertFactory.create).toHaveBeenCalledWith(ConditionMetAlertInstanceId);
+    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
     expect(instance.replaceState).toHaveBeenCalledWith({
       latestTimestamp: undefined,
       dateStart: expect.any(String),
@@ -286,8 +286,7 @@ describe('alertType', () => {
     const previousTimestamp = Date.now();
     const newestDocumentTimestamp = previousTimestamp + 1000;
 
-    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
+    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults([
           {
@@ -329,7 +328,7 @@ describe('alertType', () => {
       },
     });
 
-    const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
+    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
     expect(instance.replaceState).toHaveBeenCalledWith({
       // ensure the invalid "latestTimestamp" in the state is stored as an ISO string going forward
       latestTimestamp: new Date(previousTimestamp).toISOString(),
@@ -357,8 +356,7 @@ describe('alertType', () => {
 
     const oldestDocumentTimestamp = Date.now();
 
-    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
+    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults([
           {
@@ -373,6 +371,7 @@ describe('alertType', () => {
 
     const result = await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as AlertServices<
@@ -411,7 +410,7 @@ describe('alertType', () => {
       },
     });
 
-    const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
+    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
     expect(instance.replaceState).toHaveBeenCalledWith({
       latestTimestamp: undefined,
       dateStart: expect.any(String),
@@ -438,8 +437,7 @@ describe('alertType', () => {
 
     const oldestDocumentTimestamp = Date.now();
 
-    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
+    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults([
           {
@@ -451,6 +449,7 @@ describe('alertType', () => {
 
     const executorOptions = {
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as AlertServices<
@@ -489,7 +488,7 @@ describe('alertType', () => {
     };
     const result = await alertType.executor(executorOptions);
 
-    const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
+    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
     expect(instance.replaceState).toHaveBeenCalledWith({
       latestTimestamp: undefined,
       dateStart: expect.any(String),
@@ -501,8 +500,7 @@ describe('alertType', () => {
     });
 
     const newestDocumentTimestamp = oldestDocumentTimestamp + 5000;
-    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
+    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults([
           {
@@ -520,7 +518,7 @@ describe('alertType', () => {
       state: result as EsQueryAlertState,
     });
     const existingInstance: AlertInstanceMock =
-      alertServices.alertInstanceFactory.mock.results[1].value;
+      alertServices.alertFactory.create.mock.results[1].value;
     expect(existingInstance.replaceState).toHaveBeenCalledWith({
       latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
       dateStart: expect.any(String),
@@ -547,8 +545,7 @@ describe('alertType', () => {
 
     const oldestDocumentTimestamp = Date.now();
 
-    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
+    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults(
           [
@@ -566,6 +563,7 @@ describe('alertType', () => {
 
     const result = await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as AlertServices<
@@ -603,7 +601,7 @@ describe('alertType', () => {
       },
     });
 
-    const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
+    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
     expect(instance.replaceState).toHaveBeenCalledWith({
       latestTimestamp: undefined,
       dateStart: expect.any(String),
@@ -630,8 +628,7 @@ describe('alertType', () => {
 
     const oldestDocumentTimestamp = Date.now();
 
-    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
+    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults(
           [
@@ -650,6 +647,7 @@ describe('alertType', () => {
 
     const result = await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as AlertServices<
@@ -687,7 +685,7 @@ describe('alertType', () => {
       },
     });
 
-    const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
+    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
     expect(instance.replaceState).toHaveBeenCalledWith({
       latestTimestamp: undefined,
       dateStart: expect.any(String),

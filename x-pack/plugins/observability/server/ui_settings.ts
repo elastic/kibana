@@ -13,12 +13,14 @@ import {
   enableComparisonByDefault,
   enableInspectEsQueries,
   maxSuggestions,
+  enableInfrastructureView,
+  defaultApmServiceEnvironment,
 } from '../common/ui_settings_keys';
 
 /**
  * uiSettings definitions for Observability.
  */
-export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
+export const uiSettings: Record<string, UiSettingsParams<boolean | number | string>> = {
   [enableInspectEsQueries]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
@@ -48,8 +50,31 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
-      defaultMessage: 'Enable the comparison feature on APM UI',
+      defaultMessage: 'Enable the comparison feature in APM app',
     }),
     schema: schema.boolean(),
+  },
+  [enableInfrastructureView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureView', {
+      defaultMessage: 'Infrastructure feature',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
+      defaultMessage: 'Enable the Infrastruture view feature in APM app',
+    }),
+    schema: schema.boolean(),
+  },
+  [defaultApmServiceEnvironment]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.defaultApmServiceEnvironment', {
+      defaultMessage: 'Default service environment',
+    }),
+    description: i18n.translate('xpack.observability.defaultApmServiceEnvironmentDescription', {
+      defaultMessage:
+        'Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.',
+    }),
+    value: '',
+    schema: schema.string(),
   },
 };

@@ -7,7 +7,7 @@
  */
 
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
-import { IndexPattern, ISearchSource } from '../../../../../data/common';
+import { DataView, ISearchSource } from '../../../../../data/common';
 import { DataViewType } from '../../../../../data_views/common';
 import type { SortOrder } from '../../../services/saved_searches';
 import { DiscoverServices } from '../../../build_services';
@@ -25,7 +25,7 @@ export function updateSearchSource(
     sort,
     useNewFieldsApi,
   }: {
-    indexPattern: IndexPattern;
+    indexPattern: DataView;
     services: DiscoverServices;
     sort: SortOrder[];
     useNewFieldsApi: boolean;

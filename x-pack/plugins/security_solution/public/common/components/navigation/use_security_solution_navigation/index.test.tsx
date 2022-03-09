@@ -158,7 +158,7 @@ describe('useSecuritySolutionNavigation', () => {
                 "href": "securitySolutionUI/exceptions?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "id": "exceptions",
                 "isSelected": false,
-                "name": "Exceptions",
+                "name": "Exception lists",
                 "onClick": [Function],
               },
             ],
@@ -249,6 +249,16 @@ describe('useSecuritySolutionNavigation', () => {
                 "name": "Host isolation exceptions",
                 "onClick": [Function],
               },
+              Object {
+                "data-href": "securitySolutionUI/blocklist",
+                "data-test-subj": "navigation-blocklist",
+                "disabled": false,
+                "href": "securitySolutionUI/blocklist",
+                "id": "blocklist",
+                "isSelected": false,
+                "name": "Blocklist",
+                "onClick": [Function],
+              },
             ],
             "name": "Manage",
           },
@@ -258,8 +268,8 @@ describe('useSecuritySolutionNavigation', () => {
     `);
   });
 
-  // TODO: Steph/ueba remove when no longer experimental
-  it('should include ueba when feature flag is on', async () => {
+  // TODO: Steph/users remove when no longer experimental
+  it('should include users when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
@@ -268,7 +278,7 @@ describe('useSecuritySolutionNavigation', () => {
 
     // possibly undefined, but if undefined we want this test to fail
     // @ts-expect-error TS2532
-    expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.ueba);
+    expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.users);
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {
@@ -298,15 +308,15 @@ describe('useSecuritySolutionNavigation', () => {
         );
 
         const caseNavItem = (result.current?.items || [])[3].items?.find(
-          (item) => item['data-test-subj'] === 'navigation-case'
+          (item) => item['data-test-subj'] === 'navigation-cases'
         );
         expect(caseNavItem).toMatchInlineSnapshot(`
           Object {
-            "data-href": "securitySolutionUI/case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-            "data-test-subj": "navigation-case",
+            "data-href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "data-test-subj": "navigation-cases",
             "disabled": false,
-            "href": "securitySolutionUI/case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-            "id": "case",
+            "href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "id": "cases",
             "isSelected": false,
             "name": "Cases",
             "onClick": [Function],
@@ -326,7 +336,7 @@ describe('useSecuritySolutionNavigation', () => {
         );
 
         const caseNavItem = (result.current?.items || [])[3].items?.find(
-          (item) => item['data-test-subj'] === 'navigation-case'
+          (item) => item['data-test-subj'] === 'navigation-cases'
         );
         expect(caseNavItem).toBeFalsy();
       });

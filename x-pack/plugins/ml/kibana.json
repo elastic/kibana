@@ -16,7 +16,6 @@
     "share",
     "embeddable",
     "uiActions",
-    "kibanaLegacy",
     "discover",
     "triggersActionsUi",
     "fieldFormats"
@@ -29,7 +28,9 @@
     "management",
     "licenseManagement",
     "maps",
-    "usageCollection"
+    "usageCollection",
+    "dashboard",
+    "charts"
   ],
   "server": true,
   "ui": true,
@@ -42,7 +43,8 @@
     "home",
     "maps",
     "usageCollection",
-    "fieldFormats"
+    "fieldFormats",
+    "charts"
   ],
   "extraPublicDirs": [
     "common"

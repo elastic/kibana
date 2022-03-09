@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import type { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
   HostDetailsStrategyResponse,
@@ -28,8 +28,6 @@ import {
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
   HostFirstLastSeenRequestOptions,
-  HostsRiskScoreStrategyResponse,
-  HostsRiskScoreRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -72,30 +70,30 @@ import {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
+  CtiDataSourceRequestOptions,
+  CtiDataSourceStrategyResponse,
 } from './cti';
-import {
-  HostRulesRequestOptions,
-  HostRulesStrategyResponse,
-  HostTacticsRequestOptions,
-  HostTacticsStrategyResponse,
-  RiskScoreRequestOptions,
-  RiskScoreStrategyResponse,
-  UebaQueries,
-  UserRulesRequestOptions,
-  UserRulesStrategyResponse,
-} from './ueba';
 
+import {
+  RiskScoreStrategyResponse,
+  RiskQueries,
+  RiskScoreRequestOptions,
+  KpiRiskScoreStrategyResponse,
+  KpiRiskScoreRequestOptions,
+} from './risk_score';
+
+export * from './cti';
 export * from './hosts';
+export * from './risk_score';
 export * from './matrix_histogram';
 export * from './network';
-export * from './ueba';
 
 export type FactoryQueryTypes =
   | HostsQueries
   | HostsKpiQueries
-  | UebaQueries
   | NetworkQueries
   | NetworkKpiQueries
+  | RiskQueries
   | CtiQueries
   | typeof MatrixHistogramQuery
   | typeof MatrixHistogramQueryEntities;
@@ -104,7 +102,7 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: estypes.SearchDocValueField[];
+  docValueFields?: estypes.QueryDslFieldAndFormat[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
@@ -124,16 +122,6 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
-  : T extends UebaQueries.riskScore
-  ? RiskScoreStrategyResponse
-  : T extends HostsQueries.hostsRiskScore
-  ? HostsRiskScoreStrategyResponse
-  : T extends UebaQueries.hostRules
-  ? HostRulesStrategyResponse
-  : T extends UebaQueries.userRules
-  ? UserRulesStrategyResponse
-  : T extends UebaQueries.hostTactics
-  ? HostTacticsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
@@ -178,12 +166,16 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? MatrixHistogramStrategyResponse
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentStrategyResponse
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceStrategyResponse
+  : T extends RiskQueries.riskScore
+  ? RiskScoreStrategyResponse
+  : T extends RiskQueries.kpiRiskScore
+  ? KpiRiskScoreStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
-  : T extends HostsQueries.hostsRiskScore
-  ? HostsRiskScoreRequestOptions
   : T extends HostsQueries.details
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
@@ -226,18 +218,16 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkKpiUniqueFlowsRequestOptions
   : T extends NetworkKpiQueries.uniquePrivateIps
   ? NetworkKpiUniquePrivateIpsRequestOptions
-  : T extends UebaQueries.riskScore
-  ? RiskScoreRequestOptions
-  : T extends UebaQueries.hostRules
-  ? HostRulesRequestOptions
-  : T extends UebaQueries.userRules
-  ? UserRulesRequestOptions
-  : T extends UebaQueries.hostTactics
-  ? HostTacticsRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentRequestOptions
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceRequestOptions
+  : T extends RiskQueries.riskScore
+  ? RiskScoreRequestOptions
+  : T extends RiskQueries.kpiRiskScore
+  ? KpiRiskScoreRequestOptions
   : never;
 
 export interface DocValueFieldsInput {

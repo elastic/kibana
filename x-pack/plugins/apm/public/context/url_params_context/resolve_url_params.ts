@@ -7,11 +7,9 @@
 
 import { Location } from 'history';
 import { TimeRangeComparisonType } from '../../../common/runtime_types/comparison_type_rt';
-import { uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { pickKeys } from '../../../common/utils/pick_keys';
-import { toQuery } from '../../components/shared/Links/url_helpers';
+import { toQuery } from '../../components/shared/links/url_helpers';
 import {
   getDateRange,
   removeUndefinedProps,
@@ -57,8 +55,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     comparisonType,
   } = query;
 
-  const localUIFilters = pickKeys(query, ...uxLocalUIFilterNames);
-
   return removeUndefinedProps({
     // date params
     ...getDateRange({ state, rangeFrom, rangeTo }),
@@ -91,7 +87,5 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
       ? toBoolean(comparisonEnabled)
       : undefined,
     comparisonType: comparisonType as TimeRangeComparisonType | undefined,
-    // ui filters
-    ...localUIFilters,
   });
 }

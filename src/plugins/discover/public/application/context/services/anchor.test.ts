@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, SortDirection } from '../../../../../data/public';
+import { DataView, SortDirection } from '../../../../../data/common';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
@@ -20,7 +20,7 @@ describe('context app', function () {
     id: 'INDEX_PATTERN_ID',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
-  } as unknown as IndexPattern;
+  } as unknown as DataView;
 
   describe('function fetchAnchor', function () {
     beforeEach(() => {

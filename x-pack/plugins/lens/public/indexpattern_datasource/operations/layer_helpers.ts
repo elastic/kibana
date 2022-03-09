@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { partition, mapValues, pickBy } from 'lodash';
+import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { Query } from 'src/plugins/data/common';
+import memoizeOne from 'memoize-one';
+import type { VisualizeEditorLayersContext } from '../../../../../../src/plugins/visualizations/public';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -18,10 +20,10 @@ import {
   operationDefinitionMap,
   operationDefinitions,
   OperationType,
-  IndexPatternColumn,
   RequiredReference,
   OperationDefinition,
   GenericOperationDefinition,
+  TermsIndexPatternColumn,
 } from './definitions';
 import type {
   IndexPattern,
@@ -31,9 +33,16 @@ import type {
 } from '../types';
 import { getSortScoreByPriority } from './operations';
 import { generateId } from '../../id_generator';
-import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
-import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
+import {
+  GenericIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+  BaseIndexPatternColumn,
+} from './definitions/column_types';
+import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
 import type { TimeScaleUnit } from '../../../common/expressions';
+import { documentField } from '../document_field';
+import { isColumnOfType } from './definitions/helpers';
+import { isSortableByColumn } from './definitions/terms/helpers';
 
 interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -50,14 +59,18 @@ interface ColumnChange {
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
   shouldResetLabel?: boolean;
+  shouldCombineField?: boolean;
   incompleteParams?: ColumnAdvancedParams;
+  incompleteFieldName?: string;
+  incompleteFieldOperation?: OperationType;
+  columnParams?: Record<string, unknown>;
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
 }
 
 interface ColumnCopy {
   layer: IndexPatternLayer;
   targetId: string;
-  sourceColumn: IndexPatternColumn;
+  sourceColumn: GenericIndexPatternColumn;
   sourceColumnId: string;
   indexPattern: IndexPattern;
   shouldDeleteSource?: boolean;
@@ -92,7 +105,7 @@ export function copyColumn({
 
 function copyReferencesRecursively(
   layer: IndexPatternLayer,
-  sourceColumn: IndexPatternColumn,
+  sourceColumn: GenericIndexPatternColumn,
   sourceId: string,
   targetId: string,
   indexPattern: IndexPattern
@@ -184,6 +197,9 @@ export function insertNewColumn({
   targetGroup,
   shouldResetLabel,
   incompleteParams,
+  incompleteFieldName,
+  incompleteFieldOperation,
+  columnParams,
   initialParams,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
@@ -212,14 +228,12 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
+    const buildColumnFn = columnParams
+      ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
+      : operationDefinition.buildColumn({ ...baseOptions, layer });
+
     return updateDefaultLabels(
-      addOperationFn(
-        layer,
-        operationDefinition.buildColumn({ ...baseOptions, layer }),
-        columnId,
-        visualizationGroups,
-        targetGroup
-      ),
+      addOperationFn(layer, buildColumnFn, columnId, visualizationGroups, targetGroup),
       indexPattern
     );
   }
@@ -241,12 +255,30 @@ export function insertNewColumn({
       }
 
       const newId = generateId();
+      if (incompleteFieldOperation && incompleteFieldName) {
+        const validFields = indexPattern.fields.filter(
+          (validField) => validField.name === incompleteFieldName
+        );
+        tempLayer = insertNewColumn({
+          layer: tempLayer,
+          columnId: newId,
+          op: incompleteFieldOperation,
+          indexPattern,
+          field: validFields[0] ?? documentField,
+          visualizationGroups,
+          columnParams,
+          targetGroup,
+        });
+      }
       if (validOperations.length === 1) {
         const def = validOperations[0];
 
-        const validFields =
+        let validFields =
           def.input === 'field' ? indexPattern.fields.filter(def.getPossibleOperationForField) : [];
 
+        if (incompleteFieldName) {
+          validFields = validFields.filter((validField) => validField.name === incompleteFieldName);
+        }
         if (def.input === 'none') {
           tempLayer = insertNewColumn({
             layer: tempLayer,
@@ -287,14 +319,14 @@ export function insertNewColumn({
     const isBucketed = Boolean(possibleOperation.isBucketed);
 
     const addOperationFn = isBucketed ? addBucket : addMetric;
+    const buildColumnFn = columnParams
+      ? operationDefinition.buildColumn(
+          { ...baseOptions, layer: tempLayer, referenceIds },
+          columnParams
+        )
+      : operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds });
     return updateDefaultLabels(
-      addOperationFn(
-        tempLayer,
-        operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds }),
-        columnId,
-        visualizationGroups,
-        targetGroup
-      ),
+      addOperationFn(tempLayer, buildColumnFn, columnId, visualizationGroups, targetGroup),
       indexPattern
     );
   }
@@ -353,7 +385,7 @@ export function insertNewColumn({
     };
   }
 
-  const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field });
+  const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field }, columnParams);
   const isBucketed = Boolean(possibleOperation.isBucketed);
   const addOperationFn = isBucketed ? addBucket : addMetric;
   return updateDefaultLabels(
@@ -369,7 +401,9 @@ export function replaceColumn({
   op,
   field,
   visualizationGroups,
+  initialParams,
   shouldResetLabel,
+  shouldCombineField,
 }: ColumnChange): IndexPatternLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -414,6 +448,7 @@ export function replaceColumn({
         op,
         field,
         visualizationGroups,
+        incompleteParams: previousColumn,
       });
 
       // if the formula label is not the default one, propagate it to the new operation
@@ -511,7 +546,7 @@ export function replaceColumn({
     if (operationDefinition.input === 'managedReference') {
       const newColumn = operationDefinition.buildColumn(
         { ...baseOptions, layer: tempLayer },
-        previousColumn.params,
+        'params' in previousColumn ? previousColumn.params : undefined,
         operationDefinitionMap
       ) as FormulaIndexPatternColumn;
 
@@ -528,14 +563,9 @@ export function replaceColumn({
 
       try {
         newLayer = newColumn.params.formula
-          ? regenerateLayerFromAst(
-              newColumn.params.formula,
-              basicLayer,
-              columnId,
-              newColumn,
+          ? insertOrReplaceFormulaColumn(columnId, newColumn, basicLayer, {
               indexPattern,
-              operationDefinitionMap
-            ).newLayer
+            }).layer
           : basicLayer;
       } catch (e) {
         newLayer = basicLayer;
@@ -641,10 +671,14 @@ export function replaceColumn({
     operationDefinition.input === 'field' &&
     field &&
     'sourceField' in previousColumn &&
-    previousColumn.sourceField !== field.name
+    (previousColumn.sourceField !== field.name || operationDefinition?.getParamsForMultipleFields)
   ) {
     // Same operation, new field
-    let newColumn = operationDefinition.onFieldChange(previousColumn, field);
+    let newColumn = operationDefinition.onFieldChange(
+      previousColumn,
+      field,
+      shouldCombineField ? initialParams?.params : undefined
+    );
     if (!shouldResetLabel) {
       newColumn = copyCustomLabel(newColumn, previousColumn);
     }
@@ -665,11 +699,11 @@ export function replaceColumn({
 
 function removeOrphanedColumns(
   previousDefinition:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'none'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>
-    | OperationDefinition<IndexPatternColumn, 'managedReference'>,
-  previousColumn: IndexPatternColumn,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'none'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>
+    | OperationDefinition<GenericIndexPatternColumn, 'managedReference'>,
+  previousColumn: GenericIndexPatternColumn,
   tempLayer: IndexPatternLayer,
   indexPattern: IndexPattern
 ) {
@@ -765,7 +799,7 @@ function applyReferenceTransition({
 }: {
   layer: IndexPatternLayer;
   columnId: string;
-  previousColumn: IndexPatternColumn;
+  previousColumn: GenericIndexPatternColumn;
   op: OperationType;
   indexPattern: IndexPattern;
   visualizationGroups: VisualizationDimensionGroupConfig[];
@@ -962,7 +996,10 @@ function applyReferenceTransition({
   );
 }
 
-function copyCustomLabel(newColumn: IndexPatternColumn, previousOptions: IndexPatternColumn) {
+function copyCustomLabel(
+  newColumn: GenericIndexPatternColumn,
+  previousOptions: GenericIndexPatternColumn
+) {
   const adjustedColumn = { ...newColumn };
   const operationChanged = newColumn.operationType !== previousOptions.operationType;
   const fieldChanged =
@@ -978,7 +1015,7 @@ function copyCustomLabel(newColumn: IndexPatternColumn, previousOptions: IndexPa
 
 function addBucket(
   layer: IndexPatternLayer,
-  column: IndexPatternColumn,
+  column: BaseIndexPatternColumn,
   addedColumnId: string,
   visualizationGroups: VisualizationDimensionGroupConfig[],
   targetGroup?: string
@@ -1071,7 +1108,7 @@ export function reorderByGroups(
 
 function addMetric(
   layer: IndexPatternLayer,
-  column: IndexPatternColumn,
+  column: BaseIndexPatternColumn,
   addedColumnId: string
 ): IndexPatternLayer {
   const tempLayer = {
@@ -1096,7 +1133,30 @@ export function getMetricOperationTypes(field: IndexPatternField) {
   });
 }
 
-export function updateColumnParam<C extends IndexPatternColumn>({
+export function updateColumnLabel<C extends GenericIndexPatternColumn>({
+  layer,
+  columnId,
+  customLabel,
+}: {
+  layer: IndexPatternLayer;
+  columnId: string;
+  customLabel: string;
+}): IndexPatternLayer {
+  const oldColumn = layer.columns[columnId];
+  return {
+    ...layer,
+    columns: {
+      ...layer.columns,
+      [columnId]: {
+        ...oldColumn,
+        label: customLabel ? customLabel : oldColumn.label,
+        customLabel: Boolean(customLabel),
+      },
+    } as Record<string, GenericIndexPatternColumn>,
+  };
+}
+
+export function updateColumnParam<C extends GenericIndexPatternColumn>({
   layer,
   columnId,
   paramName,
@@ -1107,18 +1167,19 @@ export function updateColumnParam<C extends IndexPatternColumn>({
   paramName: string;
   value: unknown;
 }): IndexPatternLayer {
+  const oldColumn = layer.columns[columnId];
   return {
     ...layer,
     columns: {
       ...layer.columns,
       [columnId]: {
-        ...layer.columns[columnId],
+        ...oldColumn,
         params: {
-          ...layer.columns[columnId].params,
+          ...('params' in oldColumn ? oldColumn.params : {}),
           [paramName]: value,
         },
       },
-    } as Record<string, IndexPatternColumn>,
+    } as Record<string, GenericIndexPatternColumn>,
   };
 }
 
@@ -1228,7 +1289,7 @@ export function getExistingColumnGroups(layer: IndexPatternLayer): [string[], st
  * Returns true if the given column can be applied to the given index pattern
  */
 export function isColumnTransferable(
-  column: IndexPatternColumn,
+  column: GenericIndexPatternColumn,
   newIndexPattern: IndexPattern,
   layer: IndexPatternLayer
 ): boolean {
@@ -1350,6 +1411,35 @@ export function isReferenced(layer: IndexPatternLayer, columnId: string): boolea
   return allReferences.includes(columnId);
 }
 
+const computeReferenceLookup = memoizeOne((layer: IndexPatternLayer): Record<string, string> => {
+  // speed up things for deep chains as in formula
+  const refLookup: Record<string, string> = {};
+  for (const [parentId, col] of Object.entries(layer.columns)) {
+    if ('references' in col) {
+      for (const colId of col.references) {
+        refLookup[colId] = parentId;
+      }
+    }
+  }
+  return refLookup;
+});
+
+/**
+ * Given a columnId, returns the visible root column id for it
+ * This is useful to map internal properties of referenced columns to the visible column
+ * @param layer
+ * @param columnId
+ * @returns id of the reference root
+ */
+export function getReferenceRoot(layer: IndexPatternLayer, columnId: string): string {
+  const refLookup = computeReferenceLookup(layer);
+  let currentId = columnId;
+  while (isReferenced(layer, currentId)) {
+    currentId = refLookup[currentId];
+  }
+  return currentId;
+}
+
 export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: string): string[] {
   const referencedIds: string[] = [];
   function collect(id: string) {
@@ -1373,9 +1463,7 @@ export function hasTermsWithManyBuckets(layer: IndexPatternLayer): boolean {
   return layer.columnOrder.some((columnId) => {
     const column = layer.columns[columnId];
     if (column) {
-      return (
-        column.isBucketed && column.params && 'size' in column.params && column.params.size > 5
-      );
+      return isColumnOfType<TermsIndexPatternColumn>('terms', column) && column.params.size > 5;
     }
   });
 }
@@ -1447,7 +1535,7 @@ function maybeValidateOperations({
   column,
   validation,
 }: {
-  column: IndexPatternColumn;
+  column: GenericIndexPatternColumn;
   validation: RequiredReference;
 }) {
   if (!validation.specificOperations) {
@@ -1463,7 +1551,7 @@ export function isColumnValidAsReference({
   column,
   validation,
 }: {
-  column: IndexPatternColumn;
+  column: GenericIndexPatternColumn;
   validation: RequiredReference;
 }): boolean {
   if (!column) return false;
@@ -1481,14 +1569,14 @@ export function isColumnValidAsReference({
 
 export function getManagedColumnsFrom(
   columnId: string,
-  columns: Record<string, IndexPatternColumn>
-): Array<[string, IndexPatternColumn]> {
+  columns: Record<string, GenericIndexPatternColumn>
+): Array<[string, GenericIndexPatternColumn]> {
   const allNodes: Record<string, string[]> = {};
   Object.entries(columns).forEach(([id, col]) => {
     allNodes[id] = 'references' in col ? [...col.references] : [];
   });
   const queue: string[] = allNodes[columnId];
-  const store: Array<[string, IndexPatternColumn]> = [];
+  const store: Array<[string, GenericIndexPatternColumn]> = [];
 
   while (queue.length > 0) {
     const nextId = queue.shift()!;
@@ -1496,4 +1584,250 @@ export function getManagedColumnsFrom(
     queue.push(...allNodes[nextId]);
   }
   return store.filter(([, column]) => column);
+}
+
+export function computeLayerFromContext(
+  isLast: boolean,
+  metricsArray: VisualizeEditorLayersContext['metrics'],
+  indexPattern: IndexPattern,
+  format?: string,
+  customLabel?: string
+): IndexPatternLayer {
+  let layer: IndexPatternLayer = {
+    indexPatternId: indexPattern.id,
+    columns: {},
+    columnOrder: [],
+  };
+  if (isArray(metricsArray)) {
+    const metricContext = metricsArray.shift();
+    const field = metricContext
+      ? indexPattern.getFieldByName(metricContext.fieldName) ?? documentField
+      : documentField;
+
+    const operation = metricContext?.agg;
+    // Formula should be treated differently from other operations
+    if (operation === 'formula') {
+      const operationDefinition = operationDefinitionMap.formula as OperationDefinition<
+        FormulaIndexPatternColumn,
+        'managedReference'
+      >;
+      const tempLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
+      let newColumn = operationDefinition.buildColumn({
+        indexPattern,
+        layer: tempLayer,
+      }) as FormulaIndexPatternColumn;
+      let filterBy = metricContext?.params?.kql
+        ? { query: metricContext?.params?.kql, language: 'kuery' }
+        : undefined;
+      if (metricContext?.params?.lucene) {
+        filterBy = metricContext?.params?.lucene
+          ? { query: metricContext?.params?.lucene, language: 'lucene' }
+          : undefined;
+      }
+      newColumn = {
+        ...newColumn,
+        ...(filterBy && { filter: filterBy }),
+        params: {
+          ...newColumn.params,
+          ...metricContext?.params,
+        },
+      } as FormulaIndexPatternColumn;
+      layer = metricContext?.params?.formula
+        ? insertOrReplaceFormulaColumn(generateId(), newColumn, tempLayer, {
+            indexPattern,
+          }).layer
+        : tempLayer;
+    } else {
+      const columnId = generateId();
+      // recursive function to build the layer
+      layer = insertNewColumn({
+        op: operation as OperationType,
+        layer: isLast
+          ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
+          : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern),
+        columnId,
+        field: !metricContext?.isFullReference ? field ?? documentField : undefined,
+        columnParams: metricContext?.params ?? undefined,
+        incompleteFieldName: metricContext?.isFullReference ? field?.name : undefined,
+        incompleteFieldOperation: metricContext?.isFullReference
+          ? metricContext?.pipelineAggType
+          : undefined,
+        indexPattern,
+        visualizationGroups: [],
+      });
+      if (metricContext) {
+        metricContext.accessor = columnId;
+      }
+    }
+  }
+
+  // update the layer with the custom label and the format
+  let columnIdx = 0;
+  for (const [columnId, column] of Object.entries(layer.columns)) {
+    if (format) {
+      layer = updateColumnParam({
+        layer,
+        columnId,
+        paramName: 'format',
+        value: {
+          id: format,
+          params: {
+            decimals: 0,
+          },
+        },
+      });
+    }
+
+    // for percentiles I want to update all columns with the custom label
+    if (customLabel && column.operationType === 'percentile') {
+      layer = updateColumnLabel({
+        layer,
+        columnId,
+        customLabel,
+      });
+    } else if (customLabel && columnIdx === Object.keys(layer.columns).length - 1) {
+      layer = updateColumnLabel({
+        layer,
+        columnId,
+        customLabel,
+      });
+    }
+    columnIdx++;
+  }
+  return layer;
+}
+
+export function getSplitByTermsLayer(
+  indexPattern: IndexPattern,
+  splitFields: IndexPatternField[],
+  dateField: IndexPatternField | undefined,
+  layer: VisualizeEditorLayersContext
+): IndexPatternLayer {
+  const { termsParams, metrics, timeInterval, splitWithDateHistogram } = layer;
+  const copyMetricsArray = [...metrics];
+
+  const computedLayer = computeLayerFromContext(
+    metrics.length === 1,
+    copyMetricsArray,
+    indexPattern,
+    layer.format,
+    layer.label
+  );
+
+  const [baseField, ...secondaryFields] = splitFields;
+  const columnId = generateId();
+
+  let termsLayer = insertNewColumn({
+    op: splitWithDateHistogram ? 'date_histogram' : 'terms',
+    layer: insertNewColumn({
+      op: 'date_histogram',
+      layer: computedLayer,
+      columnId: generateId(),
+      field: dateField,
+      indexPattern,
+      visualizationGroups: [],
+      columnParams: {
+        interval: timeInterval,
+      },
+    }),
+    columnId,
+    field: baseField,
+    indexPattern,
+    visualizationGroups: [],
+  });
+
+  if (secondaryFields.length) {
+    termsLayer = updateColumnParam({
+      layer: termsLayer,
+      columnId,
+      paramName: 'secondaryFields',
+      value: secondaryFields.map((i) => i.name),
+    });
+
+    termsLayer = updateDefaultLabels(termsLayer, indexPattern);
+  }
+
+  const termsColumnParams = termsParams as TermsIndexPatternColumn['params'];
+  if (termsColumnParams) {
+    for (const [param, value] of Object.entries(termsColumnParams)) {
+      let paramValue = value;
+      if (param === 'orderBy') {
+        const [existingMetricColumn] = Object.keys(termsLayer.columns).filter((colId) =>
+          isSortableByColumn(termsLayer, colId)
+        );
+
+        paramValue = (
+          termsColumnParams.orderBy.type === 'column' && existingMetricColumn
+            ? {
+                type: 'column',
+                columnId: existingMetricColumn,
+              }
+            : { type: 'alphabetical', fallback: true }
+        ) as TermsIndexPatternColumn['params']['orderBy'];
+      }
+      termsLayer = updateColumnParam({
+        layer: termsLayer,
+        columnId,
+        paramName: param,
+        value: paramValue,
+      });
+    }
+  }
+  return termsLayer;
+}
+
+export function getSplitByFiltersLayer(
+  indexPattern: IndexPattern,
+  dateField: IndexPatternField | undefined,
+  layer: VisualizeEditorLayersContext
+): IndexPatternLayer {
+  const { splitFilters, metrics, timeInterval } = layer;
+  const filterParams = splitFilters?.map((param) => {
+    const query = param.filter ? param.filter.query : '';
+    const language = param.filter ? param.filter.language : 'kuery';
+    return {
+      input: {
+        query,
+        language,
+      },
+      label: param.label ?? '',
+    };
+  });
+  const copyMetricsArray = [...metrics];
+  const computedLayer = computeLayerFromContext(
+    metrics.length === 1,
+    copyMetricsArray,
+    indexPattern,
+    layer.format,
+    layer.label
+  );
+  const columnId = generateId();
+  let filtersLayer = insertNewColumn({
+    op: 'filters',
+    layer: insertNewColumn({
+      op: 'date_histogram',
+      layer: computedLayer,
+      columnId: generateId(),
+      field: dateField,
+      indexPattern,
+      visualizationGroups: [],
+      columnParams: {
+        interval: timeInterval,
+      },
+    }),
+    columnId,
+    field: undefined,
+    indexPattern,
+    visualizationGroups: [],
+  });
+
+  if (filterParams) {
+    filtersLayer = updateColumnParam({
+      layer: filtersLayer,
+      columnId,
+      paramName: 'filters',
+      value: filterParams,
+    });
+  }
+  return filtersLayer;
 }

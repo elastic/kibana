@@ -5,14 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, memo } from 'react';
-import { History } from 'history';
-import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import React, { useEffect, useState, memo, useCallback } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
 
 import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
-import { DiscoverServices } from '../../build_services';
 import {
   SavedSearch,
   getSavedSearch,
@@ -24,42 +20,21 @@ import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { redirectWhenMissing } from '../../../../kibana_utils/public';
 import { DataViewSavedObjectConflictError } from '../../../../data_views/common';
-import { getUrlTracker } from '../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
+import { DiscoverError } from '../../components/common/error_alert';
+import { useDiscoverServices } from '../../utils/use_discover_services';
+import { getUrlTracker } from '../../kibana_services';
+import { useExecutionContext } from '../../../../kibana_react/public';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
-
-export interface DiscoverMainProps {
-  /**
-   * Instance of browser history
-   */
-  history: History;
-  /**
-   * Kibana core services used by discover
-   */
-  services: DiscoverServices;
-}
 
 interface DiscoverLandingParams {
   id: string;
 }
 
-const DiscoverError = ({ error }: { error: Error }) => (
-  <EuiEmptyPrompt
-    iconType="alert"
-    iconColor="danger"
-    title={
-      <h2>
-        {i18n.translate('discover.discoverError.title', {
-          defaultMessage: 'Error loading Discover',
-        })}
-      </h2>
-    }
-    body={<p>{error.message}</p>}
-  />
-);
-
-export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
+export function DiscoverMainRoute() {
+  const history = useHistory();
+  const services = useDiscoverServices();
   const {
     core,
     chrome,
@@ -74,15 +49,35 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   const [indexPatternList, setIndexPatternList] = useState<
     Array<SavedObject<IndexPatternAttributes>>
   >([]);
-
   const { id } = useParams<DiscoverLandingParams>();
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: id || 'new',
+  });
+
+  const navigateToOverview = useCallback(() => {
+    core.application.navigateToApp('kibanaOverview', { path: '#' });
+  }, [core.application]);
+
+  const checkForDataViews = useCallback(async () => {
+    const hasUserDataView = await data.dataViews.hasUserDataView().catch(() => true);
+    if (!hasUserDataView) {
+      navigateToOverview();
+    }
+    const defaultDataView = await data.dataViews.getDefaultDataView();
+    if (!defaultDataView) {
+      navigateToOverview();
+    }
+  }, [navigateToOverview, data.dataViews]);
 
   useEffect(() => {
     const savedSearchId = id;
 
     async function loadDefaultOrCurrentIndexPattern(searchSource: ISearchSource) {
       try {
-        await data.indexPatterns.ensureDefaultDataView();
+        await checkForDataViews();
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
         const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
@@ -109,6 +104,10 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
         const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(
           currentSavedSearch.searchSource
         );
+
+        if (!loadedIndexPattern) {
+          return;
+        }
 
         if (!currentSavedSearch.searchSource.getField('index')) {
           currentSavedSearch.searchSource.setField('index', loadedIndexPattern);
@@ -142,6 +141,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
             onBeforeRedirect() {
               getUrlTracker().setTrackedUrl('/');
             },
+            theme: core.theme,
           })(e);
         }
       }
@@ -159,6 +159,8 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     id,
     services,
     toastNotifications,
+    core.theme,
+    checkForDataViews,
   ]);
 
   useEffect(() => {
@@ -177,12 +179,5 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     return <LoadingIndicator />;
   }
 
-  return (
-    <DiscoverMainAppMemoized
-      history={history}
-      indexPatternList={indexPatternList}
-      savedSearch={savedSearch}
-      services={services}
-    />
-  );
+  return <DiscoverMainAppMemoized indexPatternList={indexPatternList} savedSearch={savedSearch} />;
 }

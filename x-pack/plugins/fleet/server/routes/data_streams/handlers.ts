@@ -15,6 +15,7 @@ import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
+
 interface ESDataStreamInfo {
   name: string;
   timestamp_field: {
@@ -44,6 +45,7 @@ interface ESDataStreamStats {
 }
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
+  // Query datastreams as the current user as the Kibana internal user may not have all the required permission
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   const body: GetDataStreamsResponse = {
@@ -53,12 +55,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
   try {
     // Get matching data streams, their stats, and package SOs
     const [
-      {
-        body: { data_streams: dataStreamsInfo },
-      },
-      {
-        body: { data_streams: dataStreamStats },
-      },
+      { data_streams: dataStreamsInfo },
+      { data_streams: dataStreamStats },
       packageSavedObjects,
     ] = await Promise.all([
       esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
@@ -133,9 +131,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       };
 
       // Query backing indices to extract data stream dataset, namespace, and type values
-      const {
-        body: { aggregations: dataStreamAggs },
-      } = await esClient.search({
+      const { aggregations: dataStreamAggs } = await esClient.search({
         index: dataStream.name,
         body: {
           size: 0,
@@ -185,11 +181,11 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
       const { maxIngestedTimestamp } = dataStreamAggs as Record<
         string,
-        estypes.AggregationsValueAggregate
+        estypes.AggregationsRateAggregate
       >;
       const { dataset, namespace, type } = dataStreamAggs as Record<
         string,
-        estypes.AggregationsMultiBucketAggregate<{ key?: string; value?: number }>
+        estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
       >;
 
       // some integrations e.g custom logs don't have event.ingested
@@ -197,9 +193,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
         dataStreamResponse.last_activity_ms = maxIngestedTimestamp?.value;
       }
 
-      dataStreamResponse.dataset = dataset.buckets[0]?.key || '';
-      dataStreamResponse.namespace = namespace.buckets[0]?.key || '';
-      dataStreamResponse.type = type.buckets[0]?.key || '';
+      dataStreamResponse.dataset =
+        (dataset.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      dataStreamResponse.namespace =
+        (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      dataStreamResponse.type =
+        (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
 
       // Find package saved object
       const pkgName = dataStreamResponse.package;

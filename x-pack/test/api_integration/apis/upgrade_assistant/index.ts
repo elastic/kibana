@@ -13,5 +13,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./cloud_backup_status'));
     loadTestFile(require.resolve('./privileges'));
     loadTestFile(require.resolve('./es_deprecations'));
+    loadTestFile(require.resolve('./es_deprecation_logs'));
+    loadTestFile(require.resolve('./remote_clusters'));
   });
 }

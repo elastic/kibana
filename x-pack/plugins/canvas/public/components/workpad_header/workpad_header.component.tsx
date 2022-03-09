@@ -169,7 +169,12 @@ export const WorkpadHeader: FC<Props> = ({
               {{
                 primaryActionButton: <ElementMenu addElement={addElement} elements={elements} />,
                 quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-                addFromLibraryButton: <AddFromLibraryButton onClick={showEmbedPanel} />,
+                addFromLibraryButton: (
+                  <AddFromLibraryButton
+                    onClick={showEmbedPanel}
+                    data-test-subj="canvas-add-from-library-button"
+                  />
+                ),
                 extraButtons: [<EditorMenu addElement={addElement} />],
               }}
             </SolutionToolbar>
@@ -180,9 +185,11 @@ export const WorkpadHeader: FC<Props> = ({
             <EuiFlexItem grow={false}>
               <ViewMenu />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EditMenu commit={commit} />
-            </EuiFlexItem>
+            {isWriteable && (
+              <EuiFlexItem grow={false}>
+                <EditMenu commit={commit} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <ShareMenu />
             </EuiFlexItem>

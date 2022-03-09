@@ -7,7 +7,7 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -27,7 +27,7 @@ import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../services
 import { Loading } from '../../../components';
 import { useStartServices, useGetPackagePolicies } from '../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import { SO_SEARCH_LIMIT } from '../../../../../../common';
+import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../../../../common';
 
 import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
@@ -50,12 +50,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
+  isUpdate?: boolean;
 }> = memo(
   ({
     agentPolicy,
     packageInfo,
     packagePolicy,
     integrationToEnable,
+    isUpdate,
     updatePackagePolicy,
     validationResults,
     submitAttempted,
@@ -88,7 +90,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Update package policy's package and agent policy info
     useEffect(() => {
-      if (isLoadingPackagePolicies) {
+      if (isUpdate || isLoadingPackagePolicies) {
         return;
       }
       const pkg = packagePolicy.package;
@@ -97,20 +99,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
       // If package has changed, create shell package policy with input&stream values based on package info
       if (currentPkgKey !== pkgKey) {
-        // Retrieve highest number appended to package policy name and increment it by one
-        const pkgPoliciesNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
-        const pkgPoliciesWithMatchingNames = packagePolicyData?.items
-          ? packagePolicyData.items
-              .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-              .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-              .sort((a, b) => a - b)
-          : [];
-
-        const incrementedName = `${packageInfo.name}-${
-          pkgPoliciesWithMatchingNames.length
-            ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-            : 1
-        }`;
+        const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
         updatePackagePolicy(
           packageToPackagePolicy(
@@ -133,6 +122,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         });
       }
     }, [
+      isUpdate,
       packagePolicy,
       agentPolicy,
       packageInfo,
@@ -326,34 +316,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         });
                       }}
                     />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFormRow
-                    label={
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
-                        defaultMessage="Data retention settings"
-                      />
-                    }
-                    helpText={
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText"
-                        defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
-                        values={{
-                          learnMore: (
-                            <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
-                              {i18n.translate(
-                                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
-                                { defaultMessage: 'Learn more' }
-                              )}
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    }
-                  >
-                    <div />
                   </EuiFormRow>
                 </EuiFlexItem>
                 {/* Advanced vars */}

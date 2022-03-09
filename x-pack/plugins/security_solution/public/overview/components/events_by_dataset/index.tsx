@@ -7,10 +7,11 @@
 
 import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import uuid from 'uuid';
 
-import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
@@ -23,7 +24,7 @@ import { eventsStackByOptions } from '../../../hosts/pages/navigation';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { histogramConfigs } from '../../../hosts/pages/navigation/events_query_tab_body';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { HostsTableType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
@@ -44,6 +45,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   headerChildren?: React.ReactNode;
   indexPattern: DataViewBase;
   indexNames: string[];
+  runtimeMappings?: MappingRuntimeFields;
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -67,6 +69,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   headerChildren,
   indexPattern,
   indexNames,
+  runtimeMappings,
   onlyField,
   paddingSize,
   query,
@@ -120,7 +123,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const [filterQuery, kqlError] = useMemo(() => {
     if (combinedQueries == null) {
       return convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+        config: getEsQueryConfig(kibana.services.uiSettings),
         indexPattern,
         queries: [query],
         filters,
@@ -176,6 +179,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       headerChildren={headerContent}
       id={uniqueQueryId}
       indexNames={indexNames}
+      runtimeMappings={runtimeMappings}
       onError={toggleTopN}
       paddingSize={paddingSize}
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}

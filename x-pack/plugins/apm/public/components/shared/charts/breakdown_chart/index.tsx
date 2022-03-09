@@ -81,7 +81,7 @@ export function BreakdownChart({
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const annotationColor = theme.eui.euiColorSecondary;
+  const annotationColor = theme.eui.euiColorSuccess;
 
   const isEmpty = isTimeseriesEmpty(timeseries);
 
@@ -171,7 +171,12 @@ export function BreakdownChart({
           })
         ) : (
           // When timeseries is empty, loads an AreaSeries chart to show the default empty message.
-          <AreaSeries id="empty_chart" data={[]} />
+          <AreaSeries
+            id="empty_chart"
+            xAccessor="x"
+            yAccessors={['y']}
+            data={[]}
+          />
         )}
       </Chart>
     </ChartContainer>

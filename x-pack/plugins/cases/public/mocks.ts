@@ -5,17 +5,25 @@
  * 2.0.
  */
 
+import { mockCasesContext } from './mocks/mock_cases_context';
 import { CasesUiStart } from './types';
 
-const createStartContract = (): jest.Mocked<CasesUiStart> => ({
-  getAllCases: jest.fn(),
+export const mockCasesContract = (): jest.Mocked<CasesUiStart> => ({
+  canUseCases: jest.fn(),
+  getCases: jest.fn(),
+  getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
   getAllCasesSelectorModal: jest.fn(),
-  getCaseView: jest.fn(),
-  getConfigureCases: jest.fn(),
-  getCreateCase: jest.fn(),
+  getCreateCaseFlyout: jest.fn(),
   getRecentCases: jest.fn(),
+  hooks: {
+    getUseCasesAddToNewCaseFlyout: jest.fn(),
+    getUseCasesAddToExistingCaseModal: jest.fn(),
+  },
+  helpers: {
+    getRuleIdFromEvent: jest.fn(),
+  },
 });
 
 export const casesPluginMock = {
-  createStartContract,
+  createStartContract: mockCasesContract,
 };

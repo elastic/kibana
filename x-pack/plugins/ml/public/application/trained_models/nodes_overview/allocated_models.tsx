@@ -17,15 +17,31 @@ import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats
 
 interface AllocatedModelsProps {
   models: NodeDeploymentStatsResponse['allocated_models'];
+  hideColumns?: string[];
 }
 
-export const AllocatedModels: FC<AllocatedModelsProps> = ({ models }) => {
+export const AllocatedModels: FC<AllocatedModelsProps> = ({
+  models,
+  hideColumns = ['node_name'],
+}) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
   const durationFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DURATION);
 
   const columns: Array<EuiBasicTableColumn<AllocatedModel>> = [
     {
+      id: 'node_name',
+      field: 'node.name',
+      name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.nodeNameHeader', {
+        defaultMessage: 'Node name',
+      }),
+      width: '200px',
+      sortable: true,
+      truncateText: false,
+      'data-test-subj': 'mlAllocatedModelsTableNodeName',
+    },
+    {
+      id: 'model_id',
       field: 'model_id',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelNameHeader', {
         defaultMessage: 'Name',
@@ -43,7 +59,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({ models }) => {
       truncateText: true,
       'data-test-subj': 'mlAllocatedModelsTableSize',
       render: (v: AllocatedModel) => {
-        return bytesFormatter(v.model_size_bytes);
+        return bytesFormatter(v.required_native_memory_bytes);
       },
     },
     {
@@ -85,6 +101,16 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({ models }) => {
       },
     },
     {
+      name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelStartTimeHeader', {
+        defaultMessage: 'Start time',
+      }),
+      width: '200px',
+      'data-test-subj': 'mlAllocatedModelsTableStartedTime',
+      render: (v: AllocatedModel) => {
+        return dateFormatter(v.node.start_time);
+      },
+    },
+    {
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelLastAccessHeader', {
         defaultMessage: 'Last access',
       }),
@@ -92,6 +118,19 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({ models }) => {
       'data-test-subj': 'mlAllocatedModelsTableInferenceCount',
       render: (v: AllocatedModel) => {
         return dateFormatter(v.node.last_access);
+      },
+    },
+    {
+      name: i18n.translate(
+        'xpack.ml.trainedModels.nodesList.modelsList.modelNumberOfPendingRequestsHeader',
+        {
+          defaultMessage: 'Pending requests',
+        }
+      ),
+      width: '100px',
+      'data-test-subj': 'mlAllocatedModelsTableNumberOfPendingRequests',
+      render: (v: AllocatedModel) => {
+        return v.node.number_of_pending_requests;
       },
     },
     {
@@ -110,7 +149,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({ models }) => {
         );
       },
     },
-  ];
+  ].filter((v) => !hideColumns.includes(v.id!));
 
   return (
     <EuiInMemoryTable<AllocatedModel>
@@ -125,7 +164,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({ models }) => {
         'data-test-subj': `mlAllocatedModelTableRow row-${item.model_id}`,
       })}
       onTableChange={() => {}}
-      data-test-subj={'mlNodesTable'}
+      data-test-subj={'mlNodesAllocatedModels'}
     />
   );
 };

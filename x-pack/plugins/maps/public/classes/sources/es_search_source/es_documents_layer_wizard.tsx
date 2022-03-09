@@ -35,6 +35,7 @@ export function createDefaultLayerDescriptor(
 }
 
 export const esDocumentsLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esSearchDescription', {
     defaultMessage: 'Points, lines, and polygons from Elasticsearch',

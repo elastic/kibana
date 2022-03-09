@@ -18,6 +18,8 @@ import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { useTimeZone } from '../../lib/kibana';
 import { defaultLegendColors } from '../matrix_histogram/utils';
 import { useThrottledResizeObserver } from '../utils';
+import { hasValueToDisplay } from '../../utils/validators';
+import { EMPTY_VALUE_LABEL } from '../charts/translation';
 
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
@@ -32,6 +34,7 @@ import {
 } from './common';
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
+import type { ChartData } from './common';
 
 const LegendFlexItem = styled(EuiFlexItem)`
   overview: hidden;
@@ -50,7 +53,9 @@ const checkIfAnyValidSeriesExist = (
   data.some(checkIfAllTheDataInTheSeriesAreValid);
 
 const yAccessors = ['y'];
-const splitSeriesAccessors = ['g'];
+const splitSeriesAccessors = [
+  (datum: ChartData) => (hasValueToDisplay(datum.g) ? datum.g : EMPTY_VALUE_LABEL),
+];
 
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = ({

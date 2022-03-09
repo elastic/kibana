@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { MockSyncContext } from '../../__fixtures__/mock_sync_context';
-import sinon from 'sinon';
-import url from 'url';
-
 jest.mock('../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
@@ -22,7 +18,6 @@ import { shallow } from 'enzyme';
 import { Feature } from 'geojson';
 import { MVTSingleLayerVectorSource } from '../../../sources/mvt_single_layer_vector_source';
 import {
-  DataRequestDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
@@ -39,8 +34,7 @@ const defaultConfig = {
 function createLayer(
   layerOptions: Partial<VectorLayerDescriptor> = {},
   sourceOptions: Partial<TiledSingleLayerVectorSourceDescriptor> = {},
-  isTimeAware: boolean = false,
-  includeToken: boolean = false
+  isTimeAware: boolean = false
 ): MvtVectorLayer {
   const sourceDescriptor: TiledSingleLayerVectorSourceDescriptor = {
     type: SOURCE_TYPES.MVT_SINGLE_LAYER,
@@ -56,19 +50,6 @@ function createLayer(
     };
     mvtSource.getApplyGlobalTime = () => {
       return true;
-    };
-  }
-
-  if (includeToken) {
-    mvtSource.getUrlTemplateWithMeta = async (...args) => {
-      const superReturn = await MVTSingleLayerVectorSource.prototype.getUrlTemplateWithMeta.call(
-        mvtSource,
-        ...args
-      );
-      return {
-        ...superReturn,
-        refreshTokenParamName: 'token',
-      };
     };
   }
 
@@ -110,132 +91,5 @@ describe('getFeatureById', () => {
     const layer: MvtVectorLayer = createLayer({}, {});
     const feature = layer.getFeatureById('foobar') as Feature;
     expect(feature).toEqual(null);
-  });
-});
-
-describe('syncData', () => {
-  it('Should sync with source-params', async () => {
-    const layer: MvtVectorLayer = createLayer({}, {});
-
-    const syncContext = new MockSyncContext({ dataFilters: {} });
-
-    await layer.syncData(syncContext);
-    // @ts-expect-error
-    sinon.assert.calledOnce(syncContext.startLoading);
-    // @ts-expect-error
-    sinon.assert.calledOnce(syncContext.stopLoading);
-
-    // @ts-expect-error
-    const call = syncContext.stopLoading.getCall(0);
-    expect(call.args[2]!.minSourceZoom).toEqual(defaultConfig.minSourceZoom);
-    expect(call.args[2]!.maxSourceZoom).toEqual(defaultConfig.maxSourceZoom);
-    expect(call.args[2]!.layerName).toEqual(defaultConfig.layerName);
-    expect(call.args[2]!.urlTemplate).toEqual(defaultConfig.urlTemplate);
-  });
-
-  it('Should not resync when no changes to source params', async () => {
-    const dataRequestDescriptor: DataRequestDescriptor = {
-      data: { ...defaultConfig },
-      dataId: 'source',
-    };
-    const layer: MvtVectorLayer = createLayer(
-      {
-        __dataRequests: [dataRequestDescriptor],
-      },
-      {}
-    );
-    const syncContext = new MockSyncContext({ dataFilters: {} });
-    await layer.syncData(syncContext);
-    // @ts-expect-error
-    sinon.assert.notCalled(syncContext.startLoading);
-    // @ts-expect-error
-    sinon.assert.notCalled(syncContext.stopLoading);
-  });
-
-  it('Should resync when changes to syncContext', async () => {
-    const dataRequestDescriptor: DataRequestDescriptor = {
-      data: { ...defaultConfig },
-      dataId: 'source',
-    };
-    const layer: MvtVectorLayer = createLayer(
-      {
-        __dataRequests: [dataRequestDescriptor],
-      },
-      {},
-      true
-    );
-    const syncContext = new MockSyncContext({
-      dataFilters: {
-        timeFilters: {
-          from: 'now',
-          to: '30m',
-          mode: 'relative',
-        },
-      },
-    });
-    await layer.syncData(syncContext);
-    // @ts-expect-error
-    sinon.assert.calledOnce(syncContext.startLoading);
-    // @ts-expect-error
-    sinon.assert.calledOnce(syncContext.stopLoading);
-  });
-
-  describe('Should resync when changes to source params: ', () => {
-    [{ layerName: 'barfoo' }, { minSourceZoom: 1 }, { maxSourceZoom: 12 }].forEach((changes) => {
-      it(`change in ${Object.keys(changes).join(',')}`, async () => {
-        const dataRequestDescriptor: DataRequestDescriptor = {
-          data: defaultConfig,
-          dataId: 'source',
-        };
-        const layer: MvtVectorLayer = createLayer(
-          {
-            __dataRequests: [dataRequestDescriptor],
-          },
-          changes
-        );
-        const syncContext = new MockSyncContext({ dataFilters: {} });
-        await layer.syncData(syncContext);
-
-        // @ts-expect-error
-        sinon.assert.calledOnce(syncContext.startLoading);
-        // @ts-expect-error
-        sinon.assert.calledOnce(syncContext.stopLoading);
-
-        // @ts-expect-error
-        const call = syncContext.stopLoading.getCall(0);
-
-        const newMeta = { ...defaultConfig, ...changes };
-        expect(call.args[2]!.minSourceZoom).toEqual(newMeta.minSourceZoom);
-        expect(call.args[2]!.maxSourceZoom).toEqual(newMeta.maxSourceZoom);
-        expect(call.args[2]!.layerName).toEqual(newMeta.layerName);
-        expect(call.args[2]!.urlTemplate).toEqual(newMeta.urlTemplate);
-      });
-    });
-  });
-
-  describe('refresh token', () => {
-    const uuidRegex = /\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b/;
-
-    it(`should add token in url`, async () => {
-      const layer: MvtVectorLayer = createLayer({}, {}, false, true);
-
-      const syncContext = new MockSyncContext({ dataFilters: {} });
-
-      await layer.syncData(syncContext);
-      // @ts-expect-error
-      sinon.assert.calledOnce(syncContext.startLoading);
-      // @ts-expect-error
-      sinon.assert.calledOnce(syncContext.stopLoading);
-
-      // @ts-expect-error
-      const call = syncContext.stopLoading.getCall(0);
-      expect(call.args[2]!.minSourceZoom).toEqual(defaultConfig.minSourceZoom);
-      expect(call.args[2]!.maxSourceZoom).toEqual(defaultConfig.maxSourceZoom);
-      expect(call.args[2]!.layerName).toEqual(defaultConfig.layerName);
-      expect(call.args[2]!.urlTemplate.startsWith(defaultConfig.urlTemplate)).toBe(true);
-
-      const parsedUrl = url.parse(call.args[2]!.urlTemplate, true);
-      expect(!!(parsedUrl.query.token! as string).match(uuidRegex)).toBe(true);
-    });
   });
 });

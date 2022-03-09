@@ -226,7 +226,7 @@ export const CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP = i18n.translate(
 export const CONFIGURED_SOURCES_CONNECT_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectButton',
   {
-    defaultMessage: 'Connect',
+    defaultMessage: 'Connect another',
   }
 );
 
@@ -282,7 +282,7 @@ export const SAVE_CUSTOM_BODY1 = i18n.translate(
 export const SAVE_CUSTOM_BODY2 = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.body2',
   {
-    defaultMessage: 'Be sure to copy your API keys below.',
+    defaultMessage: 'Be sure to copy your Source Identifier below.',
   }
 );
 
@@ -290,20 +290,6 @@ export const SAVE_CUSTOM_RETURN_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.return.button',
   {
     defaultMessage: 'Return to Sources',
-  }
-);
-
-export const SAVE_CUSTOM_API_KEYS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.apiKeys.title',
-  {
-    defaultMessage: 'API Keys',
-  }
-);
-
-export const SAVE_CUSTOM_API_KEYS_BODY = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.apiKeys.body',
-  {
-    defaultMessage: "You'll need these keys to sync documents for this custom source.",
   }
 );
 

@@ -117,7 +117,7 @@ export const xyChart: ExpressionFunctionDefinition<
     },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      types: ['lens_xy_layer'] as any,
+      types: ['lens_xy_data_layer', 'lens_xy_referenceLine_layer'] as any,
       help: 'Layers of visual series',
       multi: true,
     },
@@ -148,14 +148,27 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Show values in legend',
       }),
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.ariaLabel.help', {
+        defaultMessage: 'Specifies the aria label of the xy chart',
+      }),
+      required: false,
+    },
   },
-  fn(data: LensMultiTable, args: XYArgs) {
+  fn(data: LensMultiTable, args: XYArgs, handlers) {
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',
       value: {
         data,
-        args,
+        args: {
+          ...args,
+          ariaLabel:
+            args.ariaLabel ??
+            (handlers.variables?.embeddableTitle as string) ??
+            handlers.getExecutionContext?.()?.description,
+        },
       },
     };
   },

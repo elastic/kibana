@@ -7,10 +7,12 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter/common';
-import { I18nProvider } from '@kbn/i18n/react';
+import { Ast } from '@kbn/interpreter';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type {
   SuggestionRequest,
   Visualization,
@@ -20,9 +22,9 @@ import type {
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
-import { getStopsForFixedMode } from '../shared_components';
 import { LayerType, layerTypes } from '../../common';
-import { getDefaultSummaryLabel } from '../../common/expressions';
+import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import type { ColumnState, SortingState } from '../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 export interface DatatableVisualizationState {
@@ -31,6 +33,7 @@ export interface DatatableVisualizationState {
   layerType: LayerType;
   sorting?: SortingState;
   fitRowToContent?: boolean;
+  paging?: PagingState;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -39,8 +42,10 @@ const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
 
 export const getDatatableVisualization = ({
   paletteService,
+  theme,
 }: {
   paletteService: PaletteRegistry;
+  theme: ThemeServiceStart;
 }): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
@@ -80,6 +85,8 @@ export const getDatatableVisualization = ({
 
   switchVisualizationType: (_, state) => state,
 
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
+
   initialize(addNewLayer, state) {
     return (
       state || {
@@ -100,7 +107,8 @@ export const getDatatableVisualization = ({
     if (
       keptLayerIds.length > 1 ||
       (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-      (state && table.changeType === 'unchanged')
+      (state && table.changeType === 'unchanged') ||
+      table.columns.some((col) => col.operation.isStaticValue)
     ) {
       return [];
     }
@@ -235,9 +243,9 @@ export const getDatatableVisualization = ({
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
-              const hasColoring = Boolean(
-                columnConfig.colorMode !== 'none' && columnConfig.palette?.params?.stops
-              );
+              const stops = columnConfig.palette?.params?.stops;
+              const hasColoring = Boolean(columnConfig.colorMode !== 'none' && stops);
+
               return {
                 columnId: accessor,
                 triggerIcon: columnConfig.hidden
@@ -245,12 +253,7 @@ export const getDatatableVisualization = ({
                   : hasColoring
                   ? 'colorBy'
                   : undefined,
-                palette: hasColoring
-                  ? getStopsForFixedMode(
-                      columnConfig.palette?.params?.stops || [],
-                      columnConfig.palette?.params?.colorStops
-                    )
-                  : undefined,
+                palette: hasColoring && stops ? stops.map(({ color }) => color) : undefined,
               };
             }),
           supportsMoreColumns: true,
@@ -294,9 +297,11 @@ export const getDatatableVisualization = ({
   },
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <TableDimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <TableDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
@@ -306,7 +311,7 @@ export const getDatatableVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.datatable.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];
@@ -358,8 +363,12 @@ export const getDatatableVisualization = ({
                     : [],
                 reverse: false, // managed at UI level
               };
+              const sortingHint = datasource!.getOperationForColumnId(column.columnId)!.sortingHint;
 
               const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
+
+              const canColor =
+                datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
 
               return {
                 type: 'expression',
@@ -377,12 +386,13 @@ export const getDatatableVisualization = ({
                         !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
                       ],
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
-                      colorMode: [column.colorMode ?? 'none'],
+                      colorMode: [canColor && column.colorMode ? column.colorMode : 'none'],
                       palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
                       summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
                       summaryLabel: hasNoSummaryRow
                         ? []
                         : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
+                      sortingHint: sortingHint ? [sortingHint] : [],
                     },
                   },
                 ],
@@ -391,6 +401,7 @@ export const getDatatableVisualization = ({
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
             fitRowToContent: [state.fitRowToContent ?? false],
+            pageSize: state.paging?.enabled ? [state.paging.size] : [],
           },
         },
       ],
@@ -403,9 +414,11 @@ export const getDatatableVisualization = ({
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <DataTableToolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <DataTableToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
@@ -421,10 +434,11 @@ export const getDatatableVisualization = ({
           },
         };
       case 'toggle':
+        const toggleColumnId = event.data.columnId;
         return {
           ...state,
           columns: state.columns.map((column) => {
-            if (column.columnId === event.data.columnId) {
+            if (column.columnId === toggleColumnId) {
               return {
                 ...column,
                 hidden: !column.hidden,
@@ -436,10 +450,11 @@ export const getDatatableVisualization = ({
         };
       case 'resize':
         const targetWidth = event.data.width;
+        const resizeColumnId = event.data.columnId;
         return {
           ...state,
           columns: state.columns.map((column) => {
-            if (column.columnId === event.data.columnId) {
+            if (column.columnId === resizeColumnId) {
               return {
                 ...column,
                 width: targetWidth,
@@ -448,6 +463,14 @@ export const getDatatableVisualization = ({
               return column;
             }
           }),
+        };
+      case 'pagesize':
+        return {
+          ...state,
+          paging: {
+            enabled: state.paging?.enabled || false,
+            size: event.data.size,
+          },
         };
       default:
         return state;

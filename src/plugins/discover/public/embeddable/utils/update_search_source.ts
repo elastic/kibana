@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, ISearchSource } from '../../../../data/common';
+import { DataView, ISearchSource } from '../../../../data/common';
 import { getSortForSearchSource } from '../../components/doc_table';
 import { SortPairArr } from '../../components/doc_table/lib/get_sort';
 
 export const updateSearchSource = (
   searchSource: ISearchSource,
-  indexPattern: IndexPattern | undefined,
+  indexPattern: DataView | undefined,
   sort: (SortPairArr[] & string[][]) | undefined,
   useNewFieldsApi: boolean,
   defaults: {

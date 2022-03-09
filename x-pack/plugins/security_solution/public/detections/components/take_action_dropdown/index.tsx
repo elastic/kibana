@@ -8,8 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
-import { isEmpty } from 'lodash/fp';
-import { TimelineEventsDetailsItem } from '../../../../common';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
@@ -81,11 +80,11 @@ export const TakeActionDropdown = React.memo(
       [detailsData]
     );
 
-    const alertIds = useMemo(
-      () => (isEmpty(actionsData.eventId) ? null : [actionsData.eventId]),
-      [actionsData.eventId]
-    );
     const isEvent = actionsData.eventKind === 'event';
+
+    const isAgentEndpoint = useMemo(() => ecsData?.agent?.type?.includes('endpoint'), [ecsData]);
+
+    const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
 
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
@@ -135,9 +134,10 @@ export const TakeActionDropdown = React.memo(
 
     const { eventFilterActionItems } = useEventFilterAction({
       onAddEventFilterClick: handleOnAddEventFilterClick,
+      disabled: !isEndpointEvent,
     });
 
-    const afterCaseSelection = useCallback(() => {
+    const onMenuItemClick = useCallback(() => {
       closePopoverHandler();
     }, [closePopoverHandler]);
 
@@ -151,7 +151,6 @@ export const TakeActionDropdown = React.memo(
     });
 
     const { investigateInTimelineActionItems } = useInvestigateInTimeline({
-      alertIds,
       ecsRowData: ecsData,
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
@@ -160,14 +159,23 @@ export const TakeActionDropdown = React.memo(
       () =>
         !isEvent && actionsData.ruleId
           ? [...statusActionItems, ...exceptionActionItems]
-          : eventFilterActionItems,
-      [eventFilterActionItems, exceptionActionItems, statusActionItems, isEvent, actionsData.ruleId]
+          : isEndpointEvent
+          ? eventFilterActionItems
+          : [],
+      [
+        eventFilterActionItems,
+        isEndpointEvent,
+        exceptionActionItems,
+        statusActionItems,
+        isEvent,
+        actionsData.ruleId,
+      ]
     );
 
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData,
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
-      afterCaseSelection,
+      onMenuItemClick,
       timelineId,
     });
 

@@ -27,6 +27,7 @@ import { CustomizePanelTitleAction } from '.';
 
 export interface PanelHeaderProps {
   title?: string;
+  index?: number;
   isViewMode: boolean;
   hidePanelTitle: boolean;
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
@@ -114,6 +115,7 @@ function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription)
 
 export function PanelHeader({
   title,
+  index,
   isViewMode,
   hidePanelTitle,
   getActionContextMenuPanel,
@@ -153,12 +155,13 @@ export function PanelHeader({
 
   if (!showPanelBar) {
     return (
-      <div className={classes}>
+      <div data-test-subj="dashboardPanelTitle__wrapper" className={classes}>
         <PanelOptionsMenu
           getActionContextMenuPanel={getActionContextMenuPanel}
           isViewMode={isViewMode}
           closeContextMenu={closeContextMenu}
           title={title}
+          index={index}
         />
         <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
       </div>
@@ -212,22 +215,25 @@ export function PanelHeader({
   };
 
   return (
-    <figcaption
-      className={classes}
-      data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
-    >
-      <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
-        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-        {renderTitle()}
-        {renderBadges(badges, embeddable)}
-      </h2>
-      {renderNotifications(notifications, embeddable)}
-      <PanelOptionsMenu
-        isViewMode={isViewMode}
-        getActionContextMenuPanel={getActionContextMenuPanel}
-        closeContextMenu={closeContextMenu}
-        title={title}
-      />
-    </figcaption>
+    <span data-test-subj="dashboardPanelTitle__wrapper">
+      <figcaption
+        className={classes}
+        data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
+      >
+        <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
+          <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+          {renderTitle()}
+          {renderBadges(badges, embeddable)}
+        </h2>
+        {renderNotifications(notifications, embeddable)}
+        <PanelOptionsMenu
+          isViewMode={isViewMode}
+          getActionContextMenuPanel={getActionContextMenuPanel}
+          closeContextMenu={closeContextMenu}
+          title={title}
+          index={index}
+        />
+      </figcaption>
+    </span>
   );
 }

@@ -10,9 +10,10 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesW
 import type {
   IEsSearchRequest,
   IEsSearchResponse,
+  FieldSpec,
+  RuntimeField,
 } from '../../../../../../src/plugins/data/common';
 import type { DocValueFields, Maybe } from '../common';
-import { FieldSpec } from '../../../../../../src/plugins/data/common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 
@@ -71,6 +72,7 @@ export interface BrowserField {
   type: string;
   subType?: IFieldSubType;
   readFromDocValues: boolean;
+  runtimeField?: RuntimeField;
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;

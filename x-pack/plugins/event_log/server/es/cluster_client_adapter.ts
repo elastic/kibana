@@ -15,6 +15,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
+import { ParsedIndexAlias } from './init';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
@@ -119,9 +120,9 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       const esClient = await this.elasticsearchClientPromise;
       const response = await esClient.bulk({ body: bulkBody });
 
-      if (response.body.errors) {
+      if (response.errors) {
         const error = new Error('Error writing some bulk events');
-        error.stack += '\n' + util.inspect(response.body.items, { depth: null });
+        error.stack += '\n' + util.inspect(response.items, { depth: null });
         this.logger.error(error);
       }
     } catch (err) {
@@ -163,8 +164,8 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body: legacyResult } = await esClient.indices.existsTemplate({ name });
-      const { body: indexTemplateResult } = await esClient.indices.existsIndexTemplate({ name });
+      const legacyResult = await esClient.indices.existsTemplate({ name });
+      const indexTemplateResult = await esClient.indices.existsIndexTemplate({ name });
       return (legacyResult as boolean) || (indexTemplateResult as boolean);
     } catch (err) {
       throw new Error(`error checking existence of index template: ${err.message}`);
@@ -177,7 +178,6 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       await esClient.indices.putIndexTemplate({
         name,
         body: template,
-        // @ts-expect-error doesn't exist in @elastic/elasticsearch
         create: true,
       });
     } catch (err) {
@@ -199,11 +199,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   ): Promise<estypes.IndicesGetTemplateResponse> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body: templates } = await esClient.indices.getTemplate(
-        { name: indexTemplatePattern },
-        { ignore: [404] }
-      );
-      return templates;
+      return await esClient.indices.getTemplate({ name: indexTemplatePattern }, { ignore: [404] });
     } catch (err) {
       throw new Error(`error getting existing legacy index templates: ${err.message}`);
     }
@@ -237,11 +233,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   ): Promise<estypes.IndicesGetSettingsResponse> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body: indexSettings } = await esClient.indices.getSettings(
-        { index: indexPattern },
-        { ignore: [404] }
-      );
-      return indexSettings;
+      return await esClient.indices.getSettings({ index: indexPattern }, { ignore: [404] });
     } catch (err) {
       throw new Error(
         `error getting existing indices matching pattern ${indexPattern}: ${err.message}`
@@ -255,7 +247,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       await esClient.indices.putSettings({
         index: indexName,
         body: {
-          'index.hidden': true,
+          index: { hidden: true },
         },
       });
     } catch (err) {
@@ -268,11 +260,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   ): Promise<estypes.IndicesGetAliasResponse> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body: indexAliases } = await esClient.indices.getAlias(
-        { index: indexPattern },
-        { ignore: [404] }
-      );
-      return indexAliases;
+      return await esClient.indices.getAlias({ index: indexPattern }, { ignore: [404] });
     } catch (err) {
       throw new Error(
         `error getting existing index aliases matching pattern ${indexPattern}: ${err.message}`
@@ -281,15 +269,15 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   }
 
   public async setIndexAliasToHidden(
-    indexName: string,
-    currentAliases: estypes.IndicesGetAliasIndexAliases
+    aliasName: string,
+    currentAliasData: ParsedIndexAlias[]
   ): Promise<void> {
     try {
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.updateAliases({
         body: {
-          actions: Object.keys(currentAliases.aliases).map((aliasName) => {
-            const existingAliasOptions = pick(currentAliases.aliases[aliasName], [
+          actions: currentAliasData.map((aliasData) => {
+            const existingAliasOptions = pick(aliasData, [
               'is_write_index',
               'filter',
               'index_routing',
@@ -299,7 +287,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
             return {
               add: {
                 ...existingAliasOptions,
-                index: indexName,
+                index: aliasData.indexName,
                 alias: aliasName,
                 is_hidden: true,
               },
@@ -309,7 +297,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       });
     } catch (err) {
       throw new Error(
-        `error setting existing index aliases for index ${indexName} to is_hidden: ${err.message}`
+        `error setting existing index aliases for alias ${aliasName} to is_hidden: ${err.message}`
       );
     }
   }
@@ -317,7 +305,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   public async doesAliasExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body } = await esClient.indices.existsAlias({ name });
+      const body = await esClient.indices.existsAlias({ name });
       return body as boolean;
     } catch (err) {
       throw new Error(`error checking existance of initial index: ${err.message}`);
@@ -526,9 +514,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
     try {
       const {
-        body: {
-          hits: { hits, total },
-        },
+        hits: { hits, total },
       } = await esClient.search<IValidatedEvent>({
         index,
         track_total_hits: true,
@@ -537,7 +523,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       return {
         page,
         per_page: perPage,
-        total: isNumber(total) ? total : total.value,
+        total: isNumber(total) ? total : total!.value,
         data: hits.map((hit) => hit._source),
       };
     } catch (err) {

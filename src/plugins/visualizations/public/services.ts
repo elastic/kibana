@@ -15,6 +15,8 @@ import type {
   OverlayStart,
   SavedObjectsStart,
   DocLinksStart,
+  ThemeServiceStart,
+  ExecutionContextSetup,
 } from '../../../core/public';
 import type { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
@@ -26,6 +28,8 @@ import { EmbeddableStart } from '../../embeddable/public';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 
@@ -61,5 +65,8 @@ export const [getAggs, setAggs] =
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
+
+export const [getExecutionContext, setExecutionContext] =
+  createGetterSetter<ExecutionContextSetup>('ExecutionContext');
 
 export const [getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spaces', false);

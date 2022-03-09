@@ -16,7 +16,7 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 
 import type { DataStream } from '../../../types';
 import { useGetDataStreams, useStartServices, usePagination, useBreadcrumbs } from '../../../hooks';
@@ -27,9 +27,7 @@ import { DataStreamRowActions } from './components/data_stream_row_actions';
 export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('data_streams');
 
-  const {
-    data: { fieldFormats },
-  } = useStartServices();
+  const { fieldFormats } = useStartServices();
 
   const { pagination, pageSizeOptions } = usePagination();
 

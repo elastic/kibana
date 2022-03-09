@@ -85,7 +85,7 @@
     "deprecated_settings": [
       {
         "level": "warning",
-        "message": "translog retention settings are ignored",
+        "message": "Translog retention settings are deprecated",
         "url":
           "https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html",
         "details":

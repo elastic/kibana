@@ -74,17 +74,17 @@ export function UptimeSection({ bucketSize }: Props) {
   const { appLink, stats, series } = data || {};
 
   const downColor = theme.eui.euiColorVis2;
-  const upColor = theme.eui.euiColorLightShade;
+  const upColor = theme.eui.euiColorMediumShade;
 
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.uptime.title', {
-        defaultMessage: 'Uptime',
+        defaultMessage: 'Monitors',
       })}
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.uptime.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Show monitors',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}

@@ -11,9 +11,7 @@
 import { keys, each, cloneDeep, clone, uniq, filter, map } from 'lodash';
 // @ts-expect-error
 import realHits from '../../../../../__fixtures__/real_hits.js';
-
-import { IndexPattern } from '../../../../../../../data/public';
-import { flattenHit } from '../../../../../../../data/common';
+import { flattenHit, DataView } from '../../../../../../../data/common';
 
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
@@ -142,21 +140,16 @@ describe('fieldCalculator', function () {
     it('Should return an array of values for core meta fields', function () {
       const types = fieldCalculator.getFieldValues(
         hits,
-        indexPattern.fields.getByName('_type'),
+        indexPattern.fields.getByName('_id'),
         indexPattern
       );
       expect(types).toBeInstanceOf(Array);
-      expect(
-        filter(types, function (v) {
-          return v === 'apache';
-        }).length
-      ).toBe(18);
-      expect(uniq(clone(types)).sort()).toEqual(['apache', 'nginx']);
+      expect(types.length).toBe(20);
     });
   });
 
   describe('getFieldValueCounts', function () {
-    let params: { hits: any; field: any; count: number; indexPattern: IndexPattern };
+    let params: { hits: any; field: any; count: number; indexPattern: DataView };
     beforeEach(function () {
       params = {
         hits: cloneDeep(realHits),

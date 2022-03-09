@@ -16,7 +16,7 @@ import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
@@ -266,6 +266,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         filename: '[path].br',
         test: /\.(js|css)$/,
         cache: false,
+        compressionOptions: {
+          level: 11,
+        },
       }),
       new CompressionPlugin({
         algorithm: 'gzip',
@@ -283,7 +286,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           extractComments: false,
           parallel: false,
           terserOptions: {
-            compress: true,
+            compress: { passes: 2 },
             keep_classnames: true,
             mangle: true,
           },

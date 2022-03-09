@@ -51,6 +51,7 @@ export default {
                 alerts: [],
                 transactionTypes: [],
                 serviceName,
+                fallbackToTransactions: false,
               }}
             >
               <KibanaContext.Provider>

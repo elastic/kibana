@@ -9,8 +9,8 @@ import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import uuid from 'uuid/v5';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
-import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
-import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT } from '../../common';
+import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
+import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT, outputType } from '../../common';
 import { OutputUnauthorizedError } from '../errors';
 
 import { appContextService } from './app_context';
@@ -75,7 +75,10 @@ class OutputService {
         is_default_monitoring: !defaultMonitoringOutput,
       } as NewOutput;
 
-      return await this.create(soClient, newDefaultOutput);
+      return await this.create(soClient, newDefaultOutput, {
+        id: DEFAULT_OUTPUT_ID,
+        overwrite: true,
+      });
     }
 
     return defaultOutput;
@@ -118,7 +121,7 @@ class OutputService {
   public async create(
     soClient: SavedObjectsClientContract,
     output: NewOutput,
-    options?: { id?: string; fromPreconfiguration?: boolean }
+    options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
     const data: OutputSOAttributes = { ...output };
 
@@ -146,7 +149,7 @@ class OutputService {
       }
     }
 
-    if (data.hosts) {
+    if (data.type === outputType.Elasticsearch && data.hosts) {
       data.hosts = data.hosts.map(normalizeHostsForAgents);
     }
 
@@ -155,7 +158,7 @@ class OutputService {
     }
 
     const newSo = await soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
-      overwrite: options?.fromPreconfiguration,
+      overwrite: options?.overwrite || options?.fromPreconfiguration,
       id: options?.id ? outputIdToUuid(options.id) : undefined,
     });
 
@@ -193,6 +196,8 @@ class OutputService {
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
+      sortField: 'is_default',
+      sortOrder: 'desc',
     });
 
     return {
@@ -255,7 +260,7 @@ class OutputService {
       );
     }
 
-    const updateData = { ...data };
+    const updateData = { type: originalOutput.type, ...data };
 
     // ensure only default output exists
     if (data.is_default) {
@@ -282,7 +287,7 @@ class OutputService {
       }
     }
 
-    if (updateData.hosts) {
+    if (updateData.type === outputType.Elasticsearch && updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
     const outputSO = await soClient.update<OutputSOAttributes>(

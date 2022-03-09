@@ -54,9 +54,7 @@ describe('deleteLegacyUrlAliases', () => {
         body: { error: { type: 'es_type', reason: 'es_reason' } },
       })
     );
-    params.client.updateByQuery.mockResolvedValueOnce(
-      elasticsearchClientMock.createErrorTransportRequestPromise(esError)
-    );
+    params.client.updateByQuery.mockResolvedValueOnce(Promise.reject(esError));
     mockGetEsErrorMessage.mockClear();
     mockGetEsErrorMessage.mockReturnValue('Oh no!');
 

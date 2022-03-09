@@ -33,20 +33,27 @@ import {
   RecursivePartial,
   AxisStyle,
   ScaleType,
+  AreaSeriesProps,
+  BarSeriesProps,
+  LineSeriesProps,
 } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type {
   ExpressionRenderDefinition,
   Datatable,
   DatatableRow,
+  DatatableColumn,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
+import { ThemeServiceStart } from 'kibana/public';
+import { FieldFormat } from 'src/plugins/field_formats/common';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
-import { layerTypes } from '../../common';
-import type { LayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
+import type { DataLayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
 import { visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
@@ -59,7 +66,6 @@ import {
   useActiveCursor,
 } from '../../../../../src/plugins/charts/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../src/plugins/charts/common';
-import { EmptyPlaceholder } from '../shared_components';
 import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
@@ -71,6 +77,7 @@ import {
   ReferenceLineAnnotations,
 } from './expression_reference_lines';
 import { computeOverallDataDomain } from './reference_line_helpers';
+import { getReferenceLayers, isDataLayer } from './visualization_helpers';
 
 declare global {
   interface Window {
@@ -81,10 +88,7 @@ declare global {
   }
 }
 
-type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
-type SeriesSpec = InferPropType<typeof LineSeries> &
-  InferPropType<typeof BarSeries> &
-  InferPropType<typeof AreaSeries>;
+type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -104,7 +108,7 @@ export type XYChartRenderProps = XYChartProps & {
 export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
-  const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
+  const isTimeViz = filteredLayers.every((l) => l.xScaleType === 'time');
   const xColumn = data.tables[filteredLayers[0].layerId].columns.find(
     (column) => column.id === filteredLayers[0].xAccessor
   );
@@ -134,6 +138,7 @@ export const getXyChartRenderer = (dependencies: {
   paletteService: PaletteRegistry;
   timeZone: string;
   useLegacyTimeAxis: boolean;
+  kibanaTheme: ThemeServiceStart;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -156,23 +161,25 @@ export const getXyChartRenderer = (dependencies: {
     };
 
     ReactDOM.render(
-      <I18nProvider>
-        <XYChartReportable
-          {...config}
-          formatFactory={dependencies.formatFactory}
-          chartsActiveCursorService={dependencies.chartsActiveCursorService}
-          chartsThemeService={dependencies.chartsThemeService}
-          paletteService={dependencies.paletteService}
-          timeZone={dependencies.timeZone}
-          useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
-          minInterval={calculateMinInterval(config)}
-          interactive={handlers.isInteractive()}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-          renderMode={handlers.getRenderMode()}
-          syncColors={handlers.isSyncColorsEnabled()}
-        />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={dependencies.kibanaTheme.theme$}>
+        <I18nProvider>
+          <XYChartReportable
+            {...config}
+            formatFactory={dependencies.formatFactory}
+            chartsActiveCursorService={dependencies.chartsActiveCursorService}
+            chartsThemeService={dependencies.chartsThemeService}
+            paletteService={dependencies.paletteService}
+            timeZone={dependencies.timeZone}
+            useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
+            minInterval={calculateMinInterval(config)}
+            interactive={handlers.isInteractive()}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
+            renderMode={handlers.getRenderMode()}
+            syncColors={handlers.isSyncColorsEnabled()}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domNode,
       () => handlers.done()
     );
@@ -248,7 +255,7 @@ export function XYChart({
   const layersById = filteredLayers.reduce((memo, layer) => {
     memo[layer.layerId] = layer;
     return memo;
-  }, {} as Record<string, LayerArgs>);
+  }, {} as Record<string, DataLayerArgs>);
 
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
     datatables: Object.values(data.tables),
@@ -258,9 +265,6 @@ export function XYChart({
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return <EmptyPlaceholder icon={icon} />;
   }
-  const referenceLineLayers = layers.filter(
-    (layer) => layer.layerType === layerTypes.REFERENCELINE
-  );
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
@@ -313,7 +317,7 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => layer.splitAccessor);
 
-  const isTimeViz = Boolean(data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time'));
+  const isTimeViz = Boolean(filteredLayers.every((l) => l.xScaleType === 'time'));
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
@@ -328,7 +332,6 @@ export function XYChart({
     left: yAxesConfiguration.find(({ groupId }) => groupId === 'left'),
     right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
   };
-  const referenceLinePaddings = getReferenceLineRequiredPaddings(referenceLineLayers, yAxesMap);
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
@@ -345,6 +348,9 @@ export function XYChart({
         .filter((name) => Boolean(name))[0]
     );
   };
+
+  const referenceLineLayers = getReferenceLayers(layers);
+  const referenceLinePaddings = getReferenceLineRequiredPaddings(referenceLineLayers, yAxesMap);
 
   const getYAxesStyle = (groupId: 'left' | 'right') => {
     const tickVisible =
@@ -492,18 +498,22 @@ export function XYChart({
     if (xySeries.seriesKeys.length > 1) {
       const pointValue = xySeries.seriesKeys[0];
 
+      const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
+      const splitFormatter = formatFactory(splitColumn && splitColumn.meta?.params);
+
       points.push({
-        row: table.rows.findIndex(
-          (row) => layer.splitAccessor && row[layer.splitAccessor] === pointValue
-        ),
+        row: table.rows.findIndex((row) => {
+          if (layer.splitAccessor) {
+            if (layersAlreadyFormatted[layer.splitAccessor]) {
+              return splitFormatter.convert(row[layer.splitAccessor]) === pointValue;
+            }
+            return row[layer.splitAccessor] === pointValue;
+          }
+        }),
         column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
         value: pointValue,
       });
     }
-    const currentColumnMeta = table.columns.find((el) => el.id === layer.xAccessor)?.meta;
-    const xAxisFieldName = currentColumnMeta?.field;
-    const isDateField = currentColumnMeta?.type === 'date';
-
     const context: LensFilterEvent['data'] = {
       data: points.map((point) => ({
         row: point.row,
@@ -511,7 +521,6 @@ export function XYChart({
         value: point.value,
         table,
       })),
-      timeFieldName: xDomain && isDateField ? xAxisFieldName : undefined,
     };
     onClickValue(context);
   };
@@ -529,13 +538,10 @@ export function XYChart({
 
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === filteredLayers[0].xAccessor);
 
-    const timeFieldName = isTimeViz ? table.columns[xAxisColumnIndex]?.meta?.field : undefined;
-
     const context: LensBrushEvent['data'] = {
       range: [min, max],
       table,
       column: xAxisColumnIndex,
-      timeFieldName,
     };
     onSelectRange(context);
   };
@@ -549,9 +555,8 @@ export function XYChart({
   } as LegendPositionConfig;
 
   const isHistogramModeEnabled = filteredLayers.some(
-    ({ isHistogram, seriesType, splitAccessor }) =>
+    ({ isHistogram, seriesType }) =>
       isHistogram &&
-      (seriesType.includes('stacked') || !splitAccessor) &&
       (seriesType.includes('stacked') ||
         !seriesType.includes('bar') ||
         !chartHasMoreThanOneBarSeries)
@@ -596,6 +601,7 @@ export function XYChart({
               : undefined,
         },
       };
+
   return (
     <Chart ref={chartRef}>
       <Settings
@@ -653,6 +659,8 @@ export function XYChart({
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
+        ariaLabel={args.ariaLabel}
+        ariaUseDefaultSummary={!args.ariaLabel}
       />
 
       <Axis
@@ -725,6 +733,11 @@ export function XYChart({
 
           const table = data.tables[layerId];
 
+          const formatterPerColumn = new Map<DatatableColumn, FieldFormat>();
+          for (const column of table.columns) {
+            formatterPerColumn.set(column, formatFactory(column.meta.params));
+          }
+
           // what if row values are not primitive? That is the case of, for instance, Ranges
           // remaps them to their serialized version with the formatHint metadata
           // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
@@ -739,7 +752,7 @@ export function XYChart({
                   // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
                   (!isPrimitive(record) || (column.id === xAccessor && xScaleType === 'ordinal'))
                 ) {
-                  newRow[column.id] = formatFactory(column.meta.params).convert(record);
+                  newRow[column.id] = formatterPerColumn.get(column)!.convert(record);
                 }
               }
               return newRow;
@@ -793,6 +806,8 @@ export function XYChart({
           );
 
           const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
+          const splitHint = table.columns.find((col) => col.id === splitAccessor)?.meta?.params;
+          const splitFormatter = formatFactory(splitHint);
 
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
@@ -852,8 +867,6 @@ export function XYChart({
               },
             },
             name(d) {
-              const splitHint = table.columns.find((col) => col.id === splitAccessor)?.meta?.params;
-
               // For multiple y series, the name of the operation is used on each, either:
               // * Key - Y name
               // * Formatted value - Y name
@@ -866,7 +879,7 @@ export function XYChart({
                       splitAccessor &&
                       !layersAlreadyFormatted[splitAccessor]
                     ) {
-                      return formatFactory(splitHint).convert(key);
+                      return splitFormatter.convert(key);
                     }
                     return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
                   })
@@ -880,7 +893,7 @@ export function XYChart({
                 if (splitAccessor && layersAlreadyFormatted[splitAccessor]) {
                   return d.seriesKeys[0];
                 }
-                return formatFactory(splitHint).convert(d.seriesKeys[0]);
+                return splitFormatter.convert(d.seriesKeys[0]);
               }
               // This handles both split and single-y cases:
               // * If split series without formatting, show the value literally
@@ -972,10 +985,11 @@ export function XYChart({
   );
 }
 
-function getFilteredLayers(layers: LayerArgs[], data: LensMultiTable) {
-  return layers.filter(({ layerId, xAccessor, accessors, splitAccessor, layerType }) => {
+function getFilteredLayers(layers: DataLayerArgs[], data: LensMultiTable) {
+  return layers.filter((layer) => {
+    const { layerId, xAccessor, accessors, splitAccessor } = layer;
     return (
-      layerType === layerTypes.DATA &&
+      isDataLayer(layer) &&
       !(
         !accessors.length ||
         !data.tables[layerId] ||

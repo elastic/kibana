@@ -23,6 +23,7 @@ import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../timelines/public/components';
+import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -35,6 +36,9 @@ jest.mock('../body/events/index', () => ({
 }));
 
 jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
+}));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -46,9 +50,15 @@ jest.mock('../../../../common/lib/kibana', () => {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
       services: {
+        theme: {
+          theme$: {},
+        },
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
+        },
+        cases: {
+          getCasesContext: () => mockCasesContext,
         },
         docLinks: { links: { query: { eql: 'url-eql_doc' } } },
         uiSettings: {
@@ -180,6 +190,7 @@ describe('Timeline', () => {
         loading: true,
         indexPattern: {},
         selectedPatterns: [],
+        missingPatterns: [],
       });
       const wrapper = mount(
         <TestProviders>

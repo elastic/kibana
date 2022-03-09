@@ -8,33 +8,19 @@
 import React from 'react';
 import { configure, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RecentCases from '.';
+import RecentCases, { RecentCasesProps } from '.';
 import { TestProviders } from '../../common/mock';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesMockState } from '../../containers/mock';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
 
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../common/lib/kibana/hooks');
+jest.mock('../../common/navigation/hooks');
 
 configure({ testIdAttribute: 'data-test-subj' });
-const defaultProps = {
-  allCasesNavigation: {
-    href: 'all-cases-href',
-    onClick: jest.fn(),
-  },
-  caseDetailsNavigation: {
-    href: () => 'case-details-href',
-    onClick: jest.fn(),
-  },
-  createCaseNavigation: {
-    href: 'create-details-href',
-    onClick: jest.fn(),
-  },
-  hasWritePermissions: true,
+const defaultProps: RecentCasesProps = {
   maxCasesToShow: 10,
-  owner: [SECURITY_SOLUTION_OWNER],
 };
 
 const setFilters = jest.fn();
@@ -76,7 +62,7 @@ describe('RecentCases', () => {
         <RecentCases {...defaultProps} />
       </TestProviders>
     );
-    expect(getAllByTestId('case-details-link')).toHaveLength(5);
+    expect(getAllByTestId('case-details-link')).toHaveLength(7);
   });
 
   it('is good at rendering max cases', () => {

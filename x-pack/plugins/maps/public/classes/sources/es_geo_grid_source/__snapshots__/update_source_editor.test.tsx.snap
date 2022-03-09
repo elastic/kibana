@@ -1,67 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`source editor geo_grid_source default vector layer config should allow super-fine option 1`] = `
-<Fragment>
-  <EuiPanel>
-    <EuiTitle
-      size="xs"
-    >
-      <h6>
-        <FormattedMessage
-          defaultMessage="Metrics"
-          id="xpack.maps.source.esGrid.metricsLabel"
-          values={Object {}}
-        />
-      </h6>
-    </EuiTitle>
-    <EuiSpacer
-      size="m"
-    />
-    <MetricsEditor
-      allowMultipleMetrics={true}
-      fields={Array []}
-      key="12345"
-      metrics={Array []}
-      onChange={[Function]}
-    />
-  </EuiPanel>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiPanel>
-    <EuiTitle
-      size="xs"
-    >
-      <h6>
-        <FormattedMessage
-          defaultMessage="Grid parameters"
-          id="xpack.maps.source.esGrid.geoTileGridLabel"
-          values={Object {}}
-        />
-      </h6>
-    </EuiTitle>
-    <EuiSpacer
-      size="m"
-    />
-    <ResolutionEditor
-      includeSuperFine={true}
-      metrics={Array []}
-      onChange={[Function]}
-      resolution="COARSE"
-    />
-    <RenderAsSelect
-      isColumnCompressed={true}
-      onChange={[Function]}
-      renderAs="point"
-    />
-  </EuiPanel>
-  <EuiSpacer
-    size="s"
-  />
-</Fragment>
-`;
-
-exports[`source editor geo_grid_source should put limitations based on heatmap-rendering selection should not allow super-fine option for heatmaps and should not allow multiple metrics 1`] = `
+exports[`source editor geo_grid_source should not allow editing multiple metrics for heatmap 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle
@@ -95,9 +34,40 @@ exports[`source editor geo_grid_source should put limitations based on heatmap-r
       size="xs"
     >
       <h6>
+        Heat map
+      </h6>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <ResolutionEditor
+      isHeatmap={true}
+      metrics={Array []}
+      onChange={[Function]}
+      resolution="COARSE"
+    />
+    <RenderAsSelect
+      isColumnCompressed={true}
+      onChange={[Function]}
+      renderAs="point"
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;
+
+exports[`source editor geo_grid_source should render editor 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h6>
         <FormattedMessage
-          defaultMessage="Grid parameters"
-          id="xpack.maps.source.esGrid.geoTileGridLabel"
+          defaultMessage="Metrics"
+          id="xpack.maps.source.esGrid.metricsLabel"
           values={Object {}}
         />
       </h6>
@@ -105,8 +75,31 @@ exports[`source editor geo_grid_source should put limitations based on heatmap-r
     <EuiSpacer
       size="m"
     />
+    <MetricsEditor
+      allowMultipleMetrics={true}
+      fields={Array []}
+      key="12345"
+      metrics={Array []}
+      metricsFilter={[Function]}
+      onChange={[Function]}
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h6>
+        Clusters and grids
+      </h6>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
     <ResolutionEditor
-      includeSuperFine={false}
+      isHeatmap={false}
       metrics={Array []}
       onChange={[Function]}
       resolution="COARSE"

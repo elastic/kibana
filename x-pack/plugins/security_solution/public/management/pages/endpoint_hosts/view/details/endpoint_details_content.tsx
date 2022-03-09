@@ -8,8 +8,6 @@
 import styled from 'styled-components';
 import {
   EuiDescriptionList,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,26 +16,38 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isPolicyOutOfDate } from '../../utils';
 import { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
-import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
+import { nonExistingPolicies, policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
-import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
+import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointDetailsPath } from '../../../../common/routing';
-import { EndpointPolicyLink } from '../components/endpoint_policy_link';
+import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
 import { EndpointAgentStatus } from '../components/endpoint_agent_status';
 
-const HostIds = styled(EuiListGroupItem)`
-  margin-top: 0;
-  .euiListGroupItem__text {
-    padding: 0;
+const EndpointDetailsContentStyled = styled.div`
+  dl dt {
+    max-width: 27%;
+  }
+  dl dd {
+    max-width: 73%;
+  }
+  .policyLineText {
+    padding-right: 5px;
   }
 `;
+
+const ColumnTitle = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <EuiText size="s">
+      <h5>{children}</h5>
+    </EuiText>
+  );
+};
 
 export const EndpointDetailsContent = memo(
   ({
@@ -53,6 +63,8 @@ export const EndpointDetailsContent = memo(
     const policyStatus = useEndpointSelector(
       policyResponseStatus
     ) as keyof typeof POLICY_STATUS_TO_BADGE_COLOR;
+
+    const missingPolicies = useEndpointSelector(nonExistingPolicies);
 
     const policyResponseRoutePath = useMemo(() => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -70,83 +82,97 @@ export const EndpointDetailsContent = memo(
     const detailsResults = useMemo(() => {
       return [
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.os', {
-            defaultMessage: 'OS',
-          }),
-          description: <EuiText>{details.host.os.full}</EuiText>,
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.os"
+                defaultMessage="OS"
+              />
+            </ColumnTitle>
+          ),
+          description: <EuiText size="xs">{details.host.os.full}</EuiText>,
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.agentStatus', {
-            defaultMessage: 'Agent Status',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.agentStatus"
+                defaultMessage="Agent Status"
+              />
+            </ColumnTitle>
+          ),
           description: <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={details} />,
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.lastSeen', {
-            defaultMessage: 'Last Seen',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.lastSeen"
+                defaultMessage="Last Seen"
+              />
+            </ColumnTitle>
+          ),
           description: (
-            <EuiText>
-              {' '}
-              <FormattedDateAndTime date={new Date(details['@timestamp'])} />
+            <EuiText size="xs">
+              <FormattedDate value={details['@timestamp']} fieldName="" />
             </EuiText>
           ),
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.policy', {
-            defaultMessage: 'Policy',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.policy"
+                defaultMessage="Policy"
+              />
+            </ColumnTitle>
+          ),
           description: (
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <EndpointPolicyLink
-                    policyId={details.Endpoint.policy.applied.id}
-                    data-test-subj="policyDetailsValue"
-                  >
-                    {details.Endpoint.policy.applied.name}
-                  </EndpointPolicyLink>
+            <EuiText size="xs" className={'eui-textBreakWord'}>
+              <EndpointPolicyLink
+                policyId={details.Endpoint.policy.applied.id}
+                data-test-subj="policyDetailsValue"
+                className={'policyLineText'}
+                missingPolicies={missingPolicies}
+              >
+                {details.Endpoint.policy.applied.name}
+              </EndpointPolicyLink>
+              {details.Endpoint.policy.applied.endpoint_policy_version && (
+                <EuiText
+                  color="subdued"
+                  size="xs"
+                  className={'eui-displayInlineBlock eui-textNoWrap policyLineText'}
+                  data-test-subj="policyDetailsRevNo"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.details.policy.revisionNumber"
+                    defaultMessage="rev. {revNumber}"
+                    values={{
+                      revNumber: details.Endpoint.policy.applied.endpoint_policy_version,
+                    }}
+                  />
                 </EuiText>
-              </EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="baseline">
-                {details.Endpoint.policy.applied.endpoint_policy_version && (
-                  <EuiFlexItem grow={false}>
-                    <EuiText
-                      color="subdued"
-                      size="xs"
-                      style={{ whiteSpace: 'nowrap' }}
-                      data-test-subj="policyDetailsRevNo"
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.details.policy.revisionNumber"
-                        defaultMessage="rev. {revNumber}"
-                        values={{
-                          revNumber: details.Endpoint.policy.applied.endpoint_policy_version,
-                        }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                )}
-                {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && (
-                  <EuiFlexItem grow={false}>
-                    <OutOfDate />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexGroup>
+              )}
+              {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && <OutOfDate />}
+            </EuiText>
           ),
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.policyStatus', {
-            defaultMessage: 'Policy Status',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.policyStatus"
+                defaultMessage="Policy Status"
+              />
+            </ColumnTitle>
+          ),
           description: (
             <EuiHealth
               data-test-subj={`policyStatusValue-${policyStatus}`}
               color={POLICY_STATUS_TO_BADGE_COLOR[policyStatus] || 'default'}
             >
               <EuiLink onClick={policyStatusClickHandler} data-test-subj="policyStatusValue">
-                <EuiText size="m">
+                <EuiText size="xs">
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.details.policyStatusValue"
                     defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
@@ -158,37 +184,48 @@ export const EndpointDetailsContent = memo(
           ),
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.endpointVersion', {
-            defaultMessage: 'Endpoint Version',
-          }),
-          description: <EuiText>{details.agent.version}</EuiText>,
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.endpointVersion"
+                defaultMessage="Endpoint Version"
+              />
+            </ColumnTitle>
+          ),
+          description: <EuiText size="xs">{details.agent.version}</EuiText>,
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.ipAddress', {
-            defaultMessage: 'IP Address',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.ipAddress"
+                defaultMessage="IP Address"
+              />
+            </ColumnTitle>
+          ),
           description: (
-            <EuiListGroup flush>
-              <EuiText size="xs">
-                {details.host.ip.map((ip: string, index: number) => (
-                  <HostIds key={index} label={ip} />
-                ))}
-              </EuiText>
-            </EuiListGroup>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {details.host.ip.map((ip: string, index: number) => (
+                <EuiFlexItem key={index}>
+                  <EuiText size="xs">{ip}</EuiText>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
           ),
         },
       ];
-    }, [details, hostStatus, policyStatus, policyStatusClickHandler, policyInfo]);
+    }, [details, hostStatus, policyStatus, policyStatusClickHandler, policyInfo, missingPolicies]);
 
     return (
-      <>
-        <EuiSpacer size="l" />
+      <EndpointDetailsContentStyled>
+        <EuiSpacer size="s" />
         <EuiDescriptionList
+          compressed={true}
           type="column"
           listItems={detailsResults}
           data-test-subj="endpointDetailsList"
         />
-      </>
+      </EndpointDetailsContentStyled>
     );
   }
 );

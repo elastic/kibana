@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
 import { EndpointDetailsFlyout } from './details';
@@ -39,6 +39,7 @@ import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../co
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
@@ -49,7 +50,6 @@ import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/rou
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 import { EndpointAction } from '../store/action';
-import { EndpointPolicyLink } from './components/endpoint_policy_link';
 import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
@@ -59,7 +59,7 @@ import { TableRowActions } from './components/table_row_actions';
 import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
-import { WARNING_TRANSFORM_STATES } from '../../../../../common/constants';
+import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -128,14 +128,17 @@ export const EndpointList = () => {
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
   const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
+  const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
   useEffect(() => {
-    if (!endpointsExist || !listData?.length) {
+    // if no endpoint policy, skip transform check
+    if (!shouldCheckTransforms || !policyItems || !policyItems.length) {
       return;
     }
 
     dispatch({ type: 'loadMetadataTransformStats' });
-  }, [endpointsExist, listData.length, dispatch]);
+    setShouldCheckTransforms(false);
+  }, [policyItems, shouldCheckTransforms, dispatch]);
 
   useEffect(() => {
     const hasFailure = metadataTransformStats.some((transform) =>
@@ -182,14 +185,14 @@ export const EndpointList = () => {
       }/add-integration`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution',
+          APP_UI_ID,
           {
             path: getEndpointListPath({ name: 'endpointList' }),
           },
         ],
         onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
         onSaveNavigateTo: [
-          'securitySolution',
+          APP_UI_ID,
           {
             path: getEndpointListPath({ name: 'endpointList' }),
           },
@@ -225,10 +228,7 @@ export const EndpointList = () => {
     useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>('fleet', {
       path: `/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
       state: {
-        onDoneNavigateTo: [
-          'securitySolution',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
-        ],
+        onDoneNavigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
       },
     });
 
@@ -658,7 +658,7 @@ export const EndpointList = () => {
           </>
         )}
         {transformFailedCallout}
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="s">
           {shouldShowKQLBar && (
             <EuiFlexItem>
               <AdminSearchBar />

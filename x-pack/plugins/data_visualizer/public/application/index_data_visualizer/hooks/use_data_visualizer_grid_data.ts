@@ -24,12 +24,11 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 import { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
-  FieldRequestConfig,
   JOB_FIELD_TYPES,
-  JobFieldType,
   NON_AGGREGATABLE_FIELD_TYPES,
   OMIT_FIELDS,
-} from '../../../../common';
+} from '../../../../common/constants';
+import type { FieldRequestConfig, JobFieldType } from '../../../../common/types';
 import { kbnTypeToJobType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
 import { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
@@ -57,7 +56,7 @@ export const useDataVisualizerGridData = (
   const dataVisualizerListStateRef = useRef(dataVisualizerListState);
 
   const [lastRefresh, setLastRefresh] = useState(0);
-  const [searchSessionId, setSearchSessionId] = useState<string | undefined>();
+  const searchSessionId = input.sessionId;
 
   const {
     currentSavedSearch,
@@ -65,6 +64,7 @@ export const useDataVisualizerGridData = (
     currentQuery,
     currentFilters,
     visibleFieldNames,
+    fieldsToFetch,
   } = useMemo(
     () => ({
       currentSavedSearch: input?.savedSearch,
@@ -72,6 +72,7 @@ export const useDataVisualizerGridData = (
       currentQuery: input?.query,
       visibleFieldNames: input?.visibleFieldNames ?? [],
       currentFilters: input?.filters,
+      fieldsToFetch: input?.fieldsToFetch,
     }),
     [input]
   );
@@ -117,13 +118,6 @@ export const useDataVisualizerGridData = (
     }),
     lastRefresh,
   ]);
-
-  useEffect(() => {
-    const currentSearchSessionId = data.search?.session?.getSessionId();
-    if (currentSearchSessionId !== undefined) {
-      setSearchSessionId(currentSearchSessionId);
-    }
-  }, [data]);
 
   const _timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -179,7 +173,12 @@ export const useDataVisualizerGridData = (
 
       const aggregatableFields: string[] = [];
       const nonAggregatableFields: string[] = [];
-      currentIndexPattern.fields.forEach((field) => {
+
+      const fields = currentIndexPattern.fields;
+      fields?.forEach((field) => {
+        if (fieldsToFetch && !fieldsToFetch.includes(field.name)) {
+          return;
+        }
         const fieldName = field.displayName !== undefined ? field.displayName : field.name;
         if (!OMIT_FIELDS.includes(fieldName)) {
           if (field.aggregatable === true && !NON_AGGREGATABLE_FIELD_TYPES.has(field.type)) {
@@ -199,9 +198,10 @@ export const useDataVisualizerGridData = (
         sessionId: searchSessionId,
         index: currentIndexPattern.title,
         timeFieldName: currentIndexPattern.timeFieldName,
-        runtimeFieldMap: currentIndexPattern.getComputedFields().runtimeFields,
+        runtimeFieldMap: currentIndexPattern.getRuntimeMappings(),
         aggregatableFields,
         nonAggregatableFields,
+        fieldsToFetch,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -214,6 +214,7 @@ export const useDataVisualizerGridData = (
       samplerShardSize,
       searchSessionId,
       lastRefresh,
+      fieldsToFetch,
     ]
   );
 
@@ -492,12 +493,12 @@ export const useDataVisualizerGridData = (
   const extendedColumns = useMemo(() => {
     const actions = getActions(
       input.indexPattern,
-      { lens: services.lens },
+      services,
       {
         searchQueryLanguage,
         searchString,
       },
-      actionFlyoutRef
+      input.allowEditDataView ? actionFlyoutRef : undefined
     );
     if (!Array.isArray(actions) || actions.length < 1) return;
 
@@ -510,7 +511,7 @@ export const useDataVisualizerGridData = (
     };
 
     return [actionColumn];
-  }, [input.indexPattern, services, searchQueryLanguage, searchString]);
+  }, [input.indexPattern, services, searchQueryLanguage, searchString, input.allowEditDataView]);
 
   return {
     progress: combinedProgress,

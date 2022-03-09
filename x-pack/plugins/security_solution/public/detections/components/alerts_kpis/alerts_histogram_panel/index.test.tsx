@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 
-import { esQuery, Filter } from '../../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 import { TestProviders } from '../../../../common/mock';
 import { SecurityPageName } from '../../../../app/types';
 
@@ -22,6 +22,7 @@ jest.mock('react-router-dom', () => {
     ...originalModule,
     createHref: jest.fn(),
     useHistory: jest.fn(),
+    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
   };
 });
 
@@ -37,8 +38,20 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
           navigateToApp: mockNavigateToApp,
           getUrlForApp: jest.fn(),
         },
+        data: {
+          search: {
+            search: jest.fn(),
+          },
+        },
         uiSettings: {
           get: jest.fn(),
+        },
+        notifications: {
+          toasts: {
+            addWarning: jest.fn(),
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+          },
         },
       },
     }),
@@ -133,10 +146,11 @@ describe('AlertsHistogramPanel', () => {
   describe('Query', () => {
     it('it render with a illegal KQL', async () => {
       await act(async () => {
-        const spyOnBuildEsQuery = jest.spyOn(esQuery, 'buildEsQuery');
-        spyOnBuildEsQuery.mockImplementation(() => {
-          throw new Error('Something went wrong');
-        });
+        jest.mock('@kbn/es-query', () => ({
+          buildEsQuery: jest.fn().mockImplementation(() => {
+            throw new Error('Something went wrong');
+          }),
+        }));
         const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
         const wrapper = mount(
           <TestProviders>
@@ -183,6 +197,7 @@ describe('AlertsHistogramPanel', () => {
               },
             },
           ],
+          undefined,
         ]);
       });
       wrapper.unmount();
@@ -236,6 +251,7 @@ describe('AlertsHistogramPanel', () => {
               },
             },
           ],
+          undefined,
         ]);
       });
       wrapper.unmount();

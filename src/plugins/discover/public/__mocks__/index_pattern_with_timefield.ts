@@ -7,7 +7,7 @@
  */
 
 import { IIndexPatternFieldList } from '../../../data/common';
-import { IndexPattern } from '../../../data/common';
+import { DataView } from '../../../data/common';
 
 const fields = [
   {
@@ -71,7 +71,7 @@ const indexPattern = {
   getFormatterForField: () => ({ convert: (value: unknown) => value }),
   isTimeNanosBased: () => false,
   popularizeField: () => {},
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
 
