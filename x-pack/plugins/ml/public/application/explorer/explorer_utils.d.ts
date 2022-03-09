@@ -202,8 +202,8 @@ export declare const removeFilterFromQueryString: (
   fieldValue: string
 ) => string;
 
-export declare function escapeParens(input: string): string;
+export declare const escapeParens: (input: string) => string;
 
-export declare function getQueryPattern(fieldName: string, fieldValue: unknown): RegExp;
+export declare const getQueryPattern: (fieldName: string, fieldValue: unknown) => RegExp;
 
-export declare function escapeDoubleQuotes(input: string): string;
+export declare const escapeDoubleQuotes: (input: string) => string;

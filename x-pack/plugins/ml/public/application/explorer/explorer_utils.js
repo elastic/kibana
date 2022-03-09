@@ -26,8 +26,7 @@ import {
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
-import { getTimeBucketsFromCache } from '../util/time_buckets';
-import { getTimefilter, getUiSettings } from '../util/dependency_cache';
+import { getUiSettings } from '../util/dependency_cache';
 
 import {
   MAX_CATEGORY_EXAMPLES,
