@@ -135,8 +135,9 @@ describe('alert_form', () => {
           <KibanaReactContext.Provider>
             <RuleForm
               rule={initialAlert}
+              config={{ minimumScheduleInterval: '1m' }}
               dispatch={() => {}}
-              errors={{ name: [], interval: [] }}
+              errors={{ name: [], 'schedule.interval': [] }}
               operation="create"
               actionTypeRegistry={actionTypeRegistry}
               ruleTypeRegistry={ruleTypeRegistry}

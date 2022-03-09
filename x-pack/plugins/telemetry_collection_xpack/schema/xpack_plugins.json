@@ -3720,6 +3720,12 @@
                 "description": "Number of times the user toggled fullscreen mode on formula."
               }
             },
+            "toggle_autoapply": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled auto-apply."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -3965,6 +3971,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
+            "toggle_autoapply": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled auto-apply."
               }
             },
             "indexpattern_field_info_click": {

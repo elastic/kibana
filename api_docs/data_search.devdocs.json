@@ -23898,7 +23898,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"date\" | \"long\" | \"double\" | \"date_nanos\" | undefined"
+              "\"date\" | \"date_nanos\" | \"long\" | \"double\" | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
@@ -27660,7 +27660,7 @@
             "section": "def-common.SortDirection",
             "text": "SortDirection"
           },
-          "; numeric_type?: \"date\" | \"long\" | \"double\" | \"date_nanos\" | undefined; }"
+          "; numeric_type?: \"date\" | \"date_nanos\" | \"long\" | \"double\" | undefined; }"
         ],
         "path": "src/plugins/data/common/search/search_source/types.ts",
         "deprecated": false,

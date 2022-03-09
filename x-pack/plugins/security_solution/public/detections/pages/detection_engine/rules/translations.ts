@@ -454,18 +454,18 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_ACTIVATE_SELECTED_ERROR = (totalRules: number) =>
+export const BATCH_ACTION_ENABLE_SELECTED_ERROR = (totalRules: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedErrorTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.enableSelectedErrorTitle',
     {
       values: { totalRules },
       defaultMessage: 'Error enabling {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
 
-export const BATCH_ACTION_DEACTIVATE_SELECTED_ERROR = (totalRules: number) =>
+export const BATCH_ACTION_DISABLE_SELECTED_ERROR = (totalRules: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deactivateSelectedErrorTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.disableSelectedErrorTitle',
     {
       values: { totalRules },
       defaultMessage: 'Error disabling {totalRules, plural, =1 {rule} other {rules}}',

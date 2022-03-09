@@ -109,7 +109,7 @@ export const EventDetailsFooterComponent = React.memo(
 
     return (
       <>
-        <EuiFlyoutFooter>
+        <EuiFlyoutFooter data-test-subj="side-panel-flyout-footer">
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               {detailsEcsData && (
@@ -145,7 +145,11 @@ export const EventDetailsFooterComponent = React.memo(
             />
           )}
         {isAddEventFilterModalOpen && detailsEcsData != null && (
-          <EventFiltersFlyout data={detailsEcsData} onCancel={closeAddEventFilterModal} />
+          <EventFiltersFlyout
+            data={detailsEcsData}
+            onCancel={closeAddEventFilterModal}
+            maskProps={{ style: 'z-index: 5000' }}
+          />
         )}
       </>
     );

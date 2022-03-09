@@ -20,6 +20,7 @@ target
 *.iml
 *.log
 types.eslint.config.js
+__tmp__
 
 # Ignore example plugin builds
 /examples/*/build
@@ -95,4 +96,3 @@ fleet-server-*
 elastic-agent.yml
 fleet-server.yml
 
-/x-pack/plugins/fleet/server/bundled_packages
