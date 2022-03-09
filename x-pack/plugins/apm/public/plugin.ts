@@ -135,13 +135,26 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 label: 'APM',
                 sortKey: 400,
                 entries: [
-                  {
-                    label: servicesTitle,
-                    app: 'apm',
-                    path: serviceGroupsEnabled
-                      ? '/service-groups'
-                      : '/services',
-                  },
+                  serviceGroupsEnabled
+                    ? {
+                        label: servicesTitle,
+                        app: 'apm',
+                        path: '/service-groups',
+                        matchPath(currentPath: string) {
+                          return [
+                            '/service-groups',
+                            '/services',
+                            '/service-map',
+                          ].some((testPath) =>
+                            currentPath.startsWith(testPath)
+                          );
+                        },
+                      }
+                    : {
+                        label: servicesTitle,
+                        app: 'apm',
+                        path: '/services',
+                      },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
                   {
                     label: dependenciesTitle,
@@ -253,7 +266,26 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         {
           id: 'services',
           title: servicesTitle,
-          path: serviceGroupsEnabled ? '/service-groups' : '/services',
+          // path: serviceGroupsEnabled ? '/service-groups' : '/services',
+          deepLinks: serviceGroupsEnabled
+            ? [
+                {
+                  id: 'service-groups-list',
+                  title: 'Service groups',
+                  path: '/service-groups',
+                },
+                {
+                  id: 'service-groups-services',
+                  title: servicesTitle,
+                  path: '/services',
+                },
+                {
+                  id: 'service-groups-service-map',
+                  title: serviceMapTitle,
+                  path: '/service-map',
+                },
+              ]
+            : [],
         },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
