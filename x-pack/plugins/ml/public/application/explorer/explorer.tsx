@@ -203,7 +203,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         const { clearSettings, settings } = getKqlQueryValues({
           inputString: `${newQueryString}`,
           queryLanguage: language,
-          indexPattern,
+          indexPattern: indexPattern as DataView,
         });
 
         if (clearSettings === true) {
@@ -337,7 +337,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
       influencers={influencers}
       filterActive={filterActive}
       filterPlaceHolder={filterPlaceHolder}
-      indexPattern={indexPattern}
+      indexPattern={indexPattern as DataView}
       queryString={queryString}
       updateLanguage={updateLanguage}
     >

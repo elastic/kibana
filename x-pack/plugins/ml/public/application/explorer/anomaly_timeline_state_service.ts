@@ -126,7 +126,7 @@ export class AnomalyTimelineStateService {
       const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
         currentlySelected,
         filterSettings.filterActive,
-        filterSettings.filteredFields,
+        filterSettings.filteredFields as string[],
         false,
         selectedCells,
         selectedJobs
