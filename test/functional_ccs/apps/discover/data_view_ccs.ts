@@ -39,14 +39,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover_ccs');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover_ccs');
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
     });
 
