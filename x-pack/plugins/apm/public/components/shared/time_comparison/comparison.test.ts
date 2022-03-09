@@ -21,7 +21,7 @@ function getExpectedTimesAndComparisons({
   const comparisonOptions = getComparisonOptions({ start, end });
 
   const comparisons = comparisonOptions.map(({ value, text }) => {
-    const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    const { comparisonStart, comparisonEnd, offset } = getTimeRangeComparison({
       comparisonEnabled: true,
       comparisonType: value,
       start,
@@ -33,6 +33,7 @@ function getExpectedTimesAndComparisons({
       text,
       comparisonStart,
       comparisonEnd,
+      offset,
     };
   });
 
@@ -79,12 +80,14 @@ describe('Comparison test suite', () => {
           text: 'Day before',
           comparisonStart: '2022-01-14T18:00:00.000Z',
           comparisonEnd: '2022-01-15T18:30:00.000Z',
+          offset: '1d',
         },
         {
           value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
           comparisonStart: '2022-01-08T18:00:00.000Z',
           comparisonEnd: '2022-01-09T18:30:00.000Z',
+          offset: '1w',
         },
       ]);
     });
@@ -112,6 +115,7 @@ describe('Comparison test suite', () => {
           text: 'Week before',
           comparisonStart: '2022-01-08T18:00:00.000Z',
           comparisonEnd: '2022-01-09T19:00:00.000Z',
+          offset: '1w',
         },
       ]);
     });
@@ -139,6 +143,7 @@ describe('Comparison test suite', () => {
           text: 'Week before',
           comparisonStart: '2022-01-08T18:00:00.000Z',
           comparisonEnd: '2022-01-15T21:00:00.000Z',
+          offset: '1w',
         },
       ]);
     });
@@ -166,6 +171,7 @@ describe('Comparison test suite', () => {
           text: '07/01 18:00 - 15/01 18:00',
           comparisonStart: '2022-01-07T18:00:00.000Z',
           comparisonEnd: '2022-01-15T18:00:00.000Z',
+          offset: '691200000ms',
         },
       ]);
     });
@@ -193,6 +199,7 @@ describe('Comparison test suite', () => {
           text: '06/01 06:00 - 15/01 00:00',
           comparisonStart: '2022-01-06T06:00:00.000Z',
           comparisonEnd: '2022-01-15T00:00:00.000Z',
+          offset: '756000000ms',
         },
       ]);
     });
@@ -220,12 +227,14 @@ describe('Comparison test suite', () => {
           text: 'Day before',
           comparisonStart: '2022-01-13T00:00:00.000Z',
           comparisonEnd: '2022-01-13T23:59:59.999Z',
+          offset: '1d',
         },
         {
           value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
           comparisonStart: '2022-01-07T00:00:00.000Z',
           comparisonEnd: '2022-01-07T23:59:59.999Z',
+          offset: '1w',
         },
       ]);
     });
@@ -253,6 +262,7 @@ describe('Comparison test suite', () => {
           text: 'Week before',
           comparisonStart: '2022-01-02T00:00:00.000Z',
           comparisonEnd: '2022-01-08T23:59:59.999Z',
+          offset: '1w',
         },
       ]);
     });
@@ -280,12 +290,14 @@ describe('Comparison test suite', () => {
           text: 'Day before',
           comparisonStart: '2022-01-12T18:30:15.500Z',
           comparisonEnd: '2022-01-13T18:30:15.500Z',
+          offset: '1d',
         },
         {
           value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
           comparisonStart: '2022-01-06T18:30:15.500Z',
           comparisonEnd: '2022-01-07T18:30:15.500Z',
+          offset: '1w',
         },
       ]);
     });
@@ -313,12 +325,14 @@ describe('Comparison test suite', () => {
           text: 'Day before',
           comparisonStart: '2022-01-12T18:00:00.000Z',
           comparisonEnd: '2022-01-13T18:30:15.500Z',
+          offset: '1d',
         },
         {
           value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
           comparisonStart: '2022-01-06T18:00:00.000Z',
           comparisonEnd: '2022-01-07T18:30:15.500Z',
+          offset: '1w',
         },
       ]);
     });
@@ -346,6 +360,7 @@ describe('Comparison test suite', () => {
           text: 'Week before',
           comparisonStart: '2021-12-31T18:30:15.500Z',
           comparisonEnd: '2022-01-07T18:30:15.500Z',
+          offset: '1w',
         },
       ]);
     });
@@ -373,6 +388,7 @@ describe('Comparison test suite', () => {
           text: 'Week before',
           comparisonStart: '2021-12-31T00:00:00.000Z',
           comparisonEnd: '2022-01-07T18:30:15.500Z',
+          offset: '1w',
         },
       ]);
     });
@@ -400,6 +416,7 @@ describe('Comparison test suite', () => {
           text: '15/11/21 18:30 - 15/12/21 18:30',
           comparisonStart: '2021-11-15T18:30:15.500Z',
           comparisonEnd: '2021-12-15T18:30:15.500Z',
+          offset: '2592000000ms',
         },
       ]);
     });
@@ -427,6 +444,7 @@ describe('Comparison test suite', () => {
           text: '14/11/21 05:29 - 15/12/21 00:00',
           comparisonStart: '2021-11-14T05:29:44.500Z',
           comparisonEnd: '2021-12-15T00:00:00.000Z',
+          offset: '2658615500ms',
         },
       ]);
     });
