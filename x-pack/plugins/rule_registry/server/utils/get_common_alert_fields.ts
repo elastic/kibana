@@ -19,11 +19,11 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { AlertExecutorOptions } from '../../../alerting/server';
-import { CommonAlertFields } from '../../common/schemas';
+import { CommonAlertFieldsLatest } from '../../common/schemas';
 
 export const getCommonAlertFields = (
   options: AlertExecutorOptions<any, any, any, any, any>
-): CommonAlertFields => {
+): CommonAlertFieldsLatest => {
   return {
     [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,
     [ALERT_RULE_CONSUMER]: options.rule.consumer,
