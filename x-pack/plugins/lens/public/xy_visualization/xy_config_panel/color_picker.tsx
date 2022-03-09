@@ -22,7 +22,7 @@ import {
 import { getSortedAccessors } from '../to_expression';
 import { updateLayer } from '.';
 import { TooltipWrapper } from '../../shared_components';
-import { isReferenceLayer } from '../visualization_helpers';
+import { isDataLayer, isReferenceLayer } from '../visualization_helpers';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
@@ -55,7 +55,6 @@ export const ColorPicker = ({
 }) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
-  const disabled = Boolean(layer.splitAccessor);
 
   const overwriteColor = getSeriesColor(layer, accessor);
   const currentColor = useMemo(() => {
@@ -87,6 +86,7 @@ export const ColorPicker = ({
 
   const [color, setColor] = useState(currentColor);
 
+  const disabled = Boolean(isDataLayer(layer) && layer.splitAccessor);
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
     setColor(text);
     if (output.isValid || text === '') {
