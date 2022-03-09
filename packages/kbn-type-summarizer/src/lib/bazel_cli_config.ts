@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fs from 'fs';
 
 import { CliError } from './cli_error';
 import { parseCliFlags } from './cli_flags';
+import * as Path from './path';
 
-const TYPE_SUMMARIZER_PACKAGES = ['@kbn/type-summarizer', '@kbn/crypto'];
+const TYPE_SUMMARIZER_PACKAGES = ['@kbn/type-summarizer', '@kbn/crypto', '@kbn/generate'];
 
 const isString = (i: any): i is string => typeof i === 'string' && i.length > 0;
 
@@ -23,6 +23,36 @@ interface BazelCliConfig {
   inputPath: string;
   repoRelativePackageDir: string;
   use: 'api-extractor' | 'type-summarizer';
+}
+
+function isKibanaRepo(dir: string) {
+  try {
+    const json = Fs.readFileSync(Path.join(dir, 'package.json'), 'utf8');
+    const parsed = JSON.parse(json);
+    return parsed.name === 'kibana';
+  } catch {
+    return false;
+  }
+}
+
+function findRepoRoot() {
+  const start = Path.resolve(__dirname);
+  let dir = start;
+  while (true) {
+    if (isKibanaRepo(dir)) {
+      return dir;
+    }
+
+    // this is not the kibana directory, try moving up a directory
+    const parent = Path.join(dir, '..');
+    if (parent === dir) {
+      throw new Error(
+        `unable to find Kibana's package.json file when traversing up from [${start}]`
+      );
+    }
+
+    dir = parent;
+  }
 }
 
 export function parseBazelCliFlags(argv: string[]): BazelCliConfig {
@@ -39,19 +69,7 @@ export function parseBazelCliFlags(argv: string[]): BazelCliConfig {
     });
   }
 
-  let REPO_ROOT;
-  try {
-    const name = 'utils';
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const utils = require('@kbn/' + name);
-    REPO_ROOT = utils.REPO_ROOT as string;
-  } catch (error) {
-    if (error && error.code === 'MODULE_NOT_FOUND') {
-      throw new CliError('type-summarizer bazel cli only works after bootstrap');
-    }
-
-    throw error;
-  }
+  const repoRoot = findRepoRoot();
 
   const [relativePackagePath, ...extraPositional] = rawFlags._;
   if (typeof relativePackagePath !== 'string') {
@@ -70,26 +88,45 @@ export function parseBazelCliFlags(argv: string[]): BazelCliConfig {
   const packageName: string = JSON.parse(
     Fs.readFileSync(Path.join(packageDir, 'package.json'), 'utf8')
   ).name;
-  const repoRelativePackageDir = Path.relative(REPO_ROOT, packageDir);
+  const repoRelativePackageDir = Path.relative(repoRoot, packageDir);
 
   return {
     use,
     packageName,
-    tsconfigPath: Path.join(REPO_ROOT, repoRelativePackageDir, 'tsconfig.json'),
-    inputPath: Path.resolve(REPO_ROOT, 'node_modules', packageName, 'target_types/index.d.ts'),
+    tsconfigPath: Path.join(repoRoot, repoRelativePackageDir, 'tsconfig.json'),
+    inputPath: Path.join(repoRoot, 'node_modules', packageName, 'target_types/index.d.ts'),
     repoRelativePackageDir,
-    outputDir: Path.resolve(REPO_ROOT, 'data/type-summarizer-output', use),
+    outputDir: Path.join(repoRoot, 'data/type-summarizer-output', use),
   };
 }
 
-export function parseBazelCliJson(json: string): BazelCliConfig {
-  let config;
+function parseJsonFromCli(json: string) {
   try {
-    config = JSON.parse(json);
+    return JSON.parse(json);
   } catch (error) {
-    throw new CliError('unable to parse first positional argument as JSON');
-  }
+    // TODO: This is to handle a bug in Bazel which escapes `"` in .bat arguments incorrectly, replacing them with `\`
+    if (
+      error.message === 'Unexpected token \\ in JSON at position 1' &&
+      process.platform === 'win32'
+    ) {
+      const unescapedJson = json.replaceAll('\\', '"');
+      try {
+        return JSON.parse(unescapedJson);
+      } catch (e) {
+        throw new CliError(
+          `unable to parse first positional argument as JSON: "${e.message}"\n  unescaped value: ${unescapedJson}\n  raw value: ${json}`
+        );
+      }
+    }
 
+    throw new CliError(
+      `unable to parse first positional argument as JSON: "${error.message}"\n  value: ${json}`
+    );
+  }
+}
+
+export function parseBazelCliJson(json: string): BazelCliConfig {
+  const config = parseJsonFromCli(json);
   if (typeof config !== 'object' || config === null) {
     throw new CliError('config JSON must be an object');
   }
@@ -131,14 +168,12 @@ export function parseBazelCliJson(json: string): BazelCliConfig {
     throw new CliError(`buildFilePath [${buildFilePath}] must be a relative path`);
   }
 
-  const repoRelativePackageDir = Path.dirname(buildFilePath);
-
   return {
     packageName,
     outputDir: Path.resolve(outputDir),
     tsconfigPath: Path.resolve(tsconfigPath),
     inputPath: Path.resolve(inputPath),
-    repoRelativePackageDir,
+    repoRelativePackageDir: Path.dirname(buildFilePath),
     use: TYPE_SUMMARIZER_PACKAGES.includes(packageName) ? 'type-summarizer' : 'api-extractor',
   };
 }
