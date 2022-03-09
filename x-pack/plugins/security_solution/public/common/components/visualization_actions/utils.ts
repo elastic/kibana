@@ -12,7 +12,6 @@ export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
     ? [
         {
           meta: {
-            index: 'e5bb994d-e8fb-4ddb-a36e-730ad8cc0712',
             alias: null,
             negate: false,
             disabled: false,
@@ -119,7 +118,6 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
     ? [
         {
           meta: {
-            index: '62d8e968-7ce3-4062-98b8-64b0e0bbff59',
             type: 'phrases',
             key: '_index',
             params: selectedPatterns,
@@ -134,9 +132,6 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
               })),
               minimum_should_match: 1,
             },
-          },
-          $state: {
-            store: 'appState',
           },
         },
       ]
