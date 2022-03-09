@@ -82,6 +82,8 @@ export class ReportingCore {
 
   public getContract: () => ReportingSetup;
 
+  private kibanaShuttingDown$ = new Rx.ReplaySubject<void>(1);
+
   constructor(private logger: Logger, context: PluginInitializerContext<ReportingConfigType>) {
     this.packageInfo = context.env.packageInfo;
     const syncConfig = context.config.get<ReportingConfigType>();
@@ -127,6 +129,14 @@ export class ReportingCore {
     const { executeTask, monitorTask } = this;
     // enable this instance to generate reports and to monitor for pending reports
     await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
+  }
+
+  public pluginStop() {
+    this.kibanaShuttingDown$.next();
+  }
+
+  public getKibanaShutdown$(): Rx.Observable<void> {
+    return this.kibanaShuttingDown$.pipe(take(1));
   }
 
   private async assertKibanaIsAvailable(): Promise<void> {

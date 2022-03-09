@@ -22,7 +22,6 @@ import type { SpacesPluginStart } from '../../spaces/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '../../triggers_actions_ui/public';
 import { CasesByAlertId, CommentRequestAlertType, CommentRequestUserType } from '../common/api';
 import { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { CreateCaseFlyoutProps } from './components/create/flyout';
 import { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { CasesOwners } from './client/helpers/can_use_cases';
 import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
@@ -89,9 +88,6 @@ export interface CasesUiStart {
     getAllCasesSelectorModal: (
       props: GetAllCasesSelectorModalProps
     ) => ReactElement<GetAllCasesSelectorModalProps>;
-    getAllCasesSelectorModalNoProvider: (
-      props: GetAllCasesSelectorModalProps
-    ) => ReactElement<GetAllCasesSelectorModalProps>;
     /**
      * Flyout with the form to create a case for the owner
      * @param props GetCreateCaseFlyoutProps
@@ -100,9 +96,6 @@ export interface CasesUiStart {
     getCreateCaseFlyout: (
       props: GetCreateCaseFlyoutProps
     ) => ReactElement<GetCreateCaseFlyoutProps>;
-    getCreateCaseFlyoutNoProvider: (
-      props: CreateCaseFlyoutProps
-    ) => ReactElement<CreateCaseFlyoutProps>;
     /**
      * Get the recent cases component
      * @param props GetRecentCasesProps

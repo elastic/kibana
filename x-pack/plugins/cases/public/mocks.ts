@@ -16,10 +16,8 @@ const uiMock: jest.Mocked<CasesUiStart['ui']> = {
   getCases: jest.fn(),
   getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
   getAllCasesSelectorModal: jest.fn(),
-  getAllCasesSelectorModalNoProvider: jest.fn(),
   getCreateCaseFlyout: jest.fn(),
   getRecentCases: jest.fn(),
-  getCreateCaseFlyoutNoProvider: jest.fn(),
 };
 
 const hooksMock: jest.Mocked<CasesUiStart['hooks']> = {
@@ -49,6 +47,3 @@ export const mockCasesContract = (): CaseUiClientMock => ({
 export const casesPluginMock = {
   createStartContract: mockCasesContract,
 };
-
-const casesMock = casesPluginMock.createStartContract();
-casesMock.ui.getRecentCases.mockImplementation();

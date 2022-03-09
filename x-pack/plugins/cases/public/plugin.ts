@@ -19,16 +19,10 @@ import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases
 import { createClientAPI } from './client/api';
 import { canUseCases } from './client/helpers/can_use_cases';
 import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
-import {
-  getAllCasesSelectorModalLazy,
-  getAllCasesSelectorModalNoProviderLazy,
-} from './client/ui/get_all_cases_selector_modal';
+import { getAllCasesSelectorModalLazy } from './client/ui/get_all_cases_selector_modal';
 import { getCasesLazy } from './client/ui/get_cases';
 import { getCasesContextLazy } from './client/ui/get_cases_context';
-import {
-  getCreateCaseFlyoutLazy,
-  getCreateCaseFlyoutLazyNoProvider,
-} from './client/ui/get_create_case_flyout';
+import { getCreateCaseFlyoutLazy } from './client/ui/get_create_case_flyout';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
 
 /**
@@ -97,12 +91,10 @@ export class CasesUiPlugin
         getCases: getCasesLazy,
         getCasesContext: getCasesContextLazy,
         getRecentCases: getRecentCasesLazy,
+        // @deprecated Please use the hook getUseCasesAddToNewCaseFlyout
         getCreateCaseFlyout: getCreateCaseFlyoutLazy,
+        // @deprecated Please use the hook getUseCasesAddToExistingCaseModal
         getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
-        // Temporal methods to remove timelines and cases deep integration
-        // https://github.com/elastic/kibana/issues/123183
-        getCreateCaseFlyoutNoProvider: getCreateCaseFlyoutLazyNoProvider,
-        getAllCasesSelectorModalNoProvider: getAllCasesSelectorModalNoProviderLazy,
       },
       hooks: {
         getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
