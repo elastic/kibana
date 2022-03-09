@@ -191,16 +191,53 @@ describe('EventLogStart', () => {
   describe('aggregateEventsBySavedObjectIds', () => {
     test('verifies that the user can access the specified saved object', async () => {
       savedObjectGetter.mockResolvedValueOnce(expectedSavedObject);
-      await eventLogClient.aggregateEventsBySavedObjectIds('saved-object-type', [
-        'saved-object-id',
-      ]);
+      await eventLogClient.aggregateEventsBySavedObjectIds(
+        'saved-object-type',
+        ['saved-object-id'],
+        { aggs: {} }
+      );
       expect(savedObjectGetter).toHaveBeenCalledWith('saved-object-type', ['saved-object-id']);
+    });
+    test('throws when no aggregation is defined in options', async () => {
+      savedObjectGetter.mockResolvedValueOnce(expectedSavedObject);
+      await expect(
+        eventLogClient.aggregateEventsBySavedObjectIds('saved-object-type', ['saved-object-id'])
+      ).rejects.toMatchInlineSnapshot(`[Error: No aggregation defined!]`);
     });
     test('throws when the user doesnt have permission to access the specified saved object', async () => {
       savedObjectGetter.mockRejectedValue(new Error('Fail'));
       await expect(
-        eventLogClient.aggregateEventsBySavedObjectIds('saved-object-type', ['saved-object-id'])
+        eventLogClient.aggregateEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
+          aggs: {},
+        })
       ).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
+    });
+    test('calls aggregateEventsBySavedObjects with given aggregation', async () => {
+      savedObjectGetter.mockResolvedValueOnce(expectedSavedObject);
+      await eventLogClient.aggregateEventsBySavedObjectIds(
+        'saved-object-type',
+        ['saved-object-id'],
+        { aggs: { myAgg: {} } }
+      );
+      expect(savedObjectGetter).toHaveBeenCalledWith('saved-object-type', ['saved-object-id']);
+      expect(esContext.esAdapter.aggregateEventsBySavedObjects).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespace: undefined,
+        type: 'saved-object-type',
+        ids: ['saved-object-id'],
+        aggregateOptions: {
+          aggs: { myAgg: {} },
+          page: 1,
+          per_page: 10,
+          sort: [
+            {
+              sort_field: '@timestamp',
+              sort_order: 'asc',
+            },
+          ],
+        },
+        legacyIds: undefined,
+      });
     });
   });
 });
