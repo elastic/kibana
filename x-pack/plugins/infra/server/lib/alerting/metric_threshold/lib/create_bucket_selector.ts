@@ -100,8 +100,8 @@ export const createBucketSelector = (
 
   const evaluationScript =
     alertOnGroupDisappear && lastPeriodEnd
-      ? 'params.missingGroup > 0 || params.shouldWarn > 0 || params.shouldTrigger > 0 || params.newOrRecoveredGroup > 0'
-      : 'params.shouldWarn > 0 || params.shouldTrigger > 0';
+      ? '(params.missingGroups != null && params.missingGroup > 0) || (params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0) || (params.newOrRecoveredGroup != null && params.newOrRecoveredGroup > 0)'
+      : '(params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0)';
 
   aggs.evaluation = {
     bucket_selector: {
