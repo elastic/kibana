@@ -399,6 +399,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     application: ApplicationSetup;
     // (undocumented)
+    executionContext: ExecutionContextSetup;
+    // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
@@ -426,6 +428,8 @@ export interface CoreStart {
     deprecations: DeprecationsServiceStart;
     // (undocumented)
     docLinks: DocLinksStart;
+    // (undocumented)
+    executionContext: ExecutionContextStart;
     // (undocumented)
     fatalErrors: FatalErrorsStart;
     // (undocumented)
@@ -459,6 +463,7 @@ export class CoreSystem {
     // (undocumented)
     start(): Promise<{
         application: InternalApplicationStart;
+        executionContext: ExecutionContextSetup;
     } | undefined>;
     // (undocumented)
     stop(): void;
@@ -508,6 +513,20 @@ export interface ErrorToastOptions extends ToastOptions {
     title: string;
     toastMessage?: string;
 }
+
+// @public
+export interface ExecutionContextSetup {
+    clear(): void;
+    context$: Observable<KibanaExecutionContext>;
+    get(): KibanaExecutionContext;
+    // Warning: (ae-forgotten-export) The symbol "Labels" needs to be exported by the entry point index.d.ts
+    getAsLabels(): Labels_2;
+    set(c$: KibanaExecutionContext): void;
+    withGlobalContext(context?: KibanaExecutionContext): KibanaExecutionContext;
+}
+
+// @public
+export type ExecutionContextStart = ExecutionContextSetup;
 
 // @public
 export interface FatalErrorInfo {
@@ -749,9 +768,10 @@ export interface IUiSettingsClient {
 
 // @public
 export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
+    readonly type?: string;
+    readonly name?: string;
+    readonly page?: string;
+    readonly id?: string;
     readonly description?: string;
     readonly url?: string;
     child?: KibanaExecutionContext;
@@ -1520,6 +1540,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:173:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:183:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

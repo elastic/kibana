@@ -34,7 +34,7 @@ export async function getFullAgentPolicy(
   options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {
   let agentPolicy;
-  const standalone = options?.standalone;
+  const standalone = options?.standalone ?? false;
 
   try {
     agentPolicy = await agentPolicyService.get(soClient, id);

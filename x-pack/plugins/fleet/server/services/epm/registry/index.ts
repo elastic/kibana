@@ -8,6 +8,7 @@
 import { URL } from 'url';
 
 import mime from 'mime-types';
+import semverGte from 'semver/functions/gte';
 
 import type { Response } from 'node-fetch';
 
@@ -21,7 +22,6 @@ import type {
   InstallSource,
   RegistryPackage,
   RegistrySearchResults,
-  RegistrySearchResult,
   GetCategoriesRequest,
 } from '../../../types';
 import {
@@ -34,6 +34,8 @@ import {
 import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
+
+import { getBundledPackageByName } from '../packages/bundled_packages';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -65,20 +67,19 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-// When `throwIfNotFound` is true or undefined, return type will never be undefined.
-export async function fetchFindLatestPackage(
+interface FetchFindLatestPackageOptions {
+  ignoreConstraints?: boolean;
+}
+
+async function _fetchFindLatestPackage(
   packageName: string,
-  options?: { ignoreConstraints?: boolean; throwIfNotFound?: true }
-): Promise<RegistrySearchResult>;
-export async function fetchFindLatestPackage(
-  packageName: string,
-  options: { ignoreConstraints?: boolean; throwIfNotFound: false }
-): Promise<RegistrySearchResult | undefined>;
-export async function fetchFindLatestPackage(
-  packageName: string,
-  options?: { ignoreConstraints?: boolean; throwIfNotFound?: boolean }
-): Promise<RegistrySearchResult | undefined> {
-  const { ignoreConstraints = false, throwIfNotFound = true } = options ?? {};
+  options?: FetchFindLatestPackageOptions
+) {
+  const logger = appContextService.getLogger();
+  const { ignoreConstraints = false } = options ?? {};
+
+  const bundledPackage = await getBundledPackageByName(packageName);
+
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
 
@@ -86,12 +87,61 @@ export async function fetchFindLatestPackage(
     setKibanaVersion(url);
   }
 
-  const res = await fetchUrl(url.toString());
-  const searchResults = JSON.parse(res);
-  if (searchResults.length) {
-    return searchResults[0];
-  } else if (throwIfNotFound) {
+  try {
+    const res = await fetchUrl(url.toString(), 1);
+    const searchResults: RegistryPackage[] = JSON.parse(res);
+
+    const latestPackageFromRegistry = searchResults[0] ?? null;
+
+    if (bundledPackage && semverGte(bundledPackage.version, latestPackageFromRegistry.version)) {
+      return bundledPackage;
+    }
+
+    return latestPackageFromRegistry;
+  } catch (error) {
+    logger.error(
+      `Failed to fetch latest version of ${packageName} from registry: ${error.message}`
+    );
+
+    // Fall back to the bundled version of the package if it exists
+    if (bundledPackage) {
+      return bundledPackage;
+    }
+
+    // Otherwise, return null and allow callers to determine whether they'll consider this an error or not
+    return null;
+  }
+}
+
+export async function fetchFindLatestPackageOrThrow(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  const latestPackage = await _fetchFindLatestPackage(packageName, options);
+
+  if (!latestPackage) {
     throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
+  }
+
+  return latestPackage;
+}
+
+export async function fetchFindLatestPackageOrUndefined(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  const logger = appContextService.getLogger();
+
+  try {
+    const latestPackage = await _fetchFindLatestPackage(packageName, options);
+
+    if (!latestPackage) {
+      return undefined;
+    }
+    return latestPackage;
+  } catch (error) {
+    logger.warn(`Error fetching latest package for ${packageName}: ${error.message}`);
+    return undefined;
   }
 }
 

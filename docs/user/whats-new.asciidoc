@@ -1,12 +1,275 @@
 [[whats-new]]
-== What's new in 8.0
+== What's new in {minor-version}
 
-This section summarizes the most important changes in each release. For the 
-full list, see <<release-notes>> and <<breaking-changes-8.1.0>>. 
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check the <<release-notes, release notes>>.
+
+Previous versions: {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+=== Discover
+
+[float]
+==== Field statistics on by default
+
+Find fields to visualize and learn more about the shape of your data
+with *Field statistics*.  This view
+is similar to the *Index Data Visualizer* in *{ml-app}*.
+For details, check {kibana-ref}/show-field-statistics.html[Explore the fields in your data].
+
+[role="screenshot"]
+image::discover/images/field-statistics-view.png[Filter panel in Canvas]
+
+[float]
+==== New $ field syntax for Painless scripts
+Creating runtime fields is now easier and more reliable.
+{kib} has a shortcut for the field method when a script context supports the scripting fields API.
+This shortcut replaces `field('fieldname').get(defaultValue)` with `$('fieldname', defaultValue)`.
+For more information, check {kibana-ref}/managing-data-views.html#runtime-fields[Explore your data with runtime fields].
+
+*Before*
+
+[source,js]
+----------------------------------
+if (!doc.containsKey('myfield') || doc['myfield'].empty) { return "unavailable" } else { return doc['myfield'].value }
+----------------------------------
+
+*After*
+
+[source,js]
+----------------------------------
+$('myfield', 'unavailable')
+----------------------------------
+
+[float]
+==== Calling all Document Explorers
+
+Try the new {kibana-ref}/document-explorer.html[Document Explorer], which
+helps you quickly sort, select, and compare data, resize columns,
+and view documents in fullscreen. The Document Explorer is in beta in 8.1.
+
+
+[float]
+=== Dashboard
+
+[float]
+==== Synchronized ML anomaly visualizations
+*{ml-app}* visualizations now synchronize your cursor position with the visualization panels you create with
+*Lens*, *TSVB*, *Timelion*, and *Aggregation-based* editors.
+Highlight an anomaly in time and see a visual indication
+of this time on other panels.
+The reverse is also true&mdash;hovering in another editor highlights the same point-in-time in *{ml-app}* panels.
+
+[float]
+=== Canvas
+
+[float]
+==== Add heatmap elements to workpads
+Create heatmaps in workpads using *Canvas*-only functionality to fetch data, such as {es} SQL.
+Configure your heatmap with flexible legend, axis,
+and visual controls.
+
+[float]
+==== New filter capabilities
+Use the new *Filter* panel on any object to see which objects are filtering it.
+This helps you author your workpad with the right behavior.
+
+[role="screenshot"]
+image::images/highlights-canvas-filter.png[Filter panel in Canvas]
+
+[float]
+=== Lens & visualizations
+
+[float]
+==== Combine fields with drag and drop
+
+Combine multiple fields with drag and drop to view the top combinations in *Lens*.
+You'll find the combinations that contribute most to your metrics' performance.
+
+[role="screenshot"]
+image::images/highlights-lens-combine.gif[Drag to combine in Lens]
+
+[float]
+==== Top values by rarity
+
+Take advantage of the {es} rare terms aggregations in *Lens* and view the top values by rarity.
+You'll find answers to "What's not normal here?"
+
+[role="screenshot"]
+image::images/highlights-lens-rarity.png[Rank by rarity in top values in Lens, width=50%]
+
+[float]
+==== Horizontal and vertical gauges
+
+Use the gauge visualization to add extra context to your metrics.
+Show minimum and maximum values dynamically by using a quick function or custom formula,
+or set a static value for known metric ranges. Include a goal value to see
+if a metric is above or below the goal. Set color bands to show ranges visually&mdash;similar
+to reference lines in bar, line, and area visualizations. The gauge visualization is
+in technical preview in 8.1.
+
+[role="screenshot"]
+image::images/highlights-lens-guage.png[Example horizontal gauge with target value in Lens, width=50%]
+
+[float]
+==== Mosaic visualization
+
+Add a mosaic visualization, also known as marimekko or mekko, for side-by-side
+comparison of two dimensions against a single metric. Treemaps and two-layered
+pies do this as well, but the mosaic can be more effective for visual comparisons
+by aligning the colors for the terms side-by-side. For the best mosaic visualizations, create with low cardinality dimensions.
+The mosaic visualization is in technical preview in 8.1.
+
+[role="screenshot"]
+image::images/highlights-lens-mosaic.png[Example mosaic visualization in Lens]
+
+[float]
+==== Waffle visualization
+
+Create proportional waffle visualizations, which make
+more efficient use of space than pie charts.
+Waffles are designed for square spaces, which aligns well with how
+most dashboards are created. Because waffles display the data in 1% blocks, they are best for low cardinality breakdowns, and are not recommended for small partitions.
+You might be surprised how small you can make a waffle
+visualization and maintain readability. The waffle visualization is in technical preview in 8.1.
+
+[role="screenshot"]
+image::images/highlights-lens-waffle.png[Example waffle visualization in Lens, width=50%]
+
+[float]
+==== Color by value in metrics
+
+Apply color to the text and background of metric visualizations
+based on the value of the metric. Set up color stops for multiple colors, similar
+to what you can do in *Lens* tables, heatmaps, and gauge.
+
+[role="screenshot"]
+image::images/highlights-lens-metric.png[Metric color options in Lens, width=75%]
+
+[float]
+==== Sort tables in dashboard view mode
+Enable users with view-only dashboard privileges to sort data tables on the fly, similar to the existing visualization editor behavior.
+
+[float]
+==== Filter formulas globally
+
+Filter each part of your formula with KQL
+without copying or pasting to all the aggregations in the formula.
+
+[float]
+==== Configurable donut visualizations
+Configure the inner area size (or donut hole) in the donut
+visualization. The inner area is a smaller size by default to allow maximize space for
+labels. You can change this option in *Lens*.
+
+[role="screenshot"]
+image::images/highlights-lens-donut.png[Inner area size setting in Lens donuts,width=75%]
+
+[float]
+==== Collapsable Suggestions panel
+
+Get back some vertical space in *Lens* and save on the query cost of
+suggestions by collapsing the *Suggestions* panel. {kib} remembers when you collapse
+your suggestions the next time you use the editor with the same browser.
+
+[float]
+==== Improved color controls
+
+The revised color stop editing experience offers a more streamlined way to specify
+what happens outside of the defined ranges (above and below the minimum and maximum).
+These revised controls also add the ability to evenly distribute color stops
+in one click. Look for the new functionality in *Lens* tables, heatmaps, metrics,
+and gauges.
+
+[role="screenshot"]
+image::images/highlights-lens-color.png[Color editing in Lens, width=50%]
+
+[float]
+=== Maps
+
+[float]
+==== Shapefile upload
+Load shapefiles into Elastic with this simple but powerful uploader built
+right into the *Maps* application. Easily load local open data and boundaries for analysis and comparison.
+
+[role="screenshot"]
+image::images/highlights-maps-shapefile.png[Shapefile upload in Maps]
+
+[float]
+==== Vector tiles now the default
+All new polygon layers now enable *Use vector tiles* by default.
+Vector tiles offer the best performance and smooth
+zooming over the alternative methods. You can change the scaling options
+in layer settings if you prefer the previous approach.
+
+[float]
+=== {ml-cap}
+
+[float]
+==== {ml-cap} UI enhancements: easier anomaly investigation, new side navigation
+
+8.1 contains a couple of enhancements on the {ml} UI.
+One of the enhancements helps the user interpret the results of their 
+{anomaly-jobs} and explore what else is happening around the time of an anomaly. 
+In the anomalies table a drilldown link to Discover is automatically available 
+to investigate the anomaly in the context of the source data. 
+For the charts in the Anomaly Explorer, synchronized `crosshair` lines are 
+provided on hover so that you can see what other anomalous behavior is occurring 
+at a point in time.
+
+[role="screenshot"]
+image::images/highlights-anomaly.gif[Anomaly Explorer charts]
+
+The top navigation bar is now replaced with side navigation. The side navigation 
+is collapsible, so views such as the Anomaly Explorer and Single Metric Viewer 
+can benefit from being viewed at full width if desired.
+
+[role="screenshot"]
+image::images/highlights-anomaly-explorer.png[Side navigation]
+
+[float]
+==== {transform-cap} enhancements
+
+You can now reset and re-run your {transform} from the beginning. 
+{transform-cap} counters will be reset to zero and if the destination index was 
+created by the transform it will also be deleted.
+
+Other features previously only available to API users are also added to the UI 
+for 8.1: the ability to configure an ingest pipeline to enrich the data 
+persisted to the destination index, and the terms aggregation is available in 
+the list of options when building the aggregations in the pivot {transform} 
+wizard.
+
+[role="screenshot"]
+image::images/highlights-transforms.png[Transforms UI]
+
+[float]
+==== {ml-cap} anomaly layers in Maps
+
+Maps introduces a new vector layer–you can add layers to your maps that display 
+points or lines for the anomalies in your geographic data.
+
+[role="screenshot"]
+image::images/highlights-anomaly-maps.png[Anomaly layers in Maps]
+
+[float]
+=== ResponseOps
+
+[float]
+==== Summary stats bar in Cases
+
+The new section at the top of the Cases view displays summary statistics for the 
+case, such as total numer of alerts, and counts of associated users and hosts. 
+The summarized information in the stats bar help the analyst to determine the 
+priority of a case and indicate effectiveness.
+
+[role="screenshot"]
+image::images/highlights-cases.png[Summary bar in Cases]
 
 // end::notable-highlights[]

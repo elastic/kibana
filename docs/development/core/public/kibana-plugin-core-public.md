@@ -62,6 +62,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md) | DeprecationsService provides methods to fetch domain deprecation details from the Kibana server. |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
+|  [ExecutionContextSetup](./kibana-plugin-core-public.executioncontextsetup.md) | Kibana execution context. Used to provide execution context to Elasticsearch, reporting, performance monitoring, etc. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpFetchOptions](./kibana-plugin-core-public.httpfetchoptions.md) | All options that may be used with a [HttpHandler](./kibana-plugin-core-public.httphandler.md)<!-- -->. |
@@ -160,6 +161,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeBreadcrumb](./kibana-plugin-core-public.chromebreadcrumb.md) |  |
 |  [ChromeHelpExtensionLinkBase](./kibana-plugin-core-public.chromehelpextensionlinkbase.md) |  |
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-core-public.chromehelpextensionmenulink.md) |  |
+|  [ExecutionContextStart](./kibana-plugin-core-public.executioncontextstart.md) | See [ExecutionContextSetup](./kibana-plugin-core-public.executioncontextsetup.md)<!-- -->. |
 |  [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpStart](./kibana-plugin-core-public.httpstart.md) | See [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |
