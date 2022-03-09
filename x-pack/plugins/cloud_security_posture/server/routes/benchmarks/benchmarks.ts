@@ -14,11 +14,15 @@ import {
   AgentPolicyServiceInterface,
   AgentService,
 } from '../../../../fleet/server';
-import { GetAgentPoliciesResponseItem, PackagePolicy, AgentPolicy } from '../../../../fleet/common';
+import {
+  GetAgentPoliciesResponseItem,
+  PackagePolicy,
+  AgentPolicy,
+  ListWithKuery,
+} from '../../../../fleet/common';
 import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 
-// TODO: use the same method from common/ once PR 106 is merged
 export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
 
@@ -52,6 +56,18 @@ const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): str
   return kquery;
 };
 
+const addSortToQuery = (
+  baseQuery: ListWithKuery,
+  queryParams: BenchmarksQuerySchema
+): ListWithKuery =>
+  queryParams.sort_field
+    ? {
+        ...baseQuery,
+        sortField: queryParams.sort_field,
+        sortOrder: queryParams.sort_order,
+      }
+    : baseQuery;
+
 export const getPackagePolicies = async (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface,
@@ -64,11 +80,17 @@ export const getPackagePolicies = async (
 
   const packageNameQuery = getPackageNameQuery(packageName, queryParams.benchmark_name);
 
-  const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
+  const baseQuery = {
     kuery: packageNameQuery,
     page: queryParams.page,
     perPage: queryParams.per_page,
-  })) ?? { items: [] as PackagePolicy[] };
+  };
+
+  const query = addSortToQuery(baseQuery, queryParams);
+
+  const { items: packagePolicies } = (await packagePolicyService?.list(soClient, query)) ?? {
+    items: [] as PackagePolicy[],
+  };
 
   return packagePolicies;
 };
@@ -197,6 +219,14 @@ export const benchmarksInputSchema = rt.object({
    * The number of objects to include in each page
    */
   per_page: rt.number({ defaultValue: DEFAULT_BENCHMARKS_PER_PAGE, min: 0 }),
+  /**
+   * The field to use for sorting the found objects.
+   */
+  sort_field: rt.maybe(rt.string()),
+  /**
+   * The order to sort by
+   */
+  sort_order: rt.oneOf([rt.literal('asc'), rt.literal('desc')], { defaultValue: 'desc' }),
   /**
    * Benchmark filter
    */
