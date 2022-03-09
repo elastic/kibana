@@ -384,10 +384,10 @@ export function getFiltersInLayer(
   layerData: NonNullable<FramePublicAPI['activeData']>[string] | undefined
 ) {
   const filtersGroupedByState = collectFiltersFromMetrics(layer, columnIds);
-  const [enabledFiltersFromMetricsByLanguage, disabledFitleredFromMetricsByLanguage] = [
+  const [enabledFiltersFromMetricsByLanguage, disabledFitleredFromMetricsByLanguage] = ([
     'enabled',
     'disabled',
-  ].map((state) => groupBy(filtersGroupedByState[state], 'language') as unknown as GroupedQueries);
+  ] as const).map((state) => groupBy(filtersGroupedByState[state], 'language') as unknown as GroupedQueries);
 
   const filterOperation = columnIds
     .map((colId) => {
