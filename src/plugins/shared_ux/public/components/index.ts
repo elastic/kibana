@@ -26,7 +26,7 @@ export const LazySolutionToolbarButton = React.lazy(() =>
 );
 
 export const LazySolutionToolbarButtonProps = React.lazy(() =>
-  import('./toolbar/index').then(({ Props }) => ({
+  import('./toolbar/index').then(({ SolutionToolbarButtonProps }: any) => ({
     default: SolutionToolbarButtonProps,
   }))
 );
