@@ -25,7 +25,7 @@ const reason =
  * from the TGrid
  */
 export const RenderCellValue: React.FC<
-  EuiDataGridCellValueElementProps & CellValueElementProps
+  Omit<EuiDataGridCellValueElementProps, 'schema'> & CellValueElementProps
 > = ({
   columnId,
   data,
