@@ -13,10 +13,8 @@ export const mockCasesContract = (): jest.Mocked<CasesUiStart> => ({
   getCases: jest.fn(),
   getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
   getAllCasesSelectorModal: jest.fn(),
-  getAllCasesSelectorModalNoProvider: jest.fn(),
   getCreateCaseFlyout: jest.fn(),
   getRecentCases: jest.fn(),
-  getCreateCaseFlyoutNoProvider: jest.fn(),
   hooks: {
     getUseCasesAddToNewCaseFlyout: jest.fn(),
     getUseCasesAddToExistingCaseModal: jest.fn(),
