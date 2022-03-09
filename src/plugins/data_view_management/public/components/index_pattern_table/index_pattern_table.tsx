@@ -141,21 +141,17 @@ export const IndexPatternTable = ({
       }),
       render: (name: string, dataView: IndexPatternTableItem) => (
         <>
-          <EuiFlexGroup gutterSize="s" wrap>
-            <EuiFlexItem grow={false} css={flexItemStyles}>
-              <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>{name}</EuiLink>
-            </EuiFlexItem>
-            {dataView?.id?.indexOf(securitySolution) === 0 && (
-              <EuiFlexItem grow={false} css={flexItemStyles}>
-                <EuiBadge>{securityDataView}</EuiBadge>
-              </EuiFlexItem>
-            )}
-            {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
-              <EuiFlexItem grow={false} css={flexItemStyles} key={tagKey}>
-                <EuiBadge>{tagName}</EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>{name}</EuiLink>
+          {dataView?.id?.indexOf(securitySolution) === 0 && (
+            <>
+              &emsp;<EuiBadge>{securityDataView}</EuiBadge>
+            </>
+          )}
+          {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
+            <>
+              &emsp;<EuiBadge>{tagName}</EuiBadge>
+            </>
+          ))}
         </>
       ),
       dataType: 'string' as const,
