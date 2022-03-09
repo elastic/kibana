@@ -36,7 +36,20 @@ but may not be displayed on the UI.
 
 You can also set more custom options on the configuration like colors which get used while rendering the chart.
 
-## report definition vs filters
+Some options in configuration are
+
+### Definition fields
+They are also filters, but usually main filters, around which usually app UI is based.
+For apm, it could be service name and for uptime, monitor name.
+
+### Filters
+You can define base filters in kql form or data plugin filter format, filters are strongly typed.
+
+### Breakdown fields
+List of fields from an index pattern, UI will use this to populate breakdown option select.
+
+### Labels
+You can set key/value map for your field labels. UI will use these to set labels for data view fields.
 
 
 ## Lens Embeddable
@@ -47,4 +60,5 @@ Exploratory view generates the lens embeddable attributes as json and pass it to
 
 Based on configuration, exploratory view generates layers and columns.
 
+Add a link to lens embeddable readme
 
