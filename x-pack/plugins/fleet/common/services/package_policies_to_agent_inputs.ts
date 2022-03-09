@@ -26,7 +26,9 @@ export const storedPackagePoliciesToAgentInputs = (
       }
 
       const fullInput: FullAgentPolicyInput = {
-        id: `${input.type}${input.policy_template ? `-${input.policy_template}-` : '-'}${packagePolicy.id}`,
+        id: `${input.type}${input.policy_template ? `-${input.policy_template}-` : '-'}${
+          packagePolicy.id
+        }`,
         revision: packagePolicy.revision,
         name: packagePolicy.name,
         type: input.type,
