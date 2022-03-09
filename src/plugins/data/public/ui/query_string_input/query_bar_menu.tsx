@@ -121,6 +121,8 @@ export function QueryBarMenu({
       }
       if (filtersHaveChanged || !isEqual(query, savedQuery?.attributes.query)) {
         setSavedQueryHasChanged(true);
+      } else {
+        setSavedQueryHasChanged(false);
       }
     }
   }, [filters, query, savedQuery, savedQuery?.attributes.filters, savedQuery?.attributes.query]);
@@ -356,7 +358,7 @@ export function QueryBarMenu({
                 defaultMessage: 'Save filter set',
               }),
           icon: 'save',
-          disabled: !hasFiltersOrQuery,
+          disabled: !hasFiltersOrQuery || (savedQuery && !savedQueryHasChanged),
           panel: 1,
         },
         { isSeparator: true },
