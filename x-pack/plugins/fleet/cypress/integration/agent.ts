@@ -71,6 +71,14 @@ describe('View agents', () => {
           monitoring_enabled: ['logs', 'metrics'],
           status: 'active',
         },
+        {
+          id: 'policy-2',
+          name: 'Agent policy 2',
+          description: '',
+          namespace: 'default',
+          monitoring_enabled: ['logs', 'metrics'],
+          status: 'active',
+        },
       ],
     });
     cy.intercept('/api/fleet/agent_status', {
@@ -92,8 +100,8 @@ describe('View agents', () => {
     }).as('getAgents');
   });
 
-  describe('autocomplete', () => {
-    it('should show correct suggestions for agent.id', async () => {
+  describe('Agent filter suggestions', () => {
+    it('should show correct suggestions for agent.id', () => {
       cy.intercept(/\/api\/index_patterns*/, {
         fields: [
           {
@@ -127,20 +135,46 @@ describe('View agents', () => {
   });
 
   describe('Upgrade available filter', () => {
-    it('should call API with correct query param on click ', async () => {
+    it('should call API with correct query param on click ', () => {
       cy.visit('/app/fleet/agents');
       cy.contains('agent-1');
 
-      cy.get('[data-test-subj="filterShowUpgradable"]').click();
+      cy.get('[data-test-subj="agentList.showUpgradeable"]').click();
       // getAgents can be called many times on load, wait() was grabbing the wrong call
       // .all returns all requests performed so far, allowing us to reliably grab the most recent call
-      // the tick is needed to ensure the call is collected, test is flaky without it
-      cy.tick(500);
       cy.get('@getAgents.all').then((requests) => {
         // @ts-ignore no property request, typings are incorrect for .all
         const latestRequest = requests[requests.length - 1].request;
         const latestRequestUrl = new URL(latestRequest.url);
         expect(latestRequestUrl.searchParams.get('showUpgradeable')).equals('true');
+      });
+    });
+  });
+
+  describe('Agent policy filter', () => {
+    it('should should show all policies as options', () => {
+      cy.visit('/app/fleet/agents');
+      cy.contains('agent-1');
+
+      cy.get('[data-test-subj="agentList.policyFilter"]').click();
+
+      cy.get('button').contains('Agent policy 1');
+      cy.get('button').contains('Agent policy 2');
+    });
+    it('should filter on policy', () => {
+      cy.visit('/app/fleet/agents');
+      cy.contains('agent-1');
+
+      cy.get('[data-test-subj="agentList.policyFilter"]').click();
+
+      cy.get('button').contains('Agent policy 2').click();
+      cy.get('@getAgents.all').then((requests) => {
+        // @ts-ignore no property request, typings are incorrect for .all
+        const latestRequest = requests[requests.length - 1].request;
+        const latestRequestUrl = new URL(latestRequest.url);
+        expect(latestRequestUrl.searchParams.get('kuery')).contains(
+          'fleet-agents.policy_id : ("policy-2")'
+        );
       });
     });
   });

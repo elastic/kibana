@@ -174,6 +174,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       numActiveFilters={selectedAgentPolicies.length}
                       numFilters={agentPolicies.length}
                       disabled={agentPolicies.length === 0}
+                      data-test-subj="agentList.policyFilter"
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentList.policyFilterText"
@@ -208,7 +209,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   onClick={() => {
                     onShowUpgradeableChange(!showUpgradeable);
                   }}
-                  data-test-subj="filterShowUpgradable"
+                  data-test-subj="agentList.showUpgradeable"
                 >
                   <FormattedMessage
                     id="xpack.fleet.agentList.showUpgradeableFilterLabel"
