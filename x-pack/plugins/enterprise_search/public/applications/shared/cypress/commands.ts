@@ -40,7 +40,7 @@ export const login = ({
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'cypress-axe'; // eslint complains this should be in `dependencies` and not `devDependencies`, but these tests should only run on dev
-import { AXE_CONFIG, AXE_OPTIONS } from 'test/accessibility/services/a11y/constants';
+import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/test';
 
 const axeConfig = {
   ...AXE_CONFIG,

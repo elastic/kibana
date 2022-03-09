@@ -7,34 +7,20 @@
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { axe } from 'jest-axe';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { ImpactValue, Result } from 'axe-core';
+import { configureAxe } from 'jest-axe';
+import { AXE_OPTIONS, AXE_CONFIG } from '@kbn/test';
 import { ReactWrapper } from './testbed/types';
 
-/**
- * Function to get an array of a11y violations from axe automated testing
- * @param component
- * @param impactLevel One of 'minor', 'moderate', 'serious', 'critical'. Default is 'critical'.
- */
-export const getA11yViolations = async (
-  component: ReactWrapper,
-  impactLevel?: ImpactValue
-): Promise<Result[]> => {
-  impactLevel = impactLevel ?? 'critical';
-  const axeResults = await axe(component.html(), { resultTypes: ['violations'] });
-  return axeResults.violations.filter((violation) => violation.impact === impactLevel);
-};
+const axeRunner = configureAxe({ globalOptions: { ...AXE_CONFIG } });
 
 /**
  * Function to test if a component doesn't have a11y violations from axe automated testing
  * @param component
- * @param impactLevel One of 'minor', 'moderate', 'serious', 'critical'. Default is 'critical'.
  */
-export const expectToBeAccessible = async (
-  component: ReactWrapper,
-  impactLevel?: ImpactValue
-): Promise<void> => {
-  const violations = await getA11yViolations(component, impactLevel);
-  expect(violations).toHaveLength(0);
+export const expectToBeAccessible = async (component: ReactWrapper): Promise<void> => {
+  const axeResults = await axeRunner(component.html(), {
+    ...AXE_OPTIONS,
+    resultTypes: ['violations'],
+  });
+  expect(axeResults.violations).toHaveLength(0);
 };
