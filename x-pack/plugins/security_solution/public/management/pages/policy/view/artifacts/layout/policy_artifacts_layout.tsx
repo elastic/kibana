@@ -40,7 +40,7 @@ interface PolicyArtifactsLayoutProps {
   /** A list of labels for the given policy artifact page. Not all have to be defined, only those that should override the defaults */
   labels: PolicyArtifactsPageLabels;
   getExceptionsListApiClient: () => ExceptionsListApiClient;
-  searcheableFields: string[];
+  searcheableFields: readonly string[];
   getArtifactPath: (
     location?:
       | Partial<EventFiltersPageLocation>
@@ -216,7 +216,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             policyName={policyItem.name}
             apiClient={exceptionsListApiClient}
             exception={exceptionItemToDelete}
-            onCancel={handleDeleteModalClose}
+            onClose={handleDeleteModalClose}
             labels={labels}
           />
         )}

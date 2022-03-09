@@ -25,16 +25,18 @@ export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS = Object.freeze({
   deleteModalErrorMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.hostIsolationException.list.removeDialog.errorToastTitle',
     {
-      defaultMessage: 'Error while attempt to remove host isolation exception',
+      defaultMessage: 'Error while attempting to remove host isolation exception',
     }
   ),
-  flyoutWarningCalloutMessage: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.hostIsolationException.layout.flyout.searchWarning.text',
-    {
-      defaultMessage:
-        'Only the first 100 host isolation exceptions are displayed. Please use the search bar to refine the results.',
-    }
-  ),
+  flyoutWarningCalloutMessage: (maxNumber: number) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.policy.hostIsolationException.layout.flyout.searchWarning.text',
+      {
+        defaultMessage:
+          'Only the first {maxNumber} host isolation exceptions are displayed. Please use the search bar to refine the results.',
+        values: { maxNumber },
+      }
+    ),
   flyoutNoArtifactsToBeAssignedMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.hostIsolationException.layout.flyout.noAssignable',
     {

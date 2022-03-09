@@ -13,6 +13,7 @@ import React, { useCallback } from 'react';
 import { useBulkUpdateArtifact } from '../../../../../hooks/artifacts';
 import { useToasts } from '../../../../../../common/lib/kibana';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../../common/endpoint/service/artifacts';
 import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
 
 interface PolicyArtifactsDeleteModalProps {
@@ -20,12 +21,12 @@ interface PolicyArtifactsDeleteModalProps {
   policyName: string;
   apiClient: ExceptionsListApiClient;
   exception: ExceptionListItemSchema;
-  onCancel: () => void;
+  onClose: () => void;
   labels: typeof POLICY_ARTIFACT_DELETE_MODAL_LABELS;
 }
 
 export const PolicyArtifactsDeleteModal = React.memo<PolicyArtifactsDeleteModalProps>(
-  ({ policyId, policyName, apiClient, exception, onCancel, labels }) => {
+  ({ policyId, policyName, apiClient, exception, onClose, labels }) => {
     const toasts = useToasts();
     const queryClient = useQueryClient();
 
@@ -37,15 +38,13 @@ export const PolicyArtifactsDeleteModal = React.memo<PolicyArtifactsDeleteModalP
             title: labels.deleteModalSuccessMessageTitle,
             text: labels.deleteModalSuccessMessageText(exception, policyName),
           });
+          queryClient.invalidateQueries(['list', apiClient]);
+          onClose();
         },
         onError: (error?: HttpFetchError) => {
           toasts.addError(error as unknown as Error, {
             title: labels.deleteModalErrorMessage,
           });
-        },
-        onSettled: () => {
-          queryClient.invalidateQueries(['list', apiClient]);
-          onCancel();
         },
       }
     );
@@ -53,20 +52,20 @@ export const PolicyArtifactsDeleteModal = React.memo<PolicyArtifactsDeleteModalP
     const handleModalConfirm = useCallback(() => {
       const modifiedException = {
         ...exception,
-        tags: exception.tags.filter((tag) => tag !== `policy:${policyId}`),
+        tags: exception.tags.filter((tag) => tag !== `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId}`),
       };
       updateArtifact([modifiedException]);
     }, [exception, policyId, updateArtifact]);
 
-    const handleCancel = useCallback(() => {
+    const handleOnClose = useCallback(() => {
       if (!isUpdateArtifactLoading) {
-        onCancel();
+        onClose();
       }
-    }, [isUpdateArtifactLoading, onCancel]);
+    }, [isUpdateArtifactLoading, onClose]);
 
     return (
       <EuiConfirmModal
-        onCancel={handleCancel}
+        onCancel={handleOnClose}
         onConfirm={handleModalConfirm}
         title={labels.deleteModalTitle}
         cancelButtonText={labels.deleteModalCancelButtonTitle}

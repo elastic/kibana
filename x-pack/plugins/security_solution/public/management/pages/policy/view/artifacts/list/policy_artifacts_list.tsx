@@ -95,19 +95,19 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       [navigateCallback]
     );
 
-    const handleOnExpandCollapse: ArtifactCardGridProps['onExpandCollapse'] = ({
-      expanded,
-      collapsed,
-    }) => {
-      const newExpandedMap = new Map(expandedItemsMap);
-      for (const item of expanded) {
-        newExpandedMap.set(item.id, true);
-      }
-      for (const item of collapsed) {
-        newExpandedMap.set(item.id, false);
-      }
-      setExpandedItemsMap(newExpandedMap);
-    };
+    const handleOnExpandCollapse = useCallback<ArtifactCardGridProps['onExpandCollapse']>(
+      ({ expanded, collapsed }) => {
+        const newExpandedMap = new Map(expandedItemsMap);
+        for (const item of expanded) {
+          newExpandedMap.set(item.id, true);
+        }
+        for (const item of collapsed) {
+          newExpandedMap.set(item.id, false);
+        }
+        setExpandedItemsMap(newExpandedMap);
+      },
+      [expandedItemsMap]
+    );
     const handleOnPageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
       ({ pageIndex, pageSize }) => {
         if (artifacts?.total) navigateCallback({ page_index: pageIndex, page_size: pageSize });
@@ -120,41 +120,56 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     }, [artifacts?.data.length, labels]);
 
     const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
-    const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (artifact) => {
-      const viewUrlPath = getArtifactPath({
-        filter: (artifact as ExceptionListItemSchema).item_id,
-      });
-      const fullDetailsAction = {
-        icon: 'controlsHorizontal',
-        children: labels.listFullDetailsActionTitle,
-        href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
-        navigateAppId: APP_UI_ID,
-        navigateOptions: { path: viewUrlPath, state },
-        'data-test-subj': 'view-full-details-action',
-      };
-      const item = artifact as ExceptionListItemSchema;
+    const provideCardProps = useCallback(
+      (artifact) => {
+        const viewUrlPath = getArtifactPath({
+          filter: (artifact as ExceptionListItemSchema).item_id,
+        });
+        const fullDetailsAction = {
+          icon: 'controlsHorizontal',
+          children: labels.listFullDetailsActionTitle,
+          href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
+          navigateAppId: APP_UI_ID,
+          navigateOptions: { path: viewUrlPath, state },
+          'data-test-subj': 'view-full-details-action',
+        };
+        const item = artifact as ExceptionListItemSchema;
 
-      const isGlobal = isGlobalPolicyEffected(item.tags);
-      const deleteAction = {
-        icon: 'trash',
-        children: labels.listRemoveActionTitle,
-        onClick: () => {
-          onDeleteActionCallback(item);
-        },
-        disabled: isGlobal,
-        toolTipContent: isGlobal ? labels.listRemoveActionNotAllowedMessage : undefined,
-        toolTipPosition: 'top' as const,
-        'data-test-subj': 'remove-from-policy-action',
-      };
-      return {
-        expanded: expandedItemsMap.get(item.id) || false,
-        actions:
-          canCreateArtifactsByPolicy && externalPrivileges
-            ? [fullDetailsAction, deleteAction]
-            : [fullDetailsAction],
-        policies: artifactCardPolicies,
-      };
-    };
+        const isGlobal = isGlobalPolicyEffected(item.tags);
+        const deleteAction = {
+          icon: 'trash',
+          children: labels.listRemoveActionTitle,
+          onClick: () => {
+            onDeleteActionCallback(item);
+          },
+          disabled: isGlobal,
+          toolTipContent: isGlobal ? labels.listRemoveActionNotAllowedMessage : undefined,
+          toolTipPosition: 'top' as const,
+          'data-test-subj': 'remove-from-policy-action',
+        };
+        return {
+          expanded: expandedItemsMap.get(item.id) || false,
+          actions:
+            canCreateArtifactsByPolicy && externalPrivileges
+              ? [fullDetailsAction, deleteAction]
+              : [fullDetailsAction],
+          policies: artifactCardPolicies,
+        };
+      },
+      [
+        artifactCardPolicies,
+        canCreateArtifactsByPolicy,
+        expandedItemsMap,
+        externalPrivileges,
+        getAppUrl,
+        getArtifactPath,
+        labels.listFullDetailsActionTitle,
+        labels.listRemoveActionNotAllowedMessage,
+        labels.listRemoveActionTitle,
+        onDeleteActionCallback,
+        state,
+      ]
+    );
 
     return (
       <>

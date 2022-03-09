@@ -54,13 +54,11 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
           title: labels.flyoutSuccessMessageTitle,
           text: labels.flyoutSuccessMessageText(updatedExceptions),
         });
+        queryClient.invalidateQueries(['list', apiClient]);
+        onClose();
       },
       onError: () => {
         toasts.addDanger(labels.flyoutErrorMessage);
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(['list', apiClient]);
-        onClose();
       },
     });
 
@@ -120,12 +118,12 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
             heading="h4"
             title={labels.flyoutWarningCalloutTitle}
           >
-            {labels.flyoutWarningCalloutMessage}
+            {labels.flyoutWarningCalloutMessage(MAX_ALLOWED_RESULTS)}
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
       ),
-      [labels.flyoutWarningCalloutTitle, labels.flyoutWarningCalloutMessage]
+      [labels]
     );
 
     const assignableArtifacts = useMemo(

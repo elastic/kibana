@@ -25,16 +25,18 @@ export const POLICY_ARTIFACT_EVENT_FILTERS_LABELS = Object.freeze({
   deleteModalErrorMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.eventFilters.list.removeDialog.errorToastTitle',
     {
-      defaultMessage: 'Error while attempt to remove event filter',
+      defaultMessage: 'Error while attempting to remove event filter',
     }
   ),
-  flyoutWarningCalloutMessage: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.eventFilters.layout.flyout.searchWarning.text',
-    {
-      defaultMessage:
-        'Only the first 100 event filters are displayed. Please use the search bar to refine the results.',
-    }
-  ),
+  flyoutWarningCalloutMessage: (maxNumber: number) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.policy.eventFilters.layout.flyout.searchWarning.text',
+      {
+        defaultMessage:
+          'Only the first {maxNumber} event filters are displayed. Please use the search bar to refine the results.',
+        values: { maxNumber },
+      }
+    ),
   flyoutNoArtifactsToBeAssignedMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.eventFilters.layout.flyout.noAssignable',
     {

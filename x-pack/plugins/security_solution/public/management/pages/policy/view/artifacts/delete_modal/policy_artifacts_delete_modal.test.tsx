@@ -27,13 +27,13 @@ describe('Policy details artifacts delete modal', () => {
   let mockedContext: AppContextTestRender;
   let exception: ExceptionListItemSchema;
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
-  let onCancelMock: () => jest.Mock;
+  let onCloseMock: () => jest.Mock;
 
   beforeEach(() => {
     policyId = uuid.v4();
     mockedContext = createAppRootMockRenderer();
     exception = getExceptionListItemSchemaMock();
-    onCancelMock = jest.fn();
+    onCloseMock = jest.fn();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     render = async () => {
       await act(async () => {
@@ -43,7 +43,7 @@ describe('Policy details artifacts delete modal', () => {
             policyName="fakeName"
             apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
             exception={exception}
-            onCancel={onCancelMock}
+            onClose={onCloseMock}
             labels={POLICY_ARTIFACT_DELETE_MODAL_LABELS}
           />
         );
@@ -96,7 +96,7 @@ describe('Policy details artifacts delete modal', () => {
       expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalled();
     });
 
-    expect(onCancelMock).toHaveBeenCalled();
+    expect(onCloseMock).toHaveBeenCalled();
     expect(mockedContext.coreStart.notifications.toasts.addSuccess).toHaveBeenCalled();
   });
 
@@ -115,7 +115,7 @@ describe('Policy details artifacts delete modal', () => {
     });
 
     expect(mockedContext.coreStart.notifications.toasts.addError).toHaveBeenCalledWith(error, {
-      title: 'Error while attempt to remove artifact',
+      title: 'Error while attempting to remove artifact',
     });
   });
 });

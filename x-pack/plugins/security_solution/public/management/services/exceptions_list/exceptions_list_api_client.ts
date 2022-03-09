@@ -83,6 +83,10 @@ export class ExceptionsListApiClient {
     }
   }
 
+  public isHttp(coreHttp: HttpStart): boolean {
+    return this.http === coreHttp;
+  }
+
   /**
    * Static method to get a fresh or existing instance.
    * It will ensure we only check and create the list once.
@@ -94,7 +98,7 @@ export class ExceptionsListApiClient {
   ): ExceptionsListApiClient {
     if (
       !ExceptionsListApiClient.instance.has(listId) ||
-      ExceptionsListApiClient.instance.get(listId)?.http !== http
+      !ExceptionsListApiClient.instance.get(listId)?.isHttp(http)
     ) {
       ExceptionsListApiClient.instance.set(
         listId,

@@ -36,7 +36,7 @@ const generator = new EndpointDocGenerator();
 let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
 let history: AppContextTestRender['history'];
 
-const eventFiltersLabels = {
+const getEventFiltersLabels = () => ({
   ...POLICY_ARTIFACT_EVENT_FILTERS_LABELS,
   layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
     <FormattedMessage
@@ -45,7 +45,7 @@ const eventFiltersLabels = {
       values={{ count, link }}
     />
   ),
-};
+});
 
 describe('Policy artifacts layout', () => {
   beforeEach(() => {
@@ -63,11 +63,11 @@ describe('Policy artifacts layout', () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsLayout
             policyItem={policyItem}
-            labels={eventFiltersLabels}
+            labels={getEventFiltersLabels()}
             getExceptionsListApiClient={() =>
               EventFiltersApiClient.getInstance(mockedContext.coreStart.http)
             }
-            searcheableFields={[...EVENT_FILTERS_SEARCHABLE_FIELDS]}
+            searcheableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
             getArtifactPath={getEventFiltersListPath}
             getPolicyArtifactsPath={getPolicyEventFiltersPath}
             externalPrivileges={externalPrivileges}
@@ -84,7 +84,7 @@ describe('Policy artifacts layout', () => {
     const component = mockedContext.render(
       <PolicyArtifactsLayout
         policyItem={policyItem}
-        labels={eventFiltersLabels}
+        labels={getEventFiltersLabels()}
         getExceptionsListApiClient={() =>
           EventFiltersApiClient.getInstance(mockedContext.coreStart.http)
         }
@@ -107,8 +107,7 @@ describe('Policy artifacts layout', () => {
 
   it('should render layout with no assigned artifacts data when there are artifacts', async () => {
     mockedApi.responseProvider.eventFiltersList.mockImplementation(
-      // @ts-expect-error
-      (args) => {
+      (args?: { query: { filter: string } }) => {
         if (
           !args ||
           args.query.filter !== parsePoliciesAndFilterToKql({ policies: [policyItem.id, 'all'] })

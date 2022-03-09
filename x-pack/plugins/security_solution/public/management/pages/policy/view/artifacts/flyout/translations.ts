@@ -15,13 +15,15 @@ export const POLICY_ARTIFACT_FLYOUT_LABELS = Object.freeze({
       defaultMessage: 'Limited search results',
     }
   ),
-  flyoutWarningCalloutMessage: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.searchWarning.text',
-    {
-      defaultMessage:
-        'Only the first 100 artifacts are displayed. Please use the search bar to refine the results.',
-    }
-  ),
+  flyoutWarningCalloutMessage: (maxNumber: number) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.searchWarning.text',
+      {
+        defaultMessage:
+          'Only the first {maxNumber} artifacts are displayed. Please use the search bar to refine the results.',
+        values: { maxNumber },
+      }
+    ),
   flyoutNoArtifactsToBeAssignedMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.artifacts.layout.flyout.noAssignable',
     {

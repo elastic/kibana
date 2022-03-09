@@ -25,16 +25,18 @@ export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS = Object.freeze({
   deleteModalErrorMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.errorToastTitle',
     {
-      defaultMessage: 'Error while attempt to remove trusted app',
+      defaultMessage: 'Error while attempting to remove trusted app',
     }
   ),
-  flyoutWarningCalloutMessage: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.searchWarning.text',
-    {
-      defaultMessage:
-        'Only the first 100 trusted apps are displayed. Please use the search bar to refine the results.',
-    }
-  ),
+  flyoutWarningCalloutMessage: (maxNumber: number) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.searchWarning.text',
+      {
+        defaultMessage:
+          'Only the first 100 trusted apps are displayed. Please use the search bar to refine the results.',
+        values: { maxNumber },
+      }
+    ),
   flyoutNoArtifactsToBeAssignedMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.noAssignable',
     {

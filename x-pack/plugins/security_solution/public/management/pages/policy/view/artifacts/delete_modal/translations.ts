@@ -58,7 +58,7 @@ export const POLICY_ARTIFACT_DELETE_MODAL_LABELS = Object.freeze({
   deleteModalErrorMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.artifacts.list.removeDialog.errorToastTitle',
     {
-      defaultMessage: 'Error while attempt to remove artifact',
+      defaultMessage: 'Error while attempting to remove artifact',
     }
   ),
 });
