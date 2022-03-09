@@ -140,7 +140,7 @@ export const IndexPatternTable = ({
         defaultMessage: 'Name',
       }),
       render: (name: string, dataView: IndexPatternTableItem) => (
-        <>
+        <div>
           <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>{name}</EuiLink>
           {dataView?.id?.indexOf(securitySolution) === 0 && (
             <>
@@ -149,10 +149,10 @@ export const IndexPatternTable = ({
           )}
           {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
             <>
-              &emsp;<EuiBadge>{tagName}</EuiBadge>
+              &emsp;<EuiBadge key={tagKey}>{tagName}</EuiBadge>
             </>
           ))}
-        </>
+        </div>
       ),
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
