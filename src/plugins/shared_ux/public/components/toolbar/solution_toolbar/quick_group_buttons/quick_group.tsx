@@ -14,7 +14,7 @@ import {
   useEuiTheme,
   IconType,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { QuickGroupButtonStyles } from './quick_group.styles';
 export interface QuickButton {
   label: string;
   title?: string;
@@ -30,7 +30,8 @@ export interface Props {
 type Option = EuiButtonGroupOptionProps & Omit<QuickButton, 'label'>;
 
 export const QuickButtonGroup = ({ buttons }: Props) => {
-  const { euiTheme } = useEuiTheme();
+  const euiTheme = useEuiTheme();
+  const quickButtonGroupStyles = QuickGroupButtonStyles(euiTheme);
 
   const buttonGroupOptions: Option[] = buttons.map((button: QuickButton, index) => {
     const { label, title = label, ...rest } = button;
@@ -41,7 +42,7 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
       id: `${htmlIdGenerator()()}${index}`,
       label,
       title,
-      className: `quickButtonGroup__button`,
+      css: [quickButtonGroupStyles.quickButtonStyles],
     };
   });
 
@@ -49,36 +50,17 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
     buttonGroupOptions.find((x) => x.id === optionId)?.onClick();
   };
 
-  const quickButtonCSS = css`
-    .euiButtonGroup__buttons {
-      border-radius: ${euiTheme.border.radius};
-      .quickButtonGroup__button {
-        background-color: ${euiTheme.colors.emptyShade};
-        border-width: ${euiTheme.border.width.thin} !important;
-        border-style: solid !important;
-        border-color: ${euiTheme.border.color} !important;
-      }
-      .quickButtonGroup__button:first-of-type {
-        border-top-left-radius: ${euiTheme.border.radius.medium} !important;
-        border-bottom-left-radius: ${euiTheme.border.radius.medium} !important;
-      }
-      .quickButtonGroup__button:last-of-type {
-        border-top-right-radius: ${euiTheme.border.radius.medium} !important;
-        border-bottom-right-radius: ${euiTheme.border.radius.medium} !important;
-      }
-    }
-  `;
+  const getLegend = buttonGroupOptions[0].getLegend;
 
   return (
     <EuiButtonGroup
       buttonSize="m"
-      // set this as a constant?
-      legend={buttonGroupOptions[0].getLegend}
+      legend={getLegend}
       options={buttonGroupOptions}
       onChange={onChangeIconsMulti}
       type="multi"
       isIconOnly
-      css={quickButtonCSS}
+      css={[quickButtonGroupStyles.quickButtonGroupStyles]}
     />
   );
 };

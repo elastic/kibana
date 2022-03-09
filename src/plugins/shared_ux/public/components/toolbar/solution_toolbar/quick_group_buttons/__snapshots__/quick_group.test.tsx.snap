@@ -1,26 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<QuickButtonGroup /> is rendered 1`] = `
-.emotion-0 .euiButtonGroup__buttons {
-  border-radius:medium: 6px;
-  small: 4px;
+.emotion-0 {
+  border-radius: 6px;
 }
 
-.emotion-0 .euiButtonGroup__buttons .quickButtonGroup__button {
-  background-color: #FFF;
+.emotion-1 {
+  background-color: #FFF!important;
+}
+
+.emotion-1.euiButtonGroupButton {
   border-width: 1px!important;
   border-style: solid!important;
   border-color: #D3DAE6!important;
 }
 
-.emotion-0 .euiButtonGroup__buttons .quickButtonGroup__button:first-of-type {
+.emotion-1:first-of-type {
   border-top-left-radius: 6px!important;
   border-bottom-left-radius: 6px!important;
 }
 
-.emotion-0 .euiButtonGroup__buttons .quickButtonGroup__button:last-of-type {
+.emotion-1:last-of-type {
   border-top-right-radius: 6px!important;
   border-bottom-right-radius: 6px!important;
+}
+
+.emotion-1:hover {
+  background-color: #D3DAE6!important;
 }
 
 <ServicesProvider
@@ -60,31 +66,11 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
     <EuiButtonGroup
       buttonSize="m"
       css={
-        Object {
-          "map": undefined,
-          "name": "1i3zstc",
-          "next": undefined,
-          "styles": "
-    .euiButtonGroup__buttons {
-      border-radius: medium:6px;small:4px;;
-      .quickButtonGroup__button {
-        background-color: #FFF;
-        border-width: 1px !important;
-        border-style: solid !important;
-        border-color: #D3DAE6 !important;
-      }
-      .quickButtonGroup__button:first-of-type {
-        border-top-left-radius: 6px !important;
-        border-bottom-left-radius: 6px !important;
-      }
-      .quickButtonGroup__button:last-of-type {
-        border-top-right-radius: 6px !important;
-        border-bottom-right-radius: 6px !important;
-      }
-    }
-  ",
-          "toString": [Function],
-        }
+        Array [
+          Object {
+            "borderRadius": "6px",
+          },
+        ]
       }
       isIconOnly={true}
       legend=""
@@ -93,7 +79,27 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
         Array [
           Object {
             "aria-label": "Text",
-            "className": "quickButtonGroup__button",
+            "css": Array [
+              Object {
+                "&.euiButtonGroupButton": Object {
+                  "borderColor": "#D3DAE6 !important",
+                  "borderStyle": "solid !important",
+                  "borderWidth": "1px !important",
+                },
+                "&:first-of-type": Object {
+                  "borderBottomLeftRadius": "6px !important",
+                  "borderTopLeftRadius": "6px !important",
+                },
+                "&:hover": Object {
+                  "backgroundColor": "#D3DAE6 !important",
+                },
+                "&:last-of-type": Object {
+                  "borderBottomRightRadius": "6px !important",
+                  "borderTopRightRadius": "6px !important",
+                },
+                "backgroundColor": "#FFF !important",
+              },
+            ],
             "getLegend": "",
             "iconType": "visText",
             "id": "generated-id0",
@@ -123,7 +129,7 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
           >
             <EuiButtonGroupButton
               aria-label="Text"
-              className="quickButtonGroup__button"
+              className="emotion-1"
               color="text"
               element="button"
               getLegend=""
@@ -131,7 +137,6 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
               id="generated-id0"
               isDisabled={false}
               isIconOnly={true}
-              key="0"
               label="Text"
               name="generated-id"
               onChange={[Function]}
@@ -142,7 +147,7 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
               <EuiButtonDisplay
                 aria-label="Text"
                 baseClassName="euiButtonGroupButton"
-                className="euiButtonGroupButton-isIconOnly quickButtonGroup__button"
+                className="euiButtonGroupButton-isIconOnly emotion-1"
                 color="text"
                 data-test-subj="generated-id0"
                 element="button"
@@ -167,7 +172,7 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
                 <button
                   aria-label="Text"
                   aria-pressed={false}
-                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton-isIconOnly quickButtonGroup__button"
+                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton-isIconOnly emotion-1"
                   data-test-subj="generated-id0"
                   disabled={false}
                   getLegend=""
