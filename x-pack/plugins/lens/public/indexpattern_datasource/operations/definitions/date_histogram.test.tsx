@@ -514,6 +514,41 @@ describe('date_histogram', () => {
       expect(newLayer).toHaveProperty('columns.col1.params.interval', 'auto');
     });
 
+    it('turns off drop partial bucket on tuning off time range ignore', () => {
+      const thirdLayer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'Value of timestamp',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            params: {
+              interval: '1h',
+              ignoreTimeRange: true,
+            },
+            sourceField: 'timestamp',
+          } as DateHistogramIndexPatternColumn,
+        },
+      };
+
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          layer={thirdLayer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
+          indexPattern={{ ...indexPattern1, timeFieldName: 'other_timestamp' }}
+        />
+      );
+      expect(instance.find(EuiSwitch).first().prop('disabled')).toBeTruthy();
+    });
+
     it('should force calendar values to 1', () => {
       const updateLayerSpy = jest.fn();
       const instance = shallow(

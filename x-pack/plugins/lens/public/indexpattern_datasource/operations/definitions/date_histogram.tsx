@@ -38,6 +38,7 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { HelpPopover, HelpPopoverButton } from '../../help_popover';
 import { IndexPatternLayer } from '../../types';
+import { TooltipWrapper } from '../../../shared_components';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -143,7 +144,11 @@ export const dateHistogramOperation: OperationDefinition<
     const usedField = indexPattern.getFieldByName(column.sourceField);
     let timeZone: string | undefined;
     let interval = column.params?.interval ?? autoInterval;
-    const dropPartials = Boolean(column.params?.dropPartials);
+    const dropPartials = Boolean(
+      column.params?.dropPartials &&
+        // set to false when detached from time picker
+        (indexPattern.timeFieldName === usedField?.name || !column.params?.ignoreTimeRange)
+    );
     if (
       usedField &&
       usedField.aggregationRestrictions &&
@@ -227,17 +232,32 @@ export const dateHistogramOperation: OperationDefinition<
       updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
     };
 
+    const bindToGlobalTimePickerValue =
+      indexPattern.timeFieldName === field?.name || !currentColumn.params.ignoreTimeRange;
+
     return (
       <>
         <EuiFormRow display="rowCompressed" hasChildLabel={false}>
-          <EuiSwitch
-            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.dropPArtialBuckets', {
-              defaultMessage: 'Drop partial buckets',
-            })}
-            checked={Boolean(currentColumn.params.dropPartials)}
-            onChange={onChangeDropPartialBuckets}
-            compressed
-          />
+          <TooltipWrapper
+            tooltipContent={i18n.translate(
+              'xpack.lens.indexPattern.dateHistogram.dropPartialBucketsHelp',
+              {
+                defaultMessage:
+                  'Drop partial buckets is disabled as these can be computed only for time field bound to global time picker in the top right.',
+              }
+            )}
+            condition={!bindToGlobalTimePickerValue}
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.lens.indexPattern.dateHistogram.dropPartialBuckets', {
+                defaultMessage: 'Drop partial buckets',
+              })}
+              checked={Boolean(currentColumn.params.dropPartials)}
+              onChange={onChangeDropPartialBuckets}
+              compressed
+              disabled={!bindToGlobalTimePickerValue}
+            />
+          </TooltipWrapper>
         </EuiFormRow>
         {!intervalIsRestricted && (
           <EuiFormRow display="rowCompressed" hasChildLabel={false}>
@@ -404,10 +424,7 @@ export const dateHistogramOperation: OperationDefinition<
                   </>
                 }
                 disabled={indexPattern.timeFieldName === field?.name}
-                checked={
-                  indexPattern.timeFieldName === field?.name ||
-                  !currentColumn.params.ignoreTimeRange
-                }
+                checked={bindToGlobalTimePickerValue}
                 onChange={() => {
                   updateLayer(
                     updateColumnParam({
