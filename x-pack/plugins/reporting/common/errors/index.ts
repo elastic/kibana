@@ -9,6 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 export abstract class ReportingError extends Error {
+  /**
+   * A string that uniquely brands an error type. This is used to power telemetry
+   * about reporting failures.
+   *
+   * @note Convention for codes: lower-case, snake-case and end in `_error`.
+   */
   public abstract code: string;
 
   constructor(public details?: string) {
@@ -32,7 +38,7 @@ export abstract class ReportingError extends Error {
  * access token expired.
  */
 export class AuthenticationExpiredError extends ReportingError {
-  code = 'authentication_expired';
+  code = 'authentication_expired_error';
 }
 
 export class QueueTimeoutError extends ReportingError {
@@ -59,7 +65,9 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
   }
 }
 
-// TODO: Add ReportingError for Kibana stopping unexpectedly
-// TODO: Add ReportingError for missing Chromium dependencies
+export class KibanaShuttingDownError extends ReportingError {
+  code = 'kibana_shutting_down_error';
+}
+
 // TODO: Add ReportingError for missing Chromium dependencies
 // TODO: Add ReportingError for Chromium not starting for an unknown reason
