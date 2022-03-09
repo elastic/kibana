@@ -29,13 +29,12 @@ const inputs = [
   },
 ];
 
-const cypressSuites = ['security_solution', 'osquery_cypress', 'fleet_cypress'];
-
 for (const group of groups) {
   if (!group.ciGroups) {
     inputs.push(stepInput(group.key, group.name));
-  } else if (group.key.includes('cypress')) {
+  } else if (group.ciGroups === 3) {
     for (let i = 0; i < group.ciGroups; i++) {
+      const cypressSuites = ['security_solution', 'osquery_cypress', 'fleet_cypress'];
       const testSuite = cypressSuites[i];
       inputs.push(stepInput(`${group.key}/${testSuite}`, `${group.name} ${testSuite}`));
     }
