@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext, Context, useState, useCallback, useMemo } from 'react';
 import { HttpFetchError } from 'kibana/public';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { AppDataType } from '../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
@@ -17,40 +17,38 @@ import { useExploratoryView } from '../contexts/exploratory_view_config';
 import { DataViewInsufficientAccessError } from '../../../../../../../../src/plugins/data_views/common';
 import { getApmDataViewTitle } from '../utils/utils';
 
-export interface IndexPatternContext {
+export interface DataViewContext {
   loading: boolean;
-  indexPatterns: IndexPatternState;
-  indexPatternErrors: IndexPatternErrors;
+  dataViews: DataViewState;
+  dataViewErrors: DataViewErrors;
   hasAppData: HasAppDataState;
-  loadIndexPattern: (params: { dataType: AppDataType }) => void;
+  loadDataView: (params: { dataType: AppDataType }) => void;
 }
 
-export const IndexPatternContext = createContext<Partial<IndexPatternContext>>({});
+export const DataViewContext = createContext<Partial<DataViewContext>>({});
 
 interface ProviderProps {
   children: JSX.Element;
 }
 
 type HasAppDataState = Record<AppDataType, boolean | undefined>;
-export type IndexPatternState = Record<AppDataType, IndexPattern>;
-export type IndexPatternErrors = Record<AppDataType, HttpFetchError>;
+export type DataViewState = Record<AppDataType, DataView>;
+export type DataViewErrors = Record<AppDataType, HttpFetchError>;
 type LoadingState = Record<AppDataType, boolean>;
 
-export function IndexPatternContextProvider({ children }: ProviderProps) {
+export function DataViewContextProvider({ children }: ProviderProps) {
   const [loading, setLoading] = useState<LoadingState>({} as LoadingState);
-  const [indexPatterns, setIndexPatterns] = useState<IndexPatternState>({} as IndexPatternState);
-  const [indexPatternErrors, setIndexPatternErrors] = useState<IndexPatternErrors>(
-    {} as IndexPatternErrors
-  );
+  const [dataViews, setDataViews] = useState<DataViewState>({} as DataViewState);
+  const [dataViewErrors, setDataViewErrors] = useState<DataViewErrors>({} as DataViewErrors);
   const [hasAppData, setHasAppData] = useState<HasAppDataState>({} as HasAppDataState);
 
   const {
-    services: { dataViews },
+    services: { dataViews: dataViewsService },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
-  const { indexPatterns: indexPatternsList } = useExploratoryView();
+  const { dataViews: dataViewsList } = useExploratoryView();
 
-  const loadIndexPattern: IndexPatternContext['loadIndexPattern'] = useCallback(
+  const loadDataView: DataViewContext['loadDataView'] = useCallback(
     async ({ dataType }) => {
       if (typeof hasAppData[dataType] === 'undefined' && !loading[dataType]) {
         setLoading((prevState) => ({ ...prevState, [dataType]: true }));
@@ -58,8 +56,8 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
         try {
           let hasDataT = false;
           let indices: string | undefined = '';
-          if (indexPatternsList[dataType]) {
-            indices = indexPatternsList[dataType];
+          if (dataViewsList[dataType]) {
+            indices = dataViewsList[dataType];
             hasDataT = true;
           }
           switch (dataType) {
@@ -84,10 +82,10 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
 
           if (hasDataT && indices) {
-            const obsvIndexP = new ObservabilityDataViews(dataViews);
-            const indPattern = await obsvIndexP.getDataView(dataType, indices);
+            const obsvDataV = new ObservabilityDataViews(dataViewsService);
+            const dataV = await obsvDataV.getDataView(dataType, indices);
 
-            setIndexPatterns((prevState) => ({ ...prevState, [dataType]: indPattern }));
+            setDataViews((prevState) => ({ ...prevState, [dataType]: dataV }));
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         } catch (e) {
@@ -95,48 +93,48 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
             e instanceof DataViewInsufficientAccessError ||
             (e as HttpFetchError).body === 'Forbidden'
           ) {
-            setIndexPatternErrors((prevState) => ({ ...prevState, [dataType]: e }));
+            setDataViewErrors((prevState) => ({ ...prevState, [dataType]: e }));
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         }
       }
     },
-    [dataViews, hasAppData, indexPatternsList, loading]
+    [dataViewsService, hasAppData, dataViewsList, loading]
   );
 
   return (
-    <IndexPatternContext.Provider
+    <DataViewContext.Provider
       value={{
         hasAppData,
-        indexPatterns,
-        loadIndexPattern,
-        indexPatternErrors,
+        dataViews,
+        loadDataView,
+        dataViewErrors,
         loading: !!Object.values(loading).find((loadingT) => loadingT),
       }}
     >
       {children}
-    </IndexPatternContext.Provider>
+    </DataViewContext.Provider>
   );
 }
 
-export const useAppIndexPatternContext = (dataType?: AppDataType) => {
-  const { loading, hasAppData, loadIndexPattern, indexPatterns, indexPatternErrors } = useContext(
-    IndexPatternContext as unknown as Context<IndexPatternContext>
+export const useAppDataViewContext = (dataType?: AppDataType) => {
+  const { loading, hasAppData, loadDataView, dataViews, dataViewErrors } = useContext(
+    DataViewContext as unknown as Context<DataViewContext>
   );
 
-  if (dataType && !indexPatterns?.[dataType] && !loading) {
-    loadIndexPattern({ dataType });
+  if (dataType && !dataViews?.[dataType] && !loading) {
+    loadDataView({ dataType });
   }
 
   return useMemo(() => {
     return {
       hasAppData,
       loading,
-      indexPatterns,
-      indexPatternErrors,
-      indexPattern: dataType ? indexPatterns?.[dataType] : undefined,
+      dataViews,
+      dataViewErrors,
+      dataView: dataType ? dataViews?.[dataType] : undefined,
       hasData: dataType ? hasAppData?.[dataType] : undefined,
-      loadIndexPattern,
+      loadDataView,
     };
-  }, [dataType, hasAppData, indexPatternErrors, indexPatterns, loadIndexPattern, loading]);
+  }, [dataType, hasAppData, dataViewErrors, dataViews, loadDataView, loading]);
 };
