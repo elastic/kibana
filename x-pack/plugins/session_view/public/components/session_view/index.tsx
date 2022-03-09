@@ -23,8 +23,10 @@ import { ProcessTree } from '../process_tree';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
+import { SessionViewDisplayOptions } from '../session_view_toggle_options';
 import { useStyles } from './styles';
 import { useFetchSessionViewProcessEvents } from './hooks';
+import { i18n } from '@kbn/i18n';
 
 interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
@@ -35,7 +37,7 @@ interface SessionViewDeps {
 
 interface optionsField {
   label: string;
-  value: string;
+  
   checked: 'on' | 'off' | undefined;
 }
 
@@ -57,19 +59,23 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
   const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
 
-  const optionsList: optionsField[] = [
-    {
-      label: 'Timestamp',
-      value: 'Timestamp',
-      checked: 'on',
-    },
-    {
-      label: 'Verbose mode',
-      value: 'Verbose mode',
-      checked: 'on',
-    },
-  ];
-  const [options, setOptions] = useState(optionsList);
+  const [optionsStates, setOptionsStates] = useState({timeStamp: true, verboseMode: true})
+
+  // const optionsList: optionsField[] = [
+  //   {
+  //     label: i18n.translate('xpack.sessionView.sessionViewToggle.sessionViewToggleOptions', {
+  //         defaultMessage: 'Timestamp',
+  //       }),
+  //     checked: 'on',
+  //   },
+  //   {
+  //     label: i18n.translate('xpack.sessionView.sessionViewToggle.sessionViewToggleOptions', {
+  //         defaultMessage: 'Verbose mode',
+  //       }),
+  //     checked: 'on',
+  //   },
+  // ];
+  // const [options, setOptions] = useState(optionsList);
 
   const {
     data,
@@ -112,32 +118,33 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     );
   }
 
-  const renderOptionToggleDropDown = () => {
-    return (
-      <>
-        <EuiPopover
-          button={OptionButton}
-          isOpen={isOptionDropdownOpen}
-          closePopover={closeOptionButton}
-        >
-          <EuiSelectable
-            options={options}
-            onChange={(newOptions) => handleOptionChange(newOptions)}
-          >
-            {(list) => (
-              <div style={{ width: 240 }}>
-                <EuiPopoverTitle>Display options</EuiPopoverTitle>
-                {list}
-              </div>
-            )}
-          </EuiSelectable>
-        </EuiPopover>
-      </>
-    );
-  };
+  // const renderOptionToggleDropDown = () => {
+  //   return (
+  //     <>
+  //       <EuiPopover
+  //         button={OptionButton}
+  //         isOpen={isOptionDropdownOpen}
+  //         closePopover={closeOptionButton}
+  //       >
+  //         <EuiSelectable
+  //           options={options}
+  //           onChange={(newOptions) => handleOptionChange(newOptions)}
+  //         >
+  //           {(list) => (
+  //             <div style={{ width: 240 }}>
+  //               <EuiPopoverTitle>Display options</EuiPopoverTitle>
+  //               {list}
+  //             </div>
+  //           )}
+  //         </EuiSelectable>
+  //       </EuiPopover>
+  //     </>
+  //   );
+  // };
 
-  const handleOptionChange = (value: optionsField[]) => {
-    setOptions(value);
+  const handleOptionChange = (value) => {
+    console.log(optionsStates)
+    setOptionsStates(value);
   };
 
   const toggleOptionButton = () => {
@@ -178,7 +185,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
           </EuiFlexItem>
 
           <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
-            {renderOptionToggleDropDown()}
+            <SessionViewDisplayOptions optionsStates={optionsStates} onChange={handleOptionChange}/>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
@@ -250,8 +257,11 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                     fetchNextPage={fetchNextPage}
                     fetchPreviousPage={fetchPreviousPage}
                     setSearchResults={setSearchResults}
-                    timeStampOn={options[0].checked === 'on'}
-                    verboseModeOn={options[1].checked === 'on'}
+                    // timeStampOn={options[0].checked === 'on'}
+                    // verboseModeOn={options[1].checked === 'on'}
+                    timeStampOn={optionsStates.timeStamp}
+                    verboseModeOn={optionsStates.verboseMode}
+
                   />
                 </div>
               )}
