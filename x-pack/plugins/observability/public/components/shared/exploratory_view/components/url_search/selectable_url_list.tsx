@@ -10,7 +10,6 @@ import React, {
   useRef,
   useState,
   KeyboardEvent,
-  useEffect,
   ReactNode,
   FormEventHandler,
 } from 'react';
