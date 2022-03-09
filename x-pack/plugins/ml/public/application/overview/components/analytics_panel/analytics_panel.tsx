@@ -40,7 +40,6 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
   );
   const [errorMessage, setErrorMessage] = useState<GetDataFrameAnalyticsStatsResponseError>();
   const [isInitialized, setIsInitialized] = useState(false);
-  // const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
 
   const manageJobsLink = useMlLink({
     page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,

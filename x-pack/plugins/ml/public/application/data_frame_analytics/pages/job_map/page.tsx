@@ -74,14 +74,40 @@ export const Page: FC = () => {
     );
   };
 
+  const jobId = mapJobId || analyticsId?.job_id;
+  const modelId = mapModelId || analyticsId?.model_id;
+
   return (
     <>
-      <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.dataframe.analyticsMap.title"
-          defaultMessage="Map for Analytics"
-        />
-      </MlPageHeader>
+      {jobId === undefined && modelId === undefined ? (
+        <MlPageHeader>
+          <FormattedMessage
+            data-test-subj="mlPageDataFrameAnalyticsMapTitle"
+            id="xpack.ml.dataframe.analyticsMap.title"
+            defaultMessage="Map for Analytics"
+          />
+        </MlPageHeader>
+      ) : null}
+      {jobId !== undefined ? (
+        <MlPageHeader>
+          <FormattedMessage
+            data-test-subj="mlPageDataFrameAnalyticsMapTitle"
+            id="xpack.ml.dataframe.analyticsMap.analyticsIdTitle"
+            defaultMessage="Map for job ID {jobId}"
+            values={{ jobId }}
+          />
+        </MlPageHeader>
+      ) : null}
+      {modelId !== undefined ? (
+        <MlPageHeader>
+          <FormattedMessage
+            data-test-subj="mlPageDataFrameAnalyticsMapTitle"
+            id="xpack.ml.dataframe.analyticsMap.modelIdTitle"
+            defaultMessage="Map for trained model ID {modelId}"
+            values={{ modelId }}
+          />
+        </MlPageHeader>
+      ) : null}
 
       <NodeAvailableWarning />
 

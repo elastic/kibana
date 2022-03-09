@@ -17,7 +17,6 @@ import { useCurrentEuiTheme, EuiThemeType } from '../../../components/color_rang
 import { useRefresh } from '../../../routing/use_refresh';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
-import { JobMapTitle } from './job_map_title';
 
 const getCytoscapeDivStyle = (theme: EuiThemeType) => ({
   background: `linear-gradient(
@@ -143,33 +142,22 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   return (
     <div data-test-subj="mlPageDataFrameAnalyticsMap">
       <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <JobMapTitle analyticsId={analyticsId} modelId={modelId} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <JobMapLegend theme={euiTheme} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <JobMapLegend theme={euiTheme} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" component="span">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="mlAnalyticsResetGraphButton"
-                // trigger reset on value change
-                onClick={() => setResetCyToggle(!resetCyToggle)}
-              >
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsList.resetMapButtonLabel"
-                  defaultMessage="Reset"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiButtonEmpty
+            size="xs"
+            data-test-subj="mlAnalyticsResetGraphButton"
+            // trigger reset on value change
+            onClick={() => setResetCyToggle(!resetCyToggle)}
+          >
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsList.resetMapButtonLabel"
+              defaultMessage="Reset"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <div

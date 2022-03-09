@@ -77,13 +77,23 @@ export const Page: FC<{
 
   return (
     <>
-      <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.dataframe.analyticsExploration.title"
-          defaultMessage="Explore results for Analytics ID {id}"
-          values={{ id: jobIdToUse }}
-        />
-      </MlPageHeader>
+      {jobIdToUse !== undefined && (
+        <MlPageHeader>
+          <FormattedMessage
+            id="xpack.ml.dataframe.analyticsExploration.titleWithId"
+            defaultMessage="Explore results for job ID {id}"
+            values={{ id: jobIdToUse }}
+          />
+        </MlPageHeader>
+      )}
+      {jobIdToUse === undefined && (
+        <MlPageHeader>
+          <FormattedMessage
+            id="xpack.ml.dataframe.analyticsExploration.title"
+            defaultMessage="Explore results for job ID"
+          />
+        </MlPageHeader>
+      )}
       {jobIdToUse && analysisTypeToUse ? (
         <div data-test-subj="mlPageDataFrameAnalyticsExploration">
           {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
