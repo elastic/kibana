@@ -485,10 +485,10 @@ const UnstyledProcessEventDot = React.memo(
               >
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
                   {i18n.translate('xpack.securitySolution.resolver.node_button_name', {
-                    defaultMessage: `{nodeState, select, error {Reload {processName}} other {{processName}}}`,
+                    defaultMessage: `{nodeState, select, error {Reload {nodeName}} other {{nodeName}}}`,
                     values: {
                       nodeState,
-                      processName,
+                      nodeName: processName,
                     },
                   })}
                 </span>
