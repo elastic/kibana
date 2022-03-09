@@ -32,7 +32,6 @@ export const SpacesList: FC<Props> = ({ spacesApi, spaceIds, id, title, refresh 
 
   function onClose() {
     setShowFlyout(false);
-    refresh();
   }
 
   const LazySpaceList = spacesApi.ui.components.getSpaceList;
@@ -46,6 +45,7 @@ export const SpacesList: FC<Props> = ({ spacesApi, spaceIds, id, title, refresh 
       title,
       noun,
     },
+    onUpdate: refresh,
     onClose,
   };
 
