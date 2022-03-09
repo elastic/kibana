@@ -183,6 +183,18 @@ for (const testSuite of testSuites) {
         concurrency_group: UUID,
         concurrency_method: 'eager',
       });
+    case 'cypress':
+      const CYPRESS_SUITE = CI_GROUP;
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${CYPRESS_SUITE}.sh`,
+        label: `Default Cypress`,
+        agents: { queue: 'ci-group-6' },
+        depends_on: 'build',
+        parallelism: RUN_COUNT,
+        concurrency: concurrency,
+        concurrency_group: UUID,
+        concurrency_method: 'eager',
+      });
       break;
   }
 }

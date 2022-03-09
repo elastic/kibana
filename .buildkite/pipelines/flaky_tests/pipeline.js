@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>} */ (
-  require('./groups.json').groups
-);
+const groups =
+  /** @type {Array<{key: string, name: string, ciGroups: number, cypressSuites: Array<string> }>} */ (
+    require('./groups.json').groups
+  );
 
 const stepInput = (key, nameOfSuite) => {
   return {
@@ -29,7 +30,12 @@ const inputs = [
 ];
 
 for (const group of groups) {
-  if (!group.ciGroups) {
+  if (group.cypressSuites) {
+    for (let i = 1; i <= group.cypressSuites.length; i++) {
+      const testSuite = group.cypressSuites[i];
+      inputs.push(stepInput(`${group.key}/${testSuite}`, `${group.name} ${testSuite}`));
+    }
+  } else if (!group.ciGroups) {
     inputs.push(stepInput(group.key, group.name));
   } else {
     for (let i = 1; i <= group.ciGroups; i++) {
