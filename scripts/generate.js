@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs/promises';
-import { sortPackageJson as sort } from '@kbn/dev-utils/sort_package_json';
-import { Kibana } from './kibana';
-
-export async function sortPackageJson(kbn: Kibana) {
-  const packageJsonPath = kbn.getAbsolute('package.json');
-  await Fs.writeFile(packageJsonPath, sort(await Fs.readFile(packageJsonPath, 'utf-8')));
-}
+require('../src/setup_node_env/ensure_node_preserve_symlinks');
+require('source-map-support/register');
+require('@kbn/generate').runGenerateCli();
