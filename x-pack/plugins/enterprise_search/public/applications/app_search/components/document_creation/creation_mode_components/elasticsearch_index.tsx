@@ -5,47 +5,139 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
-  EuiFlyoutHeader,
-  EuiLink,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
+  EuiHighlight,
+  EuiIcon,
+  EuiLink,
+  EuiSelectable,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 
-import { FLYOUT_ARIA_LABEL_ID } from '../constants';
-import { Errors } from '../creation_response_components';
 import { DocumentCreationLogic } from '../index';
 
-import './paste_json_text.scss';
+import './elasticsearch_index.scss';
 
-export const ElasticsearchIndex: React.FC = () => (
-  <>
-    <FlyoutHeader />
-    <FlyoutBody />
-    <FlyoutFooter />
-  </>
-);
+const selectableOptions = [
+  {
+    label: '.my-elastic-index',
+    status: 'Open',
+    docsCount: 33213142,
+    storage: '108Mb',
+    health: 'Healthy',
+  },
+  {
+    label: '.my-elastic-index-2',
+    status: 'Open',
+    docsCount: 33213142,
+    storage: '108Mb',
+    health: 'Healthy',
+  },
+  {
+    label: '.my-elastic-index-3',
+    status: 'Open',
+    docsCount: 33213142,
+    storage: '108Mb',
+    health: 'Healthy',
+  },
+  {
+    label: '.my-elastic-index-4',
+    status: 'Open',
+    docsCount: 33213142,
+    storage: '108Mb',
+    health: 'Degraded',
+  },
+];
+
+export const ElasticsearchIndex: React.FC = () => {
+  const { loadElasticsearchIndices } = useActions(DocumentCreationLogic);
+  useEffect(() => {
+    loadElasticsearchIndices();
+  }, []);
+  return (
+    <>
+      <FlyoutHeader />
+      <FlyoutBody />
+      <FlyoutFooter />
+    </>
+  );
+};
+
+const renderIndexOption = (option, searchValue) => {
+  return (
+    <>
+      <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+      <EuiSpacer size="xs" />
+      <EuiTextColor color="subdued">
+        <small>
+          <span className="selectableSecondaryContentLabel">
+            <EuiIcon type="dot" color={option.health === 'Healthy' ? 'success' : 'warning'} />{' '}
+            &nbsp;{option.health}
+          </span>
+          <span className="selectableSecondaryContentLabel">
+            <b>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.status',
+                {
+                  defaultMessage: 'Status:',
+                }
+              )}
+            </b>
+            &nbsp;{option.status}
+          </span>
+          <span className="selectableSecondaryContentLabel">
+            <b>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.docCount',
+                {
+                  defaultMessage: 'Docs count:',
+                }
+              )}
+            </b>
+            &nbsp;{option.docsCount}
+          </span>
+          <span className="selectableSecondaryContentLabel">
+            <b>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.storage',
+                {
+                  defaultMessage: 'Storage size:',
+                }
+              )}
+            </b>
+            &nbsp;{option.storage}
+          </span>
+        </small>
+      </EuiTextColor>
+    </>
+  );
+};
 
 export const FlyoutHeader: React.FC = () => {
   return (
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
-        <h2 id={FLYOUT_ARIA_LABEL_ID}>
+        <h2>
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.title',
             {
@@ -59,40 +151,109 @@ export const FlyoutHeader: React.FC = () => {
 };
 
 export const FlyoutBody: React.FC = () => {
+  const [indexSelectableVisible, setIndexSelectableVisible] = useState(true);
+  const { isLoadingIndices } = useValues(DocumentCreationLogic);
+
   return (
-    <EuiFlyoutBody banner={<Errors />}>
+    <EuiFlyoutBody>
       <EuiText color="subdued">
         <p>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.description"
-            defaultMessage="'You can now connect directly to an existing Elasticsearch index to make its data searchable and tunable through Enterprise Search Uls. {learnMoreLink}"
-            values={{
-              learnMoreLink: (
-                <EuiLink target="_blank" href={'TODO'}>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.link',
-                    {
-                      defaultMessage: 'Learn more about using an existing index',
-                    }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.description',
+            {
+              defaultMessage:
+                'You can now connect directly to an existing Elasticsearch index to make its data searchable and tunable through Enterprise Search UIs.',
+            }
+          )}
+          <EuiSpacer size="xs" />
+          <EuiLink href="#todo" external>
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.learnMoreLink',
+              {
+                defaultMessage: 'Learn more about using an Elasticsearch index',
+              }
+            )}
+          </EuiLink>
         </p>
       </EuiText>
       <EuiSpacer />
-      {'{Form fields go here}'}
+      <EuiFlexGroup alignItems="center" gutterSize="none">
+        <EuiFlexItem>
+          <EuiForm component="form">
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.indexNameLabel',
+                {
+                  defaultMessage: 'Name your search index (optional)',
+                }
+              )}
+              helpText={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.indexNameHelpText',
+                {
+                  defaultMessage:
+                    'Provide a unique name for your index. This name will show when configuring search engines.',
+                }
+              )}
+            >
+              <EuiFieldText fullWidth />
+            </EuiFormRow>
+
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.indexSelectorLabel',
+                {
+                  defaultMessage: 'Select and existing Elasticsearch index',
+                }
+              )}
+            >
+              <EuiFlexItem>
+                <EuiSelectable
+                  aria-label={i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.indexSelectorAriaLabel',
+                    {
+                      defaultMessage: 'Select and existing Elasticsearch index',
+                    }
+                  )}
+                  allowExclusions
+                  singleSelection="always"
+                  searchable
+                  isLoading={isLoadingIndices}
+                  listProps={{ bordered: true, rowHeight: 56 }}
+                  options={selectableOptions}
+                  onChange={() => {
+                    return [];
+                  }}
+                  renderOption={renderIndexOption}
+                >
+                  {(list, search) => (
+                    <>
+                      {search}
+                      {/* <EuiFieldText
+                        fullWidth
+                        onFocus={() => {
+                          setIndexSelectableVisible(true);
+                        }}
+                        onBlur={() => {
+                          setIndexSelectableVisible(false);
+                        }}
+                      /> */}
+                      {indexSelectableVisible ? list : null}
+                    </>
+                  )}
+                </EuiSelectable>
+              </EuiFlexItem>
+            </EuiFormRow>
+          </EuiForm>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlyoutBody>
   );
 };
 
 export const FlyoutFooter: React.FC = () => {
-  // TODO: replace these
-  const { textInput, isUploading } = useValues(DocumentCreationLogic);
-  // TODO: replace 'onSubmitJson'
-  const { onSubmitJson, closeDocumentCreation } = useActions(DocumentCreationLogic);
-
+  const { closeDocumentCreation } = useActions(DocumentCreationLogic);
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -100,11 +261,16 @@ export const FlyoutFooter: React.FC = () => {
           <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={onSubmitJson} isLoading={isUploading} isDisabled={!textInput}>
+          <EuiButton
+            fill
+            onClick={() => {
+              console.log('todo');
+            }}
+          >
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.button',
+              'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.connectButton',
               {
-                defaultMessage: 'Connect to index',
+                defaultMessage: 'Connect to Index',
               }
             )}
           </EuiButton>

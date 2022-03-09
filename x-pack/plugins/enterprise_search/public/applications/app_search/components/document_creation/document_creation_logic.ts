@@ -33,6 +33,8 @@ interface DocumentCreationValues {
   warnings: string[];
   errors: string[];
   summary: DocumentCreationSummary;
+  availableElasticsearchIndices: object[]; // TODO common Elasticsearchindex type
+  isLoadingIndices: boolean;
 }
 
 interface DocumentCreationActions {
@@ -49,6 +51,10 @@ interface DocumentCreationActions {
   onSubmitFile(): void;
   onSubmitJson(): void;
   uploadDocuments(args: { documents: object[] }): { documents: object[] };
+  loadElasticsearchIndices(): void;
+  onElasticsearchIndicesLoaded(args: { availableElasticsearchIndices: object[] }): {
+    availableElasticsearchIndices: object[];
+  };
 }
 
 export const DocumentCreationLogic = kea<
@@ -69,6 +75,10 @@ export const DocumentCreationLogic = kea<
     onSubmitJson: () => null,
     onSubmitFile: () => null,
     uploadDocuments: ({ documents }) => ({ documents }),
+    loadElasticsearchIndices: () => null,
+    onElasticsearchIndicesLoaded: ({ availableElasticsearchIndices }) => ({
+      availableElasticsearchIndices,
+    }),
   }),
   reducers: () => ({
     isDocumentCreationOpen: [
@@ -147,6 +157,22 @@ export const DocumentCreationLogic = kea<
       {} as DocumentCreationSummary,
       {
         setSummary: (_, { summary }) => summary,
+      },
+    ],
+    availableElasticsearchIndices: [
+      [],
+      {
+        onElasticsearchIndicesLoaded: (_, { availableElasticsearchIndices }) =>
+          availableElasticsearchIndices,
+      },
+    ],
+    isLoadingIndices: [
+      false,
+      {
+        loadElasticsearchIndices: () => true,
+        onElasticsearchIndicesLoaded: () => false,
+        setErrors: () => false,
+        setSummary: () => false,
       },
     ],
   }),
@@ -239,6 +265,45 @@ export const DocumentCreationLogic = kea<
         const errors = body ? `[${body.statusCode} ${body.error}] ${body.message}` : message;
         actions.setErrors(errors);
       }
+    },
+    loadElasticsearchIndices: async () => {
+      const selectableOptions = [
+        {
+          label: '.my-elastic-index',
+          status: 'Open',
+          docsCount: 33213142,
+          storage: '108Mb',
+          health: 'Healthy',
+        },
+        {
+          label: '.my-elastic-index-2',
+          status: 'Open',
+          docsCount: 33213142,
+          storage: '108Mb',
+          health: 'Healthy',
+        },
+        {
+          label: '.my-elastic-index-3',
+          status: 'Open',
+          docsCount: 33213142,
+          storage: '108Mb',
+          health: 'Healthy',
+        },
+        {
+          label: '.my-elastic-index-4',
+          status: 'Open',
+          docsCount: 33213142,
+          storage: '108Mb',
+          health: 'Degraded',
+        },
+      ];
+      const sleep = new Promise((resolve) =>
+        setTimeout(() => {
+          resolve('');
+        }, 5000)
+      );
+      await sleep;
+      actions.onElasticsearchIndicesLoaded({ availableElasticsearchIndices: selectableOptions });
     },
   }),
 });
