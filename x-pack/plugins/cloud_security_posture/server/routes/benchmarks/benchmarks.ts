@@ -86,14 +86,10 @@ export const getPackagePolicies = async (
   };
 
   const query = addSortToQuery(baseQuery, queryParams);
-  console.log({ query });
 
   const { items: packagePolicies } = (await packagePolicyService?.list(soClient, query)) ?? {
     items: [] as PackagePolicy[],
   };
-
-  console.log({ packagePolicies });
-
   return packagePolicies;
 };
 
