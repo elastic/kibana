@@ -9,6 +9,7 @@ import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/compar
 import { getTimeRangeComparison } from './get_time_range_comparison';
 import { getDateRange } from '../../../context/url_params_context/helpers';
 import { getComparisonOptions } from './get_comparison_options';
+import moment from 'moment';
 
 function getExpectedTimesAndComparisons({
   rangeFrom,
@@ -175,6 +176,12 @@ describe('Comparison test suite', () => {
         },
       ]);
     });
+
+    it('should have the same offset for start / end and comparisonStart / comparisonEnd', () => {
+      const { start, end, comparisons } = expectation;
+      const diffInMs = moment(end).diff(moment(start));
+      expect(`${diffInMs}ms`).toBe(comparisons[0].offset);
+    });
   });
 
   describe('When the time difference is more than 8 days', () => {
@@ -202,6 +209,12 @@ describe('Comparison test suite', () => {
           offset: '756000000ms',
         },
       ]);
+    });
+
+    it('should have the same offset for start / end and comparisonStart / comparisonEnd', () => {
+      const { start, end, comparisons } = expectation;
+      const diffInMs = moment(end).diff(moment(start));
+      expect(`${diffInMs}ms`).toBe(comparisons[0].offset);
     });
   });
 
@@ -420,6 +433,12 @@ describe('Comparison test suite', () => {
         },
       ]);
     });
+
+    it('should have the same offset for start / end and comparisonStart / comparisonEnd', () => {
+      const { start, end, comparisons } = expectation;
+      const diffInMs = moment(end).diff(moment(start));
+      expect(`${diffInMs}ms`).toBe(comparisons[0].offset);
+    });
   });
 
   describe('When "Last 30 days" is selected with rounding', () => {
@@ -447,6 +466,12 @@ describe('Comparison test suite', () => {
           offset: '2658615500ms',
         },
       ]);
+    });
+
+    it('should have the same offset for start / end and comparisonStart / comparisonEnd', () => {
+      const { start, end, comparisons } = expectation;
+      const diffInMs = moment(end).diff(moment(start));
+      expect(`${diffInMs}ms`).toBe(comparisons[0].offset);
     });
   });
 });
