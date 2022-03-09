@@ -6,6 +6,7 @@
  */
 
 import { fieldList } from 'src/plugins/data_views/common';
+import { ResolvedLogView } from './resolved_log_view';
 
 export const createResolvedLogViewMock = (): ResolvedLogView => ({
   name: 'LOG VIEW',
