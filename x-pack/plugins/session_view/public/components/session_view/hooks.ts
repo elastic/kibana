@@ -5,12 +5,16 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import { useInfiniteQuery } from 'react-query';
+import { useInfiniteQuery, useQuery } from 'react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ProcessEvent, ProcessEventResults } from '../../../common/types/process_tree';
-import { PROCESS_EVENTS_ROUTE, PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
+import {
+  PROCESS_EVENTS_ROUTE,
+  PROCESS_EVENTS_PER_PAGE,
+  ALERTS_ROUTE,
+} from '../../../common/constants';
 
 export const useFetchSessionViewProcessEvents = (
   sessionEntityId: string,
@@ -43,7 +47,7 @@ export const useFetchSessionViewProcessEvents = (
       return { events, cursor };
     },
     {
-      getNextPageParam: (lastPage, pages) => {
+      getNextPageParam: (lastPage) => {
         if (lastPage.events.length === PROCESS_EVENTS_PER_PAGE) {
           return {
             cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
@@ -51,7 +55,7 @@ export const useFetchSessionViewProcessEvents = (
           };
         }
       },
-      getPreviousPageParam: (firstPage, pages) => {
+      getPreviousPageParam: (firstPage) => {
         if (jumpToEvent && firstPage.events.length === PROCESS_EVENTS_PER_PAGE) {
           return {
             cursor: firstPage.events[0]['@timestamp'],
@@ -70,6 +74,31 @@ export const useFetchSessionViewProcessEvents = (
       query.fetchPreviousPage();
     }
   }, [jumpToEvent, query]);
+
+  return query;
+};
+
+export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
+  const { http } = useKibana<CoreStart>().services;
+  const query = useQuery(
+    'sessionViewAlerts',
+    async () => {
+      const res = await http.get<ProcessEventResults>(ALERTS_ROUTE, {
+        query: {
+          sessionEntityId,
+        },
+      });
+
+      const events = res.events.map((event: any) => event._source as ProcessEvent);
+
+      return events;
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    }
+  );
 
   return query;
 };

@@ -20,6 +20,7 @@ interface ProcessTreeDeps {
   sessionEntityId: string;
 
   data: ProcessEventsPage[];
+  alerts: ProcessEvent[];
 
   jumpToEvent?: ProcessEvent;
   isFetching: boolean;
@@ -40,6 +41,7 @@ interface ProcessTreeDeps {
 export const ProcessTree = ({
   sessionEntityId,
   data,
+  alerts,
   jumpToEvent,
   isFetching,
   hasNextPage,
@@ -56,6 +58,7 @@ export const ProcessTree = ({
   const { sessionLeader, processMap, searchResults } = useProcessTree({
     sessionEntityId,
     data,
+    alerts,
     searchQuery,
   });
 

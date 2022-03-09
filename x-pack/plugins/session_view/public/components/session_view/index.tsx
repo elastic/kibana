@@ -19,7 +19,7 @@ import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { useStyles } from './styles';
-import { useFetchSessionViewProcessEvents } from './hooks';
+import { useFetchSessionViewProcessEvents, useFetchSessionViewAlerts } from './hooks';
 
 interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
@@ -41,6 +41,10 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     setSelectedProcess(process);
   }, []);
 
+  const toggleDetailPanel = () => {
+    setIsDetailOpen(!isDetailOpen);
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
 
@@ -54,12 +58,13 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     hasPreviousPage,
   } = useFetchSessionViewProcessEvents(sessionEntityId, jumpToEvent);
 
-  const hasData = data && data.pages.length > 0 && data.pages[0].events.length > 0;
-  const renderIsLoading = isFetching && !data;
+  const alertsQuery = useFetchSessionViewAlerts(sessionEntityId);
+  const { data: alerts, error: alertsError, isFetching: alertsFetching } = alertsQuery;
+
+  const hasData = data && alerts && data.pages.length > 0 && data.pages[0].events.length > 0;
+  const hasError = error || alertsError;
+  const renderIsLoading = (isFetching || alertsFetching) && !data;
   const renderDetails = isDetailOpen && selectedProcess;
-  const toggleDetailPanel = () => {
-    setIsDetailOpen(!isDetailOpen);
-  };
 
   if (!isFetching && !hasData) {
     return (
@@ -130,7 +135,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                 </SectionLoading>
               )}
 
-              {error && (
+              {hasError && (
                 <EuiEmptyPrompt
                   iconType="alert"
                   color="danger"
@@ -158,6 +163,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                   <ProcessTree
                     sessionEntityId={sessionEntityId}
                     data={data.pages}
+                    alerts={alerts}
                     searchQuery={searchQuery}
                     selectedProcess={selectedProcess}
                     onProcessSelected={onProcessSelected}
@@ -175,7 +181,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
             {renderDetails ? (
               <>
-                <EuiResizableButton />
+                <EuiResizableButton css={styles.resizeHandle} />
                 <EuiResizablePanel
                   id="session-detail-panel"
                   initialSize={30}
@@ -184,6 +190,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                   css={styles.detailPanel}
                 >
                   <SessionViewDetailPanel
+                    alerts={alerts}
                     selectedProcess={selectedProcess}
                     onProcessSelected={onProcessSelected}
                   />

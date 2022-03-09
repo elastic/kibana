@@ -6,9 +6,11 @@
  */
 import { IRouter } from '../../../../../src/core/server';
 import { registerProcessEventsRoute } from './process_events_route';
+import { registerAlertsRoute } from './alerts_route';
 import { sessionEntryLeadersRoute } from './session_entry_leaders_route';
 
 export const registerRoutes = (router: IRouter) => {
   registerProcessEventsRoute(router);
   sessionEntryLeadersRoute(router);
+  registerAlertsRoute(router);
 };

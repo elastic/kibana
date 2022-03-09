@@ -17,6 +17,10 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
+    const { border, colors } = euiTheme;
+
+    const thinBorder = `${border.width.thin} solid ${colors.lightShade}!important`;
+
     const processTree: CSSObject = {
       height: `${height}px`,
       paddingTop: euiTheme.size.s,
@@ -24,11 +28,18 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
 
     const detailPanel: CSSObject = {
       height: `${height}px`,
+      borderLeft: thinBorder,
+      borderRight: thinBorder,
+    };
+
+    const resizeHandle: CSSObject = {
+      zIndex: 2,
     };
 
     return {
       processTree,
       detailPanel,
+      resizeHandle,
     };
   }, [height, euiTheme]);
 

@@ -8,42 +8,37 @@ import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient } from 'kibana/server';
 import { IRouter } from '../../../../../src/core/server';
 import {
-  PROCESS_EVENTS_ROUTE,
-  PROCESS_EVENTS_PER_PAGE,
-  PROCESS_EVENTS_INDEX,
+  ALERTS_ROUTE,
+  ALERTS_PER_PAGE,
+  ALERTS_INDEX,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
 } from '../../common/constants';
+import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
-export const registerProcessEventsRoute = (router: IRouter) => {
+export const registerAlertsRoute = (router: IRouter) => {
   router.get(
     {
-      path: PROCESS_EVENTS_ROUTE,
+      path: ALERTS_ROUTE,
       validate: {
         query: schema.object({
           sessionEntityId: schema.string(),
-          cursor: schema.maybe(schema.string()),
-          forward: schema.maybe(schema.boolean()),
         }),
       },
     },
     async (context, request, response) => {
       const client = context.core.elasticsearch.client.asCurrentUser;
-      const { sessionEntityId, cursor, forward = true } = request.query;
-      const body = await doSearch(client, sessionEntityId, cursor, forward);
+      const { sessionEntityId } = request.query;
+      const body = await doSearch(client, sessionEntityId);
 
       return response.ok({ body });
     }
   );
 };
 
-export const doSearch = async (
-  client: ElasticsearchClient,
-  sessionEntityId: string,
-  cursor: string | undefined,
-  forward = true
-) => {
+export const doSearch = async (client: ElasticsearchClient, sessionEntityId: string) => {
   const search = await client.search({
-    index: [PROCESS_EVENTS_INDEX],
+    index: [ALERTS_INDEX],
+    ignore_unavailable: true, // on a new installation the .siem-signals-default index might not be created yet.
     body: {
       query: {
         match: {
@@ -57,19 +52,18 @@ export const doSearch = async (
           type: 'keyword',
         },
       },
-      size: PROCESS_EVENTS_PER_PAGE,
-      sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
-      search_after: cursor ? [cursor] : undefined,
+      size: ALERTS_PER_PAGE,
+      sort: [{ '@timestamp': 'asc' }],
     },
   });
 
-  const events = search.hits.hits;
+  const events = search.hits.hits.map((hit: any) => {
+    // TODO: re-eval if this is needed after updated ECS mappings are applied.
+    // the .siem-signals-default index flattens many properties. this util unflattens them.
+    hit._source = expandDottedObject(hit._source);
 
-  if (!forward) {
-    events.reverse();
-  }
+    return hit;
+  });
 
-  return {
-    events,
-  };
+  return { events };
 };

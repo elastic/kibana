@@ -15,12 +15,18 @@ import {
   ProcessMap,
   ProcessEventsPage,
 } from '../../../common/types/process_tree';
-import { processNewEvents, searchProcessTree, autoExpandProcessTree } from './helpers';
+import {
+  processNewEvents,
+  searchProcessTree,
+  autoExpandProcessTree,
+  updateProcessMap,
+} from './helpers';
 import { sortProcesses } from '../../../common/utils/sort_processes';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
   data: ProcessEventsPage[];
+  alerts: ProcessEvent[];
   searchQuery?: string;
 }
 
@@ -182,7 +188,12 @@ export class ProcessImpl implements Process {
   });
 }
 
-export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProcessTreeDeps) => {
+export const useProcessTree = ({
+  sessionEntityId,
+  data,
+  alerts,
+  searchQuery,
+}: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   // we add a fake session leader event, sourced from wide event data.
   // this is because we might not always have a session leader event
@@ -240,6 +251,14 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
       setOrphans(newOrphans);
     }
   }, [data, processMap, orphans, processedPages, sessionEntityId]);
+
+  useEffect(() => {
+    // currently we are loading a single page of alerts, with no pagination
+    // so we only need to add these alert events to processMap once.
+    updateProcessMap(processMap, alerts);
+    // omitting processMap to avoid a infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alerts]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));
