@@ -128,7 +128,10 @@ export function ProcessTreeNode({
     : 'sessionView:processTreeNodeForkIcon';
   const processIcon = hasExec ? 'console' : 'branch';
 
-  const timeStampsNormal = formatDate(process.getDetails().process.start, 'MMM DD, YYYY @ hh:mm:ss.SSS')
+  const timeStampsNormal = formatDate(
+    process.getDetails().process.start,
+    'MMM DD, YYYY @ hh:mm:ss.SSS'
+  );
 
   return (
     <div>
