@@ -9,15 +9,15 @@ import { CoreSetup } from '../../../../../src/core/server';
 import { monitoringCollectionMock } from '../../../monitoring_collection/server/mocks';
 import { Metric } from '../../../monitoring_collection/server';
 import { registerClusterCollector } from './register_cluster_collector';
-import { ActionsPluginsStart } from '../plugin';
-import { ClusterActionsMetric } from './types';
+import { AlertingPluginsStart } from '../plugin';
+import { ClusterRulesMetric } from './types';
 
 jest.useFakeTimers('modern');
 jest.setSystemTime(new Date('2020-03-09').getTime());
 
 describe('registerClusterCollector()', () => {
   const monitoringCollection = monitoringCollectionMock.createSetup();
-  const coreSetup = coreMock.createSetup() as unknown as CoreSetup<ActionsPluginsStart, unknown>;
+  const coreSetup = coreMock.createSetup() as unknown as CoreSetup<AlertingPluginsStart, unknown>;
   const taskManagerFetch = jest.fn();
 
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('registerClusterCollector()', () => {
     });
   });
 
-  it('should get overdue actions', async () => {
+  it('should get overdue rules', async () => {
     const metrics: Record<string, Metric<unknown>> = {};
     monitoringCollection.registerMetric.mockImplementation((metric) => {
       metrics[metric.type] = metric;
@@ -42,7 +42,7 @@ describe('registerClusterCollector()', () => {
 
     const metricTypes = Object.keys(metrics);
     expect(metricTypes.length).toBe(1);
-    expect(metricTypes[0]).toBe('cluster_actions');
+    expect(metricTypes[0]).toBe('cluster_rules');
 
     const nowInMs = +new Date();
     const docs = [
@@ -55,7 +55,7 @@ describe('registerClusterCollector()', () => {
     ];
     taskManagerFetch.mockImplementation(async () => ({ docs }));
 
-    const result = (await metrics.cluster_actions.fetch()) as ClusterActionsMetric;
+    const result = (await metrics.cluster_rules.fetch()) as ClusterRulesMetric;
     expect(result.overdue.count).toBe(docs.length);
     expect(result.overdue.duration.p50).toBe(1000);
     expect(result.overdue.duration.p99).toBe(1000);
@@ -66,7 +66,7 @@ describe('registerClusterCollector()', () => {
             {
               term: {
                 'task.scope': {
-                  value: 'actions',
+                  value: 'alerting',
                 },
               },
             },
@@ -146,7 +146,7 @@ describe('registerClusterCollector()', () => {
 
     const metricTypes = Object.keys(metrics);
     expect(metricTypes.length).toBe(1);
-    expect(metricTypes[0]).toBe('cluster_actions');
+    expect(metricTypes[0]).toBe('cluster_rules');
 
     const nowInMs = +new Date();
     const docs = [
@@ -158,7 +158,7 @@ describe('registerClusterCollector()', () => {
     ];
     taskManagerFetch.mockImplementation(async () => ({ docs }));
 
-    const result = (await metrics.cluster_actions.fetch()) as ClusterActionsMetric;
+    const result = (await metrics.cluster_rules.fetch()) as ClusterRulesMetric;
     expect(result.overdue.count).toBe(docs.length);
     expect(result.overdue.duration.p50).toBe(3000);
     expect(result.overdue.duration.p99).toBe(40000);

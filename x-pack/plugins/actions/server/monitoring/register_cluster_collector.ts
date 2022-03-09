@@ -36,7 +36,7 @@ export function registerClusterCollector({
     },
     fetch: async () => {
       const services = await core.getStartServices();
-      const now = +new Date();
+      const nowInMs = +new Date();
       const { docs: overdueTasks } = await services[1].taskManager.fetch({
         query: {
           bool: {
@@ -58,7 +58,7 @@ export function registerClusterCollector({
                             range: {
                               'task.runAt': {
                                 format: 'epoch_millis',
-                                lt: now,
+                                lt: nowInMs,
                               },
                             },
                           },
@@ -79,7 +79,7 @@ export function registerClusterCollector({
                             range: {
                               'task.retryAt': {
                                 format: 'epoch_millis',
-                                lt: now,
+                                lt: nowInMs,
                               },
                             },
                           },
@@ -115,7 +115,7 @@ export function registerClusterCollector({
       });
 
       const overdueTasksDurations = overdueTasks.map(
-        (overdueTask) => now - +new Date(overdueTask.runAt || overdueTask.retryAt)
+        (overdueTask) => nowInMs - +new Date(overdueTask.runAt || overdueTask.retryAt)
       );
 
       const metrics: ClusterActionsMetric = {
