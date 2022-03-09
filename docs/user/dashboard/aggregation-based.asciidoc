@@ -114,7 +114,9 @@ Choose the type of panel you want to create, then use the editor to configure th
 
 .. Click the type of panel you want to create.
 
-.. Click the data source you want to visualize.
+.. Select the data source you want to visualize.
++
+NOTE: There is no performance impact on the data source you select. For example, *Discover* saved searches perform the same as {data-sources}. 
 
 . From the editor, add the <<aggregation-reference,aggregations>> you want to visualize, then click *Update*. 
 +
