@@ -10,7 +10,6 @@ import { CoreStart } from 'kibana/public';
 import React from 'react';
 import { registerDataHandler, unregisterDataHandler } from '../data_handler';
 import { useHasData } from '../hooks/use_has_data';
-import * as routeParams from '../hooks/use_route_params';
 import { HasData, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { HasDataContextProvider } from './has_data_context';
 import * as pluginContext from '../hooks/use_plugin_context';
@@ -19,9 +18,6 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ApmIndicesConfig } from '../../common/typings';
 import { act } from '@testing-library/react';
-
-const relativeStart = '2020-10-08T06:00:00.000Z';
-const relativeEnd = '2020-10-08T07:00:00.000Z';
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
