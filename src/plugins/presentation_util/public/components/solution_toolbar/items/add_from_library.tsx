@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { ComponentStrings } from '../../../i18n/components';
-import { SolutionToolbarButton, Props as SolutionToolbarButtonProps } from './button';
+import { SolutionToolbarButton, SolutionToolbarButtonProps } from '../../../../../shared_ux/public';
 
 const { SolutionToolbar: strings } = ComponentStrings;
 
-export type Props = Omit<SolutionToolbarButtonProps, 'iconType' | 'label'>;
+export type Props = Omit<typeof SolutionToolbarButtonProps, 'iconType' | 'label'>;
 
 export const AddFromLibraryButton = ({ onClick, ...rest }: Props) => (
   <SolutionToolbarButton

@@ -11,9 +11,10 @@ import { Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiContextMenu } from '@elastic/eui';
 
+import { SolutionToolbarButton as PrimaryActionButton } from '../../../../shared_ux/public';
 import { SolutionToolbar } from './solution_toolbar';
 import { SolutionToolbarPopover } from './items';
-import { AddFromLibraryButton, PrimaryActionButton, QuickButtonGroup } from './items';
+import { AddFromLibraryButton, QuickButtonGroup } from './items';
 
 const quickButtons = [
   {
