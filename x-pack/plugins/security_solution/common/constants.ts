@@ -170,6 +170,9 @@ export const DEFAULT_INDEX_PATTERN = [
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
+/** This Kibana Advanced Setting enables the warnings for CCS read permissions */
+export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
+
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
 
@@ -363,6 +366,8 @@ export const showAllOthersBucket: string[] = [
 export const ELASTIC_NAME = 'estc' as const;
 
 export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
+
+export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',

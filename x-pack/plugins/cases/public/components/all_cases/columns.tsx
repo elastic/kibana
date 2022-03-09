@@ -23,12 +23,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
 import { Case, DeleteCase } from '../../../common/ui/types';
-import {
-  CaseStatuses,
-  CommentType,
-  CommentRequestAlertType,
-  ActionConnector,
-} from '../../../common/api';
+import { CaseStatuses, ActionConnector } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -45,6 +40,7 @@ import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import { PostComment } from '../../containers/use_post_comment';
 import type { CasesOwners } from '../../methods/can_use_cases';
+import { CaseAttachments } from '../../types';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -76,9 +72,10 @@ export interface GetCasesColumn {
   userCanCrud: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
-  alertData?: Omit<CommentRequestAlertType, 'type'>;
+  attachments?: CaseAttachments;
   postComment?: (args: PostComment) => Promise<void>;
   updateCase?: (newCase: Case) => void;
+
   showSolutionColumn?: boolean;
 }
 export const useCasesColumns = ({
@@ -91,7 +88,7 @@ export const useCasesColumns = ({
   userCanCrud,
   connectors = [],
   onRowClick,
-  alertData,
+  attachments,
   postComment,
   updateCase,
   showSolutionColumn,
@@ -141,21 +138,24 @@ export const useCasesColumns = ({
 
   const assignCaseAction = useCallback(
     async (theCase: Case) => {
-      if (alertData != null) {
-        await postComment?.({
-          caseId: theCase.id,
-          data: {
-            type: CommentType.alert,
-            ...alertData,
-          },
-          updateCase,
-        });
+      // TODO currently the API only supports to add a comment at the time
+      // once the API is updated we should use bulk post comment #124814
+      // this operation is intentionally made in sequence
+      if (attachments !== undefined && attachments.length > 0) {
+        for (const attachment of attachments) {
+          await postComment?.({
+            caseId: theCase.id,
+            data: attachment,
+          });
+        }
+        updateCase?.(theCase);
       }
+
       if (onRowClick) {
         onRowClick(theCase);
       }
     },
-    [alertData, onRowClick, postComment, updateCase]
+    [attachments, onRowClick, postComment, updateCase]
   );
 
   useEffect(() => {

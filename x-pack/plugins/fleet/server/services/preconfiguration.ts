@@ -57,6 +57,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
         existingOutput.hosts?.map(normalizeHostsForAgents),
         preconfiguredOutput.hosts.map(normalizeHostsForAgents)
       )) ||
+    (preconfiguredOutput.ssl && !isEqual(preconfiguredOutput.ssl, existingOutput.ssl)) ||
     existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
     existingOutput.ca_trusted_fingerprint !== preconfiguredOutput.ca_trusted_fingerprint ||
     existingOutput.config_yaml !== preconfiguredOutput.config_yaml

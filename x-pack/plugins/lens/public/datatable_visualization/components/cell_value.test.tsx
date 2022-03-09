@@ -53,6 +53,7 @@ describe('datatable cell renderer', () => {
       >
         <CellRenderer
           rowIndex={0}
+          colIndex={0}
           columnId="a"
           setCellProps={() => {}}
           isExpandable={false}
@@ -76,6 +77,7 @@ describe('datatable cell renderer', () => {
       >
         <CellRenderer
           rowIndex={0}
+          colIndex={0}
           columnId="a"
           setCellProps={() => {}}
           isExpandable={false}
@@ -154,6 +156,7 @@ describe('datatable cell renderer', () => {
         >
           <CellRendererWithPalette
             rowIndex={0}
+            colIndex={0}
             columnId="a"
             setCellProps={setCellProps}
             isExpandable={false}

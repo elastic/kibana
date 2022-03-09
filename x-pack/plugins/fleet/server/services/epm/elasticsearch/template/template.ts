@@ -132,6 +132,9 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
         case 'scaled_float':
           fieldProps.type = 'scaled_float';
           fieldProps.scaling_factor = field.scaling_factor || DEFAULT_SCALING_FACTOR;
+          if (field.metric_type) {
+            fieldProps.time_series_metric = field.metric_type;
+          }
           break;
         case 'text':
           const textMapping = generateTextMapping(field);
@@ -263,6 +266,9 @@ function generateKeywordMapping(field: Field): IndexTemplateMapping {
   }
   if (field.normalizer) {
     mapping.normalizer = field.normalizer;
+  }
+  if (field.dimension) {
+    mapping.time_series_dimension = field.dimension;
   }
   return mapping;
 }

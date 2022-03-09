@@ -22,9 +22,9 @@ describe('ConfiguredSourcesList', () => {
   it('renders', () => {
     const wrapper = shallow(<ConfiguredSourcesList {...props} />);
 
-    expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(5);
-    expect(wrapper.find('[data-test-subj="AccountOnlyTooltip"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(6);
+    expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(16);
+    expect(wrapper.find('[data-test-subj="AccountOnlyTooltip"]')).toHaveLength(2);
+    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(19);
   });
 
   it('handles empty state', () => {

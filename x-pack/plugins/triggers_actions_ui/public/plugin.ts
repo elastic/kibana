@@ -34,8 +34,8 @@ import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 
 import type {
   ActionTypeModel,
-  AlertAddProps,
-  AlertEditProps,
+  RuleAddProps,
+  RuleEditProps,
   RuleTypeModel,
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
@@ -56,11 +56,11 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<ConnectorEditFlyoutProps>;
   getAddAlertFlyout: (
-    props: Omit<AlertAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<AlertAddProps>;
+    props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+  ) => ReactElement<RuleAddProps>;
   getEditAlertFlyout: (
-    props: Omit<AlertEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<AlertEditProps>;
+    props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+  ) => ReactElement<RuleEditProps>;
 }
 
 interface PluginsSetup {
@@ -186,9 +186,7 @@ export class Plugin
           actionTypeRegistry: this.actionTypeRegistry,
         });
       },
-      getAddAlertFlyout: (
-        props: Omit<AlertAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-      ) => {
+      getAddAlertFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
         return getAddAlertFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
@@ -196,7 +194,7 @@ export class Plugin
         });
       },
       getEditAlertFlyout: (
-        props: Omit<AlertEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+        props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
       ) => {
         return getEditAlertFlyoutLazy({
           ...props,

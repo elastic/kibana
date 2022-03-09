@@ -189,6 +189,38 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.labelFont",
+            "type": "Object",
+            "tags": [],
+            "label": "labelFont",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionTypeStyle",
+                "text": "ExpressionTypeStyle"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.labelPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "labelPosition",
+            "description": [],
+            "signature": [
+              "\"top\" | \"bottom\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
             "id": "def-common.MetricArguments.metric",
             "type": "Array",
             "tags": [],
@@ -224,6 +256,16 @@
               },
               " | undefined"
             ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.colorFullBackground",
+            "type": "boolean",
+            "tags": [],
+            "label": "colorFullBackground",
+            "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false
           },
@@ -381,7 +423,7 @@
           {
             "parentPluginId": "expressionMetricVis",
             "id": "def-common.MetricVisParam.labels",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "labels",
             "description": [],
@@ -392,7 +434,18 @@
                 "docId": "kibChartsPluginApi",
                 "section": "def-common.Labels",
                 "text": "Labels"
-              }
+              },
+              " & { style: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionTypeStyle",
+                "text": "ExpressionTypeStyle"
+              },
+              "; position: ",
+              "LabelPositionType",
+              "; }"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false
@@ -422,6 +475,16 @@
               },
               ", \"bgColor\" | \"labelColor\">"
             ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.colorFullBackground",
+            "type": "boolean",
+            "tags": [],
+            "label": "colorFullBackground",
+            "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false
           },

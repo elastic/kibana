@@ -36,6 +36,7 @@ import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/g
 import { UMServerLibs, UptimeESClient, createUptimeESClient } from '../lib';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
+import { ALERT_REASON_MSG, MESSAGE, MONITOR_WITH_GEO, ACTION_VARIABLES } from './action_variables';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 /**
@@ -268,25 +269,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   ],
   actionVariables: {
     context: [
-      {
-        name: 'message',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
-          {
-            defaultMessage: 'A generated message summarizing the currently down monitors',
-          }
-        ),
-      },
-      {
-        name: 'downMonitorsWithGeo',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
-          {
-            defaultMessage:
-              'A generated summary that shows some or all of the monitors detected as "down" by the alert',
-          }
-        ),
-      },
+      ACTION_VARIABLES[MESSAGE],
+      ACTION_VARIABLES[MONITOR_WITH_GEO],
+      ACTION_VARIABLES[ALERT_REASON_MSG],
     ],
     state: [...commonMonitorStateI18, ...commonStateTranslations],
   },
@@ -375,7 +360,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           ...updateState(state, true),
         });
 
-        alert.scheduleActions(MONITOR_STATUS.id);
+        alert.scheduleActions(MONITOR_STATUS.id, {
+          [ALERT_REASON_MSG]: monitorSummary.reason,
+        });
       }
       return updateState(state, downMonitorsByLocation.length > 0);
     }
@@ -432,7 +419,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         statusMessage,
       });
 
-      alert.scheduleActions(MONITOR_STATUS.id);
+      alert.scheduleActions(MONITOR_STATUS.id, {
+        [ALERT_REASON_MSG]: monitorSummary.reason,
+      });
     });
 
     return updateState(state, downMonitorsByLocation.length > 0);

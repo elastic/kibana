@@ -105,6 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Interact with options list on dashboard', async () => {
+      let controlId: string;
       before(async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
 
@@ -113,105 +114,221 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           fieldName: 'sound.keyword',
           title: 'Animal Sounds',
         });
+
+        controlId = (await dashboardControls.getAllControlIds())[0];
       });
 
-      it('Shows available options in options list', async () => {
-        const controlIds = await dashboardControls.getAllControlIds();
-        await dashboardControls.optionsListOpenPopover(controlIds[0]);
-        await retry.try(async () => {
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(8);
-        });
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
-      });
+      describe('Apply dashboard query and filters to controls', async () => {
+        it('Applies dashboard query to options list control', async () => {
+          await queryBar.setQuery('isDog : true ');
+          await queryBar.submitQuery();
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
 
-      it('Can search options list for available options', async () => {
-        const controlIds = await dashboardControls.getAllControlIds();
-        await dashboardControls.optionsListOpenPopover(controlIds[0]);
-        await dashboardControls.optionsListPopoverSearchForOption('meo');
-        await retry.try(async () => {
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql(['meow']);
-        });
-        await dashboardControls.optionsListPopoverClearSearch();
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
-      });
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(5);
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
+              'ruff',
+              'bark',
+              'grrr',
+              'bow ow ow',
+              'grr',
+            ]);
+          });
 
-      it('Applies dashboard query to options list control', async () => {
-        await queryBar.setQuery('isDog : true ');
-        await queryBar.submitQuery();
-        await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
-
-        const controlIds = await dashboardControls.getAllControlIds();
-        await dashboardControls.optionsListOpenPopover(controlIds[0]);
-        await retry.try(async () => {
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(5);
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
-            'ruff',
-            'bark',
-            'grrr',
-            'bow ow ow',
-            'grr',
-          ]);
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
         });
 
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
-      });
+        it('Applies dashboard filters to options list control', async () => {
+          await filterBar.addFilter('sound.keyword', 'is one of', ['bark', 'bow ow ow', 'ruff']);
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
 
-      it('Applies dashboard filters to options list control', async () => {
-        await filterBar.addFilter('sound.keyword', 'is one of', ['bark', 'bow ow ow', 'ruff']);
-        await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
-
-        const controlIds = await dashboardControls.getAllControlIds();
-        await dashboardControls.optionsListOpenPopover(controlIds[0]);
-        await retry.try(async () => {
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(3);
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
-            'ruff',
-            'bark',
-            'bow ow ow',
-          ]);
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(3);
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
+              'ruff',
+              'bark',
+              'bow ow ow',
+            ]);
+          });
         });
 
-        await filterBar.removeAllFilters();
+        it('Does not apply disabled dashboard filters to options list control', async () => {
+          await filterBar.toggleFilterEnabled('sound.keyword');
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(8);
+          });
+
+          await filterBar.toggleFilterEnabled('sound.keyword');
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+        });
+
+        it('Negated filters apply to options control', async () => {
+          await filterBar.toggleFilterNegated('sound.keyword');
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(5);
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
+              'hiss',
+              'grrr',
+              'meow',
+              'growl',
+              'grr',
+            ]);
+          });
+        });
+
+        after(async () => {
+          await filterBar.removeAllFilters();
+        });
       });
 
-      it('Can select multiple available options', async () => {
-        const controlIds = await dashboardControls.getAllControlIds();
-        await dashboardControls.optionsListOpenPopover(controlIds[0]);
-        await dashboardControls.optionsListPopoverSelectOption('hiss');
-        await dashboardControls.optionsListPopoverSelectOption('grr');
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+      describe('Selections made in control apply to dashboard', async () => {
+        it('Shows available options in options list', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(8);
+          });
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
+
+        it('Can search options list for available options', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSearchForOption('meo');
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
+              'meow',
+            ]);
+          });
+          await dashboardControls.optionsListPopoverClearSearch();
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
+
+        it('Can select multiple available options', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSelectOption('hiss');
+          await dashboardControls.optionsListPopoverSelectOption('grr');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
+
+        it('Selected options appear in control', async () => {
+          const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
+          expect(selectionString).to.be('hiss, grr');
+        });
+
+        it('Applies options list control options to dashboard', async () => {
+          await retry.try(async () => {
+            expect(await pieChart.getPieSliceCount()).to.be(2);
+          });
+        });
+
+        it('Applies options list control options to dashboard by default on open', async () => {
+          await dashboard.gotoDashboardLandingPage();
+          await header.waitUntilLoadingHasFinished();
+          await dashboard.clickUnsavedChangesContinueEditing('New Dashboard');
+          await header.waitUntilLoadingHasFinished();
+          expect(await pieChart.getPieSliceCount()).to.be(2);
+
+          const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
+          expect(selectionString).to.be('hiss, grr');
+        });
+
+        after(async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverClearSelections();
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
       });
 
-      it('Selected options appear in control', async () => {
-        const controlIds = await dashboardControls.getAllControlIds();
-        const selectionString = await dashboardControls.optionsListGetSelectionsString(
-          controlIds[0]
-        );
-        expect(selectionString).to.be('hiss, grr');
-      });
+      describe('Options List validation', async () => {
+        before(async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSelectOption('meow');
+          await dashboardControls.optionsListPopoverSelectOption('bark');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
 
-      it('Applies options list control options to dashboard', async () => {
-        await retry.try(async () => {
+        it('Can mark selections invalid with Query', async () => {
+          await queryBar.setQuery('isDog : false ');
+          await queryBar.submitQuery();
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(4);
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
+              'hiss',
+              'meow',
+              'growl',
+              'grr',
+              'Ignored selection',
+              'bark',
+            ]);
+          });
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+          // only valid selections are applied as filters.
+          expect(await pieChart.getPieSliceCount()).to.be(1);
+        });
+
+        it('can make invalid selections valid again if the parent filter changes', async () => {
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(8);
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
+              'hiss',
+              'ruff',
+              'bark',
+              'grrr',
+              'meow',
+              'growl',
+              'grr',
+              'bow ow ow',
+            ]);
+          });
+
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
           expect(await pieChart.getPieSliceCount()).to.be(2);
         });
-      });
 
-      it('Applies options list control options to dashboard by default on open', async () => {
-        await dashboard.gotoDashboardLandingPage();
-        await header.waitUntilLoadingHasFinished();
-        await dashboard.clickUnsavedChangesContinueEditing('New Dashboard');
-        await header.waitUntilLoadingHasFinished();
-        expect(await pieChart.getPieSliceCount()).to.be(2);
+        it('Can mark multiple selections invalid with Filter', async () => {
+          await filterBar.addFilter('sound.keyword', 'is', ['hiss']);
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
 
-        const controlIds = await dashboardControls.getAllControlIds();
-        const selectionString = await dashboardControls.optionsListGetSelectionsString(
-          controlIds[0]
-        );
-        expect(selectionString).to.be('hiss, grr');
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
+              'hiss',
+              'Ignored selections',
+              'meow',
+              'bark',
+            ]);
+          });
+
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+          // only valid selections are applied as filters.
+          expect(await pieChart.getPieSliceCount()).to.be(1);
+        });
       });
     });
   });
