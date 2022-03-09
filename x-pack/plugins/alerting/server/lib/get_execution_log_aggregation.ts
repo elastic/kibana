@@ -18,6 +18,7 @@ const ACTION_FIELD = 'event.action';
 const OUTCOME_FIELD = 'event.outcome';
 const DURATION_FIELD = 'event.duration';
 const MESSAGE_FIELD = 'message';
+const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
 const ES_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.es_search_duration_ms';
 const TOTAL_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_search_duration_ms';
 const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
@@ -40,6 +41,7 @@ export interface IExecutionLog {
   num_errored_actions: number;
   total_search_duration_ms: number;
   es_search_duration_ms: number;
+  schedule_delay_ms: number;
   timed_out: boolean;
 }
 
@@ -66,6 +68,7 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
   ruleExecution: {
     executeStartTime: estypes.AggregationsMinAggregate;
     executionDuration: estypes.AggregationsMaxAggregate;
+    scheduleDelay: estypes.AggregationsMaxAggregate;
     esSearchDuration: estypes.AggregationsMaxAggregate;
     totalSearchDuration: estypes.AggregationsMaxAggregate;
     numTriggeredActions: estypes.AggregationsMaxAggregate;
@@ -179,6 +182,11 @@ export function getExecutionLogAggregation({
                 field: START_FIELD,
               },
             },
+            scheduleDelay: {
+              max: {
+                field: SCHEDULE_DELAY_FIELD,
+              },
+            },
             totalSearchDuration: {
               max: {
                 field: TOTAL_SEARCH_DURATION_FIELD,
@@ -241,6 +249,9 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const durationUs = bucket?.ruleExecution?.executionDuration?.value
     ? bucket.ruleExecution.executionDuration.value
     : 0;
+  const scheduleDelayUs = bucket?.ruleExecution?.scheduleDelay?.value
+    ? bucket.ruleExecution.scheduleDelay.value
+    : 0;
   const timedOut = (bucket?.timeoutMessage?.doc_count ?? 0) > 0;
 
   const actionExecutionOutcomes = bucket?.actionExecution?.actionOutcomes?.buckets ?? [];
@@ -263,6 +274,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     num_errored_actions: actionExecutionError,
     total_search_duration_ms: bucket?.ruleExecution?.totalSearchDuration?.value ?? 0,
     es_search_duration_ms: bucket?.ruleExecution?.esSearchDuration?.value ?? 0,
+    schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     timed_out: timedOut,
   };
 }

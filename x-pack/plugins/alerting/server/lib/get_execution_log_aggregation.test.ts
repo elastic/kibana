@@ -136,6 +136,11 @@ describe('getExecutionLogAggregation', () => {
             },
             aggs: {
               executeStartTime: { min: { field: 'event.start' } },
+              scheduleDelay: {
+                max: {
+                  field: 'kibana.task.schedule_delay',
+                },
+              },
               totalSearchDuration: {
                 max: { field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms' },
               },
@@ -232,6 +237,9 @@ describe('formatExecutionLogResult', () => {
                     ],
                   },
                 },
+                scheduleDelay: {
+                  value: 3.074e9,
+                },
                 totalSearchDuration: {
                   value: 0.0,
                 },
@@ -311,6 +319,9 @@ describe('formatExecutionLogResult', () => {
                     ],
                   },
                 },
+                scheduleDelay: {
+                  value: 3.126e9,
+                },
                 totalSearchDuration: {
                   value: 0.0,
                 },
@@ -366,6 +377,7 @@ describe('formatExecutionLogResult', () => {
           total_search_duration_ms: 0,
           es_search_duration_ms: 0,
           timed_out: false,
+          schedule_delay_ms: 3074,
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -383,6 +395,7 @@ describe('formatExecutionLogResult', () => {
           total_search_duration_ms: 0,
           es_search_duration_ms: 0,
           timed_out: false,
+          schedule_delay_ms: 3126,
         },
       ],
     });
@@ -445,6 +458,9 @@ describe('formatExecutionLogResult', () => {
                       },
                     ],
                   },
+                },
+                scheduleDelay: {
+                  value: 3.074e9,
                 },
                 totalSearchDuration: {
                   value: 0.0,
@@ -520,6 +536,9 @@ describe('formatExecutionLogResult', () => {
                     ],
                   },
                 },
+                scheduleDelay: {
+                  value: 3.126e9,
+                },
                 totalSearchDuration: {
                   value: 0.0,
                 },
@@ -575,6 +594,7 @@ describe('formatExecutionLogResult', () => {
           total_search_duration_ms: 0,
           es_search_duration_ms: 0,
           timed_out: true,
+          schedule_delay_ms: 3074,
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -592,6 +612,7 @@ describe('formatExecutionLogResult', () => {
           total_search_duration_ms: 0,
           es_search_duration_ms: 0,
           timed_out: false,
+          schedule_delay_ms: 3126,
         },
       ],
     });
@@ -654,6 +675,9 @@ describe('formatExecutionLogResult', () => {
                       },
                     ],
                   },
+                },
+                scheduleDelay: {
+                  value: 3.126e9,
                 },
                 totalSearchDuration: {
                   value: 0.0,
@@ -734,6 +758,9 @@ describe('formatExecutionLogResult', () => {
                     ],
                   },
                 },
+                scheduleDelay: {
+                  value: 3.133e9,
+                },
                 totalSearchDuration: {
                   value: 0.0,
                 },
@@ -789,6 +816,7 @@ describe('formatExecutionLogResult', () => {
           total_search_duration_ms: 0,
           es_search_duration_ms: 0,
           timed_out: false,
+          schedule_delay_ms: 3126,
         },
         {
           id: '61bb867b-661a-471f-bf92-23471afa10b3',
@@ -806,6 +834,7 @@ describe('formatExecutionLogResult', () => {
           total_search_duration_ms: 0,
           es_search_duration_ms: 0,
           timed_out: false,
+          schedule_delay_ms: 3133,
         },
       ],
     });

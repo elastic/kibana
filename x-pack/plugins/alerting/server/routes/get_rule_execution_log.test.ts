@@ -43,6 +43,7 @@ describe('getRuleExecutionLogRoute', () => {
         total_search_duration_ms: 0,
         es_search_duration_ms: 0,
         timed_out: false,
+        schedule_delay_ms: 3126,
       },
       {
         id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -60,6 +61,7 @@ describe('getRuleExecutionLogRoute', () => {
         total_search_duration_ms: 0,
         es_search_duration_ms: 0,
         timed_out: false,
+        schedule_delay_ms: 3008,
       },
     ],
   };
