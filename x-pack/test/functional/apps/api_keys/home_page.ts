@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Id } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -13,11 +14,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
+  const es = getService('es');
   const find = getService('find');
   const browser = getService('browser');
 
+  async function clearAllApiKeys() {
+    const existingKeys = await (
+      await es.security.queryApiKeys()
+    ).api_keys.map((key) => {
+      return key.id;
+    });
+    await es.security.invalidateApiKey({ ids: existingKeys as Id[] });
+  }
+
   describe('Home page', function () {
     before(async () => {
+      await clearAllApiKeys();
       await security.testUser.setRoles(['kibana_admin']);
       await pageObjects.common.navigateToApp('apiKeys');
     });
@@ -49,6 +61,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+      });
+
+      after(async () => {
+        await clearAllApiKeys();
       });
 
       it('when submitting form, close dialog and displays new api key', async () => {
