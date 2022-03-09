@@ -28,7 +28,7 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
 
     const result = await Promise.all(
       zipFiles.map(async (zipFile) => {
-        const file = await fs.readFile(path.join(bundledPackageLocation));
+        const file = await fs.readFile(path.join(bundledPackageLocation, zipFile));
 
         const { pkgName, pkgVersion } = splitPkgKey(zipFile.replace(/\.zip$/, ''));
 
