@@ -6,7 +6,7 @@
  */
 import { MetricResult } from '../../../monitoring_collection/server';
 
-export type RulesMetric = MetricResult<{
+export type ClusterRulesMetric = MetricResult<{
   overdue: {
     count: number;
     duration: {
@@ -14,6 +14,9 @@ export type RulesMetric = MetricResult<{
       p99: number;
     };
   };
+}>;
+
+export type NodeRulesMetric = MetricResult<{
   failures: number | null;
   executions: number | null;
 }>;

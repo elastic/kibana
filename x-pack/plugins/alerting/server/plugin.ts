@@ -63,7 +63,7 @@ import { AlertingAuthorizationClientFactory } from './alerting_authorization_cli
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
-import { registerCollector } from './monitoring';
+import { registerNodeCollector, registerClusterCollector } from './monitoring';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -256,7 +256,10 @@ export class AlertingPlugin {
     );
 
     if (plugins.monitoringCollection) {
-      registerCollector({
+      registerNodeCollector({
+        monitoringCollection: plugins.monitoringCollection,
+      });
+      registerClusterCollector({
         monitoringCollection: plugins.monitoringCollection,
         core,
       });

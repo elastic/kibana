@@ -88,7 +88,7 @@ import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/aler
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
-import { registerCollector } from './monitoring';
+import { registerClusterCollector, registerNodeCollector } from './monitoring';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 
 export interface PluginSetupContract {
@@ -287,7 +287,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.usageCounter = plugins.usageCollection?.createUsageCounter(ACTIONS_FEATURE_ID);
 
     if (plugins.monitoringCollection) {
-      registerCollector({
+      registerNodeCollector({
+        monitoringCollection: plugins.monitoringCollection,
+      });
+      registerClusterCollector({
         monitoringCollection: plugins.monitoringCollection,
         core,
       });
