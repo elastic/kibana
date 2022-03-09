@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getSampledTraceEventsIndex, DownsampledEventsIndex } from './search_flamechart';
+import {
+  getSampledTraceEventsIndex,
+  extractFileIDFromFrameID,
+  DownsampledEventsIndex,
+} from './search_flamechart';
 
 describe('Using down-sampled indexes', () => {
   test('getSampledTraceEventsIndex', () => {
@@ -52,6 +56,28 @@ describe('Using down-sampled indexes', () => {
       expect(
         getSampledTraceEventsIndex(targetSampleSize, t.sampleCountFromPow6, initialExp)
       ).toEqual(t.expected);
+    }
+  });
+});
+
+describe('Extract FileID from FrameID', () => {
+  test('extractFileIDFromFrameID', () => {
+    const tests: Array<{
+      frameID: string;
+      expected: string;
+    }> = [
+      {
+        frameID: 'aQpJmTLWydNvOapSFZOwKgAAAAAAB924',
+        expected: 'aQpJmTLWydNvOapSFZOwKg==',
+      },
+      {
+        frameID: 'hz_u-HGyrN6qeIk6UIJeCAAAAAAAAAZZ',
+        expected: 'hz_u-HGyrN6qeIk6UIJeCA==',
+      },
+    ];
+
+    for (const t of tests) {
+      expect(extractFileIDFromFrameID(t.frameID)).toEqual(t.expected);
     }
   });
 });

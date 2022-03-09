@@ -31,6 +31,32 @@ async function logExecutionLatency<T>(
   });
 }
 
+// convertFrameIDToFileID extracts the FileID from the FrameID and returns as base64url string.
+export function extractFileIDFromFrameID(frameID: string): string {
+  // Step 1: Convert the base64-encoded frameID to an array of 22 bytes.
+  // We use 'base64url' instead of 'base64' because frameID is encoded URL-friendly.
+  // The first 16 bytes contain the FileID.
+  const buf = Buffer.from(frameID, 'base64url');
+
+  // Convert the FileID bytes into base64 with URL-friendly encoding.
+  // We have to manually append '==' since we use the FileID string for
+  // comparing / looking up the FileID strings in the ES indices, which have
+  // the '==' appended.
+  // We may want to remove '==' in the future to reduce the uncompressed storage size by 10%.
+  return buf.toString('base64url', 0, 16) + '==';
+}
+
+// extractFileIDArrayFromFrameIDArray extracts all FileIDs from the array of FrameIDs
+// and returns them as an array of base64url encoded strings. The order of this array
+// corresponds to the order of the input array.
+function extractFileIDArrayFromFrameIDArray(frameIDs: string[]): string[] {
+  const fileIDs = Array<string>(frameIDs.length);
+  for (let i = 0; i < frameIDs.length; i++) {
+    fileIDs[i] = extractFileIDFromFrameID(frameIDs[i]);
+  }
+  return fileIDs;
+}
+
 const downsampledIndex = 'profiling-events-5pow';
 
 // Return the index that has between targetSampleSize..targetSampleSize*samplingFactor entries.
@@ -229,7 +255,7 @@ async function queryFlameGraph(
       return await client.mget({
         index: 'profiling-stacktraces',
         ids: [...stackTraceEvents.keys()],
-        _source_includes: ['FrameID', 'FileID', 'Type'],
+        _source_includes: ['FrameID', 'Type'],
       });
     }
   );
@@ -242,9 +268,11 @@ async function queryFlameGraph(
   const stackTraces = new Map<StackTraceID, StackTrace>();
   for (const trace of resStackTraces.body.docs) {
     if (trace.found) {
+      const frameIDs = trace._source.FrameID as string[];
+      const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
       stackTraces.set(trace._id, {
-        FileID: trace._source.FileID,
-        FrameID: trace._source.FrameID,
+        FileID: fileIDs,
+        FrameID: frameIDs,
         Type: trace._source.Type,
       });
     }
