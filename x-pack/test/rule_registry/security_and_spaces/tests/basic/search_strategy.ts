@@ -66,8 +66,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
             sort: [
               {
-                field: 'kibana.alert.evaluation.value',
-                direction: 'desc',
+                'kibana.alert.evaluation.value': {
+                  order: 'desc',
+                },
               },
             ],
           },

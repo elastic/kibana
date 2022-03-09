@@ -237,8 +237,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       featureIds: [AlertConsumers.LOGS],
       sort: [
         {
-          field: 'test',
-          direction: 'desc',
+          test: {
+            order: 'desc',
+          },
         },
       ],
     };

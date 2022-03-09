@@ -12,18 +12,13 @@ import { IEsSearchRequest, IEsSearchResponse } from 'src/plugins/data/common';
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
   featureIds: ValidFeatureId[];
   query?: { bool: estypes.QueryDslBoolQuery };
-  sort?: RuleRegistrySearchRequestSort[];
+  sort?: estypes.SortCombinations[];
   pagination?: RuleRegistrySearchRequestPagination;
 };
 
 export interface RuleRegistrySearchRequestPagination {
   pageIndex: number;
   pageSize: number;
-}
-
-export interface RuleRegistrySearchRequestSort {
-  field: string;
-  direction: 'asc' | 'desc';
 }
 
 type Prev = [
