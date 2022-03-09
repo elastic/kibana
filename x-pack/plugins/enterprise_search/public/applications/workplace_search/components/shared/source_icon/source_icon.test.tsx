@@ -20,4 +20,12 @@ describe('SourceIcon', () => {
     expect(wrapper.find(EuiIcon)).toHaveLength(1);
     expect(wrapper.find('.user-group-source')).toHaveLength(0);
   });
+
+  it('renders a png icon if one is provided', () => {
+    const wrapper = shallow(
+      <SourceIcon name="foo" serviceType="custom" iconAsBase64="base64encodedstring" />
+    );
+
+    expect(wrapper.find(EuiIcon).prop('src')).toEqual('data:image/png;base64,base64encodedstring');
+  });
 });
