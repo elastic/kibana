@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('saveIndexPatternButton');
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/126658
-  describe.skip('discover integration with data view editor', function describeIndexTests() {
+  describe('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles([
         'kibana_admin',
