@@ -94,6 +94,48 @@ export class AnomalyTimelineStateService {
       )
       .subscribe(this._swimLaneSeverity$);
 
+    this._initSwimLanePagination();
+    this._initOverallSwimLaneData();
+    this._initTopFieldValues();
+    this._initViewBySwimLaneData();
+
+    combineLatest([
+      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this.getContainerWidth$(),
+    ]).subscribe(([selectedJobs, containerWidth]) => {
+      if (!selectedJobs) return;
+      this._swimLaneBucketInterval$.next(
+        this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
+      );
+    });
+
+    this._initSelectedCells();
+  }
+
+  private _initViewByData(): void {
+    combineLatest([
+      this._swimLaneUrlState$.pipe(
+        map((v) => v?.viewByFieldName),
+        distinctUntilChanged()
+      ),
+      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this.anomalyExplorerCommonStateService.getFilterSettings$(),
+      this._selectedCells$,
+    ]).subscribe(([currentlySelected, selectedJobs, filterSettings, selectedCells]) => {
+      const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
+        currentlySelected,
+        filterSettings.filterActive,
+        filterSettings.filteredFields,
+        false,
+        selectedCells,
+        selectedJobs
+      );
+      this._viewBySwimlaneFieldName$.next(viewBySwimlaneFieldName);
+      this._viewBySwimLaneOptions$.next(viewBySwimlaneOptions);
+    });
+  }
+
+  private _initSwimLanePagination() {
     combineLatest([
       this._swimLaneUrlState$.pipe(
         map((v) => {
@@ -112,7 +154,9 @@ export class AnomalyTimelineStateService {
       }
       this._swimLanePaginations$.next(resultPaginaiton);
     });
+  }
 
+  private _initOverallSwimLaneData() {
     combineLatest([
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this._swimLaneSeverity$,
@@ -137,7 +181,9 @@ export class AnomalyTimelineStateService {
         this._overallSwimLaneData$.next(v);
         this._isOverallSwimLaneLoading$.next(false);
       });
+  }
 
+  private _initTopFieldValues() {
     combineLatest([
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
@@ -191,7 +237,9 @@ export class AnomalyTimelineStateService {
         )
       )
       .subscribe(this._topFieldValues$);
+  }
 
+  private _initViewBySwimLaneData() {
     combineLatest([
       this._overallSwimLaneData$.pipe(skipWhile((v) => !v)),
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
@@ -243,17 +291,9 @@ export class AnomalyTimelineStateService {
         this._isViewBySwimLaneLoading$.next(false);
         this._swimLaneCardinality$.next(v?.cardinality);
       });
+  }
 
-    combineLatest([
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this.getContainerWidth$(),
-    ]).subscribe(([selectedJobs, containerWidth]) => {
-      if (!selectedJobs) return;
-      this._swimLaneBucketInterval$.next(
-        this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
-      );
-    });
-
+  private _initSelectedCells() {
     combineLatest([
       this._viewBySwimlaneFieldName$,
       this._swimLaneUrlState$,
@@ -294,29 +334,6 @@ export class AnomalyTimelineStateService {
         distinctUntilChanged(isEqual)
       )
       .subscribe(this._selectedCells$);
-  }
-
-  private _initViewByData(): void {
-    combineLatest([
-      this._swimLaneUrlState$.pipe(
-        map((v) => v?.viewByFieldName),
-        distinctUntilChanged()
-      ),
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this.anomalyExplorerCommonStateService.getFilterSettings$(),
-      this._selectedCells$,
-    ]).subscribe(([currentlySelected, selectedJobs, filterSettings, selectedCells]) => {
-      const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
-        currentlySelected,
-        filterSettings.filterActive,
-        filterSettings.filteredFields,
-        false,
-        selectedCells,
-        selectedJobs
-      );
-      this._viewBySwimlaneFieldName$.next(viewBySwimlaneFieldName);
-      this._viewBySwimLaneOptions$.next(viewBySwimlaneOptions);
-    });
   }
 
   /**
