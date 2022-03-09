@@ -160,7 +160,7 @@ export const UrlStateProvider: FC = ({ children }) => {
 export const useUrlState = (
   accessor: Accessor
 ): [
-  Record<string, any> | undefined,
+  Record<string, any>,
   (attribute: string | Dictionary<unknown>, value?: unknown, replaceState?: boolean) => void
 ] => {
   const { searchString, setUrlState: setUrlStateContext } = useContext(urlStateStore);

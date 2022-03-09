@@ -22,7 +22,10 @@ export interface ExplorerState {
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
   filterPlaceHolder: string | undefined;
-  indexPattern: DataView;
+  indexPattern: {
+    title: string;
+    fields: Array<{ name: string; type: string; aggregatable: boolean; searchable: boolean }>;
+  };
   influencers: Record<string, InfluencerValueData[]>;
   isAndOperator: boolean;
   loading: boolean;

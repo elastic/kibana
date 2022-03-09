@@ -105,7 +105,7 @@ export interface ExplorerAppState {
   mlExplorerFilter: {
     influencersFilterQuery?: InfluencersFilterQuery;
     filterActive?: boolean;
-    filteredFields?: string[];
+    filteredFields?: Array<string | number>;
     queryString?: string;
   };
   query?: any;
