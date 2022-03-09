@@ -12,6 +12,7 @@ import { UsersKpiProps } from './types';
 
 import { HostsKpiAuthentications } from '../../../hosts/components/kpi_hosts/authentications';
 import { HostsKpiUniqueIps } from '../../../hosts/components/kpi_hosts/unique_ips';
+import { UsersKpiHosts } from './total_users';
 
 export const UsersKpiComponent = React.memo<UsersKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
@@ -19,6 +20,17 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
       <>
         <EuiFlexGroup wrap>
           <EuiFlexItem grow={1}>
+            <UsersKpiHosts
+              filterQuery={filterQuery}
+              from={from}
+              indexNames={indexNames}
+              to={to}
+              narrowDateRange={narrowDateRange}
+              setQuery={setQuery}
+              skip={skip}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
             <HostsKpiAuthentications
               filterQuery={filterQuery}
               from={from}
@@ -29,7 +41,7 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
               skip={skip}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem grow={2}>
             <HostsKpiUniqueIps
               filterQuery={filterQuery}
               from={from}

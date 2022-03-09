@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export enum UsersQueries {
-  details = 'userDetails',
-  kpiTotalUsers = 'usersKpiTotalUsers',
-}
+import { i18n } from '@kbn/i18n';
+
+export const USERS = i18n.translate('xpack.securitySolution.kpiUsers.totalUsers.title', {
+  defaultMessage: 'Users',
+});

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export enum UsersQueries {
-  details = 'userDetails',
-  kpiTotalUsers = 'usersKpiTotalUsers',
+import { Maybe } from '../../../..';
+
+export interface KpiHistogramData {
+  x?: Maybe<number>;
+  y?: Maybe<number>;
 }

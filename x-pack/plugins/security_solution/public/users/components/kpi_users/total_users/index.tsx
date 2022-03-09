@@ -5,30 +5,46 @@
  * 2.0.
  */
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import React from 'react';
+import { UpdateDateRange } from '../../../../common/components/charts/common';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiTlsHandshakesLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_tls_handshakes';
+import { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
-import { useNetworkKpiTlsHandshakes } from '../../../containers/kpi_network/tls_handshakes';
-import { NetworkKpiProps } from '../types';
+import { useTotalUsersKpi } from '../../../containers/kpis/total_users';
 import * as i18n from './translations';
+
+const euiVisColorPalette = euiPaletteColorBlind();
+const euiColorVis1 = euiVisColorPalette[1];
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
-    key: 'tlsHandshakes',
+    key: 'users',
     fields: [
       {
-        key: 'tlsHandshakes',
+        key: 'users',
         value: null,
-        lensAttributes: kpiTlsHandshakesLensAttributes,
+        color: euiColorVis1,
+        icon: 'storage',
       },
     ],
-    description: i18n.TLS_HANDSHAKES,
+    enableAreaChart: true,
+    description: i18n.USERS,
   },
 ];
 
-const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
+export interface UsersKpiProps {
+  filterQuery?: string;
+  from: string;
+  to: string;
+  indexNames: string[];
+  narrowDateRange: UpdateDateRange;
+  setQuery: GlobalTimeArgs['setQuery'];
+  skip: boolean;
+}
+
+const UsersKpiHostsComponent: React.FC<UsersKpiProps> = ({
   filterQuery,
   from,
   indexNames,
@@ -37,7 +53,7 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiTlsHandshakes({
+  const [loading, { refetch, id, inspect, ...data }] = useTotalUsersKpi({
     filterQuery,
     endDate: to,
     indexNames,
@@ -61,4 +77,4 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   );
 };
 
-export const NetworkKpiTlsHandshakes = React.memo(NetworkKpiTlsHandshakesComponent);
+export const UsersKpiHosts = React.memo(UsersKpiHostsComponent);
