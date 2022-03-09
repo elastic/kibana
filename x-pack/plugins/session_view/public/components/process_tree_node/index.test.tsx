@@ -133,12 +133,29 @@ describe('ProcessTreeNode component', () => {
       windowGetSelectionSpy.mockRestore();
     });
     describe('Alerts', () => {
-      it('renders Alert button when process has alerts', async () => {
+      it('renders Alert button when process has one alert', async () => {
+        const processMockWithOneAlert = {
+          ...sessionViewAlertProcessMock,
+          events: sessionViewAlertProcessMock.events.slice(
+            0,
+            sessionViewAlertProcessMock.events.length - 1
+          ),
+          getAlerts: () => [sessionViewAlertProcessMock.getAlerts()[0]],
+        };
+        renderResult = mockedContext.render(<ProcessTreeNode process={processMockWithOneAlert} />);
+
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe('Alert');
+      });
+      it('renders Alert button when process has more than one alerts', async () => {
         renderResult = mockedContext.render(
           <ProcessTreeNode process={sessionViewAlertProcessMock} />
         );
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
+          'Alerts(2)'
+        );
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {
         renderResult = mockedContext.render(

@@ -58,10 +58,10 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
     };
 
     const alertRowItem: CSSObject = {
-      '&:first-child': {
+      '&:first-of-type': {
         marginRight: size.m,
       },
-      '&:not(:first-child)': {
+      '&:not(:first-of-type)': {
         marginRight: size.s,
       },
     };

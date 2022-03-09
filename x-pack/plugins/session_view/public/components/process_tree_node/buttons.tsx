@@ -87,11 +87,15 @@ export const SessionLeaderButton = ({
 export const AlertButton = ({
   isExpanded,
   onToggle,
+  alertsCount,
 }: {
   isExpanded: boolean;
   onToggle: () => void;
+  alertsCount: number;
 }) => {
-  const { alertButton, buttonArrow, expandedIcon } = useButtonStyles({ isExpanded });
+  const { alertButton, alertsCountNumber, buttonArrow, expandedIcon } = useButtonStyles({
+    isExpanded,
+  });
 
   return (
     <EuiButton
@@ -100,7 +104,12 @@ export const AlertButton = ({
       onClick={onToggle}
       data-test-subj="processTreeNodeAlertButton"
     >
-      <FormattedMessage id="xpack.sessionView.alerts" defaultMessage="Alerts" />
+      {alertsCount > 1 ? (
+        <FormattedMessage id="xpack.sessionView.alerts" defaultMessage="Alerts" />
+      ) : (
+        <FormattedMessage id="xpack.sessionView.alert" defaultMessage="Alert" />
+      )}
+      {alertsCount > 1 && <span css={alertsCountNumber}>({alertsCount})</span>}
       <EuiIcon css={buttonArrow} size="s" type={expandedIcon} />
     </EuiButton>
   );

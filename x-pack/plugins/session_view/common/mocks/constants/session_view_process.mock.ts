@@ -916,7 +916,7 @@ export const sessionViewAlertProcessMock: Process = {
   ...processMock,
   events: [...mockEvents, ...mockAlerts],
   hasAlerts: () => true,
-  getAlerts: () => mockEvents,
+  getAlerts: () => mockAlerts,
   hasExec: () => true,
   isUserEntered: () => true,
 };

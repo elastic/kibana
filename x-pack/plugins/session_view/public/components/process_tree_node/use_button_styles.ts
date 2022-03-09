@@ -43,6 +43,10 @@ export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
       border: `${border.width.thin} solid ${transparentize(colors.dangerText, 0.48)}`,
     };
 
+    const alertsCountNumber: CSSObject = {
+      paddingLeft: size.xs,
+    };
+
     if (isExpanded) {
       button.color = colors.ghost;
       button.background = theme.euiColorVis6;
@@ -70,6 +74,7 @@ export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
       buttonArrow,
       button,
       alertButton,
+      alertsCountNumber,
       userChangedButton,
       expandedIcon,
     };

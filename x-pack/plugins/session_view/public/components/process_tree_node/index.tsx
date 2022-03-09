@@ -208,7 +208,11 @@ export function ProcessTreeNode({
             <ChildrenProcessesButton isExpanded={childrenExpanded} onToggle={onChildrenToggle} />
           )}
           {alerts.length > 0 && (
-            <AlertButton onToggle={onAlertsToggle} isExpanded={alertsExpanded} />
+            <AlertButton
+              onToggle={onAlertsToggle}
+              isExpanded={alertsExpanded}
+              alertsCount={alerts.length}
+            />
           )}
         </div>
       </div>

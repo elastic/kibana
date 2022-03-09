@@ -38,11 +38,12 @@ export function ProcessTreeAlerts({
 
   return (
     <div css={styles.container} data-test-subj="sessionView:sessionViewAlertDetails">
-      {alerts.map((alert: ProcessEvent) => {
+      {alerts.map((alert: ProcessEvent, idx: number) => {
         const alertUuid = alert.kibana?.alert.uuid || null;
 
         return (
           <ProcessTreeAlert
+            key={`${alertUuid}-${idx}`}
             alert={alert}
             isInvestigated={jumpToAlertID === alertUuid}
             isSelected={isProcessSelected && selectedAlert?.uuid === alertUuid}

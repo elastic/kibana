@@ -68,7 +68,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
       cursor: 'pointer',
       position: 'relative',
       margin: `${size.s} 0px`,
-      '&:not(:first-child)': {
+      '&:not(:first-of-type)': {
         marginTop: size.s,
       },
       '&:hover:before': {
