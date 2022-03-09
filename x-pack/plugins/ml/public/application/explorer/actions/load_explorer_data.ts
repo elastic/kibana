@@ -33,10 +33,10 @@ import { AnomalyTimelineService } from '../../services/anomaly_timeline_service'
 import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
-import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
-import { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import type { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
+import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { mlJobService } from '../../services/job_service';
-import { TimeBucketsInterval } from '../../util/time_buckets';
+import type { TimeBucketsInterval, TimeRangeBounds } from '../../util/time_buckets';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -129,7 +129,7 @@ const loadExplorerDataProvider = (
     const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
     const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
 
-    const bounds = timefilter.getBounds();
+    const bounds = timefilter.getBounds() as Required<TimeRangeBounds>;
 
     const timerange = getSelectionTimeRange(
       selectedCells,

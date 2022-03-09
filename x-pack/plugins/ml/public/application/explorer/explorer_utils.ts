@@ -9,14 +9,14 @@
  * utils for Anomaly Explorer.
  */
 
-import { get, union, sortBy, uniq } from 'lodash';
+import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
-import { getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
 import {
   isSourceDataChartableForDetector,
@@ -32,27 +32,96 @@ import {
   MAX_CATEGORY_EXAMPLES,
   MAX_INFLUENCER_FIELD_VALUES,
   SWIMLANE_TYPE,
+  SwimlaneType,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
+import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { MlResultsService } from '../services/results_service';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
+import { TimeRangeBounds } from '../util/time_buckets';
+import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
+import { Influencer } from '../../../common/types/anomalies';
+import { RecordForInfluencer } from '../services/results_service/results_service';
+
+export interface ExplorerJob {
+  id: string;
+  selected: boolean;
+  bucketSpanSeconds: number;
+}
+
+interface ClearedSelectedAnomaliesState {
+  selectedCells: undefined;
+}
+
+export interface SwimlanePoint {
+  laneLabel: string;
+  time: number;
+  value: number;
+}
+
+export interface SwimlaneData {
+  fieldName?: string;
+  laneLabels: string[];
+  points: SwimlanePoint[];
+  interval: number;
+}
+
+export interface AppStateSelectedCells {
+  type: SwimlaneType;
+  lanes: string[];
+  times: [number, number];
+  showTopFieldValues?: boolean;
+  viewByFieldName?: string;
+}
+
+interface SelectionTimeRange {
+  earliestMs: number;
+  latestMs: number;
+}
+
+export interface AnomaliesTableData {
+  anomalies: any[];
+  interval: number;
+  examplesByJobId: string[];
+  showViewSeriesLink: boolean;
+  jobIds: string[];
+}
+
+export interface ChartRecord extends RecordForInfluencer {
+  function: string;
+}
+
+export interface OverallSwimlaneData extends SwimlaneData {
+  /**
+   * Earliest timestampt in seconds
+   */
+  earliest: number;
+  /**
+   * Latest timestampt in seconds
+   */
+  latest: number;
+}
+
+export interface ViewBySwimLaneData extends OverallSwimlaneData {
+  cardinality: number;
+}
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
-export function createJobs(jobs) {
+export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
   return jobs.map((job) => {
     const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-    return { id: job.job_id, selected: false, bucketSpanSeconds: bucketSpan.asSeconds() };
+    return { id: job.job_id, selected: false, bucketSpanSeconds: bucketSpan!.asSeconds() };
   });
 }
 
-export function getClearedSelectedAnomaliesState() {
+export function getClearedSelectedAnomaliesState(): ClearedSelectedAnomaliesState {
   return {
     selectedCells: undefined,
-    viewByLoadedForTimeFormatted: null,
-    swimlaneLimit: undefined,
   };
 }
 
-export function getDefaultSwimlaneData() {
+export function getDefaultSwimlaneData(): SwimlaneData {
   return {
     fieldName: '',
     laneLabels: [],
@@ -62,18 +131,18 @@ export function getDefaultSwimlaneData() {
 }
 
 export async function loadFilteredTopInfluencers(
-  mlResultsService,
-  jobIds,
-  earliestMs,
-  latestMs,
-  records,
-  influencers,
-  noInfluencersConfigured,
-  influencersFilterQuery
-) {
+  mlResultsService: MlResultsService,
+  jobIds: string[],
+  earliestMs: number,
+  latestMs: number,
+  records: any[],
+  influencers: any[],
+  noInfluencersConfigured: boolean,
+  influencersFilterQuery: InfluencersFilterQuery
+): Promise<any[]> {
   // Filter the Top Influencers list to show just the influencers from
   // the records in the selected time range.
-  const recordInfluencersByName = {};
+  const recordInfluencersByName: Record<string, any[]> = {};
 
   // Add the specified influencer(s) to ensure they are used in the filter
   // even if their influencer score for the selected time range is zero.
@@ -87,7 +156,7 @@ export async function loadFilteredTopInfluencers(
 
   // Add the influencers from the top scoring anomalies.
   records.forEach((record) => {
-    const influencersByName = record.influencers || [];
+    const influencersByName: Influencer[] = record.influencers || [];
     influencersByName.forEach((influencer) => {
       const fieldName = influencer.influencer_field_name;
       const fieldValues = influencer.influencer_field_values;
@@ -98,13 +167,13 @@ export async function loadFilteredTopInfluencers(
     });
   });
 
-  const uniqValuesByName = {};
+  const uniqValuesByName: Record<string, any[]> = {};
   Object.keys(recordInfluencersByName).forEach((fieldName) => {
     const fieldValues = recordInfluencersByName[fieldName];
     uniqValuesByName[fieldName] = uniq(fieldValues);
   });
 
-  const filterInfluencers = [];
+  const filterInfluencers: EntityField[] = [];
   Object.keys(uniqValuesByName).forEach((fieldName) => {
     // Find record influencers with the same field name as the clicked on cell(s).
     const matchingFieldName = influencers.find((influencer) => {
@@ -122,7 +191,7 @@ export async function loadFilteredTopInfluencers(
     }
   });
 
-  return await loadTopInfluencers(
+  return (await loadTopInfluencers(
     mlResultsService,
     jobIds,
     earliestMs,
@@ -130,11 +199,11 @@ export async function loadFilteredTopInfluencers(
     filterInfluencers,
     noInfluencersConfigured,
     influencersFilterQuery
-  );
+  )) as any[];
 }
 
-export function getInfluencers(selectedJobs = []) {
-  const influencers = [];
+export function getInfluencers(selectedJobs: any[]): string[] {
+  const influencers: string[] = [];
   selectedJobs.forEach((selectedJob) => {
     const job = mlJobService.getJob(selectedJob.id);
     if (job !== undefined && job.analysis_config && job.analysis_config.influencers) {
@@ -144,7 +213,7 @@ export function getInfluencers(selectedJobs = []) {
   return influencers;
 }
 
-export function getDateFormatTz() {
+export function getDateFormatTz(): string {
   const uiSettings = getUiSettings();
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = uiSettings.get('dateFormat:tz');
@@ -173,18 +242,22 @@ export function getFieldsByJob() {
             reducedfieldsForJob.push(detector.by_field_name);
           }
           return reducedfieldsForJob;
-        }, [])
+        }, [] as string[])
         .concat(influencers);
 
       reducedFieldsByJob[job.job_id] = uniq(fieldsForJob);
       reducedFieldsByJob['*'] = union(reducedFieldsByJob['*'], reducedFieldsByJob[job.job_id]);
       return reducedFieldsByJob;
     },
-    { '*': [] }
+    { '*': [] } as Record<string, string[]>
   );
 }
 
-export function getSelectionTimeRange(selectedCells, interval, bounds) {
+export function getSelectionTimeRange(
+  selectedCells: AppStateSelectedCells | undefined,
+  interval: number,
+  bounds: Required<TimeRangeBounds>
+): SelectionTimeRange {
   // Returns the time range of the cell(s) currently selected in the swimlane.
   // If no cell(s) are currently selected, returns the dashboard time range.
   let earliestMs = bounds.min.valueOf();
@@ -205,7 +278,10 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
   return { earliestMs, latestMs };
 }
 
-export function getSelectionInfluencers(selectedCells, fieldName) {
+export function getSelectionInfluencers(
+  selectedCells: AppStateSelectedCells | undefined,
+  fieldName: string
+): EntityField[] {
   if (
     selectedCells !== undefined &&
     selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
@@ -218,7 +294,10 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
   return [];
 }
 
-export function getSelectionJobIds(selectedCells, selectedJobs) {
+export function getSelectionJobIds(
+  selectedCells: AppStateSelectedCells | undefined,
+  selectedJobs: ExplorerJob[]
+): string[] {
   if (
     selectedCells !== undefined &&
     selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
@@ -231,123 +310,11 @@ export function getSelectionJobIds(selectedCells, selectedJobs) {
   return selectedJobs.map((d) => d.id);
 }
 
-// Obtain the list of 'View by' fields per job and viewBySwimlaneFieldName
-export function getViewBySwimlaneOptions({
-  currentViewBySwimlaneFieldName,
-  filterActive,
-  filteredFields,
-  isAndOperator,
-  selectedCells,
-  selectedJobs,
-}) {
-  const selectedJobIds = selectedJobs.map((d) => d.id);
-
-  // Unique influencers for the selected job(s).
-  const viewByOptions = sortBy(
-    uniq(
-      mlJobService.jobs.reduce((reducedViewByOptions, job) => {
-        if (selectedJobIds.some((jobId) => jobId === job.job_id)) {
-          return reducedViewByOptions.concat(job.analysis_config.influencers || []);
-        }
-        return reducedViewByOptions;
-      }, [])
-    ),
-    (fieldName) => fieldName.toLowerCase()
-  );
-
-  viewByOptions.push(VIEW_BY_JOB_LABEL);
-  let viewBySwimlaneOptions = viewByOptions;
-
-  let viewBySwimlaneFieldName = undefined;
-
-  if (viewBySwimlaneOptions.indexOf(currentViewBySwimlaneFieldName) !== -1) {
-    // Set the swimlane viewBy to that stored in the state (URL) if set.
-    // This means we reset it to the current state because it was set by the listener
-    // on initialization.
-    viewBySwimlaneFieldName = currentViewBySwimlaneFieldName;
-  } else {
-    if (selectedJobIds.length > 1) {
-      // If more than one job selected, default to job ID.
-      viewBySwimlaneFieldName = VIEW_BY_JOB_LABEL;
-    } else if (mlJobService.jobs.length > 0 && selectedJobIds.length > 0) {
-      // For a single job, default to the first partition, over,
-      // by or influencer field of the first selected job.
-      const firstSelectedJob = mlJobService.jobs.find((job) => {
-        return job.job_id === selectedJobIds[0];
-      });
-
-      const firstJobInfluencers = firstSelectedJob.analysis_config.influencers || [];
-      firstSelectedJob.analysis_config.detectors.forEach((detector) => {
-        if (
-          detector.partition_field_name !== undefined &&
-          firstJobInfluencers.indexOf(detector.partition_field_name) !== -1
-        ) {
-          viewBySwimlaneFieldName = detector.partition_field_name;
-          return false;
-        }
-
-        if (
-          detector.over_field_name !== undefined &&
-          firstJobInfluencers.indexOf(detector.over_field_name) !== -1
-        ) {
-          viewBySwimlaneFieldName = detector.over_field_name;
-          return false;
-        }
-
-        // For jobs with by and over fields, don't add the 'by' field as this
-        // field will only be added to the top-level fields for record type results
-        // if it also an influencer over the bucket.
-        if (
-          detector.by_field_name !== undefined &&
-          detector.over_field_name === undefined &&
-          firstJobInfluencers.indexOf(detector.by_field_name) !== -1
-        ) {
-          viewBySwimlaneFieldName = detector.by_field_name;
-          return false;
-        }
-      });
-
-      if (viewBySwimlaneFieldName === undefined) {
-        if (firstJobInfluencers.length > 0) {
-          viewBySwimlaneFieldName = firstJobInfluencers[0];
-        } else {
-          // No influencers for first selected job - set to first available option.
-          viewBySwimlaneFieldName =
-            viewBySwimlaneOptions.length > 0 ? viewBySwimlaneOptions[0] : undefined;
-        }
-      }
-    }
-  }
-
-  // filter View by options to relevant filter fields
-  // If it's an AND filter only show job Id view by as the rest will have no results
-  if (filterActive === true && isAndOperator === true && selectedCells === null) {
-    viewBySwimlaneOptions = [VIEW_BY_JOB_LABEL];
-  } else if (
-    filterActive === true &&
-    Array.isArray(viewBySwimlaneOptions) &&
-    Array.isArray(filteredFields)
-  ) {
-    const filteredOptions = viewBySwimlaneOptions.filter((option) => {
-      return (
-        filteredFields.includes(option) ||
-        option === VIEW_BY_JOB_LABEL ||
-        (selectedCells && selectedCells.viewByFieldName === option)
-      );
-    });
-    // only replace viewBySwimlaneOptions with filteredOptions if we found a relevant matching field
-    if (filteredOptions.length > 1) {
-      viewBySwimlaneOptions = filteredOptions;
-    }
-  }
-
-  return {
-    viewBySwimlaneFieldName,
-    viewBySwimlaneOptions,
-  };
-}
-
-export function loadOverallAnnotations(selectedJobs, interval, bounds) {
+export function loadOverallAnnotations(
+  selectedJobs: ExplorerJob[],
+  interval: number,
+  bounds: Required<TimeRangeBounds>
+): Promise<AnnotationsTable> {
   const jobIds = selectedJobs.map((d) => d.id);
   const timeRange = getSelectionTimeRange(undefined, interval, bounds);
 
@@ -369,7 +336,7 @@ export function loadOverallAnnotations(selectedJobs, interval, bounds) {
           });
         }
 
-        const annotationsData = [];
+        const annotationsData: Annotations = [];
         jobIds.forEach((jobId) => {
           const jobAnnotations = resp.annotations[jobId];
           if (jobAnnotations !== undefined) {
@@ -398,7 +365,12 @@ export function loadOverallAnnotations(selectedJobs, interval, bounds) {
   });
 }
 
-export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
+export function loadAnnotationsTableData(
+  selectedCells: AppStateSelectedCells | undefined,
+  selectedJobs: ExplorerJob[],
+  interval: number,
+  bounds: Required<TimeRangeBounds>
+): Promise<AnnotationsTable> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 
@@ -421,7 +393,7 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
           });
         }
 
-        const annotationsData = [];
+        const annotationsData: Annotations = [];
         jobIds.forEach((jobId) => {
           const jobAnnotations = resp.annotations[jobId];
           if (jobAnnotations !== undefined) {
@@ -453,16 +425,16 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
 }
 
 export async function loadAnomaliesTableData(
-  selectedCells,
-  selectedJobs,
-  dateFormatTz,
-  interval,
-  bounds,
-  fieldName,
-  tableInterval,
-  tableSeverity,
-  influencersFilterQuery
-) {
+  selectedCells: AppStateSelectedCells | undefined,
+  selectedJobs: ExplorerJob[],
+  dateFormatTz: any,
+  interval: number,
+  bounds: Required<TimeRangeBounds>,
+  fieldName: string,
+  tableInterval: string,
+  tableSeverity: number,
+  influencersFilterQuery: InfluencersFilterQuery
+): Promise<AnomaliesTableData> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
@@ -486,6 +458,7 @@ export async function loadAnomaliesTableData(
       .then((resp) => {
         const anomalies = resp.anomalies;
         const detectorsByJob = mlJobService.detectorsByJob;
+        // @ts-ignore
         anomalies.forEach((anomaly) => {
           // Add a detector property to each anomaly.
           // Default to functionDescription if no description available.
@@ -534,6 +507,7 @@ export async function loadAnomaliesTableData(
         });
       })
       .catch((resp) => {
+        // eslint-disable-next-line no-console
         console.log('Explorer - error loading data for anomalies table:', resp);
         reject();
       });
@@ -541,13 +515,13 @@ export async function loadAnomaliesTableData(
 }
 
 export async function loadTopInfluencers(
-  mlResultsService,
-  selectedJobIds,
-  earliestMs,
-  latestMs,
-  influencers = [],
-  noInfluencersConfigured,
-  influencersFilterQuery
+  mlResultsService: MlResultsService,
+  selectedJobIds: string[],
+  earliestMs: number,
+  latestMs: number,
+  influencers: any[],
+  noInfluencersConfigured?: boolean,
+  influencersFilterQuery?: InfluencersFilterQuery
 ) {
   return new Promise((resolve) => {
     if (noInfluencersConfigured !== true) {
@@ -574,26 +548,30 @@ export async function loadTopInfluencers(
 
 // Recommended by MDN for escaping user input to be treated as a literal string within a regular expression
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
-export function escapeRegExp(string) {
+export function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-export function escapeParens(string) {
+export function escapeParens(string: string): string {
   return string.replace(/[()]/g, '\\$&');
 }
 
-export function escapeDoubleQuotes(string) {
+export function escapeDoubleQuotes(string: string): string {
   return string.replace(/[\\"]/g, '\\$&');
 }
 
-export function getQueryPattern(fieldName, fieldValue) {
+export function getQueryPattern(fieldName: string, fieldValue: string) {
   const sanitizedFieldName = escapeRegExp(fieldName);
   const sanitizedFieldValue = escapeRegExp(fieldValue);
 
   return new RegExp(`(${sanitizedFieldName})\\s?:\\s?(")?(${sanitizedFieldValue})(")?`, 'i');
 }
 
-export function removeFilterFromQueryString(currentQueryString, fieldName, fieldValue) {
+export function removeFilterFromQueryString(
+  currentQueryString: string,
+  fieldName: string,
+  fieldValue: string
+) {
   let newQueryString = '';
   // Remove the passed in fieldName and value from the existing filter
   const queryPattern = getQueryPattern(fieldName, fieldValue);
