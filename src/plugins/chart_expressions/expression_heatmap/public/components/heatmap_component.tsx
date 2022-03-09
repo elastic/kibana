@@ -305,7 +305,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const { min, max } = minMaxByColumnId[valueAccessor!];
     // formatters
     const xValuesFormatter = formatFactory(xAxisMeta?.params);
-    const metricFormatter = formatFactory(getFormatByAccessor(args.valueAccessor, table.columns));
+    const metricFormatter = formatFactory(getFormatByAccessor(args.valueAccessor!, table.columns));
     const dateHistogramMeta = xAxisColumn
       ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
       : undefined;
