@@ -47,7 +47,7 @@ export const ProcessTreeAlert = ({
     >
       <EuiButtonIcon iconType="expand" aria-label="expand" css={styles.alertRowItem} />
       <EuiIcon type="alert" css={styles.alertRowItem} />
-      <EuiText size="s" css={styles.alertRowItem}>
+      <EuiText size="s" css={styles.alertRuleName}>
         {name}
       </EuiText>
       <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>

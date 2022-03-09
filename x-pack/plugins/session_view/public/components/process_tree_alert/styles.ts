@@ -44,7 +44,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       fontFamily: font.family,
       display: 'flex',
       alignItems: 'center',
-      height: '20px',
+      minHeight: '20px',
       padding: `${size.xs} ${size.base}`,
       boxSizing: 'content-box',
       cursor: 'pointer',
@@ -66,6 +66,11 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       },
     };
 
+    const alertRuleName: CSSObject = {
+      ...alertRowItem,
+      maxWidth: '70%',
+    };
+
     const alertStatus: CSSObject = {
       ...alertRowItem,
       textTransform: 'capitalize',
@@ -77,6 +82,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
     return {
       alert,
       alertRowItem,
+      alertRuleName,
       alertStatus,
     };
   }, [euiTheme, isInvestigated, isSelected]);
