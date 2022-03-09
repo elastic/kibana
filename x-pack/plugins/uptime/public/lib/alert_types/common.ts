@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { stringify } from 'querystring';
-
 export const getUrlForAlert = (id: string, basePath: string) => {
   return basePath + '/app/management/insightsAndAlerting/triggersActions/alert/' + id;
 };
