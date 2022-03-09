@@ -66,18 +66,23 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       data: artifacts,
       isLoading: isLoadingArtifacts,
       isRefetching: isRefetchingArtifacts,
-    } = useListArtifact(apiClient, searcheableFields, {
-      perPage: MAX_ALLOWED_RESULTS,
-      filter: currentFilter,
-      excludedPolicies: [policyItem.id, 'all'],
-    });
+    } = useListArtifact(
+      apiClient,
+      {
+        perPage: MAX_ALLOWED_RESULTS,
+        filter: currentFilter,
+        excludedPolicies: [policyItem.id, 'all'],
+      },
+      searcheableFields
+    );
 
     const { data: allNotAssigned, isLoading: isLoadingAllNotAssigned } = useListArtifact(
       apiClient,
-      searcheableFields,
+
       {
         excludedPolicies: [policyItem.id, 'all'],
-      }
+      },
+      searcheableFields
     );
 
     const handleOnSearch = useCallback((query) => {

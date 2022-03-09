@@ -89,6 +89,21 @@ export const PolicyTabs = React.memo(() => {
     }
   }, [canSeeHostIsolationExceptions, history, isInHostIsolationExceptionsTab, policyId]);
 
+  const getTrustedAppsApiClientInstance = useCallback(
+    () => TrustedAppsApiClient.getInstance(http),
+    [http]
+  );
+
+  const getEventFiltersApiClientInstance = useCallback(
+    () => EventFiltersApiClient.getInstance(http),
+    [http]
+  );
+
+  const getHostIsolationExceptionsApiClientInstance = useCallback(
+    () => HostIsolationExceptionsApiClient.getInstance(http),
+    [http]
+  );
+
   const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
     const trustedAppsLabels = {
       ...POLICY_ARTIFACT_TRUSTED_APPS_LABELS,
@@ -147,7 +162,7 @@ export const PolicyTabs = React.memo(() => {
             <PolicyArtifactsLayout
               policyItem={policyItem}
               labels={trustedAppsLabels}
-              getExceptionsListApiClient={() => TrustedAppsApiClient.getInstance(http)}
+              getExceptionsListApiClient={getTrustedAppsApiClientInstance}
               searcheableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
               getArtifactPath={getTrustedAppsListPath}
               getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
@@ -166,7 +181,7 @@ export const PolicyTabs = React.memo(() => {
             <PolicyArtifactsLayout
               policyItem={policyItem}
               labels={eventFiltersLabels}
-              getExceptionsListApiClient={() => EventFiltersApiClient.getInstance(http)}
+              getExceptionsListApiClient={getEventFiltersApiClientInstance}
               searcheableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
               getArtifactPath={getEventFiltersListPath}
               getPolicyArtifactsPath={getPolicyEventFiltersPath}
@@ -189,9 +204,7 @@ export const PolicyTabs = React.memo(() => {
                 <PolicyArtifactsLayout
                   policyItem={policyItem}
                   labels={hostIsolationExceptionsLabels}
-                  getExceptionsListApiClient={() =>
-                    HostIsolationExceptionsApiClient.getInstance(http)
-                  }
+                  getExceptionsListApiClient={getHostIsolationExceptionsApiClientInstance}
                   searcheableFields={HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS}
                   getArtifactPath={getHostIsolationExceptionsListPath}
                   getPolicyArtifactsPath={getPolicyHostIsolationExceptionsPath}
@@ -202,7 +215,14 @@ export const PolicyTabs = React.memo(() => {
           }
         : undefined,
     };
-  }, [canSeeHostIsolationExceptions, http, policyItem, privileges.canIsolateHost]);
+  }, [
+    canSeeHostIsolationExceptions,
+    getEventFiltersApiClientInstance,
+    getHostIsolationExceptionsApiClientInstance,
+    getTrustedAppsApiClientInstance,
+    policyItem,
+    privileges.canIsolateHost,
+  ]);
 
   // convert tabs object into an array EuiTabbedContent can understand
   const tabsList: PolicyTab[] = useMemo(

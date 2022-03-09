@@ -84,17 +84,17 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
 
     const { data: allAssigned, isLoading: isLoadingAllAssigned } = useListArtifact(
       exceptionsListApiClient,
-      [...searcheableFields],
       {
         policies: policyItem ? [policyItem.id, 'all'] : [],
-      }
+      },
+      searcheableFields
     );
 
     const {
       data: allArtifacts,
       isLoading: isLoadingAllArtifacts,
       isRefetching: isRefetchingAllArtifacts,
-    } = useListArtifact(exceptionsListApiClient, [...searcheableFields], {}, {}, ['allExisting']);
+    } = useListArtifact(exceptionsListApiClient, {}, searcheableFields, {}, ['allExisting']);
 
     const handleOnClickAssignButton = useCallback(() => {
       navigateCallback({ show: 'list' });

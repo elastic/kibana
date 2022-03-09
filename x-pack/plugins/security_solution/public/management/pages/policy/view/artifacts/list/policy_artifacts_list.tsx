@@ -73,12 +73,16 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       data: artifacts,
       isLoading: isLoadingArtifacts,
       isRefetching: isRefetchingArtifacts,
-    } = useListArtifact(apiClient, searcheableFields, {
-      page: urlPagination.page,
-      perPage: urlPagination.pageSize,
-      filter: urlParams.filter as string,
-      policies: [policy.id, 'all'],
-    });
+    } = useListArtifact(
+      apiClient,
+      {
+        page: urlPagination.page,
+        perPage: urlPagination.pageSize,
+        filter: urlParams.filter as string,
+        policies: [policy.id, 'all'],
+      },
+      searcheableFields
+    );
 
     const pagination: Pagination = useMemo(
       () => ({
