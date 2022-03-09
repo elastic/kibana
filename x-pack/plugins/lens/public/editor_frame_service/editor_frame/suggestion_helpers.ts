@@ -149,6 +149,7 @@ export function getSuggestions({
             currentVisualizationState,
             subVisualizationId,
             palette,
+            visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
             activeData
           );
         });
@@ -207,6 +208,7 @@ function getVisualizationSuggestions(
   currentVisualizationState: unknown,
   subVisualizationId?: string,
   mainPalette?: PaletteOutput,
+  isFromContext?: boolean,
   activeData?: Record<string, Datatable>
 ) {
   return visualization
@@ -216,6 +218,7 @@ function getVisualizationSuggestions(
       keptLayerIds: datasourceSuggestion.keptLayerIds,
       subVisualizationId,
       mainPalette,
+      isFromContext,
       activeData,
     })
     .map(({ state, ...visualizationSuggestion }) => ({

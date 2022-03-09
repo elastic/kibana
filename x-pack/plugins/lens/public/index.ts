@@ -22,7 +22,6 @@ export type {
   VisualizationSuggestion,
 } from './types';
 export type {
-  MetricState,
   AxesSettingsConfig,
   XYLayerConfig,
   LegendConfig,
