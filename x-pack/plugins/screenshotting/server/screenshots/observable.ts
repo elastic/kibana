@@ -23,6 +23,7 @@ import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
+import { pngsToPdf } from './pdf_maker';
 
 export interface PhaseTimeouts {
   /**
@@ -81,7 +82,7 @@ export interface ScreenshotObservableOptions {
    *
    * Defaults to: { type: 'png' }
    */
-  format?: { type: 'png' } | { type: 'pdf'; options: { title: string } };
+  format?: { type: 'png' } | { type: 'pdf'; options: { title?: string; logo?: string } };
 }
 
 export interface ScreenshotObservableResult {
@@ -245,16 +246,44 @@ export class ScreenshotObservableHandler {
     );
   }
 
+  private async pngsToPdf(pngs: Screenshot[], title: undefined | string, logo: undefined | string) {
+    try {
+      return await pngsToPdf({
+        pngs,
+        title,
+        logo,
+        layout: this.layout,
+        logger: this.logger,
+      });
+    } catch (e) {
+      this.logger.error(`Could not generate the PDF buffer!`);
+      throw e;
+    }
+  }
+
   public getScreenshots() {
     return (withRenderComplete: Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
         mergeMap(async (data: PageSetupResults): Promise<ScreenshotObservableResult> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
-
           const elements =
             data.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
-          const screenshots = await getScreenshots(this.driver, this.logger, elements);
+          let screenshots = await getScreenshots(this.driver, this.logger, elements);
+
+          if (this.options.format?.type === 'pdf') {
+            const { options } = this.options.format;
+            const title = options.title
+              ? options.title + (data.timeRange ? ` - ${data.timeRange}` : '')
+              : undefined;
+            screenshots = [
+              {
+                data: await this.pngsToPdf(screenshots, title, options.logo),
+                title: null,
+                description: null,
+              },
+            ];
+          }
           const { timeRange, error: setupError } = data;
 
           return {

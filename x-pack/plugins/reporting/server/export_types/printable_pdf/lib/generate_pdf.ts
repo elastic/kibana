@@ -13,8 +13,6 @@ import { ReportingCore } from '../../../';
 import { ScreenshotResult } from '../../../../../screenshotting/server';
 import type { PdfMetrics } from '../../../../common/types';
 import { ScreenshotOptions } from '../../../types';
-import { PdfMaker } from '../../common/pdf';
-import { getTracker } from './tracker';
 
 const getTimeRange = (urlScreenshots: ScreenshotResult['results']) => {
   const grouped = groupBy(urlScreenshots.map(({ timeRange }) => timeRange));

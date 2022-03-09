@@ -6,7 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
+const TRANSACTION_TYPE = 'reporting'; // TODO: Find out whether we can rename to "screenshotting";
 
 interface PdfTracker {
   setByteLength: (byteLength: number) => void;
@@ -31,7 +31,7 @@ interface ApmSpan {
 }
 
 export function getTracker(): PdfTracker {
-  const apmTrans = apm.startTransaction('generate-pdf', REPORTING_TRANSACTION_TYPE);
+  const apmTrans = apm.startTransaction('generate-pdf', TRANSACTION_TYPE);
 
   let apmScreenshots: ApmSpan | null = null;
   let apmSetup: ApmSpan | null = null;
