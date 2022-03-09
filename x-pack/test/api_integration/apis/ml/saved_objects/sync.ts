@@ -109,10 +109,18 @@ export default ({ getService }: FtrProviderContext) => {
       const body = await runSyncRequest(USER.ML_POWERUSER_ALL_SPACES, 200);
 
       expect(body).to.eql({
-        datafeedsAdded: { [adJobId2]: { success: true, type: 'anomaly-detector' } },
-        datafeedsRemoved: { [adJobId3]: { success: true, type: 'anomaly-detector' } },
-        savedObjectsCreated: { [adJobIdES]: { success: true, type: 'anomaly-detector' } },
-        savedObjectsDeleted: { [adJobId1]: { success: true, type: 'anomaly-detector' } },
+        datafeedsAdded: {
+          'anomaly-detector': { [adJobId2]: { success: true } },
+        },
+        datafeedsRemoved: {
+          'anomaly-detector': { [adJobId3]: { success: true } },
+        },
+        savedObjectsCreated: {
+          'anomaly-detector': { [adJobIdES]: { success: true } },
+        },
+        savedObjectsDeleted: {
+          'anomaly-detector': { [adJobId1]: { success: true } },
+        },
       });
     });
 
@@ -146,7 +154,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       // expect datafeed to be added
       expect(body).to.eql({
-        datafeedsAdded: { [adJobId1]: { success: true, type: 'anomaly-detector' } },
+        datafeedsAdded: {
+          'anomaly-detector': { [adJobId1]: { success: true } },
+        },
         datafeedsRemoved: {},
         savedObjectsCreated: {},
         savedObjectsDeleted: {},
@@ -172,7 +182,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       // previous datafeed should be removed and new datafeed should be added on sync
       expect(body2).to.eql({
-        datafeedsAdded: { [adJobId1]: { success: true, type: 'anomaly-detector' } },
+        datafeedsAdded: {
+          'anomaly-detector': { [adJobId1]: { success: true } },
+        },
         datafeedsRemoved: {},
         savedObjectsCreated: {},
         savedObjectsDeleted: {},

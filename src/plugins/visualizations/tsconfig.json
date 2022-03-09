@@ -30,6 +30,7 @@
     { "path": "../home/tsconfig.json" },
     { "path": "../share/tsconfig.json" },
     { "path": "../presentation_util/tsconfig.json" },
+    { "path": "../screenshot_mode/tsconfig.json" },
     { "path": "../../../x-pack/plugins/spaces/tsconfig.json" }
   ]
 }

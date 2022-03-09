@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import { AddConfigDeprecation } from '@kbn/config';
+import apm from 'elastic-apm-node';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
@@ -885,7 +886,7 @@ export { EcsEventOutcome }
 export { EcsEventType }
 
 // @public
-export type ElasticsearchClient = Omit<Client, 'connectionPool' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'>;
+export type ElasticsearchClient = Omit<Client, 'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'>;
 
 // @public
 export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'compression' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
@@ -958,10 +959,6 @@ export interface ElasticsearchServiceSetup {
 export interface ElasticsearchServiceStart {
     readonly client: IClusterClient;
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
-    // @deprecated (undocumented)
-    legacy: {
-        readonly config$: Observable<ElasticsearchConfig>;
-    };
 }
 
 // @public (undocumented)
@@ -994,6 +991,8 @@ export class EventLoopDelaysMonitor {
 
 // @public (undocumented)
 export interface ExecutionContextSetup {
+    // (undocumented)
+    getAsLabels(): apm.Labels;
     withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
 }
 
@@ -1124,8 +1123,6 @@ export interface HttpServicePreboot {
 
 // @public
 export interface HttpServiceSetup {
-    // @deprecated
-    auth: HttpAuth;
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() => IRouter<Context>;
@@ -1319,9 +1316,10 @@ export interface IUiSettingsClient {
 
 // @public
 export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
+    readonly type?: string;
+    readonly name?: string;
+    readonly page?: string;
+    readonly id?: string;
     readonly description?: string;
     readonly url?: string;
     child?: KibanaExecutionContext;
@@ -2497,8 +2495,6 @@ export interface SavedObjectsImportFailure {
         icon?: string;
     };
     overwrite?: boolean;
-    // @deprecated (undocumented)
-    title?: string;
     // (undocumented)
     type: string;
 }

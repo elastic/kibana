@@ -314,7 +314,7 @@ export const LensTopNavMenu = ({
     initialContext,
   ]);
 
-  const canShowUnderlyingData = useMemo(() => {
+  const layerMetaInfo = useMemo(() => {
     if (!activeDatasourceId || !discover) {
       return;
     }
@@ -342,7 +342,7 @@ export const LensTopNavMenu = ({
             (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
         ) || Boolean(initialContextIsEmbedded),
       enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
-      showOpenInDiscover: Boolean(canShowUnderlyingData?.isVisible),
+      showOpenInDiscover: Boolean(layerMetaInfo?.isVisible),
       isByValueMode: getIsByValueMode(),
       allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
       showCancel: Boolean(isLinkedToOriginatingApp),
@@ -366,7 +366,7 @@ export const LensTopNavMenu = ({
           return undefined;
         },
         showUnderlyingDataWarning: () => {
-          return canShowUnderlyingData?.error;
+          return layerMetaInfo?.error;
         },
       },
       actions: {
@@ -436,10 +436,10 @@ export const LensTopNavMenu = ({
           }
         },
         getUnderlyingDataUrl: () => {
-          if (!canShowUnderlyingData) {
+          if (!layerMetaInfo) {
             return;
           }
-          const { error, meta } = canShowUnderlyingData;
+          const { error, meta } = layerMetaInfo;
           // If Discover is not available, return
           // If there's no data, return
           if (error || !discover || !meta) {
@@ -470,7 +470,7 @@ export const LensTopNavMenu = ({
     initialContextIsEmbedded,
     isSaveable,
     activeData,
-    canShowUnderlyingData,
+    layerMetaInfo,
     getIsByValueMode,
     savingToLibraryPermitted,
     savingToDashboardPermitted,

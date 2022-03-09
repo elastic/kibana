@@ -53,10 +53,7 @@ export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,
   activeData: TableInspectorAdapter | undefined,
-  capabilities: RecursiveReadonly<{
-    navLinks: Capabilities['navLinks'];
-    discover?: Capabilities['discover'];
-  }>
+  capabilities: RecursiveReadonly<Capabilities>
 ): { meta: LayerMetaInfo | undefined; isVisible: boolean; error: string | undefined } {
   const isVisible = Boolean(capabilities.navLinks?.discover && capabilities.discover?.show);
   // If Multiple tables, return
@@ -86,15 +83,15 @@ export function getLayerMetaInfo(
     state: datasourceState,
   });
   // maybe add also datasourceId validation here?
-  //   if (datasourceAPI.datasourceId !== 'indexpattern') {
-  //     return {
-  //       meta: undefined,
-  //       error: i18n.translate('xpack.lens.app.showUnderlyingDataUnsupportedDatasource', {
-  //         defaultMessage: 'Underlying data does not support the current datasource',
-  //       }),
-  //       isVisible,
-  //     };
-  //   }
+  if (datasourceAPI.datasourceId !== 'indexpattern') {
+    return {
+      meta: undefined,
+      error: i18n.translate('xpack.lens.app.showUnderlyingDataUnsupportedDatasource', {
+        defaultMessage: 'Underlying data does not support the current datasource',
+      }),
+      isVisible,
+    };
+  }
   const tableSpec = datasourceAPI.getTableSpec();
 
   const columnsWithNoTimeShifts = tableSpec.filter(
@@ -111,16 +108,6 @@ export function getLayerMetaInfo(
   }
 
   const uniqueFields = [...new Set(columnsWithNoTimeShifts.map(({ fields }) => fields).flat())];
-  // If no field, return? Or rather carry on and show the default columns?
-  // if (!uniqueFields.length) {
-  //   return {
-  //     meta: undefined,
-  //     error: i18n.translate('xpack.lens.app.showUnderlyingDataNoFields', {
-  //       defaultMessage: 'The current visualization has no available fields to show',
-  //     }),
-  //     isVisible,
-  //   };
-  // }
   return {
     meta: {
       id: datasourceAPI.getSourceId()!,

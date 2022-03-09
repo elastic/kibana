@@ -228,15 +228,12 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
+    const buildColumnFn = columnParams
+      ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
+      : operationDefinition.buildColumn({ ...baseOptions, layer });
 
     return updateDefaultLabels(
-      addOperationFn(
-        layer,
-        operationDefinition.buildColumn({ ...baseOptions, layer }),
-        columnId,
-        visualizationGroups,
-        targetGroup
-      ),
+      addOperationFn(layer, buildColumnFn, columnId, visualizationGroups, targetGroup),
       indexPattern
     );
   }
@@ -1702,12 +1699,13 @@ export function computeLayerFromContext(
 
 export function getSplitByTermsLayer(
   indexPattern: IndexPattern,
-  splitField: IndexPatternField,
+  splitFields: IndexPatternField[],
   dateField: IndexPatternField | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { termsParams, metrics, timeInterval, splitWithDateHistogram } = layer;
   const copyMetricsArray = [...metrics];
+
   const computedLayer = computeLayerFromContext(
     metrics.length === 1,
     copyMetricsArray,
@@ -1716,7 +1714,9 @@ export function getSplitByTermsLayer(
     layer.label
   );
 
+  const [baseField, ...secondaryFields] = splitFields;
   const columnId = generateId();
+
   let termsLayer = insertNewColumn({
     op: splitWithDateHistogram ? 'date_histogram' : 'terms',
     layer: insertNewColumn({
@@ -1731,10 +1731,22 @@ export function getSplitByTermsLayer(
       },
     }),
     columnId,
-    field: splitField,
+    field: baseField,
     indexPattern,
     visualizationGroups: [],
   });
+
+  if (secondaryFields.length) {
+    termsLayer = updateColumnParam({
+      layer: termsLayer,
+      columnId,
+      paramName: 'secondaryFields',
+      value: secondaryFields.map((i) => i.name),
+    });
+
+    termsLayer = updateDefaultLabels(termsLayer, indexPattern);
+  }
+
   const termsColumnParams = termsParams as TermsIndexPatternColumn['params'];
   if (termsColumnParams) {
     for (const [param, value] of Object.entries(termsColumnParams)) {

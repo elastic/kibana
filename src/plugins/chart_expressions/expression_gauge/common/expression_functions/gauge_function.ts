@@ -11,6 +11,7 @@ import { findAccessorOrFail } from '../../../../visualizations/common/utils';
 import type { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { prepareLogTable } from '../../../../visualizations/common/utils';
 import type { DatatableColumn } from '../../../../expressions';
+import { validateOptions } from '../../../../charts/common';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -76,16 +77,6 @@ const validateAccessor = (
 ) => {
   if (accessor && typeof accessor === 'string') {
     findAccessorOrFail(accessor, columns);
-  }
-};
-
-const validateOptions = (
-  value: string,
-  availableOptions: Record<string, string>,
-  getErrorMessage: () => string
-) => {
-  if (!Object.values(availableOptions).includes(value)) {
-    throw new Error(getErrorMessage());
   }
 };
 
@@ -187,6 +178,14 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       options: [GaugeLabelMajorModes.NONE, GaugeLabelMajorModes.AUTO, GaugeLabelMajorModes.CUSTOM],
       help: i18n.translate('expressionGauge.functions.gauge.args.centralMajorMode.help', {
         defaultMessage: 'Specifies the mode of centralMajor',
+      }),
+    },
+    // used only in legacy gauge, consider it as @deprecated
+    percentageMode: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionGauge.functions.gauge.percentageMode.help', {
+        defaultMessage: 'Enables relative precentage mode',
       }),
     },
     ariaLabel: {

@@ -160,7 +160,12 @@ export interface DatasourceSuggestion<T = unknown> {
   keptLayerIds: string[];
 }
 
-export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
+type StateSetterArg<T> = T | ((prevState: T) => T);
+
+export type StateSetter<T, OptionsShape = unknown> = (
+  newState: StateSetterArg<T>,
+  options?: OptionsShape
+) => void;
 
 export interface InitializationOptions {
   isFullEditor?: boolean;
@@ -372,7 +377,7 @@ export interface DatasourcePublicAPI {
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
-  setState: StateSetter<T>;
+  setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
@@ -411,13 +416,13 @@ export type ParamEditorCustomProps = Record<string, unknown> & { label?: string 
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
-  setState: (
-    newState: Parameters<StateSetter<T>>[0],
-    publishToVisualization?: {
+  setState: StateSetter<
+    T,
+    {
       isDimensionComplete?: boolean;
       forceRender?: boolean;
     }
-  ) => void;
+  >;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
@@ -460,7 +465,13 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   groupId: string;
   columnId: string;
   state: T;
-  setState: StateSetter<T>;
+  setState: StateSetter<
+    T,
+    {
+      isDimensionComplete?: boolean;
+      forceRender?: boolean;
+    }
+  >;
   dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
@@ -623,6 +634,7 @@ export interface SuggestionRequest<T = unknown> {
    */
   state?: T;
   mainPalette?: PaletteOutput;
+  isFromContext?: boolean;
   /**
    * The visualization needs to know which table is being suggested
    */
@@ -669,6 +681,7 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
+  appliedDatasourceLayers?: Record<string, DatasourcePublicAPI>; // this is only set when auto-apply is turned off
   /**
    * Data of the chart currently rendered in the preview.
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.

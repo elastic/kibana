@@ -343,9 +343,6 @@ describe('#toExpression', () => {
           {
             layerId: 'referenceLine',
             layerType: layerTypes.REFERENCELINE,
-            seriesType: 'area',
-            splitAccessor: 'd',
-            xAccessor: 'a',
             accessors: ['b', 'c'],
             yConfig: [{ forAccessor: 'a' }],
           },

@@ -118,8 +118,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const input = await find.activeElement();
       await input.type(`bytes > 6000`);
+      // the tooltip seems to be there as long as the focus is in the query string
+      await input.pressKeys(browser.keys.RIGHT);
 
       await PageObjects.lens.closeDimensionEditor();
+
       await PageObjects.lens.waitForVisualization();
       // expect the button is shown and enabled
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
@@ -154,8 +157,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.sleep(1000);
       await PageObjects.lens.setFilterBy('bytes > 4000');
       await PageObjects.common.sleep(1000);
-
-      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.waitForVisualization();
       // expect the button is shown and enabled
