@@ -33,7 +33,7 @@ export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS = Object.freeze({
       'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.searchWarning.text',
       {
         defaultMessage:
-          'Only the first 100 trusted apps are displayed. Please use the search bar to refine the results.',
+          'Only the first {maxNumber} trusted apps are displayed. Please use the search bar to refine the results.',
         values: { maxNumber },
       }
     ),

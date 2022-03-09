@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiSpacer, EuiText, Pagination } from '@elastic/eui';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
@@ -14,10 +14,6 @@ import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import { useUrlParams } from '../../../../../components/hooks/use_url_params';
 import { useUrlPagination } from '../../../../../components/hooks/use_url_pagination';
-import {
-  MANAGEMENT_PAGE_SIZE_OPTIONS,
-  MANAGEMENT_DEFAULT_PAGE_SIZE,
-} from '../../../../../common/constants';
 import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
 import {
   ArtifactCardGrid,
