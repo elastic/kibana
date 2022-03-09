@@ -73,6 +73,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
 import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField, validateOperationOnAttributes } from './lib';
@@ -1309,12 +1310,13 @@ export class RulesClient {
 
     const results = await this.unsecuredSavedObjectsClient.bulkUpdate(rules);
 
-    await pMap(
-      apiKeysToInvalidate,
-      (apiKey) =>
-        markApiKeyForInvalidation({ apiKey }, this.logger, this.unsecuredSavedObjectsClient),
-      { concurrency: 50 }
-    );
+    if (apiKeysToInvalidate.length) {
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: apiKeysToInvalidate },
+        this.logger,
+        this.unsecuredSavedObjectsClient
+      );
+    }
 
     return { rules: results.saved_objects, errors };
   }
