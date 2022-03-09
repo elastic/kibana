@@ -128,8 +128,8 @@ export function QueryBarMenu({
   useEffect(() => {
     const hasFilters = Boolean(filters && filters.length > 0);
     const hasQuery = Boolean(query && query.query);
-    setHasFiltersOrQuery(hasFilters || hasQuery || Boolean(savedQuery));
-  }, [filters, query, savedQuery]);
+    setHasFiltersOrQuery(hasFilters || hasQuery);
+  }, [filters, query]);
 
   useEffect(() => {
     if (openQueryBarMenu) {
@@ -321,7 +321,7 @@ export function QueryBarMenu({
           name: i18n.translate('data.filter.options.clearllFiltersButtonLabel', {
             defaultMessage: 'Clear all',
           }),
-          disabled: !hasFiltersOrQuery,
+          disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
           icon: 'crossInACircleFilled',
           onClick: () => {
             closePopover();
