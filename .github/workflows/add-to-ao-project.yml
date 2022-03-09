@@ -1,28 +1,21 @@
-name: Add to Actionable Observability project
+name: Add issues to Actionable Observability project
 on:
   issues:
-    types:
-      - labeled
+    types: [labeled]
 jobs:
-  add_to_project:
+  sync_issues_with_table:
     runs-on: ubuntu-latest
-    if: |
-      contains(github.event.issue.labels.*.name, 'Team: Actionable Observability')
+    name: Add issues to project
     steps:
-      - uses: octokit/graphql-action@v2.x
-        id: add_to_project
+      - name: Add
+        uses: richkuz/projectnext-label-assigner@1.0.2
+        id: add_to_projects
         with:
-          headers: '{"GraphQL-Features": "projects_next_graphql"}'
-          query: |
-            mutation add_to_project($projectid:ID!,$contentid:ID!) {
-              addProjectNextItem(input:{projectId:$projectid contentId:$contentid}) {
-                projectNextItem {
-                  id
-                }
-              }
-            }
-          projectid: ${{ env.PROJECT_ID }}
-          contentid: ${{ github.event.issue.node_id }}
+          config: |
+            [
+              {"label": "Team: Actionable Observability", "projectNumber": 669}
+            ]
         env:
-          PROJECT_ID: "TO_BE_COMPLETED"
-          GITHUB_TOKEN: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
+          GRAPHQL_API_BASE: 'https://api.github.com'
+          PAT_TOKEN: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
