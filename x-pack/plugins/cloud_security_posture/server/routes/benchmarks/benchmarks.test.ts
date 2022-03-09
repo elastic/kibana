@@ -151,17 +151,6 @@ describe('benchmarks API', () => {
     });
 
     describe('test getPackagePolicies', () => {
-      it('should throw when agentPolicyService is undefined', async () => {
-        const mockAgentPolicyService = undefined;
-        expect(
-          getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
-            page: 1,
-            per_page: 100,
-            sort_order: 'desc',
-          })
-        ).rejects.toThrow();
-      });
-
       it('should format request by package name', async () => {
         const mockPackagePolicyService = createPackagePolicyServiceMock();
 
@@ -171,7 +160,7 @@ describe('benchmarks API', () => {
           sort_order: 'desc',
         });
 
-        expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
+        expect(mockPackagePolicyService.list.mock.calls[0][1]).toMatchObject(
           expect.objectContaining({
             kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
             page: 1,
@@ -211,7 +200,7 @@ describe('benchmarks API', () => {
           sort_order: 'asc',
         });
 
-        expect(mockPackagePolicyService.list.mock.calls[0][1]).toMatchObject(
+        expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
           expect.objectContaining({
             kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
             page: 1,
@@ -229,6 +218,7 @@ describe('benchmarks API', () => {
       await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
         page: 1,
         per_page: 100,
+        sortOrder: 'desc',
         benchmark_name: 'my_cis_benchmark',
       });
 
