@@ -8,9 +8,11 @@
 
 import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SolutionToolbarButton } from 'src/plugins/shared_ux/public';
 
-import { SolutionToolbarButton as PrimaryActionButton } from '../../../../shared_ux/public';
+import {
+  SolutionToolbarButton,
+  SolutionToolbarButton as PrimaryActionButton,
+} from '../../../../shared_ux/public';
 
 import {
   AddFromLibraryButton,

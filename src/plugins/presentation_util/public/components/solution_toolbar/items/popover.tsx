@@ -7,12 +7,12 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, IconType } from '@elastic/eui';
 import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
 import {
   SolutionToolbarButton,
   SolutionToolbarButtonProps as ButtonProps,
-} from '../../../../../shared_ux/public/index';
+} from '../../../../../shared_ux/public';
 
 type AllowedButtonProps = Omit<typeof ButtonProps, 'onClick' | 'fill'>;
 type AllowedPopoverProps = Omit<
@@ -23,16 +23,10 @@ type AllowedPopoverProps = Omit<
 export type Props = AllowedButtonProps &
   AllowedPopoverProps & {
     children: (arg: { closePopover: () => void }) => React.ReactNode;
+    iconType: IconType;
   };
 
-export const SolutionToolbarPopover = ({
-  label,
-  iconType,
-  primary,
-  iconSide,
-  children,
-  ...popover
-}: Props) => {
+export const SolutionToolbarPopover = ({ iconType, children, ...popover }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onButtonClick = () => setIsOpen((status) => !status);
@@ -40,7 +34,7 @@ export const SolutionToolbarPopover = ({
 
   const button = (
     <SolutionToolbarButton
-      {...{ label, iconType, primary, iconSide }}
+      {...{ label, iconType }}
       onClick={onButtonClick}
       data-test-subj={popover['data-test-subj']}
     />
