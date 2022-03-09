@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { LandingCards } from '../components/landing_cards';
 
 export const LandingPage = memo(() => {
   return (
     <>
       <SecuritySolutionPageWrapper>
-        <EuiFlexGroup>
-          <EuiFlexItem>{'landing page'}</EuiFlexItem>
-        </EuiFlexGroup>
+        <LandingCards />
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.landing} />
     </>
