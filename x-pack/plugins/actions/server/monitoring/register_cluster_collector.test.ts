@@ -50,7 +50,7 @@ describe('registerClusterCollector()', () => {
         runAt: nowInMs - 1000,
       },
       {
-        runAt: nowInMs - 1000,
+        retryAt: nowInMs - 1000,
       },
     ];
     taskManagerFetch.mockImplementation(async () => ({ docs }));
