@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESLicense } from '../../../telemetry_collection_xpack/server';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH, USAGE_FETCH_INTERVAL } from '../../common/constants';
 
 /**
  * Get statistics for all selected Elasticsearch clusters.
@@ -53,6 +53,15 @@ export async function fetchLicenses(
              */
             { term: { type: 'cluster_stats' } },
             { terms: { cluster_uuid: clusterUuids } },
+            {
+              range: {
+                timestamp: {
+                  format: 'epoch_millis',
+                  gte: timestamp - USAGE_FETCH_INTERVAL,
+                  lte: timestamp,
+                },
+              },
+            },
           ],
         },
       },
