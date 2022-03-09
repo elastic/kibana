@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../common';
 import type { DataView } from '../../../../data_views/public';
-import { SortDirection } from '../../../../data/common';
+import { SortDirection } from '../../../../data/public';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';

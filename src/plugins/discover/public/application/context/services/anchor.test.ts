@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { DataView } from '../../../../../data_views/public';
-import { SortDirection } from '../../../../../data/common';
+import { SortDirection } from '../../../../../data/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';

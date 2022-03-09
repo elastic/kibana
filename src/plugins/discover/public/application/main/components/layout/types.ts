@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Query, SavedObject, TimeRange } from '../../../../../../data/common';
+import type { SavedObject } from '../../../../../../data/common';
+import type { Query, TimeRange } from '../../../../../../data/public';
 import type { DataViewAttributes } from '../../../../../../data_views/common';
 import type { DataView } from '../../../../../../data_views/public';
 import { ISearchSource } from '../../../../../../data/public';
