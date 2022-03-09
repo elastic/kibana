@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-dev-utils"
-PKG_REQUIRE_NAME = "@kbn/dev-utils"
+PKG_BASE_NAME = "kbn-generate"
+PKG_REQUIRE_NAME = "@kbn/generate"
 
 SOURCE_FILES = glob(
   [
@@ -21,78 +21,25 @@ filegroup(
   srcs = SRCS,
 )
 
-filegroup(
-  name = "certs",
-  srcs = glob(
-    [
-      "certs/**/*",
-    ],
-    exclude = [
-      "**/README.md"
-    ],
-  ),
-)
-
-NPM_MODULE_EXTRA_FILES = [
+NPM_MODULE_EXTRA_FILES = glob(["templates/**/*"]) + [
   "package.json",
-  "README.md",
-  ":certs",
-  "ci_stats_reporter/package.json",
-  "sort_package_json/package.json",
-  "stdio/package.json",
-  "tooling_log/package.json"
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-std",
+  "//packages/kbn-dev-utils",
+  "//packages/kbn-packages",
   "//packages/kbn-utils",
-  "@npm//@babel/core",
-  "@npm//axios",
-  "@npm//chalk",
-  "@npm//cheerio",
-  "@npm//dedent",
-  "@npm//execa",
-  "@npm//exit-hook",
-  "@npm//getopts",
-  "@npm//globby",
-  "@npm//load-json-file",
-  "@npm//markdown-it",
+  "@npm//ejs",
   "@npm//normalize-path",
-  "@npm//prettier",
-  "@npm//rxjs",
-  "@npm//sort-package-json",
-  "@npm//tar",
-  "@npm//tree-kill",
-  "@npm//vinyl",
-  "@npm//yauzl",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-std:npm_module_types",
+  "//packages/kbn-dev-utils:npm_module_types",
+  "//packages/kbn-packages:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
-  "@npm//@babel/parser",
-  "@npm//@babel/types",
-  "@npm//@types/babel__core",
-  "@npm//@types/cheerio",
-  "@npm//@types/dedent",
-  "@npm//@types/flot",
-  "@npm//@types/jest",
-  "@npm//@types/markdown-it",
-  "@npm//@types/node",
-  "@npm//@types/normalize-path",
-  "@npm//@types/prettier",
-  "@npm//@types/react",
-  "@npm//@types/tar",
-  "@npm//@types/testing-library__jest-dom",
-  "@npm//@types/vinyl",
-  "@npm//@types/yauzl",
-  "@npm//axios",
-  "@npm//execa",
-  "@npm//exit-hook",
-  "@npm//getopts",
-  "@npm//rxjs",
-  "@npm//sort-package-json",
-  "@npm//tree-kill",
+  "@npm//ejs",
+  "@npm//normalize-path",
+  "@npm//@types/ejs",
 ]
 
 jsts_transpiler(
