@@ -18,13 +18,13 @@ import {
   setFirstPreviewLayerToSelectedLayer,
   setEditLayerToSelectedLayer,
   updateFlyout,
+  setAutoOpenLayerWizardId,
 } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { hasPreviewLayers, isLoadingPreviewLayers } from '../../selectors/map_selectors';
 import { DRAW_MODE } from '../../../common/constants';
 import { getAutoOpenLayerWizardId } from '../../selectors/ui_selectors';
-import { SET_AUTO_OPEN_WIZARD_ID } from '../../actions/ui_actions';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -53,10 +53,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES));
     },
     clearAutoOpenLayerWizardId: () => {
-      dispatch({
-        type: SET_AUTO_OPEN_WIZARD_ID,
-        autoOpenLayerWizardId: '',
-      });
+      dispatch(setAutoOpenLayerWizardId(''));
     },
   };
 }
