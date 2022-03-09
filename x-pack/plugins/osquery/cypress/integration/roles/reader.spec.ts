@@ -10,11 +10,11 @@ import { navigateTo } from '../../tasks/navigation';
 import { ROLES } from '../../test';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
-describe('T1 Analyst - only READ', () => {
+describe('Reader - only READ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
 
   beforeEach(() => {
-    login(ROLES.t1_analyst);
+    login(ROLES.reader);
   });
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');

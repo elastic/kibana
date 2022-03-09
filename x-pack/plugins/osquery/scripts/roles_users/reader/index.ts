@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export * from './reader';
-export * from './t1_analyst';
+import * as readerUser from './user.json';
+import * as readerRole from './role.json';
+
+export { readerUser, readerRole };
