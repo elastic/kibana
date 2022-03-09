@@ -309,4 +309,68 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     expect(data.search.searchAsInternalUser.search).not.toHaveBeenCalled();
     expect(searchStrategySearch).toHaveBeenCalled();
   });
+
+  it('should support pagination', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+      pagination: {
+        pageSize: 10,
+        pageIndex: 1,
+      },
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(data.search.searchAsInternalUser.search.mock.calls.length).toBe(1);
+    expect(data.search.searchAsInternalUser.search.mock.calls[0][0].params.body.size).toBe(10);
+    expect(data.search.searchAsInternalUser.search.mock.calls[0][0].params.body.from).toBe(10);
+  });
+
+  it('should support sorting', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+      sort: [
+        {
+          test: {
+            order: 'desc',
+          },
+        },
+      ],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(data.search.searchAsInternalUser.search.mock.calls.length).toBe(1);
+    expect(data.search.searchAsInternalUser.search.mock.calls[0][0].params.body.sort).toStrictEqual(
+      [{ test: { order: 'desc' } }]
+    );
+  });
 });

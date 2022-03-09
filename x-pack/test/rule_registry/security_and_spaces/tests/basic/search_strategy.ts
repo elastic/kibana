@@ -66,8 +66,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should support pagination and sorting', async () => {
-        const result = await bsearch.send<RuleRegistrySearchResponse>({
-          supertest,
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: logsOnlySpacesAll.username,
+            password: logsOnlySpacesAll.password,
+          },
           options: {
             featureIds: [AlertConsumers.LOGS],
             pagination: {
