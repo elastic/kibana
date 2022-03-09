@@ -42,7 +42,7 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
       id: `${htmlIdGenerator()()}${index}`,
       label,
       title,
-      css: [quickButtonGroupStyles.quickButtonStyles],
+      css: [quickButtonGroupStyles.button],
     };
   });
 
@@ -60,7 +60,6 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
       onChange={onChangeIconsMulti}
       type="multi"
       isIconOnly
-      css={[quickButtonGroupStyles.quickButtonGroupStyles]}
     />
   );
 };

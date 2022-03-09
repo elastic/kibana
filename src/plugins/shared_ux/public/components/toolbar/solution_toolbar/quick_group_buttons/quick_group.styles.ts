@@ -10,15 +10,10 @@ import { UseEuiTheme } from '@elastic/eui';
 
 export const QuickGroupButtonStyles = ({ euiTheme }: UseEuiTheme) => {
   return {
-    quickButtonGroupStyles: {
-      borderRadius: euiTheme.border.radius.medium,
-    },
-    quickButtonStyles: {
+    button: {
       '&.euiButtonGroupButton': {
         backgroundColor: euiTheme.colors.emptyShade,
-        borderWidth: `${euiTheme.border.width.thin} !important`,
-        borderStyle: `solid !important`,
-        borderColor: `${euiTheme.border.color} !important`,
+        border: `${euiTheme.border.thin} !important`,
         '&:first-of-type': {
           borderTopLeftRadius: `${euiTheme.border.radius.medium} !important`,
           borderBottomLeftRadius: `${euiTheme.border.radius.medium} !important`,
@@ -26,9 +21,6 @@ export const QuickGroupButtonStyles = ({ euiTheme }: UseEuiTheme) => {
         '&:last-of-type': {
           borderTopRightRadius: `${euiTheme.border.radius.medium} !important`,
           borderBottomRightRadius: `${euiTheme.border.radius.medium} !important`,
-        },
-        '&:hover': {
-          backgroundColor: euiTheme.colors.lightShade,
         },
       },
     },
