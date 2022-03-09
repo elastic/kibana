@@ -32,7 +32,7 @@ For more information, see
 [cols="2*<"]
 |===
 | `monitoring.cluster_alerts.email_notifications.email_address` {ess-icon}::
-  | deprecated:[7.11.0,"In 8.2.0 and later, this setting will no longer be supported."] 
+  | deprecated:[7.11.0] 
   When enabled, specifies the email address where you want to receive cluster alert notifications.
   
 | `monitoring.enabled`
