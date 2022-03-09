@@ -41,7 +41,6 @@ import {
   MappedParams,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
-import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
@@ -82,7 +81,6 @@ export interface AlertServices<
   };
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
-  search: IAbortableClusterClient;
 }
 
 export interface AlertExecutorOptions<
