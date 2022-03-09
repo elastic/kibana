@@ -8,54 +8,42 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
-import { GetAlertSummaryParams } from '../rules_client';
-import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
-import {
-  AlertingRequestHandlerContext,
-  INTERNAL_BASE_ALERTING_API_PATH,
-  AlertSummary,
-} from '../types';
+import { GetExecutionLogByIdParams } from '../rules_client';
+import { RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
 const querySchema = schema.object({
-  date_start: schema.maybe(schema.string()),
+  date_start: schema.string(),
   date_end: schema.maybe(schema.string()),
+  filter: schema.maybe(schema.string()),
+  per_page: schema.number({ defaultValue: 10, min: 1 }),
+  page: schema.number({ defaultValue: 1, min: 1 }),
+  sort_field: schema.oneOf([schema.literal('timestamp'), schema.literal('duration')], {
+    defaultValue: 'timestamp',
+  }),
+  sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+    defaultValue: 'desc',
+  }),
 });
 
-const rewriteReq: RewriteRequestCase<GetAlertSummaryParams> = ({
+const rewriteReq: RewriteRequestCase<GetExecutionLogByIdParams> = ({
   date_start: dateStart,
-  number_of_executions: numberOfExecutions,
+  date_end: dateEnd,
+  per_page: perPage,
+  sort_field: sortField,
+  sort_order: sortOrder,
   ...rest
 }) => ({
   ...rest,
-  numberOfExecutions,
   dateStart,
-});
-
-const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
-  ruleTypeId,
-  muteAll,
-  statusStartDate,
-  statusEndDate,
-  errorMessages,
-  lastRun,
-  executionDuration: { valuesWithTimestamp, ...executionDuration },
-  ...rest
-}) => ({
-  ...rest,
-  rule_type_id: ruleTypeId,
-  mute_all: muteAll,
-  status_start_date: statusStartDate,
-  status_end_date: statusEndDate,
-  error_messages: errorMessages,
-  last_run: lastRun,
-  execution_duration: {
-    ...executionDuration,
-    values_with_timestamp: valuesWithTimestamp,
-  },
+  dateEnd,
+  perPage,
+  sortField,
+  sortOrder,
 });
 
 export const getRuleExecutionLogRoute = (
@@ -74,8 +62,9 @@ export const getRuleExecutionLogRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
-        const execLog = await rulesClient.getExecutionLogForRule(rewriteReq({ id, ...req.query }));
-        return res.ok({ body: rewriteBodyRes(execLog) });
+        return res.ok({
+          body: await rulesClient.getExecutionLogForRule(rewriteReq({ id, ...req.query })),
+        });
       })
     )
   );

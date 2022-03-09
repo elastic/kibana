@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
+import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { rulesClientMock } from '../rules_client.mock';
-import { AlertSummary } from '../types';
+import { IExecutionLogResult } from '../lib/get_execution_log_aggregation';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -22,43 +22,59 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('getRuleAlertSummaryRoute', () => {
+describe('getRuleExecutionLogRoute', () => {
   const dateString = new Date().toISOString();
-  const mockedAlertSummary: AlertSummary = {
-    id: '',
-    name: '',
-    tags: [],
-    ruleTypeId: '',
-    consumer: '',
-    muteAll: false,
-    throttle: null,
-    enabled: false,
-    statusStartDate: dateString,
-    statusEndDate: dateString,
-    status: 'OK',
-    errorMessages: [],
-    alerts: {},
-    executionDuration: {
-      average: 1,
-      valuesWithTimestamp: {
-        '17 Nov 2021 @ 19:19:17': 3,
-        '18 Nov 2021 @ 19:19:17': 5,
-        '19 Nov 2021 @ 19:19:17': 5,
+  const mockedExecutionLog: IExecutionLogResult = {
+    total: 374,
+    data: [
+      {
+        id: '6705da7d-2635-499d-a6a8-1aee1ae1eac9',
+        timestamp: '2022-03-07T15:38:32.617Z',
+        duration_ms: 1056,
+        status: 'success',
+        message:
+          "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+        num_active_alerts: 5,
+        num_new_alerts: 5,
+        num_recovered_alerts: 0,
+        num_triggered_actions: 5,
+        num_succeeded_actions: 5,
+        num_errored_actions: 0,
+        total_search_duration_ms: 0,
+        es_search_duration_ms: 0,
+        timed_out: false,
       },
-    },
+      {
+        id: '41b2755e-765a-4044-9745-b03875d5e79a',
+        timestamp: '2022-03-07T15:39:05.604Z',
+        duration_ms: 1165,
+        status: 'success',
+        message:
+          "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+        num_active_alerts: 5,
+        num_new_alerts: 5,
+        num_recovered_alerts: 5,
+        num_triggered_actions: 5,
+        num_succeeded_actions: 5,
+        num_errored_actions: 0,
+        total_search_duration_ms: 0,
+        es_search_duration_ms: 0,
+        timed_out: false,
+      },
+    ],
   };
 
-  it('gets rule alert summary', async () => {
+  it('gets rule execution log', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getRuleAlertSummaryRoute(router, licenseState);
+    getRuleExecutionLogRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_alert_summary"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_execution_log"`);
 
-    rulesClient.getAlertSummary.mockResolvedValueOnce(mockedAlertSummary);
+    rulesClient.getExecutionLogForRule.mockResolvedValue(mockedExecutionLog);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -66,23 +82,30 @@ describe('getRuleAlertSummaryRoute', () => {
         params: {
           id: '1',
         },
-        query: {},
+        query: {
+          date_start: dateString,
+          per_page: 10,
+          page: 1,
+          sort_field: 'timestamp',
+          sort_order: 'desc',
+        },
       },
       ['ok']
     );
 
     await handler(context, req, res);
 
-    expect(rulesClient.getAlertSummary).toHaveBeenCalledTimes(1);
-    expect(rulesClient.getAlertSummary.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "dateStart": undefined,
-          "id": "1",
-          "numberOfExecutions": undefined,
-        },
-      ]
-    `);
+    expect(rulesClient.getExecutionLogForRule).toHaveBeenCalledTimes(1);
+    expect(rulesClient.getExecutionLogForRule.mock.calls[0]).toEqual([
+      {
+        dateStart: dateString,
+        id: '1',
+        page: 1,
+        perPage: 10,
+        sortField: 'timestamp',
+        sortOrder: 'desc',
+      },
+    ]);
 
     expect(res.ok).toHaveBeenCalled();
   });
@@ -91,11 +114,11 @@ describe('getRuleAlertSummaryRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getRuleAlertSummaryRoute(router, licenseState);
+    getRuleExecutionLogRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.getAlertSummary = jest
+    rulesClient.getExecutionLogForRule = jest
       .fn()
       .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
 
