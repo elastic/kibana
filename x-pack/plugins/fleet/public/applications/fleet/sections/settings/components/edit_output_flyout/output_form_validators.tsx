@@ -14,7 +14,10 @@ export function validateHosts(value: string[]) {
   value.forEach((val, idx) => {
     try {
       const urlParsed = new URL(val);
-      if (!['http:', 'https:'].includes(urlParsed.protocol)) {
+      if (!val || val === '') {
+        throw new Error('Host URL required');
+      }
+      else if (!['http:', 'https:'].includes(urlParsed.protocol)) {
         throw new Error('Invalid protocol');
       }
     } catch (error) {
