@@ -58,7 +58,7 @@ describe('Fleet host isolation exceptions card filters card', () => {
 
       expect(
         renderResult.getByTestId('hostIsolationExceptions-fleet-integration-card')
-      ).toHaveTextContent('Host isolation exceptions');
+      ).toHaveTextContent('Host isolation exceptions5');
     });
   });
 
