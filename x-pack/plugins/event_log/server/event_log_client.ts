@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IClusterClient, KibanaRequest } from 'src/core/server';
@@ -117,7 +118,13 @@ export class EventLogClient implements IEventLogClient {
     options?: AggregateOptionsType,
     legacyIds?: string[]
   ) {
-    const aggregateOptions = queryOptionsSchema.validate(options ?? {});
+    const aggs = options?.aggs;
+    if (!aggs) {
+      throw new Error('No aggregation defined!');
+    }
+
+    // validate other query options separately from
+    const aggregateOptions = queryOptionsSchema.validate(omit(options, 'aggs') ?? {});
 
     // verify the user has the required permissions to view this saved object
     await this.savedObjectGetter(type, ids);
@@ -127,7 +134,7 @@ export class EventLogClient implements IEventLogClient {
       namespace: await this.getNamespace(),
       type,
       ids,
-      aggregateOptions: aggregateOptions as AggregateOptionsType,
+      aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
       legacyIds,
     });
   }
