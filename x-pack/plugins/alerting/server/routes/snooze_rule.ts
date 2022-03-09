@@ -20,9 +20,9 @@ const bodySchema = schema.object({
     schema.string({
       validate: (value) => {
         const parsedValue = Date.parse(value);
-        if (isNaN(parsedValue)) return 'Invalid date';
-        if (parsedValue <= Date.now()) return 'Date cannot be in the past';
-        return undefined;
+        if (isNaN(parsedValue)) return `Invalid date: ${value}`;
+        if (parsedValue <= Date.now()) return `Invalid snooze date as it is in the past: ${value}`;
+        return;
       },
     }),
     schema.literal(-1),
