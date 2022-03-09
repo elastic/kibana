@@ -8,6 +8,7 @@
 import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { Query } from 'src/plugins/data/common';
+import memoizeOne from 'memoize-one';
 import type { VisualizeEditorLayersContext } from '../../../../../../src/plugins/visualizations/public';
 import type {
   DatasourceFixAction,
@@ -1413,6 +1414,35 @@ export function isReferenced(layer: IndexPatternLayer, columnId: string): boolea
   return allReferences.includes(columnId);
 }
 
+const computeReferenceLookup = memoizeOne((layer: IndexPatternLayer): Record<string, string> => {
+  // speed up things for deep chains as in formula
+  const refLookup: Record<string, string> = {};
+  for (const [parentId, col] of Object.entries(layer.columns)) {
+    if ('references' in col) {
+      for (const colId of col.references) {
+        refLookup[colId] = parentId;
+      }
+    }
+  }
+  return refLookup;
+});
+
+/**
+ * Given a columnId, returns the visible root column id for it
+ * This is useful to map internal properties of referenced columns to the visible column
+ * @param layer
+ * @param columnId
+ * @returns id of the reference root
+ */
+export function getReferenceRoot(layer: IndexPatternLayer, columnId: string): string {
+  const refLookup = computeReferenceLookup(layer);
+  let currentId = columnId;
+  while (isReferenced(layer, currentId)) {
+    currentId = refLookup[currentId];
+  }
+  return currentId;
+}
+
 export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: string): string[] {
   const referencedIds: string[] = [];
   function collect(id: string) {
@@ -1672,12 +1702,13 @@ export function computeLayerFromContext(
 
 export function getSplitByTermsLayer(
   indexPattern: IndexPattern,
-  splitField: IndexPatternField,
+  splitFields: IndexPatternField[],
   dateField: IndexPatternField | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { termsParams, metrics, timeInterval, splitWithDateHistogram } = layer;
   const copyMetricsArray = [...metrics];
+
   const computedLayer = computeLayerFromContext(
     metrics.length === 1,
     copyMetricsArray,
@@ -1686,7 +1717,9 @@ export function getSplitByTermsLayer(
     layer.label
   );
 
+  const [baseField, ...secondaryFields] = splitFields;
   const columnId = generateId();
+
   let termsLayer = insertNewColumn({
     op: splitWithDateHistogram ? 'date_histogram' : 'terms',
     layer: insertNewColumn({
@@ -1701,10 +1734,22 @@ export function getSplitByTermsLayer(
       },
     }),
     columnId,
-    field: splitField,
+    field: baseField,
     indexPattern,
     visualizationGroups: [],
   });
+
+  if (secondaryFields.length) {
+    termsLayer = updateColumnParam({
+      layer: termsLayer,
+      columnId,
+      paramName: 'secondaryFields',
+      value: secondaryFields.map((i) => i.name),
+    });
+
+    termsLayer = updateDefaultLabels(termsLayer, indexPattern);
+  }
+
   const termsColumnParams = termsParams as TermsIndexPatternColumn['params'];
   if (termsColumnParams) {
     for (const [param, value] of Object.entries(termsColumnParams)) {

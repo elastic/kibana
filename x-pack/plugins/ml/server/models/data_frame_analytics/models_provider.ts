@@ -34,6 +34,7 @@ const NODE_FIELDS = ['attributes', 'name', 'roles', 'version'] as const;
 
 export type RequiredNodeFields = Pick<NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
 
+// @ts-expect-error TrainedModelDeploymentStatsResponse missing properties from MlTrainedModelDeploymentStats
 interface TrainedModelStatsResponse extends MlTrainedModelStats {
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
   model_size_stats?: TrainedModelModelSizeStats;

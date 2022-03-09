@@ -119,8 +119,8 @@ export const DataGrid: FC<Props> = memo(
         analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
         analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
         ? {
-            featureImportance: ({ children }: { cellContentsElement: any; children: any }) => {
-              const rowIndex = children?.props?.visibleRowIndex;
+            featureImportance: ({ children }: { children: any }) => {
+              const rowIndex = children?.props?.rowIndex;
               const row = data[rowIndex];
               if (!row) return <div />;
               // if resultsField for some reason is not available then use ml

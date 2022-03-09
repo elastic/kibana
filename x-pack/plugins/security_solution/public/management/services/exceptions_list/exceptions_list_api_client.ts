@@ -30,7 +30,7 @@ export class ExceptionsListApiClient {
 
   constructor(
     private readonly http: HttpStart,
-    private readonly listId: ListId,
+    public readonly listId: ListId,
     private readonly listDefinition: CreateExceptionListSchema
   ) {
     this.ensureListExists = this.createExceptionList();
@@ -46,27 +46,27 @@ export class ExceptionsListApiClient {
     }
     ExceptionsListApiClient.wasListCreated.set(
       this.listId,
-      new Promise<void>(async (resolve, reject) => {
-        try {
-          await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
-            body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
-          });
+      new Promise<void>((resolve, reject) => {
+        const asyncFunction = async () => {
+          try {
+            await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
+              body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
+            });
 
-          resolve();
-        } catch (err) {
-          // Ignore 409 errors. List already created
-          if (err.response?.status !== 409) {
-            reject(err);
+            resolve();
+          } catch (err) {
+            // Ignore 409 errors. List already created
+            if (err.response?.status !== 409) {
+              ExceptionsListApiClient.wasListCreated.delete(this.listId);
+              reject(err);
+            }
+
+            resolve();
           }
-
-          resolve();
-        }
+        };
+        asyncFunction();
       })
     );
-
-    ExceptionsListApiClient.wasListCreated.get(this.listId)?.catch(() => {
-      ExceptionsListApiClient.wasListCreated.delete(this.listId);
-    });
 
     return ExceptionsListApiClient.wasListCreated.get(this.listId);
   }
@@ -117,12 +117,11 @@ export class ExceptionsListApiClient {
     [
       'created_at',
       'created_by',
-      'created_at',
-      'created_by',
       'list_id',
       'tie_breaker_id',
       'updated_at',
       'updated_by',
+      'meta',
     ].forEach((field) => {
       delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
     });
@@ -167,14 +166,19 @@ export class ExceptionsListApiClient {
   }
 
   /**
-   * Returns an item filtered by id
-   * It requires an id in order to get the desired item
+   * Returns an item for the given `itemId` or `id`. Exception List Items have both an `item_id`
+   * and `id`, and at least one of these two is required to be provided.
    */
-  async get(id: string): Promise<ExceptionListItemSchema> {
+  async get(itemId?: string, id?: string): Promise<ExceptionListItemSchema> {
+    if (!itemId && !id) {
+      throw TypeError('either `itemId` or `id` argument must be set');
+    }
+
     await this.ensureListExists;
     return this.http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       query: {
         id,
+        item_id: itemId,
         namespace_type: 'agnostic',
       },
     });
@@ -187,6 +191,7 @@ export class ExceptionsListApiClient {
   async create(exception: CreateExceptionListItemSchema): Promise<ExceptionListItemSchema> {
     await this.ensureListExists;
     this.checkIfIsUsingTheRightInstance(exception.list_id);
+    delete exception.meta;
     return this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
     });
@@ -204,14 +209,19 @@ export class ExceptionsListApiClient {
   }
 
   /**
-   * It deletes an existing item.
-   * It requires a valid item id.
+   * It deletes an existing item by `itemId` or `id`. Exception List Items have both an `item_id`
+   * and `id`, and at least one of these two is required to be provided.
    */
-  async delete(id: string): Promise<ExceptionListItemSchema> {
+  async delete(itemId?: string, id?: string): Promise<ExceptionListItemSchema> {
+    if (!itemId && !id) {
+      throw TypeError('either `itemId` or `id` argument must be set');
+    }
+
     await this.ensureListExists;
     return this.http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       query: {
         id,
+        item_id: itemId,
         namespace_type: 'agnostic',
       },
     });
@@ -226,8 +236,16 @@ export class ExceptionsListApiClient {
     return this.http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
       query: {
         filter,
+        list_id: this.listId,
         namespace_type: 'agnostic',
       },
     });
+  }
+
+  /**
+   * Checks if the given list has any data in it
+   */
+  async hasData(): Promise<boolean> {
+    return (await this.find({ perPage: 1, page: 1 })).total > 0;
   }
 }

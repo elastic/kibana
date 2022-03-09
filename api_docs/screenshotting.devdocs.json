@@ -47,6 +47,28 @@
             ],
             "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-server.ScreenshotOptions.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nSource Kibana request object from where the headers will be extracted."
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined"
+            ],
+            "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -79,18 +101,16 @@
           },
           {
             "parentPluginId": "screenshotting",
-            "id": "def-server.ScreenshotResult.metrics$",
+            "id": "def-server.ScreenshotResult.metrics",
             "type": "Object",
             "tags": [],
-            "label": "metrics$",
+            "label": "metrics",
             "description": [
               "\nCollected performance metrics during the screenshotting session."
             ],
             "signature": [
-              "Observable",
-              "<",
               "PerformanceMetrics",
-              ">"
+              " | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
             "deprecated": false
