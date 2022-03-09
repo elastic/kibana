@@ -6,6 +6,7 @@
  */
 import {
   EuiEmptyPrompt,
+  EuiLoadingLogo,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -64,7 +65,19 @@ export function ServiceGroupsList() {
   }, []);
 
   if (isLoading) {
-    return null;
+    // return null;
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+        title={
+          <h2>
+            {i18n.translate('xpack.apm.servicesGroups.loadingServiceGroups', {
+              defaultMessage: 'Loading service groups',
+            })}
+          </h2>
+        }
+      />
+    );
   }
 
   return (
