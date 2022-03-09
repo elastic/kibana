@@ -27,62 +27,15 @@ described in <<action-types>>. Alternatively, you can create them in
 *Add connector*.
 +
 [role="screenshot"]
-image::images/add-case-connector.png[]
+image::images/cases-connectors.png[]
 
 . From the *Incident management system* list, select *Add new connector*.
 
 . Select an external incident management system.
 
-. Enter your required settings. Refer to
-<<jira-connector-configuration,Jira>> connector configuration details.
-////
-+
-|=== 
-
-| *Connector name* | Name for the connector. 
-
-| *URL* | The URL of the external system.
-
-| *ServiceNow instance URL* | (ServiceNow only) The URL of the ServiceNow instance.
-
-| *API URL* |  ({swimlane} only) The URL of the {swimlane} instance.
-
-| *Organization ID* | (IBM Resilient only) Your organization's IBM Resilient ID number.
-
-| *Application ID* | ({swimlane} only) The application ID of your {swimlane} application. From {swimlane}, you can find the application
-ID by checking your application's settings or at the end of your application's URL after you've opened it.
-
-| *Username* | (ServiceNow only) The username of the ServiceNow account that is used to access the ServiceNow instance.
-
-| *Password* | (ServiceNow only) The password of the ServiceNow account that is used to access the ServiceNow instance.
-
-| *Project key* | (Jira only) The key of the Jira project.
-
-| *Email or Username* | (Jira only) The Jira account username or email.
-
-| *API token or Password* | (Jira only) The API token or password that is used to authenticate Jira updates.
-
-| *API key ID* | (IBM Resilient only) The API key that is used to authenticate IBM Resilient updates.
-
-| *API key secret* | (IBM Resilient only) The API key secret that is used to authenticate IBM Resilient updates.
-
-| *API token* | ({swimlane} only) The {swimlane} API authentication token that is used for HTTP Basic authentication.
-This is the personal access token for your user role.
-
-|===
-////
-. Choose the connector type ({swimlane} only):
-+
-|=== 
-
-| *All* | You can choose to set all or no field mappings when creating your new {swimlane} connector. However, note that if
-you don't set field mappings now, you'll be prompted to do so when you want to use the connector for a case or a rule. The prompts no longer display after you set up the required mappings. 
-
-| *Alerts* | Provide an alert ID and rule name.
-
-| *Cases* | Provide a case ID, a case name, comments, and a description.
-
-|=== 
+. Enter your required settings. Refer to <<resilient-action-type>>,
+<<jira-action-type>>, <<servicenow-action-type>>, <<servicenow-sir-action-type>>,
+or <<swimlane-action-type>> for connector configuration details.
 
 . Click *Save*.
 
