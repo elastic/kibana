@@ -58,7 +58,8 @@ export function runGenerateCli() {
         string: ['dir'],
         help: `
           --dev          Generate a package which is intended for dev-only use and can access things like devDependencies
-          --web          Build webpack-compatible version of sources for this package
+          --web          Build webpack-compatible version of sources for this package. If your package is intended to be
+                          used in the browser and Node.js then you need to opt-into these sources being created.
           --dir          Directory where this package will live, defaults to [./packages]
           --force        If the packageDir already exists, delete it before generation
         `,
