@@ -55,11 +55,12 @@ function useServicesFetcher() {
             end,
             environment,
             kuery,
+            serviceGroup,
           },
         },
       });
     },
-    [start, end, environment, kuery]
+    [start, end, environment, kuery, serviceGroup]
   );
 
   const mainStatisticsFetch = useFetcher(

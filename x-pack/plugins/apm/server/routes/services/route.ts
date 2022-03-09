@@ -1251,7 +1251,12 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   params: t.type({
-    query: t.intersection([rangeRt, environmentRt, kueryRt]),
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      kueryRt,
+      t.partial({ serviceGroup: t.string }),
+    ]),
   }),
   handler: async (
     resources
@@ -1262,7 +1267,7 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
     }>;
   }> => {
     const {
-      query: { start, end, environment, kuery },
+      query: { start, end, environment, kuery, serviceGroup: serviceGroupId },
     } = resources.params;
 
     if (kuery) {
@@ -1271,7 +1276,14 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
       };
     }
 
-    const setup = await setupRequest(resources);
+    const savedObjectsClient = resources.context.core.savedObjects.client;
+
+    const [setup, serviceGroup] = await Promise.all([
+      setupRequest(resources),
+      serviceGroupId
+        ? getServiceGroup({ savedObjectsClient, serviceGroupId })
+        : Promise.resolve(null),
+    ]);
     return {
       services: await getSortedAndFilteredServices({
         setup,
@@ -1279,6 +1291,7 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
         end,
         environment,
         logger: resources.logger,
+        serviceGroup,
       }),
     };
   },

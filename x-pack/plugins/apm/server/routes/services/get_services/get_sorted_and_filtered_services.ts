@@ -11,6 +11,7 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { ServiceGroup } from '../../../../common/service_groups';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 
@@ -20,12 +21,14 @@ export async function getSortedAndFilteredServices({
   end,
   environment,
   logger,
+  serviceGroup,
 }: {
   setup: Setup;
   start: number;
   end: number;
   environment: Environment;
   logger: Logger;
+  serviceGroup: ServiceGroup | null;
 }) {
   const { apmEventClient } = setup;
 
@@ -50,6 +53,12 @@ export async function getSortedAndFilteredServices({
         },
       }
     );
+
+    if (serviceGroup?.serviceNames) {
+      return serviceGroup.serviceNames.filter((serviceName) =>
+        response.terms.includes(serviceName)
+      );
+    }
 
     return response.terms;
   }
