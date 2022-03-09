@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { MouseEvent } from 'react';
+import React from 'react';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessTreeAlerts } from './index';

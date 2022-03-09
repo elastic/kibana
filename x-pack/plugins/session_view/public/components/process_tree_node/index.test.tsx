@@ -147,14 +147,30 @@ describe('ProcessTreeNode component', () => {
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe('Alert');
       });
-      it('renders Alert button when process has more than one alerts', async () => {
+      it('renders Alerts button when process has more than one alerts', async () => {
         renderResult = mockedContext.render(
           <ProcessTreeNode process={sessionViewAlertProcessMock} />
         );
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
-          'Alerts(2)'
+          `Alerts(${sessionViewAlertProcessMock.getAlerts().length})`
+        );
+      });
+      it('renders Alerts button with 99+ when process has more than 99 alerts', async () => {
+        const processMockWithOneAlert = {
+          ...sessionViewAlertProcessMock,
+          getAlerts: () =>
+            Array.from(
+              new Array(100),
+              (item) => (item = sessionViewAlertProcessMock.getAlerts()[0])
+            ),
+        };
+        renderResult = mockedContext.render(<ProcessTreeNode process={processMockWithOneAlert} />);
+
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
+          'Alerts(99+)'
         );
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {

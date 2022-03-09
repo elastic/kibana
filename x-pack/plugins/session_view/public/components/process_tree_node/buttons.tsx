@@ -109,7 +109,9 @@ export const AlertButton = ({
       ) : (
         <FormattedMessage id="xpack.sessionView.alert" defaultMessage="Alert" />
       )}
-      {alertsCount > 1 && <span css={alertsCountNumber}>({alertsCount})</span>}
+      {alertsCount > 1 && (
+        <span css={alertsCountNumber}>({alertsCount > 99 ? '99+' : alertsCount})</span>
+      )}
       <EuiIcon css={buttonArrow} size="s" type={expandedIcon} />
     </EuiButton>
   );
