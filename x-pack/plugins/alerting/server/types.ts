@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
 import type {
   IRouter,
   RequestHandlerContext,
   SavedObjectReference,
-  ElasticsearchClient,
   IUiSettingsClient,
 } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -49,10 +47,6 @@ import { RuleExecutionConfig } from './config';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-
-export interface ElasticsearchClientWithChild extends ElasticsearchClient {
-  child: Client['child'];
-}
 
 /**
  * @public
