@@ -9,7 +9,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { memo, useMemo, Fragment, HTMLAttributes } from 'react';
+import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
