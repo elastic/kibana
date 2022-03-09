@@ -1604,7 +1604,7 @@ describe('IndexPattern Data Source suggestions', () => {
       const updatedContext = [
         {
           ...context[0],
-          splitField: 'source',
+          splitFields: ['source'],
           splitMode: 'terms',
           termsParams: {
             size: 10,
