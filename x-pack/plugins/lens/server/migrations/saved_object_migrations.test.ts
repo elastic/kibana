@@ -1779,4 +1779,96 @@ describe('Lens migrations', () => {
       );
     });
   });
+
+  describe('8.2.0', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      dataType: 'string',
+                      isBucketed: true,
+                      label: 'Top values of geoip.country_iso_code',
+                      operationType: 'terms',
+                      params: {},
+                      scale: 'ordinal',
+                      sourceField: 'geoip.country_iso_code',
+                    },
+                    '4': {
+                      label: 'Anzahl der Aufnahmen',
+                      dataType: 'number',
+                      operationType: 'count',
+                      sourceField: 'Aufnahmen',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                    '5': {
+                      label: 'Sum of bytes',
+                      dataType: 'numver',
+                      operationType: 'last_value',
+                      params: {
+                        // no showArrayValues
+                      },
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+                '3': {
+                  columns: {
+                    '5': {
+                      label: 'Sum of bytes',
+                      dataType: 'numver',
+                      operationType: 'last_value',
+                      params: {
+                        // no showArrayValues
+                      },
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('should set showArrayValues for last-value columns', () => {
+      const result = migrations['8.2.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+
+      const layer2Columns =
+        result.attributes.state.datasourceStates.indexpattern.layers['2'].columns;
+      const layer3Columns =
+        result.attributes.state.datasourceStates.indexpattern.layers['3'].columns;
+      expect(layer2Columns['5'].params).toHaveProperty('showArrayValues', true);
+      expect(layer2Columns['3'].params).not.toHaveProperty('showArrayValues');
+      expect(layer3Columns['5'].params).toHaveProperty('showArrayValues', true);
+    });
+  });
 });

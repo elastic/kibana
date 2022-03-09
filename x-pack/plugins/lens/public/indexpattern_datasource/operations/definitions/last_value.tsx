@@ -105,7 +105,7 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   operationType: 'last_value';
   params: {
     sortField: string;
-    showArrayValues?: boolean;
+    showArrayValues: boolean;
     // last value on numeric fields can be formatted
     format?: {
       id: string;

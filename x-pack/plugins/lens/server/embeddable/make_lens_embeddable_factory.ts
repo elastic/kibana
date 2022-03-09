@@ -18,6 +18,7 @@ import {
   commonRenameFilterReferences,
   commonRenameOperationsForFormula,
   commonRenameRecordsField,
+  commonSetLastValueShowArrayValues,
   commonUpdateVisLayerType,
   getLensCustomVisualizationMigrations,
   getLensFilterMigrations,
@@ -26,6 +27,7 @@ import {
   CustomVisualizationMigrations,
   LensDocShape713,
   LensDocShape715,
+  LensDocShape810,
   LensDocShapePre712,
   VisState716,
   VisStatePre715,
@@ -83,6 +85,14 @@ export const makeLensEmbeddableFactory =
               const migratedLensState = commonRenameRecordsField(
                 commonRenameFilterReferences(lensState.attributes)
               );
+              return {
+                ...lensState,
+                attributes: migratedLensState,
+              } as unknown as SerializableRecord;
+            },
+            '8.2.0': (state) => {
+              const lensState = state as unknown as { attributes: LensDocShape810 };
+              const migratedLensState = commonSetLastValueShowArrayValues(lensState.attributes);
               return {
                 ...lensState,
                 attributes: migratedLensState,

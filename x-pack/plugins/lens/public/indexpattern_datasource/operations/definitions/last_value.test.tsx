@@ -159,6 +159,7 @@ describe('last_value', () => {
         dataType: 'number',
         params: {
           sortField: 'datefield',
+          showArrayValues: false,
         },
       };
       const indexPattern = createMockedIndexPattern();
@@ -179,6 +180,7 @@ describe('last_value', () => {
         dataType: 'number',
         params: {
           sortField: 'datefield',
+          showArrayValues: false,
         },
       };
       const indexPattern = createMockedIndexPattern();
@@ -198,6 +200,7 @@ describe('last_value', () => {
         dataType: 'number',
         params: {
           sortField: 'datefield',
+          showArrayValues: false,
         },
       };
       const indexPattern = createMockedIndexPattern();
