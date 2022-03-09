@@ -91,7 +91,7 @@ export const ruleRegistrySearchStrategyProvider = (
             filter.push(getSpacesFilter(space.id) as estypes.QueryDslQueryContainer);
           }
 
-          const sort = request.sort ?? {};
+          const sort = request.sort ?? [];
 
           const query = {
             bool: {
