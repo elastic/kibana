@@ -134,9 +134,7 @@ export const config: PluginConfigDescriptor = {
     developer: schema.object({
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
       allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
-      bundledPackageLocation: schema.maybe(
-        schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION })
-      ),
+      bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
     }),
   }),
 };
