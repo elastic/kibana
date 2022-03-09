@@ -51,7 +51,7 @@ export const getLegendActions = (
       );
       formattedTitle =
         formatter
-          .deserialize(getFormatByAccessor(accessor!, visData.columns))
+          .deserialize(accessor ? getFormatByAccessor(accessor, visData.columns) : undefined)
           .convert(pieSeries.key) ?? '';
     }
 
