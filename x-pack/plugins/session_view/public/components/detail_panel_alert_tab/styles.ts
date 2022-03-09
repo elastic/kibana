@@ -27,9 +27,15 @@ export const useStyles = () => {
       paddingTop: size.base,
     };
 
+    const viewMode: CSSObject = {
+      margin: size.base,
+      marginBottom: 0,
+    };
+
     return {
       container,
       stickyItem,
+      viewMode,
     };
   }, [euiTheme]);
 

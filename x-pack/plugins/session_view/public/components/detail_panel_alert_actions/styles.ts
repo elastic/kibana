@@ -76,7 +76,7 @@ export const useStyles = ({ minimal = false, isInvestigated = false }: StylesDep
     const processPanel: CSSObject = {
       border: `${borderThickness} solid ${colors.lightShade}`,
       fontFamily: font.familyCode,
-      marginTop: minimal ? size.s : size.m,
+      marginTop: mediumPadding,
       padding: `${size.xs} ${size.s}`,
     };
 
@@ -93,14 +93,6 @@ export const useStyles = ({ minimal = false, isInvestigated = false }: StylesDep
       textAlign: 'center',
     };
 
-    const minimalContextMenu: CSSObject = {
-      float: 'right',
-    };
-
-    const minimalHR: CSSObject = {
-      marginBottom: 0,
-    };
-
     return {
       alertItem,
       alertTitle,
@@ -108,8 +100,6 @@ export const useStyles = ({ minimal = false, isInvestigated = false }: StylesDep
       alertAccordionButton,
       processPanel,
       investigatedLabel,
-      minimalContextMenu,
-      minimalHR,
     };
   }, [euiTheme, isInvestigated, minimal]);
 
