@@ -18,6 +18,7 @@ import React, {
   useEffect,
   MouseEvent,
   useCallback,
+  useMemo,
 } from 'react';
 import { EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -58,12 +59,17 @@ export function ProcessTreeNode({
   }, [isSessionLeader, process.autoExpand]);
 
   const alerts = process.getAlerts();
-  const hasInvestigatedAlert = !!(
-    alerts.length &&
-    alerts.find((alert) => jumpToAlertID && jumpToAlertID === alert.kibana?.alert.uuid)
+  const hasAlerts = useMemo(() => !!alerts.length, [alerts]);
+  const hasInvestigatedAlert = useMemo(
+    () =>
+      !!(
+        hasAlerts &&
+        alerts.find((alert) => jumpToAlertID && jumpToAlertID === alert.kibana?.alert.uuid)
+      ),
+    [hasAlerts, alerts, jumpToAlertID]
   );
-  const styles = useStyles({ depth, hasInvestigatedAlert });
-  const buttonStyles = useButtonStyles();
+  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert });
+  const buttonStyles = useButtonStyles({});
 
   // Automatically expand alerts list when investigating an alert
   useEffect(() => {
@@ -115,7 +121,7 @@ export function ProcessTreeNode({
 
   const processDetails = process.getDetails();
 
-  if (!(processDetails && processDetails.process)) {
+  if (!processDetails?.process) {
     return null;
   }
 
@@ -194,7 +200,7 @@ export function ProcessTreeNode({
             >
               <FormattedMessage
                 id="xpack.sessionView.execUserChange"
-                defaultMessage="Root escalation"
+                defaultMessage="Exec user change: Root"
               />
             </EuiButton>
           )}

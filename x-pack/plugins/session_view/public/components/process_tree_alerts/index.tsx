@@ -14,14 +14,14 @@ import { MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
 interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
   jumpToAlertID?: string;
-  isProcessSelected: boolean;
+  isProcessSelected?: boolean;
   onAlertSelected: (e: MouseEvent) => void;
 }
 
 export function ProcessTreeAlerts({
   alerts,
   jumpToAlertID,
-  isProcessSelected,
+  isProcessSelected = false,
   onAlertSelected,
 }: ProcessTreeAlertsDeps) {
   const styles = useStyles();

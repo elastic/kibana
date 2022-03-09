@@ -11,16 +11,17 @@ import { CSSObject } from '@emotion/react';
 
 interface StylesDeps {
   depth: number;
+  hasAlerts: boolean;
   hasInvestigatedAlert: boolean;
 }
 
-export const useStyles = ({ depth, hasInvestigatedAlert }: StylesDeps) => {
+export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { colors, border, size } = euiTheme;
 
-    const TREE_INDENT = euiTheme.base * 2;
+    const TREE_INDENT = `calc(${size.l} + ${size.xxs})`;
 
     const darkText: CSSObject = {
       color: colors.text,
@@ -49,10 +50,12 @@ export const useStyles = ({ depth, hasInvestigatedAlert }: StylesDeps) => {
       const hoverColor = transparentize(colors.primary, 0.04);
       let borderColor = 'transparent';
 
-      // TODO: alerts highlight colors
+      if (hasAlerts) {
+        borderColor = colors.danger;
+      }
+
       if (hasInvestigatedAlert) {
         bgColor = transparentize(colors.danger, 0.04);
-        borderColor = transparentize(colors.danger, 0.48);
       }
 
       return { bgColor, borderColor, hoverColor };
@@ -76,10 +79,10 @@ export const useStyles = ({ depth, hasInvestigatedAlert }: StylesDeps) => {
         height: '100%',
         pointerEvents: 'none',
         content: `''`,
-        marginLeft: `-${depth * TREE_INDENT}px`,
+        marginLeft: `calc(-${depth} * ${TREE_INDENT})`,
         borderLeft: `${size.xs} solid ${borderColor}`,
         backgroundColor: bgColor,
-        width: `calc(100% + ${depth * TREE_INDENT}px)`,
+        width: `calc(100% + ${depth} * ${TREE_INDENT})`,
       },
     };
 
@@ -112,7 +115,7 @@ export const useStyles = ({ depth, hasInvestigatedAlert }: StylesDeps) => {
       workingDir,
       alertDetails,
     };
-  }, [depth, euiTheme, hasInvestigatedAlert]);
+  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert]);
 
   return cached;
 };

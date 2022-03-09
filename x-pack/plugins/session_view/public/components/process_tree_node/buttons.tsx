@@ -17,7 +17,7 @@ export const ChildrenProcessesButton = ({
   onToggle: () => void;
   isExpanded: boolean;
 }) => {
-  const { button, buttonArrow, getExpandedIcon } = useButtonStyles();
+  const { button, buttonArrow, expandedIcon } = useButtonStyles({ isExpanded });
 
   return (
     <EuiButton
@@ -27,7 +27,7 @@ export const ChildrenProcessesButton = ({
       data-test-subj="sessionView:processTreeNodeChildProcessesButton"
     >
       <FormattedMessage id="xpack.sessionView.childProcesses" defaultMessage="Child processes" />
-      <EuiIcon css={buttonArrow} size="s" type={getExpandedIcon(isExpanded)} />
+      <EuiIcon css={buttonArrow} size="s" type={expandedIcon} />
     </EuiButton>
   );
 };
@@ -45,7 +45,9 @@ export const SessionLeaderButton = ({
 }) => {
   const groupLeaderCount = process.getChildren(false).length;
   const sameGroupCount = childCount - groupLeaderCount;
-  const { button, buttonArrow, getExpandedIcon } = useButtonStyles();
+  const { button, buttonArrow, expandedIcon } = useButtonStyles({
+    isExpanded: !showGroupLeadersOnly,
+  });
 
   if (sameGroupCount > 0) {
     return (
@@ -74,7 +76,7 @@ export const SessionLeaderButton = ({
               count: sameGroupCount,
             }}
           />
-          <EuiIcon css={buttonArrow} size="s" type={getExpandedIcon(showGroupLeadersOnly)} />
+          <EuiIcon css={buttonArrow} size="s" type={expandedIcon} />
         </EuiButton>
       </EuiToolTip>
     );
@@ -89,7 +91,7 @@ export const AlertButton = ({
   isExpanded: boolean;
   onToggle: () => void;
 }) => {
-  const { alertButton, buttonArrow, getExpandedIcon } = useButtonStyles();
+  const { alertButton, buttonArrow, expandedIcon } = useButtonStyles({ isExpanded });
 
   return (
     <EuiButton
@@ -99,7 +101,7 @@ export const AlertButton = ({
       data-test-subj="processTreeNodeAlertButton"
     >
       <FormattedMessage id="xpack.sessionView.alerts" defaultMessage="Alerts" />
-      <EuiIcon css={buttonArrow} size="s" type={getExpandedIcon(isExpanded)} />
+      <EuiIcon css={buttonArrow} size="s" type={expandedIcon} />
     </EuiButton>
   );
 };
