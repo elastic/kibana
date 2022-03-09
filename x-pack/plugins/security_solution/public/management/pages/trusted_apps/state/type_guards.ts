@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import {
   ConditionEntry,
-  ConditionEntryField,
   EffectScope,
   GlobalEffectScope,
   MacosLinuxConditionEntry,

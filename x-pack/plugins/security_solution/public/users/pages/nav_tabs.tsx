@@ -15,8 +15,20 @@ const getTabsOnUsersUrl = (tabName: UsersTableType) => `${USERS_PATH}/${tabName}
 export const navTabsUsers: UsersNavTab = {
   [UsersTableType.allUsers]: {
     id: UsersTableType.allUsers,
-    name: i18n.ALL_USERS_TITLE,
+    name: i18n.NAVIGATION_ALL_USERS_TITLE,
     href: getTabsOnUsersUrl(UsersTableType.allUsers),
+    disabled: false,
+  },
+  [UsersTableType.anomalies]: {
+    id: UsersTableType.anomalies,
+    name: i18n.NAVIGATION_ANOMALIES_TITLE,
+    href: getTabsOnUsersUrl(UsersTableType.anomalies),
+    disabled: false,
+  },
+  [UsersTableType.risk]: {
+    id: UsersTableType.risk,
+    name: i18n.NAVIGATION_RISK_TITLE,
+    href: getTabsOnUsersUrl(UsersTableType.risk),
     disabled: false,
   },
 };

@@ -26,6 +26,8 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 
 import { once } from 'lodash';
 
+import type { SpacesPluginStart } from '../../spaces/public';
+
 import type { CloudStart } from '../../cloud/public';
 
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
@@ -105,6 +107,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   storage: Storage;
   share: SharePluginStart;
   cloud?: CloudSetup & CloudStart;
+  spaces?: SpacesPluginStart;
   authz: FleetAuthz;
 }
 

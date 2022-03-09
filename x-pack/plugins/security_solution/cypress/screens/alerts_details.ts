@@ -54,7 +54,7 @@ export const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 
 export const TABLE_CELL = '.euiTableRowCell';
 
-export const CELL_EXPAND_VALUE = '.euiDataGridRowCell__expandButtonIcon';
+export const CELL_EXPAND_VALUE = '[data-test-subj="euiDataGridCellExpandButton"]';
 
 export const CELL_EXPANSION_POPOVER = '[data-test-subj="euiDataGridExpansionPopover"]';
 
