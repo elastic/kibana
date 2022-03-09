@@ -8,7 +8,12 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import { MonitorFields, SyntheticsMonitor, ConfigKey } from '../../../common/runtime_types';
+import {
+  MonitorFields,
+  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitor,
+  ConfigKey,
+} from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
@@ -18,6 +23,7 @@ import {
   sendTelemetryEvents,
   formatTelemetryUpdateEvent,
 } from './telemetry/monitor_upgrade_sender';
+import { formatSecrets } from '../../lib/synthetics_service/utils/secrets';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
@@ -44,16 +50,14 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     const { syntheticsService } = server;
 
     try {
-      const previousMonitor: SavedObject<MonitorFields> = await savedObjectsClient.get(
-        syntheticsMonitorType,
-        monitorId
-      );
-      const monitorWithRevision = {
+      const previousMonitor: SavedObject<SyntheticsMonitorWithSecrets> =
+        await savedObjectsClient.get(syntheticsMonitorType, monitorId);
+      const monitorWithRevision = formatSecrets({
         ...monitor,
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
-      };
+      });
 
-      const editMonitor: SavedObjectsUpdateResponse<MonitorFields> =
+      const editMonitor: SavedObjectsUpdateResponse<SyntheticsMonitorWithSecrets> =
         await savedObjectsClient.update<MonitorFields>(
           syntheticsMonitorType,
           monitorId,
@@ -62,7 +66,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
       const errors = await syntheticsService.pushConfigs(request, [
         {
-          ...(editMonitor.attributes as SyntheticsMonitor),
+          ...monitor,
           id: editMonitor.id,
           fields: {
             config_id: editMonitor.id,

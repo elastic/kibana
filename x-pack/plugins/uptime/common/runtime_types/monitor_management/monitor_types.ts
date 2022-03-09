@@ -227,3 +227,47 @@ export const MonitorManagementListResultCodec = t.type({
 });
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
+
+export const SyntheticsMonitorWithSecretsCodec = t.intersection([
+  SyntheticsMonitorCodec,
+  t.interface({
+    secrets: t.string,
+  }),
+]);
+
+export const SecretKeys = [
+  ConfigKey.PASSWORD,
+  ConfigKey.PROXY_URL,
+  ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
+  ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
+  ConfigKey.RESPONSE_HEADERS_CHECK,
+  ConfigKey.RESPONSE_RECEIVE_CHECK,
+  ConfigKey.RESPONSE_STATUS_CHECK,
+  ConfigKey.REQUEST_BODY_CHECK,
+  ConfigKey.REQUEST_HEADERS_CHECK,
+  ConfigKey.REQUEST_METHOD_CHECK,
+  ConfigKey.REQUEST_SEND_CHECK,
+  ConfigKey.SOURCE_INLINE,
+  ConfigKey.SOURCE_ZIP_URL,
+  ConfigKey.SOURCE_ZIP_USERNAME,
+  ConfigKey.SOURCE_ZIP_PASSWORD,
+  ConfigKey.SOURCE_ZIP_FOLDER,
+  ConfigKey.SOURCE_ZIP_PROXY_URL,
+  ConfigKey.TLS_CERTIFICATE_AUTHORITIES,
+  ConfigKey.TLS_CERTIFICATE,
+  ConfigKey.TLS_KEY,
+  ConfigKey.TLS_KEY_PASSPHRASE,
+  ConfigKey.URLS,
+  ConfigKey.USERNAME,
+  ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES,
+  ConfigKey.ZIP_URL_TLS_CERTIFICATE,
+  ConfigKey.ZIP_URL_TLS_KEY,
+  ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE,
+] as const;
+
+export type Secret = typeof SecretKeys[number];
+
+export type SyntheticsMonitorWithSecrets = Omit<
+  t.TypeOf<typeof SyntheticsMonitorWithSecretsCodec>,
+  Secret
+>;

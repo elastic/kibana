@@ -12,7 +12,7 @@ import {
 import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { DynamicSettings } from '../../../common/runtime_types';
+import { DynamicSettings, SecretKeys } from '../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
 import { UptimeConfig } from '../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
@@ -33,6 +33,11 @@ export const registerUptimeSavedObjects = (
     encryptedSavedObjects.registerType({
       type: syntheticsServiceApiKey.name,
       attributesToEncrypt: new Set(['apiKey']),
+    });
+
+    encryptedSavedObjects.registerType({
+      type: syntheticsMonitor.name,
+      attributesToEncrypt: new Set(['secrets', ...SecretKeys]),
     });
   }
 };

@@ -7,6 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { SavedObject } from 'kibana/server';
 import { KibanaRequest, Logger } from '../../../../../../src/core/server';
 import {
   ConcreteTaskInstance,
@@ -18,7 +19,7 @@ import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
-import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
+import { syntheticsMonitorType, syntheticsMonitor } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../../common/config';
 import { ServiceAPIClient } from './service_api_client';
@@ -29,15 +30,18 @@ import {
   ServiceLocations,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
+  SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 import { hydrateSavedObjects } from './hydrate_saved_object';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 
+import { normalizeSecrets } from './utils/secrets';
+
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
-const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
+const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '1m';
 
 export class SyntheticsService {
   private logger: Logger;
@@ -288,31 +292,57 @@ export class SyntheticsService {
 
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
+    const encryptedClient = this.server.encryptedSavedObjects.getClient();
+    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = [];
 
     if (!savedObjectsClient?.find) {
       return [] as SyntheticsMonitorWithId[];
     }
 
-    const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
+    const { saved_objects: encryptedMonitors } = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
       namespaces: ['*'],
-      perPage: 10000,
+      perPage: 500,
+    });
+
+    const start = Date.now();
+
+    for (const monitor of encryptedMonitors) {
+      const decryptedMonitor =
+        await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+          syntheticsMonitor.name,
+          monitor.id,
+          {
+            namespace: monitor.namespaces?.[0],
+          }
+        );
+      monitors.push(decryptedMonitor);
+    }
+
+    const end = Date.now();
+    const duration = end - start;
+
+    this.logger.info(`Decrypted ${monitors.length} monitors. Took ${duration} miliseconds`, {
+      event: {
+        duration,
+      },
+      monitors: monitors.length,
     });
 
     if (this.indexTemplateExists) {
       // without mapping, querying won't make sense
       hydrateSavedObjects({
-        monitors: findResult.saved_objects as unknown as SyntheticsMonitorSavedObject[],
+        monitors: monitors as unknown as SyntheticsMonitorSavedObject[],
         server: this.server,
       });
     }
 
-    return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
-      ...attributes,
-      id,
+    return (monitors ?? []).map((monitor) => ({
+      ...normalizeSecrets(monitor).attributes,
+      id: monitor.id,
       fields_under_root: true,
-      fields: { config_id: id },
-    })) as SyntheticsMonitorWithId[];
+      fields: { config_id: monitor.id },
+    }));
   }
 
   formatConfigs(configs: SyntheticsMonitorWithId[]) {
