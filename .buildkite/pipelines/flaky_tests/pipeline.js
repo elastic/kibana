@@ -35,7 +35,7 @@ for (const group of groups) {
   if (!group.ciGroups) {
     inputs.push(stepInput(group.key, group.name));
   } else if (group.key === 'xpack/cypress') {
-    for (let i = 1; i <= group.ciGroups.length; i++) {
+    for (let i = 1; i <= group.ciGroups; i++) {
       const testSuite = cypressSuites[i];
       inputs.push(stepInput(`${group.key}/${testSuite}`, `${group.name} ${testSuite}`));
     }
