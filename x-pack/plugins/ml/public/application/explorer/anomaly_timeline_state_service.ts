@@ -59,7 +59,7 @@ export class AnomalyTimelineStateService {
 
   private _containerWidth$ = new BehaviorSubject<number>(0);
   private _selectedCells$ = new BehaviorSubject<AppStateSelectedCells | undefined>(undefined);
-  private _swimLaneSeverity$ = new BehaviorSubject<number | undefined>(undefined);
+  private _swimLaneSeverity$ = new BehaviorSubject<number>(0);
   private _swimLanePaginations$ = new BehaviorSubject<SwimLanePagination>({
     viewByFromPage: 1,
     viewByPerPage: 10,
@@ -89,7 +89,7 @@ export class AnomalyTimelineStateService {
 
     this._swimLaneUrlState$
       .pipe(
-        map((v) => v?.severity),
+        map((v) => v?.severity ?? 0),
         distinctUntilChanged()
       )
       .subscribe(this._swimLaneSeverity$);
@@ -167,6 +167,10 @@ export class AnomalyTimelineStateService {
           this._isOverallSwimLaneLoading$.next(true);
         }),
         switchMap(([selectedJobs, severity, containerWidth]) => {
+          console.log(selectedJobs, '___selectedJobs___');
+          console.log(severity, '___severity___');
+          console.log(containerWidth, '___containerWidth___');
+
           return from(
             this.anomalyTimelineService.loadOverallData(
               selectedJobs!,
