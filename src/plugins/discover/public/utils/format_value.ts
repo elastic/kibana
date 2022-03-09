@@ -9,7 +9,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormatsStart } from '../../../field_formats/public';
 import { KBN_FIELD_TYPES } from '../../../data/common';
-import { DataView, DataViewField } from '../../../data_views/common';
+import { DataView, DataViewField } from '../../../data_views/public';
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available

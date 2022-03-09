@@ -7,7 +7,8 @@
  */
 
 import { FieldFilterState, isFieldFiltered } from './field_filter';
-import { getFieldSubtypeMulti, DataViewField } from '../../../../../../../data_views/common';
+import { getFieldSubtypeMulti } from '../../../../../../../data_views/common';
+import { DataViewField } from '../../../../../../../data_views/public';
 
 interface GroupedFields {
   selected: DataViewField[];

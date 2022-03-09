@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FieldSpec, DataViewField } from '../../../../../../../data_views/common';
+import { FieldSpec } from '../../../../../../../data_views/common';
+import { DataViewField } from '../../../../../../../data_views/public';
 
 export const fieldSpecMap: Record<string, FieldSpec> = {
   'machine.os': {

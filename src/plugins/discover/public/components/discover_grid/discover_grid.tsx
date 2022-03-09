@@ -20,7 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
-import type { DataView } from '../../../../data_views/common';
+import type { DataView } from '../../../../data_views/public';
 import { flattenHit } from '../../../../data/common';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';

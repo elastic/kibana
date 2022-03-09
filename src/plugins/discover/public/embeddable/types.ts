@@ -13,7 +13,7 @@ import {
   IEmbeddable,
 } from 'src/plugins/embeddable/public';
 import type { Filter } from '@kbn/es-query';
-import { DataView } from '../../../data_views/common';
+import { DataView } from '../../../data_views/public';
 import { TimeRange, Query } from '../../../data/common';
 import { SavedSearch } from '../services/saved_searches';
 import { SortOrder } from '../components/doc_table/components/table_header/helpers';

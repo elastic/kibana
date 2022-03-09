@@ -32,7 +32,7 @@ import {
 } from './use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
-import { DataViewType } from '../../../../../data_views/common';
+import { DataViewType } from '../../../../../data_views/public';
 
 export interface FetchDeps {
   abortController: AbortController;

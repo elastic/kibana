@@ -9,7 +9,7 @@
 import moment from 'moment';
 import { get, last } from 'lodash';
 import { SortDirection } from 'src/plugins/data/common';
-import type { DataView } from 'src/plugins/data_views/common';
+import type { DataView } from 'src/plugins/data_views/public';
 import { createContextSearchSourceStub } from './_stubs';
 import { DataPublicPluginStart, Query } from '../../../../../data/public';
 import { fetchSurroundingDocs, SurrDocType } from './context';

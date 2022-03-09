@@ -18,7 +18,7 @@ import { DocViewsRegistry } from '../../services/doc_views/doc_views_registry';
 import { setDocViewsRegistry } from '../../kibana_services';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
-import type { DataView } from '../../../../data_views/common';
+import type { DataView } from '../../../../data_views/public';
 import type { ElasticSearchHit } from '../../types';
 
 describe('Discover flyout', function () {

@@ -13,7 +13,7 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { Query, TimeRange } from '../../../../../../data/common/query';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
-import { DataViewType } from '../../../../../../data_views/common';
+import { DataViewType } from '../../../../../../data_views/public';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,

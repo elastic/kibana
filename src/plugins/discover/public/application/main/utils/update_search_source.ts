@@ -8,7 +8,7 @@
 
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { ISearchSource } from '../../../../../data/common';
-import { DataViewType, DataView } from '../../../../../data_views/common';
+import { DataViewType, DataView } from '../../../../../data_views/public';
 import type { SortOrder } from '../../../services/saved_searches';
 import { DiscoverServices } from '../../../build_services';
 import { getSortForSearchSource } from '../../../components/doc_table';

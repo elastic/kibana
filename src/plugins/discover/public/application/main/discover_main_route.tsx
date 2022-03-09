@@ -7,7 +7,10 @@
  */
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { DataViewAttributes } from 'src/plugins/data_views/common';
+import {
+  DataViewAttributes,
+  DataViewSavedObjectConflictError,
+} from 'src/plugins/data_views/common';
 import { ISearchSource, SavedObject } from 'src/plugins/data/common';
 import {
   SavedSearch,
@@ -19,7 +22,6 @@ import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pat
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { redirectWhenMissing } from '../../../../kibana_utils/public';
-import { DataViewSavedObjectConflictError } from '../../../../data_views/common';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../utils/use_discover_services';

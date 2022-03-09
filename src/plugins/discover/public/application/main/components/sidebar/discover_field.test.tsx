@@ -11,7 +11,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DiscoverField } from './discover_field';
-import { DataViewField } from '../../../../../../data_views/common';
+import { DataViewField } from '../../../../../../data_views/public';
 import { stubIndexPattern } from '../../../../../../data/common/stubs';
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 

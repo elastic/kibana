@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ISearchSource } from 'src/plugins/data/common';
-import type { DataView } from 'src/plugins/data_views/common';
+import type { DataView } from 'src/plugins/data_views/public';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { unhashUrl } from '../../../../../../kibana_utils/public';

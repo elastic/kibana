@@ -7,7 +7,7 @@
  */
 
 import { getIgnoredReason, IgnoredReason } from './get_ignored_reason';
-import type { DataViewField } from '../../../data_views/common';
+import type { DataViewField } from '../../../data_views/public';
 import { KBN_FIELD_TYPES } from '../../../data/common';
 
 function field(params: Partial<DataViewField>): DataViewField {

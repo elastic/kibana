@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewsContract } from 'src/plugins/data_views/common';
+import type { DataView, DataViewsContract } from 'src/plugins/data_views/public';
 import type { ISearchSource } from 'src/plugins/data/common';
 import type { IUiSettingsClient, SavedObject, ToastsStart } from 'kibana/public';
 export type IndexPatternSavedObject = SavedObject & { title: string };

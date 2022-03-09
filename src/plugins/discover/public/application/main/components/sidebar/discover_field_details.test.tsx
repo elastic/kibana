@@ -11,7 +11,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DiscoverFieldDetails } from './discover_field_details';
-import { DataViewField } from '../../../../../../data_views/common';
+import { DataViewField } from '../../../../../../data_views/public';
 import { stubIndexPattern } from '../../../../../../data/common/stubs';
 
 describe('discover sidebar field details', function () {

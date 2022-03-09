@@ -7,7 +7,8 @@
  */
 
 import type { Query, SavedObject, TimeRange } from '../../../../../../data/common';
-import type { DataView, DataViewAttributes } from '../../../../../../data_views/common';
+import type { DataViewAttributes } from '../../../../../../data_views/common';
+import type { DataView } from '../../../../../../data_views/public';
 import { ISearchSource } from '../../../../../../data/public';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DataRefetch$, SavedSearchData } from '../../utils/use_saved_search';
