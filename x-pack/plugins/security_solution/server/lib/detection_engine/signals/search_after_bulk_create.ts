@@ -63,14 +63,14 @@ export const searchAfterAndBulkCreate = async ({
       });
     }
     const kibanaIndexPattern = await services.savedObjectsClient.get('index-pattern', dataViewId);
-    const runtimeMappings = kibanaIndexPattern.runtimeFieldMap;
+    logger.debug(`kibana index pattern ${JSON.stringify(kibanaIndexPattern, null, 2)}`);
+    const runtimeMappings = JSON.parse(kibanaIndexPattern.attributes.runtimeFieldMap);
+    logger.debug(`runtime mappings ${runtimeMappings}`);
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
       try {
         let mergedSearchResults = createSearchResultReturnType();
         logger.debug(buildRuleMessage(`sortIds: ${sortIds}`));
-        logger.debug(`WHAT ARE THE INDEX PATTERNS ${inputIndexPattern}`);
-        logger.debug(`WHAT ARE THE filters ${JSON.stringify(filter, null, 2)}`);
         if (hasSortId) {
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
