@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
-import { oneOf } from '../../../../expressions/common';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -58,12 +57,12 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
   args: {
     shape: {
       types: ['string'],
-      validate: oneOf(
+      options: [
         GaugeShapes.HORIZONTAL_BULLET,
         GaugeShapes.VERTICAL_BULLET,
         GaugeShapes.ARC,
-        GaugeShapes.CIRCLE
-      ),
+        GaugeShapes.CIRCLE,
+      ],
       help: i18n.translate('expressionGauge.functions.gauge.args.shape.help', {
         defaultMessage: 'Type of gauge chart',
       }),
@@ -96,7 +95,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     colorMode: {
       types: ['string'],
       default: GaugeColorModes.NONE,
-      validate: oneOf(GaugeColorModes.NONE, GaugeColorModes.PALETTE),
+      options: [GaugeColorModes.NONE, GaugeColorModes.PALETTE],
       help: i18n.translate('expressionGauge.functions.gauge.args.colorMode.help', {
         defaultMessage: 'If set to palette, the palette colors will be applied to the bands',
       }),
@@ -110,11 +109,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     ticksPosition: {
       types: ['string'],
       default: GaugeTicksPositions.AUTO,
-      validate: oneOf(
-        GaugeTicksPositions.HIDDEN,
-        GaugeTicksPositions.AUTO,
-        GaugeTicksPositions.BANDS
-      ),
+      options: [GaugeTicksPositions.HIDDEN, GaugeTicksPositions.AUTO, GaugeTicksPositions.BANDS],
       help: i18n.translate('expressionGauge.functions.gauge.args.ticksPosition.help', {
         defaultMessage: 'Specifies the placement of ticks',
       }),
@@ -127,11 +122,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     },
     labelMajorMode: {
       types: ['string'],
-      validate: oneOf(
-        GaugeLabelMajorModes.NONE,
-        GaugeLabelMajorModes.AUTO,
-        GaugeLabelMajorModes.CUSTOM
-      ),
+      options: [GaugeLabelMajorModes.NONE, GaugeLabelMajorModes.AUTO, GaugeLabelMajorModes.CUSTOM],
       help: i18n.translate('expressionGauge.functions.gauge.args.labelMajorMode.help', {
         defaultMessage: 'Specifies the mode of labelMajor',
       }),
@@ -151,11 +142,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     },
     centralMajorMode: {
       types: ['string'],
-      validate: oneOf(
-        GaugeLabelMajorModes.NONE,
-        GaugeLabelMajorModes.AUTO,
-        GaugeLabelMajorModes.CUSTOM
-      ),
+      options: [GaugeLabelMajorModes.NONE, GaugeLabelMajorModes.AUTO, GaugeLabelMajorModes.CUSTOM],
       help: i18n.translate('expressionGauge.functions.gauge.args.centralMajorMode.help', {
         defaultMessage: 'Specifies the mode of centralMajor',
       }),

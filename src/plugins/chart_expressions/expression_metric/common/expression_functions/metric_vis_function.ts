@@ -15,7 +15,6 @@ import {
   validateAccessor,
 } from '../../../../visualizations/common/utils';
 import { ColorMode } from '../../../../charts/common';
-import { oneOf } from '../../../../expressions/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
 
@@ -56,7 +55,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     colorMode: {
       types: ['string'],
       default: `"${ColorMode.None}"`,
-      validate: oneOf(ColorMode.None, ColorMode.Labels, ColorMode.Background),
+      options: [ColorMode.None, ColorMode.Labels, ColorMode.Background],
       help: i18n.translate('expressionMetricVis.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
       }),
@@ -97,7 +96,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     labelPosition: {
       types: ['string'],
-      validate: oneOf(LabelPosition.BOTTOM, LabelPosition.TOP),
+      options: [LabelPosition.BOTTOM, LabelPosition.TOP],
       help: i18n.translate('expressionMetricVis.function.labelPosition.help', {
         defaultMessage: 'Label position',
       }),

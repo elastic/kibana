@@ -8,7 +8,6 @@
 
 import { Position } from '@elastic/charts';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { oneOf } from '../../../../expressions/common';
 import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
 import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
 import {
@@ -52,14 +51,14 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     legendDisplay: {
       types: ['string'],
       help: strings.getLegendDisplayArgHelp(),
-      validate: oneOf(LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT),
+      options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
       default: LegendDisplay.HIDE,
     },
     legendPosition: {
       types: ['string'],
       default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
-      validate: oneOf(Position.Top, Position.Right, Position.Bottom, Position.Left),
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
     },
     truncateLegend: {
       types: ['boolean'],

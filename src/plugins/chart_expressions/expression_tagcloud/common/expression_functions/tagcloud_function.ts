@@ -7,7 +7,6 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { oneOf } from '../../../../expressions/common';
 import {
   prepareLogTable,
   Dimension,
@@ -93,13 +92,13 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
       scale: {
         types: ['string'],
         default: ScaleOptions.LINEAR,
-        validate: oneOf(ScaleOptions.LINEAR, ScaleOptions.LOG, ScaleOptions.SQUARE_ROOT),
+        options: [ScaleOptions.LINEAR, ScaleOptions.LOG, ScaleOptions.SQUARE_ROOT],
         help: argHelp.scale,
       },
       orientation: {
         types: ['string'],
         default: Orientation.SINGLE,
-        validate: oneOf(Orientation.SINGLE, Orientation.RIGHT_ANGLED, Orientation.MULTIPLE),
+        options: [Orientation.SINGLE, Orientation.RIGHT_ANGLED, Orientation.MULTIPLE],
         help: argHelp.orientation,
       },
       minFontSize: {
