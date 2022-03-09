@@ -73,6 +73,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
     });
 
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
     it('adds a new tag to a new Dashboard', async () => {
       await createTagFromDashboard();
       PageObjects.dashboard.saveDashboard(dashboardTitle, {}, false);
