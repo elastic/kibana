@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-packages"
-PKG_REQUIRE_NAME = "@kbn/packages"
+PKG_DIRNAME = "kbn-bazel-packages"
+PKG_REQUIRE_NAME = "@kbn/bazel-packages"
 
 SOURCE_FILES = glob(
   [
