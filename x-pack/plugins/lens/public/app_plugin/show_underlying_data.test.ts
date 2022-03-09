@@ -106,7 +106,7 @@ describe('getLayerMetaInfo', () => {
   it('should basically work collecting fields and filters in the visualization', () => {
     const mockDatasource = createMockDatasource('testDatasource');
     const updatedPublicAPI: DatasourcePublicAPI = {
-      datasourceId: 'testDatasource',
+      datasourceId: 'indexpattern',
       getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
