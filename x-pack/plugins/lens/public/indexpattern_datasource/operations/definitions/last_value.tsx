@@ -105,7 +105,7 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   operationType: 'last_value';
   params: {
     sortField: string;
-    useTopHit?: boolean;
+    showArrayValues?: boolean;
     // last value on numeric fields can be formatted
     format?: {
       id: string;
@@ -218,7 +218,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     } as const;
 
     return (
-      column.params.useTopHit
+      column.params.showArrayValues
         ? buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
             ...initialArgs,
             aggregate: 'concat',
@@ -254,11 +254,11 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       (_columnId) => layer.columns[_columnId].operationType === 'terms'
     );
 
-    const setUseTopHit = (use: boolean) => {
+    const setShowArrayValues = (use: boolean) => {
       let updatedLayer = updateColumnParam({
         layer,
         columnId,
-        paramName: 'useTopHit',
+        paramName: 'showArrayValues',
         value: use,
       });
 
@@ -270,9 +270,9 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       updateLayer(updatedLayer);
     };
 
-    if (sourceIsScripted && !currentColumn.params.useTopHit) {
+    if (sourceIsScripted && !currentColumn.params.showArrayValues) {
       // actively set this so that other places in the code know that we're using top-hit
-      setUseTopHit(true);
+      setShowArrayValues(true);
     }
 
     return (
@@ -341,10 +341,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                 'When you show array values, you are unable to use this field to rank Top values.',
             }
           )}
-          isInvalid={currentColumn.params.useTopHit && usingTopValues}
+          isInvalid={currentColumn.params.showArrayValues && usingTopValues}
           display="rowCompressed"
           fullWidth
-          data-test-subj="lns-indexPattern-lastValue-useTopHit"
+          data-test-subj="lns-indexPattern-lastValue-showArrayValues"
         >
           <EuiToolTip
             content={i18n.translate(
@@ -360,10 +360,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
               label={i18n.translate('xpack.lens.indexPattern.lastValue.showArrayValues', {
                 defaultMessage: 'Show array values',
               })}
-              checked={Boolean(currentColumn.params.useTopHit)}
+              checked={Boolean(currentColumn.params.showArrayValues)}
               disabled={sourceIsScripted}
               onChange={() => {
-                setUseTopHit(!currentColumn.params.useTopHit);
+                setShowArrayValues(!currentColumn.params.showArrayValues);
               }}
             />
           </EuiToolTip>

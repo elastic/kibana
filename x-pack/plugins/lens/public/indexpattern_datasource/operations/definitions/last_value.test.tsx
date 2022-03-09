@@ -100,7 +100,7 @@ describe('last_value', () => {
     it('should use top-hit agg when param is set', () => {
       const lastValueColumn = layer.columns.col2 as LastValueIndexPatternColumn;
       const esAggsFn = lastValueOperation.toEsAggsFn(
-        { ...lastValueColumn, params: { ...lastValueColumn.params, useTopHit: true } },
+        { ...lastValueColumn, params: { ...lastValueColumn.params, showArrayValues: true } },
         'col1',
         {} as IndexPattern,
         layer,
@@ -439,27 +439,27 @@ describe('last_value', () => {
         return this._instance.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]');
       }
 
-      private get useTopHitSwitch() {
+      private get showArrayValuesSwitch() {
         return this._instance
-          .find('[data-test-subj="lns-indexPattern-lastValue-useTopHit"]')
+          .find('[data-test-subj="lns-indexPattern-lastValue-showArrayValues"]')
           .find(EuiSwitch);
       }
 
       public get showingTopValuesWarning() {
         return Boolean(
           this._instance
-            .find('[data-test-subj="lns-indexPattern-lastValue-useTopHit"]')
+            .find('[data-test-subj="lns-indexPattern-lastValue-showArrayValues"]')
             .find(EuiFormRow)
             .prop('isInvalid')
         );
       }
 
-      toggleUseTopHit() {
-        this.useTopHitSwitch.prop('onChange')({} as EuiSwitchEvent);
+      toggleShowArrayValues() {
+        this.showArrayValuesSwitch.prop('onChange')({} as EuiSwitchEvent);
       }
 
-      public get useTopHitSwitchDisabled() {
-        return this.useTopHitSwitch.prop('disabled');
+      public get showArrayValuesSwitchDisabled() {
+        return this.showArrayValuesSwitch.prop('disabled');
       }
 
       changeSortFieldOptions(options: Array<{ label: string; value: string }>) {
@@ -535,7 +535,7 @@ describe('last_value', () => {
 
         const harness = new Harness(instance);
 
-        harness.toggleUseTopHit();
+        harness.toggleShowArrayValues();
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
           ...layer,
@@ -545,7 +545,7 @@ describe('last_value', () => {
               ...layer.columns.col2,
               params: {
                 ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
-                useTopHit: true,
+                showArrayValues: true,
               },
             },
           },
@@ -581,7 +581,7 @@ describe('last_value', () => {
         );
 
         const harness = new Harness(instance);
-        harness.toggleUseTopHit();
+        harness.toggleShowArrayValues();
 
         // have to do this manually, but it happens automatically in the app
         const newLayer = updateLayerSpy.mock.calls[0][0];
@@ -590,7 +590,7 @@ describe('last_value', () => {
         expect(harness.showingTopValuesWarning).toBeFalsy();
       });
 
-      it('should set useTopHit and disable switch when scripted field', () => {
+      it('should set showArrayValues and disable switch when scripted field', () => {
         (layer.columns.col2 as LastValueIndexPatternColumn).sourceField = 'scripted';
 
         const updateLayerSpy = jest.fn();
@@ -612,13 +612,13 @@ describe('last_value', () => {
               ...layer.columns.col2,
               params: {
                 ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
-                useTopHit: true,
+                showArrayValues: true,
               },
             },
           },
         });
 
-        expect(new Harness(instance).useTopHitSwitchDisabled).toBeTruthy();
+        expect(new Harness(instance).showArrayValuesSwitchDisabled).toBeTruthy();
       });
     });
   });

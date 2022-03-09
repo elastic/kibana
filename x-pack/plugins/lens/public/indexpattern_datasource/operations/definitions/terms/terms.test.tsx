@@ -514,7 +514,7 @@ describe('terms', () => {
         })
       );
     });
-    it('should set alphabetical order type if metric column is of type last value and using top hit agg', () => {
+    it('should set alphabetical order type if metric column is of type last value and showing array values', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
         layer: {
@@ -527,7 +527,7 @@ describe('terms', () => {
               operationType: 'last_value',
               params: {
                 sortField: 'datefield',
-                useTopHit: true,
+                showArrayValues: true,
               },
             } as LastValueIndexPatternColumn,
           },
@@ -546,7 +546,7 @@ describe('terms', () => {
         expect.objectContaining({ orderBy: { type: 'alphabetical', fallback: true } })
       );
     });
-    it('should NOT set alphabetical order type if metric column is of type last value and NOT using top hit agg', () => {
+    it('should NOT set alphabetical order type if metric column is of type last value and NOT showing array values', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
         layer: {
@@ -559,7 +559,7 @@ describe('terms', () => {
               operationType: 'last_value',
               params: {
                 sortField: 'datefield',
-                useTopHit: false,
+                showArrayValues: false,
               },
             } as LastValueIndexPatternColumn,
           },
@@ -692,7 +692,7 @@ describe('terms', () => {
               operationType: 'last_value',
               params: {
                 sortField: 'time',
-                useTopHit: true,
+                showArrayValues: true,
               },
             } as LastValueIndexPatternColumn,
           },

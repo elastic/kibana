@@ -208,7 +208,7 @@ export function getDisallowedTermsMessage(
 function checkLastValue(column: GenericIndexPatternColumn) {
   if (
     column.operationType === 'last_value' &&
-    (column as LastValueIndexPatternColumn).params.useTopHit
+    (column as LastValueIndexPatternColumn).params.showArrayValues
   ) {
     return false;
   }

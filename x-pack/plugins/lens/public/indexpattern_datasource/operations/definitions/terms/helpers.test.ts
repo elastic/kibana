@@ -465,7 +465,7 @@ describe('isSortableByColumn()', () => {
               operationType: 'last_value',
               params: {
                 sortField: 'time',
-                useTopHit: true,
+                showArrayValues: true,
               },
             } as GenericIndexPatternColumn,
           ]),
@@ -486,7 +486,7 @@ describe('isSortableByColumn()', () => {
               operationType: 'last_value',
               params: {
                 sortField: 'time',
-                useTopHit: false,
+                showArrayValues: false,
               },
             } as GenericIndexPatternColumn,
           ]),
