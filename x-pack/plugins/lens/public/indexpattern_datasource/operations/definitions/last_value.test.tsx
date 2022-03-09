@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
@@ -445,6 +445,15 @@ describe('last_value', () => {
           .find(EuiSwitch);
       }
 
+      public get showingTopValuesWarning() {
+        return Boolean(
+          this._instance
+            .find('[data-test-subj="lns-indexPattern-lastValue-useTopHit"]')
+            .find(EuiFormRow)
+            .prop('isInvalid')
+        );
+      }
+
       toggleUseTopHit() {
         this.useTopHitSwitch.prop('onChange')({} as EuiSwitchEvent);
       }
@@ -513,6 +522,7 @@ describe('last_value', () => {
     describe('toggling using top-hit agg', () => {
       it('should toggle param when switch clicked', () => {
         const updateLayerSpy = jest.fn();
+
         const instance = shallow(
           <InlineOptions
             {...defaultProps}
@@ -523,7 +533,9 @@ describe('last_value', () => {
           />
         );
 
-        new Harness(instance).toggleUseTopHit();
+        const harness = new Harness(instance);
+
+        harness.toggleUseTopHit();
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
           ...layer,
@@ -538,6 +550,44 @@ describe('last_value', () => {
             },
           },
         });
+
+        // have to do this manually, but it happens automatically in the app
+        const newLayer = updateLayerSpy.mock.calls[0][0];
+        instance.setProps({ layer: newLayer, currentColumn: newLayer.columns.col2 });
+
+        expect(harness.showingTopValuesWarning).toBeTruthy();
+      });
+
+      it('should not warn user when top-values not in use', () => {
+        const updateLayerSpy = jest.fn();
+        const localLayer = {
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              type: 'not term (top values)!',
+            },
+          },
+        };
+        const instance = shallow(
+          <InlineOptions
+            {...defaultProps}
+            layer={localLayer}
+            updateLayer={updateLayerSpy}
+            columnId="col2"
+            currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
+          />
+        );
+
+        const harness = new Harness(instance);
+        harness.toggleUseTopHit();
+
+        // have to do this manually, but it happens automatically in the app
+        const newLayer = updateLayerSpy.mock.calls[0][0];
+        instance.setProps({ layer: newLayer, currentColumn: newLayer.columns.col2 });
+
+        expect(harness.showingTopValuesWarning).toBeFalsy();
       });
 
       it('should set useTopHit and disable switch when scripted field', () => {

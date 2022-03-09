@@ -7,7 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiSwitch,
+  EuiToolTip,
+} from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
@@ -244,6 +250,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     );
     const sourceIsScripted = isScriptedField(currentColumn.sourceField, indexPattern);
 
+    const usingTopValues = Object.keys(layer.columns).some(
+      (_columnId) => layer.columns[_columnId].operationType === 'terms'
+    );
+
     const setUseTopHit = (use: boolean) => {
       let updatedLayer = updateColumnParam({
         layer,
@@ -323,19 +333,40 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
             }
           />
         </EuiFormRow>
-        <EuiFormRow display="rowCompressed" fullWidth>
-          <EuiSwitch
-            label={i18n.translate('xpack.lens.indexPattern.lastValue.useTopHit', {
-              defaultMessage: 'Show array values',
-            })}
-            checked={Boolean(currentColumn.params.useTopHit)}
-            // TODO - add disabled tooltip
-            disabled={sourceIsScripted}
-            onChange={() => {
-              setUseTopHit(!currentColumn.params.useTopHit);
-            }}
-            data-test-subj="lns-indexPattern-lastValue-useTopHit"
-          />
+        <EuiFormRow
+          error={i18n.translate(
+            'xpack.lens.indexPattern.lastValue.showArrayValuesWithTopValuesWarning',
+            {
+              defaultMessage:
+                'When you show array values, you are unable to use this field to rank Top values.',
+            }
+          )}
+          isInvalid={currentColumn.params.useTopHit && usingTopValues}
+          display="rowCompressed"
+          fullWidth
+          data-test-subj="lns-indexPattern-lastValue-useTopHit"
+        >
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.lens.indexPattern.lastValue.showArrayValuesExplanation',
+              {
+                defaultMessage:
+                  'Displays all values associated with this field in each last document.',
+              }
+            )}
+            position="left"
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.lens.indexPattern.lastValue.showArrayValues', {
+                defaultMessage: 'Show array values',
+              })}
+              checked={Boolean(currentColumn.params.useTopHit)}
+              disabled={sourceIsScripted}
+              onChange={() => {
+                setUseTopHit(!currentColumn.params.useTopHit);
+              }}
+            />
+          </EuiToolTip>
         </EuiFormRow>
       </>
     );
