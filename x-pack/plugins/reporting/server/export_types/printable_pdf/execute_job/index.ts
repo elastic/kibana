@@ -8,7 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { PDF_JOB_TYPE, REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
+import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
 import { decryptJobHeaders, getFullUrls, getCustomLogo } from '../../common';
@@ -21,7 +21,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
     const encryptionKey = config.get('encryptionKey');
 
     return async function runTask(jobId, job, cancellationToken, stream) {
-      const jobLogger = parentLogger.clone([PDF_JOB_TYPE, 'execute-job', jobId]);
+      const jobLogger = parentLogger.get(`execute-job:${jobId}`);
       const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
       const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePdf: { end: () => void } | null | undefined;
