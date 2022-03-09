@@ -566,7 +566,7 @@ describe('last_value', () => {
             ...layer.columns,
             col1: {
               ...layer.columns.col1,
-              type: 'not term (top values)!',
+              operationType: 'min', // not terms
             },
           },
         };
