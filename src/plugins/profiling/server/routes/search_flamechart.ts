@@ -7,6 +7,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, Logger } from 'kibana/server';
+import seedrandom from 'seedrandom';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRemoteRoutePaths } from '../../common';
 import { FlameGraph } from './flamegraph';
@@ -77,13 +78,20 @@ export function getSampledTraceEventsIndex(
   return { name: downsampledIndex + initialExp, sampleRate: 1 / samplingFactor ** initialExp };
 }
 
-function downsampleEventsRandomly(stackTraceEvents: Map<StackTraceID, number>, p: number): number {
+function downsampleEventsRandomly(
+  stackTraceEvents: Map<StackTraceID, number>,
+  p: number,
+  seed: string
+): number {
   let totalCount = 0;
+
+  // Make the RNG predictable to get reproducible results.
+  const random = seedrandom(seed);
 
   for (const [id, count] of stackTraceEvents) {
     let newCount = 0;
     for (let i = 0; i < count; i++) {
-      if (Math.random() < p) {
+      if (random() < p) {
         newCount++;
       }
     }
@@ -209,7 +217,7 @@ async function queryFlameGraph(
   if (totalCount > sampleSize * 1.1) {
     const p = sampleSize / totalCount;
     logger.info('downsampling events with p=' + p);
-    totalCount = downsampleEventsRandomly(stackTraceEvents, p);
+    totalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
     logger.info('downsampled total count: ' + totalCount);
     logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
   }
