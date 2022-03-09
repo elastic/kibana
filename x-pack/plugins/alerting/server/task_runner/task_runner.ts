@@ -63,7 +63,6 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
-import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
 import {
   ActionsCompletion,
   AlertExecutionStore,
@@ -348,6 +347,7 @@ export class TaskRunner<
         spaceId,
       },
       logger: this.logger,
+      abortController: this.searchAbortController,
     });
 
     let updatedRuleTypeState: void | Record<string, unknown>;
@@ -384,10 +384,6 @@ export class TaskRunner<
             }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
-            search: createAbortableEsClientFactory({
-              scopedClusterClient,
-              abortController: this.searchAbortController,
-            }),
           },
           params,
           state: alertTypeState as State,
