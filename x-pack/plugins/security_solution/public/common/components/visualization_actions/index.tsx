@@ -32,6 +32,9 @@ const Wrapper = styled.div`
     top: 0;
     right: 0;
   }
+  &.histogram-viz-actions {
+    padding: ${({ theme }) => theme.eui.paddingSizes.s};
+  }
 `;
 
 export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';

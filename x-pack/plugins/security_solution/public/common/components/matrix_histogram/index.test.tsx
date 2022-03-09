@@ -13,6 +13,7 @@ import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { TestProviders } from '../../mock';
 import { mockRuntimeMappings } from '../../containers/source/mock';
+import { dnsTopDomainsAttrs } from '../visualization_actions/configs/network/dns_top_domains';
 
 jest.mock('../../lib/kibana');
 
@@ -21,7 +22,9 @@ jest.mock('./matrix_loader', () => ({
 }));
 
 jest.mock('../header_section', () => ({
-  HeaderSection: () => <div className="headerSection" />,
+  HeaderSection: ({ children }: { children: React.ReactElement }) => (
+    <div className="headerSection">{children}</div>
+  ),
 }));
 
 jest.mock('../charts/barchart', () => ({
@@ -30,6 +33,12 @@ jest.mock('../charts/barchart', () => ({
 
 jest.mock('../../containers/matrix_histogram', () => ({
   useMatrixHistogramCombined: jest.fn(),
+}));
+
+jest.mock('../visualization_actions', () => ({
+  VisualizationActions: jest.fn(({ className }: { className: string }) => (
+    <div data-test-subj="mock-viz-actions" className={className} />
+  )),
 }));
 
 jest.mock('../../components/matrix_histogram/utils', () => ({
@@ -143,6 +152,22 @@ describe('Matrix Histogram Component', () => {
   describe('select dropdown', () => {
     test('should be hidden if only one option is provided', () => {
       expect(wrapper.find('EuiSelect').exists()).toBe(false);
+    });
+  });
+
+  describe('VisualizationActions', () => {
+    test('it renders a VisualizationActions if lensAttributes is provided', () => {
+      const testProps = {
+        ...mockMatrixOverTimeHistogramProps,
+        lensAttributes: dnsTopDomainsAttrs,
+      };
+      wrapper = mount(<MatrixHistogram {...testProps} />, {
+        wrappingComponent: TestProviders,
+      });
+      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').prop('className')).toEqual(
+        'histogram-viz-actions'
+      );
     });
   });
 });
