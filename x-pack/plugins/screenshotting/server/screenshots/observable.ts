@@ -72,6 +72,16 @@ export interface ScreenshotObservableOptions {
    * Every item can either be a string or a tuple containing a URL and a context.
    */
   urls: UrlOrUrlWithContext[];
+
+  /**
+   * Whether to output a series of PNGs or a PDF as the final result.
+   *
+   * @note When generating a PDF the screenshot results array will contain a single
+   * value.
+   *
+   * Defaults to: { type: 'png' }
+   */
+  format?: { type: 'png' } | { type: 'pdf'; options: { title: string } };
 }
 
 export interface ScreenshotObservableResult {
