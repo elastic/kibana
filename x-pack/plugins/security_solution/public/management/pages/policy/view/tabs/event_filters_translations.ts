@@ -55,7 +55,7 @@ export const POLICY_ARTIFACT_EVENT_FILTERS_LABELS = Object.freeze({
       values: { policyName },
     }),
   flyoutSearchPlaceholder: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.eventFilters.layout.searh.label',
+    'xpack.securitySolution.endpoint.policy.eventFilters.layout.search.label',
     {
       defaultMessage: 'Search event filters',
     }

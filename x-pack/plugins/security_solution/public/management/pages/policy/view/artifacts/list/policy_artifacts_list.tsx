@@ -34,7 +34,7 @@ import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_
 interface PolicyArtifactsListProps {
   policy: ImmutableObject<PolicyData>;
   apiClient: ExceptionsListApiClient;
-  searcheableFields: string[];
+  searchableFields: string[];
   getArtifactPath: (
     location?:
       | Partial<EventFiltersPageLocation>
@@ -51,7 +51,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
   ({
     policy,
     apiClient,
-    searcheableFields,
+    searchableFields,
     getArtifactPath,
     getPolicyArtifactsPath,
     labels,
@@ -81,7 +81,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
         filter: urlParams.filter as string,
         policies: [policy.id, 'all'],
       },
-      searcheableFields
+      searchableFields
     );
 
     const pagination: Pagination = useMemo(

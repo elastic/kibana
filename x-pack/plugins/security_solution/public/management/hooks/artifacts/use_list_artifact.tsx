@@ -30,7 +30,7 @@ export function useListArtifact(
     policies: [],
     excludedPolicies: [],
   },
-  searcheableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
+  searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
   customQueryOptions: Partial<
     UseQueryOptions<FoundExceptionListItemSchema, HttpFetchError>
   > = DEFAULT_OPTIONS,
@@ -45,7 +45,7 @@ export function useListArtifact(
         filter: parsePoliciesAndFilterToKql({
           policies,
           excludedPolicies,
-          kuery: parseQueryFilterToKQL(filter, searcheableFields),
+          kuery: parseQueryFilterToKQL(filter, searchableFields),
         }),
         perPage,
         page,

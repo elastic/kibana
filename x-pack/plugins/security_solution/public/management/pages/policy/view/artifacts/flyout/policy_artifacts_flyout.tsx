@@ -34,7 +34,7 @@ import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 interface PolicyArtifactsFlyoutProps {
   policyItem: ImmutableObject<PolicyData>;
   apiClient: ExceptionsListApiClient;
-  searcheableFields: string[];
+  searchableFields: string[];
   onClose: () => void;
   labels: typeof POLICY_ARTIFACT_FLYOUT_LABELS;
 }
@@ -42,7 +42,7 @@ interface PolicyArtifactsFlyoutProps {
 export const MAX_ALLOWED_RESULTS = 100;
 
 export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
-  ({ policyItem, apiClient, searcheableFields, onClose, labels }) => {
+  ({ policyItem, apiClient, searchableFields, onClose, labels }) => {
     const toasts = useToasts();
     const queryClient = useQueryClient();
     const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
@@ -73,7 +73,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
         filter: currentFilter,
         excludedPolicies: [policyItem.id, 'all'],
       },
-      searcheableFields
+      searchableFields
     );
 
     const { data: allNotAssigned, isLoading: isLoadingAllNotAssigned } = useListArtifact(
@@ -82,7 +82,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       {
         excludedPolicies: [policyItem.id, 'all'],
       },
-      searcheableFields
+      searchableFields
     );
 
     const handleOnSearch = useCallback((query) => {
@@ -94,15 +94,15 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       if (!artifacts) {
         return;
       }
-      const artifactssToUpdate: ExceptionListItemSchema[] = [];
+      const artifactsToUpdate: ExceptionListItemSchema[] = [];
       selectedArtifactIds.forEach((selectedId) => {
         const artifact = artifacts.data.find((current) => current.id === selectedId);
         if (artifact) {
           artifact.tags = [...artifact.tags, `policy:${policyItem.id}`];
-          artifactssToUpdate.push(artifact);
+          artifactsToUpdate.push(artifact);
         }
       });
-      bulkUpdateMutation.mutate(artifactssToUpdate);
+      bulkUpdateMutation.mutate(artifactsToUpdate);
     }, [bulkUpdateMutation, artifacts, policyItem.id, selectedArtifactIds]);
 
     const handleSelectArtifacts = (artifactId: string, selected: boolean) => {

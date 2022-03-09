@@ -58,7 +58,7 @@ export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS = Object.freeze({
       }
     ),
   flyoutSearchPlaceholder: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.hostIsolationException.layout.searh.label',
+    'xpack.securitySolution.endpoint.policy.hostIsolationException.layout.search.label',
     {
       defaultMessage: 'Search host isolation exceptions',
     }

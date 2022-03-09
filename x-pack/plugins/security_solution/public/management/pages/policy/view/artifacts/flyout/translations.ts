@@ -48,7 +48,7 @@ export const POLICY_ARTIFACT_FLYOUT_LABELS = Object.freeze({
       values: { policyName },
     }),
   flyoutSearchPlaceholder: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.artifacts.layout.searh.label',
+    'xpack.securitySolution.endpoint.policy.artifacts.layout.search.label',
     {
       defaultMessage: 'Search artifacts',
     }

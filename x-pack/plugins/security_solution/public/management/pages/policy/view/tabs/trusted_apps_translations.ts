@@ -55,7 +55,7 @@ export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS = Object.freeze({
       values: { policyName },
     }),
   flyoutSearchPlaceholder: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.trustedApps.layout.searh.label',
+    'xpack.securitySolution.endpoint.policy.trustedApps.layout.search.label',
     {
       defaultMessage: 'Search trusted apps',
     }
