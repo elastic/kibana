@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import { decompressFromEncodedURIComponent, compressToEncodedURIComponent } from 'lz-string';
 
 import {
   EuiPage,
@@ -31,6 +32,61 @@ import {
 import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';
 import { hasAggregations, hasSearch } from './lib';
 import { Targets } from './types';
+
+// TODO remove - testing purposes only
+const searchQuery = {
+  aggs: {
+    '0': {
+      date_histogram: {
+        field: 'timestamp',
+        fixed_interval: '3h',
+        time_zone: 'America/New_York',
+      },
+    },
+  },
+  size: 0,
+  fields: [
+    {
+      field: 'timestamp',
+      format: 'date_time',
+    },
+  ],
+  script_fields: {},
+  stored_fields: ['*'],
+  runtime_mappings: {
+    hour_of_day: {
+      type: 'long',
+      script: {
+        source: "emit(doc['timestamp'].value.getHour());",
+      },
+    },
+  },
+  _source: {
+    excludes: [],
+  },
+  query: {
+    bool: {
+      must: [],
+      filter: [
+        {
+          range: {
+            timestamp: {
+              format: 'strict_date_optional_time',
+              gte: '2022-03-02T17:55:35.513Z',
+              lte: '2022-03-09T17:55:35.513Z',
+            },
+          },
+        },
+      ],
+      should: [],
+      must_not: [],
+    },
+  },
+};
+
+const testDataUri = compressToEncodedURIComponent(JSON.stringify(searchQuery, null, 2));
+
+console.log('test URI', testDataUri);
 
 export const App = () => {
   const { getLicenseStatus, notifications } = useAppContext();

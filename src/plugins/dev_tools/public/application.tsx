@@ -53,6 +53,7 @@ function DevToolsWrapper({
   updateRoute,
   theme$,
   appServices,
+  location,
 }: DevToolsWrapperProps) {
   const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
@@ -132,6 +133,7 @@ function DevToolsWrapper({
               setHeaderActionMenu: () => undefined,
               // TODO: adapt to use Core's ScopedHistory
               history: {} as any,
+              location,
               theme$,
             };
 
@@ -204,6 +206,7 @@ export function renderApp(
                   render={(props) => (
                     <DevToolsWrapper
                       updateRoute={props.history.push}
+                      location={props.location}
                       activeDevTool={devTool}
                       devTools={devTools}
                       theme$={theme$}
