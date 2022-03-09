@@ -679,7 +679,7 @@ class AgentPolicyService {
       },
     });
 
-    if (res.hits.total as number === 0) {
+    if ((res.hits.total as number) === 0) {
       return null;
     }
 

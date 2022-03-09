@@ -21,5 +21,5 @@ export async function hasFleetServers(esClient: ElasticsearchClient) {
     rest_total_hits_as_int: true,
   });
 
-  return res.hits.total as number > 0;
+  return (res.hits.total as number) > 0;
 }
