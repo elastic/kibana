@@ -18,7 +18,10 @@ export interface AnomalyExplorerState {
   selectedJobs: ExplorerJob[];
 }
 
-type FilterSettings = Required<AnomalyExplorerFilterUrlState>;
+type FilterSettings = Required<
+  Pick<AnomalyExplorerFilterUrlState, 'filterActive' | 'filteredFields' | 'queryString'>
+> &
+  Pick<AnomalyExplorerFilterUrlState, 'influencersFilterQuery'>;
 
 /**
  * Anomaly Explorer common state.
