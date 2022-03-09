@@ -222,7 +222,9 @@ export const benchmarksInputSchema = rt.object({
    */
   per_page: rt.number({ defaultValue: DEFAULT_BENCHMARKS_PER_PAGE, min: 0 }),
   /**
-   * The field to use for sorting the found objects.
+   *  Once of PackagePolicy fields for sorting the found objects.
+   *  Sortable fields: id, name, policy_id, namespace, updated_at, updated_by, created_at, created_by,
+   *  package.name,  package.title, package.version
    */
   sort_field: rt.maybe(rt.string()),
   /**
