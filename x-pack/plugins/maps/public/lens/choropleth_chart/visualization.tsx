@@ -23,6 +23,10 @@ import { RegionKeyEditor } from './region_key_editor';
 const REGION_KEY_GROUP_ID = 'region_key';
 const METRIC_GROUP_ID = 'metric';
 
+const CHART_LABEL = i18n.translate('xpack.maps.lens.choropleth.label', {
+  defaultMessage: 'Region map',
+});
+
 export const getVisualization = ({
   paletteService,
   theme,
@@ -38,9 +42,7 @@ export const getVisualization = ({
     {
       id: 'lnsChoropleth',
       icon: Icon,
-      label: i18n.translate('xpack.maps.lens.choropleth.label', {
-        defaultMessage: 'Choropleth',
-      }),
+      label: CHART_LABEL,
       groupLabel: i18n.translate('xpack.maps.lens.groupLabel', {
         defaultMessage: 'Map',
       }),
@@ -69,9 +71,7 @@ export const getVisualization = ({
   getDescription() {
     return {
       icon: Icon,
-      label: i18n.translate('xpack.maps.metric.label', {
-        defaultMessage: 'Choropleth chart',
-      }),
+      label: CHART_LABEL,
     };
   },
 

@@ -95,7 +95,7 @@ export class EMSFileSelect extends Component<Props, State> {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.emsFileSelect.selectLabel', {
-          defaultMessage: 'EMS Boundaries',
+          defaultMessage: 'EMS boundaries',
         })}
         helpText={this.state.emsFileOptions.length === 0 ? getEmsUnavailableMessage() : null}
       >
