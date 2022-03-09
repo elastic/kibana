@@ -27,8 +27,8 @@ export const getMonitorRouteFromMonitorId = ({
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: Record<string, string[]>;
-}) =>
-  format({
+}) => {
+  return format({
     pathname: `/app/uptime/monitor/${btoa(monitorId)}`,
     query: {
       dateRangeEnd,
@@ -38,3 +38,4 @@ export const getMonitorRouteFromMonitorId = ({
         : {}),
     },
   });
+};

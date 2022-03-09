@@ -36,7 +36,14 @@ import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/g
 import { UMServerLibs, UptimeESClient, createUptimeESClient } from '../lib';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
-import { ALERT_REASON_MSG, MESSAGE, MONITOR_WITH_GEO, ACTION_VARIABLES } from './action_variables';
+import {
+  ALERT_REASON_MSG,
+  MESSAGE,
+  MONITOR_WITH_GEO,
+  ACTION_VARIABLES,
+  VIEW_IN_APP_URL,
+} from './action_variables';
+import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 /**
@@ -272,6 +279,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       ACTION_VARIABLES[MESSAGE],
       ACTION_VARIABLES[MONITOR_WITH_GEO],
       ACTION_VARIABLES[ALERT_REASON_MSG],
+      ACTION_VARIABLES[VIEW_IN_APP_URL],
     ],
     state: [...commonMonitorStateI18, ...commonStateTranslations],
   },
@@ -418,9 +426,17 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         ...monitorSummary,
         statusMessage,
       });
-
+      console.log(monitorInfo);
       alert.scheduleActions(MONITOR_STATUS.id, {
         [ALERT_REASON_MSG]: monitorSummary.reason,
+        [VIEW_IN_APP_URL]: getMonitorRouteFromMonitorId({
+          monitorId: getInstanceId(monitorInfo, monIdByLoc),
+          dateRangeEnd: 'now',
+          dateRangeStart: monitorInfo['@timestamp'],
+          filters: {
+            'observer.geo.name': monitorSummary.observerLocation,
+          },
+        }),
       });
     });
 
