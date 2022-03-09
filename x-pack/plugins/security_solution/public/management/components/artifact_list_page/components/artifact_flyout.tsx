@@ -250,7 +250,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
       }
 
       // `undefined` will cause params to be dropped from url
-      setUrlParams({ id: undefined, show: undefined }, true);
+      setUrlParams({ itemId: undefined, show: undefined }, true);
     }, [isSubmittingData, setUrlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
@@ -276,7 +276,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         if (isMounted) {
           // Close the flyout
           // `undefined` will cause params to be dropped from url
-          setUrlParams({ id: undefined, show: undefined }, true);
+          setUrlParams({ itemId: undefined, show: undefined }, true);
 
           onSuccess();
         }
