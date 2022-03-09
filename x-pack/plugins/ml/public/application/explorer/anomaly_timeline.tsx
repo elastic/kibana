@@ -41,6 +41,8 @@ import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
+import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
+import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -75,7 +77,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const timeBuckets = useTimeBuckets();
 
-    const { viewByLoadedForTimeFormatted, overallAnnotations } = explorerState;
+    const { overallAnnotations } = explorerState;
 
     const { filterActive } = useObservable(
       anomalyExplorerCommonStateService.getFilterSettings$(),
@@ -121,6 +123,14 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const [severityUpdate, setSeverityUpdate] = useState(
       anomalyTimelineStateService.getSwimLaneSeverity()
     );
+
+    const timeRange = getTimeBoundsFromSelection(selectedCells);
+
+    const viewByLoadedForTimeFormatted = timeRange
+      ? `${formatHumanReadableDateTime(timeRange.earliestMs)} - ${formatHumanReadableDateTime(
+          timeRange.latestMs
+        )}`
+      : null;
 
     useDebounce(
       () => {

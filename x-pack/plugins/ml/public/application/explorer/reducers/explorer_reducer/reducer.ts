@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
-
 import { getDefaultChartsData } from '../../explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from '../../explorer_constants';
 import { Action } from '../../explorer_dashboard_service';
-import { getClearedSelectedAnomaliesState, getSwimlaneBucketInterval } from '../../explorer_utils';
+import { getClearedSelectedAnomaliesState } from '../../explorer_utils';
 
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
 import { jobSelectionChange } from './job_selection_change';
@@ -85,15 +83,8 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     return nextState;
   }
 
-  // const timeRange = getTimeBoundsFromSelection(selectedCells);
-
   return {
     ...nextState,
-    // viewByLoadedForTimeFormatted: timeRange
-    //   ? `${formatHumanReadableDateTime(timeRange.earliestMs)} - ${formatHumanReadableDateTime(
-    //       timeRange.latestMs
-    //     )}`
-    //   : null,
     ...setKqlQueryBarPlaceholder(nextState),
   };
 };

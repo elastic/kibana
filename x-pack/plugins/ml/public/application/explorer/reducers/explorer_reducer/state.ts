@@ -32,7 +32,6 @@ export interface ExplorerState {
   selectedJobs: ExplorerJob[] | null;
   tableData: AnomaliesTableData;
   tableQueryString: string;
-  viewByLoadedForTimeFormatted: string | null;
   showCharts: boolean;
 }
 
@@ -70,7 +69,6 @@ export function getExplorerDefaultState(): ExplorerState {
       showViewSeriesLink: false,
     },
     tableQueryString: '',
-    viewByLoadedForTimeFormatted: null,
     showCharts: true,
   };
 }
