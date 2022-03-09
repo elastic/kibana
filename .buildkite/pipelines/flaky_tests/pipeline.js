@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-const groups =
-  /** @type {Array<{key: string, name: string, ciGroups: number | Array<string> }>} */ (
-    require('./groups.json').groups
-  );
+const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>} */ (
+  require('./groups.json').groups
+);
 
 const stepInput = (key, nameOfSuite) => {
   return {
