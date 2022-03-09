@@ -13,8 +13,7 @@ import { response } from './mock_data/apm.mock';
 import * as hasDataHook from '../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../context/has_data_context';
-import { AppMountParameters, CoreStart } from 'kibana/public';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import { AppMountParameters } from 'kibana/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
 import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
 
