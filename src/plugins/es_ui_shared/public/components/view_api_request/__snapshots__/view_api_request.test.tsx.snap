@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EuiCodeEditor is rendered 1`] = `
+exports[`ViewApiRequest is rendered 1`] = `
 <div
   data-eui="EuiFlyout"
   role="dialog"
@@ -41,15 +41,58 @@ exports[`EuiCodeEditor is rendered 1`] = `
         <div
           class="euiSpacer euiSpacer--l"
         />
-        <div>
-          <pre>
-            <code
-              data-code-language="json"
-              data-test-subj="apiRequestFlyoutBody"
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn insRequestCodeViewer"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <div
+              class="eui-textRight"
             >
-              Hello world
-            </code>
-          </pre>
+              <span
+                class="euiToolTipAnchor"
+              >
+                <button
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                  data-test-subj="apiRequestFlyoutCopyClipboardButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="copyClipboard"
+                    />
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      Copy to clipboard
+                    </span>
+                  </span>
+                </button>
+              </span>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem"
+          >
+            <div>
+              <pre>
+                <code
+                  data-code-language="json"
+                  data-test-subj="apiRequestFlyoutBody"
+                >
+                  Hello world
+                </code>
+              </pre>
+            </div>
+          </div>
         </div>
       </div>
     </div>

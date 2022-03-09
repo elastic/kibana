@@ -5,6 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+// We want to allow both right-clicking to open in a new tab and clicking through
+// the "Open in Console" link. We could use `RedirectAppLinks` at the top level
+// but that inserts a div which messes up the layout of the flyout.
+/* eslint-disable @elastic/eui/href-or-on-click */
 
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,7 +28,7 @@ import {
   EuiFlexItem,
   EuiCopy,
 } from '@elastic/eui';
-import { ApplicationStart, Capabilities } from 'src/core/public';
+import { ApplicationStart } from 'src/core/public';
 import type { UrlService } from 'src/plugins/share/common/url_service';
 
 interface Props {
@@ -32,9 +36,9 @@ interface Props {
   description: string;
   request: string;
   closeFlyout: () => void;
-  navigateToUrl: ApplicationStart['navigateToUrl'];
+  navigateToUrl?: ApplicationStart['navigateToUrl'];
   urlService?: UrlService;
-  capabilities?: Capabilities;
+  canShowDevtools?: boolean;
 }
 
 export const ViewApiRequest: React.FunctionComponent<Props> = ({
@@ -44,7 +48,7 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({
   closeFlyout,
   navigateToUrl,
   urlService,
-  capabilities,
+  canShowDevtools,
 }) => {
   let consoleLink: string | undefined;
 
@@ -54,8 +58,9 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({
       .get('CONSOLE_APP_LOCATOR')
       ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
   }
+
   // Check if both the Dev Tools UI and the Console UI are enabled.
-  const shouldShowDevToolsLink = capabilities?.dev_tools.show && consoleLink !== undefined;
+  const shouldShowDevToolsLink = canShowDevtools && consoleLink !== undefined;
   const consolePreviewClick = useCallback(
     () => consoleLink && navigateToUrl && navigateToUrl(consoleLink),
     [consoleLink, navigateToUrl]
