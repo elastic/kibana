@@ -2,15 +2,15 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-dev-utils"
-PKG_REQUIRE_NAME = "@kbn/dev-utils"
+PKG_DIRNAME = "kbn-packages"
+PKG_REQUIRE_NAME = "@kbn/packages"
 
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
   ],
   exclude = [
-    "**/*.test.*"
+    "**/*.test.*",
   ],
 )
 
@@ -21,78 +21,41 @@ filegroup(
   srcs = SRCS,
 )
 
-filegroup(
-  name = "certs",
-  srcs = glob(
-    [
-      "certs/**/*",
-    ],
-    exclude = [
-      "**/README.md"
-    ],
-  ),
-)
-
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
   "README.md",
-  ":certs",
-  "ci_stats_reporter/package.json",
-  "sort_package_json/package.json",
-  "stdio/package.json",
-  "tooling_log/package.json"
 ]
 
+# In this array place runtime dependencies, including other packages and NPM packages
+# which must be available for this code to run.
+#
+#  To reference other packages use:
+#    "//repo/relative/path/to/package"
+#    eg. "//packages/kbn-utils"
+#
+#  To reference a NPM package use:
+#    "@npm//name-of-package"
+#    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "//packages/kbn-std",
   "//packages/kbn-utils",
-  "@npm//@babel/core",
-  "@npm//axios",
-  "@npm//chalk",
-  "@npm//cheerio",
-  "@npm//dedent",
-  "@npm//execa",
-  "@npm//exit-hook",
-  "@npm//getopts",
+  "//packages/kbn-std",
   "@npm//globby",
-  "@npm//load-json-file",
-  "@npm//markdown-it",
-  "@npm//normalize-path",
-  "@npm//prettier",
-  "@npm//rxjs",
-  "@npm//sort-package-json",
-  "@npm//tar",
-  "@npm//tree-kill",
-  "@npm//vinyl",
-  "@npm//yauzl",
 ]
 
+# In this array place dependencies necessary to build the types, which will include the
+# :npm_module_types target of other packages and packages from NPM, including @types/*
+# packages.
+#
+#  To reference the types for another package use:
+#    "//repo/relative/path/to/package:npm_module_types"
+#    eg. "//packages/kbn-utils:npm_module_types"
+#
+#  References to NPM packages work the same as RUNTIME_DEPS:
+#    eg. "@npm//@types/babel__core"
 TYPES_DEPS = [
-  "//packages/kbn-std:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
-  "@npm//@babel/parser",
-  "@npm//@babel/types",
-  "@npm//@types/babel__core",
-  "@npm//@types/cheerio",
-  "@npm//@types/dedent",
-  "@npm//@types/flot",
-  "@npm//@types/jest",
-  "@npm//@types/markdown-it",
-  "@npm//@types/node",
-  "@npm//@types/normalize-path",
-  "@npm//@types/prettier",
-  "@npm//@types/react",
-  "@npm//@types/tar",
-  "@npm//@types/testing-library__jest-dom",
-  "@npm//@types/vinyl",
-  "@npm//@types/yauzl",
-  "@npm//axios",
-  "@npm//execa",
-  "@npm//exit-hook",
-  "@npm//getopts",
-  "@npm//rxjs",
-  "@npm//sort-package-json",
-  "@npm//tree-kill",
+  "//packages/kbn-std:npm_module_types",
+  "@npm//globby",
 ]
 
 jsts_transpiler(
@@ -123,7 +86,7 @@ ts_project(
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
@@ -132,16 +95,12 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
   name = "build",
-  srcs = [
-    ":npm_module",
-  ],
+  srcs = [":npm_module"],
   visibility = ["//visibility:public"],
 )
 
@@ -156,8 +115,6 @@ pkg_npm_types(
 
 filegroup(
   name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
+  srcs = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )
