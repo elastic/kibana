@@ -269,6 +269,8 @@ describe('metric_visualization', () => {
             dataType: 'number',
             isBucketed: false,
             label: 'shazm',
+            isStaticValue: false,
+            hasTimeShift: false,
           };
         },
       };
