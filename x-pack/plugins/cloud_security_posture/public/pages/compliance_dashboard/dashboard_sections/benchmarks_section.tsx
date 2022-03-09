@@ -84,7 +84,7 @@ export const BenchmarksSection = () => {
                       <EuiText style={{ textAlign: 'center' }}>
                         <h4>{`Cluster ID ${shortId || mockClusterId}`}</h4>
                       </EuiText>
-                      <EuiSpacer size='xs' />
+                      <EuiSpacer size="xs" />
                       <EuiText size="xs" color="subdued" style={{ textAlign: 'center' }}>
                         <EuiIcon type="clock" />
                         {moment(cluster.meta.lastUpdate).fromNow()}

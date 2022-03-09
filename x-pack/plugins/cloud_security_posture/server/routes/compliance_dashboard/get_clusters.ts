@@ -18,7 +18,7 @@ import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
 
-type UnixEpochTime = number
+type UnixEpochTime = number;
 
 export interface ClusterBucket extends ResourceTypeQueryResult, KeyDocCount {
   failed_findings: {
@@ -52,12 +52,12 @@ export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest =
         },
         timestamps: {
           terms: {
-            field: "@timestamp",
+            field: '@timestamp',
             size: 1,
             order: {
-              _key: "desc"
-            }
-          }
+              _key: 'desc'
+            },
+          },
         },
         ...resourceTypeAggQuery,
         ...findingsEvaluationAggsQuery,
@@ -77,7 +77,7 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): CloudPostureStat
     const meta = {
       clusterId: cluster.key,
       benchmarkName: benchmarks[0].key,
-      lastUpdate: timestamps[0].key
+      lastUpdate: timestamps[0].key,
     };
 
     // get cluster's stats
