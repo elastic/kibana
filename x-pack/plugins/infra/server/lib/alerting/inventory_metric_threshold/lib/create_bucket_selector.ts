@@ -60,7 +60,7 @@ export const createBucketSelector = (
           shouldTrigger: 'shouldTrigger',
         },
         script:
-          '(params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger && params.shouldTrigger > 0)',
+          '(params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0)',
       },
     },
     shouldWarn,
