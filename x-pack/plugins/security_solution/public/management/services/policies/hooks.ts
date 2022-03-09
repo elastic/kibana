@@ -61,6 +61,7 @@ export function useGetAgentCountForPolicy({
       if (policyIds.length > 0) {
         return sendGetAgentPolicyList(http, {
           query: {
+            perPage: 50,
             kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIds.join(
               ' or '
             )})`,
