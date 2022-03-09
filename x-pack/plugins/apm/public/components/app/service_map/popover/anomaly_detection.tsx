@@ -9,8 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiIcon,
-  EuiToolTip,
+  EuiIconTip,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -79,9 +78,7 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
           <h3>{ANOMALY_DETECTION_TITLE}</h3>
         </HealthStatusTitle>
         &nbsp;
-        <EuiToolTip position="top" content={ANOMALY_DETECTION_TOOLTIP}>
-          <EuiIcon type="iInCircle" color="subdued" />
-        </EuiToolTip>
+        <EuiIconTip type="iInCircle" content={ANOMALY_DETECTION_TOOLTIP} />
         {!mlJobId && <EnableText>{ANOMALY_DETECTION_DISABLED_TEXT}</EnableText>}
       </section>
       {hasAnomalyDetectionScore && (
