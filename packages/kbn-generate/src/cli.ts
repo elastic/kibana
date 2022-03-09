@@ -19,7 +19,7 @@ import {
   isFailError,
   sortPackageJson,
 } from '@kbn/dev-utils';
-import { discoverPackages, generatePackagesBuildBazelFile } from '@kbn/packages';
+import { discoverBazelPackages, generatePackagesBuildBazelFile } from '@kbn/bazel-packages';
 import normalizePath from 'normalize-path';
 
 const ROOT_PKG_DIR = Path.resolve(REPO_ROOT, 'packages');
@@ -173,7 +173,7 @@ export function runGenerateCli() {
 
         await Fsp.writeFile(
           Path.resolve(REPO_ROOT, 'packages/BUILD.bazel'),
-          generatePackagesBuildBazelFile(await discoverPackages())
+          generatePackagesBuildBazelFile(await discoverBazelPackages())
         );
         log.info('Updated packages/BUILD.bazel');
 
