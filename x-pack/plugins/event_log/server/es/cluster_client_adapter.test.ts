@@ -700,7 +700,7 @@ describe('aggregateEventsBySavedObject', () => {
       },
     });
     expect(result).toEqual({
-      aggregateResults: {
+      aggregations: {
         genericAgg: {
           buckets: [
             {

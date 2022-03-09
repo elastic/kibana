@@ -59,7 +59,7 @@ export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySave
 };
 
 export interface AggregateEventsBySavedObjectResult {
-  aggregateResults: Record<string, estypes.AggregationsAggregate> | undefined;
+  aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -407,7 +407,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         body,
       });
       return {
-        aggregateResults: aggregations,
+        aggregations,
       };
     } catch (err) {
       throw new Error(

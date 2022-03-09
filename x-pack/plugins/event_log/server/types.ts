@@ -8,12 +8,14 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
 import { IEvent } from '../generated/schemas';
 import { AggregateOptionsType, FindOptionsType } from './event_log_client';
-import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+import {
+  AggregateEventsBySavedObjectResult,
+  QueryEventsBySavedObjectResult,
+} from './es/cluster_client_adapter';
 export type {
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
@@ -58,9 +60,7 @@ export interface IEventLogClient {
     ids: string[],
     options?: Partial<AggregateOptionsType>,
     legacyIds?: string[]
-  ): Promise<{
-    aggregateResults: Record<string, estypes.AggregationsAggregate> | undefined;
-  }>;
+  ): Promise<AggregateEventsBySavedObjectResult>;
 }
 
 export interface IEventLogger {
