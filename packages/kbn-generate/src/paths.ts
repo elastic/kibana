@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-generate'],
-};
+import Path from 'path';
+
+import { REPO_ROOT } from '@kbn/utils';
+
+export const ROOT_PKG_DIR = Path.resolve(REPO_ROOT, 'packages');
+export const TEMPLATE_DIR = Path.resolve(__dirname, '../templates');
+export const PKG_TEMPLATE_DIR = Path.resolve(TEMPLATE_DIR, 'package');
