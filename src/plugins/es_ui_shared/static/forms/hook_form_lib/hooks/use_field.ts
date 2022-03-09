@@ -615,10 +615,9 @@ export const useField = <T, FormType = FormData, I = T>(
       setIsChangingValue(true);
 
       runValidationsOnValueChange(() => {
-        if (!isMounted.current) {
-          return;
+        if (isMounted.current) {
+          setIsChangingValue(false);
         }
-        setIsChangingValue(false);
       });
     }
 
