@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository } from 'kibana/server';
+import { ISavedObjectsRepository, Logger } from 'kibana/server';
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 
 export interface Buckets {
@@ -29,6 +29,7 @@ export interface ReferencesAggregation {
 
 export interface CollectTelemetryDataParams {
   savedObjectsClient: ISavedObjectsRepository;
+  logger: Logger;
 }
 
 export interface TypeLong {

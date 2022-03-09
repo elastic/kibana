@@ -39,7 +39,6 @@ export const createCasesTelemetry = async ({
   taskManager,
   usageCollection,
   logger,
-  kibanaVersion,
 }: CreateCasesTelemetryArgs) => {
   const getInternalSavedObjectClient = async (): Promise<ISavedObjectsRepository> => {
     const [coreStart] = await core.getStartServices();
@@ -48,12 +47,13 @@ export const createCasesTelemetry = async ({
 
   taskManager.registerTaskDefinitions({
     [CASES_TELEMETRY_TASK_NAME]: {
-      title: 'Collect Cases usage',
+      title: 'Collect Cases telemetry data',
       createTaskRunner: () => {
         return {
           run: async () => {
             await collectAndStore();
           },
+          cancel: async () => {},
         };
       },
     },
@@ -61,7 +61,7 @@ export const createCasesTelemetry = async ({
 
   const collectAndStore = async () => {
     const savedObjectsClient = await getInternalSavedObjectClient();
-    const telemetryData = await collectTelemetryData({ savedObjectsClient });
+    const telemetryData = await collectTelemetryData({ savedObjectsClient, logger });
 
     await savedObjectsClient.create(CASE_TELEMETRY_SAVED_OBJECT, telemetryData, {
       id: CASE_TELEMETRY_SAVED_OBJECT_ID,

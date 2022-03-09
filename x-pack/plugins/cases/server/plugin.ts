@@ -141,7 +141,7 @@ export class CasePlugin {
     this.logger.debug(`Starting Case Workflow`);
 
     if (plugins.taskManager) {
-      scheduleCasesTelemetryTask(plugins.taskManager);
+      scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
     }
 
     this.clientFactory.initialize({

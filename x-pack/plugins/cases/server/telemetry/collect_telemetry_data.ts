@@ -16,25 +16,38 @@ import { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
 export const collectTelemetryData = async ({
   savedObjectsClient,
-}: CollectTelemetryDataParams): Promise<CasesTelemetry> => {
-  const [cases, userActions, comments, alerts, connectors, pushes, configuration] =
-    await Promise.all([
-      getCasesTelemetryData({ savedObjectsClient }),
-      getUserActionsTelemetryData({ savedObjectsClient }),
-      getUserCommentsTelemetryData({ savedObjectsClient }),
-      getAlertsTelemetryData({ savedObjectsClient }),
-      getConnectorsTelemetryData({ savedObjectsClient }),
-      getPushedTelemetryData({ savedObjectsClient }),
-      getConfigurationTelemetryData({ savedObjectsClient }),
-    ]);
+  logger,
+}: CollectTelemetryDataParams): Promise<Partial<CasesTelemetry>> => {
+  try {
+    const [cases, userActions, comments, alerts, connectors, pushes, configuration] =
+      await Promise.all([
+        getCasesTelemetryData({ savedObjectsClient, logger }),
+        getUserActionsTelemetryData({ savedObjectsClient, logger }),
+        getUserCommentsTelemetryData({ savedObjectsClient, logger }),
+        getAlertsTelemetryData({ savedObjectsClient, logger }),
+        getConnectorsTelemetryData({ savedObjectsClient, logger }),
+        getPushedTelemetryData({ savedObjectsClient, logger }),
+        getConfigurationTelemetryData({ savedObjectsClient, logger }),
+      ]);
 
-  return {
-    cases,
-    userActions,
-    comments,
-    alerts,
-    connectors,
-    pushes,
-    configuration,
-  };
+    return {
+      cases,
+      userActions,
+      comments,
+      alerts,
+      connectors,
+      pushes,
+      configuration,
+    };
+  } catch (err) {
+    logger.warn('Failed collecting Cases telemetry data');
+    logger.warn(err);
+    /**
+     * Return an empty object instead of an empty state to distinguish between
+     * clusters that they do not use cases thus all counts will be zero
+     * and clusters where an error occurred.
+     *  */
+
+    return {};
+  }
 };

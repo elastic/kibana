@@ -56,6 +56,7 @@ export const getLatestCasesDates = async ({
 
 export const getCasesTelemetryData = async ({
   savedObjectsClient,
+  logger,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['cases']> => {
   const owners = ['observability', 'securitySolution', 'cases'] as const;
   const byOwnerAggregationQuery = owners.reduce(
@@ -159,7 +160,7 @@ export const getCasesTelemetryData = async ({
     },
   });
 
-  const latestDates = await getLatestCasesDates({ savedObjectsClient });
+  const latestDates = await getLatestCasesDates({ savedObjectsClient, logger });
 
   const aggregationsBuckets = getAggregationsBuckets({
     aggs: casesRes.aggregations,
