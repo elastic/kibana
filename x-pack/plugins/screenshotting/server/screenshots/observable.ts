@@ -118,6 +118,7 @@ interface PageSetupResults {
   elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   timeRange: string | null;
   error?: Error;
+  renderErrors?: string[];
 }
 
 const getDefaultElementPosition = (dimensions: { height?: number; width?: number } | null) => {
@@ -284,12 +285,13 @@ export class ScreenshotObservableHandler {
               },
             ];
           }
-          const { timeRange, error: setupError } = data;
+          const { timeRange, error: setupError, renderErrors } = data;
 
           return {
             timeRange,
             screenshots,
             error: setupError,
+            renderErrors,
             elementsPositionAndAttributes: elements,
           };
         })
