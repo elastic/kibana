@@ -118,7 +118,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       ])
     ).toEqual([
       {
-        id: 'some-uuid',
+        id: 'test-logs-some-uuid',
         name: 'mock-package-policy',
         revision: 1,
         type: 'test-logs',
@@ -169,7 +169,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       ])
     ).toEqual([
       {
-        id: 'some-uuid',
+        id: 'test-logs-some-uuid',
         name: 'mock-package-policy',
         revision: 1,
         type: 'test-logs',
@@ -201,7 +201,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       ])
     ).toEqual([
       {
-        id: 'some-uuid',
+        id: 'test-logs-some-uuid',
         name: 'mock-package-policy',
         revision: 1,
         type: 'test-logs',
@@ -263,7 +263,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       ])
     ).toEqual([
       {
-        id: 'some-uuid',
+        id: 'test-logs-some-uuid',
         revision: 1,
         name: 'mock-package-policy',
         type: 'test-logs',
