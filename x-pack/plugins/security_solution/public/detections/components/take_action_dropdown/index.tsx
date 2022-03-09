@@ -137,7 +137,7 @@ export const TakeActionDropdown = React.memo(
       disabled: !isEndpointEvent,
     });
 
-    const afterCaseSelection = useCallback(() => {
+    const onMenuItemClick = useCallback(() => {
       closePopoverHandler();
     }, [closePopoverHandler]);
 
@@ -175,7 +175,7 @@ export const TakeActionDropdown = React.memo(
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData,
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
-      afterCaseSelection,
+      onMenuItemClick,
       timelineId,
     });
 

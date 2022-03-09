@@ -18,13 +18,15 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import {
-  ConditionEntry,
   ConditionEntryField,
+  OperatingSystem,
+  TrustedAppEntryTypes,
+} from '@kbn/securitysolution-utils';
+import {
+  ConditionEntry,
   EffectScope,
   NewTrustedApp,
-  OperatingSystem,
   TrustedApp,
-  TrustedAppEntryTypes,
   UpdateTrustedApp,
 } from '../../../../../common/endpoint/types';
 import { tagsToEffectScope } from '../../../../../common/endpoint/service/trusted_apps/mapping';
