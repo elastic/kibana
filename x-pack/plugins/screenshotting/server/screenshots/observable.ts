@@ -51,6 +51,16 @@ type Url = string;
 type UrlWithContext = [url: Url, context: Context];
 export type UrlOrUrlWithContext = Url | UrlWithContext;
 
+interface PngFormat {
+  type: 'png';
+}
+
+interface PdfFormat {
+  type: 'pdf';
+  title?: string;
+  logo?: string;
+}
+
 export interface ScreenshotObservableOptions {
   /**
    * The browser timezone that will be emulated in the browser instance.
@@ -82,7 +92,7 @@ export interface ScreenshotObservableOptions {
    *
    * Defaults to: { type: 'png' }
    */
-  format?: { type: 'png' } | { type: 'pdf'; options: { title?: string; logo?: string } };
+  format?: PngFormat | PdfFormat;
 }
 
 export interface ScreenshotObservableResult {
@@ -247,7 +257,9 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  private async pngsToPdf(pngs: Screenshot[], title: undefined | string, logo: undefined | string) {
+  private async pngsToPdf(pngs: Screenshot[], format: PdfFormat, timeRange: null | string) {
+    const { logo } = format;
+    const title = format.title ? format.title + (timeRange ? ` - ${timeRange}` : '') : undefined;
     try {
       return await pngsToPdf({
         pngs,
@@ -273,13 +285,9 @@ export class ScreenshotObservableHandler {
           let screenshots = await getScreenshots(this.driver, this.logger, elements);
 
           if (this.options.format?.type === 'pdf') {
-            const { options } = this.options.format;
-            const title = options.title
-              ? options.title + (data.timeRange ? ` - ${data.timeRange}` : '')
-              : undefined;
             screenshots = [
               {
-                data: await this.pngsToPdf(screenshots, title, options.logo),
+                data: await this.pngsToPdf(screenshots, this.options.format, data.timeRange),
                 title: null,
                 description: null,
               },
