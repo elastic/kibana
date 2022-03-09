@@ -71,6 +71,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
       onSubmit(newTitle);
     }
     setEditMode(false);
+    setErrors([]);
   }, [newTitle, onSubmit, title]);
 
   const handleOnChange = useCallback(
