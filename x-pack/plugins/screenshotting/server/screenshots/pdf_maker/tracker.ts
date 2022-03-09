@@ -6,16 +6,9 @@
  */
 
 import apm from 'elastic-apm-node';
-const TRANSACTION_TYPE = 'reporting'; // TODO: Find out whether we can rename to "screenshotting";
 
 interface PdfTracker {
   setByteLength: (byteLength: number) => void;
-  setCpuUsage: (cpu: number) => void;
-  setMemoryUsage: (memory: number) => void;
-  startScreenshots: () => void;
-  endScreenshots: () => void;
-  startSetup: () => void;
-  endSetup: () => void;
   startAddImage: () => void;
   endAddImage: () => void;
   startCompile: () => void;
@@ -23,7 +16,7 @@ interface PdfTracker {
   end: () => void;
 }
 
-const SPANTYPE_SETUP = 'setup';
+const TRANSACTION_TYPE = 'reporting'; // TODO: Find out whether we can rename to "screenshotting";
 const SPANTYPE_OUTPUT = 'output';
 
 interface ApmSpan {
@@ -33,47 +26,27 @@ interface ApmSpan {
 export function getTracker(): PdfTracker {
   const apmTrans = apm.startTransaction('generate-pdf', TRANSACTION_TYPE);
 
-  let apmScreenshots: ApmSpan | null = null;
-  let apmSetup: ApmSpan | null = null;
   let apmAddImage: ApmSpan | null = null;
   let apmCompilePdf: ApmSpan | null = null;
 
   return {
-    startScreenshots() {
-      apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', SPANTYPE_SETUP) || null;
-    },
-    endScreenshots() {
-      if (apmScreenshots) apmScreenshots.end();
-    },
-    startSetup() {
-      apmSetup = apmTrans?.startSpan('setup-pdf', SPANTYPE_SETUP) || null;
-    },
-    endSetup() {
-      if (apmSetup) apmSetup.end();
-    },
     startAddImage() {
       apmAddImage = apmTrans?.startSpan('add-pdf-image', SPANTYPE_OUTPUT) || null;
     },
     endAddImage() {
-      if (apmAddImage) apmAddImage.end();
+      apmAddImage?.end();
     },
     startCompile() {
       apmCompilePdf = apmTrans?.startSpan('compile-pdf', SPANTYPE_OUTPUT) || null;
     },
     endCompile() {
-      if (apmCompilePdf) apmCompilePdf.end();
+      apmCompilePdf?.end();
     },
     setByteLength(byteLength: number) {
       apmTrans?.setLabel('byte-length', byteLength, false);
     },
-    setCpuUsage(cpu: number) {
-      apmTrans?.setLabel('cpu', cpu, false);
-    },
-    setMemoryUsage(memory: number) {
-      apmTrans?.setLabel('memory', memory, false);
-    },
     end() {
-      if (apmTrans) apmTrans.end();
+      apmTrans?.end();
     },
   };
 }

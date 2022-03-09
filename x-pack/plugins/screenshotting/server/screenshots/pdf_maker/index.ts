@@ -60,6 +60,8 @@ export async function pngsToPdf({
     tracker.setByteLength(byteLength);
   } catch (err) {
     throw err;
+  } finally {
+    tracker.end();
   }
 
   return Buffer.from(buffer.buffer);
