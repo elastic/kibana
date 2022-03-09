@@ -22,7 +22,7 @@ export const useAddToExistingCase = ({
 }: {
   onAddToCaseClicked?: () => void;
   lensAttributes: LensAttributes | null;
-  timeRange: { from: string; to: string };
+  timeRange: { from: string; to: string } | null;
   userCanCrud: boolean;
 }) => {
   const { cases } = useKibana().services;
@@ -53,6 +53,6 @@ export const useAddToExistingCase = ({
 
   return {
     onAddToExistingCaseClicked,
-    disabled: lensAttributes == null || !userCanCrud,
+    disabled: lensAttributes == null || timeRange == null || !userCanCrud,
   };
 };

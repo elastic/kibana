@@ -52,11 +52,11 @@ export const useLensAttributes = ({
   }, [pageName, tabName]);
 
   const pageFilters = useMemo(() => {
-    if (location.pathname.includes(SecurityPageName.hosts) && detailName != null) {
+    if (pageName === SecurityPageName.hosts && detailName != null) {
       return getHostDetailsPageFilter(detailName);
     }
     return [];
-  }, [detailName]);
+  }, [detailName, pageName]);
 
   const indexFilters = useMemo(() => getIndexFilters(selectedPatterns), [selectedPatterns]);
 

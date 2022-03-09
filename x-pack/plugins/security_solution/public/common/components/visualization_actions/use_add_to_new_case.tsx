@@ -15,7 +15,7 @@ import { LensAttributes } from './types';
 
 export interface UseAddToNewCaseProps {
   onClick?: () => void;
-  timeRange: { from: string; to: string };
+  timeRange: { from: string; to: string } | null;
   lensAttributes: LensAttributes | null;
   userCanCrud: boolean;
 }
@@ -56,6 +56,6 @@ export const useAddToNewCase = ({
 
   return {
     onAddToNewCaseClicked,
-    disabled: lensAttributes == null || !userCanCrud,
+    disabled: lensAttributes == null || timeRange == null || !userCanCrud,
   };
 };
