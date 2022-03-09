@@ -8,7 +8,7 @@
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { layerTypes } from '../../common';
-import type { XYLayerConfig, YConfig } from '../../common/expressions';
+import type { XYDataLayerConfig, XYLayerConfig, YConfig } from '../../common/expressions';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import type { AccessorConfig, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
@@ -17,7 +17,7 @@ import type { XYState } from './types';
 import {
   checkScaleOperation,
   getAxisName,
-  isDataLayer,
+  getDataLayers,
   isNumericMetric,
 } from './visualization_helpers';
 import { generateId } from '../id_generator';
@@ -41,9 +41,7 @@ export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig
   if (!state) {
     return [];
   }
-  const dataLayers = state.layers.filter(({ layerType = layerTypes.DATA }) =>
-    isDataLayer({ layerType })
-  );
+  const dataLayers = getDataLayers(state.layers);
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
   return referenceLayers
     .filter(({ label, config }: T) => groupsAvailable[label] || config?.length)
@@ -62,9 +60,7 @@ export function getGroupsRelatedToData<T extends ReferenceLineBase>(
   if (!state) {
     return [];
   }
-  const dataLayers = state.layers.filter(({ layerType = layerTypes.DATA }) =>
-    isDataLayer({ layerType })
-  );
+  const dataLayers = getDataLayers(state.layers);
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
   return referenceLayers.filter(({ label }: T) => groupsAvailable[label]);
 }
@@ -72,7 +68,7 @@ export function getGroupsRelatedToData<T extends ReferenceLineBase>(
  * Returns a dictionary with the groups filled in all the data layers
  */
 export function getGroupsAvailableInData(
-  dataLayers: XYState['layers'],
+  dataLayers: XYDataLayerConfig[],
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   tables: Record<string, Datatable> | undefined
 ) {
@@ -88,10 +84,10 @@ export function getGroupsAvailableInData(
 }
 
 export function getStaticValue(
-  dataLayers: XYState['layers'],
+  dataLayers: XYDataLayerConfig[],
   groupId: 'x' | 'yLeft' | 'yRight',
   { activeData }: Pick<FramePublicAPI, 'activeData'>,
-  layerHasNumberHistogram: (layer: XYLayerConfig) => boolean
+  layerHasNumberHistogram: (layer: XYDataLayerConfig) => boolean
 ) {
   const fallbackValue = 100;
   if (!activeData) {
@@ -124,7 +120,7 @@ export function getStaticValue(
 
 function getAccessorCriteriaForGroup(
   groupId: 'x' | 'yLeft' | 'yRight',
-  dataLayers: XYState['layers'],
+  dataLayers: XYDataLayerConfig[],
   activeData: FramePublicAPI['activeData']
 ) {
   switch (groupId) {
@@ -158,7 +154,7 @@ function getAccessorCriteriaForGroup(
 }
 
 export function computeOverallDataDomain(
-  dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
+  dataLayers: XYDataLayerConfig[],
   accessorIds: string[],
   activeData: NonNullable<FramePublicAPI['activeData']>,
   allowStacking: boolean = true
@@ -222,7 +218,7 @@ export function computeOverallDataDomain(
 }
 
 function computeStaticValueForGroup(
-  dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
+  dataLayers: XYDataLayerConfig[],
   accessorIds: string[],
   activeData: NonNullable<FramePublicAPI['activeData']>,
   minZeroOrNegativeBase: boolean = true,
@@ -275,8 +271,7 @@ export const getReferenceSupportedLayer = (
     frame?.datasourceLayers || {},
     frame?.activeData
   );
-  const dataLayers =
-    state?.layers.filter(({ layerType = layerTypes.DATA }) => isDataLayer({ layerType })) || [];
+  const dataLayers = getDataLayers(state?.layers || []);
   const filledDataLayers = dataLayers.filter(
     ({ accessors, xAccessor }) => accessors.length || xAccessor
   );
