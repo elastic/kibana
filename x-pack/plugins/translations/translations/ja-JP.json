@@ -15886,7 +15886,6 @@
     "xpack.ingestPipelines.processors.defaultDescription.dateIndexName.indexNamePrefixDefault.noPrefixValueLabel": "プレフィックスなし",
     "xpack.ingestPipelines.processors.defaultDescription.dateIndexName.indexNamePrefixDefault.prefixValueLabel": "プレフィックス\"{prefix}\"を使用",
     "xpack.ingestPipelines.processors.defaultDescription.dissect": "分離したパターンと一致する値を\"{field}\"から抽出します",
-    "xpack.ingestPipelines.processors.defaultDescription.dot_expander": "\"{field}\"をオブジェクトフィールドに拡張します",
     "xpack.ingestPipelines.processors.defaultDescription.drop": "エラーを返さずにドキュメントを破棄します",
     "xpack.ingestPipelines.processors.defaultDescription.enrich": "\"{policy_name}\"ポリシーが\"{field}\"と一致した場合に、データを\"{target_field}\"に改善します",
     "xpack.ingestPipelines.processors.defaultDescription.fail": "実行を停止する例外を発生させます",
