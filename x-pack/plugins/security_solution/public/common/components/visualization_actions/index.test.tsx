@@ -20,7 +20,7 @@ import { UpdateQueryParams, upsertQuery } from '../../store/inputs/helpers';
 import { cloneDeep } from 'lodash';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { CASES_FEATURE_ID } from '../../../../common/constants';
-import { mockCasesContext } from '../../../../../cases/public/mocks/mock_cases_context';
+import { mockCasesContract } from '../../../../../cases/public/mocks';
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return {
@@ -79,7 +79,7 @@ describe('VisualizationActions', () => {
           SaveModalComponent: MockLensSaveModalComponent,
         },
         cases: {
-          getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+          ...mockCasesContract(),
           hooks: {
             getUseCasesAddToExistingCaseModal: jest
               .fn()
