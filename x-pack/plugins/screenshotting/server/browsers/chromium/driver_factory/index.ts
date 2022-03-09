@@ -101,7 +101,7 @@ const DEFAULT_ARGS = [
 const DIAGNOSTIC_TIME = 5 * 1000;
 
 export class HeadlessChromiumDriverFactory {
-  private userDataDir = fs.mkdtempSync(path.join(getDataPath(), 'chromium-'));
+  private userDataDir: string;
   type = 'chromium';
 
   constructor(
@@ -111,6 +111,10 @@ export class HeadlessChromiumDriverFactory {
     private binaryPath: string,
     private basePath: string
   ) {
+    const dataDir = getDataPath();
+    fs.mkdirSync(dataDir, { recursive: true });
+    this.userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
+
     if (this.config.browser.chromium.disableSandbox) {
       logger.warn(`Enabling the Chromium sandbox provides an additional layer of protection.`);
     }
