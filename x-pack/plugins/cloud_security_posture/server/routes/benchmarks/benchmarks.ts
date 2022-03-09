@@ -8,7 +8,6 @@ import { uniq, map } from 'lodash';
 import type { IRouter, SavedObjectsClientContract } from 'src/core/server';
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { string } from 'io-ts';
 import {
   PackagePolicyServiceInterface,
   AgentPolicyServiceInterface,
@@ -87,10 +86,13 @@ export const getPackagePolicies = async (
   };
 
   const query = addSortToQuery(baseQuery, queryParams);
+  console.log({ query });
 
   const { items: packagePolicies } = (await packagePolicyService?.list(soClient, query)) ?? {
     items: [] as PackagePolicy[],
   };
+
+  console.log({ packagePolicies });
 
   return packagePolicies;
 };
@@ -155,16 +157,20 @@ const createBenchmarks = (
   agentPolicies: GetAgentPoliciesResponseItem[],
   packagePolicies: PackagePolicy[]
 ): Benchmark[] =>
-  agentPolicies
-    .flatMap((agentPolicy) =>
-      agentPolicy.package_policies.map((agentPackagePolicy) => {
-        const id = string.is(agentPackagePolicy) ? agentPackagePolicy : agentPackagePolicy.id;
-        const packagePolicy = packagePolicies.find((pkgPolicy) => pkgPolicy.id === id);
-        if (!packagePolicy) return;
-        return createBenchmarkEntry(agentPolicy, packagePolicy);
+  packagePolicies.flatMap((packagePolicy) => {
+    return agentPolicies
+      .map((agentPolicy) => {
+        const agentPkgPolicies = agentPolicy.package_policies as string[];
+        const isExistsOnAgent = agentPkgPolicies.find(
+          (pkgPolicy) => pkgPolicy === packagePolicy.id
+        );
+        if (isExistsOnAgent) {
+          return createBenchmarkEntry(agentPolicy, packagePolicy);
+        }
+        return;
       })
-    )
-    .filter(isNonNullable);
+      .filter(isNonNullable);
+  });
 
 export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
