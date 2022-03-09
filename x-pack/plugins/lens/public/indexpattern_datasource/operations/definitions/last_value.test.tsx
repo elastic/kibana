@@ -169,6 +169,48 @@ describe('last_value', () => {
       expect(column).toHaveProperty('sourceField', 'source');
       expect(column.params.format).toBeUndefined();
     });
+
+    it('should set show array values if field is scripted', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        label: 'Last value of bytes',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: 'datefield',
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.fields.find((i) => i.name === 'scripted')!;
+
+      expect(
+        lastValueOperation.onFieldChange(oldColumn, field).params.showArrayValues
+      ).toBeTruthy();
+    });
+
+    it('should preserve show array values setting if field is not scripted', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        label: 'Last value of bytes',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: 'datefield',
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.fields.find((i) => i.name === 'source')!;
+
+      expect(lastValueOperation.onFieldChange(oldColumn, field).params.showArrayValues).toBeFalsy();
+      expect(
+        lastValueOperation.onFieldChange(
+          { ...oldColumn, params: { ...oldColumn.params, showArrayValues: true } },
+          field
+        ).params.showArrayValues
+      ).toBeTruthy();
+    });
   });
 
   describe('getPossibleOperationForField', () => {
@@ -342,6 +384,54 @@ describe('last_value', () => {
           sortField: 'datefield',
         })
       );
+    });
+
+    it('should set showArrayValues if field is scripted or comes from existing params', () => {
+      const indexPattern = createMockedIndexPattern();
+
+      const scriptedField = indexPattern.fields.find((field) => field.scripted);
+      const nonScriptedField = indexPattern.fields.find((field) => !field.scripted);
+
+      const localLayer = {
+        columns: {
+          col1: {
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+            sourceField: '___records___',
+            operationType: 'count',
+          },
+        },
+        columnOrder: [],
+        indexPatternId: '',
+      } as IndexPatternLayer;
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: scriptedField!,
+        }).params.showArrayValues
+      ).toBeTruthy();
+
+      expect(
+        lastValueOperation.buildColumn(
+          {
+            indexPattern,
+            layer: localLayer,
+            field: nonScriptedField!,
+          },
+          { showArrayValues: true }
+        ).params.showArrayValues
+      ).toBeTruthy();
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: nonScriptedField!,
+        }).params.showArrayValues
+      ).toBeFalsy();
     });
   });
 
@@ -603,20 +693,6 @@ describe('last_value', () => {
             currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
           />
         );
-
-        expect(updateLayerSpy).toHaveBeenCalledWith({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            col2: {
-              ...layer.columns.col2,
-              params: {
-                ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
-                showArrayValues: true,
-              },
-            },
-          },
-        });
 
         expect(new Harness(instance).showArrayValuesSwitchDisabled).toBeTruthy();
       });

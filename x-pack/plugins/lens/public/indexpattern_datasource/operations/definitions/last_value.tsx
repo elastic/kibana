@@ -116,7 +116,11 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   };
 }
 
-export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn, 'field'> = {
+export const lastValueOperation: OperationDefinition<
+  LastValueIndexPatternColumn,
+  'field',
+  Partial<LastValueIndexPatternColumn['params']>
+> = {
   type: 'last_value',
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
     defaultMessage: 'Last value',
@@ -126,6 +130,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
+
+    newParams.showArrayValues = isScriptedField(field) || oldColumn.params.showArrayValues;
 
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
@@ -187,6 +193,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       );
     }
 
+    const showArrayValues = isScriptedField(field) || lastValueParams?.showArrayValues;
+
     return {
       label: ofName(field.displayName, previousColumn?.timeShift),
       dataType: field.type as DataType,
@@ -197,6 +205,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
+        showArrayValues,
         sortField: lastValueParams?.sortField || sortField,
         ...getFormatFromPreviousColumn(previousColumn),
       },
@@ -248,7 +257,6 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       currentColumn.params.sortField,
       indexPattern
     );
-    const sourceIsScripted = isScriptedField(currentColumn.sourceField, indexPattern);
 
     const usingTopValues = Object.keys(layer.columns).some(
       (_columnId) => layer.columns[_columnId].operationType === 'terms'
@@ -269,11 +277,6 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
 
       updateLayer(updatedLayer);
     };
-
-    if (sourceIsScripted && !currentColumn.params.showArrayValues) {
-      // actively set this so that other places in the code know that we're using top-hit
-      setShowArrayValues(true);
-    }
 
     return (
       <>
@@ -361,10 +364,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                 defaultMessage: 'Show array values',
               })}
               checked={Boolean(currentColumn.params.showArrayValues)}
-              disabled={sourceIsScripted}
-              onChange={() => {
-                setShowArrayValues(!currentColumn.params.showArrayValues);
-              }}
+              disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
+              onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
             />
           </EuiToolTip>
         </EuiFormRow>
