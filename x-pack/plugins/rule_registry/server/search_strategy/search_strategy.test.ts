@@ -68,7 +68,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   });
 
   let getAuthzFilterSpy: jest.SpyInstance;
-  const search = jest.fn().mockImplementation(() => of(response));
+  const searchStrategySearch = jest.fn().mockImplementation(() => of(response));
 
   beforeEach(() => {
     ruleDataService.findIndicesByFeature.mockImplementation(() => {
@@ -81,8 +81,12 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     data.search.getSearchStrategy.mockImplementation(() => {
       return {
-        search,
+        search: searchStrategySearch,
       };
+    });
+
+    (data.search.searchAsInternalUser.search as jest.Mock).mockImplementation(() => {
+      return of(response);
     });
 
     getAuthzFilterSpy = jest
@@ -95,8 +99,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   afterEach(() => {
     ruleDataService.findIndicesByFeature.mockClear();
     data.search.getSearchStrategy.mockClear();
+    (data.search.searchAsInternalUser.search as jest.Mock).mockClear();
     getAuthzFilterSpy.mockClear();
-    search.mockClear();
+    searchStrategySearch.mockClear();
   });
 
   it('should handle a basic search request', async () => {
@@ -202,13 +207,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     expect(result).toBe(EMPTY_RESPONSE);
   });
 
-  it('should support pagination', async () => {
+  it('should not apply rbac filters for siem', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.LOGS],
-      pagination: {
-        pageSize: 10,
-        pageIndex: 1,
-      },
+      featureIds: [AlertConsumers.SIEM],
     };
     const options = {};
     const deps = {
@@ -227,21 +228,41 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
-    expect(search.mock.calls.length).toBe(1);
-    expect(search.mock.calls[0][0].params.body.size).toBe(10);
-    expect(search.mock.calls[0][0].params.body.from).toBe(10);
+    expect(getAuthzFilterSpy).not.toHaveBeenCalled();
   });
 
-  it('should support sorting', async () => {
+  it('should throw an error if requesting multiple featureIds and one is SIEM', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    let err;
+    try {
+      await strategy
+        .search(request, options, deps as unknown as SearchStrategyDependencies)
+        .toPromise();
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeDefined();
+  });
+
+  it('should use internal user when requesting o11y alerts as RBAC is applied', async () => {
     const request: RuleRegistrySearchRequest = {
       featureIds: [AlertConsumers.LOGS],
-      sort: [
-        {
-          test: {
-            order: 'desc',
-          },
-        },
-      ],
     };
     const options = {};
     const deps = {
@@ -260,7 +281,32 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
-    expect(search.mock.calls.length).toBe(1);
-    expect(search.mock.calls[0][0].params.body.sort).toStrictEqual([{ test: { order: 'desc' } }]);
+    expect(data.search.searchAsInternalUser.search).toHaveBeenCalled();
+    expect(searchStrategySearch).not.toHaveBeenCalled();
+  });
+
+  it('should use scoped user when requesting siem alerts as RBAC is not applied', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(data.search.searchAsInternalUser.search).not.toHaveBeenCalled();
+    expect(searchStrategySearch).toHaveBeenCalled();
   });
 });
