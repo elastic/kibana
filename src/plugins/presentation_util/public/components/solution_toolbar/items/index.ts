@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-/** @deprecated Use `SolutionToolbarButton` from `src/plugins/shared_ux/public`. */
-export { SolutionToolbarButton } from './button';
-
 export { SolutionToolbarPopover } from './popover';
 export { AddFromLibraryButton } from './add_from_library';
 export type { QuickButtonProps } from './quick_group';

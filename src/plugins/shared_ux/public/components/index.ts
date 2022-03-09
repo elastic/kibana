@@ -25,6 +25,12 @@ export const LazySolutionToolbarButton = React.lazy(() =>
   }))
 );
 
+export const LazySolutionToolbarButtonProps = React.lazy(() =>
+  import('./toolbar/index').then(({ Props }) => ({
+    default: SolutionToolbarButtonProps,
+  }))
+);
+
 /**
  * A `ExitFullScreenButton` component that is wrapped by the `withSuspense` HOC.  This component can
  * be used directly by consumers and will load the `LazyExitFullScreenButton` component lazily with
@@ -38,6 +44,8 @@ export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
  * a predefined fallback and error boundary.
  */
 export const SolutionToolbarButton = withSuspense(LazySolutionToolbarButton);
+
+export const SolutionToolbarButtonProps = withSuspense(LazySolutionToolbarButtonProps);
 
 /**
  * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the

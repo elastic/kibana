@@ -9,10 +9,12 @@
 import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
+import {
+  SolutionToolbarButton,
+  SolutionToolbarButtonProps as ButtonProps,
+} from '../../../../../shared_ux/public/index';
 
-import { SolutionToolbarButton, Props as ButtonProps } from './button';
-
-type AllowedButtonProps = Omit<ButtonProps, 'onClick' | 'fill'>;
+type AllowedButtonProps = Omit<typeof ButtonProps, 'onClick' | 'fill'>;
 type AllowedPopoverProps = Omit<
   EuiPopoverProps,
   'button' | 'isOpen' | 'closePopover' | 'anchorPosition'

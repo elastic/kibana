@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { SolutionToolbarButton } from './solution_toolbar/button/primary';
+export { SolutionToolbarButton, Props } from './solution_toolbar/button/primary';

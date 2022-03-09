@@ -9,7 +9,16 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "extraPublicDirs": ["common/lib"],
-  "requiredPlugins": ["savedObjects", "kibanaReact", "embeddable", "expressions", "dataViews"],
+  "extraPublicDirs": [
+    "common/lib"
+  ],
+  "requiredPlugins": [
+    "savedObjects",
+    "kibanaReact",
+    "embeddable",
+    "expressions",
+    "dataViews",
+    "shared-ux"
+  ],
   "optionalPlugins": []
 }
