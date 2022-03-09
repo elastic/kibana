@@ -142,7 +142,7 @@ export class TaskRunner<
     this.executionId = uuid.v4();
   }
 
-  async getDecryptedAttributes(
+  private async getDecryptedAttributes(
     ruleId: string,
     spaceId: string
   ): Promise<{ apiKey: string | null; enabled: boolean }> {
@@ -267,7 +267,7 @@ export class TaskRunner<
     }
   }
 
-  async executeAlert(
+  private async executeAlert(
     alertId: string,
     alert: CreatedAlert<InstanceState, InstanceContext>,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>
@@ -283,7 +283,7 @@ export class TaskRunner<
     return executionHandler({ actionGroup, actionSubgroup, context, state, alertId });
   }
 
-  async executeAlerts(
+  private async executeAlerts(
     fakeRequest: KibanaRequest,
     rule: SanitizedAlert<Params>,
     params: Params,
@@ -548,7 +548,7 @@ export class TaskRunner<
     };
   }
 
-  async validateAndExecuteRule(
+  private async validateAndExecuteRule(
     fakeRequest: KibanaRequest,
     apiKey: RawRule['apiKey'],
     rule: SanitizedAlert<Params>,
@@ -574,7 +574,9 @@ export class TaskRunner<
     return this.executeAlerts(fakeRequest, rule, validatedParams, executionHandler, spaceId, event);
   }
 
-  async loadRuleAttributesAndRun(event: Event): Promise<Resultable<RuleExecutionRunResult, Error>> {
+  private async loadRuleAttributesAndRun(
+    event: Event
+  ): Promise<Resultable<RuleExecutionRunResult, Error>> {
     const {
       params: { alertId: ruleId, spaceId },
     } = this.taskInstance;
