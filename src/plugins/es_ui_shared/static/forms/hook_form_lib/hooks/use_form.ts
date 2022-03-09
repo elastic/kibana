@@ -69,8 +69,19 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const [errorMessages, setErrorMessages] = useState<{ [fieldName: string]: string }>({});
 
+  /**
+   * Map of all the fields currently in the form
+   */
   const fieldsRefs = useRef<FieldsMap>({});
+  /**
+   * Keep a track of the fields that have been removed from the form.
+   * This will allow us to know if the form has been modified
+   */
   const fieldsRemovedRefs = useRef<FieldsMap>({});
+  /**
+   * A list of all subscribers to form data and validity changes that
+   * called "form.subscribe()"
+   */
   const formUpdateSubscribers = useRef<Subscription[]>([]);
   const isMounted = useRef<boolean>(false);
   const defaultValueDeserialized = useRef(defaultValueMemoized);
@@ -78,6 +89,8 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   /**
    * We have both a state and a ref for the error messages so the consumer can, in the same callback,
    * validate the form **and** have the errors returned immediately.
+   * Note: As an alternative we could return the errors when calling the "validate()" method but that creates
+   * a breaking change in the API which would require to update many forms.
    *
    * ```
    * const myHandler = useCallback(async () => {
@@ -275,7 +288,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         // When we submit() the form we set the "isSubmitted" state to "true" and all fields are marked as "isValidated: true".
         // If a **new** field is added and and its "isValidated" is "false" it means that we have swapped fields and added new ones:
         // --> we have a new form in front of us with different set of fields. We need to reset the "isSubmitted" state.
-        // (e.g. This happnes when changing a field "type" in the mappings editor which brings a whole new set of settings to configure)
+        // (e.g. In the mappings editor when the user swithc the field "type" it brings a whole new set of settings)
         setIsSubmitted(false);
       }
     },
@@ -285,18 +298,16 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const removeField: FormHook<T, I>['__removeField'] = useCallback(
     (_fieldNames) => {
       const fieldNames = Array.isArray(_fieldNames) ? _fieldNames : [_fieldNames];
-      const currentFormData = { ...getFormData$().value };
+      const updatedFormData = { ...getFormData$().value };
 
       fieldNames.forEach((name) => {
-        // Keep a track of the fields that have been removed from the form
-        // This will allow us to know if the form has been modified
         fieldsRemovedRefs.current[name] = fieldsRefs.current[name];
         updateFieldErrorMessage(name, null);
         delete fieldsRefs.current[name];
-        delete currentFormData[name];
+        delete updatedFormData[name];
       });
 
-      updateFormData$(currentFormData);
+      updateFormData$(updatedFormData);
 
       /**
        * After removing a field, the form validity might have changed
@@ -307,7 +318,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
           const isFormValid = fieldsToArray().every(isFieldValid);
           return isFormValid;
         }
-        // If the form validity is "true" or "undefined", it does not change after removing a field
+        // If the form validity is "true" or "undefined", it remains the same after removing a field
         return prev;
       });
     },
