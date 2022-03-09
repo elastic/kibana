@@ -98,6 +98,25 @@ function downsampleEventsRandomly(stackTraceEvents: Map<StackTraceID, number>, p
   return totalCount;
 }
 
+function getNumberOfUniqueStacktracesWithoutLeafNode(
+  stackTraces: Map<StackTraceID, StackTrace>,
+  level: number
+): number {
+  // Calculate the reduction in lookups that would derive from
+  // StackTraces without leaf frame.
+  const stackTracesNoLeaf = new Set<string>();
+  for (const trace of stackTraces.values()) {
+    stackTracesNoLeaf.add(
+      JSON.stringify({
+        FileID: trace.FileID.slice(level),
+        FrameID: trace.FrameID.slice(level),
+        Type: trace.Type.slice(level),
+      })
+    );
+  }
+  return stackTracesNoLeaf.size;
+}
+
 async function queryFlameGraph(
   logger: Logger,
   client: ElasticsearchClient,
@@ -229,6 +248,16 @@ async function queryFlameGraph(
         ' stacktraces (todo: find out why)'
     );
   }
+
+  logger.info(
+    '* unique stacktraces without leaf frame: ' +
+      getNumberOfUniqueStacktracesWithoutLeafNode(stackTraces, 1)
+  );
+
+  logger.info(
+    '* unique stacktraces without 2 leaf frames: ' +
+      getNumberOfUniqueStacktracesWithoutLeafNode(stackTraces, 2)
+  );
 
   // Create the set of unique FrameIDs.
   const stackFrameDocIDs = new Set<string>();
