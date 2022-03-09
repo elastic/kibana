@@ -29,25 +29,25 @@ const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
   {
     value: LegendSizes.AUTO,
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.auto', {
-      defaultMessage: 'auto',
+      defaultMessage: 'Auto',
     }),
   },
   {
     value: LegendSizes.SMALL,
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.small', {
-      defaultMessage: 'small',
+      defaultMessage: 'Small',
     }),
   },
   {
     value: LegendSizes.MEDIUM,
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.medium', {
-      defaultMessage: 'medium',
+      defaultMessage: 'Medium',
     }),
   },
   {
     value: LegendSizes.LARGE,
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.large', {
-      defaultMessage: 'large',
+      defaultMessage: 'Large',
     }),
   },
   {
@@ -55,7 +55,7 @@ const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
     inputDisplay: i18n.translate(
       'xpack.lens.shared.legendSizeSetting.legendSizeOptions.extraLarge',
       {
-        defaultMessage: 'extra large',
+        defaultMessage: 'Extra large',
       }
     ),
   },
