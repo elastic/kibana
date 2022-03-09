@@ -180,6 +180,14 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Specifies the mode of centralMajor',
       }),
     },
+    // used only in legacy gauge, consider it as @deprecated
+    percentageMode: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionGauge.functions.gauge.percentageMode.help', {
+        defaultMessage: 'Enables relative precentage mode',
+      }),
+    },
     ariaLabel: {
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gaugeChart.config.ariaLabel.help', {
