@@ -142,7 +142,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
           const isCached = this.formatCache.has(fieldParams);
           const cachedFormat =
             this.formatCache.get(fieldParams) ||
-            getFieldFormat({ id: fieldParams.id, params: fieldParams });
+            getFieldFormat({ id: fieldParams.id, params: fieldParams.params });
           if (!isCached) {
             this.formatCache.set(fieldParams, cachedFormat);
           }
