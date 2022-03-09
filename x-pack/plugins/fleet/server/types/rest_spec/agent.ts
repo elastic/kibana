@@ -114,6 +114,6 @@ export const GetAgentStatusRequestSchema = {
 
 export const GetAgentDataRequestSchema = {
   query: schema.object({
-    agentsIds: schema.arrayOf(schema.string()),
+    agentsIds: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
   }),
 };

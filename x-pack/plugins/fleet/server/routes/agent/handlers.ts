@@ -226,7 +226,13 @@ export const getAgentDataHandler: RequestHandler<
 > = async (context, request, response) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    const items = await AgentService.getIncomingDataByAgentsId(esClient, request.query.agentsIds);
+    let items;
+
+    if (isStringArray(request.query.agentsIds)) {
+      items = await AgentService.getIncomingDataByAgentsId(esClient, request.query.agentsIds);
+    } else {
+      items = await AgentService.getIncomingDataByAgentsId(esClient, [request.query.agentsIds]);
+    }
 
     const body = { items };
 
@@ -235,3 +241,7 @@ export const getAgentDataHandler: RequestHandler<
     return defaultIngestErrorHandler({ error, response });
   }
 };
+
+function isStringArray(arr: unknown | string[]): arr is string[] {
+  return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
+}

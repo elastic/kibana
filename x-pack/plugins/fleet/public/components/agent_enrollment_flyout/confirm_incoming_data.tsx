@@ -41,12 +41,15 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({ agentsIds 
   return (
     <>
       {isLoading ? (
-        <EuiText size="s">
-          {i18n.translate('xpack.fleet.confirmIncomingData.title', {
-            defaultMessage:
-              'It may take a few minutes for data to arrive in Elasticsearch. If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you’re having trouble, see our troubleshooting guide. You may close this dialog and check later by viewing our integration assets.',
-          })}
-        </EuiText>
+        <>
+          <EuiText size="s">
+            {i18n.translate('xpack.fleet.confirmIncomingData.loading', {
+              defaultMessage:
+                'It may take a few minutes for data to arrive in Elasticsearch. If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you’re having trouble, see our troubleshooting guide. You may close this dialog and check later by viewing our integration assets.',
+            })}
+          </EuiText>
+          <EuiSpacer size="m" />
+        </>
       ) : (
         <>
           <EuiCallOut
@@ -64,14 +67,13 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({ agentsIds 
           />
           <EuiSpacer size="m" />
           <EuiText size="s">
-            {i18n.translate('xpack.fleet.confirmIncomingData.title', {
+            {i18n.translate('xpack.fleet.confirmIncomingData.subtitle', {
               defaultMessage: 'Your agent is enrolled successfully and your data is received.',
             })}
           </EuiText>
           <EuiSpacer size="m" />
         </>
       )}
-      {/* build link to logs */}
       <EuiButton
         href="Link"
         color="primary"
