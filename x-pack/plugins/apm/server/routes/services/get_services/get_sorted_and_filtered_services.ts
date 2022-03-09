@@ -32,7 +32,7 @@ export async function getSortedAndFilteredServices({
 }) {
   const { apmEventClient } = setup;
 
-  async function getServicesFromTermsEnum() {
+  async function getServiceNamesFromTermsEnum() {
     if (environment !== ENVIRONMENT_ALL.value) {
       return [];
     }
@@ -54,36 +54,35 @@ export async function getSortedAndFilteredServices({
       }
     );
 
-    if (serviceGroup?.serviceNames) {
-      return serviceGroup.serviceNames.filter((serviceName) =>
-        response.terms.includes(serviceName)
-      );
-    }
-
     return response.terms;
   }
 
-  const [servicesWithHealthStatuses, serviceNamesFromTermsEnum] =
-    await Promise.all([
-      getHealthStatuses({
-        setup,
-        start,
-        end,
-        environment,
-      }).catch((error) => {
-        logger.error(error);
-        return [];
-      }),
-      getServicesFromTermsEnum(),
-    ]);
+  const [servicesWithHealthStatuses, selectedServices] = await Promise.all([
+    getHealthStatuses({
+      setup,
+      start,
+      end,
+      environment,
+    }).catch((error) => {
+      logger.error(error);
+      return [];
+    }),
+    serviceGroup
+      ? getServiceNamesFromServiceGroup(serviceGroup)
+      : getServiceNamesFromTermsEnum(),
+  ]);
 
   const services = joinByKey(
     [
       ...servicesWithHealthStatuses,
-      ...serviceNamesFromTermsEnum.map((serviceName) => ({ serviceName })),
+      ...selectedServices.map((serviceName) => ({ serviceName })),
     ],
     'serviceName'
   );
 
   return services;
+}
+
+async function getServiceNamesFromServiceGroup(serviceGroup: ServiceGroup) {
+  return serviceGroup.serviceNames;
 }
