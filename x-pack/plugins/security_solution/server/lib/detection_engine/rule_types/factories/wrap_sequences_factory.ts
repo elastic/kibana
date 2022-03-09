@@ -11,7 +11,10 @@ import { WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
 import { ConfigType } from '../../../../config';
 import { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
-import { BaseAlert, WrappedAlert } from '../../../../../common/detection_engine/schemas/alerts';
+import {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
 
 export const wrapSequencesFactory =
   ({
@@ -29,7 +32,7 @@ export const wrapSequencesFactory =
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
-      (acc: Array<WrappedAlert<BaseAlert>>, sequence) => [
+      (acc: Array<WrappedFieldsLatest<BaseFieldsLatest>>, sequence) => [
         ...acc,
         ...buildAlertGroupFromSequence(
           logger,

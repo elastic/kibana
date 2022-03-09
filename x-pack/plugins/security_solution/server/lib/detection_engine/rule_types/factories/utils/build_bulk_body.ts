@@ -18,7 +18,7 @@ import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import { buildRuleNameFromMapping } from '../../../signals/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../../signals/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_score_from_mapping';
-import { BaseAlert } from '../../../../../../common/detection_engine/schemas/alerts';
+import { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
 
 const isSourceDoc = (
   hit: SignalSourceHit
@@ -50,7 +50,7 @@ export const buildBulkBody = (
   ignoreFields: ConfigType['alertIgnoreFields'],
   applyOverrides: boolean,
   buildReasonMessage: BuildReasonMessage
-): BaseAlert => {
+): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const eventFields = buildEventTypeAlert(mergedDoc);
   const filteredSource = filterSource(mergedDoc);

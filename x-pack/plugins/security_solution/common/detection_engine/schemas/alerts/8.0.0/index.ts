@@ -70,7 +70,7 @@ import {
 } from '../../../../field_maps/field_names';
 // TODO: Create and import 8.0.0 versioned RuleAlertAction type
 import { RuleAlertAction, SearchTypes } from '../../../types';
-import { CommonAlertFields } from '../../../../../../rule_registry/common/schemas';
+import { AlertWithCommonFields } from '../../../../../../rule_registry/common/schemas/8.0.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.0.0.
@@ -82,7 +82,7 @@ Then, update `../index.ts` to import from the new folder that has the latest sch
 new schemas to the union of all alert schemas.
 */
 
-export interface Ancestor {
+export interface Ancestor800 {
   rule?: string;
   id: string;
   type: string;
@@ -90,17 +90,17 @@ export interface Ancestor {
   depth: number;
 }
 
-export interface BaseAlert {
+export interface BaseFields800 {
   [TIMESTAMP]: string;
   [SPACE_IDS]: string[];
   [EVENT_KIND]: 'signal';
   [ALERT_ORIGINAL_TIME]: string | undefined;
   // When we address https://github.com/elastic/kibana/issues/102395 and change ID generation logic, consider moving
-  // ALERT_UUID creation into buildAlert and keep ALERT_UUID with the rest of BaseAlert fields. As of 8.2 though,
+  // ALERT_UUID creation into buildAlert and keep ALERT_UUID with the rest of BaseFields fields. As of 8.2 though,
   // ID generation logic is fragmented and it would be more confusing to put any of it in buildAlert
   // [ALERT_UUID]: string;
   [ALERT_RULE_CONSUMER]: string;
-  [ALERT_ANCESTORS]: Ancestor[];
+  [ALERT_ANCESTORS]: Ancestor800[];
   [ALERT_STATUS]: string;
   [ALERT_WORKFLOW_STATUS]: string;
   [ALERT_DEPTH]: number;
@@ -149,24 +149,30 @@ export interface BaseAlert {
   [key: string]: SearchTypes;
 }
 
-// This is the type of the final generated alert including base fields, common fields
-// added by the alertWithPersistence function, and arbitrary fields copied from source documents
-export type DetectionAlert<T extends BaseAlert = BaseAlert> = T & CommonAlertFields;
-
 // This type is used after the alert UUID is generated and stored in the _id and ALERT_UUID fields
-export interface WrappedAlert<T extends BaseAlert> {
+export interface WrappedFields800<T extends BaseFields800> {
   _id: string;
   _index: string;
   _source: T & { [ALERT_UUID]: string };
 }
 
-export interface EqlBuildingBlockAlert extends BaseAlert {
+export interface EqlBuildingBlockFields800 extends BaseFields800 {
   [ALERT_GROUP_ID]: string;
   [ALERT_GROUP_INDEX]: number;
   [ALERT_BUILDING_BLOCK_TYPE]: 'default';
 }
 
-export interface EqlShellAlert extends BaseAlert {
+export interface EqlShellFields800 extends BaseFields800 {
   [ALERT_GROUP_ID]: string;
   [ALERT_UUID]: string;
 }
+
+export type EqlBuildingBlockAlert800 = AlertWithCommonFields<EqlBuildingBlockFields800>;
+
+export type EqlShellAlert800 = AlertWithCommonFields<EqlShellFields800>;
+
+export type GenericAlert800 = AlertWithCommonFields<BaseFields800>;
+
+// This is the type of the final generated alert including base fields, common fields
+// added by the alertWithPersistence function, and arbitrary fields copied from source documents
+export type DetectionAlert800 = GenericAlert800 | EqlShellAlert800 | EqlBuildingBlockAlert800;

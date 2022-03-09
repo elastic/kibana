@@ -14,7 +14,10 @@ import { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
 import { generateId } from '../../signals/utils';
 import { buildBulkBody } from './utils/build_bulk_body';
 import { BuildReasonMessage } from '../../signals/reason_formatters';
-import { BaseAlert, WrappedAlert } from '../../../../../common/detection_engine/schemas/alerts';
+import {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
 
 export const wrapHitsFactory =
   ({
@@ -31,8 +34,8 @@ export const wrapHitsFactory =
   (
     events: Array<estypes.SearchHit<SignalSource>>,
     buildReasonMessage: BuildReasonMessage
-  ): Array<WrappedAlert<BaseAlert>> => {
-    const wrappedDocs = events.map((event): WrappedAlert<BaseAlert> => {
+  ): Array<WrappedFieldsLatest<BaseFieldsLatest>> => {
+    const wrappedDocs = events.map((event): WrappedFieldsLatest<BaseFieldsLatest> => {
       const id = generateId(
         event._index,
         event._id,

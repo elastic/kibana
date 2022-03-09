@@ -37,9 +37,9 @@ import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_ma
 import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 import { BuildReasonMessage } from './reason_formatters';
 import {
-  BaseAlert,
+  BaseFieldsLatest,
   DetectionAlert,
-  WrappedAlert,
+  WrappedFieldsLatest,
 } from '../../../../common/detection_engine/schemas/alerts';
 
 // used for gap detection code
@@ -290,8 +290,8 @@ export interface QueryFilter {
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
-export type BulkCreate = <T extends BaseAlert>(
-  docs: Array<WrappedAlert<T>>
+export type BulkCreate = <T extends BaseFieldsLatest>(
+  docs: Array<WrappedFieldsLatest<T>>
 ) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
@@ -299,12 +299,12 @@ export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 export type WrapHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => Array<WrappedAlert<BaseAlert>>;
+) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
 export type WrapSequences = (
   sequences: Array<EqlSequence<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => Array<WrappedAlert<BaseAlert>>;
+) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
 export interface SearchAfterAndBulkCreateParams {
   tuple: {

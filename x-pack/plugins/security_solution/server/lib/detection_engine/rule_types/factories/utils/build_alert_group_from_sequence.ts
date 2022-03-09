@@ -24,10 +24,10 @@ import {
   ALERT_GROUP_INDEX,
 } from '../../../../../../common/field_maps/field_names';
 import {
-  BaseAlert,
-  EqlBuildingBlockAlert,
-  EqlShellAlert,
-  WrappedAlert,
+  BaseFieldsLatest,
+  EqlBuildingBlockFieldsLatest,
+  EqlShellFieldsLatest,
+  WrappedFieldsLatest,
 } from '../../../../../../common/detection_engine/schemas/alerts';
 
 /**
@@ -44,15 +44,15 @@ export const buildAlertGroupFromSequence = (
   mergeStrategy: ConfigType['alertMergeStrategy'],
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage
-): Array<WrappedAlert<EqlBuildingBlockAlert | EqlShellAlert>> => {
+): Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>> => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
     return [];
   }
 
-  // The "building block" alerts start out as regular BaseAlerts. We'll add the group ID and index fields
+  // The "building block" alerts start out as regular BaseFields. We'll add the group ID and index fields
   // after creating the shell alert later on, since that's when the group ID is determined.
-  let baseAlerts: BaseAlert[] = [];
+  let baseAlerts: BaseFieldsLatest[] = [];
   try {
     baseAlerts = sequence.events.map((event) =>
       buildBulkBody(spaceId, completeRule, event, mergeStrategy, [], false, buildReasonMessage)
@@ -63,10 +63,10 @@ export const buildAlertGroupFromSequence = (
   }
 
   // The ID of each building block alert depends on all of the other building blocks as well,
-  // so we generate the IDs after making all the BaseAlerts
+  // so we generate the IDs after making all the BaseFields
   const buildingBlockIds = generateBuildingBlockIds(baseAlerts);
-  const wrappedBaseAlerts: Array<WrappedAlert<BaseAlert>> = baseAlerts.map(
-    (block, i): WrappedAlert<BaseAlert> => ({
+  const wrappedBaseFields: Array<WrappedFieldsLatest<BaseFieldsLatest>> = baseAlerts.map(
+    (block, i): WrappedFieldsLatest<BaseFieldsLatest> => ({
       _id: buildingBlockIds[i],
       _index: '',
       _source: {
@@ -79,16 +79,16 @@ export const buildAlertGroupFromSequence = (
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
-  const shellAlert = buildAlertRoot(wrappedBaseAlerts, completeRule, spaceId, buildReasonMessage);
-  const sequenceAlert: WrappedAlert<EqlShellAlert> = {
+  const shellAlert = buildAlertRoot(wrappedBaseFields, completeRule, spaceId, buildReasonMessage);
+  const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
     _id: shellAlert[ALERT_UUID],
     _index: '',
     _source: shellAlert,
   };
 
-  // Finally, we have the group id from the shell alert so we can convert the BaseAlerts into EqlBuildingBlocks
-  const wrappedBuildingBlocks = wrappedBaseAlerts.map(
-    (block, i): WrappedAlert<EqlBuildingBlockAlert> => ({
+  // Finally, we have the group id from the shell alert so we can convert the BaseFields into EqlBuildingBlocks
+  const wrappedBuildingBlocks = wrappedBaseFields.map(
+    (block, i): WrappedFieldsLatest<EqlBuildingBlockFieldsLatest> => ({
       ...block,
       _source: {
         ...block._source,
@@ -103,11 +103,11 @@ export const buildAlertGroupFromSequence = (
 };
 
 export const buildAlertRoot = (
-  wrappedBuildingBlocks: Array<WrappedAlert<BaseAlert>>,
+  wrappedBuildingBlocks: Array<WrappedFieldsLatest<BaseFieldsLatest>>,
   completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage
-): EqlShellAlert => {
+): EqlShellFieldsLatest => {
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({
     name: completeRule.ruleConfig.name,

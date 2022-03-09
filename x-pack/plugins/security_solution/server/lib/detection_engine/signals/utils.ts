@@ -62,10 +62,10 @@ import type {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
-import type { SearchTypes } from '../../../../common/detection_engine/types';
+import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { DetectionAlert, WrappedAlert } from '../../../../common/detection_engine/schemas/alerts';
+import { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
 
 interface SortExceptionsReturn {
@@ -971,15 +971,15 @@ export const buildChunkedOrFilter = (field: string, values: string[], chunkSize:
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
-  return !isWrappedSignalHit(event) && !isWrappedAlert(event);
+  return !isWrappedSignalHit(event) && !isWrappedDetectionAlert(event);
 };
 
 export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit => {
   return (event as WrappedSignalHit)?._source?.signal != null;
 };
 
-export const isWrappedAlert = (event: SimpleHit): event is WrappedAlert<DetectionAlert> => {
-  return (event as WrappedAlert<DetectionAlert>)?._source?.[ALERT_UUID] != null;
+export const isWrappedDetectionAlert = (event: SimpleHit): event is BaseHit<DetectionAlert> => {
+  return (event as BaseHit<DetectionAlert>)?._source?.[ALERT_UUID] != null;
 };
 
 export const isDetectionAlert = (event: unknown): event is DetectionAlert => {
@@ -1020,7 +1020,7 @@ export const racFieldMappings: Record<string, string> = {
 };
 
 export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
-  if (isWrappedAlert(event)) {
+  if (isWrappedDetectionAlert(event)) {
     const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
     const parts = mappedField.split('.');
     if (mappedField.includes(ALERT_RULE_PARAMETERS) && parts[parts.length - 1] !== 'parameters') {

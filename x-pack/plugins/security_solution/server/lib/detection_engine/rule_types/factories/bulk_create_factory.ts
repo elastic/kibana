@@ -13,19 +13,17 @@ import { BuildRuleMessage } from '../../signals/rule_messages';
 import { makeFloatString } from '../../signals/utils';
 import { RefreshTypes } from '../../types';
 import { PersistenceAlertService } from '../../../../../../rule_registry/server';
-import { AlertWithCommonFields } from '../../../../../../rule_registry/common/schemas';
 import {
-  BaseAlert,
-  DetectionAlert,
-  WrappedAlert,
+  BaseFieldsLatest,
+  DetectionAlertLatest,
+  WrappedFieldsLatest,
 } from '../../../../../common/detection_engine/schemas/alerts';
-import { BulkResponseErrorAggregation } from '../../signals/types';
 
-export interface GenericBulkCreateResponse<T extends BaseAlert> {
+export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
   bulkCreateDuration: string;
   createdItemsCount: number;
-  createdItems: Array<DetectionAlert<T> & { _id: string; _index: string }>;
+  createdItems: Array<DetectionAlertLatest & { _id: string; _index: string }>;
   errors: string[];
 }
 
@@ -36,8 +34,8 @@ export const bulkCreateFactory =
     buildRuleMessage: BuildRuleMessage,
     refreshForBulkCreate: RefreshTypes
   ) =>
-  async <T extends BaseAlert>(
-    wrappedDocs: Array<WrappedAlert<T>>
+  async <T extends BaseFieldsLatest>(
+    wrappedDocs: Array<WrappedFieldsLatest<T>>
   ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
       return {

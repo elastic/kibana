@@ -47,7 +47,7 @@ import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../si
 import {
   getField,
   getValidDateFromDoc,
-  isWrappedAlert,
+  isWrappedDetectionAlert,
   isWrappedSignalHit,
 } from '../../../signals/utils';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
@@ -80,9 +80,9 @@ import {
 } from '../../../schemas/rule_converters';
 import { transformTags } from '../../../routes/rules/utils';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { BaseAlert } from '../../../../../../common/detection_engine/schemas/alerts';
+import { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
 
-export const generateAlertId = (alert: BaseAlert) => {
+export const generateAlertId = (alert: BaseFieldsLatest) => {
   return createHash('sha256')
     .update(
       alert[ALERT_ANCESTORS].reduce(
@@ -99,7 +99,7 @@ export const generateAlertId = (alert: BaseAlert) => {
  * @param doc The parent event
  */
 export const buildParent = (doc: SimpleHit): Ancestor => {
-  const isSignal: boolean = isWrappedSignalHit(doc) || isWrappedAlert(doc);
+  const isSignal: boolean = isWrappedSignalHit(doc) || isWrappedDetectionAlert(doc);
   const parent: Ancestor = {
     id: doc._id,
     type: isSignal ? 'signal' : 'event',
@@ -140,7 +140,7 @@ export const buildAlert = (
     severityOverride: string;
     riskScoreOverride: number;
   }
-): BaseAlert => {
+): BaseFieldsLatest => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce((acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)), []);

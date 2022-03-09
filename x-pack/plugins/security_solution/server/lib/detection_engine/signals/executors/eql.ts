@@ -33,7 +33,10 @@ import { ExperimentalFeatures } from '../../../../../common/experimental_feature
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
 import { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { BaseAlert, WrappedAlert } from '../../../../../common/detection_engine/schemas/alerts';
+import {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
 
 export const eqlExecutor = async ({
   completeRule,
@@ -125,7 +128,7 @@ export const eqlExecutor = async ({
     const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
     result.searchAfterTimes = [eqlSearchDuration];
 
-    let newSignals: Array<WrappedAlert<BaseAlert>> | undefined;
+    let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
     if (response.hits.sequences !== undefined) {
       newSignals = wrapSequences(response.hits.sequences, buildReasonMessageForEqlAlert);
     } else if (response.hits.events !== undefined) {
