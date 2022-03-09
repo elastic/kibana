@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock } from '../../../../../../src/core/server/mocks';
+import {
+  savedObjectsRepositoryMock,
+  loggingSystemMock,
+} from '../../../../../../src/core/server/mocks';
 import { getConnectorsTelemetryData } from './connectors';
 
 describe('getConnectorsTelemetryData', () => {
   describe('getConnectorsTelemetryData', () => {
+    const logger = loggingSystemMock.createLogger();
     const savedObjectsClient = savedObjectsRepositoryMock.create();
 
     const mockFind = (aggs: Record<string, unknown>) => {
@@ -41,7 +45,7 @@ describe('getConnectorsTelemetryData', () => {
     it('it returns the correct res', async () => {
       mockResponse();
 
-      const res = await getConnectorsTelemetryData({ savedObjectsClient });
+      const res = await getConnectorsTelemetryData({ savedObjectsClient, logger });
       expect(res).toEqual({
         all: {
           all: {
@@ -70,7 +74,7 @@ describe('getConnectorsTelemetryData', () => {
     it('should call find with correct arguments', async () => {
       mockResponse();
 
-      await getConnectorsTelemetryData({ savedObjectsClient });
+      await getConnectorsTelemetryData({ savedObjectsClient, logger });
 
       expect(savedObjectsClient.find.mock.calls[0][0]).toEqual({
         aggs: {

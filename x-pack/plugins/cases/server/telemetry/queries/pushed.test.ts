@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock } from '../../../../../../src/core/server/mocks';
+import {
+  savedObjectsRepositoryMock,
+  loggingSystemMock,
+} from '../../../../../../src/core/server/mocks';
 import { getPushedTelemetryData } from './pushes';
 
 describe('pushes', () => {
   describe('getPushedTelemetryData', () => {
+    const logger = loggingSystemMock.createLogger();
     const savedObjectsClient = savedObjectsRepositoryMock.create();
     savedObjectsClient.find.mockResolvedValue({
       total: 5,
@@ -26,7 +30,7 @@ describe('pushes', () => {
     });
 
     it('it returns the correct res', async () => {
-      const res = await getPushedTelemetryData({ savedObjectsClient });
+      const res = await getPushedTelemetryData({ savedObjectsClient, logger });
       expect(res).toEqual({
         all: {
           maxOnACase: 1,
@@ -36,7 +40,7 @@ describe('pushes', () => {
     });
 
     it('should call find with correct arguments', async () => {
-      await getPushedTelemetryData({ savedObjectsClient });
+      await getPushedTelemetryData({ savedObjectsClient, logger });
       expect(savedObjectsClient.find).toBeCalledWith({
         aggs: {
           references: {

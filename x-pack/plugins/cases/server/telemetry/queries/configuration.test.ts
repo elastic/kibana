@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock } from '../../../../../../src/core/server/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '../../../../../../src/core/server/mocks';
 import { getConfigurationTelemetryData } from './configuration';
 
 describe('configuration', () => {
   describe('getConfigurationTelemetryData', () => {
+    const logger = loggingSystemMock.createLogger();
     const savedObjectsClient = savedObjectsRepositoryMock.create();
     savedObjectsClient.find.mockResolvedValue({
       total: 5,
@@ -31,7 +35,7 @@ describe('configuration', () => {
     });
 
     it('it returns the correct res', async () => {
-      const res = await getConfigurationTelemetryData({ savedObjectsClient });
+      const res = await getConfigurationTelemetryData({ savedObjectsClient, logger });
       expect(res).toEqual({
         all: {
           closure: {
@@ -43,7 +47,7 @@ describe('configuration', () => {
     });
 
     it('should call find with correct arguments', async () => {
-      await getConfigurationTelemetryData({ savedObjectsClient });
+      await getConfigurationTelemetryData({ savedObjectsClient, logger });
       expect(savedObjectsClient.find).toBeCalledWith({
         aggs: {
           closureType: {

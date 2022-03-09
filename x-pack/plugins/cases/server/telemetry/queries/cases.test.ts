@@ -6,11 +6,15 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { savedObjectsRepositoryMock } from '../../../../../../src/core/server/mocks';
+import {
+  savedObjectsRepositoryMock,
+  loggingSystemMock,
+} from '../../../../../../src/core/server/mocks';
 import { getCasesTelemetryData } from './cases';
 
 describe('getCasesTelemetryData', () => {
   describe('getCasesTelemetryData', () => {
+    const logger = loggingSystemMock.createLogger();
     const savedObjectsClient = savedObjectsRepositoryMock.create();
 
     const mockFind = (
@@ -114,7 +118,7 @@ describe('getCasesTelemetryData', () => {
     it('it returns the correct res', async () => {
       mockResponse();
 
-      const res = await getCasesTelemetryData({ savedObjectsClient });
+      const res = await getCasesTelemetryData({ savedObjectsClient, logger });
       expect(res).toEqual({
         all: {
           total: 5,
@@ -163,7 +167,7 @@ describe('getCasesTelemetryData', () => {
     it('should call find with correct arguments', async () => {
       mockResponse();
 
-      await getCasesTelemetryData({ savedObjectsClient });
+      await getCasesTelemetryData({ savedObjectsClient, logger });
 
       expect(savedObjectsClient.find.mock.calls[0][0]).toEqual({
         aggs: {
