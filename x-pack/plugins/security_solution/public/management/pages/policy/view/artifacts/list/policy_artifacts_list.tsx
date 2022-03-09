@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiSpacer, EuiText, Pagination } from '@elastic/eui';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
@@ -13,6 +13,7 @@ import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import { useUrlParams } from '../../../../../components/hooks/use_url_params';
+import { useUrlPagination } from '../../../../../components/hooks/use_url_pagination';
 import {
   MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
@@ -70,23 +71,28 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
 
     const { state } = useGetLinkTo(policy.id, policy.name, getPolicyArtifactsPath, getArtifactPath);
 
+    const { pageSizeOptions, pagination: urlPagination, setPagination } = useUrlPagination();
+
     const {
       data: artifacts,
       isLoading: isLoadingArtifacts,
       isRefetching: isRefetchingArtifacts,
     } = useListArtifact(apiClient, searcheableFields, {
-      page: Number(urlParams.page_index) + 1 || undefined,
-      perPage: Number(urlParams.page_size) || undefined,
+      page: urlPagination.page,
+      perPage: urlPagination.pageSize,
       filter: urlParams.filter as string,
       policies: [policy.id, 'all'],
     });
 
-    const pagination: Pagination = {
-      pageSize: Number(urlParams.page_size) || MANAGEMENT_DEFAULT_PAGE_SIZE,
-      pageIndex: Number(urlParams.page_index) || 0,
-      pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-      totalItemCount: artifacts?.total || 0,
-    };
+    const pagination: Pagination = useMemo(
+      () => ({
+        pageSize: urlPagination.pageSize,
+        pageIndex: urlPagination.page - 1,
+        pageSizeOptions,
+        totalItemCount: artifacts?.total || 0,
+      }),
+      [artifacts?.total, pageSizeOptions, urlPagination.page, urlPagination.pageSize]
+    );
 
     const handleOnSearch = useCallback(
       (filter) => {
@@ -110,9 +116,9 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     );
     const handleOnPageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
       ({ pageIndex, pageSize }) => {
-        if (artifacts?.total) navigateCallback({ page_index: pageIndex, page_size: pageSize });
+        if (artifacts?.total) setPagination({ page: pageIndex + 1, pageSize });
       },
-      [artifacts?.total, navigateCallback]
+      [artifacts?.total, setPagination]
     );
 
     const totalItemsCountLabel = useMemo<string>(() => {
