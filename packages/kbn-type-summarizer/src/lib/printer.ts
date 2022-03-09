@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-
 import * as ts from 'typescript';
 import { SourceNode, CodeWithSourceMap } from 'source-map';
 
+import * as Path from './path';
 import { findKind } from './ts_nodes';
 import { SourceMapper } from './source_mapper';
 import { CollectorResult } from './export_collector';

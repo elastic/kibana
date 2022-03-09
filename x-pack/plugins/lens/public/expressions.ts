@@ -14,7 +14,10 @@ import {
 } from '../common/expressions/xy_chart/axis_config';
 import { gridlinesConfig } from '../common/expressions/xy_chart/grid_lines_config';
 import { labelsOrientationConfig } from '../common/expressions/xy_chart/labels_orientation_config';
-import { layerConfig } from '../common/expressions/xy_chart/layer_config';
+import {
+  dataLayerConfig,
+  referenceLineLayerConfig,
+} from '../common/expressions/xy_chart/layer_config';
 import { legendConfig } from '../common/expressions/xy_chart/legend_config';
 import { tickLabelsConfig } from '../common/expressions/xy_chart/tick_labels_config';
 import { xyChart } from '../common/expressions/xy_chart/xy_chart';
@@ -41,7 +44,8 @@ export const setupExpressions = (
     mergeTables,
     counterRate,
     yAxisConfig,
-    layerConfig,
+    dataLayerConfig,
+    referenceLineLayerConfig,
     formatColumn,
     legendConfig,
     renameColumns,

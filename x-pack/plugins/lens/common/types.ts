@@ -18,7 +18,13 @@ import type {
   PaletteOutput,
   ColorMode,
 } from '../../../../src/plugins/charts/common';
-import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
+import {
+  CategoryDisplay,
+  layerTypes,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+} from './constants';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
@@ -76,7 +82,7 @@ export type RequiredPaletteParamTypes = Required<CustomPaletteParams> & {
   maxSteps?: number;
 };
 
-export type LayerType = 'data' | 'referenceLine';
+export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 
 // Shared by XY Chart and Heatmap as for now
 export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
