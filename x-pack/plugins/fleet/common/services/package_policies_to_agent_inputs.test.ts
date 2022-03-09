@@ -78,34 +78,34 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
   };
 
   const mockInput2: PackagePolicyInput = {
-  type: 'test-metrics',
-  policy_template: 'some-template',
-  enabled: true,
-  vars: {
-    inputVar: { value: 'input-value' },
-    inputVar2: { value: undefined },
-    inputVar3: {
-      type: 'yaml',
-      value: 'testField: test',
-    },
-    inputVar4: { value: '' },
-  },
-  streams: [
-    {
-      id: 'test-metrics-foo',
-      enabled: true,
-      data_stream: { dataset: 'foo', type: 'metrics' },
-      vars: {
-        fooVar: { value: 'foo-value' },
-        fooVar2: { value: [1, 2] },
+    type: 'test-metrics',
+    policy_template: 'some-template',
+    enabled: true,
+    vars: {
+      inputVar: { value: 'input-value' },
+      inputVar2: { value: undefined },
+      inputVar3: {
+        type: 'yaml',
+        value: 'testField: test',
       },
-      compiled_stream: {
-        fooKey: 'fooValue1',
-        fooKey2: ['fooValue2'],
-      },
+      inputVar4: { value: '' },
     },
-  ],
-};
+    streams: [
+      {
+        id: 'test-metrics-foo',
+        enabled: true,
+        data_stream: { dataset: 'foo', type: 'metrics' },
+        vars: {
+          fooVar: { value: 'foo-value' },
+          fooVar2: { value: [1, 2] },
+        },
+        compiled_stream: {
+          fooKey: 'fooValue1',
+          fooKey2: ['fooValue2'],
+        },
+      },
+    ],
+  };
 
   it('returns no inputs for package policy with no inputs, or only disabled inputs', () => {
     expect(storedPackagePoliciesToAgentInputs([mockPackagePolicy])).toEqual([]);
