@@ -194,6 +194,7 @@ export class Typeahead extends Component {
             onKeyUp={this.onKeyUp}
             onChange={this.onChangeInputValue}
             onClick={this.onClickInput}
+            onBlur={this.onBlur}
             autoComplete="off"
             spellCheck={false}
             prepend={prepend}

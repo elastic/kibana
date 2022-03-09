@@ -60,7 +60,7 @@ export function GroupDetails({
         setDescription(serviceGroup.description);
       }
     },
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [serviceGroup?.groupName, serviceGroup?.description, serviceGroup?.color]
   );
 
@@ -163,7 +163,7 @@ export function GroupDetails({
                   onDeleteGroup();
                 }}
                 color="danger"
-                disabled={isLoading}
+                isDisabled={isLoading}
               >
                 {i18n.translate(
                   'xpack.apm.serviceGroups.groupDetailsForm.deleteGroup',
@@ -173,7 +173,7 @@ export function GroupDetails({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-            <EuiButtonEmpty onClick={onCloseModal}>
+            <EuiButtonEmpty onClick={onCloseModal} isDisabled={isLoading}>
               {i18n.translate(
                 'xpack.apm.serviceGroups.groupDetailsForm.cancel',
                 { defaultMessage: 'Cancel' }
@@ -193,7 +193,7 @@ export function GroupDetails({
                   kuery: serviceGroup?.kuery ?? '',
                 });
               }}
-              isDisabled={isInvalid}
+              isDisabled={isInvalid || isLoading}
             >
               {i18n.translate(
                 'xpack.apm.serviceGroups.groupDetailsForm.selectServices',

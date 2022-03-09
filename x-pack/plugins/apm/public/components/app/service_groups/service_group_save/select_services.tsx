@@ -19,16 +19,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { KueryBar } from '../../../shared/kuery_bar';
 import { ServiceListPreview } from './service_list_preview';
 import type { StagedServiceGroup } from './save_modal';
-// import { useServiceGroupContext } from '../../../../context/service_group/use_service_group_context';
-// import { useNavigateToServiceGroups } from '../../use_navigate_to_service_group';
+import { getDateRange } from '../../../../context/url_params_context/helpers';
 
 const CentralizedContainer = styled.div`
   display: flex;
@@ -64,17 +62,24 @@ export function SelectServices({
   isLoading,
 }: Props) {
   const [kuery, setKuery] = useState(serviceGroup?.kuery || '');
+  const [stagedKuery, setStagedKuery] = useState(serviceGroup?.kuery || '');
 
   useEffect(() => {
     if (isEdit) {
       setKuery(serviceGroup.kuery);
+      setStagedKuery(serviceGroup.kuery);
     }
   }, [isEdit, serviceGroup.kuery]);
 
-  const { start, end, refreshTimeRange } = useTimeRange({
-    rangeFrom: 'now-24h',
-    rangeTo: 'now',
-  });
+  const { start, end } = useMemo(
+    () =>
+      getDateRange({
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [kuery]
+  );
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -88,8 +93,7 @@ export function SelectServices({
     { preservePreviousData: true }
   );
 
-  // const { reloadServiceGroupList } = useServiceGroupContext();
-  // const navigateToServiceGroups = useNavigateToServiceGroups();
+  const isServiceListPreviewLoading = status === FETCH_STATUS.LOADING;
 
   return (
     <Container>
@@ -136,19 +140,29 @@ export function SelectServices({
                   onSubmit={(value) => {
                     setKuery(value);
                   }}
+                  onChange={(value) => {
+                    setStagedKuery(value);
+                  }}
                   value={kuery}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  onClick={refreshTimeRange}
-                  iconType="refresh"
-                  isDisabled={!kuery}
+                  onClick={() => {
+                    setKuery(stagedKuery);
+                  }}
+                  iconType={!kuery ? 'search' : 'refresh'}
+                  isDisabled={isServiceListPreviewLoading || !stagedKuery}
                 >
-                  {i18n.translate(
-                    'xpack.apm.serviceGroups.selectServicesForm.refresh',
-                    { defaultMessage: 'Refresh' }
-                  )}
+                  {!kuery
+                    ? i18n.translate(
+                        'xpack.apm.serviceGroups.selectServicesForm.preview',
+                        { defaultMessage: 'Preview' }
+                      )
+                    : i18n.translate(
+                        'xpack.apm.serviceGroups.selectServicesForm.refresh',
+                        { defaultMessage: 'Refresh' }
+                      )}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -168,12 +182,7 @@ export function SelectServices({
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <EuiPanel
-              hasShadow={false}
-              hasBorder
-              paddingSize="s"
-              // style={{ height: 300 }}
-            >
+            <EuiPanel hasShadow={false} hasBorder paddingSize="s">
               {!kuery && (
                 <CentralizedContainer>
                   <EuiText size="s" color="subdued">
@@ -184,7 +193,7 @@ export function SelectServices({
                   </EuiText>
                 </CentralizedContainer>
               )}
-              {!data && status === FETCH_STATUS.LOADING && (
+              {!data && isServiceListPreviewLoading && (
                 <CentralizedContainer>
                   <EuiLoadingSpinner />
                 </CentralizedContainer>
@@ -192,7 +201,7 @@ export function SelectServices({
               {kuery && data && (
                 <ServiceListPreview
                   items={data.items}
-                  isLoading={status === FETCH_STATUS.LOADING}
+                  isLoading={isServiceListPreviewLoading}
                 />
               )}
             </EuiPanel>
@@ -217,7 +226,7 @@ export function SelectServices({
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCloseModal}>
+            <EuiButtonEmpty onClick={onCloseModal} isDisabled={isLoading}>
               {i18n.translate(
                 'xpack.apm.serviceGroups.selectServicesForm.cancel',
                 {

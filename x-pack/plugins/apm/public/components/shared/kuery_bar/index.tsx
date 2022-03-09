@@ -40,6 +40,7 @@ export function KueryBar(props: {
   boolFilter?: QueryDslQueryContainer[];
   prepend?: React.ReactNode | string;
   onSubmit?: (value: string) => void;
+  onChange?: (value: string) => void;
   value?: string;
 }) {
   const { path, query } = useApmParams('/*');
@@ -91,6 +92,9 @@ export function KueryBar(props: {
     });
 
   async function onChange(inputValue: string, selectionStart: number) {
+    if (typeof props.onChange === 'function') {
+      props.onChange(inputValue);
+    }
     if (dataView == null) {
       return;
     }
