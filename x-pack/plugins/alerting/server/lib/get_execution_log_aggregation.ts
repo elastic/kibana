@@ -53,7 +53,7 @@ interface IActionExecution
   buckets: Array<{ key: string; doc_count: number }>;
 }
 
-interface IBucketAggregationResult extends estypes.AggregationsStringTermsBucketKeys {
+interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketKeys {
   timeoutMessage: estypes.AggregationsMultiBucketBase;
   ruleExecution: {
     executeStartTime: estypes.AggregationsMinAggregate;
@@ -69,6 +69,10 @@ interface IBucketAggregationResult extends estypes.AggregationsStringTermsBucket
   };
 }
 
+interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
+  extends estypes.AggregationsAggregateBase {
+  buckets: TBucket[];
+}
 export interface IExecutionLogAggOptions {
   numExecutions: number;
   page: number;
@@ -220,31 +224,32 @@ function getProviderAndActionFilter(provider: string, action: string) {
   };
 }
 
-export function formatExecutionLogAggBucket(bucketVal: IBucketAggregationResult): IExecutionLog {
-  const durationUs = bucketVal.ruleExecution.executionDuration.value
-    ? bucketVal.ruleExecution.executionDuration.value
+export function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutionLog {
+  const durationUs = bucket?.ruleExecution?.executionDuration?.value
+    ? bucket.ruleExecution.executionDuration.value
     : 0;
-  const timedOut = bucketVal.timeoutMessage.doc_count > 0;
+  const timedOut = (bucket?.timeoutMessage?.doc_count ?? 0) > 0;
 
-  const actionExecutionOutcomes = bucketVal.actionExecution.actionOutcomes.buckets;
+  const actionExecutionOutcomes = bucket?.actionExecution?.actionOutcomes?.buckets ?? [];
   const actionExecutionSuccess =
-    actionExecutionOutcomes.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
+    actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'success')?.doc_count ?? 0;
   const actionExecutionError =
-    actionExecutionOutcomes.find((bucket) => bucket.key === 'failure')?.doc_count ?? 0;
+    actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
+
   return {
-    id: bucketVal.key,
-    timestamp: bucketVal.ruleExecution.executeStartTime.value_as_string!,
+    id: bucket?.key ?? '',
+    timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / Millis2Nanos,
-    status: bucketVal.ruleExecution.outcomeAndMessage.hits.hits[0]?._source?.event?.outcome,
-    message: bucketVal.ruleExecution.outcomeAndMessage.hits.hits[0]?._source?.message,
-    num_active_alerts: bucketVal.alertCounts.buckets.activeAlerts.doc_count,
-    num_new_alerts: bucketVal.alertCounts.buckets.newAlerts.doc_count,
-    num_recovered_alerts: bucketVal.alertCounts.buckets.recoveredAlerts.doc_count,
-    num_triggered_actions: bucketVal.ruleExecution.numTriggeredActions.value ?? 0,
+    status: bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome,
+    message: bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.message,
+    num_active_alerts: bucket?.alertCounts?.buckets?.activeAlerts?.doc_count ?? 0,
+    num_new_alerts: bucket?.alertCounts?.buckets?.newAlerts?.doc_count ?? 0,
+    num_recovered_alerts: bucket?.alertCounts?.buckets?.recoveredAlerts?.doc_count ?? 0,
+    num_triggered_actions: bucket?.ruleExecution?.numTriggeredActions?.value ?? 0,
     num_succeeded_actions: actionExecutionSuccess,
     num_errored_actions: actionExecutionError,
-    total_search_duration_ms: bucketVal.ruleExecution.totalSearchDuration.value ?? 0,
-    es_search_duration_ms: bucketVal.ruleExecution.esSearchDuration.value ?? 0,
+    total_search_duration_ms: bucket?.ruleExecution?.totalSearchDuration?.value ?? 0,
+    es_search_duration_ms: bucket?.ruleExecution?.esSearchDuration?.value ?? 0,
     timed_out: timedOut,
   };
 }
@@ -261,12 +266,10 @@ export function formatExecutionLogResult(results: AggregateEventsBySavedObjectRe
 
   const total = (aggregations.executionUuidCardinality as estypes.AggregationsCardinalityAggregate)
     .value;
-  const buckets = (
-    aggregations.executionUuid as estypes.AggregationsMultiBucketAggregateBase<IBucketAggregationResult>
-  ).buckets as IBucketAggregationResult[];
+  const buckets = (aggregations.executionUuid as ExecutionUuidAggResult).buckets;
 
   return {
     total,
-    data: buckets.map((bucket: IBucketAggregationResult) => formatExecutionLogAggBucket(bucket)),
+    data: buckets.map((bucket: IExecutionUuidAggBucket) => formatExecutionLogAggBucket(bucket)),
   };
 }
