@@ -78,7 +78,7 @@ function getMultipleDateHistogramsErrorMessage(layer: IndexPatternLayer, columnI
 export const dateHistogramOperation: OperationDefinition<
   DateHistogramIndexPatternColumn,
   'field',
-  { interval: string }
+  { interval: string; dropPartials?: boolean }
 > = {
   type: 'date_histogram',
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
@@ -120,6 +120,7 @@ export const dateHistogramOperation: OperationDefinition<
       scale: 'interval',
       params: {
         interval: columnParams?.interval ?? autoInterval,
+        dropPartials: Boolean(columnParams?.dropPartials),
       },
     };
   },
