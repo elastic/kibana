@@ -208,6 +208,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   onClick={() => {
                     onShowUpgradeableChange(!showUpgradeable);
                   }}
+                  data-test-subj="filterShowUpgradable"
                 >
                   <FormattedMessage
                     id="xpack.fleet.agentList.showUpgradeableFilterLabel"

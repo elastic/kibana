@@ -89,7 +89,7 @@ describe('View agents', () => {
       items: [agent],
       list: [agent],
       total: 1,
-    });
+    }).as('getAgents');
   });
 
   describe('autocomplete', () => {
@@ -122,6 +122,25 @@ describe('View agents', () => {
       cy.get('.kbnTypeahead').within(() => {
         cy.contains('suggestion1');
         cy.contains('suggestion2');
+      });
+    });
+  });
+
+  describe('Upgrade available filter', () => {
+    it('should call API with correct query param on click ', async () => {
+      cy.visit('/app/fleet/agents');
+      cy.contains('agent-1');
+
+      cy.get('[data-test-subj="filterShowUpgradable"]').click();
+      // getAgents can be called many times on load, wait() was grabbing the wrong call
+      // .all returns all requests performed so far, allowing us to reliably grab the most recent call
+      // the tick is needed to ensure the call is collected, test is flaky without it
+      cy.tick(500);
+      cy.get('@getAgents.all').then((requests) => {
+        // @ts-ignore no property request, typings are incorrect for .all
+        const latestRequest = requests[requests.length - 1].request;
+        const latestRequestUrl = new URL(latestRequest.url);
+        expect(latestRequestUrl.searchParams.get('showUpgradeable')).equals('true');
       });
     });
   });
