@@ -9,8 +9,8 @@ import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
 import { MessageChannel, MessagePort, Worker } from 'worker_threads';
-import type { Layout } from '../../../../../screenshotting/server';
-import { PdfWorkerOutOfMemoryError } from '../../../../common/errors';
+import type { Layout } from '../../layouts';
+import { errors } from '../../../common';
 import {
   headingHeight,
   pageMarginBottom,
@@ -193,7 +193,7 @@ export class PdfMaker {
         this.worker = this.createWorker(theirPort);
         this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
           if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
-            reject(new PdfWorkerOutOfMemoryError(workerError.message));
+            reject(new errors.PdfWorkerOutOfMemoryError(workerError.message));
           } else {
             reject(workerError);
           }
