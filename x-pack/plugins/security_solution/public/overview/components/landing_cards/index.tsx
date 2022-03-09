@@ -33,107 +33,128 @@ const imgUrls = {
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  margin-top: 20px;
+`;
 
 export const LandingCards = memo(() => (
-  <>
-    <EuiFlexGroup gutterSize="l">
-      <EuiFlexItem>
-        <EuiCard
-          description={i18n.SIEM_DESCRIPTION}
-          hasBorder
-          image={imgUrls.siem}
-          textAlign="center"
-          title={i18n.SIEM_TITLE}
-          footer={
-            <EuiText size="s">
-              <p>
-                <EuiLink href="#">{i18n.SIEM_CTA}</EuiLink>
-              </p>
-            </EuiText>
-          }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel hasBorder>
-          <StyledEuiFlexGroup direction="column" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiImage alt="Accessible image alt goes here" src={imgUrls.endpoint} />
-                  <EuiSpacer />
-                  <EuiText size="xs">
-                    <h4>{i18n.ENDPOINT_TITLE}</h4>
-                    <p>{i18n.ENDPOINT_DESCRIPTION}</p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiImage alt="Accessible image alt goes here" src={imgUrls.cloud} />
-                  <EuiSpacer />
-                  <EuiText size="xs">
-                    <h4>{i18n.CLOUD_TITLE}</h4>
-                    <p>{i18n.CLOUD_DESCRIPTION}</p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <p>
-                      <EuiLink href="#">{i18n.SIEM_CTA}</EuiLink>
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </StyledEuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+  <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexItem>
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem>
+          <EuiCard
+            description={i18n.SIEM_DESCRIPTION}
+            hasBorder
+            image={imgUrls.siem}
+            textAlign="center"
+            title={i18n.SIEM_TITLE}
+            footer={
+              <EuiText size="s">
+                <p>
+                  <EuiLink href="#">{i18n.SIEM_CTA}</EuiLink>
+                </p>
+              </EuiText>
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel hasBorder>
+            <StyledEuiFlexGroup gutterSize="none" direction="column" justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiFlexGroup
+                      gutterSize="none"
+                      direction="column"
+                      justifyContent="spaceBetween"
+                    >
+                      <EuiFlexItem>
+                        <EuiImage alt={i18n.ENDPOINT_TITLE} src={imgUrls.endpoint} />
+                      </EuiFlexItem>
 
-    <EuiFlexGroup gutterSize="l">
-      <EuiFlexItem>
-        <EuiCard
-          description={i18n.TIMELINE_DESCRIPTION}
-          hasBorder
-          image={imgUrls.timeline}
-          textAlign="center"
-          title={i18n.TIMELINE_TITLE}
-          href={'#'}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiCard
-          description={i18n.ANALYZER_DESCRIPTION}
-          hasBorder
-          image={imgUrls.analyzer}
-          textAlign="center"
-          title={i18n.ANALYZER_TITLE}
-          href={'#'}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiCard
-          description={i18n.SESSION_VIEWER_DESCRIPTION}
-          hasBorder
-          image={imgUrls.sessionViewer}
-          textAlign="center"
-          title={i18n.SESSION_VIEWER_TITLE}
-          href={'#'}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiCard
-          description={i18n.CORRELATION_DESCRIPTION}
-          hasBorder
-          image={imgUrls.correlation}
-          textAlign="center"
-          title={i18n.CORRELATION_TITLE}
-          href={'#'}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <h4>{i18n.ENDPOINT_TITLE}</h4>
+                          <p>{i18n.ENDPOINT_DESCRIPTION}</p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+                      <EuiFlexItem>
+                        <EuiImage alt={i18n.CLOUD_TITLE} src={imgUrls.cloud} />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <h4>{i18n.CLOUD_TITLE}</h4>
+                          <p>{i18n.CLOUD_DESCRIPTION}</p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <StyledEuiFlexItem grow={false}>
+                <EuiFlexGroup justifyContent="spaceAround">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <p>
+                        <EuiLink href="#">{i18n.SIEM_CTA}</EuiLink>
+                      </p>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </StyledEuiFlexItem>
+            </StyledEuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem>
+          <EuiCard
+            description={i18n.TIMELINE_DESCRIPTION}
+            hasBorder
+            image={imgUrls.timeline}
+            textAlign="center"
+            title={i18n.TIMELINE_TITLE}
+            href={'#'}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            description={i18n.ANALYZER_DESCRIPTION}
+            hasBorder
+            image={imgUrls.analyzer}
+            textAlign="center"
+            title={i18n.ANALYZER_TITLE}
+            href={'#'}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            description={i18n.SESSION_VIEWER_DESCRIPTION}
+            hasBorder
+            image={imgUrls.sessionViewer}
+            textAlign="center"
+            title={i18n.SESSION_VIEWER_TITLE}
+            href={'#'}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            description={i18n.CORRELATION_DESCRIPTION}
+            hasBorder
+            image={imgUrls.correlation}
+            textAlign="center"
+            title={i18n.CORRELATION_TITLE}
+            href={'#'}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 ));
 LandingCards.displayName = 'LandingCards';
