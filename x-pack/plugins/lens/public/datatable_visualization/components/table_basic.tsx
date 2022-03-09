@@ -334,9 +334,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         columnConfig,
         DataContext,
         props.uiSettings,
-        props.args.fitRowToContent
+        props.args.fitRowToContent,
+        props.args.rowHeightLines
       ),
-    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
+    [
+      formatters,
+      columnConfig,
+      props.uiSettings,
+      props.args.fitRowToContent,
+      props.args.rowHeightLines,
+    ]
   );
 
   const columnVisibility = useMemo(
