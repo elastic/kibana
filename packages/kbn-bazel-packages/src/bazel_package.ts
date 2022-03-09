@@ -13,7 +13,7 @@ import { REPO_ROOT } from '@kbn/utils';
 const BUILD_RULE_NAME = /(^|\s)name\s*=\s*"build"/;
 const BUILD_TYPES_RULE_NAME = /(^|\s)name\s*=\s*"build_types"/;
 
-export class Package {
+export class BazelPackage {
   static async fromDir(dir: string) {
     let pkg;
     try {
@@ -31,7 +31,7 @@ export class Package {
       }
     }
 
-    return new Package(Path.relative(REPO_ROOT, dir), pkg, buildBazelContent);
+    return new BazelPackage(Path.relative(REPO_ROOT, dir), pkg, buildBazelContent);
   }
 
   constructor(
