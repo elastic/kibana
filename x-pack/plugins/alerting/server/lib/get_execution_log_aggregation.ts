@@ -7,7 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
+import { parseDuration } from '.';
 import { AggregateEventsBySavedObjectResult } from '../../../event_log/server';
+
+const DEFAULT_MAX_BUCKETS_LIMIT = 65535;
 
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';
@@ -38,6 +41,11 @@ export interface IExecutionLog {
   total_search_duration_ms: number;
   es_search_duration_ms: number;
   timed_out: boolean;
+}
+
+export interface IExecutionLogResult {
+  total: number;
+  data: IExecutionLog[];
 }
 
 interface IAlertCounts extends estypes.AggregationsMultiBucketAggregateBase {
@@ -196,7 +204,7 @@ export function getExecutionLogAggregation({
             },
           },
         },
-        // If there was a timeout, this filter will return non-zero
+        // If there was a timeout, this filter will return non-zero doc count
         timeoutMessage: {
           filter: getProviderAndActionFilter('alerting', 'execute-timeout'),
         },
@@ -254,7 +262,9 @@ export function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IE
   };
 }
 
-export function formatExecutionLogResult(results: AggregateEventsBySavedObjectResult) {
+export function formatExecutionLogResult(
+  results: AggregateEventsBySavedObjectResult
+): IExecutionLogResult {
   const { aggregations } = results;
 
   if (!aggregations) {
@@ -272,4 +282,13 @@ export function formatExecutionLogResult(results: AggregateEventsBySavedObjectRe
     total,
     data: buckets.map((bucket: IExecutionUuidAggBucket) => formatExecutionLogAggBucket(bucket)),
   };
+}
+
+export function getNumExecutions(dateStart: Date, dateEnd: Date, ruleSchedule: string) {
+  const durationInMillis = dateEnd.getTime() - dateStart.getTime();
+  const scheduleMillis = parseDuration(ruleSchedule);
+
+  const numExecutions = Math.ceil(durationInMillis / scheduleMillis);
+
+  return Math.min(numExecutions < 0 ? 0 : numExecutions, DEFAULT_MAX_BUCKETS_LIMIT);
 }

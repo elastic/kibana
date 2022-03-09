@@ -6,9 +6,42 @@
  */
 
 import {
+  getNumExecutions,
   getExecutionLogAggregation,
   formatExecutionLogResult,
 } from './get_execution_log_aggregation';
+
+describe('getNumExecutions', () => {
+  test('should calculate the expected number of executions in a given date range with a given schedule interval', () => {
+    expect(
+      getNumExecutions(
+        new Date('2020-12-01T00:00:00.000Z'),
+        new Date('2020-12-02T00:00:00.000Z'),
+        '1h'
+      )
+    ).toEqual(24);
+  });
+
+  test('should return 0 if dateEnd is less that dateStart', () => {
+    expect(
+      getNumExecutions(
+        new Date('2020-12-02T00:00:00.000Z'),
+        new Date('2020-12-01T00:00:00.000Z'),
+        '1h'
+      )
+    ).toEqual(0);
+  });
+
+  test('should cap numExecutions at default max buckets limit', () => {
+    expect(
+      getNumExecutions(
+        new Date('2020-12-01T00:00:00.000Z'),
+        new Date('2020-12-02T00:00:00.000Z'),
+        '1s'
+      )
+    ).toEqual(65535);
+  });
+});
 
 describe('getExecutionLogAggregation', () => {
   test('should throw error when given bad sort field', () => {
@@ -121,6 +154,12 @@ describe('getExecutionLogAggregation', () => {
 });
 
 describe('formatExecutionLogResult', () => {
+  test('should return empty results if aggregations are undefined', () => {
+    expect(formatExecutionLogResult({ aggregations: undefined })).toEqual({
+      total: 0,
+      data: [],
+    });
+  });
   test('should format results correctly', () => {
     const results = {
       aggregations: {
@@ -544,5 +583,217 @@ describe('formatExecutionLogResult', () => {
     });
   });
 
-  test('should format results correctly when action errors occur', () => {});
+  test('should format results correctly when action errors occur', () => {
+    const results = {
+      aggregations: {
+        executionUuid: {
+          meta: {},
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'ecf7ac4c-1c15-4a1d-818a-cacbf57f6158',
+              doc_count: 32,
+              timeoutMessage: {
+                meta: {},
+                doc_count: 0,
+              },
+              alertCounts: {
+                meta: {},
+                buckets: {
+                  activeAlerts: {
+                    doc_count: 5,
+                  },
+                  newAlerts: {
+                    doc_count: 5,
+                  },
+                  recoveredAlerts: {
+                    doc_count: 5,
+                  },
+                },
+              },
+              ruleExecution: {
+                meta: {},
+                doc_count: 1,
+                numTriggeredActions: {
+                  value: 5.0,
+                },
+                outcomeAndMessage: {
+                  hits: {
+                    total: {
+                      value: 1,
+                      relation: 'eq',
+                    },
+                    max_score: 1.0,
+                    hits: [
+                      {
+                        _index: '.kibana-event-log-8.2.0-000001',
+                        _id: '7xKcb38BcntAq5ycFwiu',
+                        _score: 1.0,
+                        _source: {
+                          event: {
+                            outcome: 'success',
+                          },
+                          message:
+                            "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                        },
+                      },
+                    ],
+                  },
+                },
+                totalSearchDuration: {
+                  value: 0.0,
+                },
+                esSearchDuration: {
+                  value: 0.0,
+                },
+                executionDuration: {
+                  value: 1.374e9,
+                },
+                executeStartTime: {
+                  value: 1.646844973039e12,
+                  value_as_string: '2022-03-09T16:56:13.039Z',
+                },
+              },
+              actionExecution: {
+                meta: {},
+                doc_count: 5,
+                actionOutcomes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'failure',
+                      doc_count: 5,
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              key: '61bb867b-661a-471f-bf92-23471afa10b3',
+              doc_count: 32,
+              timeoutMessage: {
+                meta: {},
+                doc_count: 0,
+              },
+              alertCounts: {
+                meta: {},
+                buckets: {
+                  activeAlerts: {
+                    doc_count: 5,
+                  },
+                  newAlerts: {
+                    doc_count: 5,
+                  },
+                  recoveredAlerts: {
+                    doc_count: 5,
+                  },
+                },
+              },
+              ruleExecution: {
+                meta: {},
+                doc_count: 1,
+                numTriggeredActions: {
+                  value: 5.0,
+                },
+                outcomeAndMessage: {
+                  hits: {
+                    total: {
+                      value: 1,
+                      relation: 'eq',
+                    },
+                    max_score: 1.0,
+                    hits: [
+                      {
+                        _index: '.kibana-event-log-8.2.0-000001',
+                        _id: 'zRKbb38BcntAq5ycOwgk',
+                        _score: 1.0,
+                        _source: {
+                          event: {
+                            outcome: 'success',
+                          },
+                          message:
+                            "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                        },
+                      },
+                    ],
+                  },
+                },
+                totalSearchDuration: {
+                  value: 0.0,
+                },
+                esSearchDuration: {
+                  value: 0.0,
+                },
+                executionDuration: {
+                  value: 4.18e8,
+                },
+                executeStartTime: {
+                  value: 1.646844917518e12,
+                  value_as_string: '2022-03-09T16:55:17.518Z',
+                },
+              },
+              actionExecution: {
+                meta: {},
+                doc_count: 5,
+                actionOutcomes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'success',
+                      doc_count: 5,
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        executionUuidCardinality: {
+          value: 417,
+        },
+      },
+    };
+    expect(formatExecutionLogResult(results)).toEqual({
+      total: 417,
+      data: [
+        {
+          id: 'ecf7ac4c-1c15-4a1d-818a-cacbf57f6158',
+          timestamp: '2022-03-09T16:56:13.039Z',
+          duration_ms: 1374,
+          status: 'success',
+          message:
+            "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          num_active_alerts: 5,
+          num_new_alerts: 5,
+          num_recovered_alerts: 5,
+          num_triggered_actions: 5,
+          num_succeeded_actions: 0,
+          num_errored_actions: 5,
+          total_search_duration_ms: 0,
+          es_search_duration_ms: 0,
+          timed_out: false,
+        },
+        {
+          id: '61bb867b-661a-471f-bf92-23471afa10b3',
+          timestamp: '2022-03-09T16:55:17.518Z',
+          duration_ms: 418,
+          status: 'success',
+          message:
+            "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          num_active_alerts: 5,
+          num_new_alerts: 5,
+          num_recovered_alerts: 5,
+          num_triggered_actions: 5,
+          num_succeeded_actions: 5,
+          num_errored_actions: 0,
+          total_search_duration_ms: 0,
+          es_search_duration_ms: 0,
+          timed_out: false,
+        },
+      ],
+    });
+  });
 });
