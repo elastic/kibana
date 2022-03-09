@@ -7,7 +7,7 @@
  */
 
 const groups =
-  /** @type {Array<{key: string, name: string, ciGroups: number, cypressSuites: Array<string> }>} */ (
+  /** @type {Array<{key: string, name: string, ciGroups: number | Array<string> }>} */ (
     require('./groups.json').groups
   );
 
@@ -30,13 +30,13 @@ const inputs = [
 ];
 
 for (const group of groups) {
-  if (group.cypressSuites) {
-    for (let i = 1; i <= group.cypressSuites.length; i++) {
-      const testSuite = group.cypressSuites[i];
+  if (!group.ciGroups) {
+    inputs.push(stepInput(group.key, group.name));
+  } else if (Array.isArray(group.ciGroups)) {
+    for (let i = 1; i <= group.ciGroups.length; i++) {
+      const testSuite = group.ciGroups[i];
       inputs.push(stepInput(`${group.key}/${testSuite}`, `${group.name} ${testSuite}`));
     }
-  } else if (!group.ciGroups) {
-    inputs.push(stepInput(group.key, group.name));
   } else {
     for (let i = 1; i <= group.ciGroups; i++) {
       inputs.push(stepInput(`${group.key}/${i}`, `${group.name} ${i}`));

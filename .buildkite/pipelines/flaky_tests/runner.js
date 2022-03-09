@@ -184,9 +184,8 @@ for (const testSuite of testSuites) {
         concurrency_method: 'eager',
       });
     case 'cypress':
-      const CYPRESS_SUITE = CI_GROUP;
       steps.push({
-        command: `.buildkite/scripts/steps/functional/${CYPRESS_SUITE}.sh`,
+        command: `.buildkite/scripts/steps/functional/${CI_GROUP}.sh`,
         label: `Default Cypress`,
         agents: { queue: 'ci-group-6' },
         depends_on: 'build',

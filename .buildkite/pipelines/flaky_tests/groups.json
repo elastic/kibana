@@ -16,7 +16,7 @@
     {
       "key": "xpack/cypress",
       "name": "Default Cypress",
-      "cypressSuites": ["security_solution", "osquery_cypress", "fleet_cypress"]
+      "ciGroups": ["security_solution", "osquery_cypress", "fleet_cypress"]
     },
     {
       "key": "xpack/cigroup",
