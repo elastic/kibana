@@ -42,7 +42,7 @@ export const getLatestCycleIds = async (
 ): Promise<string[] | undefined> => {
   try {
     const agentLogs = await esClient.search(getAgentLogsEsQuery());
-    const aggregations = agentLogs.body.aggregations;
+    const aggregations = agentLogs.aggregations;
     if (!aggregations) {
       return;
     }

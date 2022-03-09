@@ -155,7 +155,7 @@ describe('findings API', () => {
 
       mockEsClient.search.mockResolvedValueOnce(
         // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             group: {
               buckets: [
@@ -169,7 +169,7 @@ describe('findings API', () => {
               ],
             },
           },
-        })
+        }
       );
 
       const [context, req, res] = [mockContext, mockRequest, mockResponse];
@@ -413,7 +413,7 @@ describe('findings API', () => {
 
       mockEsClient.search.mockResolvedValueOnce(
         // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             group: {
               buckets: [
@@ -427,7 +427,7 @@ describe('findings API', () => {
               ],
             },
           },
-        })
+        }
       );
 
       const [context, req, res] = [mockContext, mockRequest, mockResponse];

@@ -25,13 +25,13 @@ describe('get latest cycle ids', () => {
   it('expect to throw when find empty bucket', async () => {
     mockEsClient.search.mockResolvedValueOnce(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           group: {
             buckets: [{}],
           },
         },
-      })
+      }
     );
     expect(getLatestCycleIds(mockEsClient, logger)).rejects.toThrow();
   });
@@ -39,7 +39,7 @@ describe('get latest cycle ids', () => {
   it('expect to find 1 cycle id', async () => {
     mockEsClient.search.mockResolvedValueOnce(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           group: {
             buckets: [
@@ -53,7 +53,7 @@ describe('get latest cycle ids', () => {
             ],
           },
         },
-      })
+      }
     );
     const response = await getLatestCycleIds(mockEsClient, logger);
     expect(response).toEqual(expect.arrayContaining(['randomId1']));
@@ -62,7 +62,7 @@ describe('get latest cycle ids', () => {
   it('expect to find multiple cycle ids', async () => {
     mockEsClient.search.mockResolvedValueOnce(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           group: {
             buckets: [
@@ -90,7 +90,7 @@ describe('get latest cycle ids', () => {
             ],
           },
         },
-      })
+      }
     );
     const response = await getLatestCycleIds(mockEsClient, logger);
     expect(response).toEqual(expect.arrayContaining(['randomId1', 'randomId2', 'randomId3']));

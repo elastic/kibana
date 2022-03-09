@@ -127,7 +127,7 @@ export const defineFindingsIndexRoute = (router: IRouter, cspContext: CspAppCont
         const esQuery = getFindingsEsQuery(query, options);
 
         const findings = await esClient.search(esQuery);
-        const hits = findings.body.hits.hits;
+        const hits = findings.hits.hits;
 
         return response.ok({ body: hits });
       } catch (err) {
