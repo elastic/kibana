@@ -10,19 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import { visType } from '../types';
 import { prepareLogTable, Dimension } from '../../../../visualizations/common/utils';
-import { ColorMode } from '../../../../charts/common';
+import { ColorMode, validateOptions } from '../../../../charts/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
-
-const validateOptions = (
-  value: string,
-  availableOptions: Record<string, string>,
-  getErrorMessage: () => string
-) => {
-  if (!Object.values(availableOptions).includes(value)) {
-    throw new Error(getErrorMessage());
-  }
-};
 
 const errors = {
   invalidColorModeError: () =>
