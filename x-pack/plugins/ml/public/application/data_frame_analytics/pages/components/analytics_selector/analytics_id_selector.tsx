@@ -24,21 +24,32 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
+import { GetDataFrameAnalyticsResponse } from '../../../../services/ml_api_service/data_frame_analytics';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from '../../../../trained_models/models_management';
-import {
-  DataFrameAnalyticsListColumn,
-  DataFrameAnalyticsListRow,
-} from '../../analytics_management/components/analytics_list/common';
+import { DataFrameAnalyticsConfig } from '../../../common';
 import { useMlApiContext } from '../../../../contexts/kibana';
+import { TrainedModelConfigResponse } from '../../../../../../common/types/trained_models';
+
+export interface AnalyticsSelectorIds {
+  model_id?: string;
+  job_id?: string;
+  analysis_type?: string;
+}
+
+type TableItem = DataFrameAnalyticsConfig | TrainedModelConfigResponse;
+
+function isDataFrameAnalyticsConfigs(arg: any): arg is DataFrameAnalyticsConfig {
+  return arg.dest && arg.analysis && arg.id;
+}
 
 const columns = [
   {
-    field: DataFrameAnalyticsListColumn.id,
+    field: 'id',
     name: i18n.translate('xpack.ml.analyticsSelector.id', {
       defaultMessage: 'ID',
     }),
-    sortable: (item: DataFrameAnalyticsListRow) => item.id,
+    sortable: (item: DataFrameAnalyticsConfig) => item.id,
     truncateText: true,
     'data-test-subj': 'mlAnalyticsSelectorTableColumnId',
     scope: 'row',
@@ -95,7 +106,7 @@ const modelColumns = [
 ];
 
 interface Props {
-  setAnalyticsId: React.Dispatch<React.SetStateAction<any>>;
+  setAnalyticsId: React.Dispatch<React.SetStateAction<AnalyticsSelectorIds | undefined>>;
   jobsOnly?: boolean;
 }
 
@@ -103,8 +114,8 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   const [selected, setSelected] = useState<
     { model_id?: string; job_id?: string; analysis_type?: string } | undefined
   >();
-  const [analyticsJobs, setAnalyticsJobs] = useState<any[]>([]);
-  const [trainedModels, setTrainedModels] = useState<any[]>([]);
+  const [analyticsJobs, setAnalyticsJobs] = useState<DataFrameAnalyticsConfig[]>([]);
+  const [trainedModels, setTrainedModels] = useState<TrainedModelConfigResponse[]>([]);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { displayErrorToast } = useToastNotificationService();
@@ -120,7 +131,8 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   async function fetchAnalyticsJobs() {
     setIsLoading(true);
     try {
-      const { data_frame_analytics: dataFrameAnalytics } = await getDataFrameAnalytics();
+      const { data_frame_analytics: dataFrameAnalytics }: GetDataFrameAnalyticsResponse =
+        await getDataFrameAnalytics();
       setAnalyticsJobs(dataFrameAnalytics);
     } catch (e) {
       console.error('Error fetching analytics', e); // eslint-disable-line
@@ -165,8 +177,10 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
     }
   }, []);
 
-  const applySelection: any = useCallback(() => {
-    setAnalyticsId(selected);
+  const applySelection = useCallback(() => {
+    if (selected !== undefined) {
+      setAnalyticsId(selected);
+    }
     closeFlyout();
   }, [selected?.model_id, selected?.job_id]);
 
@@ -176,18 +190,35 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   };
 
   const selectionValue = {
-    selectable: (item: any) => {
+    selectable: (item: TableItem) => {
       const selectedId = selected?.job_id || selected?.model_id;
-      return selected === undefined || selectedId === item.id || selectedId === item.model_id;
+      let itemId;
+      if (isDataFrameAnalyticsConfigs(item)) {
+        itemId = item?.id;
+      } else {
+        itemId = item?.model_id;
+      }
+      return selected === undefined || selectedId === itemId;
     },
-    onSelectionChange: (selectedItem: any) => {
+    onSelectionChange: (selectedItem: TableItem[]) => {
       const item = selectedItem[0];
-      const config = item?.analysis || item?.inference_config;
-      const analysisType = item ? Object.keys(config)[0] : undefined;
+      let config:
+        | DataFrameAnalyticsConfig['analysis']
+        | TrainedModelConfigResponse['inference_config'];
+      let modelId;
+      let jobId;
+      if (isDataFrameAnalyticsConfigs(item)) {
+        config = item?.analysis;
+        jobId = item?.id;
+      } else {
+        config = item?.inference_config;
+        modelId = item?.model_id;
+      }
+      const analysisType = item ? Object.keys(config!)[0] : undefined;
 
       setSelected({
-        model_id: item?.model_id,
-        job_id: item?.id,
+        model_id: modelId,
+        job_id: jobId,
         analysis_type: analysisType,
       });
     },

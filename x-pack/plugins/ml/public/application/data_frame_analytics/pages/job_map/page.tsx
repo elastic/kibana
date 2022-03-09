@@ -18,7 +18,7 @@ import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
-import { AnalyticsIdSelector } from '../components/analytics_selector';
+import { AnalyticsIdSelector, AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 
 export const Page: FC = () => {
@@ -28,7 +28,7 @@ export const Page: FC = () => {
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   const mapJobId = globalState?.ml?.jobId;
   const mapModelId = globalState?.ml?.modelId;
-  const [analyticsId, setAnalyticsId] = useState<{ model_id?: string; job_id?: string }>();
+  const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds | undefined>();
   const {
     services: { docLinks },
   } = useMlKibana();

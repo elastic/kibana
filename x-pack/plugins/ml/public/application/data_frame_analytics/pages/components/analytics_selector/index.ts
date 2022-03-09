@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { AnalyticsIdSelector } from './analytics_id_selector';
+export { AnalyticsIdSelector, AnalyticsSelectorIds } from './analytics_id_selector';
