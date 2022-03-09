@@ -1,8 +1,8 @@
 {
   "baseUrl": "http://localhost:5601",
-  "defaultCommandTimeout": 120000,
-  "execTimeout": 120000,
-  "pageLoadTimeout": 120000,
+  "defaultCommandTimeout": 4000,
+  "execTimeout": 60000,
+  "pageLoadTimeout": 60000,
   "nodeVersion": "system",
   "retries": {
     "runMode": 2
