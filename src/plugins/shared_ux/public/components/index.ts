@@ -39,6 +39,8 @@ export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
  */
 export const SolutionToolbarButton = withSuspense(LazySolutionToolbarButton);
 
+export type { SolutionToolbarButtonProps } from './toolbar';
+
 /**
  * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the
  * `withSuspense` HOC to load this component.
