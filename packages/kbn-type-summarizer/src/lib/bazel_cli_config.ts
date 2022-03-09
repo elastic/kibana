@@ -12,7 +12,7 @@ import { CliError } from './cli_error';
 import { parseCliFlags } from './cli_flags';
 import * as Path from './path';
 
-const TYPE_SUMMARIZER_PACKAGES = ['@kbn/type-summarizer', '@kbn/crypto'];
+const TYPE_SUMMARIZER_PACKAGES = ['@kbn/type-summarizer', '@kbn/crypto', '@kbn/generate'];
 
 const isString = (i: any): i is string => typeof i === 'string' && i.length > 0;
 
