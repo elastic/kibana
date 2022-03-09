@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { css } from '@emotion/react';
+
 import {
   EuiBadge,
   EuiButton,
@@ -13,8 +13,6 @@ import {
   EuiInMemoryTable,
   EuiPageHeader,
   EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
@@ -52,10 +50,6 @@ const securityDataView = i18n.translate(
 );
 
 const securitySolution = 'security-solution';
-
-const flexItemStyles = css`
-  justify-content: center;
-`;
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
