@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const spacesService = getService('spaces');
+  const renderService = getService('renderable');
 
   const getExportCount = async () => {
     return await retry.tryForTime(10000, async () => {
@@ -40,6 +41,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       return count;
     });
+  };
+
+  const getSpacePrefix = (spaceId: string) => {
+    return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
   };
 
   describe('should be able to handle multi-space imports correctly', function () {
@@ -86,16 +91,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
       // dashboard should load properly
       await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
-      await PageObjects.dashboard.waitForRenderComplete();
+
+      // count of panels rendered completely
+      await renderService.waitForRender(8);
+
       // There should be 0 error embeddables on the dashboard
       const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
       expect(errorEmbeddables.length).to.be(0);
     });
 
     it('should be able to import saved objects into another space', async function () {
-      const getSpacePrefix = (spaceId: string) => {
-        return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-      };
       const spaceId = 'another_space';
       await PageObjects.common.navigateToUrl('settings', 'kibana/objects', {
         basePath: getSpacePrefix(spaceId),
@@ -117,9 +122,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render all panels on the dashboard in another space', async () => {
-      const getSpacePrefix = (spaceId: string) => {
-        return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-      };
       const spaceId = 'another_space';
       await PageObjects.common.navigateToUrl('dashboard', undefined, {
         basePath: getSpacePrefix(spaceId),
@@ -129,7 +131,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // dashboard should load properly
       await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
-      await PageObjects.dashboard.waitForRenderComplete();
+
+      // count of panels rendered completely
+      await renderService.waitForRender(8);
 
       // There should be 0 error embeddables on the dashboard
       const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
@@ -138,9 +142,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to copy the dashboard into third space in saved objects table using copy to space', async () => {
       const destinationSpaceId = 'third_space';
-      const getSpacePrefix = (spaceId: string) => {
-        return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-      };
       const spaceId = 'another_space';
       await PageObjects.common.navigateToUrl('settings', 'kibana/objects', {
         basePath: getSpacePrefix(spaceId),
@@ -172,9 +173,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render all panels on the copied dashboard in third space', async () => {
-      const getSpacePrefix = (spaceId: string) => {
-        return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-      };
       const spaceId = 'third_space';
       await PageObjects.common.navigateToUrl('dashboard', undefined, {
         basePath: getSpacePrefix(spaceId),
@@ -184,7 +182,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // dashboard should load properly
       await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
-      await PageObjects.dashboard.waitForRenderComplete();
+
+      // count of panels rendered completely
+      await renderService.waitForRender(8);
 
       // There should be 0 error embeddables on the dashboard
       const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
