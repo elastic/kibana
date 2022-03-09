@@ -4,53 +4,53 @@ This component is used in observability plugin to show lens embeddable based obs
 The view is populated using configs stored as json within the view for each data type.
 
 This readme file contains few of the concepts being used in the component.
+
+## Report Type
+
+The exploratory view report type controls how the data is visualized in the lens embeddable. The report type defines a set of constraits over the x and y axis. For example, the `kpi-over-time` report type is a time series chart type that plots key performance indicators over time, while the `data-distrubtion` chart plots the percentage of documents over key performance indicators. Current available data types can be found at `exploratory_view/configurations/constants`.
+
+Each report type has one or more available visualizations to plot data from one or more data types. 
+
 ## Data Types
 
-Right now data types essentially refers to four kinds of apps we have, synthetics(uptime), apm, metrics, logs. 
-Essentially we are trying to create 1-1 relation between apps and data types we have.
+Each available visualization is backed by a data type. A data type consists of a set of configuration for displaying domain-specific visualizations for observability data. Some example data types include apm, metrics, and logs.
 
-For each respective data type, we fetch index pattern string from the app plugin contract.
+For each respective data type, we fetch index pattern string from the app plugin contract, leveraging existing hasData API we have to return the index pattern string as well as a `hasData` boolean from each plugin.
 
-We leverage existing hasData API we have, we return index pattern string also hasData boolean from each plugin.
+In most cases, there will be a 1-1 relation between apps and data types.
 
-## Observability dataViews
+### Observability `dataViews`
 
-Once we have index pattern string for each data type , we create a respective dataView. We try to make sure, if there is an existing dataView for an index pattern string, we fetch , that and reuse it.
-After the dataView is created we also set field formats for some fields. For example, we set format for monitor duration field, which is monitor.duration.us, from microseconds to seconds for browser monitors.
+Once we have index pattern string for each data type, a respective `dataView` is created. If there is an existing dataView for an index pattern, we will fetch and reuse it.
 
-So that when visualization is created value is human-readable.
+After the dataView is created we also set field formats to promote human-readibility. For example, we set format for monitor duration field, which is monitor.duration.us, from microseconds to seconds for browser monitors.
 
-## Report types
-Report types are actually what we want to draw on the chart, is it kpi over time chart or is it a simple distribution.
-Based on configurations we have , we show the user report type select and once the report type is selected, we create relevant chart from lens library.
+### Visualization Configuration
 
-This usually also reflects field we will have on x or y axises of the chart. KPI over time usually means
-@timestamp will be reflected on x-axis.
+Each data type may have one or more visualization configuration. The data type to visualization configuration can be found in [`exploratory_view/obs_exploratory_view`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability/public/components/shared/exploratory_view/obsv_exploratory_view.tsx#L86)
 
-## Report configurations
-Configuration are used to define what UI we want to display for each report type and data type in the series builder below chart in exploratory view.
-Based on configuration we also generate lens embeddable attributes which get pushed to lens embeddable, which renders the chart.
+Each visualizaiton configuration is mapped to a single report type.
 
-Configuration includes UI filters it needs to display, breakdown select options and if it has any custom base filters, which usually get pushed to query,
-but may not be displayed on the UI. 
+Visualization configurations are used to define what the UI we display for each report type and data type combination in the series builder. Visualization configuration define UI options and display, including available metrics, available filters, available breakdown options, definitons for human-readable labels, and more. The configuration also defines any custom base filters, which usually get pushed to a query, but are not displayed on the UI. You can also set more custom options on the configuration like colors which get used while rendering the chart.
 
-You can also set more custom options on the configuration like colors which get used while rendering the chart.
+Visualization configuration can be found at [`exploratory_view/configurations`](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability/public/components/shared/exploratory_view/configurations), where each data type typically has a folder that holds one or more visualization configurations. 
 
-Some options in configuration are
+The configuration defined ultimately influences the lens embeddable attributes which get pushed to lens embeddable, rendering the chart.
 
-### Definition fields
+Some options in configuration are:
+
+#### Definition fields
 They are also filters, but usually main filters, around which usually app UI is based.
 For apm, it could be service name and for uptime, monitor name.
 
-### Filters
+#### Filters
 You can define base filters in kql form or data plugin filter format, filters are strongly typed.
 
-### Breakdown fields
+#### Breakdown fields
 List of fields from an index pattern, UI will use this to populate breakdown option select.
 
-### Labels
+#### Labels
 You can set key/value map for your field labels. UI will use these to set labels for data view fields.
-
 
 ## Lens Embeddable
 
