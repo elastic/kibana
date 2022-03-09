@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './discover_packages';
-export * from './generate_packages_build_bazel_file';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-bazel-packages'],
+};

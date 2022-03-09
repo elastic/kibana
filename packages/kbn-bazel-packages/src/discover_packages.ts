@@ -12,9 +12,13 @@ import globby from 'globby';
 import { REPO_ROOT } from '@kbn/utils';
 import { asyncMapWithLimit } from '@kbn/std';
 
-import { Package } from './package';
+import { BazelPackage } from './bazel_package';
 
-export async function discoverPackages() {
+/**
+ * Search the local Kibana repo for bazel packages and return an array of BazelPackage objects
+ * representing each package found.
+ */
+export async function discoverBazelPackages() {
   const packageJsons = globby.sync('*/package.json', {
     cwd: Path.resolve(REPO_ROOT, 'packages'),
     absolute: true,
@@ -23,6 +27,6 @@ export async function discoverPackages() {
   return await asyncMapWithLimit(
     packageJsons.sort((a, b) => a.localeCompare(b)),
     10,
-    (path) => Package.fromDir(Path.dirname(path))
+    (path) => BazelPackage.fromDir(Path.dirname(path))
   );
 }
