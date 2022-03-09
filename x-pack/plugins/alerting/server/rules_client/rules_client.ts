@@ -1213,44 +1213,6 @@ export class RulesClient {
       perPage: 1000,
     });
 
-    const applyActionToRule = (action: BulkUpdateAction, rule: RawRule): RawRule => {
-      const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
-        Array.from(new Set([...arr, ...items]));
-
-      const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
-        const itemsSet = new Set(items);
-        return arr.filter((item) => !itemsSet.has(item));
-      };
-
-      switch (action.action) {
-        case 'set':
-          set(rule, action.field, action.value);
-          break;
-
-        case 'add':
-          if (get(rule, action.field)) {
-            set(
-              rule,
-              action.field,
-              addItemsToArray(get(rule, action.field) as typeof action.value, action.value)
-            );
-          }
-          break;
-
-        case 'delete':
-          if (get(rule, action.field)) {
-            set(
-              rule,
-              action.field,
-              deleteItemsFromArray(get(rule, action.field) as typeof action.value, action.value)
-            );
-          }
-          break;
-      }
-
-      return rule;
-    };
-
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const errors: BulkUpdateError[] = [];
     const apiKeysToInvalidate: string[] = [];
@@ -1264,44 +1226,52 @@ export class RulesClient {
               apiKeysToInvalidate.push(rule.attributes.apiKey);
             }
 
+            // apply actions to rule attributes
             const attributes = actions.reduce(
-              (acc, action) => applyActionToRule(action, acc),
+              (acc, action) => this.applyBulkUpdateActionToRule(action, acc),
               rule.attributes
             );
 
             const ruleType = this.ruleTypeRegistry.get(attributes.alertTypeId);
 
-            if (ruleType.minimumScheduleInterval && data?.schedule?.interval) {
-              const intervalInMs = parseDuration(data.schedule.interval);
-              const minimumScheduleIntervalInMs = parseDuration(ruleType.minimumScheduleInterval);
-              if (intervalInMs < minimumScheduleIntervalInMs) {
-                throw Error(
-                  `Error updating rule: the interval is less than the minimum interval of ${ruleType.minimumScheduleInterval}`
-                );
-              }
-            }
+            // validate rule params
             const validatedAlertTypeParams = validateRuleTypeParams(
-              attributes.params,
+              { ...attributes.params, ...data.params },
               ruleType.validate?.params
             );
 
-            let ruleActions = attributes.actions;
-            let references = rule.references;
-            if (data.actions) {
-              await this.validateActions(ruleType, data.actions ?? []);
-
-              const refs = await this.extractReferences(
-                ruleType,
-                data.actions,
-                validatedAlertTypeParams
-              );
-
-              ruleActions = refs.actions;
-              references = refs.references;
+            // validate schedule interval
+            if (data.schedule) {
+              const intervalInMs = parseDuration(data.schedule.interval);
+              if (intervalInMs < this.minimumScheduleIntervalInMs) {
+                throw Boom.badRequest(
+                  `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
+                );
+              }
             }
 
-            const username = await this.getUserName();
+            // validate actions
+            if (data.actions) {
+              await this.validateActions(ruleType, data.actions);
+            }
 
+            const {
+              actions: ruleActions,
+              references,
+              params: updatedParams,
+            } = await this.extractReferences(
+              ruleType,
+              data.actions ??
+                this.injectReferencesIntoActions(
+                  rule.id,
+                  rule.attributes.actions,
+                  rule.references || []
+                ),
+              validatedAlertTypeParams
+            );
+
+            // create API key
+            const username = await this.getUserName();
             let createdAPIKey = null;
             try {
               createdAPIKey = attributes.enabled
@@ -1310,15 +1280,18 @@ export class RulesClient {
             } catch (error) {
               throw Error(`Error updating rule: could not create API key - ${error.message}`);
             }
-
             const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-            const notifyWhen = getAlertNotifyWhenType(attributes.notifyWhen, attributes.throttle);
+
+            // get notifyWhen
+            const notifyWhen = data.notifyWhen
+              ? getAlertNotifyWhenType(data.notifyWhen, data.throttle ?? null)
+              : attributes.notifyWhen;
 
             const updatedAttributes = this.updateMeta({
               ...attributes,
               ...data,
               ...apiKeyAttributes,
-              params: attributes.params,
+              params: updatedParams as RawRule['params'],
               actions: ruleActions,
               notifyWhen,
               updatedBy: username,
@@ -2309,6 +2282,44 @@ export class RulesClient {
       alertAttributes.meta.versionApiKeyLastmodified = this.kibanaVersion;
     }
     return alertAttributes;
+  }
+
+  private applyBulkUpdateActionToRule(action: BulkUpdateAction, rule: RawRule) {
+    const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
+      Array.from(new Set([...arr, ...items]));
+
+    const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
+      const itemsSet = new Set(items);
+      return arr.filter((item) => !itemsSet.has(item));
+    };
+
+    switch (action.action) {
+      case 'set':
+        set(rule, action.field, action.value);
+        break;
+
+      case 'add':
+        if (get(rule, action.field)) {
+          set(
+            rule,
+            action.field,
+            addItemsToArray(get(rule, action.field) as typeof action.value, action.value)
+          );
+        }
+        break;
+
+      case 'delete':
+        if (get(rule, action.field)) {
+          set(
+            rule,
+            action.field,
+            deleteItemsFromArray(get(rule, action.field) as typeof action.value, action.value)
+          );
+        }
+        break;
+    }
+
+    return rule;
   }
 }
 
