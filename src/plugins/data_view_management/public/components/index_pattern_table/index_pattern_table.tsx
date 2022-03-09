@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
+  EuiLink,
   EuiInMemoryTable,
   EuiPageHeader,
   EuiSpacer,
@@ -143,9 +143,7 @@ export const IndexPatternTable = ({
         <>
           <EuiFlexGroup gutterSize="s" wrap>
             <EuiFlexItem grow={false} css={flexItemStyles}>
-              <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>
-                {name}
-              </EuiButtonEmpty>
+              <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>{name}</EuiLink>
             </EuiFlexItem>
             {dataView?.id?.indexOf(securitySolution) === 0 && (
               <EuiFlexItem grow={false} css={flexItemStyles}>
