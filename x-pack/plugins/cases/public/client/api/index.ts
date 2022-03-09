@@ -11,6 +11,6 @@ import { CasesByAlertId, getCasesFromAlertsUrl } from '../../../common/api';
 export const createClientAPI = ({ http }: { http: HttpStart }) => {
   return {
     getRelatedCases: async (alertId: string): Promise<CasesByAlertId> =>
-      (await http.get(getCasesFromAlertsUrl(alertId))) as CasesByAlertId,
+      http.get<CasesByAlertId>(getCasesFromAlertsUrl(alertId)),
   };
 };
