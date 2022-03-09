@@ -9,8 +9,8 @@
 
 import path from 'path';
 import { isUint8Array } from 'util/types';
-import { createMockLayout } from '../../../../../../screenshotting/server/layouts/mock';
-import { PdfWorkerOutOfMemoryError } from '../../../../../common/errors';
+import { createMockLayout } from '../../../layouts/mock';
+import { errors } from '../../../../common';
 import { PdfMaker } from '../';
 
 const imageBase64 = Buffer.from(
@@ -54,7 +54,7 @@ describe.skip('PdfMaker', () => {
         protected workerMaxYoungHeapSizeMb = 2;
         protected workerModulePath = path.resolve(__dirname, './memory_leak_worker.js');
       })(layout, undefined);
-      await expect(leakyMaker.generate()).rejects.toBeInstanceOf(PdfWorkerOutOfMemoryError);
+      await expect(leakyMaker.generate()).rejects.toBeInstanceOf(errors.PdfWorkerOutOfMemoryError);
     });
 
     it.skip('restarts the PDF worker if it crashes', async () => {

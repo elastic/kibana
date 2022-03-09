@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export type { LayoutParams } from './layout';
-export { LayoutTypes } from './layout';
-import * as errors from './errors';
-export { errors };
+export class PdfWorkerOutOfMemoryError extends Error {}
