@@ -39,7 +39,7 @@ for (const group of groups) {
       inputs.push(stepInput(`${group.key}/${testSuite}`, `${group.name} ${testSuite}`));
     }
   } else {
-    for (let i = 1; i <= group.ciGroups; i++) {
+    for (let i = 3; i <= group.ciGroups; i++) {
       inputs.push(stepInput(`${group.key}/${i}`, `${group.name} ${i}`));
     }
   }
