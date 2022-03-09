@@ -70,7 +70,7 @@ import {
 } from '../../../../field_maps/field_names';
 // TODO: Create and import 8.0.0 versioned RuleAlertAction type
 import { RuleAlertAction, SearchTypes } from '../../../types';
-import { AlertWithCommonFields } from '../../../../../../rule_registry/common/schemas/8.0.0';
+import { AlertWithCommonFields800 } from '../../../../../../rule_registry/common/schemas/8.0.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.0.0.
@@ -167,11 +167,11 @@ export interface EqlShellFields800 extends BaseFields800 {
   [ALERT_UUID]: string;
 }
 
-export type EqlBuildingBlockAlert800 = AlertWithCommonFields<EqlBuildingBlockFields800>;
+export type EqlBuildingBlockAlert800 = AlertWithCommonFields800<EqlBuildingBlockFields800>;
 
-export type EqlShellAlert800 = AlertWithCommonFields<EqlShellFields800>;
+export type EqlShellAlert800 = AlertWithCommonFields800<EqlShellFields800>;
 
-export type GenericAlert800 = AlertWithCommonFields<BaseFields800>;
+export type GenericAlert800 = AlertWithCommonFields800<BaseFields800>;
 
 // This is the type of the final generated alert including base fields, common fields
 // added by the alertWithPersistence function, and arbitrary fields copied from source documents

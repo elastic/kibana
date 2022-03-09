@@ -6,15 +6,15 @@
  */
 
 import type {
-  CommonAlertFieldName,
-  CommonAlertIdFieldName,
-  CommonAlertFields,
-  AlertWithCommonFields,
+  CommonAlertFieldName800,
+  CommonAlertIdFieldName800,
+  CommonAlertFields800,
+  AlertWithCommonFields800,
 } from './8.0.0';
 
 export type {
-  CommonAlertFieldName,
-  CommonAlertIdFieldName,
-  CommonAlertFields,
-  AlertWithCommonFields,
+  CommonAlertFieldName800 as CommonAlertFieldNameLatest,
+  CommonAlertIdFieldName800 as CommonAlertIdFieldNameLatest,
+  CommonAlertFields800 as CommonAlertFieldsLatest,
+  AlertWithCommonFields800 as AlertWithCommonFieldsLatest,
 };

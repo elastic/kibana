@@ -15,15 +15,15 @@ import { RefreshTypes } from '../../types';
 import { PersistenceAlertService } from '../../../../../../rule_registry/server';
 import {
   BaseFieldsLatest,
-  DetectionAlertLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/detection_engine/schemas/alerts';
+import { AlertWithCommonFieldsLatest } from '../../../../../../rule_registry/common/schemas';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
   bulkCreateDuration: string;
   createdItemsCount: number;
-  createdItems: Array<DetectionAlertLatest & { _id: string; _index: string }>;
+  createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
 }
 
