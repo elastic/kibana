@@ -56,10 +56,9 @@ const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLa
 function ofName(name?: string, secondaryFieldsCount: number = 0, rare: boolean = false, termsSize: number = 0) {
   if (rare) {
     return i18n.translate('xpack.lens.indexPattern.rareTermsOf', {
-      defaultMessage: 'Rare {termsSize} values of {name}',
+      defaultMessage: 'Rare values of {name}',
       values: {
         name: name ?? missingFieldLabel,
-        termsSize: termsSize > 0 ? termsSize : '',
       },
     });
   }
