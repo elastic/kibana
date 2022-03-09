@@ -41,13 +41,13 @@ export const getColumns = (
     return {
       bucketColumns,
       metricColumn: getMetricColumn(
-        metric ?? ({ accessor: matchingIndex + 1 } as ExpressionValueVisDimension),
+        metric ?? { accessor: matchingIndex + 1, type: 'vis_dimension', format: {} },
         visData
       )!,
     };
   }
   const metricColumn = getMetricColumn(
-    metric ?? ({ accessor: 0 } as ExpressionValueVisDimension),
+    metric ?? { accessor: 0, type: 'vis_dimension', format: {} },
     visData
   )!;
   return {
