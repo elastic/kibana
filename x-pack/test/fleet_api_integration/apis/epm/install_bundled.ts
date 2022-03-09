@@ -25,7 +25,6 @@ export default function (providerContext: FtrProviderContext) {
   );
 
   const bundlePackage = async (name: string) => {
-    log.info(`Bundling fixture package in ${BUNDLED_PACKAGE_DIR}`);
     try {
       await fs.access(BUNDLED_PACKAGE_DIR);
     } catch (error) {
@@ -84,7 +83,7 @@ export default function (providerContext: FtrProviderContext) {
         await bundlePackage('nginx-1.2.1');
 
         const installResponse = await supertest
-          .post(`/api/fleet/epm/packages/elastic_agent/1.0.0`)
+          .post(`/api/fleet/epm/packages/nginx/1.1.0`)
           .set('kbn-xsrf', 'xxxx')
           .type('application/json')
           .send({ force: true })
