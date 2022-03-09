@@ -307,7 +307,7 @@ export const getXyVisualization = ({
       ...(palette && { palette }),
       yConfig,
       layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
-    };
+    } as XYLayerConfig;
 
     const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
 
