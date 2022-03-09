@@ -35,6 +35,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   executionStatus,
   actions,
   scheduledTaskId,
+  snoozeEndTime,
   ...rest
 }) => ({
   ...rest,
@@ -47,6 +48,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   notify_when: notifyWhen,
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
+  snooze_end_time: snoozeEndTime,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
     ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
