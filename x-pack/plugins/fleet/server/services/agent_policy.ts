@@ -667,6 +667,7 @@ class AgentPolicyService {
     const res = await esClient.search({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           term: {
@@ -678,8 +679,7 @@ class AgentPolicyService {
       },
     });
 
-    // @ts-expect-error value is number | TotalHits
-    if (res.body.hits.total.value === 0) {
+    if (res.hits.total as number === 0) {
       return null;
     }
 
