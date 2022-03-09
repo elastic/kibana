@@ -23,11 +23,9 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 
 const initialData = {
   requestId: '',
-  mainStatisticsData: {
-    items: [],
-    hasHistoricalData: true,
-    hasLegacyData: false,
-  },
+  items: [],
+  hasHistoricalData: true,
+  hasLegacyData: false,
 };
 
 function useServicesFetcher() {
@@ -48,10 +46,7 @@ function useServicesFetcher() {
     comparisonType,
   });
 
-  const {
-    data: sortedAndFilteredServicesData,
-    status: sortedAndFilteredServicesStatus,
-  } = useFetcher(
+  const sortedAndFilteredServicesFetch = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/sorted_and_filtered_services', {
         params: {
@@ -67,7 +62,7 @@ function useServicesFetcher() {
     [start, end, environment, kuery]
   );
 
-  const { data = initialData, status: mainStatisticsStatus } = useFetcher(
+  const mainStatisticsFetch = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi('GET /internal/apm/services', {
@@ -82,7 +77,7 @@ function useServicesFetcher() {
         }).then((mainStatisticsData) => {
           return {
             requestId: uuid(),
-            mainStatisticsData,
+            ...mainStatisticsData,
           };
         });
       }
@@ -90,9 +85,9 @@ function useServicesFetcher() {
     [environment, kuery, start, end]
   );
 
-  const { mainStatisticsData, requestId } = data;
+  const { data: mainStatisticsData = initialData } = mainStatisticsFetch;
 
-  const { data: comparisonData } = useFetcher(
+  const comparisonFetch = useFetcher(
     (callApmApi) => {
       if (start && end && mainStatisticsData.items.length) {
         return callApmApi('GET /internal/apm/services/detailed_statistics', {
@@ -116,26 +111,22 @@ function useServicesFetcher() {
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, offset],
+    [mainStatisticsData.requestId, offset],
     { preservePreviousData: false }
   );
 
   return {
-    sortedAndFilteredServicesData,
-    sortedAndFilteredServicesStatus,
-    mainStatisticsData,
-    mainStatisticsStatus,
-    comparisonData,
+    sortedAndFilteredServicesFetch,
+    mainStatisticsFetch,
+    comparisonFetch,
   };
 }
 
 export function ServiceInventory() {
   const {
-    mainStatisticsData,
-    mainStatisticsStatus,
-    sortedAndFilteredServicesData,
-    sortedAndFilteredServicesStatus,
-    comparisonData,
+    sortedAndFilteredServicesFetch,
+    mainStatisticsFetch,
+    comparisonFetch,
   } = useServicesFetcher();
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
@@ -150,12 +141,12 @@ export function ServiceInventory() {
     shouldDisplayMlCallout(anomalyDetectionSetupState);
 
   const isLoading =
-    sortedAndFilteredServicesStatus === FETCH_STATUS.LOADING ||
-    (sortedAndFilteredServicesStatus === FETCH_STATUS.SUCCESS &&
-      sortedAndFilteredServicesData?.services.length === 0 &&
-      mainStatisticsStatus === FETCH_STATUS.LOADING);
+    sortedAndFilteredServicesFetch.status === FETCH_STATUS.LOADING ||
+    (sortedAndFilteredServicesFetch.status === FETCH_STATUS.SUCCESS &&
+      sortedAndFilteredServicesFetch.data?.services.length === 0 &&
+      mainStatisticsFetch.status === FETCH_STATUS.LOADING);
 
-  const isFailure = mainStatisticsStatus === FETCH_STATUS.FAILURE;
+  const isFailure = mainStatisticsFetch.status === FETCH_STATUS.FAILURE;
   const noItemsMessage = (
     <EuiEmptyPrompt
       title={
@@ -171,8 +162,8 @@ export function ServiceInventory() {
 
   const items = joinByKey(
     [
-      ...(sortedAndFilteredServicesData?.services ?? []),
-      ...(mainStatisticsData.items ?? []),
+      ...(sortedAndFilteredServicesFetch.data?.services ?? []),
+      ...(mainStatisticsFetch.data?.items ?? []),
     ],
     'serviceName'
   );
@@ -195,7 +186,7 @@ export function ServiceInventory() {
             isLoading={isLoading}
             isFailure={isFailure}
             items={items}
-            comparisonData={comparisonData}
+            comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
           />
         </EuiFlexItem>

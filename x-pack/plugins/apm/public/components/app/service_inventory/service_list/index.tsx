@@ -283,9 +283,8 @@ export function ServiceList({
     ]
   );
 
-  const initialSortField = displayHealthStatus
-    ? 'healthStatus'
-    : 'transactionsPerMinute';
+  const initialSortField = displayHealthStatus ? 'healthStatus' : 'serviceName';
+  const initialSortDirection = displayHealthStatus ? 'desc' : 'asc';
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -332,7 +331,7 @@ export function ServiceList({
           items={items}
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
-          initialSortDirection="desc"
+          initialSortDirection={initialSortDirection}
           sortFn={(itemsToSort, sortField, sortDirection) => {
             // For healthStatus, sort items by healthStatus first, then by name
             return sortField === 'healthStatus'
