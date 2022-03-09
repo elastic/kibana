@@ -384,7 +384,7 @@ describe('date_histogram', () => {
       );
       expect(instance.find('[data-test-subj="lensDateHistogramValue"]').exists()).toBeFalsy();
       expect(instance.find('[data-test-subj="lensDateHistogramUnit"]').exists()).toBeFalsy();
-      expect(instance.find(EuiSwitch).first().prop('checked')).toBe(false);
+      expect(instance.find(EuiSwitch).at(1).prop('checked')).toBe(false);
     });
 
     it('should allow switching to manual interval', () => {
@@ -419,7 +419,7 @@ describe('date_histogram', () => {
       );
       instance
         .find(EuiSwitch)
-        .first()
+        .at(1)
         .simulate('change', {
           target: { checked: true },
         });
@@ -504,7 +504,7 @@ describe('date_histogram', () => {
       );
       instance
         .find(EuiSwitch)
-        .first()
+        .at(1)
         .simulate('change', {
           target: { checked: false },
         });
@@ -695,7 +695,7 @@ describe('date_histogram', () => {
       );
       instance
         .find(EuiSwitch)
-        .at(1)
+        .first()
         .simulate('change', {
           target: { checked: true },
         });

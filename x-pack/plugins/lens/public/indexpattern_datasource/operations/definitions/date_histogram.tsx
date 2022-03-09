@@ -229,6 +229,16 @@ export const dateHistogramOperation: OperationDefinition<
 
     return (
       <>
+        <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.dropPArtialBuckets', {
+              defaultMessage: 'Drop partial buckets',
+            })}
+            checked={Boolean(currentColumn.params.dropPartials)}
+            onChange={onChangeDropPartialBuckets}
+            compressed
+          />
+        </EuiFormRow>
         {!intervalIsRestricted && (
           <EuiFormRow display="rowCompressed" hasChildLabel={false}>
             <EuiSwitch
@@ -241,16 +251,6 @@ export const dateHistogramOperation: OperationDefinition<
             />
           </EuiFormRow>
         )}
-        <EuiFormRow display="rowCompressed" hasChildLabel={false}>
-          <EuiSwitch
-            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.dropPArtialBuckets', {
-              defaultMessage: 'Drop partial buckets',
-            })}
-            checked={Boolean(currentColumn.params.dropPartials)}
-            onChange={onChangeDropPartialBuckets}
-            compressed
-          />
-        </EuiFormRow>
         {currentColumn.params.interval !== autoInterval && (
           <>
             <EuiFormRow
