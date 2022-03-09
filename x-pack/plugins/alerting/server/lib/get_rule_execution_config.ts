@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 import { RuleExecutionConfig, RuleTypeConfig } from '../config';
 
-export const getFormattedExecutionConfig = ({
+export const getRuleExecutionConfig = ({
   executionConfig,
   ruleTypeId,
 }: {

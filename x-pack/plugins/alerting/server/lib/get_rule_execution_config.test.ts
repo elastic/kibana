@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getFormattedExecutionConfig } from './get_formatted_execution_config';
+import { getRuleExecutionConfig } from './get_rule_execution_config';
 import { RuleExecutionConfig } from '../config';
 
 const ruleTypeId = 'test-rule-type-id';
@@ -26,9 +26,7 @@ const configWithRuleType = {
 
 describe('getFormattedExecutionConfig', () => {
   test('returns the rule type specific config and keeps the default values that are not overwritten', () => {
-    expect(
-      getFormattedExecutionConfig({ executionConfig: configWithRuleType, ruleTypeId })
-    ).toEqual({
+    expect(getRuleExecutionConfig({ executionConfig: configWithRuleType, ruleTypeId })).toEqual({
       id: ruleTypeId,
       aDefaultConfig: 1,
       actions: { max: 20 },
@@ -36,6 +34,6 @@ describe('getFormattedExecutionConfig', () => {
   });
 
   test('returns the default config when there is no rule type specific config', () => {
-    expect(getFormattedExecutionConfig({ executionConfig, ruleTypeId })).toEqual(executionConfig);
+    expect(getRuleExecutionConfig({ executionConfig, ruleTypeId })).toEqual(executionConfig);
   });
 });

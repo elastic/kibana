@@ -24,7 +24,7 @@ const ruleExecutionMetricsSchema = t.partial({
 
 const alertExecutionStore = t.partial({
   numberOfTriggeredActions: t.number,
-  completion: t.string,
+  triggeredActionsStatus: t.string,
 });
 
 export type RuleExecutionMetrics = t.TypeOf<typeof ruleExecutionMetricsSchema>;

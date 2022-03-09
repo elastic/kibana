@@ -477,7 +477,7 @@ export class TaskRunner<
 
     const alertExecutionStore: AlertExecutionStore = {
       numberOfTriggeredActions: 0,
-      completion: ActionsCompletion.COMPLETE,
+      triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
     if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
@@ -723,7 +723,6 @@ export class TaskRunner<
         return getDefaultRuleMonitoring();
       }) ?? getDefaultRuleMonitoring();
 
-    // active or ok set
     const executionStatus = map<RuleExecutionState, ElasticsearchError, AlertExecutionStatus>(
       state,
       (ruleExecutionState) => executionStatusFromState(ruleExecutionState),

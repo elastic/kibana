@@ -20,7 +20,7 @@ import { RuleType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
 
-const generateAlertConfig = (): AlertingConfig => ({
+const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
     interval: '5m',
   },
@@ -76,7 +76,7 @@ describe('Alerting Plugin', () => {
 
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
       const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-        generateAlertConfig()
+        generateAlertingConfig()
       );
       plugin = new AlertingPlugin(context);
 
@@ -92,7 +92,7 @@ describe('Alerting Plugin', () => {
 
     it('should create usage counter if usageCollection plugin is defined', async () => {
       const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-        generateAlertConfig()
+        generateAlertingConfig()
       );
       plugin = new AlertingPlugin(context);
 
@@ -107,7 +107,7 @@ describe('Alerting Plugin', () => {
 
     it(`exposes configured minimumScheduleInterval()`, async () => {
       const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-        generateAlertConfig()
+        generateAlertingConfig()
       );
       plugin = new AlertingPlugin(context);
 
@@ -118,7 +118,7 @@ describe('Alerting Plugin', () => {
 
     it(`applies the default config if there is no rule type specific config `, async () => {
       const context = coreMock.createPluginInitializerContext<AlertingConfig>({
-        ...generateAlertConfig(),
+        ...generateAlertingConfig(),
         rules: {
           execution: {
             actions: {
@@ -136,6 +136,32 @@ describe('Alerting Plugin', () => {
 
       expect(ruleType.executionConfig).toEqual({
         actions: { max: 123 },
+      });
+    });
+
+    it(`applies rule type specific config if defined in config`, async () => {
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
+        ...generateAlertingConfig(),
+        rules: {
+          execution: {
+            actions: { max: 123 },
+            ruleTypeOverrides: [{ id: sampleRuleType.id, timeout: '1d' }],
+          },
+        },
+      });
+      plugin = new AlertingPlugin(context);
+
+      const setupContract = await plugin.setup(setupMocks, mockPlugins);
+
+      const ruleType = { ...sampleRuleType };
+      setupContract.registerType(ruleType);
+
+      expect(ruleType.executionConfig).toEqual({
+        id: sampleRuleType.id,
+        actions: {
+          max: 123,
+        },
+        timeout: '1d',
       });
     });
 
@@ -213,7 +239,7 @@ describe('Alerting Plugin', () => {
     describe('getRulesClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
         const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-          generateAlertConfig()
+          generateAlertingConfig()
         );
         const plugin = new AlertingPlugin(context);
 
@@ -246,7 +272,7 @@ describe('Alerting Plugin', () => {
 
       it(`doesn't throw error when encryptedSavedObjects plugin has encryption key`, async () => {
         const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-          generateAlertConfig()
+          generateAlertingConfig()
         );
         const plugin = new AlertingPlugin(context);
 
@@ -293,7 +319,7 @@ describe('Alerting Plugin', () => {
 
     test(`exposes getAlertingAuthorizationWithRequest()`, async () => {
       const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-        generateAlertConfig()
+        generateAlertingConfig()
       );
       const plugin = new AlertingPlugin(context);
 

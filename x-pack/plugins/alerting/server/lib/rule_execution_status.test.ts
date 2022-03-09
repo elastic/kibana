@@ -34,7 +34,7 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         alertExecutionStore: {
           numberOfTriggeredActions: 0,
-          completion: ActionsCompletion.COMPLETE,
+          triggeredActionsStatus: ActionsCompletion.COMPLETE,
         },
       } as RuleExecutionState);
       checkDateIsNearNow(status.lastExecutionDate);
@@ -48,7 +48,7 @@ describe('RuleExecutionStatus', () => {
         alertInstances: {},
         alertExecutionStore: {
           numberOfTriggeredActions: 0,
-          completion: ActionsCompletion.COMPLETE,
+          triggeredActionsStatus: ActionsCompletion.COMPLETE,
         },
         metrics,
       });
@@ -64,7 +64,7 @@ describe('RuleExecutionStatus', () => {
         alertInstances: { a: {} },
         alertExecutionStore: {
           numberOfTriggeredActions: 0,
-          completion: ActionsCompletion.COMPLETE,
+          triggeredActionsStatus: ActionsCompletion.COMPLETE,
         },
         metrics,
       });
@@ -79,7 +79,7 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         alertExecutionStore: {
           numberOfTriggeredActions: 1,
-          completion: ActionsCompletion.COMPLETE,
+          triggeredActionsStatus: ActionsCompletion.COMPLETE,
         },
         alertInstances: { a: {} },
         metrics,
@@ -96,7 +96,7 @@ describe('RuleExecutionStatus', () => {
         alertInstances: { a: {} },
         alertExecutionStore: {
           numberOfTriggeredActions: 3,
-          completion: ActionsCompletion.PARTIAL,
+          triggeredActionsStatus: ActionsCompletion.PARTIAL,
         },
         metrics,
       });

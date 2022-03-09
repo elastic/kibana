@@ -125,7 +125,7 @@ describe('Create Execution Handler', () => {
     );
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
-      completion: ActionsCompletion.COMPLETE,
+      triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
   });
 
@@ -240,7 +240,7 @@ describe('Create Execution Handler', () => {
       },
     });
 
-    expect(alertExecutionStore.completion).toBe(ActionsCompletion.COMPLETE);
+    expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.COMPLETE);
   });
 
   test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
@@ -462,7 +462,7 @@ describe('Create Execution Handler', () => {
     );
 
     expect(alertExecutionStore.numberOfTriggeredActions).toBe(0);
-    expect(alertExecutionStore.completion).toBe(ActionsCompletion.PARTIAL);
+    expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.COMPLETE);
   });
 
   test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions', async () => {
@@ -499,7 +499,7 @@ describe('Create Execution Handler', () => {
 
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
-      completion: ActionsCompletion.COMPLETE,
+      triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
     await executionHandler({
@@ -511,7 +511,7 @@ describe('Create Execution Handler', () => {
     });
 
     expect(alertExecutionStore.numberOfTriggeredActions).toBe(2);
-    expect(alertExecutionStore.completion).toBe(ActionsCompletion.PARTIAL);
+    expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.PARTIAL);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
   });
 });

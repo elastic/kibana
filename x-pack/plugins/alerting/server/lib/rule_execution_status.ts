@@ -23,7 +23,7 @@ export function executionStatusFromState(state: RuleExecutionState): AlertExecut
   const alertIds = Object.keys(state.alertInstances ?? {});
 
   const hasIncompleteAlertExecution =
-    state.alertExecutionStore.completion === ActionsCompletion.PARTIAL;
+    state.alertExecutionStore.triggeredActionsStatus === ActionsCompletion.PARTIAL;
 
   let status: AlertExecutionStatuses =
     alertIds.length === 0 ? AlertExecutionStatusValues[0] : AlertExecutionStatusValues[1];

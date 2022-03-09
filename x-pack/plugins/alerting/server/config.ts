@@ -10,9 +10,11 @@ import { validateDurationSchema } from './lib';
 
 const ruleTypeConfig = schema.object({
   id: schema.string(),
+  timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
 });
 
 const ruleExecutionSchema = schema.object({
+  timeout: schema.maybe(schema.string({ validate: validateDurationSchema, defaultValue: '5m' })),
   actions: schema.object({
     max: schema.number({ defaultValue: 100000 }),
   }),
