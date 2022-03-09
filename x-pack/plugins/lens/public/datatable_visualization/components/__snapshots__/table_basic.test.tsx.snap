@@ -227,6 +227,13 @@ exports[`DatatableComponent it renders actions column when there are row actions
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
+      rowHeightsOptions={
+        Object {
+          "defaultHeight": Object {
+            "lineCount": 1,
+          },
+        }
+      }
       sorting={
         Object {
           "columns": Array [],
@@ -472,6 +479,13 @@ exports[`DatatableComponent it renders the title and value 1`] = `
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
+      rowHeightsOptions={
+        Object {
+          "defaultHeight": Object {
+            "lineCount": 1,
+          },
+        }
+      }
       sorting={
         Object {
           "columns": Array [],
@@ -712,6 +726,13 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
+      rowHeightsOptions={
+        Object {
+          "defaultHeight": Object {
+            "lineCount": 1,
+          },
+        }
+      }
       sorting={
         Object {
           "columns": Array [],
