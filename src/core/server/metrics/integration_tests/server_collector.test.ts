@@ -93,11 +93,15 @@ describe('ServerMetricsCollector', () => {
     await server.start();
 
     await sendGet('/');
+
+    // Subscribe to expect 2 requests to /disconnect
+    const waitFor2Requests = disconnectRequested$.pipe(take(2)).toPromise();
+
     const discoReq1 = sendGet('/disconnect').end();
     const discoReq2 = sendGet('/disconnect').end();
 
     // Wait for 2 requests to /disconnect
-    await disconnectRequested$.pipe(take(2)).toPromise();
+    await waitFor2Requests;
 
     let metrics = await collector.collect();
     expect(metrics.requests).toEqual(
@@ -108,9 +112,13 @@ describe('ServerMetricsCollector', () => {
       })
     );
 
+    // Subscribe to the aborted$ event
+    const waitFor1stAbort = disconnectAborted$.pipe(take(1)).toPromise();
+
     discoReq1.abort();
+
     // Wait for the aborted$ event
-    await disconnectAborted$.pipe(take(1)).toPromise();
+    await waitFor1stAbort;
 
     metrics = await collector.collect();
     expect(metrics.requests).toEqual(
@@ -120,9 +128,13 @@ describe('ServerMetricsCollector', () => {
       })
     );
 
+    // Subscribe to the aborted$ event
+    const waitFor2ndAbort = disconnectAborted$.pipe(take(1)).toPromise();
+
     discoReq2.abort();
+
     // Wait for the aborted$ event
-    await disconnectAborted$.pipe(take(1)).toPromise();
+    await waitFor2ndAbort;
 
     metrics = await collector.collect();
     expect(metrics.requests).toEqual(
