@@ -18090,7 +18090,6 @@
     "xpack.ml.management.jobsList.noPermissionToAccessLabel": "访问被拒绝",
     "xpack.ml.management.jobsList.syncFlyoutButton": "同步已保存对象",
     "xpack.ml.management.jobsListTitle": "Machine Learning 作业",
-    "xpack.ml.management.jobsSpacesList.objectNoun": "作业",
     "xpack.ml.management.jobsSpacesList.updateSpaces.error": "更新 {id} 时出错",
     "xpack.ml.management.syncSavedObjectsFlyout.closeButton": "关闭",
     "xpack.ml.management.syncSavedObjectsFlyout.datafeedsAdded.description": "如果有已保存对象缺失异常检测作业的数据馈送 ID，则将添加该 ID。",
