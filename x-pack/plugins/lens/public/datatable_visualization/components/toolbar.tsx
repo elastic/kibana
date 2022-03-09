@@ -69,7 +69,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
     {
       id: `${idPrefix}auto`,
       label: i18n.translate('xpack.lens.table.rowHeight.auto', {
-        defaultMessage: 'Auto',
+        defaultMessage: 'Auto fit',
       }),
       'data-test-subj': 'lnsDatatable_rowHeight_auto',
     },

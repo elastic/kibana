@@ -370,7 +370,10 @@ describe('Datatable Visualization', () => {
       const datasource = createMockDatasource('test');
       const frame = mockFrame();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
 
       expect(
         datatableVisualization.getConfiguration({
@@ -501,7 +504,10 @@ describe('Datatable Visualization', () => {
 
     beforeEach(() => {
       datasource = createMockDatasource('test');
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
 
       frame = mockFrame();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
@@ -512,6 +518,8 @@ describe('Datatable Visualization', () => {
         dataType: 'string',
         isBucketed: false, // <= make them metrics
         label: 'label',
+        isStaticValue: false,
+        hasTimeShift: false,
       });
 
       const expression = datatableVisualization.toExpression(
@@ -559,6 +567,8 @@ describe('Datatable Visualization', () => {
         dataType: 'string',
         isBucketed: true, // move it from the metric to the break down by side
         label: 'label',
+        isStaticValue: false,
+        hasTimeShift: false,
       });
 
       const expression = datatableVisualization.toExpression(
@@ -650,11 +660,16 @@ describe('Datatable Visualization', () => {
       const datasource = createMockDatasource('test');
       const frame = mockFrame();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         isBucketed: true, // move it from the metric to the break down by side
         label: 'label',
+        isStaticValue: false,
+        hasTimeShift: false,
       });
 
       const error = datatableVisualization.getErrorMessages({
@@ -670,11 +685,16 @@ describe('Datatable Visualization', () => {
       const datasource = createMockDatasource('test');
       const frame = mockFrame();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         isBucketed: false, // keep it a metric
         label: 'label',
+        isStaticValue: false,
+        hasTimeShift: false,
       });
 
       const error = datatableVisualization.getErrorMessages({
