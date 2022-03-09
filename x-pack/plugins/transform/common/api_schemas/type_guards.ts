@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { EsIndex } from '../types/es_index';
+import type { EsIngestPipeline } from '../types/es_ingest_pipeline';
 import { isPopulatedObject } from '../shared_imports';
 
 // To be able to use the type guards on the client side, we need to make sure we don't import
@@ -68,6 +69,10 @@ export const isResetTransformsResponseSchema = (
 
 export const isEsIndices = (arg: unknown): arg is EsIndex[] => {
   return Array.isArray(arg);
+};
+
+export const isEsIngestPipelines = (arg: unknown): arg is EsIngestPipeline[] => {
+  return Array.isArray(arg) && arg.every((d) => isPopulatedObject(d, ['name']));
 };
 
 export const isEsSearchResponse = (arg: unknown): arg is estypes.SearchResponse => {

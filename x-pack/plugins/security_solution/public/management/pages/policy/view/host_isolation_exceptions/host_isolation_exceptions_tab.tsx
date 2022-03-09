@@ -181,7 +181,7 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
         color="transparent"
         borderRadius="none"
       >
-        <PolicyHostIsolationExceptionsList policyId={policyId} />
+        <PolicyHostIsolationExceptionsList policyId={policyId} policyName={policy.name} />
       </EuiPageContent>
     </div>
   ) : (

@@ -39,7 +39,7 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
-  'packages/kbn-test/jest_integration/jest-preset.js',
+  'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
@@ -107,7 +107,10 @@ export const IGNORE_DIRECTORY_GLOBS = [
  *
  * @type {Array}
  */
-export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
+export const REMOVE_EXTENSION = [
+  'packages/kbn-plugin-generator/template/**/*.ejs',
+  'packages/kbn-generate/templates/**/*.ejs',
+];
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!

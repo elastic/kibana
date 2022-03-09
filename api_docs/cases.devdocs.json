@@ -446,6 +446,35 @@
     "misc": [
       {
         "parentPluginId": "cases",
+        "id": "def-public.CaseAttachments",
+        "type": "Type",
+        "tags": [],
+        "label": "CaseAttachments",
+        "description": [],
+        "signature": [
+          "SupportedCaseAttachment",
+          "[]"
+        ],
+        "path": "x-pack/plugins/cases/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.DRAFT_COMMENT_STORAGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DRAFT_COMMENT_STORAGE_ID",
+        "description": [],
+        "signature": [
+          "\"xpack.cases.commentDraft\""
+        ],
+        "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-public.GetAllCasesSelectorModalProps",
         "type": "Type",
         "tags": [],
@@ -648,6 +677,25 @@
         },
         {
           "parentPluginId": "cases",
+          "id": "def-public.CasesUiStart.getCasesContext",
+          "type": "Function",
+          "tags": [],
+          "label": "getCasesContext",
+          "description": [],
+          "signature": [
+            "() => (props: ",
+            "CasesContextProps",
+            " & { children: React.ReactNode; }) => React.ReactElement<",
+            "CasesContextProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cases",
           "id": "def-public.CasesUiStart.getAllCasesSelectorModal",
           "type": "Function",
           "tags": [],
@@ -703,6 +751,58 @@
           "returnComment": [
             "A react component that is a modal for selecting a case"
           ]
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-public.CasesUiStart.getAllCasesSelectorModalNoProvider",
+          "type": "Function",
+          "tags": [],
+          "label": "getAllCasesSelectorModalNoProvider",
+          "description": [],
+          "signature": [
+            "(props: ",
+            {
+              "pluginId": "cases",
+              "scope": "public",
+              "docId": "kibCasesPluginApi",
+              "section": "def-public.GetAllCasesSelectorModalProps",
+              "text": "GetAllCasesSelectorModalProps"
+            },
+            ") => React.ReactElement<",
+            {
+              "pluginId": "cases",
+              "scope": "public",
+              "docId": "kibCasesPluginApi",
+              "section": "def-public.GetAllCasesSelectorModalProps",
+              "text": "GetAllCasesSelectorModalProps"
+            },
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "cases",
+              "id": "def-public.CasesUiStart.getAllCasesSelectorModalNoProvider.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "cases",
+                  "scope": "public",
+                  "docId": "kibCasesPluginApi",
+                  "section": "def-public.GetAllCasesSelectorModalProps",
+                  "text": "GetAllCasesSelectorModalProps"
+                }
+              ],
+              "path": "x-pack/plugins/cases/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "cases",
@@ -764,6 +864,40 @@
         },
         {
           "parentPluginId": "cases",
+          "id": "def-public.CasesUiStart.getCreateCaseFlyoutNoProvider",
+          "type": "Function",
+          "tags": [],
+          "label": "getCreateCaseFlyoutNoProvider",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "CreateCaseFlyoutProps",
+            ") => React.ReactElement<",
+            "CreateCaseFlyoutProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "cases",
+              "id": "def-public.CasesUiStart.getCreateCaseFlyoutNoProvider.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "CreateCaseFlyoutProps"
+              ],
+              "path": "x-pack/plugins/cases/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cases",
           "id": "def-public.CasesUiStart.getRecentCases",
           "type": "Function",
           "tags": [],
@@ -819,6 +953,23 @@
           "returnComment": [
             "A react component for showing recent cases"
           ]
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-public.CasesUiStart.hooks",
+          "type": "Object",
+          "tags": [],
+          "label": "hooks",
+          "description": [],
+          "signature": [
+            "{ getUseCasesAddToNewCaseFlyout: (props: ",
+            "CreateCaseFlyoutProps",
+            ") => { open: () => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props: ",
+            "AllCasesSelectorModalProps",
+            ") => { open: () => void; close: () => void; }; }"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false
         }
       ],
       "lifecycle": "start",
@@ -916,21 +1067,6 @@
           },
           {
             "parentPluginId": "cases",
-            "id": "def-server.CasesClient.subCases",
-            "type": "Object",
-            "tags": [],
-            "label": "subCases",
-            "description": [
-              "\nRetrieves an interface for interacting with the case as a connector entities.\n\nCurrently this functionality is disabled and will throw an error if this function is called."
-            ],
-            "signature": [
-              "SubCasesClient"
-            ],
-            "path": "x-pack/plugins/cases/server/client/client.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
             "id": "def-server.CasesClient.configure",
             "type": "Object",
             "tags": [],
@@ -940,21 +1076,6 @@
             ],
             "signature": [
               "ConfigureSubClient"
-            ],
-            "path": "x-pack/plugins/cases/server/client/client.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-server.CasesClient.stats",
-            "type": "Object",
-            "tags": [],
-            "label": "stats",
-            "description": [
-              "\nRetrieves an interface for retrieving statistics related to the cases entities."
-            ],
-            "signature": [
-              "StatsSubClient"
             ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false
@@ -1238,39 +1359,6 @@
           },
           {
             "parentPluginId": "cases",
-            "id": "def-common.Case.subCases",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "subCases",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "cases",
-                "scope": "common",
-                "docId": "kibCasesPluginApi",
-                "section": "def-common.SubCase",
-                "text": "SubCase"
-              },
-              "[] | null | undefined"
-            ],
-            "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.Case.subCaseIds",
-            "type": "Array",
-            "tags": [],
-            "label": "subCaseIds",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
             "id": "def-common.Case.settings",
             "type": "Object",
             "tags": [],
@@ -1291,19 +1379,6 @@
             "description": [],
             "signature": [
               "string[]"
-            ],
-            "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.Case.type",
-            "type": "Enum",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "CaseType"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
@@ -1370,52 +1445,6 @@
               "SignalEcsAAD",
               "; } | undefined"
             ],
-            "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.SubCase",
-        "type": "Interface",
-        "tags": [],
-        "label": "SubCase",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.SubCase",
-            "text": "SubCase"
-          },
-          " extends BasicCase"
-        ],
-        "path": "x-pack/plugins/cases/common/ui/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.SubCase.associationType",
-            "type": "Enum",
-            "tags": [],
-            "label": "associationType",
-            "description": [],
-            "signature": [
-              "AssociationType"
-            ],
-            "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.SubCase.caseParentId",
-            "type": "string",
-            "tags": [],
-            "label": "caseParentId",
-            "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
@@ -1493,22 +1522,6 @@
           "{ refreshCase: () => Promise<void>; } | null"
         ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.ENABLE_CASE_CONNECTOR",
-        "type": "boolean",
-        "tags": [],
-        "label": "ENABLE_CASE_CONNECTOR",
-        "description": [
-          "\nThis flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete."
-        ],
-        "signature": [
-          "false"
-        ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

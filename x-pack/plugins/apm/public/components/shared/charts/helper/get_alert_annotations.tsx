@@ -107,7 +107,7 @@ export function getAlertAnnotations({
     const color = getAlertColor({ severityLevel, theme });
     const experimentalLabel = i18n.translate(
       'xpack.apm.alertAnnotationTooltipExperimentalText',
-      { defaultMessage: 'Experimental' }
+      { defaultMessage: 'Technical preview' }
     );
     const header = `${getAlertHeader({
       severityLevel,

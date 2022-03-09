@@ -57,11 +57,13 @@ import { elasticAgentManifest } from './elastic_agent_manifest';
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
+import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
+import { validateOutputForPolicy } from './agent_policies';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -97,6 +99,8 @@ class AgentPolicyService {
         `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`
       );
     }
+
+    await validateOutputForPolicy(agentPolicy);
 
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
@@ -167,6 +171,8 @@ class AgentPolicyService {
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
     await this.requireUniqueName(soClient, agentPolicy);
+
+    await validateOutputForPolicy(agentPolicy);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
@@ -360,14 +366,16 @@ class AgentPolicyService {
       options
     );
 
-    // Copy all package policies and append (copy) to their names
+    // Copy all package policies and append (copy n) to their names
     if (baseAgentPolicy.package_policies.length) {
-      const newPackagePolicies = (baseAgentPolicy.package_policies as PackagePolicy[]).map(
-        (packagePolicy: PackagePolicy) => {
+      const newPackagePolicies = await pMap(
+        baseAgentPolicy.package_policies as PackagePolicy[],
+        async (packagePolicy: PackagePolicy) => {
           const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
+
           const updatedPackagePolicy = {
             ...newPackagePolicy,
-            name: `${packagePolicy.name} (copy)`,
+            name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
           };
           return updatedPackagePolicy;
         }
@@ -675,7 +683,7 @@ class AgentPolicyService {
       return null;
     }
 
-    return res.body.hits.hits[0]._source;
+    return res.hits.hits[0]._source;
   }
 
   public async getFullAgentConfigMap(

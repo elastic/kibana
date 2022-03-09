@@ -11,6 +11,7 @@ import { FtrService } from '../../functional/ftr_provider_context';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
+  METADATA_UNITED_INDEX,
 } from '../../../plugins/security_solution/common/endpoint/constants';
 import {
   deleteIndexedHostsAndAlerts,
@@ -28,6 +29,7 @@ export class EndpointTestResources extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly kbnClient = this.ctx.getService('kibanaServer');
   private readonly transform = this.ctx.getService('transform');
+  private readonly config = this.ctx.getService('config');
 
   private generateTransformId(endpointPackageVersion?: string): string {
     return `${metadataTransformPrefix}-${endpointPackageVersion ?? ''}`;
@@ -137,41 +139,20 @@ export class EndpointTestResources extends FtrService {
     return deleteIndexedHostsAndAlerts(this.esClient as Client, this.kbnClient, indexedData);
   }
 
-  /**
-   * Waits for endpoints to show up on the `metadata-current` index.
-   * Optionally, specific endpoint IDs (agent.id) can be provided to ensure those specific ones show up.
-   *
-   * @param [ids] optional list of ids to check for. If empty, it will just check if data exists in the index
-   */
-  async waitForEndpoints(ids: string[] = []) {
-    const body = ids.length
-      ? {
-          query: {
-            bool: {
-              filter: [
-                {
-                  terms: {
-                    'agent.id': ids,
-                  },
-                },
-              ],
-            },
-          },
-        }
-      : {
-          query: {
-            match_all: {},
-          },
-        };
-
+  private async waitForIndex(
+    ids: string[],
+    index: string,
+    body: any = {},
+    timeout: number = this.config.get('timeouts.waitFor')
+  ) {
     // If we have a specific number of endpoint hosts to check for, then use that number,
     // else we just want to make sure the index has data, thus just having one in the index will do
     const size = ids.length || 1;
 
-    await this.retry.waitFor('endpoint hosts', async () => {
+    await this.retry.waitForWithTimeout(`endpoint hosts in ${index}`, timeout, async () => {
       try {
         const searchResponse = await this.esClient.search({
-          index: metadataCurrentIndexPattern,
+          index,
           size,
           body,
           rest_total_hits_as_int: true,
@@ -188,6 +169,74 @@ export class EndpointTestResources extends FtrService {
         throw new EndpointError(error.message, error);
       }
     });
+  }
+
+  /**
+   * Waits for endpoints to show up on the `metadata-current` index.
+   * Optionally, specific endpoint IDs (agent.id) can be provided to ensure those specific ones show up.
+   *
+   * @param [ids] optional list of ids to check for. If empty, it will just check if data exists in the index
+   * @param [timeout] optional max timeout to waitFor in ms. default is 20000.
+   */
+  async waitForEndpoints(ids: string[] = [], timeout = this.config.get('timeouts.waitFor')) {
+    const body = ids.length
+      ? {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'agent.id': ids,
+                  },
+                },
+              ],
+            },
+          },
+        }
+      : {
+          size: 1,
+          query: {
+            match_all: {},
+          },
+        };
+
+    await this.waitForIndex(ids, metadataCurrentIndexPattern, body, timeout);
+  }
+
+  /**
+   * Waits for endpoints to show up on the `metadata_united` index.
+   * Optionally, specific endpoint IDs (agent.id) can be provided to ensure those specific ones show up.
+   *
+   * @param [ids] optional list of ids to check for. If empty, it will just check if data exists in the index
+   * @param [timeout] optional max timeout to waitFor in ms. default is 20000.
+   */
+  async waitForUnitedEndpoints(ids: string[] = [], timeout = this.config.get('timeouts.waitFor')) {
+    const body = ids.length
+      ? {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'agent.id': ids,
+                  },
+                },
+                // make sure that both endpoint and agent portions are populated
+                // since agent is likely to be populated first
+                { exists: { field: 'united.endpoint.agent.id' } },
+                { exists: { field: 'united.agent.agent.id' } },
+              ],
+            },
+          },
+        }
+      : {
+          size: 1,
+          query: {
+            match_all: {},
+          },
+        };
+
+    await this.waitForIndex(ids, METADATA_UNITED_INDEX, body, timeout);
   }
 
   /**

@@ -23,16 +23,7 @@ describe('addColorRange', () => {
     ];
   });
 
-  it('should add new color range with the corresponding interval', () => {
-    expect(addColorRange(colorRanges, 'number', { min: 0, max: 81 })).toEqual([
-      { color: '#aaa', start: 20, end: 40 },
-      { color: '#bbb', start: 40, end: 60 },
-      { color: '#ccc', start: 60, end: 80 },
-      { color: '#ccc', start: 80, end: 81 },
-    ]);
-  });
-
-  it('should add new color range with the interval equal 1 if new range out of max bound', () => {
+  it('should add new color range with the corresponding interva', () => {
     colorRanges[colorRanges.length - 1].end = 80;
     expect(addColorRange(colorRanges, 'number', { min: 0, max: 80 })).toEqual([
       { color: '#aaa', start: 20, end: 40 },

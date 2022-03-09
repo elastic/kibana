@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeEditorVisInstance } from '../types';
 import { SplitChartWarning } from './split_chart_warning';

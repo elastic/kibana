@@ -48,7 +48,7 @@ export const getArtifact = async (
     });
 
     // @ts-expect-error @elastic/elasticsearch _source is optional
-    return esSearchHitToArtifact(esData.body);
+    return esSearchHitToArtifact(esData);
   } catch (e) {
     if (isElasticsearchItemNotFoundError(e)) {
       return;
@@ -114,11 +114,11 @@ export const listArtifacts = async (
 
     return {
       // @ts-expect-error @elastic/elasticsearch _source is optional
-      items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
+      items: searchResult.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
       page,
       perPage,
       // @ts-expect-error doesn't handle total as number
-      total: searchResult.body.hits.total.value,
+      total: searchResult.hits.total.value,
     };
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);

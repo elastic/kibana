@@ -9,7 +9,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { findTestSubject, nextTick } from '@kbn/test/jest';
+import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';

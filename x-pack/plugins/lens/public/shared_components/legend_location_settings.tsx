@@ -170,6 +170,7 @@ const FloatingColumnsInput = ({
       onChange={(e) => {
         handleInputChange(Number(e.target.value));
       }}
+      step={1}
     />
   );
 };

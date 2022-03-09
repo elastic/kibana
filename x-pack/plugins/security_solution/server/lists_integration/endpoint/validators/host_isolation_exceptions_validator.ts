@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { BaseValidator } from './base_validator';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
-
 import { ExceptionItemLikeOptions } from '../types';
 
 import {
@@ -41,6 +41,19 @@ const HostIsolationDataSchema = schema.object(
     unknowns: 'ignore',
   }
 );
+
+// use the baseSchema and overwrite the os_type
+// to accept all OSs in the list for host isolation exception
+const HostIsolationBasicDataSchema = BasicEndpointExceptionDataSchema.extends({
+  osTypes: schema.arrayOf(
+    schema.oneOf([
+      schema.literal(OperatingSystem.WINDOWS),
+      schema.literal(OperatingSystem.LINUX),
+      schema.literal(OperatingSystem.MAC),
+    ]),
+    { minSize: 3, maxSize: 3 }
+  ),
+});
 
 export class HostIsolationExceptionsValidator extends BaseValidator {
   static isHostIsolationException(item: { listId: string }): boolean {
@@ -100,9 +113,8 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   }
 
   private async validateHostIsolationData(item: ExceptionItemLikeOptions): Promise<void> {
-    await this.validateBasicData(item);
-
     try {
+      HostIsolationBasicDataSchema.validate(item);
       HostIsolationDataSchema.validate(item);
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);

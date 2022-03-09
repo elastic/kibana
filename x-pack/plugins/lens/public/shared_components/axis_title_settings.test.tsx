@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { AxisTitleSettings, AxisTitleSettingsProps } from './axis_title_settings';
 
 describe('Axes Title settings', () => {

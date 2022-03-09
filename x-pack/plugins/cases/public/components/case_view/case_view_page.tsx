@@ -356,9 +356,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                         isLoadingUserActions={isLoadingUserActions}
                         onShowAlertDetails={onShowAlertDetails}
                         onUpdateField={onUpdateField}
-                        renderInvestigateInTimelineActionComponent={
-                          timelineUi?.renderInvestigateInTimelineActionComponent
-                        }
                         statusActionButton={
                           userCanCrud ? (
                             <StatusActionButton

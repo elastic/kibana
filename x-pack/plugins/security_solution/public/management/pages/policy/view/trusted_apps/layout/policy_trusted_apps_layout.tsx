@@ -166,7 +166,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
             />
           )
         ) : displayHeaderAndContent ? (
-          <PolicyTrustedAppsList />
+          <PolicyTrustedAppsList policyId={policyItem.id} policyName={policyItem.name} />
         ) : (
           <ManagementPageLoader data-test-subj="policyTrustedAppsListLoader" />
         )}

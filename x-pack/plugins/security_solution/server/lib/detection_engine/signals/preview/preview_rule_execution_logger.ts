@@ -6,27 +6,19 @@
  */
 
 import {
-  RuleExecutionLoggerFactory,
+  RuleExecutionLogForExecutorsFactory,
   RuleExecutionContext,
   StatusChangeArgs,
 } from '../../rule_execution_log';
 
 export interface IPreviewRuleExecutionLogger {
-  factory: RuleExecutionLoggerFactory;
-
-  logged: {
-    statusChanges: Array<RuleExecutionContext & StatusChangeArgs>;
-  };
-
-  clearLogs(): void;
+  factory: RuleExecutionLogForExecutorsFactory;
 }
 
-export const createPreviewRuleExecutionLogger = () => {
-  let logged: IPreviewRuleExecutionLogger['logged'] = {
-    statusChanges: [],
-  };
-
-  const factory: RuleExecutionLoggerFactory = (
+export const createPreviewRuleExecutionLogger = (
+  loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs>
+) => {
+  const factory: RuleExecutionLogForExecutorsFactory = (
     savedObjectsClient,
     eventLogService,
     logger,
@@ -36,17 +28,11 @@ export const createPreviewRuleExecutionLogger = () => {
       context,
 
       logStatusChange(args: StatusChangeArgs): Promise<void> {
-        logged.statusChanges.push({ ...context, ...args });
+        loggedStatusChanges.push({ ...context, ...args });
         return Promise.resolve();
       },
     };
   };
 
-  const clearLogs = (): void => {
-    logged = {
-      statusChanges: [],
-    };
-  };
-
-  return { factory, logged, clearLogs };
+  return { factory };
 };

@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiButtonGroup, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type {
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -39,6 +39,16 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+// Need to mock the debounce call to test some FieldInput behaviour
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
+
 const uiSettingsMock = {} as IUiSettingsClient;
 
 const defaultProps = {
@@ -49,7 +59,8 @@ const defaultProps = {
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
-  operationDefinitionMap: {},
+  // need to provide the terms operation as some helpers use operation specific features
+  operationDefinitionMap: { terms: termsOperation as unknown as GenericOperationDefinition },
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
@@ -224,15 +235,18 @@ describe('terms', () => {
           },
           orderDirection: 'asc',
           format: { id: 'number', params: { decimals: 0 } },
+          parentFormat: { id: 'terms' },
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newStringField = indexPattern.fields.find((i) => i.name === 'source')!;
+      const newStringField = indexPattern.getFieldByName('source')!;
 
       const column = termsOperation.onFieldChange(oldColumn, newStringField);
       expect(column).toHaveProperty('dataType', 'string');
       expect(column).toHaveProperty('sourceField', 'source');
       expect(column.params.format).toBeUndefined();
+      // Preserve the parentFormat as it will be ignored down the line if not required
+      expect(column.params.parentFormat).toEqual({ id: 'terms' });
     });
 
     it('should remove secondary fields when a new field is passed', () => {
@@ -253,7 +267,7 @@ describe('terms', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newStringField = indexPattern.fields.find((i) => i.name === 'source')!;
+      const newStringField = indexPattern.getFieldByName('source')!;
 
       const column = termsOperation.onFieldChange(oldColumn, newStringField);
       expect(column.params.secondaryFields).toBeUndefined();
@@ -277,12 +291,58 @@ describe('terms', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const sanemStringField = indexPattern.fields.find((i) => i.name === 'bytes')!;
+      const newNumericField = indexPattern.getFieldByName('bytes')!;
 
-      const column = termsOperation.onFieldChange(oldColumn, sanemStringField, {
+      const column = termsOperation.onFieldChange(oldColumn, newNumericField, {
         secondaryFields: ['dest', 'geo.src'],
       });
       expect(column.params.secondaryFields).toEqual(expect.arrayContaining(['dest', 'geo.src']));
+    });
+
+    it('should reassign the parentFormatter on single field change', () => {
+      const oldColumn: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'bytes',
+        label: 'Top values of bytes',
+        isBucketed: true,
+        dataType: 'number',
+        params: {
+          size: 5,
+          orderBy: {
+            type: 'alphabetical',
+          },
+          orderDirection: 'asc',
+          format: { id: 'number', params: { decimals: 0 } },
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newNumberField = indexPattern.getFieldByName('memory')!;
+
+      const column = termsOperation.onFieldChange(oldColumn, newNumberField);
+      expect(column.params.parentFormat).toEqual({ id: 'terms' });
+    });
+
+    it('should reassign the parentFormatter on multiple fields change', () => {
+      const oldColumn: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'bytes',
+        label: 'Top values of bytes',
+        isBucketed: true,
+        dataType: 'number',
+        params: {
+          size: 5,
+          orderBy: {
+            type: 'alphabetical',
+          },
+          orderDirection: 'asc',
+          format: { id: 'number', params: { decimals: 0 } },
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newNumberField = indexPattern.getFieldByName('memory')!;
+
+      const column = termsOperation.onFieldChange(oldColumn, newNumberField);
+      expect(column.params.parentFormat).toEqual({ id: 'terms' });
     });
   });
 
@@ -515,6 +575,23 @@ describe('terms', () => {
         },
       });
       expect(termsColumn.params).toEqual(expect.objectContaining({ size: 5 }));
+    });
+
+    it('should set a parentFormat as "terms" if a numeric field is passed', () => {
+      const termsColumn = termsOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'number',
+          name: 'numericTest',
+          displayName: 'test',
+        },
+      });
+      expect(termsColumn.params).toEqual(
+        expect.objectContaining({ parentFormat: { id: 'terms' } })
+      );
     });
   });
 
@@ -940,7 +1017,7 @@ describe('terms', () => {
       ).toBeTruthy();
     });
 
-    it('should show an error message when field is invalid', () => {
+    it('should show an error message when first field is invalid', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
@@ -973,7 +1050,7 @@ describe('terms', () => {
       ).toBe('Invalid field. Check your data view or pick another field.');
     });
 
-    it('should show an error message when field is not supported', () => {
+    it('should show an error message when first field is not supported', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
@@ -1005,6 +1082,74 @@ describe('terms', () => {
       expect(
         instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
       ).toBe('This field does not work with the selected function.');
+    });
+
+    it('should show an error message when any field but the first is invalid', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      layer.columns.col1 = {
+        label: 'Top value of geo.src + 1 other',
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+          secondaryFields: ['unsupported'],
+        },
+        sourceField: 'geo.src',
+      } as TermsIndexPatternColumn;
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      expect(
+        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+      ).toBe('Invalid field: "unsupported". Check your data view or pick another field.');
+    });
+
+    it('should show an error message when any field but the first is not supported', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      layer.columns.col1 = {
+        label: 'Top value of geo.src + 1 other',
+        dataType: 'date',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+          secondaryFields: ['timestamp'],
+        },
+        sourceField: 'geo.src',
+      } as TermsIndexPatternColumn;
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      expect(
+        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+      ).toBe('Invalid field: "timestamp". Check your data view or pick another field.');
     });
 
     it('should render the an add button for single layer, but no other hints', () => {
@@ -1294,6 +1439,38 @@ describe('terms', () => {
       );
     });
 
+    it('should filter fields with unsupported types when in multi terms mode', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      // get inner instance
+      expect(
+        instance.find('[data-test-subj="indexPattern-dimension-field-0"]').at(1).prop('options')
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            options: expect.arrayContaining([
+              expect.not.objectContaining({ 'data-test-subj': 'lns-fieldOption-timestamp' }),
+            ]),
+          }),
+        ])
+      );
+    });
+
     it('should limit the number of multiple fields', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
@@ -1363,6 +1540,100 @@ describe('terms', () => {
       expect(
         instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().prop('isDisabled')
       ).toBeTruthy();
+    });
+
+    it('should update the parentFormatter on transition between single to multi terms', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      let instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      // add a new field
+      act(() => {
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
+      });
+      instance = instance.update();
+
+      act(() => {
+        instance.find(EuiComboBox).last().prop('onChange')!([
+          { value: { type: 'field', field: 'bytes' }, label: 'bytes' },
+        ]);
+      });
+
+      expect(updateLayerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: expect.objectContaining({
+            col1: expect.objectContaining({
+              params: expect.objectContaining({
+                parentFormat: { id: 'multi_terms' },
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should preserve custom label when set by the user', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      layer.columns.col1 = {
+        label: 'MyCustomLabel',
+        customLabel: true,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+          secondaryFields: ['geo.src'],
+        },
+        sourceField: 'source',
+      } as TermsIndexPatternColumn;
+      let instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      // add a new field
+      act(() => {
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
+      });
+      instance = instance.update();
+
+      act(() => {
+        instance.find(EuiComboBox).last().prop('onChange')!([
+          { value: { type: 'field', field: 'bytes' }, label: 'bytes' },
+        ]);
+      });
+
+      expect(updateLayerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: expect.objectContaining({
+            col1: expect.objectContaining({
+              label: 'MyCustomLabel',
+            }),
+          }),
+        })
+      );
     });
   });
 
@@ -1593,6 +1864,30 @@ describe('terms', () => {
         'column$$$col2',
         'alphabetical',
         'rare',
+      ]);
+    });
+
+    it('should disable rare ordering for floating point types', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={
+            { ...layer.columns.col1, sourceField: 'memory' } as TermsIndexPatternColumn
+          }
+        />
+      );
+
+      const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
+
+      expect(select.prop('value')).toEqual('alphabetical');
+
+      expect(select.prop('options')!.map(({ value }) => value)).toEqual([
+        'column$$$col2',
+        'alphabetical',
       ]);
     });
 
@@ -2046,7 +2341,10 @@ describe('terms', () => {
           sourceColumn: createMultiTermsColumn(['bytes', 'memory']),
           indexPattern: defaultProps.indexPattern,
         })
-      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes', 'memory']) });
+      ).toEqual({
+        secondaryFields: expect.arrayContaining(['dest', 'bytes', 'memory']),
+        parentFormat: { id: 'multi_terms' },
+      });
     });
 
     it('should return existing multiterms with only new fields from source column', () => {
@@ -2056,7 +2354,10 @@ describe('terms', () => {
           sourceColumn: createMultiTermsColumn(['bytes', 'dest']),
           indexPattern: defaultProps.indexPattern,
         })
-      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes']) });
+      ).toEqual({
+        secondaryFields: expect.arrayContaining(['dest', 'bytes']),
+        parentFormat: { id: 'multi_terms' },
+      });
     });
 
     it('should return existing multiterms with only multiple new fields from source column', () => {
@@ -2066,7 +2367,10 @@ describe('terms', () => {
           sourceColumn: createMultiTermsColumn(['dest', 'bytes', 'memory']),
           indexPattern: defaultProps.indexPattern,
         })
-      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes', 'memory']) });
+      ).toEqual({
+        secondaryFields: expect.arrayContaining(['dest', 'bytes', 'memory']),
+        parentFormat: { id: 'multi_terms' },
+      });
     });
 
     it('should append field to multiterms', () => {
@@ -2079,7 +2383,10 @@ describe('terms', () => {
           field,
           indexPattern,
         })
-      ).toEqual({ secondaryFields: expect.arrayContaining(['bytes']) });
+      ).toEqual({
+        secondaryFields: expect.arrayContaining(['bytes']),
+        parentFormat: { id: 'multi_terms' },
+      });
     });
 
     it('should not append scripted field to multiterms', () => {
@@ -2092,7 +2399,7 @@ describe('terms', () => {
           field,
           indexPattern,
         })
-      ).toEqual({ secondaryFields: [] });
+      ).toEqual({ secondaryFields: [], parentFormat: { id: 'terms' } });
     });
 
     it('should add both sourceColumn and field (as last term) to the targetColumn', () => {
@@ -2105,7 +2412,10 @@ describe('terms', () => {
           field,
           indexPattern,
         })
-      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'memory', 'bytes']) });
+      ).toEqual({
+        secondaryFields: expect.arrayContaining(['dest', 'memory', 'bytes']),
+        parentFormat: { id: 'multi_terms' },
+      });
     });
 
     it('should not add sourceColumn field if it has only scripted field', () => {
@@ -2118,7 +2428,70 @@ describe('terms', () => {
           field,
           indexPattern,
         })
-      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes']) });
+      ).toEqual({
+        secondaryFields: expect.arrayContaining(['dest', 'bytes']),
+        parentFormat: { id: 'multi_terms' },
+      });
+    });
+
+    it('should assign a parent formatter if a custom formatter is present', () => {
+      const indexPattern = createMockedIndexPattern();
+
+      const targetColumn = createMultiTermsColumn(['source', 'dest']);
+      targetColumn.params.format = { id: 'bytes', params: { decimals: 2 } };
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn,
+          sourceColumn: createMultiTermsColumn(['scripted']),
+          indexPattern,
+        })
+      ).toEqual({
+        secondaryFields: expect.arrayContaining(['dest']),
+        parentFormat: { id: 'multi_terms' },
+      });
+    });
+  });
+
+  describe('getNonTransferableFields', () => {
+    it('should return empty array if all fields are transferable', () => {
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn(['source']),
+          defaultProps.indexPattern
+        )
+      ).toEqual([]);
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn(['source', 'bytes']),
+          defaultProps.indexPattern
+        )
+      ).toEqual([]);
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn([]),
+          defaultProps.indexPattern
+        )
+      ).toEqual([]);
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn(['source', 'geo.src']),
+          defaultProps.indexPattern
+        )
+      ).toEqual([]);
+    });
+    it('should return only non transferable fields (invalid or not existence)', () => {
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn(['source', 'timestamp']),
+          defaultProps.indexPattern
+        )
+      ).toEqual(['timestamp']);
+      expect(
+        termsOperation.getNonTransferableFields?.(
+          createMultiTermsColumn(['source', 'unsupported']),
+          defaultProps.indexPattern
+        )
+      ).toEqual(['unsupported']);
     });
   });
 });

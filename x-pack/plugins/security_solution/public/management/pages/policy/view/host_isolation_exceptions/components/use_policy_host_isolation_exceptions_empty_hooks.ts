@@ -14,16 +14,21 @@ import {
   getHostIsolationExceptionsListPath,
 } from '../../../../../common/routing';
 import { APP_UI_ID } from '../../../../../../../common/constants';
+import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
 
-export const useGetLinkTo = (policyId: string, policyName: string) => {
+export const useGetLinkTo = (
+  policyId: string,
+  policyName: string,
+  location?: Partial<HostIsolationExceptionsPageLocation>
+) => {
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
-    const path = getHostIsolationExceptionsListPath();
+    const path = getHostIsolationExceptionsListPath(location);
     return {
       toRoutePath: path,
       toRouteUrl: getAppUrl({ path }),
     };
-  }, [getAppUrl]);
+  }, [getAppUrl, location]);
 
   const policyHostIsolationExceptionsPath = useMemo(
     () => getPolicyHostIsolationExceptionsPath(policyId),
@@ -61,5 +66,6 @@ export const useGetLinkTo = (policyId: string, policyName: string) => {
   return {
     onClickHandler,
     toRouteUrl,
+    state: policyHostIsolationExceptionsRouteState,
   };
 };

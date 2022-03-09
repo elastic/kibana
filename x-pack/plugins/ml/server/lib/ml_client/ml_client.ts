@@ -102,7 +102,7 @@ export function getMlClient(
     // similar to groupIdsCheck above, however we need to load the jobs first to get the groups information
     const ids = getADJobIdsFromRequest(p);
     if (ids.length) {
-      const { body } = await mlClient.getJobs(...p);
+      const body = await mlClient.getJobs(...p);
       await groupIdsCheck(p, body.jobs, filteredJobIds);
     }
   }
@@ -207,14 +207,14 @@ export function getMlClient(
       return mlClient.getCalendarEvents(...p);
     },
     async getCalendars(...p: Parameters<MlClient['getCalendars']>) {
-      const { body } = await mlClient.getCalendars(...p);
-      const {
-        body: { jobs: allJobs },
-      } = await mlClient.getJobs<{ jobs: Job[] }>();
+      const [params, options = {}] = p;
+      const meta = options.meta ?? false;
+      const response = await mlClient.getCalendars(params, { ...options, meta: true });
+      const { jobs: allJobs } = await mlClient.getJobs();
       const allJobIds = allJobs.map((j) => j.job_id);
 
       // flatten the list of all jobs ids and check which ones are valid
-      const calJobIds = [...new Set(body.calendars.map((c) => c.job_ids).flat())];
+      const calJobIds = [...new Set(response.body.calendars.map((c) => c.job_ids).flat())];
       // find groups by getting the cal job ids which aren't real jobs.
       const groups = calJobIds.filter((j) => allJobIds.includes(j) === false);
 
@@ -223,12 +223,19 @@ export function getMlClient(
         'anomaly-detector',
         calJobIds
       );
-      const calendars = body.calendars.map((c) => ({
+      const calendars = response.body.calendars.map((c) => ({
         ...c,
         job_ids: c.job_ids.filter((id) => filteredJobIds.includes(id) || groups.includes(id)),
         total_job_count: calJobIds.length,
       }));
-      return { body: { ...body, calendars } };
+
+      const enhancedBody = { ...response.body, calendars };
+
+      if (meta) {
+        return { ...response, body: enhancedBody };
+      } else {
+        return enhancedBody;
+      }
     },
     async getCategories(...p: Parameters<MlClient['getCategories']>) {
       await jobIdsCheck('anomaly-detector', p);
@@ -237,16 +244,23 @@ export function getMlClient(
     async getDataFrameAnalytics(...p: Parameters<MlClient['getDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p, true);
       try {
-        const { body } = await mlClient.getDataFrameAnalytics<{
-          data_frame_analytics: DataFrameAnalyticsConfig[];
-        }>(...p);
+        const [params, options = {}] = p;
+        const meta = options.meta ?? false;
+
+        const response = await mlClient.getDataFrameAnalytics(params, { ...options, meta: true });
         const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
           'data-frame-analytics',
           // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
-          body.data_frame_analytics,
+          response.body.data_frame_analytics,
           'id'
         );
-        return { body: { ...body, count: jobs.length, data_frame_analytics: jobs } };
+
+        const enhancedBody = { ...response.body, count: jobs.length, data_frame_analytics: jobs };
+        if (meta) {
+          return { ...response, body: enhancedBody };
+        } else {
+          return enhancedBody;
+        }
       } catch (error) {
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
@@ -258,15 +272,26 @@ export function getMlClient(
       // this should use DataFrameAnalyticsStats, but needs a refactor to move DataFrameAnalyticsStats to common
       await jobIdsCheck('data-frame-analytics', p, true);
       try {
-        const { body } = (await mlClient.getDataFrameAnalyticsStats(...p)) as unknown as {
+        const [params, options = {}] = p;
+        const meta = options.meta ?? false;
+        const response = (await mlClient.getDataFrameAnalyticsStats(params, {
+          ...options,
+          meta: true,
+        })) as unknown as {
           body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
         };
         const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
           'data-frame-analytics',
-          body.data_frame_analytics,
+          response.body.data_frame_analytics,
           'id'
         );
-        return { body: { ...body, count: jobs.length, data_frame_analytics: jobs } };
+
+        const enhancedBody = { ...response.body, count: jobs.length, data_frame_analytics: jobs };
+        if (meta) {
+          return { ...response, body: enhancedBody };
+        } else {
+          return enhancedBody;
+        }
       } catch (error) {
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
@@ -277,13 +302,21 @@ export function getMlClient(
     async getDatafeedStats(...p: Parameters<MlClient['getDatafeedStats']>) {
       await datafeedIdsCheck(p, true);
       try {
-        const { body } = await mlClient.getDatafeedStats(...p);
+        const [params, options = {}] = p;
+        const meta = options.meta ?? false;
+        const response = await mlClient.getDatafeedStats(params, { ...options, meta: true });
         const datafeeds = await jobSavedObjectService.filterDatafeedsForSpace(
           'anomaly-detector',
-          body.datafeeds,
+          response.body.datafeeds,
           'datafeed_id'
         );
-        return { body: { ...body, count: datafeeds.length, datafeeds } };
+
+        const enhancedBody = { ...response.body, count: datafeeds.length, datafeeds };
+        if (meta) {
+          return { ...response, body: enhancedBody };
+        } else {
+          return enhancedBody;
+        }
       } catch (error) {
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
@@ -294,13 +327,21 @@ export function getMlClient(
     async getDatafeeds(...p: Parameters<MlClient['getDatafeeds']>) {
       await datafeedIdsCheck(p, true);
       try {
-        const { body } = await mlClient.getDatafeeds(...p);
+        const [params, options = {}] = p;
+        const meta = options.meta ?? false;
+        const response = await mlClient.getDatafeeds(params, { ...options, meta: true });
         const datafeeds = await jobSavedObjectService.filterDatafeedsForSpace<Datafeed>(
           'anomaly-detector',
-          body.datafeeds,
+          response.body.datafeeds,
           'datafeed_id'
         );
-        return { body: { ...body, count: datafeeds.length, datafeeds } };
+
+        const enhancedBody = { ...response.body, count: datafeeds.length, datafeeds };
+        if (meta) {
+          return { ...response, body: enhancedBody };
+        } else {
+          return enhancedBody;
+        }
       } catch (error) {
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
@@ -317,17 +358,25 @@ export function getMlClient(
     },
     async getJobStats(...p: Parameters<MlClient['getJobStats']>) {
       try {
-        const { body } = await mlClient.getJobStats(...p);
+        const [params, options = {}] = p;
+        const meta = options.meta ?? false;
+        const response = await mlClient.getJobStats(params, { ...options, meta: true });
         const jobs = await jobSavedObjectService.filterJobsForSpace(
           'anomaly-detector',
-          body.jobs,
+          response.body.jobs,
           'job_id'
         );
         await groupIdsCheckFromJobStats(
           jobs.map((j) => j.job_id),
           ...p
         );
-        return { body: { ...body, count: jobs.length, jobs } };
+
+        const enhancedBody = { ...response.body, count: jobs.length, jobs };
+        if (meta) {
+          return { ...response, body: enhancedBody };
+        } else {
+          return enhancedBody;
+        }
       } catch (error) {
         if (error instanceof MLJobNotFound) {
           throw error;
@@ -340,18 +389,26 @@ export function getMlClient(
     },
     async getJobs(...p: Parameters<MlClient['getJobs']>) {
       try {
-        const { body } = await mlClient.getJobs<{ jobs: Job[] }>(...p);
+        const [params, options = {}] = p;
+        const meta = options.meta ?? false;
+        const response = await mlClient.getJobs(params, { ...options, meta: true });
         const jobs = await jobSavedObjectService.filterJobsForSpace<Job>(
           'anomaly-detector',
-          body.jobs,
+          response.body.jobs,
           'job_id'
         );
         await groupIdsCheck(
           p,
-          body.jobs,
+          response.body.jobs,
           jobs.map((j) => j.job_id)
         );
-        return { body: { ...body, count: jobs.length, jobs } };
+
+        const enhancedBody = { ...response.body, count: jobs.length, jobs };
+        if (meta) {
+          return { ...response, body: enhancedBody };
+        } else {
+          return enhancedBody;
+        }
       } catch (error) {
         if (error instanceof MLJobNotFound) {
           throw error;
@@ -485,11 +542,14 @@ export function getMlClient(
       // @ts-expect-error body doesn't exist in the type
       const { datafeed_id: id, body } = p[0];
 
-      return client.asInternalUser.transport.request({
-        method: 'POST',
-        path: `/_ml/datafeeds/${id}/_update`,
-        body,
-      });
+      return client.asInternalUser.transport.request(
+        {
+          method: 'POST',
+          path: `/_ml/datafeeds/${id}/_update`,
+          body,
+        },
+        p[1]
+      );
 
       // this should be reinstated once https://github.com/elastic/elasticsearch-js/issues/1601
       // is fixed

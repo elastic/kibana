@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   checkAAD,
-  getTestAlertData,
+  getTestRuleData,
   getConsumerUnauthorizedErrorMessage,
   getUrlPrefix,
   ObjectRemover,
@@ -57,7 +57,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 actions: [
                   {
                     id: createdAction.id,
@@ -124,7 +124,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
-                monitoring: response.body.monitoring,
               });
               expect(typeof response.body.scheduled_task_id).to.be('string');
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
@@ -156,7 +155,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
@@ -195,7 +194,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
@@ -245,7 +244,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.noop',
                 consumer: 'alerts',
               })
@@ -291,7 +290,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.noop',
                 consumer: 'some consumer patrick invented',
               })
@@ -326,7 +325,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData({ enabled: false }));
+            .send(getTestRuleData({ enabled: false }));
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -362,7 +361,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 name: ' leading and trailing whitespace ',
               })
             );
@@ -401,7 +400,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.unregistered-alert-type',
               })
             );
@@ -459,7 +458,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.validation',
               })
             );
@@ -501,7 +500,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData(getTestAlertData({ schedule: { interval: '10x' } })));
+            .send(getTestRuleData({ schedule: { interval: '10x' } }));
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -528,7 +527,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData(getTestAlertData({ schedule: { interval: '0s' } })));
+            .send(getTestRuleData({ schedule: { interval: '0s' } }));
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':

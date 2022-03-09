@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ColorRanges, ColorRangesProps } from './color_ranges';
@@ -14,18 +14,18 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ColorRangesContext } from './color_ranges_context';
 
 const extraActionSelectors = {
-  addColorRange: '[data-test-subj^="lnsPalettePanel_dynamicColoring_addColorRange"]',
+  addColor: '[data-test-subj^="lnsPalettePanel_dynamicColoring_addColor"]',
   reverseColors: '[data-test-subj^="lnsPalettePanel_dynamicColoring_reverseColors"]',
-  distributeEqually: '[data-test-subj="lnsPalettePanel_dynamicColoring_distributeEqually"]',
+  distributeValues: '[data-test-subj="lnsPalettePanel_dynamicColoring_distributeValues"]',
 };
 
 const pageObjects = {
   getAddColorRangeButton: (component: ReactWrapper) =>
-    component.find(extraActionSelectors.addColorRange).first(),
+    component.find(extraActionSelectors.addColor).first(),
   reverseColors: (component: ReactWrapper) =>
     component.find(extraActionSelectors.reverseColors).first(),
-  distributeEqually: (component: ReactWrapper) =>
-    component.find(extraActionSelectors.distributeEqually).first(),
+  distributeValues: (component: ReactWrapper) =>
+    component.find(extraActionSelectors.distributeValues).first(),
 };
 
 function renderColorRanges(props: ColorRangesProps) {
@@ -142,7 +142,7 @@ describe('Color Ranges', () => {
     });
   });
 
-  it('should distribute equally ranges when use click on "Distribute equally" button', () => {
+  it('should distribute equally ranges when use click on "Distribute values" button', () => {
     props.colorRanges = [
       { color: '#aaa', start: 0, end: 2 },
       { color: '#bbb', start: 3, end: 4 },
@@ -153,7 +153,7 @@ describe('Color Ranges', () => {
     const component = renderColorRanges(props);
 
     act(() => {
-      pageObjects.distributeEqually(component).simulate('click');
+      pageObjects.distributeValues(component).simulate('click');
     });
 
     component.update();

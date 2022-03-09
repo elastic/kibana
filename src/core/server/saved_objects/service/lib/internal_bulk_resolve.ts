@@ -138,7 +138,7 @@ export async function internalBulkResolve<T>(
   const bulkGetResponse = docsToBulkGet.length
     ? await client.mget<SavedObjectsRawDocSource>(
         { body: { docs: docsToBulkGet } },
-        { ignore: [404] }
+        { ignore: [404], meta: true }
       )
     : undefined;
   // exit early if a 404 isn't from elasticsearch
@@ -293,7 +293,7 @@ async function fetchAndUpdateAliases(
     require_alias: true,
     body: bulkUpdateDocs,
   });
-  return bulkUpdateResponse.body.items.map((item) => {
+  return bulkUpdateResponse.items.map((item) => {
     // Map the bulk update response to the `_source` fields that were returned for each document
     return item.update?.get;
   });

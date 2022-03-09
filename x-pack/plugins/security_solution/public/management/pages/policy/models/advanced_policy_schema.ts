@@ -840,4 +840,37 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'mac.advanced.kernel.network_extension.enable_content_filtering',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network_extension.enable_content_filtering',
+      {
+        defaultMessage:
+          'Enable or disable the network content filter, this will enable/disable network eventing. Host isolation will fail if this option is disabled. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.kernel.network_extension.enable_packet_filtering',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network_extension.enable_packet_filtering',
+      {
+        defaultMessage:
+          'Enable or disable the network packet filter. Host isolation will fail if this option is disabled. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode_trampoline_detection',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_trampoline_detection',
+      {
+        defaultMessage:
+          'Enable trampoline-based shellcode injection detection as a part of memory protection. Default: true',
+      }
+    ),
+  },
 ];

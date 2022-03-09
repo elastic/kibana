@@ -38,6 +38,37 @@ This plugin provides cases management in Kibana
 cases: CasesUiStart;
 ```
 
+#### CasesContext setup
+
+To use any of the Cases UI hooks you must first initialize `CasesContext` in your plugin.
+
+Without a `CasesContext` the hooks won't work and won't be able to render.
+
+`CasesContext` works a bridge between your plugin and the Cases UI. It effectively renders
+the Cases UI.
+
+To initialize the `CasesContext` you can use this code:
+
+
+```ts
+// somewhere high on your plugin render tree
+<CasesContext
+  owner={[PLUGIN_CASES_OWNER_ID]}
+  userCanCrud={CASES_USER_CAN_CRUD}
+  features={CASES_FEATURES}
+>
+  <RouteRender /> {/* or something similar */}
+</CasesContext/>
+```
+
+props:
+
+| prop                  | type            | description                                                    |
+|-----------------------|-----------------|----------------------------------------------------------------|
+| PLUGIN_CASES_OWNER_ID | `string`        | The owner string for your plugin. e.g: securitySolution        |
+| CASES_USER_CAN_CRUD   | `boolean`       | Defines if the user has access to cases to CRUD                |
+| CASES_FEATURES        | `CasesFeatures` | `CasesFeatures` object defining the features to enable/disable |
+
 #### Cases UI Methods
 
 - From the UI component, get the component from the `useKibana` hook start services
@@ -74,7 +105,7 @@ Arguments:
 | userCanCrud                                                          | `boolean;` user permissions to crud                                                                                                                               |
 | owner                                                                | `string[];` owner ids of the cases                                                                                                                                |
 | basePath                                                             | `string;` path to mount the Cases router on top of                                                                                                                |
-| useFetchAlertData                                                    | `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts                                                                                            |
+| useFetchAlertData                                                    | `(alertIds: string[]) => [boolean, Record<string, unknown>];` fetch alerts                                                                                            |
 | disableAlerts?                                                       | `boolean` (default: false) flag to not show alerts information                                                                                                    |
 | actionsNavigation?                                                   | <code>CasesNavigation<string, 'configurable'></code>                                                                                                              |
 | ruleDetailsNavigation?                                               | <code>CasesNavigation<string &vert; null &vert; undefined, 'configurable'></code>                                                                                 |
@@ -139,6 +170,57 @@ Arguments:
 
 UI component:
 ![Recent Cases Component][recent-cases-img]
+
+### hooks
+
+
+#### getUseCasesAddToNewCaseFlyout
+
+Returns an object containing two methods: `open` and `close` to either open or close the add to new case flyout.
+You can use this hook to prompt the user to create a new case with some attachments directly attached to it. e.g.: alerts or text comments.
+
+
+Arguments:
+
+| Property          | Description                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| userCanCrud       | `boolean;` user permissions to crud                                                                                |
+| onClose           | `() => void;` callback when create case is canceled                                                                |
+| onSuccess         | `(theCase: Case) => Promise<void>;` callback passing newly created case after pushCaseToExternalService is called  |
+| afterCaseCreated? | `(theCase: Case) => Promise<void>;` callback passing newly created case before pushCaseToExternalService is called |
+| attachments?      | `CaseAttachments`; array of `SupportedCaseAttachment` (see types) that will be attached to the newly created case  |
+
+returns: an object with `open` and `close` methods to open or close the flyout.
+
+`open()` and `close()` don't take any arguments. They will open or close the flyout at will.
+
+#### `getUseCasesAddToExistingCaseModal`
+
+Returns an object containing two methods: `open` and `close` to either open or close the  case selector modal.
+
+You can use this hook to prompt the user to select a case and get the selected case. You can also pass attachments directly  and have them attached to the selected case after selection. e.g.: alerts or text comments.
+
+
+Arguments:
+
+| Property        | Description                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------- |
+| onRowClick      | <code>(theCase?: Case) => void;</code> callback for row click, passing case in row |
+| updateCase?     | <code>(theCase: Case) => void;</code> callback after case has been updated         |
+| onClose?        | `() => void` called when the modal is closed without selecting a case                             |
+| attachments?    | `CaseAttachments`; array of `SupportedCaseAttachment` (see types) that will be attached to the newly created case  |
+
+### helpers
+
+#### getRuleIdFromEvent
+
+Returns an object with a rule `id` and `name` of the event passed. This helper method is necessary to bridge the gap between previous events schema and new ones.
+
+Arguments:
+
+| property | description                                                                                  |
+|----------|----------------------------------------------------------------------------------------------|
+| event    | Event containing an `ecs` attribute with ecs data and a `data` attribute with `nonEcs` data. |
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->

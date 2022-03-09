@@ -16,7 +16,7 @@ export const PolicyHostIsolationExceptionsEmptyUnexisting = ({
 }: {
   policy: PolicyData;
 }) => {
-  const { onClickHandler, toRouteUrl } = useGetLinkTo(policy.id, policy.name);
+  const { onClickHandler, toRouteUrl } = useGetLinkTo(policy.id, policy.name, { show: 'create' });
 
   return (
     <EuiPageTemplate template="centeredContent">

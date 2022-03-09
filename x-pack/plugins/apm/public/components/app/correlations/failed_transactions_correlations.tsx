@@ -16,7 +16,6 @@ import {
   EuiSpacer,
   EuiIcon,
   EuiTitle,
-  EuiBetaBadge,
   EuiBadge,
   EuiToolTip,
   EuiSwitch,
@@ -451,31 +450,6 @@ export function FailedTransactionsCorrelations({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiBetaBadge
-            label={i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaLabel',
-              {
-                defaultMessage: 'Beta',
-              }
-            )}
-            title={i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaTitle',
-              {
-                defaultMessage: 'Failed transaction correlations',
-              }
-            )}
-            tooltipContent={i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaDescription',
-              {
-                defaultMessage:
-                  'Failed transaction correlations is not GA. Please help us by reporting any bugs.',
-              }
-            )}
-          />
-        </EuiFlexItem>
-
         <EuiFlexItem>
           <ChartTitleToolTip />
         </EuiFlexItem>

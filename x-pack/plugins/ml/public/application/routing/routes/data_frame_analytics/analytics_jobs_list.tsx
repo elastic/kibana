@@ -20,6 +20,9 @@ export const analyticsJobsListRouteFactory = (
 ): MlRoute => ({
   id: 'data_frame_analytics',
   path: '/data_frame_analytics',
+  title: i18n.translate('xpack.ml.dataFrameAnalytics.jobs.docTitle', {
+    defaultMessage: 'Data Frame Analytics Jobs',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),

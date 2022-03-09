@@ -287,9 +287,7 @@
                 "label": "reportUiCounter",
                 "description": [],
                 "signature": [
-                  "((appName: string, type: ",
-                  "UiCounterMetricType",
-                  ", eventNames: string | string[], count?: number | undefined) => void) | undefined"
+                  "((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -5204,9 +5202,7 @@
             "section": "def-public.NotificationsStart",
             "text": "NotificationsStart"
           },
-          "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: ",
-          "UiCounterMetricType",
-          ", eventNames: string | string[], count?: number | undefined) => void) | undefined; theme: ",
+          "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined; theme: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -5493,9 +5489,7 @@
                 "label": "reportUiCounter",
                 "description": [],
                 "signature": [
-                  "((appName: string, type: ",
-                  "UiCounterMetricType",
-                  ", eventNames: string | string[], count?: number | undefined) => void) | undefined"
+                  "((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false
@@ -5830,6 +5824,19 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableChildPanelProps.index",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableChildPanelProps.className",
             "type": "string",
             "tags": [],
@@ -5917,7 +5924,7 @@
                 "section": "def-public.EmbeddableContainerContext",
                 "text": "EmbeddableContainerContext"
               },
-              " | undefined; }>"
+              " | undefined; index?: number | undefined; }>"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
             "deprecated": false,
@@ -8680,7 +8687,7 @@
             "section": "def-public.EmbeddableContainerContext",
             "text": "EmbeddableContainerContext"
           },
-          " | undefined; }>"
+          " | undefined; index?: number | undefined; }>"
         ],
         "path": "src/plugins/embeddable/public/plugin.tsx",
         "deprecated": false,
@@ -9348,7 +9355,7 @@
               "section": "def-public.EmbeddableContainerContext",
               "text": "EmbeddableContainerContext"
             },
-            " | undefined; }>"
+            " | undefined; index?: number | undefined; }>"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,

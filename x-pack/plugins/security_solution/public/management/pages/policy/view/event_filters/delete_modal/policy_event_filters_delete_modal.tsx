@@ -16,10 +16,12 @@ import { useBulkUpdateEventFilters } from '../hooks';
 
 export const PolicyEventFiltersDeleteModal = ({
   policyId,
+  policyName,
   exception,
   onCancel,
 }: {
   policyId: string;
+  policyName: string;
   exception: ExceptionListItemSchema;
   onCancel: () => void;
 }) => {
@@ -36,8 +38,8 @@ export const PolicyEventFiltersDeleteModal = ({
           text: i18n.translate(
             'xpack.securitySolution.endpoint.policy.eventFilters.list.removeDialog.successToastText',
             {
-              defaultMessage: '"{exception}" has been removed from policy',
-              values: { exception: exception.name },
+              defaultMessage: '"{eventFilterName}" has been removed from {policyName} policy',
+              values: { eventFilterName: exception.name, policyName },
             }
           ),
         });
