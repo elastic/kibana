@@ -26,17 +26,17 @@ const Millis2Nanos = 1000 * 1000;
 export interface IExecutionLog {
   id: string;
   timestamp: string;
-  duration_ms: number | null;
+  duration_ms: number;
   status: string;
   message: string;
   num_active_alerts: number;
   num_new_alerts: number;
   num_recovered_alerts: number;
-  num_triggered_actions: number | null;
+  num_triggered_actions: number;
   num_succeeded_actions: number;
   num_errored_actions: number;
-  total_search_duration_ms: number | null;
-  es_search_duration_ms: number | null;
+  total_search_duration_ms: number;
+  es_search_duration_ms: number;
   timed_out: boolean;
 }
 
@@ -240,19 +240,30 @@ export function formatExecutionLogAggBucket(bucketVal: IBucketAggregationResult)
     num_active_alerts: bucketVal.alertCounts.buckets.activeAlerts.doc_count,
     num_new_alerts: bucketVal.alertCounts.buckets.newAlerts.doc_count,
     num_recovered_alerts: bucketVal.alertCounts.buckets.recoveredAlerts.doc_count,
-    num_triggered_actions: bucketVal.ruleExecution.numTriggeredActions.value,
+    num_triggered_actions: bucketVal.ruleExecution.numTriggeredActions.value ?? 0,
     num_succeeded_actions: actionExecutionSuccess,
     num_errored_actions: actionExecutionError,
-    total_search_duration_ms: bucketVal.ruleExecution.totalSearchDuration.value,
-    es_search_duration_ms: bucketVal.ruleExecution.esSearchDuration.value,
+    total_search_duration_ms: bucketVal.ruleExecution.totalSearchDuration.value ?? 0,
+    es_search_duration_ms: bucketVal.ruleExecution.esSearchDuration.value ?? 0,
     timed_out: timedOut,
   };
 }
 
 export function formatExecutionLogResult(results: AggregateEventsBySavedObjectResult) {
-  const { aggregateResults } = results;
-  const total = aggregateResults.executionUuidCardinality.value;
-  const buckets: IBucketAggregationResult[] = aggregateResults.executionUuid.buckets;
+  const { aggregations } = results;
+
+  if (!aggregations) {
+    return {
+      total: 0,
+      data: [],
+    };
+  }
+
+  const total = (aggregations.executionUuidCardinality as estypes.AggregationsCardinalityAggregate)
+    .value;
+  const buckets = (
+    aggregations.executionUuid as estypes.AggregationsMultiBucketAggregateBase<IBucketAggregationResult>
+  ).buckets as IBucketAggregationResult[];
 
   return {
     total,

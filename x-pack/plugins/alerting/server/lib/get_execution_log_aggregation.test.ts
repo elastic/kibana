@@ -9,7 +9,6 @@ import {
   getExecutionLogAggregation,
   formatExecutionLogResult,
 } from './get_execution_log_aggregation';
-import { AggregateEventsBySavedObjectResult } from '../../../event_log/server';
 
 describe('getExecutionLogAggregation', () => {
   test('should throw error when given bad sort field', () => {
@@ -124,7 +123,7 @@ describe('getExecutionLogAggregation', () => {
 describe('formatExecutionLogResult', () => {
   test('should format results correctly', () => {
     const results = {
-      aggregateResults: {
+      aggregations: {
         executionUuid: {
           meta: {},
           doc_count_error_upper_bound: 0,
@@ -338,7 +337,7 @@ describe('formatExecutionLogResult', () => {
 
   test('should format results correctly when execution timeouts occur', () => {
     const results = {
-      aggregateResults: {
+      aggregations: {
         executionUuid: {
           meta: {},
           doc_count_error_upper_bound: 0,
