@@ -11,8 +11,8 @@ import { ApplicationStart } from 'src/core/public';
 import { getClosestLink, hasActiveModifierKey } from './utils';
 
 interface CreateCrossAppClickHandlerOptions {
-  container: HTMLElement;
   navigateToUrl: ApplicationStart['navigateToUrl'];
+  container?: HTMLElement;
 }
 
 export const createNavigateToUrlClickHandler = ({
