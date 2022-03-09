@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import { journey, step, expect, before, after, Page } from '@elastic/synthetics';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 import { DataStream } from '../../common/runtime_types/monitor_management';
@@ -14,10 +15,10 @@ const basicMonitorDetails = {
   location: 'US Central',
   schedule: '@every 3m',
 };
-const httpName = 'http monitor';
-const icmpName = 'icmp monitor';
-const tcpName = 'tcp monitor';
-const browserName = 'browser monitor';
+const httpName = `http monitor ${uuid.v4()}`;
+const icmpName = `icmp monitor ${uuid.v4()}`;
+const tcpName = `tcp monitor ${uuid.v4()}`;
+const browserName = `browser monitor ${uuid.v4()}`;
 
 const configuration = {
   [DataStream.HTTP]: {
@@ -154,7 +155,7 @@ Object.keys(configuration).forEach((type) => {
 journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page; params: any }) => {
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const defaultMonitorDetails = {
-    name: 'Sample monitor',
+    name: `Sample monitor ${uuid.v4()}`,
     location: 'US Central',
     schedule: '@every 3m',
     apmServiceName: 'service',
