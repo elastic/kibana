@@ -89,10 +89,6 @@ export interface SavedObjectsImportMissingReferencesError {
 export interface SavedObjectsImportFailure {
   id: string;
   type: string;
-  /**
-   * @deprecated Use `meta.title` instead
-   */
-  title?: string;
   meta: { title?: string; icon?: string };
   /**
    * If `overwrite` is specified, an attempt was made to overwrite an existing object.
