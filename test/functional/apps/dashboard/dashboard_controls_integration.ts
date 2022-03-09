@@ -51,12 +51,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('shows the empty control callout on a new dashboard', async () => {
-      await testSubjects.existOrFail('controls-empty');
+    describe('Controls callout visibility', async () => {
+      describe('does not show the empty control callout on an empty dashboard', async () => {
+        it('in view mode', async () => {
+          await dashboard.saveDashboard('Test Controls Callout');
+          await dashboard.clickCancelOutOfEditMode();
+          await testSubjects.missingOrFail('controls-empty');
+        });
+
+        it('in edit mode', async () => {
+          await dashboard.switchToEditMode();
+          await testSubjects.missingOrFail('controls-empty');
+        });
+      });
+
+      it('show the empty control callout on a dashboard with panels', async () => {
+        await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
+        await testSubjects.existOrFail('controls-empty');
+      });
+
+      it('adding control hides the empty control callout', async () => {
+        await dashboardControls.createOptionsListControl({
+          dataViewTitle: 'animals-*',
+          fieldName: 'sound.keyword',
+        });
+        await testSubjects.missingOrFail('controls-empty');
+      });
+
+      after(async () => {
+        await dashboard.clickCancelOutOfEditMode();
+        await dashboard.gotoDashboardLandingPage();
+      });
     });
 
     describe('Options List Control creation and editing experience', async () => {
       it('can add a new options list control from a blank state', async () => {
+        await dashboard.clickNewDashboard();
+        await timePicker.setDefaultDataRange();
         await dashboardControls.createOptionsListControl({ fieldName: 'machine.os.raw' });
         expect(await dashboardControls.getControlsCount()).to.be(1);
       });
@@ -114,7 +145,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Interact with options list on dashboard', async () => {
       before(async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
-
         await dashboardControls.createOptionsListControl({
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
