@@ -1488,6 +1488,7 @@ module.exports = {
         'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
+        '@typescript-eslint/no-unused-vars': 'error',
       },
     },
     {
