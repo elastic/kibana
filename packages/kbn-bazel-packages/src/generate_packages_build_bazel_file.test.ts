@@ -8,11 +8,11 @@
 
 import { generatePackagesBuildBazelFile } from './generate_packages_build_bazel_file';
 
-import { Package } from './package';
+import { BazelPackage } from './bazel_package';
 
 it('produces a valid BUILD.bazel file', () => {
   const packages = [
-    new Package(
+    new BazelPackage(
       'foo',
       {},
       `
@@ -24,7 +24,7 @@ it('produces a valid BUILD.bazel file', () => {
         )
       `
     ),
-    new Package(
+    new BazelPackage(
       'bar',
       {},
       `
@@ -33,7 +33,7 @@ it('produces a valid BUILD.bazel file', () => {
         )
       `
     ),
-    new Package(
+    new BazelPackage(
       'bar',
       {},
       `
@@ -42,7 +42,7 @@ it('produces a valid BUILD.bazel file', () => {
         )
       `
     ),
-    new Package('bar', {}),
+    new BazelPackage('bar', {}),
   ];
 
   expect(generatePackagesBuildBazelFile(packages)).toMatchInlineSnapshot(`
