@@ -7,9 +7,18 @@
 
 import React, { useState, useMemo } from 'react';
 
-import { EuiCallOut, EuiButton, EuiSpacer, EuiLink, EuiCodeBlock } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiButton,
+  EuiSpacer,
+  EuiLink,
+  EuiCodeBlock,
+  EuiCopy,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import type { EuiCallOutProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../../../hooks';
 
@@ -101,6 +110,25 @@ const LogstashInstructionSteps = () => {
               <EuiCodeBlock paddingSize="m">
                 <h5>API Key</h5>
                 {logstashApiKey.apiKey}
+                <EuiCopy textToCopy={logstashApiKey.apiKey}>
+                  {(copy) => (
+                    <div className="euiCodeBlock__controls">
+                      <div className="euiCodeBlock__copyButton">
+                        <EuiButtonIcon
+                          onClick={copy}
+                          iconType="copyClipboard"
+                          color="text"
+                          aria-label={i18n.translate(
+                            'xpack.fleet.settings.logstashInstructions.copyApiKeyButtonLabel',
+                            {
+                              defaultMessage: 'Copy message',
+                            }
+                          )}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </EuiCopy>
               </EuiCodeBlock>
             ) : (
               <EuiButton
@@ -125,7 +153,7 @@ const LogstashInstructionSteps = () => {
               defaultMessage="In your Logstash configuration directory, open the pipelines.yml file and add the following configuration. Replace the path to your file."
             />
             <EuiSpacer size="m" />
-            <EuiCodeBlock paddingSize="m" language="yaml">
+            <EuiCodeBlock paddingSize="m" language="yaml" isCopyable>
               {LOGSTASH_CONFIG_PIPELINES}
             </EuiCodeBlock>
           </>
@@ -139,7 +167,7 @@ const LogstashInstructionSteps = () => {
               defaultMessage="Next, open the elastic-agent-pipeline.config file and insert the following content:"
             />
             <EuiSpacer size="m" />
-            <EuiCodeBlock paddingSize="m" language="yaml">
+            <EuiCodeBlock paddingSize="m" language="yaml" isCopyable>
               {getLogstashPipeline(logstashApiKey.apiKey)}
             </EuiCodeBlock>
           </>
