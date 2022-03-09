@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { parseDuration } from '.';
 import { AggregateEventsBySavedObjectResult } from '../../../event_log/server';
 
-const DEFAULT_MAX_BUCKETS_LIMIT = 65535;
+const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';

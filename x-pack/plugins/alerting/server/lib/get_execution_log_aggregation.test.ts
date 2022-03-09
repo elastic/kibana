@@ -39,7 +39,7 @@ describe('getNumExecutions', () => {
         new Date('2020-12-02T00:00:00.000Z'),
         '1s'
       )
-    ).toEqual(65535);
+    ).toEqual(1000);
   });
 });
 
