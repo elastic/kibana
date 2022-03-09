@@ -10,7 +10,11 @@ import React, { Component } from 'react';
 import { MetricVisValue } from './metric_value';
 import { VisParams, MetricOptions } from '../../common/types';
 import type { IFieldFormat } from '../../../../field_formats/common';
-import { getColumnByAccessor } from '../../../../visualizations/common/utils';
+import {
+  getColumnByAccessor,
+  getAccessor,
+  getFormatByAccessor,
+} from '../../../../visualizations/common/utils';
 import { Datatable } from '../../../../expressions/public';
 import { CustomPaletteState } from '../../../../charts/public';
 import { getFormatService, getPaletteService } from '../../../expression_metric/public/services';
@@ -52,7 +56,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
       const bucketColumn = getColumnByAccessor(dimensions.bucket!, table.columns);
       bucketColumnId = bucketColumn?.id!;
       bucketFormatter = getFormatService().deserialize(
-        typeof dimensions.bucket === 'string' ? bucketColumn?.meta.params : dimensions.bucket.format
+        getFormatByAccessor(dimensions.bucket, table.columns)
       );
     }
 
@@ -60,7 +64,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
       (acc: MetricOptions[], metric: string | ExpressionValueVisDimension) => {
         const column = getColumnByAccessor(metric, table?.columns);
         const formatter = getFormatService().deserialize(
-          typeof metric === 'string' ? column?.meta.params : metric.format
+          getFormatByAccessor(metric, table.columns)
         );
         const metrics = table.rows.map((row, rowIndex) => {
           let title = column!.name;
@@ -107,10 +111,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         data: [
           {
             table,
-            column:
-              typeof dimensions.bucket === 'string'
-                ? dimensions.bucket
-                : dimensions.bucket.accessor,
+            column: getAccessor(dimensions.bucket),
             row,
           },
         ],

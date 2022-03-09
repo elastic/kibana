@@ -13,7 +13,7 @@ import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } fr
 import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { Datatable } from '../../../../expressions/public';
-import { getColumnByAccessor } from '../../../../visualizations/common/utils';
+import { getFormatByAccessor, getAccessor } from '../../../../visualizations/common/utils';
 import { PartitionVisParams } from '../../common/types';
 import { FieldFormatsStart } from '../../../../field_formats/public';
 import { FilterEvent } from '../types';
@@ -46,17 +46,12 @@ export const getLegendActions = (
 
     let formattedTitle = '';
     if (visParams.dimensions.buckets) {
-      const column = visParams.dimensions.buckets.find(
-        (bucket) =>
-          (typeof bucket === 'string' ? bucket : bucket.accessor) === filterData.data.data[0].column
+      const accessor = visParams.dimensions.buckets.find(
+        (bucket) => getAccessor(bucket) === filterData.data.data[0].column
       );
       formattedTitle =
         formatter
-          .deserialize(
-            typeof column === 'string'
-              ? getColumnByAccessor(column, visData.columns)!.meta.params
-              : column?.format
-          )
+          .deserialize(getFormatByAccessor(accessor!, visData.columns))
           .convert(pieSeries.key) ?? '';
     }
 

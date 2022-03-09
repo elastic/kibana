@@ -60,6 +60,19 @@ export const validateAccessor = (
   }
 };
 
+export function getAccessor(dimension: string | ExpressionValueVisDimension) {
+  return typeof dimension === 'string' ? dimension : dimension.accessor;
+}
+
+export function getFormatByAccessor(
+  dimension: string | ExpressionValueVisDimension,
+  columns: DatatableColumn[]
+) {
+  return typeof dimension === 'string'
+    ? getColumnByAccessor(dimension, columns)?.meta.params
+    : dimension.format;
+}
+
 export const getColumnByAccessor = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns'] = []

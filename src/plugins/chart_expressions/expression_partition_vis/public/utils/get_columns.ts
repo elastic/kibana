@@ -7,7 +7,7 @@
  */
 
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { getColumnByAccessor } from '../../../../visualizations/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '../../../../visualizations/common/utils';
 import { DatatableColumn, Datatable } from '../../../../expressions/public';
 import { BucketColumns, PartitionVisParams } from '../../common/types';
 
@@ -31,7 +31,7 @@ export const getColumns = (
       const column = getColumnByAccessor(bucket, visData.columns);
       return {
         ...column,
-        format: typeof bucket === 'string' ? column?.meta.params : bucket.format,
+        format: getFormatByAccessor(bucket, visData.columns),
       };
     });
 

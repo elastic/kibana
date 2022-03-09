@@ -14,7 +14,11 @@ import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/chart
 import type { PaletteRegistry, PaletteOutput } from '../../../../charts/public';
 import { IInterpreterRenderHandlers } from '../../../../expressions/public';
 import { getFormatService } from '../format_service';
-import { getColumnByAccessor } from '../../../../visualizations/common/utils';
+import {
+  getColumnByAccessor,
+  getAccessor,
+  getFormatByAccessor,
+} from '../../../../visualizations/common/utils';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 
@@ -81,14 +85,13 @@ export const TagCloudChart = ({
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
   const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
-  const bucketColumn = bucket ? getColumnByAccessor(bucket, visData.columns)! : null;
+
   const bucketFormatter = bucket
-    ? getFormatService().deserialize(
-        typeof bucket === 'string' ? bucketColumn?.meta?.params : bucket.format
-      )
+    ? getFormatService().deserialize(getFormatByAccessor(bucket, visData.columns))
     : null;
 
   const tagCloudData = useMemo(() => {
+    const bucketColumn = bucket ? getColumnByAccessor(bucket, visData.columns)! : null;
     const tagColumn = bucket ? bucketColumn!.id : null;
     const metricColumn = getColumnByAccessor(metric, visData.columns)!.id;
 
@@ -109,7 +112,6 @@ export const TagCloudChart = ({
       };
     });
   }, [
-    bucketColumn,
     bucket,
     bucketFormatter,
     metric,
@@ -168,7 +170,7 @@ export const TagCloudChart = ({
           data: [
             {
               table: visData,
-              column: typeof bucket === 'string' ? bucket : bucket.accessor,
+              column: getAccessor(bucket),
               row: rowIndex,
             },
           ],

@@ -25,7 +25,10 @@ import {
 import type { CustomPaletteState } from '../../../../charts/public';
 import { search } from '../../../../data/public';
 import { LegendToggle, EmptyPlaceholder } from '../../../../charts/public';
-import { getAccessorByDimension } from '../../../../visualizations/common/utils';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../visualizations/common/utils';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import {
@@ -302,9 +305,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const { min, max } = minMaxByColumnId[valueAccessor!];
     // formatters
     const xValuesFormatter = formatFactory(xAxisMeta?.params);
-    const metricFormatter = formatFactory(
-      typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
-    );
+    const metricFormatter = formatFactory(getFormatByAccessor(args.valueAccessor, table.columns));
     const dateHistogramMeta = xAxisColumn
       ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
       : undefined;

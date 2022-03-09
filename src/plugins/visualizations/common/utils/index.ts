@@ -14,4 +14,6 @@ export {
   validateAccessor,
   getColumnByAccessor,
   isVisDimension,
+  getAccessor,
+  getFormatByAccessor,
 } from './accessors';
