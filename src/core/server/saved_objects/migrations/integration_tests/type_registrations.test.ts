@@ -69,6 +69,7 @@ const previouslyRegisteredTypes = [
   'maps-telemetry',
   'metrics-explorer-view',
   'ml-job',
+  'ml-trained-model',
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
