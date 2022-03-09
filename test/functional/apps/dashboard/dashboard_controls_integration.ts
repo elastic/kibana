@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
     });
-    
+
     after(async () => {
       await security.testUser.restoreDefaults();
       await kibanaServer.savedObjects.cleanStandardList();

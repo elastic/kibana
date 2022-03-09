@@ -597,20 +597,17 @@ export function DashboardTopNav({
                   data-test-subj="dashboardAddNewPanelButton"
                 />
               ),
-              controlsButton:
-                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(),
               quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-              addFromLibraryButton: (
-                <AddFromLibraryButton
-                  onClick={addFromLibrary}
-                  data-test-subj="dashboardAddPanelButton"
-                />
-              ),
               extraButtons: [
                 <EditorMenu
                   createNewVisType={createNewVisType}
                   dashboardContainer={dashboardAppState.dashboardContainer}
                 />,
+                <AddFromLibraryButton
+                  onClick={addFromLibrary}
+                  data-test-subj="dashboardAddPanelButton"
+                />,
+                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(),
               ],
             }}
           </SolutionToolbar>
