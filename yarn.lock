@@ -3818,6 +3818,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/bazel-packages@link:bazel-bin/packages/kbn-bazel-packages":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode":
   version "0.0.0"
   uid ""
@@ -3911,10 +3915,6 @@
   uid ""
 
 "@kbn/optimizer@link:bazel-bin/packages/kbn-optimizer":
-  version "0.0.0"
-  uid ""
-
-"@kbn/packages@link:bazel-bin/packages/kbn-packages":
   version "0.0.0"
   uid ""
 
@@ -6799,6 +6799,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__bazel-packages@link:bazel-bin/packages/kbn-bazel-packages/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6868,10 +6872,6 @@
   uid ""
 
 "@types/kbn__optimizer@link:bazel-bin/packages/kbn-optimizer/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__packages@link:bazel-bin/packages/kbn-packages/npm_module_types":
   version "0.0.0"
   uid ""
 

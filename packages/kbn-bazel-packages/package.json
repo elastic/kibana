@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/packages",
+  "name": "@kbn/bazel-packages",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",
