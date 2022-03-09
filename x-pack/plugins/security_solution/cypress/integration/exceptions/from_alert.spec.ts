@@ -35,7 +35,7 @@ describe.skip('From alert', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule({ ...getNewRule(), index: ['exceptions-*'] }, 'rule_testing', '10s');
+    createCustomRule({ ...getNewRule(), index: ['exceptions-*'] }, 'rule_testing');
     reload();
     goToRuleDetails();
 

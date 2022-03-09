@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './blocklists_api_client';
+export { BlocklistsApiClient } from './blocklists_api_client';
