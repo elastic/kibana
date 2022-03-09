@@ -41,31 +41,29 @@ export function GroupDetails({
   isLoading,
 }: Props) {
   const [name, setName] = useState<string>(serviceGroup?.groupName || '');
-  const [color, setColor, errors] = useColorPickerState(
+  const [color, setColor, colorPickerErrors] = useColorPickerState(
     serviceGroup?.color || '#5094C4'
   );
   const [description, setDescription] = useState<string | undefined>(
     serviceGroup?.description
   );
-  useEffect(
-    () => {
-      if (serviceGroup) {
-        setName(serviceGroup.groupName);
-        if (serviceGroup.color) {
-          setColor(serviceGroup.color, {
-            hex: serviceGroup.color,
-            isValid: true,
-          });
-        }
-        setDescription(serviceGroup.description);
+  useEffect(() => {
+    if (serviceGroup) {
+      setName(serviceGroup.groupName);
+      if (serviceGroup.color) {
+        setColor(serviceGroup.color, {
+          hex: serviceGroup.color,
+          isValid: true,
+        });
       }
-    },
+      setDescription(serviceGroup.description);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [serviceGroup?.groupName, serviceGroup?.description, serviceGroup?.color]
-  );
+  }, [serviceGroup]); // setColor omitted: new reference each render
 
-  const isInvalidColor = !!errors?.length;
-  const isInvalid = !name || isInvalidColor;
+  const isInvalidColor = !!colorPickerErrors?.length;
+  const isInvalidName = !name;
+  const isInvalid = isInvalidName || isInvalidColor;
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -100,7 +98,7 @@ export function GroupDetails({
                     'xpack.apm.serviceGroups.groupDetailsForm.name',
                     { defaultMessage: 'Name' }
                   )}
-                  isInvalid={isInvalid}
+                  isInvalid={isInvalidName}
                 >
                   <EuiFieldText
                     value={name}
@@ -118,7 +116,17 @@ export function GroupDetails({
                     { defaultMessage: 'Color' }
                   )}
                   isInvalid={isInvalidColor}
-                  error={isInvalidColor ? errors[0] : undefined}
+                  error={
+                    isInvalidColor
+                      ? i18n.translate(
+                          'xpack.apm.serviceGroups.groupDetailsForm.invalidColorError',
+                          {
+                            defaultMessage:
+                              'Please provide a valid color value',
+                          }
+                        )
+                      : undefined
+                  }
                 >
                   <EuiColorPicker onChange={setColor} color={color} />
                 </EuiFormRow>

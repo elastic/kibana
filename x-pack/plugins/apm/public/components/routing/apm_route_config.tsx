@@ -92,7 +92,7 @@ const apmRoutes = {
             </ApmMainTemplate>
           </Breadcrumb>
         ),
-        params: t.partial({
+        params: t.type({
           query: t.intersection([
             t.type({
               rangeFrom: t.string,

@@ -20,14 +20,16 @@ export function ServiceGroupSaveButton() {
 
   const isGroupEditMode = !!serviceGroup;
 
-  const { data } = useFetcher((callApmApi) => {
-    if (isGroupEditMode) {
-      return callApmApi('GET /internal/apm/service-group', {
-        params: { query: { serviceGroup } },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { data } = useFetcher(
+    (callApmApi) => {
+      if (isGroupEditMode) {
+        return callApmApi('GET /internal/apm/service-group', {
+          params: { query: { serviceGroup } },
+        });
+      }
+    },
+    [serviceGroup, isGroupEditMode]
+  );
   const savedServiceGroup = data?.serviceGroup;
 
   return (

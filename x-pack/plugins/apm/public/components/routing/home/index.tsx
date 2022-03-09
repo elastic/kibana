@@ -91,7 +91,7 @@ function serviceGroupPage<TPath extends string>({
       params: t.type({
         query: t.type({ serviceGroup: t.string }),
       }),
-      defaults: { query: { serviceGroup: '' as const } },
+      defaults: { query: { serviceGroup: '' } },
     },
   } as Record<
     TPath,

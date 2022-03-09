@@ -16,6 +16,7 @@ export function serviceGroupQuery(
     return [];
   }
 
-  const { serviceNames } = serviceGroup;
-  return [{ terms: { [SERVICE_NAME]: serviceNames } }];
+  return serviceGroup?.serviceNames
+    ? [{ terms: { [SERVICE_NAME]: serviceGroup.serviceNames } }]
+    : [];
 }
