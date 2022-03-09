@@ -51,6 +51,8 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     [deserializer]
   );
 
+  // We create this stable reference to be able to initialize our "defaultValueDeserialized" ref below
+  // as we can't initialize useRef by calling a function (e.g. const myRef = useRef(initDefaultValue()))
   const defaultValueMemoized = useMemo<I | undefined>(() => {
     return initDefaultValue(defaultValue);
   }, [defaultValue, initDefaultValue]);
@@ -76,6 +78,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   /**
    * Keep a track of the fields that have been removed from the form.
    * This will allow us to know if the form has been modified
+   * (this ref is then accessed in the "useFormIsModified()" hook)
    */
   const fieldsRemovedRefs = useRef<FieldsMap>({});
   /**
@@ -84,6 +87,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
    */
   const formUpdateSubscribers = useRef<Subscription[]>([]);
   const isMounted = useRef<boolean>(false);
+  /**
+   * Keep a reference to the form defaultValue once it has been deserialized.
+   * This allows us to reset the form and put back the initial value of each fields
+   */
   const defaultValueDeserialized = useRef(defaultValueMemoized);
 
   /**
@@ -101,16 +108,22 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
    */
   const errorMessagesRef = useRef<{ [fieldName: string]: string }>({});
 
-  // formData$ is an observable we can subscribe to in order to receive live
-  // update of the raw form data. As an observable it does not trigger any React
-  // render().
-  // The "useFormData()" hook is the one in charge of reading this observable
-  // and updating its own state that will trigger the necessary re-renders in the UI.
+  /**
+   * formData$ is an observable that gets updated every time a field value changes.
+   * It is the "useFormData()" hook that subscribes to this observable and updates
+   * its internal "formData" state that in turn triggers the necessary re-renders in the consumer component.
+   */
   const formData$ = useRef<Subject<FormData> | null>(null);
 
   // ----------------------------------
   // -- HELPERS
   // ----------------------------------
+  /**
+   * We can't initialize a React ref by calling a function (in this case
+   * useRef(new Subject())) the function is called on every render and would
+   * create a new "Subject" instance.
+   * We use this handler to access the ref and initialize it if needed.
+   */
   const getFormData$ = useCallback((): Subject<FormData> => {
     if (formData$.current === null) {
       formData$.current = new Subject<FormData>({});
@@ -550,6 +563,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     validateFields,
     validate,
   ]);
+
+  // ----------------------------------
+  // -- EFFECTS
+  // ----------------------------------
 
   useEffect(() => {
     if (!isMounted.current) {

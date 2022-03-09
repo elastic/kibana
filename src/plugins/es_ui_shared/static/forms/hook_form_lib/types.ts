@@ -46,7 +46,20 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
    * Reset the form states to their initial value and optionally
    * all the fields to their initial values.
    */
-  reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
+  reset: (options?: {
+    /**
+     * Flag to indicate if the fields values are reset or only the states
+     * (isSubmitted, isPristine, isValidated...).
+     * @default true
+     */
+    resetValues?: boolean;
+    /**
+     * The defaultValue object of the form to reset to (if resetValues is "true").
+     * If not specified, the initial "defaultValue" passed when initiating the form will be used.
+     * Pass an empty object (`{}`) to reset to a blank form.
+     */
+    defaultValue?: Partial<T>;
+  }) => void;
   validateFields: (
     fieldNames: string[],
     /** Run only blocking validations */

@@ -57,8 +57,8 @@ export const useFormIsModified = ({
 
     return discard.reduce((acc, path) => ({ ...acc, [path]: {} }), {} as { [key: string]: {} });
 
-    // discardToString === discard, we don't want to add it to the deps so we
-    // the coansumer does not need to memoize the array he provides.
+    // discardToString === discard, we don't want to add it to the dependencies so
+    // the consumer does not need to memoize the "discard" array they provide.
   }, [discardToString]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // We listen to all the form data change to trigger a re-render
