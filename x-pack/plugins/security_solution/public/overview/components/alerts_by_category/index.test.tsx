@@ -19,9 +19,7 @@ import { mockCasesContext } from '../../../../../cases/public/mocks/mock_cases_c
 
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/components/visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => (
-    <div data-test-subj="mock-viz-actions">{'mockVizAction'}</div>
-  )),
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
 
 jest.mock('../../../common/containers/matrix_histogram', () => ({

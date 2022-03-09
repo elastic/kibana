@@ -246,17 +246,22 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
-                <VisualizationActions
-                  getLensAttributes={getLensAttributes}
-                  isInspectButtonDisabled={filterQuery === undefined}
-                  lensAttributes={lensAttributes}
-                  queryId={id}
-                  stackByField={selectedStackByOption.value}
-                  timerange={timerange}
-                  title={title}
-                />
-              </CasesContext>
+              {(getLensAttributes || lensAttributes) && timerange && (
+                <EuiFlexItem grow={false}>
+                  <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
+                    <VisualizationActions
+                      className="histogram-viz-actions"
+                      getLensAttributes={getLensAttributes}
+                      isInspectButtonDisabled={filterQuery === undefined}
+                      lensAttributes={lensAttributes}
+                      queryId={id}
+                      stackByField={selectedStackByOption.value}
+                      timerange={timerange}
+                      title={title}
+                    />
+                  </CasesContext>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 {stackByOptions.length > 1 && (
                   <EuiSelect

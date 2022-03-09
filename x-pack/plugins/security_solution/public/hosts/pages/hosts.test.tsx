@@ -37,9 +37,7 @@ jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
 jest.mock('../../common/components/visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => (
-    <div data-test-subj="mock-viz-actions">{'mockVizAction'}</div>
-  )),
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
 
 jest.mock('../../common/lib/kibana', () => {
