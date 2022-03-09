@@ -24,11 +24,11 @@ const payload = {
 const urlService = {
   locators: {
     get: jest.fn().mockReturnValue({
-      useUrl: jest.fn().mockImplementation(value => {
+      useUrl: jest.fn().mockImplementation((value) => {
         return `devToolsUrl_${value?.loadFrom}`;
-      })
-    })
-  }
+      }),
+    }),
+  },
 } as any as UrlService;
 
 describe('ViewApiRequest', () => {
@@ -49,9 +49,7 @@ describe('ViewApiRequest', () => {
     });
 
     test('doesnt have openInConsole when some optional props are not supplied', async () => {
-      const component = mountWithI18nProvider(
-        <ViewApiRequest {...payload} canShowDevtools />
-      );
+      const component = mountWithI18nProvider(<ViewApiRequest {...payload} canShowDevtools />);
 
       const openInConsole = findTestSubject(component, 'apiRequestFlyoutOpenInConsoleButton');
       expect(openInConsole.length).toEqual(0);
