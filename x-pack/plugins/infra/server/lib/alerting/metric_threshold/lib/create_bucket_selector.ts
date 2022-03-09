@@ -23,8 +23,10 @@ const EMPTY_SHOULD_WARN = {
 export const createBucketSelector = (
   condition: MetricExpressionParams,
   alertOnGroupDisappear: boolean = false,
+  groupBy?: string | string[],
   lastPeriodEnd?: number
 ) => {
+  const hasGroupBy = groupBy != null;
   const hasWarn = condition.warningThreshold != null && condition.warningComparator != null;
   const isPercentile = [Aggregators.P95, Aggregators.P99].includes(condition.aggType);
   const isCount = condition.aggType === Aggregators.COUNT;
@@ -65,7 +67,7 @@ export const createBucketSelector = (
     shouldTrigger,
   };
 
-  if (alertOnGroupDisappear && lastPeriodEnd) {
+  if (hasGroupBy && alertOnGroupDisappear && lastPeriodEnd) {
     const wrappedPeriod = createLastPeriod(lastPeriodEnd, condition);
     aggs.lastPeriod = wrappedPeriod.lastPeriod;
     aggs.missingGroup = {
@@ -88,27 +90,29 @@ export const createBucketSelector = (
     };
   }
 
-  const evalutionBucketPath =
-    alertOnGroupDisappear && lastPeriodEnd
-      ? {
-          shouldWarn: 'shouldWarn',
-          shouldTrigger: 'shouldTrigger',
-          missingGroup: 'missingGroup',
-          newOrRecoveredGroup: 'newOrRecoveredGroup',
-        }
-      : { shouldWarn: 'shouldWarn', shouldTrigger: 'shouldTrigger' };
+  if (hasGroupBy) {
+    const evalutionBucketPath =
+      alertOnGroupDisappear && lastPeriodEnd
+        ? {
+            shouldWarn: 'shouldWarn',
+            shouldTrigger: 'shouldTrigger',
+            missingGroup: 'missingGroup',
+            newOrRecoveredGroup: 'newOrRecoveredGroup',
+          }
+        : { shouldWarn: 'shouldWarn', shouldTrigger: 'shouldTrigger' };
 
-  const evaluationScript =
-    alertOnGroupDisappear && lastPeriodEnd
-      ? '(params.missingGroups != null && params.missingGroup > 0) || (params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0) || (params.newOrRecoveredGroup != null && params.newOrRecoveredGroup > 0)'
-      : '(params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0)';
+    const evaluationScript =
+      alertOnGroupDisappear && lastPeriodEnd
+        ? '(params.missingGroups != null && params.missingGroup > 0) || (params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0) || (params.newOrRecoveredGroup != null && params.newOrRecoveredGroup > 0)'
+        : '(params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0)';
 
-  aggs.evaluation = {
-    bucket_selector: {
-      buckets_path: evalutionBucketPath,
-      script: evaluationScript,
-    },
-  };
+    aggs.evaluation = {
+      bucket_selector: {
+        buckets_path: evalutionBucketPath,
+        script: evaluationScript,
+      },
+    };
+  }
 
   return aggs;
 };

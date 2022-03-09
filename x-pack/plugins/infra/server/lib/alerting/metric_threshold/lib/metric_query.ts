@@ -69,6 +69,7 @@ export const getElasticsearchMetricQuery = (
   const bucketSelectorAggregations = createBucketSelector(
     metricParams,
     alertOnGroupDisappear,
+    groupBy,
     lastPeriodEnd
   );
 

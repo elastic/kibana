@@ -85,7 +85,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
           ...criterion,
           metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
           currentValue: result.value,
-          timestamp: moment().toISOString(),
+          timestamp: moment(calculatedTimerange.end).toISOString(),
           shouldFire: result.trigger,
           shouldWarn: result.warn,
           isNoData: result.value === null,

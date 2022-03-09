@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
 import {
   Aggregators,
   Comparator,
@@ -97,7 +98,15 @@ export default function ({ getService }: FtrProviderContext) {
             metricAlias: 'filebeat-*',
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
-          const results = await evaluateRule(esClient, params, config, [], 10000, true, timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -108,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 20895,
-                timestamp: '2021-10-19T00:48:59.997Z',
+                timestamp: '2021-10-19T00:53:59.997Z',
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: false,
@@ -137,7 +146,15 @@ export default function ({ getService }: FtrProviderContext) {
             metricAlias: 'filebeat-*',
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
-          const results = await evaluateRule(esClient, params, config, [], 10000, true, timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               web: {
@@ -148,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 20895,
-                timestamp: '2021-10-19T00:48:59.997Z',
+                timestamp: '2021-10-19T00:53:59.997Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
@@ -179,10 +196,11 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             config,
-            ['middleware'],
             10000,
             true,
-            timeFrame
+            void 0,
+            timeFrame,
+            ['middleware']
           );
           expect(results).to.eql([
             {
@@ -194,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 20895,
-                timestamp: '2021-10-19T00:48:59.997Z',
+                timestamp: '2021-10-19T00:53:59.997Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
@@ -207,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: null,
-                timestamp: '2021-10-19T00:48:59.997Z',
+                timestamp: '2021-10-19T00:53:59.997Z',
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
@@ -237,9 +255,9 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             configuration,
-            [],
             10000,
             true,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -252,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: null,
-                timestamp: '2021-01-01T00:55:00.000Z',
+                timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
@@ -267,9 +285,9 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             configuration,
-            [],
             10000,
             true,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -282,7 +300,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'sum',
                 metric: 'value',
                 currentValue: null,
-                timestamp: '2021-01-01T00:55:00.000Z',
+                timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
@@ -312,9 +330,9 @@ export default function ({ getService }: FtrProviderContext) {
               esClient,
               params,
               configuration,
-              [],
               10000,
               true,
+              void 0,
               timeFrame
             );
             expect(results).to.eql([
@@ -327,7 +345,7 @@ export default function ({ getService }: FtrProviderContext) {
                   aggType: 'count',
                   metric: 'Document count',
                   currentValue: null,
-                  timestamp: '2021-01-01T00:55:00.000Z',
+                  timestamp: '2021-01-01T01:00:00.000Z',
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
@@ -356,10 +374,11 @@ export default function ({ getService }: FtrProviderContext) {
               esClient,
               params,
               configuration,
-              ['web', 'prod'],
               10000,
               true,
-              timeFrame
+              void 0,
+              timeFrame,
+              ['web', 'prod']
             );
             expect(results).to.eql([
               {
@@ -371,7 +390,7 @@ export default function ({ getService }: FtrProviderContext) {
                   aggType: 'count',
                   metric: 'Document count',
                   currentValue: null,
-                  timestamp: '2021-01-01T00:55:00.000Z',
+                  timestamp: '2021-01-01T01:00:00.000Z',
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
@@ -384,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
                   aggType: 'count',
                   metric: 'Document count',
                   currentValue: null,
-                  timestamp: '2021-01-01T00:55:00.000Z',
+                  timestamp: '2021-01-01T01:00:00.000Z',
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
@@ -397,7 +416,7 @@ export default function ({ getService }: FtrProviderContext) {
                   aggType: 'count',
                   metric: 'Document count',
                   currentValue: null,
-                  timestamp: '2021-01-01T00:55:00.000Z',
+                  timestamp: '2021-01-01T01:00:00.000Z',
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
@@ -431,9 +450,9 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             configuration,
-            [],
             10000,
             true,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -446,7 +465,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 4,
-                timestamp: '2021-01-01T00:55:00.000Z',
+                timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
@@ -472,9 +491,9 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             configuration,
-            [],
             10000,
             true,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -487,7 +506,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 0,
-                timestamp: '2021-01-01T01:05:00.000Z',
+                timestamp: '2021-01-01T01:10:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
@@ -502,9 +521,9 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             configuration,
-            [],
             10000,
             true,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -517,7 +536,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'sum',
                 metric: 'value',
                 currentValue: 1,
-                timestamp: '2021-01-01T00:55:00.000Z',
+                timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
@@ -546,9 +565,9 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             configuration,
-            [],
             10000,
             true,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -561,7 +580,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 2,
-                timestamp: '2021-01-01T00:55:00.000Z',
+                timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
@@ -574,7 +593,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 2,
-                timestamp: '2021-01-01T00:55:00.000Z',
+                timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
@@ -592,26 +611,13 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             configuration,
-            [],
             10000,
             true,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
             {
-              dev: {
-                timeSize: 5,
-                timeUnit: 'm',
-                threshold: [1],
-                comparator: '>=',
-                aggType: 'sum',
-                metric: 'value',
-                currentValue: 0,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: false,
-                shouldWarn: false,
-                isNoData: false,
-              },
               prod: {
                 timeSize: 5,
                 timeUnit: 'm',
@@ -620,7 +626,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'sum',
                 metric: 'value',
                 currentValue: 1,
-                timestamp: '2021-01-01T00:55:00.000Z',
+                timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
@@ -639,10 +645,11 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             configuration,
-            ['dev', 'prod'],
             10000,
             true,
-            timeFrame
+            void 0,
+            timeFrame,
+            ['dev']
           );
           expect(results).to.eql([
             {
@@ -654,23 +661,10 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'sum',
                 metric: 'value',
                 currentValue: null,
-                timestamp: '2021-01-01T00:25:00.000Z',
+                timestamp: '2021-01-01T00:30:00.000Z',
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
-              },
-              prod: {
-                timeSize: 5,
-                timeUnit: 'm',
-                threshold: [1],
-                comparator: '>=',
-                aggType: 'sum',
-                metric: 'value',
-                currentValue: 0,
-                timestamp: '2021-01-01T00:25:00.000Z',
-                shouldFire: false,
-                shouldWarn: false,
-                isNoData: false,
               },
             },
           ]);
@@ -700,9 +694,9 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             configuration,
-            [],
             10000,
             true,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -714,8 +708,8 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'rate',
                 metric: 'value',
-                currentValue: 0.54,
-                timestamp: '2021-01-02T00:00:00.000Z',
+                currentValue: 0.6666666666666666,
+                timestamp: '2021-01-02T00:05:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
@@ -747,9 +741,9 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             params,
             configuration,
-            [],
             10000,
             true,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -763,8 +757,8 @@ export default function ({ getService }: FtrProviderContext) {
                 warningComparator: '>=',
                 aggType: 'rate',
                 metric: 'value',
-                currentValue: 0.54,
-                timestamp: '2021-01-02T00:00:00.000Z',
+                currentValue: 0.6666666666666666,
+                timestamp: '2021-01-02T00:05:00.000Z',
                 shouldFire: false,
                 shouldWarn: true,
                 isNoData: false,

@@ -29,6 +29,7 @@ interface Aggs {
     doc_count: number;
     aggregatedValue?: AggregatedValue;
   };
+  aggregatedValue?: AggregatedValue;
   shouldWarn?: {
     value: number;
   };
@@ -50,7 +51,7 @@ interface ResponseAggregations extends Partial<Aggs> {
   };
   all?: {
     buckets: {
-      all: {
+      all?: {
         doc_count: number;
       } & Aggs;
     };
@@ -102,6 +103,7 @@ export const getData = async (
           shouldTrigger,
           missingGroup,
           currentPeriod: { aggregatedValue, doc_count: docCount },
+          aggregatedValue: aggregatedValueForRate,
         } = bucket;
         if (missingGroup && missingGroup.value > 0) {
           previous[key] = {
@@ -113,7 +115,9 @@ export const getData = async (
           const value =
             params.aggType === Aggregators.COUNT
               ? docCount
-              : aggregatedValue
+              : params.aggType === Aggregators.RATE && aggregatedValueForRate != null
+              ? aggregatedValueForRate.value
+              : aggregatedValue != null
               ? getValue(aggregatedValue, params)
               : null;
           previous[key] = {
@@ -140,16 +144,19 @@ export const getData = async (
       }
       return previous;
     }
-    if (aggs.all) {
+    if (aggs.all?.buckets.all) {
       const {
         currentPeriod: { aggregatedValue, doc_count: docCount },
+        aggregatedValue: aggregatedValueForRate,
         shouldWarn,
         shouldTrigger,
       } = aggs.all.buckets.all;
       const value =
         params.aggType === Aggregators.COUNT
           ? docCount
-          : aggregatedValue
+          : params.aggType === Aggregators.RATE && aggregatedValueForRate != null
+          ? aggregatedValueForRate.value
+          : aggregatedValue != null
           ? getValue(aggregatedValue, params)
           : null;
       // There is an edge case where there is no results and the shouldWarn/shouldTrigger
