@@ -218,7 +218,7 @@ describe('benchmarks API', () => {
       await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
         page: 1,
         per_page: 100,
-        sortOrder: 'desc',
+        sort_order: 'desc',
         benchmark_name: 'my_cis_benchmark',
       });
 
