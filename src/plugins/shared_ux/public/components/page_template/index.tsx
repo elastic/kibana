@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './elastic_agent_card';
-/** @deprecated Use `NoDataCard` from `src/plugins/shared_ux/page_template`. */
-export * from './no_data_card';
+export { NoDataCard } from './no_data_page/no_data_card';
