@@ -731,6 +731,7 @@ const BaseRule: SanitizedAlert<{ bar: boolean }> = {
   throttle: null,
   notifyWhen: null,
   muteAll: false,
+  snoozeEndTime: null,
   mutedInstanceIds: [],
   params: { bar: true },
   actions: [],

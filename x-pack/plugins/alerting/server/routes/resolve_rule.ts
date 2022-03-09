@@ -30,6 +30,7 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>
   apiKeyOwner,
   notifyWhen,
   muteAll,
+  snoozeEndTime,
   mutedInstanceIds,
   executionStatus,
   actions,
@@ -45,6 +46,7 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>
   api_key_owner: apiKeyOwner,
   notify_when: notifyWhen,
   mute_all: muteAll,
+  snooze_end_time: snoozeEndTime,
   muted_alert_ids: mutedInstanceIds,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {

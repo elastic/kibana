@@ -242,11 +242,11 @@ export interface RawRule extends SavedObjectAttributes {
   throttle: string | null;
   notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
+  snoozeEndTime: string | null;
   mutedInstanceIds: string[];
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: string;
 }
 
 export type AlertInfoParams = Pick<

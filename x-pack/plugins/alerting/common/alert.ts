@@ -91,6 +91,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   throttle: string | null;
   notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
+  snoozeEndTime: Date | null;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
   monitoring?: RuleMonitoring;

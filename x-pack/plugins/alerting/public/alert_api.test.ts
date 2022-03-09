@@ -135,6 +135,7 @@ describe('loadAlert', () => {
           "interval": "1s",
         },
         "scheduledTaskId": "52125fb0-5895-11ec-ae69-bb65d1a71b72",
+        "snoozeEndTime": null,
         "tags": Array [],
         "throttle": null,
         "updatedAt": 2021-12-11T16:59:50.152Z,
@@ -307,6 +308,7 @@ function getRule(): Alert<{ x: number }> {
     createdBy: 'elastic',
     updatedBy: '2889684073',
     muteAll: false,
+    snoozeEndTime: null,
     mutedInstanceIds: [],
     schedule: {
       interval: '1s',

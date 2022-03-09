@@ -61,6 +61,7 @@ describe('createAlertRoute', () => {
     ...mockedAlert,
     enabled: true,
     muteAll: false,
+    snoozeEndTime: null,
     createdBy: '',
     updatedBy: '',
     apiKey: '',

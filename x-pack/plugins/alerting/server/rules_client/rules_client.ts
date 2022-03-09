@@ -200,6 +200,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'apiKey'
     | 'apiKeyOwner'
     | 'muteAll'
+    | 'snoozeEndTime'
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
@@ -375,6 +376,7 @@ export class RulesClient {
       updatedAt: new Date(createTime).toISOString(),
       params: updatedParams as RawRule['params'],
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       notifyWhen,
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),

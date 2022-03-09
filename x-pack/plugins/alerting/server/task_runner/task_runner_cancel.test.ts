@@ -133,6 +133,7 @@ describe('Task Runner Cancel', () => {
     updatedAt: mockDate,
     throttle: null,
     muteAll: false,
+    snoozeEndTime: null,
     notifyWhen: 'onActiveAlert',
     enabled: true,
     alertTypeId: ruleType.id,

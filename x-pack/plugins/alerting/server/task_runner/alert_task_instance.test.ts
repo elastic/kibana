@@ -32,6 +32,7 @@ const alert: SanitizedAlert<{
   throttle: null,
   notifyWhen: null,
   muteAll: false,
+  snoozeEndTime: null,
   mutedInstanceIds: [],
   executionStatus: {
     status: 'unknown',

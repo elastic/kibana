@@ -44,6 +44,7 @@ describe('common_transformations', () => {
       throttle: '2s',
       notify_when: 'onActiveAlert',
       mute_all: false,
+      snooze_end_time: null,
       muted_alert_ids: ['bob', 'jim'],
       execution_status: {
         last_execution_date: dateExecuted.toISOString(),
@@ -109,6 +110,7 @@ describe('common_transformations', () => {
           "interval": "1s",
         },
         "scheduledTaskId": "some-task-id",
+        "snoozeEndTime": null,
         "tags": Array [
           "tag-1",
           "tag-2",
@@ -147,6 +149,7 @@ describe('common_transformations', () => {
       throttle: '2s',
       notify_when: 'onActiveAlert',
       mute_all: false,
+      snooze_end_time: null,
       muted_alert_ids: ['bob', 'jim'],
       execution_status: {
         last_execution_date: dateExecuted.toISOString(),
@@ -188,6 +191,7 @@ describe('common_transformations', () => {
           "interval": "1s",
         },
         "scheduledTaskId": undefined,
+        "snoozeEndTime": null,
         "tags": Array [],
         "throttle": "2s",
         "updatedAt": 2021-12-15T12:34:55.789Z,

@@ -399,7 +399,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is muted.`
+      `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is snoozed.`
     );
     expect(logger.debug).nthCalledWith(
       4,
