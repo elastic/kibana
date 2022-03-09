@@ -746,9 +746,7 @@ describe('Execution', () => {
           arg: {
             help: '',
             multi: true,
-            validate(value) {
-              return value === 'valid';
-            },
+            options: ['valid'],
           },
         },
         help: '',
@@ -764,7 +762,8 @@ describe('Execution', () => {
       expect(result).toMatchObject({
         type: 'error',
         error: {
-          message: "[validateArg] > Value 'invalid' is not valid for argument 'arg'",
+          message:
+            "[validateArg] > Value 'invalid' is not among the allowed options for argument 'arg': 'valid'",
         },
       });
     });
@@ -777,7 +776,8 @@ describe('Execution', () => {
       expect(result).toMatchObject({
         type: 'error',
         error: {
-          message: "[validateArg] > Value 'invalid' is not valid for argument 'arg'",
+          message:
+            "[validateArg] > Value 'invalid' is not among the allowed options for argument 'arg': 'valid'",
         },
       });
     });
