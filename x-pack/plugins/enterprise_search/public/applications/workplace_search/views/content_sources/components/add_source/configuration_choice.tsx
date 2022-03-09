@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../../../shared/kibana';
@@ -70,7 +70,14 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
       >
         {internalConnectorAvailable && (
           <EuiFlexItem grow>
-            <EuiPanel color="plain" hasShadow={false} hasBorder>
+            <EuiCard
+              title={i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.title',
+                {
+                  defaultMessage: 'Default connector',
+                }
+              )}
+            >
               <EuiFlexGroup
                 justifyContent="center"
                 alignItems="center"
@@ -78,23 +85,6 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
                 gutterSize="s"
                 responsive={false}
               >
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <h4>{name}</h4>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <h3>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.title',
-                        {
-                          defaultMessage: 'Default connector',
-                        }
-                      )}
-                    </h3>
-                  </EuiText>
-                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="s">
                     {i18n.translate(
@@ -116,12 +106,20 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiPanel>
+            </EuiCard>
           </EuiFlexItem>
         )}
         {externalConnectorAvailable && (
           <EuiFlexItem grow>
-            <EuiPanel color="plain" hasShadow={false} hasBorder>
+            <EuiCard
+              title={i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.title',
+                {
+                  defaultMessage: 'Custom connector',
+                }
+              )}
+              betaBadgeProps={{ label: 'Beta' }}
+            >
               <EuiFlexGroup
                 justifyContent="center"
                 alignItems="center"
@@ -129,23 +127,6 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
                 gutterSize="s"
                 responsive={false}
               >
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <h4>{name}</h4>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <h3>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.title',
-                        {
-                          defaultMessage: 'Custom connector',
-                        }
-                      )}
-                    </h3>
-                  </EuiText>
-                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="s">
                     {i18n.translate(
@@ -170,12 +151,19 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexGroup>
-            </EuiPanel>
+            </EuiCard>
           </EuiFlexItem>
         )}
         {customConnectorAvailable && (
           <EuiFlexItem grow>
-            <EuiPanel>
+            <EuiCard
+              title={i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.title',
+                {
+                  defaultMessage: 'Custom connector',
+                }
+              )}
+            >
               <EuiFlexGroup
                 justifyContent="center"
                 alignItems="center"
@@ -183,23 +171,6 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
                 gutterSize="s"
                 responsive={false}
               >
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <h4>{name}</h4>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <h3>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.custom.title',
-                        {
-                          defaultMessage: 'Custom connector',
-                        }
-                      )}
-                    </h3>
-                  </EuiText>
-                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="s">
                     {i18n.translate(
@@ -224,7 +195,7 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiPanel>
+            </EuiCard>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

@@ -319,6 +319,18 @@ describe('AddSourceLogic', () => {
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReauthenticateStep);
       });
+      it('sets SaveConfig as first step for external connectors', () => {
+        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
+        const addSourceProps = {
+          sourceData: {
+            ...DEFAULT_SERVICE_TYPE,
+            serviceType: 'external',
+          },
+        };
+        AddSourceLogic.actions.initializeAddSource(addSourceProps);
+
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
+      });
     });
 
     describe('saveSourceParams', () => {
