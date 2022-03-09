@@ -55,7 +55,7 @@ export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest =
             field: '@timestamp',
             size: 1,
             order: {
-              _key: 'desc'
+              _key: 'desc',
             },
           },
         },
