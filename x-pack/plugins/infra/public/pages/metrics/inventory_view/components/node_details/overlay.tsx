@@ -167,7 +167,9 @@ export const NodeContextPopover = ({
               </EuiTab>
               <EuiTab
                 onClick={() =>
-                  share.url.locators.get(uptimeOverviewLocatorID)!.navigate({ [nodeType]: node.id })
+                  share.url.locators
+                    .get(uptimeOverviewLocatorID)!
+                    .navigate({ [nodeType]: node.id, ip: node.ip })
                 }
               >
                 <EuiIcon type="popout" />{' '}
