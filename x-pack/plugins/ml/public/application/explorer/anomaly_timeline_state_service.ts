@@ -36,6 +36,7 @@ import {
 import { mlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 import type { TimeBucketsInterval } from '../util/time_buckets';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
 
 interface SwimLanePagination {
   viewByFromPage: number;
@@ -167,10 +168,6 @@ export class AnomalyTimelineStateService {
           this._isOverallSwimLaneLoading$.next(true);
         }),
         switchMap(([selectedJobs, severity, containerWidth]) => {
-          console.log(selectedJobs, '___selectedJobs___');
-          console.log(severity, '___severity___');
-          console.log(containerWidth, '___containerWidth___');
-
           return from(
             this.anomalyTimelineService.loadOverallData(
               selectedJobs!,
@@ -188,15 +185,27 @@ export class AnomalyTimelineStateService {
   }
 
   private _initTopFieldValues() {
-    combineLatest([
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
-      this.getViewBySwimlaneFieldName$(),
-      this.getSwimLanePagination$(),
-      this.getSwimLaneCardinality$(),
-      this.getContainerWidth$(),
-      this.getSelectedCells$(),
-    ])
+    (
+      combineLatest([
+        this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+        this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
+        this.getViewBySwimlaneFieldName$(),
+        this.getSwimLanePagination$(),
+        this.getSwimLaneCardinality$(),
+        this.getContainerWidth$(),
+        this.getSelectedCells$(),
+      ]) as Observable<
+        [
+          ExplorerJob[],
+          InfluencersFilterQuery,
+          string,
+          SwimLanePagination,
+          number,
+          number,
+          AppStateSelectedCells
+        ]
+      >
+    )
       .pipe(
         switchMap(
           ([
@@ -219,7 +228,7 @@ export class AnomalyTimelineStateService {
 
             const timerange = getSelectionTimeRange(
               selectedCells,
-              this.getSwimLaneBucketInterval()!.asSeconds,
+              this.getSwimLaneBucketInterval()!.asSeconds(),
               this.timefilter.getBounds()
             );
 
