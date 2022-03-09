@@ -387,8 +387,8 @@ export const QueryBarTopRow = React.memo(
     return (
       <EuiFlexGroup
         className={classes}
-        responsive={!!showDatePicker}
         direction={isMobile ? 'columnReverse' : 'row'}
+        responsive={false}
         gutterSize="s"
       >
         <EuiFlexItem style={{ minWidth: '50%' }}>{renderQueryInput()}</EuiFlexItem>

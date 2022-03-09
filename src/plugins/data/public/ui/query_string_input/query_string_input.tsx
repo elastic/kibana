@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import React, { PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -122,6 +124,8 @@ const KEY_CODES = {
 export default class QueryStringInputUI extends PureComponent<Props, State> {
   static defaultProps = {
     storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
+    iconType: 'search',
+    isClearable: true,
   };
 
   public state: State = {
@@ -683,19 +687,15 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
     const containerClassName = classNames(
-      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
+      'euiFormControlLayout kbnQueryBar__wrap',
       this.props.className
     );
-    const inputClassName = classNames(
-      'kbnQueryBar__textarea',
-      this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null,
-      this.props.prepend ? 'kbnQueryBar__textarea--hasPrepend' : null,
-      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textarea--hasAppend' : null
-    );
+    const inputClassName = classNames('kbnQueryBar__textarea', {
+      'kbnQueryBar__textarea--withIcon': this.props.iconType,
+      'kbnQueryBar__textarea--isClearable': this.props.isClearable,
+    });
     const inputWrapClassName = classNames(
-      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap',
-      this.props.prepend ? 'kbnQueryBar__textareaWrap--hasPrepend' : null,
-      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textareaWrap--hasAppend' : null
+      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap'
     );
 
     return (
