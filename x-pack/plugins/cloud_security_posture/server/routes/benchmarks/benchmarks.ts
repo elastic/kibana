@@ -54,7 +54,7 @@ const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): str
 
 export const getPackagePolicies = async (
   soClient: SavedObjectsClientContract,
-  packagePolicyService: PackagePolicyServiceInterface | undefined,
+  packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
   queryParams: BenchmarksQuerySchema
 ): Promise<PackagePolicy[]> => {
@@ -159,8 +159,7 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
         const agentPolicyService = cspContext.service.agentPolicyService;
         const packagePolicyService = cspContext.service.packagePolicyService;
 
-        // TODO: This validate can be remove after #2819 will be merged
-        if (!agentPolicyService || !agentService) {
+        if (!agentPolicyService || !agentService || !packagePolicyService) {
           throw new Error(`Failed to get Fleet services`);
         }
 
