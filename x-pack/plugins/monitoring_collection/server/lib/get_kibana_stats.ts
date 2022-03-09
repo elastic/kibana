@@ -5,8 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -18,12 +16,11 @@ const ServiceStatusToLegacyState: Record<string, string> = {
   [ServiceStatusLevels.available.toString()]: 'green',
 };
 
-export async function getKibanaStats({
+export function getKibanaStats({
   config,
-  overallStatus$,
+  getStatus,
 }: {
   config: {
-    allowAnonymous: boolean;
     kibanaIndex: string;
     kibanaVersion: string;
     uuid: string;
@@ -33,9 +30,9 @@ export async function getKibanaStats({
       port: number;
     };
   };
-  overallStatus$: Observable<ServiceStatus>;
+  getStatus: () => ServiceStatus<unknown>;
 }) {
-  const overallStatus = await overallStatus$.pipe(first()).toPromise();
+  const status = getStatus();
   return {
     uuid: config.uuid,
     name: config.server.name,
@@ -45,6 +42,6 @@ export async function getKibanaStats({
     transport_address: `${config.server.hostname}:${config.server.port}`,
     version: config.kibanaVersion.replace(SNAPSHOT_REGEX, ''),
     snapshot: SNAPSHOT_REGEX.test(config.kibanaVersion),
-    status: ServiceStatusToLegacyState[overallStatus.level.toString()],
+    status: ServiceStatusToLegacyState[status.level.toString()],
   };
 }

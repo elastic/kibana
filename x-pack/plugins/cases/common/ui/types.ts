@@ -185,7 +185,7 @@ export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
   name?: string[];
-  false_positives: string[];
+  false_positives?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];

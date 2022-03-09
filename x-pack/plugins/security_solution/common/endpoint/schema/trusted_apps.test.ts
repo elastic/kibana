@@ -11,13 +11,8 @@ import {
   PostTrustedAppCreateRequestSchema,
   PutTrustedAppUpdateRequestSchema,
 } from './trusted_apps';
-import {
-  ConditionEntry,
-  ConditionEntryField,
-  NewTrustedApp,
-  OperatingSystem,
-  PutTrustedAppsRequestParams,
-} from '../types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { ConditionEntry, NewTrustedApp, PutTrustedAppsRequestParams } from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {

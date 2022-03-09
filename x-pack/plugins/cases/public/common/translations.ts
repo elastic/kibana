@@ -254,3 +254,25 @@ export const MAX_LENGTH_ERROR = (field: string, length: number) =>
 export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {
   defaultMessage: 'appropriate license',
 });
+
+export const CASE_SUCCESS_TOAST = (title: string) =>
+  i18n.translate('xpack.cases.actions.caseSuccessToast', {
+    values: { title },
+    defaultMessage: 'An alert has been added to "{title}"',
+  });
+
+export const CASE_SUCCESS_SYNC_TEXT = i18n.translate('xpack.cases.actions.caseSuccessSyncText', {
+  defaultMessage: 'Alerts in this case have their status synched with the case status',
+});
+
+export const VIEW_CASE = i18n.translate('xpack.cases.actions.viewCase', {
+  defaultMessage: 'View Case',
+});
+
+export const APP_TITLE = i18n.translate('xpack.cases.common.appTitle', {
+  defaultMessage: 'Cases',
+});
+
+export const APP_DESC = i18n.translate('xpack.cases.common.appDescription', {
+  defaultMessage: 'Open and track issues, push information to third party systems.',
+});
