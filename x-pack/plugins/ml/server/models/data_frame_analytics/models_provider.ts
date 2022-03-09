@@ -94,7 +94,6 @@ export function modelsProvider(
       }
 
       const { trained_model_stats: trainedModelStats } = await mlClient.getTrainedModelsStats({
-        model_id: '_all',
         size: 10000,
       });
 
