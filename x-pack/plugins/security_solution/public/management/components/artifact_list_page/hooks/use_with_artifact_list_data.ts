@@ -119,21 +119,30 @@ export const useWithArtifactListData = (
 
   // Keep the `doesDataExist` updated if we detect that list data result total is zero.
   // Anytime:
-  //    1. the list data total is 0
-  //    2. and page is 1
-  //    3. and filter is empty
-  //    4. and doesDataExists is currently set to true
-  // check if data exists again
+  //      1. the list data total is 0
+  //      2. and page is 1
+  //      3. and filter is empty
+  //      4. and doesDataExists is `true`
+  //  >> check if data exists again
+  // OR, Anytime:
+  //      1. `doesDataExists` is `false`,
+  //      2. and page is 1
+  //      3. and filter is empty
+  //      4. the list data total is > 0
+  //  >> Check if data exists again (which should return true
   useEffect(() => {
     if (
       isMounted &&
       !isLoadingListData &&
+      !isLoadingDataExists &&
       !listDataError &&
-      listData &&
-      listData.total === 0 &&
       String(page) === '1' &&
       !kuery &&
-      doesDataExist
+      // flow when there the last item on the list gets deleted,
+      // and list goes back to being empty
+      ((listData && listData.total === 0 && doesDataExist) ||
+        // Flow when the list starts off empty and the first item is added
+        (listData && listData.total > 0 && !doesDataExist))
     ) {
       checkIfDataExists();
     }
@@ -142,6 +151,7 @@ export const useWithArtifactListData = (
     doesDataExist,
     filter,
     includedPolicies,
+    isLoadingDataExists,
     isLoadingListData,
     isMounted,
     kuery,
