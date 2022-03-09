@@ -232,42 +232,6 @@ export function getSelectionJobIds(selectedCells, selectedJobs) {
   return selectedJobs.map((d) => d.id);
 }
 
-export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) {
-  // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
-  // and the max bucket span for the jobs shown in the chart.
-  const timefilter = getTimefilter();
-  const bounds = timefilter.getActiveBounds();
-  const buckets = getTimeBucketsFromCache();
-  buckets.setInterval('auto');
-  buckets.setBounds(bounds);
-
-  const intervalSeconds = buckets.getInterval().asSeconds();
-
-  // if the swimlane cell widths are too small they will not be visible
-  // calculate how many buckets will be drawn before the swimlanes are actually rendered
-  // and increase the interval to widen the cells if they're going to be smaller than 8px
-  // this has to be done at this stage so all searches use the same interval
-  const timerangeSeconds = (bounds.max.valueOf() - bounds.min.valueOf()) / 1000;
-  const numBuckets = parseInt(timerangeSeconds / intervalSeconds);
-  const cellWidth = Math.floor((swimlaneContainerWidth / numBuckets) * 100) / 100;
-
-  // if the cell width is going to be less than 8px, double the interval
-  if (cellWidth < 8) {
-    buckets.setInterval(intervalSeconds * 2 + 's');
-  }
-
-  const maxBucketSpanSeconds = selectedJobs.reduce(
-    (memo, job) => Math.max(memo, job.bucketSpanSeconds),
-    0
-  );
-  if (maxBucketSpanSeconds > intervalSeconds) {
-    buckets.setInterval(maxBucketSpanSeconds + 's');
-    buckets.setBounds(bounds);
-  }
-
-  return buckets.getInterval();
-}
-
 // Obtain the list of 'View by' fields per job and viewBySwimlaneFieldName
 export function getViewBySwimlaneOptions({
   currentViewBySwimlaneFieldName,

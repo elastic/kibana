@@ -52,19 +52,8 @@ const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
       mlExplorerSwimlane: {},
     };
 
-    if (state.viewBySwimlaneFieldName !== undefined) {
-      appState.mlExplorerSwimlane.viewByFieldName = state.viewBySwimlaneFieldName;
-    }
-
     if (state.showCharts !== undefined) {
       appState.mlShowCharts = state.showCharts;
-    }
-
-    if (state.filterActive) {
-      appState.mlExplorerFilter.influencersFilterQuery = state.influencersFilterQuery;
-      appState.mlExplorerFilter.filterActive = state.filterActive;
-      appState.mlExplorerFilter.filteredFields = state.filteredFields;
-      appState.mlExplorerFilter.queryString = state.queryString;
     }
 
     return appState;
@@ -96,20 +85,11 @@ export const explorerService = {
   setCharts: (payload: ExplorerChartsData) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS, payload });
   },
-  setInfluencerFilterSettings: (payload: any) => {
-    explorerAction$.next({
-      type: EXPLORER_ACTION.SET_INFLUENCER_FILTER_SETTINGS,
-      payload,
-    });
-  },
   setExplorerData: (payload: DeepPartial<ExplorerState>) => {
     explorerAction$.next(setExplorerDataActionCreator(payload));
   },
   setChartsDataLoading: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS_DATA_LOADING });
-  },
-  setViewBySwimlaneFieldName: (payload: string) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_SWIMLANE_FIELD_NAME, payload });
   },
   setShowCharts: (payload: boolean) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_SHOW_CHARTS, payload });

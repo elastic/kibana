@@ -79,11 +79,6 @@ export declare const getSelectionTimeRange: (
   bounds: TimeRangeBounds
 ) => SelectionTimeRange;
 
-export declare const getSwimlaneBucketInterval: (
-  selectedJobs: ExplorerJob[],
-  swimlaneContainerWidth: number
-) => any;
-
 interface ViewBySwimlaneOptionsArgs {
   currentViewBySwimlaneFieldName: string | undefined;
   filterActive: boolean;

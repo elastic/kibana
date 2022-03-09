@@ -207,10 +207,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
         });
 
         if (clearSettings === true) {
-          explorerService.clearInfluencerFilterSettings();
           anomalyExplorerCommonStateService.clearFilterSettings();
         } else {
-          explorerService.setInfluencerFilterSettings(settings);
           anomalyExplorerCommonStateService.setFilterSettings(settings);
         }
       } catch (e) {
@@ -270,6 +268,11 @@ export const Explorer: FC<ExplorerUIProps> = ({
   );
 
   const isDataLoading = loading || isOverallSwimLaneLoading || isViewBySwimLaneLoading;
+
+  const swimLaneBucketInterval = useObservable(
+    anomalyTimelineStateService.getSwimLaneBucketInterval$(),
+    anomalyTimelineStateService.getSwimLaneBucketInterval()
+  );
 
   const { annotationsData, totalCount: allAnnotationsCnt, error: annotationsError } = annotations;
 
@@ -492,9 +495,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                     selectedCells={selectedCells}
                     bounds={bounds}
                     interval={
-                      explorerState.swimlaneBucketInterval
-                        ? explorerState.swimlaneBucketInterval.asSeconds()
-                        : undefined
+                      swimLaneBucketInterval ? swimLaneBucketInterval.asSeconds() : undefined
                     }
                     chartsCount={chartsData.seriesToPlot.length}
                   />

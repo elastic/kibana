@@ -25,8 +25,6 @@ export const EXPLORER_ACTION = {
   SET_CHARTS: 'setCharts',
   SET_CHARTS_DATA_LOADING: 'setChartsDataLoading',
   SET_EXPLORER_DATA: 'setExplorerData',
-  SET_INFLUENCER_FILTER_SETTINGS: 'setInfluencerFilterSettings',
-  SET_VIEW_BY_SWIMLANE_FIELD_NAME: 'setViewBySwimlaneFieldName',
   SET_SHOW_CHARTS: 'setShowCharts',
 };
 

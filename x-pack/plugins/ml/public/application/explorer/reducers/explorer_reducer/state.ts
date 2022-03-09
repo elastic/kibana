@@ -12,8 +12,6 @@ import {
 } from '../../explorer_charts/explorer_charts_container_service';
 import { AnomaliesTableData, ExplorerJob } from '../../explorer_utils';
 import { AnnotationsTable } from '../../../../../common/types/annotations';
-import type { InfluencersFilterQuery } from '../../../../../common/types/es_client';
-import type { TimeBucketsInterval } from '../../../util/time_buckets';
 import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import type { InfluencerValueData } from '../../../components/influencers_list/influencers_list';
 
@@ -23,11 +21,8 @@ export interface ExplorerState {
   anomalyChartsDataLoading: boolean;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
-  filterActive: boolean;
-  filteredFields: any[];
   filterPlaceHolder: string | undefined;
   indexPattern: DataView;
-  influencersFilterQuery?: InfluencersFilterQuery;
   influencers: Record<string, InfluencerValueData[]>;
   isAndOperator: boolean;
   loading: boolean;
@@ -35,13 +30,9 @@ export interface ExplorerState {
   noInfluencersConfigured: boolean;
   queryString: string;
   selectedJobs: ExplorerJob[] | null;
-  swimlaneBucketInterval: TimeBucketsInterval | undefined;
-  swimlaneContainerWidth: number;
   tableData: AnomaliesTableData;
   tableQueryString: string;
   viewByLoadedForTimeFormatted: string | null;
-  viewBySwimlaneFieldName?: string;
-  viewBySwimlaneOptions: string[];
   showCharts: boolean;
 }
 
@@ -62,11 +53,8 @@ export function getExplorerDefaultState(): ExplorerState {
     anomalyChartsDataLoading: true,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
-    filterActive: false,
-    filteredFields: [],
     filterPlaceHolder: undefined,
     indexPattern: getDefaultIndexPattern(),
-    influencersFilterQuery: undefined,
     influencers: {},
     isAndOperator: false,
     loading: true,
@@ -74,8 +62,6 @@ export function getExplorerDefaultState(): ExplorerState {
     noInfluencersConfigured: true,
     queryString: '',
     selectedJobs: null,
-    swimlaneBucketInterval: undefined,
-    swimlaneContainerWidth: 0,
     tableData: {
       anomalies: [],
       examplesByJobId: [''],
@@ -85,8 +71,6 @@ export function getExplorerDefaultState(): ExplorerState {
     },
     tableQueryString: '',
     viewByLoadedForTimeFormatted: null,
-    viewBySwimlaneFieldName: undefined,
-    viewBySwimlaneOptions: [],
     showCharts: true,
   };
 }

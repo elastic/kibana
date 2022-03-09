@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, from, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Observable, of } from 'rxjs';
 import {
   switchMap,
   map,
@@ -35,6 +35,7 @@ import {
 // FIXME get rid of the static import
 import { mlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
+import type { TimeBucketsInterval } from '../util/time_buckets';
 
 interface SwimLanePagination {
   viewByFromPage: number;
@@ -48,8 +49,6 @@ export class AnomalyTimelineStateService {
   private _explorerURLStateCallback:
     | ((update: AnomalyExplorerSwimLaneUrlState, replaceState?: boolean) => void)
     | null = null;
-
-  private _bucketSpanInterval: number | null = null;
 
   private _overallSwimLaneData$ = new BehaviorSubject<OverallSwimlaneData | null>(null);
   private _viewBySwimLaneData$ = new BehaviorSubject<ViewBySwimLaneData | undefined>(undefined);
@@ -68,11 +67,10 @@ export class AnomalyTimelineStateService {
   private _swimLaneCardinality$ = new BehaviorSubject<number | undefined>(undefined);
   private _viewBySwimlaneFieldName$ = new BehaviorSubject<string | undefined>(undefined);
   private _viewBySwimLaneOptions$ = new BehaviorSubject<string[]>([]);
-
   private _topFieldValues$ = new BehaviorSubject<string[]>([]);
-
   private _isOverallSwimLaneLoading$ = new BehaviorSubject(true);
   private _isViewBySwimLaneLoading$ = new BehaviorSubject(true);
+  private _swimLaneBucketInterval$ = new BehaviorSubject<TimeBucketsInterval | null>(null);
 
   constructor(
     private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
@@ -171,7 +169,7 @@ export class AnomalyTimelineStateService {
 
             const timerange = getSelectionTimeRange(
               selectedCells,
-              this._bucketSpanInterval,
+              this.getSwimLaneBucketInterval()!.asSeconds,
               this.timefilter.getBounds()
             );
 
@@ -251,9 +249,9 @@ export class AnomalyTimelineStateService {
       this.getContainerWidth$(),
     ]).subscribe(([selectedJobs, containerWidth]) => {
       if (!selectedJobs) return;
-      this._bucketSpanInterval = this.anomalyTimelineService
-        .getSwimlaneBucketInterval(selectedJobs, containerWidth)
-        .asSeconds();
+      this._swimLaneBucketInterval$.next(
+        this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
+      );
     });
 
     combineLatest([
@@ -270,7 +268,7 @@ export class AnomalyTimelineStateService {
           let times: AnomalyExplorerSwimLaneUrlState['selectedTimes'] =
             swimLaneUrlState.selectedTimes ?? swimLaneUrlState.selectedTime!;
           if (typeof times === 'number') {
-            times = [times, times + this._bucketSpanInterval!];
+            times = [times, times + this.getSwimLaneBucketInterval()!.asSeconds()];
           }
 
           let lanes = swimLaneUrlState.selectedLanes ?? swimLaneUrlState.selectedLane!;
@@ -336,8 +334,10 @@ export class AnomalyTimelineStateService {
      * the selection range could be out of the time boundaries with
      * correction within the bucket interval.
      */
-    const rangeFrom = timeBounds.min!.unix() - this._bucketSpanInterval!;
-    const rangeTo = timeBounds.max!.unix() + this._bucketSpanInterval!;
+    const bucketSpanInterval = this.getSwimLaneBucketInterval()!.asSeconds();
+
+    const rangeFrom = timeBounds.min!.unix() - bucketSpanInterval;
+    const rangeTo = timeBounds.max!.unix() + bucketSpanInterval;
 
     const resultFrom = Math.max(selectedFrom, rangeFrom);
     const resultTo = Math.min(selectedTo, rangeTo);
@@ -651,5 +651,13 @@ export class AnomalyTimelineStateService {
       },
       true
     );
+  }
+
+  public getSwimLaneBucketInterval$(): Observable<TimeBucketsInterval | null> {
+    return this._swimLaneBucketInterval$.asObservable();
+  }
+
+  public getSwimLaneBucketInterval(): TimeBucketsInterval | null {
+    return this._swimLaneBucketInterval$.getValue();
   }
 }

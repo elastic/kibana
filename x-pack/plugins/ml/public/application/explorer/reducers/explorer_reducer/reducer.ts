@@ -8,13 +8,9 @@
 import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
 
 import { getDefaultChartsData } from '../../explorer_charts/explorer_charts_container_service';
-import { EXPLORER_ACTION, VIEW_BY_JOB_LABEL } from '../../explorer_constants';
+import { EXPLORER_ACTION } from '../../explorer_constants';
 import { Action } from '../../explorer_dashboard_service';
-import {
-  getClearedSelectedAnomaliesState,
-  getSwimlaneBucketInterval,
-  getViewBySwimlaneOptions,
-} from '../../explorer_utils';
+import { getClearedSelectedAnomaliesState, getSwimlaneBucketInterval } from '../../explorer_utils';
 
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
 import { jobSelectionChange } from './job_selection_change';
@@ -74,26 +70,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = { ...state, ...payload };
       break;
 
-    case EXPLORER_ACTION.SET_VIEW_BY_SWIMLANE_FIELD_NAME:
-      const { filteredFields, influencersFilterQuery } = state;
-      const viewBySwimlaneFieldName = payload;
-
-      let maskAll = false;
-
-      if (influencersFilterQuery !== undefined) {
-        maskAll =
-          viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ||
-          filteredFields.includes(viewBySwimlaneFieldName) === false;
-      }
-
-      nextState = {
-        ...state,
-        ...getClearedSelectedAnomaliesState(),
-        maskAll,
-        viewBySwimlaneFieldName,
-      };
-      break;
-
     case EXPLORER_ACTION.SET_SHOW_CHARTS:
       nextState = {
         ...state,
@@ -109,34 +85,15 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     return nextState;
   }
 
-  const swimlaneBucketInterval = getSwimlaneBucketInterval(
-    nextState.selectedJobs,
-    nextState.swimlaneContainerWidth
-  );
-
-  // Does a sanity check on the selected `viewBySwimlaneFieldName`
-  // and returns the available `viewBySwimlaneOptions`.
-  const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = getViewBySwimlaneOptions({
-    currentViewBySwimlaneFieldName: nextState.viewBySwimlaneFieldName,
-    filterActive: nextState.filterActive,
-    filteredFields: nextState.filteredFields,
-    isAndOperator: nextState.isAndOperator,
-    selectedJobs: nextState.selectedJobs,
-  });
-
-  // const { selectedCells } = nextState;
-
   // const timeRange = getTimeBoundsFromSelection(selectedCells);
 
   return {
     ...nextState,
-    swimlaneBucketInterval,
     // viewByLoadedForTimeFormatted: timeRange
     //   ? `${formatHumanReadableDateTime(timeRange.earliestMs)} - ${formatHumanReadableDateTime(
     //       timeRange.latestMs
     //     )}`
     //   : null,
-    // ...checkSelectedCells(nextState),
     ...setKqlQueryBarPlaceholder(nextState),
   };
 };

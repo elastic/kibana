@@ -201,12 +201,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
    * URL state should be the only source of truth for related props.
    */
   useEffect(() => {
-    const { viewByFieldName } = explorerUrlState?.mlExplorerSwimlane ?? {};
-
-    if (viewByFieldName !== undefined) {
-      explorerService.setViewBySwimlaneFieldName(viewByFieldName);
-    }
-
     if (explorerUrlState.mlShowCharts !== undefined) {
       explorerService.setShowCharts(explorerUrlState.mlShowCharts);
     }
@@ -241,6 +235,11 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity()
   );
 
+  const swimLaneBucketInterval = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneBucketInterval$(),
+    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneBucketInterval()
+  );
+
   const influencersFilterQuery = useObservable(
     anomalyExplorerContext.anomalyExplorerCommonStateService.getInfluencerFilterQuery$()
   );
@@ -253,7 +252,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           noInfluencersConfigured: explorerState.noInfluencersConfigured,
           selectedCells,
           selectedJobs: explorerState.selectedJobs,
-          swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
+          swimlaneBucketInterval: swimLaneBucketInterval,
           tableInterval: tableInterval.val,
           tableSeverity: tableSeverity.val,
           viewBySwimlaneFieldName: viewByFieldName,

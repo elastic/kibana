@@ -28,7 +28,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
 import { useMlKibana } from '../contexts/kibana';
-import { explorerService } from './explorer_dashboard_service';
 import { ExplorerState } from './reducers/explorer_reducer';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
@@ -76,7 +75,12 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const timeBuckets = useTimeBuckets();
 
-    const { filterActive, viewByLoadedForTimeFormatted, overallAnnotations } = explorerState;
+    const { viewByLoadedForTimeFormatted, overallAnnotations } = explorerState;
+
+    const { filterActive } = useObservable(
+      anomalyExplorerCommonStateService.getFilterSettings$(),
+      anomalyExplorerCommonStateService.getFilterSettings()
+    );
 
     const swimlaneLimit = useObservable(anomalyTimelineStateService.getSwimLaneCardinality$());
 
@@ -237,7 +241,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
                     value={viewBySwimlaneFieldName}
                     onChange={(e) => {
-                      explorerService.setViewBySwimlaneFieldName(e.target.value);
                       anomalyTimelineStateService.setViewBySwimLaneFieldName(e.target.value);
                     }}
                   />
