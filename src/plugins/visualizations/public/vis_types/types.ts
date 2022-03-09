@@ -98,7 +98,7 @@ export interface VisualizeEditorLayersContext {
   chartType?: string;
   axisPosition?: string;
   termsParams?: Record<string, unknown>;
-  splitField?: string;
+  splitFields?: string[];
   splitMode?: string;
   splitFilters?: SplitByFilters[];
   palette?: PaletteOutput;

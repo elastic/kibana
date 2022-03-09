@@ -138,8 +138,8 @@ export const enableRulesAction = async (
   setLoadingRules?: RulesTableActions['setLoadingRules']
 ) => {
   const errorTitle = enabled
-    ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(ids.length)
-    : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(ids.length);
+    ? i18n.BATCH_ACTION_ENABLE_SELECTED_ERROR(ids.length)
+    : i18n.BATCH_ACTION_DISABLE_SELECTED_ERROR(ids.length);
 
   try {
     setLoadingRules?.({ ids, action: enabled ? 'enable' : 'disable' });

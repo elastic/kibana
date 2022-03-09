@@ -266,6 +266,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         filename: '[path].br',
         test: /\.(js|css)$/,
         cache: false,
+        compressionOptions: {
+          level: 11,
+        },
       }),
       new CompressionPlugin({
         algorithm: 'gzip',
@@ -283,7 +286,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           extractComments: false,
           parallel: false,
           terserOptions: {
-            compress: true,
+            compress: { passes: 2 },
             keep_classnames: true,
             mangle: true,
           },

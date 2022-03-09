@@ -352,4 +352,54 @@ ssl.test: 123
       }
     `);
   });
+
+  it('should return placeholder ES_USERNAME and ES_PASSWORD for elasticsearch output type in standalone ', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+      },
+      true
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "ca_sha256": undefined,
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "password": "{ES_PASSWORD}",
+        "type": "elasticsearch",
+        "username": "{ES_USERNAME}",
+      }
+    `);
+  });
+
+  it('should not return placeholder ES_USERNAME and ES_PASSWORD for logstash output type in standalone ', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['host.fr:3332'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'logstash',
+      },
+      true
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "ca_sha256": undefined,
+        "hosts": Array [
+          "host.fr:3332",
+        ],
+        "type": "logstash",
+      }
+    `);
+  });
 });

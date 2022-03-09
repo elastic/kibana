@@ -17,7 +17,7 @@ import { observabilityFeatureId } from '../../../../../common';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
+import { loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
 import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
@@ -45,6 +45,7 @@ interface RuleStatsState {
   muted: number;
   error: number;
 }
+
 export interface TopAlert {
   fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
@@ -69,7 +70,7 @@ const ALERT_STATUS_REGEX = new RegExp(
 );
 
 function AlertsPage() {
-  const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
+  const { core, plugins, ObservabilityPageTemplate, config } = usePluginContext();
   const [alertFilterStatus, setAlertFilterStatus] = useState('' as AlertStatusFilterButton);
   const { prepend } = core.http.basePath;
   const refetch = useRef<() => void>();
@@ -107,13 +108,12 @@ function AlertsPage() {
       const response = await loadRuleAggregations({
         http,
       });
-      // Note that the API uses the semantics of 'alerts' instead of 'rules'
-      const { alertExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
-      if (alertExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
-        const total = Object.values(alertExecutionStatus).reduce((acc, value) => acc + value, 0);
+      const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
+      if (ruleExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
+        const total = Object.values(ruleExecutionStatus).reduce((acc, value) => acc + value, 0);
         const { disabled } = ruleEnabledStatus;
         const { muted } = ruleMutedStatus;
-        const { error } = alertExecutionStatus;
+        const { error } = ruleExecutionStatus;
         setRuleStats({
           ...ruleStats,
           total,
@@ -138,9 +138,9 @@ function AlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // In a future milestone we'll have a page dedicated to rule management in
-  // observability. For now link to the settings page.
-  const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
+  const manageRulesHref = config.unsafe.rules
+    ? prepend('/app/observability/rules')
+    : prepend('/insightsAndAlerting/triggersActions/alerts');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {

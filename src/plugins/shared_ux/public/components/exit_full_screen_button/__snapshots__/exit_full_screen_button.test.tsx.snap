@@ -2,6 +2,21 @@
 
 exports[`<ExitFullScreenButton /> is rendered 1`] = `
 <ServicesProvider
+  docLinks={
+    Object {
+      "dataViewsDocsLink": "dummy link",
+    }
+  }
+  editors={
+    Object {
+      "openDataViewEditor": [MockFunction],
+    }
+  }
+  permissions={
+    Object {
+      "canCreateNewDataView": true,
+    }
+  }
   platform={
     Object {
       "setIsFullscreen": [MockFunction],

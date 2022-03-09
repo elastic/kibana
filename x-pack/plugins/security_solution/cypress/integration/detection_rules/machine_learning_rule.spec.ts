@@ -47,7 +47,7 @@ import {
 } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineMachineLearningRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -68,13 +68,13 @@ describe.skip('Detection rules, machine learning', () => {
     cleanKibana();
   });
 
-  it('Creates and activates a new ml rule', () => {
+  it('Creates and enables a new ml rule', () => {
     loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectMachineLearningRuleType();
     fillDefineMachineLearningRuleAndContinue(getMachineLearningRule());
     fillAboutRuleAndContinue(getMachineLearningRule());
     fillScheduleRuleAndContinue(getMachineLearningRule());
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
