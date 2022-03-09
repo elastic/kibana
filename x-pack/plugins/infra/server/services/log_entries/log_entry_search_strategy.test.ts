@@ -20,10 +20,8 @@ import {
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
 import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
-import {
-  createLogViewsClientMock,
-  createResolvedLogViewMock,
-} from '../log_views/log_views_client.mock';
+import { createResolvedLogViewMock } from '../../../common/log_views/resolved_log_view.mock';
+import { createLogViewsClientMock } from '../log_views/log_views_client.mock';
 import { createLogViewsServiceStartMock } from '../log_views/log_views_service.mock';
 import {
   logEntrySearchRequestStateRT,
