@@ -17,7 +17,7 @@ export const useFetchSessionViewProcessEvents = (
   jumpToEvent: ProcessEvent | undefined
 ) => {
   const { http } = useKibana<CoreStart>().services;
-  const [isJumpToBeginning, setIsJumpToBeginning] = useState<boolean>(false);
+  const [isJumpToFirstPage, setIsJumpToFirstPage] = useState<boolean>(false);
   const jumpToCursor = jumpToEvent && jumpToEvent.process.start;
 
   const query = useInfiniteQuery(
@@ -66,11 +66,11 @@ export const useFetchSessionViewProcessEvents = (
   );
 
   useEffect(() => {
-    if (jumpToEvent && query.data?.pages.length === 1 && !isJumpToBeginning) {
+    if (jumpToEvent && query.data?.pages.length === 1 && !isJumpToFirstPage) {
       query.fetchPreviousPage({ cancelRefetch: true });
-      setIsJumpToBeginning(true);
+      setIsJumpToFirstPage(true);
     }
-  }, [jumpToEvent, query, isJumpToBeginning]);
+  }, [jumpToEvent, query, isJumpToFirstPage]);
 
   return query;
 };

@@ -25,7 +25,7 @@ export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
       border: `${border.width.thin} solid ${transparentize(theme.euiColorVis6, 0.48)}`,
       lineHeight: '18px',
       height: '20px',
-      fontSize: '12px',
+      fontSize: size.m,
       borderRadius: border.radius.medium,
       color: shade(theme.euiColorVis6, 0.25),
       marginLeft: size.s,

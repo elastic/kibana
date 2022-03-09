@@ -38,18 +38,18 @@ export function ProcessTreeAlerts({
 
   return (
     <div css={styles.container} data-test-subj="sessionView:sessionViewAlertDetails">
-      {alerts.map((alert: ProcessEvent) => (
-        <ProcessTreeAlert
-          alert={alert}
-          isInvestigated={!!jumpToAlertID && jumpToAlertID === alert.kibana?.alert.uuid}
-          isSelected={
-            !!selectedAlert?.uuid &&
-            isProcessSelected &&
-            alert.kibana?.alert.uuid === selectedAlert?.uuid
-          }
-          onClick={handleAlertClick}
-        />
-      ))}
+      {alerts.map((alert: ProcessEvent) => {
+        const alertUuid = alert.kibana?.alert.uuid || null;
+
+        return (
+          <ProcessTreeAlert
+            alert={alert}
+            isInvestigated={jumpToAlertID === alertUuid}
+            isSelected={isProcessSelected && selectedAlert?.uuid === alertUuid}
+            onClick={handleAlertClick}
+          />
+        );
+      })}
     </div>
   );
 }
