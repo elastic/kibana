@@ -13,10 +13,10 @@ import normalizePath from 'normalize-path';
 import globby from 'globby';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { discoverBazelPackages, generatePackagesBuildBazelFile } from '@kbn/bazel-packages';
+import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { createFailError, createFlagError, isFailError, sortPackageJson } from '@kbn/dev-utils';
 
-import { ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
+import { TEMPLATE_DIR, ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
 import type { GenerateCommand } from '../generate_command';
 
 export const PackageCommand: GenerateCommand = {
@@ -130,9 +130,12 @@ export const PackageCommand: GenerateCommand = {
     await Fsp.writeFile(packageJsonPath, sortPackageJson(JSON.stringify(packageJson)));
     log.info('Updated package.json file');
 
-    await Fsp.writeFile(
+    await render.toFile(
+      Path.resolve(TEMPLATE_DIR, 'packages_BUILD.bazel.ejs'),
       Path.resolve(REPO_ROOT, 'packages/BUILD.bazel'),
-      generatePackagesBuildBazelFile(await discoverBazelPackages())
+      {
+        packages: await discoverBazelPackages(),
+      }
     );
     log.info('Updated packages/BUILD.bazel');
 
