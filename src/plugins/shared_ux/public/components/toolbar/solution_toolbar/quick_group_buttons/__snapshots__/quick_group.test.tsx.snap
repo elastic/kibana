@@ -1,29 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<QuickButtonGroup /> is rendered 1`] = `
-.emotion-0 {
-  border-radius: 6px;
-}
-
-.emotion-1.euiButtonGroupButton {
+.emotion-0.euiButtonGroupButton {
   background-color: #FFF;
-  border-width: 1px!important;
-  border-style: solid!important;
-  border-color: #D3DAE6!important;
+  border: 1px solid #D3DAE6!important;
 }
 
-.emotion-1.euiButtonGroupButton:first-of-type {
+.emotion-0.euiButtonGroupButton:first-of-type {
   border-top-left-radius: 6px!important;
   border-bottom-left-radius: 6px!important;
 }
 
-.emotion-1.euiButtonGroupButton:last-of-type {
+.emotion-0.euiButtonGroupButton:last-of-type {
   border-top-right-radius: 6px!important;
   border-bottom-right-radius: 6px!important;
-}
-
-.emotion-1.euiButtonGroupButton:hover {
-  background-color: #D3DAE6;
 }
 
 <ServicesProvider
@@ -52,25 +42,18 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
     buttons={
       Array [
         Object {
-          "getLegend": "",
           "iconType": "visText",
           "label": "Text",
           "onClick": [MockFunction],
         },
       ]
     }
+    legend="Legend"
   >
     <EuiButtonGroup
       buttonSize="m"
-      css={
-        Array [
-          Object {
-            "borderRadius": "6px",
-          },
-        ]
-      }
       isIconOnly={true}
-      legend=""
+      legend="Legend"
       onChange={[Function]}
       options={
         Array [
@@ -83,21 +66,15 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
                     "borderBottomLeftRadius": "6px !important",
                     "borderTopLeftRadius": "6px !important",
                   },
-                  "&:hover": Object {
-                    "backgroundColor": "#D3DAE6",
-                  },
                   "&:last-of-type": Object {
                     "borderBottomRightRadius": "6px !important",
                     "borderTopRightRadius": "6px !important",
                   },
                   "backgroundColor": "#FFF",
-                  "borderColor": "#D3DAE6 !important",
-                  "borderStyle": "solid !important",
-                  "borderWidth": "1px !important",
+                  "border": "1px solid #D3DAE6 !important",
                 },
               },
             ],
-            "getLegend": "",
             "iconType": "visText",
             "id": "generated-id0",
             "label": "Text",
@@ -109,121 +86,115 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
       type="multi"
     >
       <fieldset
-        css="unknown styles"
+        className="euiButtonGroup euiButtonGroup--medium euiButtonGroup--text"
         disabled={false}
       >
-        <fieldset
-          className="euiButtonGroup euiButtonGroup--medium euiButtonGroup--text emotion-0"
-          disabled={false}
-        >
-          <EuiScreenReaderOnly>
-            <legend
-              className="euiScreenReaderOnly"
-            />
-          </EuiScreenReaderOnly>
-          <div
-            className="euiButtonGroup__buttons"
+        <EuiScreenReaderOnly>
+          <legend
+            className="euiScreenReaderOnly"
           >
-            <EuiButtonGroupButton
+            Legend
+          </legend>
+        </EuiScreenReaderOnly>
+        <div
+          className="euiButtonGroup__buttons"
+        >
+          <EuiButtonGroupButton
+            aria-label="Text"
+            className="emotion-0"
+            color="text"
+            element="button"
+            iconType="visText"
+            id="generated-id0"
+            isDisabled={false}
+            isIconOnly={true}
+            label="Text"
+            name="generated-id"
+            onChange={[Function]}
+            onClick={[MockFunction]}
+            size="m"
+            title="Text"
+          >
+            <EuiButtonDisplay
               aria-label="Text"
-              className="emotion-1"
+              baseClassName="euiButtonGroupButton"
+              className="euiButtonGroupButton-isIconOnly emotion-0"
               color="text"
+              data-test-subj="generated-id0"
               element="button"
-              getLegend=""
+              fill={false}
               iconType="visText"
-              id="generated-id0"
+              id="generated-id"
               isDisabled={false}
-              isIconOnly={true}
-              label="Text"
-              name="generated-id"
-              onChange={[Function]}
+              isSelected={false}
               onClick={[MockFunction]}
               size="m"
+              textProps={
+                Object {
+                  "className": "euiScreenReaderOnly",
+                  "data-text": "Text",
+                  "ref": [Function],
+                }
+              }
               title="Text"
+              type="button"
             >
-              <EuiButtonDisplay
+              <button
                 aria-label="Text"
-                baseClassName="euiButtonGroupButton"
-                className="euiButtonGroupButton-isIconOnly emotion-1"
-                color="text"
+                aria-pressed={false}
+                className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton-isIconOnly emotion-0"
                 data-test-subj="generated-id0"
-                element="button"
-                fill={false}
-                getLegend=""
-                iconType="visText"
+                disabled={false}
                 id="generated-id"
-                isDisabled={false}
-                isSelected={false}
                 onClick={[MockFunction]}
-                size="m"
-                textProps={
+                style={
                   Object {
-                    "className": "euiScreenReaderOnly",
-                    "data-text": "Text",
-                    "ref": [Function],
+                    "minWidth": undefined,
                   }
                 }
                 title="Text"
                 type="button"
               >
-                <button
-                  aria-label="Text"
-                  aria-pressed={false}
-                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton-isIconOnly emotion-1"
-                  data-test-subj="generated-id0"
-                  disabled={false}
-                  getLegend=""
-                  id="generated-id"
-                  onClick={[MockFunction]}
-                  style={
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  iconType="visText"
+                  textProps={
                     Object {
-                      "minWidth": undefined,
+                      "className": "euiButton__text euiScreenReaderOnly",
+                      "data-text": "Text",
+                      "ref": [Function],
                     }
                   }
-                  title="Text"
-                  type="button"
                 >
-                  <EuiButtonContent
-                    className="euiButton__content"
-                    iconSide="left"
-                    iconType="visText"
-                    textProps={
-                      Object {
-                        "className": "euiButton__text euiScreenReaderOnly",
-                        "data-text": "Text",
-                        "ref": [Function],
-                      }
-                    }
+                  <span
+                    className="euiButtonContent euiButton__content"
                   >
-                    <span
-                      className="euiButtonContent euiButton__content"
+                    <EuiIcon
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      size="m"
+                      type="visText"
                     >
-                      <EuiIcon
+                      <span
                         className="euiButtonContent__icon"
                         color="inherit"
+                        data-euiicon-type="visText"
                         size="m"
-                        type="visText"
-                      >
-                        <span
-                          className="euiButtonContent__icon"
-                          color="inherit"
-                          data-euiicon-type="visText"
-                          size="m"
-                        />
-                      </EuiIcon>
-                      <span
-                        className="euiButton__text euiScreenReaderOnly"
-                        data-text="Text"
-                      >
-                        Text
-                      </span>
+                      />
+                    </EuiIcon>
+                    <span
+                      className="euiButton__text euiScreenReaderOnly"
+                      data-text="Text"
+                    >
+                      Text
                     </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButtonGroupButton>
-          </div>
-        </fieldset>
+                  </span>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
+          </EuiButtonGroupButton>
+        </div>
       </fieldset>
     </EuiButtonGroup>
   </QuickButtonGroup>

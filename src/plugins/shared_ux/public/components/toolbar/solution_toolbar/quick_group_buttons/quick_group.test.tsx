@@ -30,10 +30,10 @@ describe('<QuickButtonGroup />', () => {
   test('is rendered', () => {
     const component = mount(
       <QuickButtonGroup
+        legend="Legend"
         buttons={[
           {
             label: 'Text',
-            getLegend: '',
             onClick: jest.fn(),
             iconType: 'visText',
           },

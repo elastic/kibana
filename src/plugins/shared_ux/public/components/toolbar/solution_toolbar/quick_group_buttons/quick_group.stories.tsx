@@ -25,25 +25,22 @@ export default {
 const quickButtons = [
   {
     label: 'Text',
-    getLegend: '',
     onClick: action('onTextClick'),
     iconType: 'visText',
+    title: 'Text as markdown',
   },
   {
     label: 'Control',
-    getLegend: '',
     onClick: action('onControlClick'),
     iconType: 'controlsHorizontal',
   },
   {
     label: 'Link',
-    getLegend: '',
     onClick: action('onLinkClick'),
     iconType: 'link',
   },
   {
     label: 'Image',
-    getLegend: '',
     onClick: action('onImageClick'),
     iconType: 'image',
   },
@@ -56,7 +53,12 @@ const quickButtons = [
 ];
 
 export const ConnectedComponent: Story<{ quickButtonCount: number }> = ({ quickButtonCount }) => {
-  return <QuickButtonGroup buttons={quickButtons.slice(0, quickButtonCount)} />;
+  return (
+    <QuickButtonGroup
+      legend="Example icon group"
+      buttons={quickButtons.slice(0, quickButtonCount)}
+    />
+  );
 };
 
 ConnectedComponent.argTypes = {

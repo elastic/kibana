@@ -13,23 +13,39 @@ import {
   EuiButtonGroupOptionProps,
   useEuiTheme,
   IconType,
+  EuiButtonGroupProps,
 } from '@elastic/eui';
 import { QuickGroupButtonStyles } from './quick_group.styles';
 export interface QuickButton {
+  /**
+   * The accessible button label
+   */
   label: string;
-  title?: string;
-  onClick: () => void;
+  /**
+   * EUI `IconType` to display
+   */
   iconType: IconType;
-  getLegend: string;
+  onClick: () => void;
+  /**
+   * HTML `title` attribute for tooltips if different from `label`
+   */
+  title?: string;
 }
 
 export interface Props {
+  /**
+   * Required accessible legend for the whole group
+   */
+  legend: EuiButtonGroupProps['legend'];
+  /**
+   * Array of `QuickButton`s
+   */
   buttons: QuickButton[];
 }
 
 type Option = EuiButtonGroupOptionProps & Omit<QuickButton, 'label'>;
 
-export const QuickButtonGroup = ({ buttons }: Props) => {
+export const QuickButtonGroup = ({ buttons, legend }: Props) => {
   const euiTheme = useEuiTheme();
   const quickButtonGroupStyles = QuickGroupButtonStyles(euiTheme);
 
@@ -50,12 +66,10 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
     buttonGroupOptions.find((x) => x.id === optionId)?.onClick();
   };
 
-  const getLegend = buttonGroupOptions[0].getLegend;
-
   return (
     <EuiButtonGroup
       buttonSize="m"
-      legend={getLegend}
+      legend={legend}
       options={buttonGroupOptions}
       onChange={onChangeIconsMulti}
       type="multi"
