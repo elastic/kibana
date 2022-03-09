@@ -10,9 +10,8 @@
 // but that inserts a div which messes up the layout of the flyout.
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { compressToEncodedURIComponent } from 'lz-string';
 
 import {
   EuiFlyout,
@@ -30,6 +29,7 @@ import {
 } from '@elastic/eui';
 import { ApplicationStart } from 'src/core/public';
 import type { UrlService } from 'src/plugins/share/common/url_service';
+import { useOpenInConsole } from './open_in_console';
 
 interface Props {
   title: string;
@@ -50,21 +50,14 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({
   urlService,
   canShowDevtools,
 }) => {
-  let consoleLink: string | undefined;
-
-  if (urlService) {
-    const devToolsDataUri = compressToEncodedURIComponent(request);
-    consoleLink = urlService.locators
-      .get('CONSOLE_APP_LOCATOR')
-      ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
-  }
+  const { consolePreviewClick, consolePreviewLink } = useOpenInConsole({
+    request,
+    navigateToUrl,
+    urlService,
+  });
 
   // Check if both the Dev Tools UI and the Console UI are enabled.
-  const shouldShowDevToolsLink = canShowDevtools && consoleLink !== undefined;
-  const consolePreviewClick = useCallback(
-    () => consoleLink && navigateToUrl && navigateToUrl(consoleLink),
-    [consoleLink, navigateToUrl]
-  );
+  const shouldShowDevToolsLink = canShowDevtools && consolePreviewLink !== undefined;
 
   return (
     <EuiFlyout maxWidth={480} onClose={closeFlyout}>
@@ -111,7 +104,7 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({
                   size="xs"
                   flush="right"
                   iconType="wrench"
-                  href={consoleLink}
+                  href={consolePreviewLink}
                   onClick={consolePreviewClick}
                   data-test-subj="apiRequestFlyoutOpenInConsoleButton"
                 >
