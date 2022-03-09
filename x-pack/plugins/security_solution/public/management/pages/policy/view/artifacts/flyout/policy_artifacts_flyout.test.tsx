@@ -269,7 +269,7 @@ describe('Policy details artifacts flyout', () => {
       expect(onCloseMock).toHaveBeenCalled();
     });
 
-    it('should show a toast error when the request fails and close the flyout', async () => {
+    it('should show a toast error when the request fails', async () => {
       mockedApi.responseProvider.eventFiltersUpdateOne.mockImplementation(() => {
         throw new Error('the server is too far away');
       });
@@ -282,7 +282,6 @@ describe('Policy details artifacts flyout', () => {
         expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
           'An error occurred updating artifacts'
         );
-        expect(onCloseMock).toHaveBeenCalled();
       });
     });
   });
