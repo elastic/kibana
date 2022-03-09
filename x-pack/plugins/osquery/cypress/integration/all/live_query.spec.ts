@@ -16,7 +16,7 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 
-describe('Super User - Live Query', () => {
+describe('ALL - Live Query', () => {
   beforeEach(() => {
     login();
     navigateTo('/app/osquery');

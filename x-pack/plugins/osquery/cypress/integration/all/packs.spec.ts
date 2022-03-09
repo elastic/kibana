@@ -17,7 +17,7 @@ import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { preparePack } from '../../tasks/packs';
 import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
 
-describe('SuperUser - Packs', () => {
+describe('ALL - Packs', () => {
   const integration = 'Osquery Manager';
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const PACK_NAME = 'Pack-name';

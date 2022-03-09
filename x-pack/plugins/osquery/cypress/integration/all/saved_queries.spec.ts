@@ -17,7 +17,7 @@ import {
 } from '../../tasks/live_query';
 import { login } from '../../tasks/login';
 
-describe('Super User - Saved queries', () => {
+describe('ALL - Saved queries', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const SAVED_QUERY_DESCRIPTION = 'Saved Query Description';
 

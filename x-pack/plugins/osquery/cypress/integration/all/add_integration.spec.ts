@@ -12,7 +12,7 @@ import { login } from '../../tasks/login';
 // import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
-describe('Super User - Add Integration', () => {
+describe('ALL - Add Integration', () => {
   const integration = 'Osquery Manager';
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
