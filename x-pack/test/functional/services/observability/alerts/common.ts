@@ -27,6 +27,7 @@ export function ObservabilityAlertsCommonProvider({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
   const pageObjects = getPageObjects(['common']);
@@ -51,6 +52,14 @@ export function ObservabilityAlertsCommonProvider({
   const getTableCells = async () => {
     // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
     return await testSubjects.findAll('dataGridRowCell');
+  };
+
+  const getAllDisabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:disabled');
+  };
+
+  const getAllEnabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:enabled');
   };
 
   const getTableCellsInRows = async () => {
@@ -195,6 +204,8 @@ export function ObservabilityAlertsCommonProvider({
     getAlertsFlyoutTitle,
     getAlertsFlyoutViewInAppButtonOrFail,
     getCopyToClipboardButton,
+    getAllDisabledCheckBoxInTable,
+    getAllEnabledCheckBoxInTable,
     getFilterForValueButton,
     copyToClipboardButtonExists,
     getNoDataPageOrFail,

@@ -9,6 +9,9 @@ import { setupTestUsers } from './test_users';
 
 export default function ({ loadTestFile, getService }) {
   describe('Fleet Endpoints', function () {
+    // SKIPPED: https://github.com/elastic/kibana/issues/127198
+    this.onlyEsVersion('<=7');
+
     before(async () => {
       await setupTestUsers(getService('security'));
     });

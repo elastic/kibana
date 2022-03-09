@@ -30,6 +30,7 @@ If you are using Ubuntu/Debian systems, install the following packages:
 
 * `fonts-liberation`
 * `libfontconfig1`
+* `libnss3`
 
 If the system is missing dependencies, *Reporting* fails in a non-deterministic way. {kib} runs a self-test at server startup, and
 if it encounters errors, logs them in the Console. The error message does not include
