@@ -639,6 +639,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               buttonContent={i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
                 defaultMessage: 'Advanced',
               })}
+              data-test-subj="indexPattern-terms-advanced"
             >
               <EuiSpacer size="m" />
               <EuiSwitch
