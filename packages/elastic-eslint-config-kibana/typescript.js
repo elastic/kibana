@@ -169,6 +169,7 @@ module.exports = {
               format: ['PascalCase', 'UPPER_CASE', 'camelCase'],
             },
             // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
+            // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
             {
               selector: [
                 'classProperty',
