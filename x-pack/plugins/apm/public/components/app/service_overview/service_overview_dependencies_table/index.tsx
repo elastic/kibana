@@ -38,7 +38,7 @@ export function ServiceOverviewDependenciesTable({
   } = useLegacyUrlParams();
 
   const {
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
   } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -112,6 +112,7 @@ export function ServiceOverviewDependenciesTable({
               rangeTo,
               latencyAggregationType,
               transactionType,
+              serviceGroup,
             }}
           />
         );
