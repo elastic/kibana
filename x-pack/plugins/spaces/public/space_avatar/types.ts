@@ -33,4 +33,10 @@ export interface SpaceAvatarProps {
    * Default value is false.
    */
   isDisabled?: boolean;
+
+  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+
+  onKeyPress?: (event: React.KeyboardEvent<HTMLDivElement>) => void;
+
+  style?: React.CSSProperties;
 }

@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaIndexPatterns();
 
       // click manage spaces on first entry
-      await (await testSubjects.findAll('spacesListClickTarget', 10000))[0].click();
+      await (await testSubjects.findAll('space-avatar-default', 10000))[0].click();
 
       // select custom space
       await testSubjects.click('sts-space-selector-row-custom_space');

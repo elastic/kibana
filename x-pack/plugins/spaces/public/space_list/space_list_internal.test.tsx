@@ -81,7 +81,7 @@ describe('SpaceListInternal', () => {
     return wrapper.find('EuiButtonEmpty');
   }
   function getListClickTarget(wrapper: ReactWrapper) {
-    return wrapper.find('[data-test-subj="spacesListClickTarget"]');
+    return wrapper.find('[data-test-subj="spaces-avatar-default"]');
   }
 
   describe('using default properties', () => {

@@ -140,21 +140,26 @@ export const SpaceListInternal = ({
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;
-
+  //         <span data-test-subj="spacesListClickTarget">
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-        <span onClick={listOnClick} onKeyPress={listOnClick} data-test-subj="spacesListClickTarget">
-          {displayedSpaces.map((space) => {
-            const isDisabled = space.isFeatureDisabled;
-            return (
-              <EuiFlexItem grow={false} key={space.id}>
-                <LazySpaceAvatar space={space} isDisabled={isDisabled} size={'s'} />
-              </EuiFlexItem>
-            );
-          })}
-          {unauthorizedSpacesCountBadge}
-        </span>
+        {displayedSpaces.map((space) => {
+          const isDisabled = space.isFeatureDisabled;
+          return (
+            <EuiFlexItem grow={false} key={space.id}>
+              <LazySpaceAvatar
+                space={space}
+                isDisabled={isDisabled}
+                size={'s'}
+                onClick={listOnClick}
+                onKeyPress={listOnClick}
+                style={{ cursor: 'pointer' }}
+              />
+            </EuiFlexItem>
+          );
+        })}
+        {unauthorizedSpacesCountBadge}
         {button}
       </EuiFlexGroup>
     </Suspense>
