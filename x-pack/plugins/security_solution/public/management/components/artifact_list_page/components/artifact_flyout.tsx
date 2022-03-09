@@ -332,7 +332,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         toasts.addWarning(labels.flyoutEditItemLoadFailure(error?.body?.message || error.message));
 
         // Blank out the url params for id and show (will close out the flyout)
-        setUrlParams({ id: undefined, show: undefined });
+        setUrlParams({ itemId: undefined, show: undefined });
       }
     }, [error, isEditFlow, labels, setUrlParams, toasts, urlParams.itemId]);
 
