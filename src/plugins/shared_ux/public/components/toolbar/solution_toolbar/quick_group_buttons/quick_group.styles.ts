@@ -14,22 +14,22 @@ export const QuickGroupButtonStyles = ({ euiTheme }: UseEuiTheme) => {
       borderRadius: euiTheme.border.radius.medium,
     },
     quickButtonStyles: {
-      backgroundColor: `${euiTheme.colors.emptyShade} !important`,
       '&.euiButtonGroupButton': {
+        backgroundColor: euiTheme.colors.emptyShade,
         borderWidth: `${euiTheme.border.width.thin} !important`,
         borderStyle: `solid !important`,
         borderColor: `${euiTheme.border.color} !important`,
-      },
-      '&:first-of-type': {
-        borderTopLeftRadius: `${euiTheme.border.radius.medium} !important`,
-        borderBottomLeftRadius: `${euiTheme.border.radius.medium} !important`,
-      },
-      '&:last-of-type': {
-        borderTopRightRadius: `${euiTheme.border.radius.medium} !important`,
-        borderBottomRightRadius: `${euiTheme.border.radius.medium} !important`,
-      },
-      '&:hover': {
-        backgroundColor: `${euiTheme.colors.lightShade} !important`,
+        '&:first-of-type': {
+          borderTopLeftRadius: `${euiTheme.border.radius.medium} !important`,
+          borderBottomLeftRadius: `${euiTheme.border.radius.medium} !important`,
+        },
+        '&:last-of-type': {
+          borderTopRightRadius: `${euiTheme.border.radius.medium} !important`,
+          borderBottomRightRadius: `${euiTheme.border.radius.medium} !important`,
+        },
+        '&:hover': {
+          backgroundColor: euiTheme.colors.lightShade,
+        },
       },
     },
   };

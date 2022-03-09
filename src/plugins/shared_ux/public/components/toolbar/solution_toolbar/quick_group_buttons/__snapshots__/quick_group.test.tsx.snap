@@ -5,28 +5,25 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
   border-radius: 6px;
 }
 
-.emotion-1 {
-  background-color: #FFF!important;
-}
-
 .emotion-1.euiButtonGroupButton {
+  background-color: #FFF;
   border-width: 1px!important;
   border-style: solid!important;
   border-color: #D3DAE6!important;
 }
 
-.emotion-1:first-of-type {
+.emotion-1.euiButtonGroupButton:first-of-type {
   border-top-left-radius: 6px!important;
   border-bottom-left-radius: 6px!important;
 }
 
-.emotion-1:last-of-type {
+.emotion-1.euiButtonGroupButton:last-of-type {
   border-top-right-radius: 6px!important;
   border-bottom-right-radius: 6px!important;
 }
 
-.emotion-1:hover {
-  background-color: #D3DAE6!important;
+.emotion-1.euiButtonGroupButton:hover {
+  background-color: #D3DAE6;
 }
 
 <ServicesProvider
@@ -82,22 +79,22 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
             "css": Array [
               Object {
                 "&.euiButtonGroupButton": Object {
+                  "&:first-of-type": Object {
+                    "borderBottomLeftRadius": "6px !important",
+                    "borderTopLeftRadius": "6px !important",
+                  },
+                  "&:hover": Object {
+                    "backgroundColor": "#D3DAE6",
+                  },
+                  "&:last-of-type": Object {
+                    "borderBottomRightRadius": "6px !important",
+                    "borderTopRightRadius": "6px !important",
+                  },
+                  "backgroundColor": "#FFF",
                   "borderColor": "#D3DAE6 !important",
                   "borderStyle": "solid !important",
                   "borderWidth": "1px !important",
                 },
-                "&:first-of-type": Object {
-                  "borderBottomLeftRadius": "6px !important",
-                  "borderTopLeftRadius": "6px !important",
-                },
-                "&:hover": Object {
-                  "backgroundColor": "#D3DAE6 !important",
-                },
-                "&:last-of-type": Object {
-                  "borderBottomRightRadius": "6px !important",
-                  "borderTopRightRadius": "6px !important",
-                },
-                "backgroundColor": "#FFF !important",
               },
             ],
             "getLegend": "",
