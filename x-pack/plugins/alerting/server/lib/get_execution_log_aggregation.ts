@@ -115,6 +115,11 @@ export function getExecutionLogAggregation({
     throw Boom.badRequest(`Invalid page field "${page}" - must be greater than 0`);
   }
 
+  // Check if valid page value
+  if (perPage <= 0) {
+    throw Boom.badRequest(`Invalid perPage field "${perPage}" - must be greater than 0`);
+  }
+
   return {
     // Get total number of executions
     executionUuidCardinality: {
@@ -232,7 +237,7 @@ function getProviderAndActionFilter(provider: string, action: string) {
   };
 }
 
-export function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutionLog {
+function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutionLog {
   const durationUs = bucket?.ruleExecution?.executionDuration?.value
     ? bucket.ruleExecution.executionDuration.value
     : 0;

@@ -85,6 +85,12 @@ import {
   getModifiedSearch,
   modifyFilterKueryNode,
 } from './lib/mapped_params_utils';
+import {
+  formatExecutionLogResult,
+  getExecutionLogAggregation,
+  getNumExecutions,
+  IExecutionLogResult,
+} from '../lib/get_execution_log_aggregation';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -231,18 +237,13 @@ export interface GetAlertSummaryParams {
 
 export interface GetExecutionLogByIdParams {
   id: string;
-  dateStart?: string;
-  // dateEnd?
-}
-
-export interface ExecutionLog {
-  count: number;
-  values: Array<{
-    timestamp: number;
-    duration: number;
-    status: 'failed' | 'succeeded';
-    message: string;
-  }>;
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sortField: string;
+  sortOrder: estypes.SortOrder;
 }
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -650,8 +651,13 @@ export class RulesClient {
   public async getExecutionLogForRule({
     id,
     dateStart,
-  }: // dateEnd?
-  GetExecutionLogByIdParams): Promise<ExecutionLog> {
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sortField,
+    sortOrder,
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
@@ -659,62 +665,39 @@ export class RulesClient {
     await this.authorization.ensureAuthorized({
       ruleTypeId: rule.alertTypeId,
       consumer: rule.consumer,
-      operation: ReadOperations.GetAlertSummary,
+      operation: ReadOperations.GetExecutionLog,
       entity: AlertingAuthorizationEntity.Rule,
     });
 
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
-    const durationMillis = parseDuration(rule.schedule.interval) * (numberOfExecutions ?? 60);
-    const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
-    const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
 
     const eventLogClient = await this.getEventLogClient();
 
-    let events: IEvent[];
-    let executionEvents: IEvent[];
+    const results = await eventLogClient.aggregateEventsBySavedObjectIds(
+      'alert',
+      [id],
+      {
+        start: parsedDateStart.toISOString(),
+        end: parsedDateEnd.toISOString(),
+        filter,
+        aggs: getExecutionLogAggregation({
+          // determine the number of executions to request
+          // based on the date interval and the rule schedule interval
+          // this value is capped by the max number of terms allowed in a term aggregation
+          numExecutions: getNumExecutions(parsedDateStart, parsedDateEnd, rule.schedule.interval),
+          page,
+          perPage,
+          sortField,
+          sortOrder,
+        }),
+      },
+      rule.legacyId !== null ? [rule.legacyId] : undefined
+    );
 
-    try {
-      const results = await eventLogClient.aggregateEventsBySavedObjectIds(
-        'alert',
-        [id],
-        {},
-        rule.legacyId !== null ? [rule.legacyId] : undefined
-      );
-    } catch (err) {
-      this.logger.debug(
-        `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
-      );
-    }
-
-    // desired output
-    // {
-    //   count: number;
-    //   values: [
-    //     {
-    //       // this is shown in the screenshot
-    //       executionTime: timestamp,
-    //       duration: millis,
-    //       status: failed/succeeded,
-    //       message: log message - execution timeout is separate event log entry
-
-    //       // other stuff that might be useful that we could probably get
-    //       number of active alerts
-    //       number of new alerts
-    //       number of recovered alerts
-    //       number of triggered actions
-    //       any errors in the actions
-
-    //       es search duration
-    //       total search duration
-
-    //     }
-    //   ]
-    // }
-    return {
-      count: 0,
-      values: [],
-    };
+    return formatExecutionLogResult(results);
   }
 
   public async find<Params extends RuleTypeParams = never>({
