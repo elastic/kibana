@@ -37,6 +37,11 @@ export const triggerTSVBtoLensConfiguration = async (
     return null;
   }
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
+  // get the active series number
+  let seriesNum = 0;
+  model.series.forEach((series) => {
+    if (!series.hidden) seriesNum++;
+  });
 
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
@@ -64,7 +69,7 @@ export const triggerTSVBtoLensConfiguration = async (
     }
 
     // handle multiple metrics
-    let metricsArray = getSeries(layer.metrics);
+    let metricsArray = getSeries(layer.metrics, seriesNum);
     if (!metricsArray) {
       return null;
     }

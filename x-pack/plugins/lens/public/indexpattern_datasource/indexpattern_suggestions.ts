@@ -204,6 +204,10 @@ function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
       layer.format,
       layer.label
     );
+    // static values layers do not need a date histogram column
+    if (Object.values(computedLayer.columns)[0].isStaticValue) {
+      return computedLayer;
+    }
 
     return insertNewColumn({
       op: 'date_histogram',
