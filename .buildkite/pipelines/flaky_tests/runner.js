@@ -186,7 +186,7 @@ for (const testSuite of testSuites) {
     case 'cypress':
       steps.push({
         command: `.buildkite/scripts/steps/functional/${CI_GROUP}.sh`,
-        label: `Default Cypress`,
+        label: 'Default Cypress',
         agents: { queue: 'ci-group-6' },
         depends_on: 'build',
         parallelism: RUN_COUNT,
