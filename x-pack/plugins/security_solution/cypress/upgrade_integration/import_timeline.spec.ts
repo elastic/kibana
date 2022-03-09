@@ -38,7 +38,13 @@ import {
 } from '../screens/timelines';
 
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { closeTimeline, deleteTimeline, goToCorrelationTab, goToNotesTab, setKibanaTimezoneToUTC } from '../tasks/timeline';
+import {
+  closeTimeline,
+  deleteTimeline,
+  goToCorrelationTab,
+  goToNotesTab,
+  setKibanaTimezoneToUTC,
+} from '../tasks/timeline';
 import { expandNotes, importTimeline, openTimeline } from '../tasks/timelines';
 
 import { TIMELINES_URL } from '../urls/navigation';

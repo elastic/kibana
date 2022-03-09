@@ -399,13 +399,13 @@ export const expandEventAction = () => {
 };
 
 export const setKibanaTimezoneToUTC = () =>
-  cy.request({
-    method: 'POST',
-    url: 'api/kibana/settings',
-    body: {"changes": {"dateFormat:tz": "UTC"}},
-    headers: { 'kbn-xsrf': 'set-kibana-timezone-utc' },
-  }).then(
-    () => {
+  cy
+    .request({
+      method: 'POST',
+      url: 'api/kibana/settings',
+      body: { changes: { 'dateFormat:tz': 'UTC' } },
+      headers: { 'kbn-xsrf': 'set-kibana-timezone-utc' },
+    })
+    .then(() => {
       cy.reload();
-    }
-  );
+    });
