@@ -435,6 +435,49 @@ describe('xy_visualization', () => {
         type: 'palette',
       });
     });
+
+    it('sets the context configuration correctly for reference lines', () => {
+      const newContext = {
+        ...context,
+        metrics: [
+          {
+            agg: 'static_value',
+            fieldName: 'document',
+            isFullReference: true,
+            color: '#68BC00',
+            params: {
+              value: '10',
+            },
+          },
+        ],
+      };
+      const state = xyVisualization?.updateLayersConfigurationFromContext?.({
+        prevState: {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'line',
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+          ],
+        },
+        layerId: 'first',
+        context: newContext,
+      });
+      expect(state?.layers[0]).toHaveProperty('seriesType', 'area');
+      expect(state?.layers[0]).toHaveProperty('layerType', 'referenceLine');
+      expect(state?.layers[0].yConfig).toStrictEqual([
+        {
+          axisMode: 'right',
+          color: '#68BC00',
+          forAccessor: 'a',
+          fill: 'below',
+        },
+      ]);
+    });
   });
 
   describe('#getVisualizationSuggestionFromContext', () => {
