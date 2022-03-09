@@ -136,6 +136,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           splitWithDateHistogram: false,
           timeFieldName: 'timeField2',
           timeInterval: 'auto',
+          dropPartialBuckets: false,
         },
       },
     });
@@ -308,6 +309,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           splitWithDateHistogram: false,
           timeFieldName: 'timeField2',
           timeInterval: 'auto',
+          dropPartialBuckets: false,
         },
       },
     });
