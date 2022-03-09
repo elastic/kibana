@@ -16,12 +16,10 @@ export { DRAFT_COMMENT_STORAGE_ID } from './components/markdown_editor/plugins/l
 
 export type { CasesUiPlugin };
 export type { CasesUiStart } from './types';
-export type {
-  GetCasesProps,
-  GetCreateCaseFlyoutProps,
-  GetAllCasesSelectorModalProps,
-  GetRecentCasesProps,
-} from './client';
+export type { GetCasesProps } from './client/ui/get_cases';
+export type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
+export type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
+export type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 
 export type { CaseAttachments, SupportedCaseAttachment } from './types';
 

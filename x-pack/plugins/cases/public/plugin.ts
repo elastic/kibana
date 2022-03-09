@@ -8,18 +8,6 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { CasesUiStart, CasesPluginSetup, CasesPluginStart } from './types';
 import { KibanaServices } from './common/lib/kibana';
-import {
-  getCasesLazy,
-  getRecentCasesLazy,
-  getAllCasesSelectorModalLazy,
-  getCreateCaseFlyoutLazy,
-  canUseCases,
-  getCreateCaseFlyoutLazyNoProvider,
-  getAllCasesSelectorModalNoProviderLazy,
-  getRuleIdFromEvent,
-  getCasesContextLazy,
-  createClientAPI,
-} from './client';
 import { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
@@ -28,6 +16,20 @@ import { ManagementAppMountParams } from '../../../../src/plugins/management/pub
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import { createClientAPI } from './client/api';
+import { canUseCases } from './client/helpers/can_use_cases';
+import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
+import {
+  getAllCasesSelectorModalLazy,
+  getAllCasesSelectorModalNoProviderLazy,
+} from './client/ui/get_all_cases_selector_modal';
+import { getCasesLazy } from './client/ui/get_cases';
+import { getCasesContextLazy } from './client/ui/get_cases_context';
+import {
+  getCreateCaseFlyoutLazy,
+  getCreateCaseFlyoutLazyNoProvider,
+} from './client/ui/get_create_case_flyout';
+import { getRecentCasesLazy } from './client/ui/get_recent_cases';
 
 /**
  * @public
