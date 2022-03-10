@@ -74,6 +74,9 @@ describe('Histogram Agg', () => {
         "chain": Array [
           Object {
             "arguments": Object {
+              "autoExtendBounds": Array [
+                false,
+              ],
               "enabled": Array [
                 true,
               ],
