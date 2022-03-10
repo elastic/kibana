@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ExpressionXyPluginSetup {}
+import { ExpressionsServerStart, ExpressionsServerSetup } from '../../../expressions/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ExpressionXyPluginStart {}
+export type ExpressionXyPluginSetup = void;
+export type ExpressionXyPluginStart = void;
+
+export interface SetupDeps {
+  expressions: ExpressionsServerSetup;
+}
+
+export interface StartDeps {
+  expression: ExpressionsServerStart;
+}

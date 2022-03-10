@@ -8,3 +8,16 @@
 
 export const PLUGIN_ID = 'expressionXy';
 export const PLUGIN_NAME = 'expressionXy';
+
+export {
+  xyChartFunction,
+  yAxisConfigFunction,
+  legendConfigFunction,
+  gridlinesConfigFunction,
+  dataLayerConfigFunction,
+  axisExtentConfigFunction,
+  tickLabelsConfigFunction,
+  labelsOrientationConfigFunction,
+  referenceLineLayerConfigFunction,
+  axisTitlesVisibilityConfigFunction,
+} from './expression_functions';

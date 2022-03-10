@@ -9,19 +9,37 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/server';
 
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
+import {
+  xyChartFunction,
+  yAxisConfigFunction,
+  legendConfigFunction,
+  gridlinesConfigFunction,
+  dataLayerConfigFunction,
+  axisExtentConfigFunction,
+  tickLabelsConfigFunction,
+  labelsOrientationConfigFunction,
+  referenceLineLayerConfigFunction,
+  axisTitlesVisibilityConfigFunction,
+} from '../common';
+import { SetupDeps } from './types';
 
 export class ExpressionXyPlugin
   implements Plugin<ExpressionXyPluginSetup, ExpressionXyPluginStart>
 {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {
-    return {};
+  public setup(core: CoreSetup, { expressions }: SetupDeps) {
+    expressions.registerFunction(yAxisConfigFunction);
+    expressions.registerFunction(legendConfigFunction);
+    expressions.registerFunction(gridlinesConfigFunction);
+    expressions.registerFunction(dataLayerConfigFunction);
+    expressions.registerFunction(axisExtentConfigFunction);
+    expressions.registerFunction(tickLabelsConfigFunction);
+    expressions.registerFunction(labelsOrientationConfigFunction);
+    expressions.registerFunction(referenceLineLayerConfigFunction);
+    expressions.registerFunction(axisTitlesVisibilityConfigFunction);
+    expressions.registerFunction(xyChartFunction);
   }
 
-  public start(core: CoreStart) {
-    return {};
-  }
+  public start(core: CoreStart) {}
 
   public stop() {}
 }

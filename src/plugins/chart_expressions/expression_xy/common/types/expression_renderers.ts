@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsPublicPlugin, ExpressionsServiceStart } from '../../../expressions/public';
+import { XY_CHART_RENDERER } from '../constants';
+import { LensMultiTable, XYArgs } from './expression_functions';
 
-export interface SetupDeps {
-  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
+export interface XYChartProps {
+  data: LensMultiTable;
+  args: XYArgs;
 }
 
-export interface StartDeps {
-  expression: ExpressionsServiceStart;
+export interface XYRender {
+  type: 'render';
+  as: typeof XY_CHART_RENDERER;
+  value: XYChartProps;
 }
-
-export type ExpressionXyPluginSetup = void;
-export type ExpressionXyPluginStart = void;

@@ -6,15 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsPublicPlugin, ExpressionsServiceStart } from '../../../expressions/public';
-
-export interface SetupDeps {
-  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
-}
-
-export interface StartDeps {
-  expression: ExpressionsServiceStart;
-}
-
-export type ExpressionXyPluginSetup = void;
-export type ExpressionXyPluginStart = void;
+export * from './expression_functions';
+export * from './expression_renderers';
