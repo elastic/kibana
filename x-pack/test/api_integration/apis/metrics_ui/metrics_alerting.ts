@@ -93,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
             timeframe,
             100,
             true,
+            void 0,
             'agent.id'
           );
           const result = await client.search({
@@ -114,6 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           timeframe,
           100,
           true,
+          void 0,
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
