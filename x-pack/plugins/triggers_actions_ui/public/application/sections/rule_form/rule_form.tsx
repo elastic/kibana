@@ -42,7 +42,6 @@ import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
 } from '../../../../../alerting/common/parse_duration';
-import { loadRuleTypes } from '../../lib/rule_api';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -76,6 +75,7 @@ import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compa
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
 import { DEFAULT_ALERT_INTERVAL } from '../../constants';
+import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 
 const ENTER_KEY = 13;
 
@@ -95,6 +95,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
+  filteredSolutions?: string[] | undefined;
 }
 
 const defaultScheduleInterval = getDurationNumberInItsUnit(DEFAULT_ALERT_INTERVAL);
@@ -112,9 +113,9 @@ export const RuleForm = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
+  filteredSolutions,
 }: RuleFormProps) => {
   const {
-    http,
     notifications: { toasts },
     docLinks,
     application: { capabilities },
@@ -156,14 +157,14 @@ export const RuleForm = ({
   const [solutions, setSolutions] = useState<Map<string, string> | undefined>(undefined);
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
   let hasDisabledByLicenseRuleTypes: boolean = false;
+  const { ruleTypes } = useLoadRuleTypes({ filteredSolutions });
 
   // load rule types
   useEffect(() => {
     (async () => {
       try {
-        const ruleTypesResult = await loadRuleTypes({ http });
         const index: RuleTypeIndex = new Map();
-        for (const ruleTypeItem of ruleTypesResult) {
+        for (const ruleTypeItem of ruleTypes) {
           index.set(ruleTypeItem.id, ruleTypeItem);
         }
         if (rule.ruleTypeId && index.has(rule.ruleTypeId)) {
@@ -171,7 +172,7 @@ export const RuleForm = ({
         }
         setRuleTypeIndex(index);
 
-        const availableRuleTypesResult = getAvailableRuleTypes(ruleTypesResult);
+        const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
         setAvailableRuleTypes(availableRuleTypesResult);
 
         const solutionsResult = availableRuleTypesResult.reduce(
@@ -202,7 +203,7 @@ export const RuleForm = ({
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ruleTypes]);
 
   useEffect(() => {
     setRuleTypeModel(rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null);

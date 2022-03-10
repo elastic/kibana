@@ -66,6 +66,8 @@ export const OBSERVABILITY_RULE_TYPES = [
   'logs.alert.document.count',
 ];
 
+export const OBSERVABILITY_SOLUTIONS = ['logs', 'uptime', 'infrastructure', 'apm'];
+
 export type InitialRule = Partial<Rule> &
   Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
 

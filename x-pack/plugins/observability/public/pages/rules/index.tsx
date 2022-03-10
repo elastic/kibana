@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,9 +37,13 @@ import {
   disableRule,
   muteRule,
 } from '../../../../triggers_actions_ui/public';
-import { AlertExecutionStatus } from '../../../../alerting/common';
+import { AlertExecutionStatus, ALERTS_FEATURE_ID } from '../../../../alerting/common';
 import { Pagination } from './types';
-import { DEFAULT_SEARCH_PAGE_SIZE, convertRulesToTableItems } from './config';
+import {
+  DEFAULT_SEARCH_PAGE_SIZE,
+  convertRulesToTableItems,
+  OBSERVABILITY_SOLUTIONS,
+} from './config';
 import {
   LAST_RESPONSE_COLUMN_TITLE,
   LAST_RUN_COLUMN_TITLE,
@@ -57,7 +62,7 @@ import {
 
 export function RulesPage() {
   const { core, ObservabilityPageTemplate } = usePluginContext();
-  const { docLinks } = useKibana().services;
+  const { docLinks, triggersActionsUi } = useKibana().services;
   const {
     http,
     notifications: { toasts },
@@ -71,6 +76,7 @@ export function RulesPage() {
   const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+  const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setCurrentRuleToEdit(ruleItem);
@@ -171,11 +177,37 @@ export function RulesPage() {
     ];
   };
 
+  const CreateRuleFlyout = useMemo(
+    () =>
+      triggersActionsUi.getAddAlertFlyout({
+        consumer: ALERTS_FEATURE_ID,
+        onClose: () => {
+          setCreateRuleFlyoutVisibility(false);
+          reload();
+        },
+        filteredSolutions: OBSERVABILITY_SOLUTIONS,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: <>{RULES_PAGE_TITLE} </>,
         rightSideItems: [
+          <EuiButton
+            iconType="plusInCircle"
+            key="create-alert"
+            data-test-subj="createRuleButton"
+            fill
+            onClick={() => setCreateRuleFlyoutVisibility(true)}
+          >
+            <FormattedMessage
+              id="xpack.observability.rules.addRuleButtonLabel"
+              defaultMessage="Create rule"
+            />
+          </EuiButton>,
           <EuiButtonEmpty
             href={docLinks.links.alerting.guide}
             target="_blank"
@@ -266,6 +298,7 @@ export function RulesPage() {
           title: error,
         })}
       {currentRuleToEdit && <EditRuleFlyout onSave={reload} currentRule={currentRuleToEdit} />}
+      {createRuleFlyoutVisibility && CreateRuleFlyout}
     </ObservabilityPageTemplate>
   );
 }
