@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export {
-  ComparatorFns,
-  ComparatorFnNames,
-  getHumanReadableComparator,
-  validateComparator,
-} from './comparator';
+export enum Comparator {
+  GT = '>',
+  LT = '<',
+  GT_OR_EQ = '>=',
+  LT_OR_EQ = '<=',
+  BETWEEN = 'between',
+  NOT_BETWEEN = 'notBetween',
+}

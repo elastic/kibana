@@ -24,6 +24,7 @@ import { coreMock } from '../../../../../../src/core/server/mocks';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
 import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
+import { Comparator } from '../../../common/comparator_types';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
@@ -111,7 +112,7 @@ describe('alertType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: '<',
+        thresholdComparator: Comparator.LT,
         threshold: [0],
         searchType: 'esQuery',
       };
@@ -130,7 +131,7 @@ describe('alertType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: 'between',
+        thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
         searchType: 'esQuery',
       };
@@ -148,7 +149,7 @@ describe('alertType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: 'between',
+        thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
         searchType: 'esQuery',
       };
@@ -178,7 +179,7 @@ describe('alertType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: '>',
+        thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
       };
@@ -224,7 +225,7 @@ describe('alertType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: '>',
+        thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
       };
@@ -273,7 +274,7 @@ describe('alertType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: '>',
+        thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
       };
@@ -316,7 +317,7 @@ describe('alertType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: '>',
+        thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
       };
@@ -388,7 +389,7 @@ describe('alertType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: '>',
+        thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
       };
@@ -434,7 +435,7 @@ describe('alertType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: '>',
+        thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
       };
@@ -502,7 +503,7 @@ describe('alertType', () => {
       size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
-      thresholdComparator: '<',
+      thresholdComparator: Comparator.LT,
       threshold: [0],
       searchConfiguration: {},
       searchType: 'searchSource',
@@ -522,7 +523,7 @@ describe('alertType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: '<',
+        thresholdComparator: Comparator.LT,
         threshold: [0],
         esQuery: '',
         searchType: 'searchSource',
@@ -566,7 +567,7 @@ describe('alertType', () => {
     });
 
     it('alert executor schedule actions when condition met', async () => {
-      const params = { ...defaultParams, thresholdComparator: '>=', threshold: [3] };
+      const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
       const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {

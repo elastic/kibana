@@ -11,6 +11,7 @@ import { updateSearchSource } from './fetch_search_source_query';
 import { stubbedSavedObjectIndexPattern } from '../../../../../../../src/plugins/data_views/common/data_view.stub';
 import { DataView } from '../../../../../../../src/plugins/data_views/common';
 import { fieldFormatsMock } from '../../../../../../../src/plugins/field_formats/common/mocks';
+import { Comparator } from '../../../../common/comparator_types';
 
 const createDataView = () => {
   const id = 'test-id';
@@ -32,7 +33,7 @@ const defaultParams: OnlySearchSourceAlertParams = {
   size: 100,
   timeWindowSize: 5,
   timeWindowUnit: 'm',
-  thresholdComparator: '<',
+  thresholdComparator: Comparator.LT,
   threshold: [0],
   searchConfiguration: {},
   searchType: 'searchSource',
@@ -53,7 +54,7 @@ describe('fetchSearchSourceQuery', () => {
     });
 
     it('without latest timestamp', async () => {
-      const params = { ...defaultParams, thresholdComparator: '>=', threshold: [3] };
+      const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
 
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
@@ -88,7 +89,7 @@ describe('fetchSearchSourceQuery', () => {
     });
 
     it('with latest timestamp in between the given time range ', async () => {
-      const params = { ...defaultParams, thresholdComparator: '>=', threshold: [3] };
+      const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
 
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
@@ -128,7 +129,7 @@ describe('fetchSearchSourceQuery', () => {
     });
 
     it('with latest timestamp in before the given time range ', async () => {
-      const params = { ...defaultParams, thresholdComparator: '>=', threshold: [3] };
+      const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
 
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 

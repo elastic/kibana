@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ComparatorFnNames } from '../lib';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
 import { AlertTypeState } from '../../../../alerting/server';
+import { Comparator } from '../../../common/comparator_types';
+import { validateComparator } from '../lib';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 
@@ -19,12 +20,14 @@ export interface EsQueryAlertState extends AlertTypeState {
   latestTimestamp: string | undefined;
 }
 
-export const EsQueryAlertParamsSchemaProperties = {
+const EsQueryAlertParamsSchemaProperties = {
   size: schema.number({ min: 0, max: ES_QUERY_MAX_HITS_PER_EXECUTION }),
   timeWindowSize: schema.number({ min: 1 }),
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
-  thresholdComparator: schema.string({ validate: validateComparator }),
+  thresholdComparator: schema.string({
+    validate: validateComparator('xpack.stackAlerts.esQuery.invalidComparatorErrorMessage'),
+  }) as Type<Comparator>,
   searchType: schema.oneOf([schema.literal('esQuery'), schema.literal('searchSource')]),
   // searchSource alert param only
   searchConfiguration: schema.conditional(
@@ -92,15 +95,4 @@ function validateParams(anyParams: unknown): string | undefined {
       defaultMessage: '[esQuery]: must be valid JSON',
     });
   }
-}
-
-export function validateComparator(comparator: string): string | undefined {
-  if (ComparatorFnNames.has(comparator)) return;
-
-  return i18n.translate('xpack.stackAlerts.esQuery.invalidComparatorErrorMessage', {
-    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
-    values: {
-      comparator,
-    },
-  });
 }

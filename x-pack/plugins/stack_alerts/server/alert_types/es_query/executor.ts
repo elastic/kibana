@@ -15,6 +15,7 @@ import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { EsQueryAlertParams } from './alert_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
+import { Comparator } from '../../../common/comparator_types';
 
 export async function executor(
   logger: Logger,
@@ -181,7 +182,7 @@ export function getInvalidComparatorError(comparator: string) {
   });
 }
 
-export function getContextConditionsDescription(comparator: string, threshold: number[]) {
+export function getContextConditionsDescription(comparator: Comparator, threshold: number[]) {
   return i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
     defaultMessage: 'Number of matching documents is {thresholdComparator} {threshold}',
     values: {
