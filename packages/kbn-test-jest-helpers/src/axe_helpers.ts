@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { configureAxe } from 'jest-axe';
 import { Result } from 'axe-core';
 import { AXE_OPTIONS, AXE_CONFIG } from '@kbn/test';
