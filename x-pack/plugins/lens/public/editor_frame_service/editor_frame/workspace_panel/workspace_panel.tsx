@@ -360,7 +360,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ) : (
       <DragDrop
         className={classNames('lnsWorkspacePanel__dragDrop', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,
         })}
         dataTestSubj="lnsWorkspace"
