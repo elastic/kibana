@@ -34,6 +34,7 @@ describe.skip('From rule', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1';
   beforeEach(() => {
     cleanKibana();
+    esArchiverLoad('auditbeat_for_exceptions');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createCustomRule({ ...getNewRule(), index: ['exceptions-*'] }, 'rule_testing', '10s');
     reload();
@@ -77,6 +78,7 @@ describe.skip('From rule', () => {
 
     goToExceptionsTab();
     removeException();
+    esArchiverLoad('auditbeat_for_exceptions2');
     goToAlertsTab();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
