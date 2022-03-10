@@ -13,6 +13,7 @@ import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
 import { EMPTY, merge, pipe, Subscription } from 'rxjs';
 import { distinctUntilChanged, debounceTime, catchError, switchMap, map } from 'rxjs/operators';
+import { EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
 
 import {
   ControlGroupInput,
@@ -24,6 +25,7 @@ import {
   withSuspense,
   LazyReduxEmbeddableWrapper,
   ReduxEmbeddableWrapperPropsWithChildren,
+  SolutionToolbarPopover,
 } from '../../../../presentation_util/public';
 import { pluginServices } from '../../services';
 import { DataView } from '../../../../data_views/public';
@@ -32,6 +34,9 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { Container, EmbeddableFactory } from '../../../../embeddable/public';
+import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
+import { EditControlGroup } from '../editor/edit_control_group';
+import { ControlGroupStrings } from '../control_group_strings';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
@@ -61,6 +66,74 @@ export class ControlGroupContainer extends Container<
       });
     }
     return Promise.resolve();
+  };
+
+  /**
+   * Returns a button that allows controls to be created externally using the embeddable
+   * @param buttonType Controls the button styling
+   * @param closePopover Closes the create control menu popover when flyout opens - only necessary if `buttonType === 'toolbar'`
+   * @return If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.
+   *         Otherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types.
+   */
+  public getCreateControlButton = (
+    buttonType: CreateControlButtonTypes,
+    closePopover?: () => void
+  ) => {
+    return (
+      <CreateControlButton
+        buttonType={buttonType}
+        defaultControlWidth={this.getInput().defaultControlWidth}
+        updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+        addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+        closePopover={closePopover}
+      />
+    );
+  };
+
+  private getEditControlGroupButton = (closePopover: () => void) => {
+    return (
+      <EditControlGroup
+        controlStyle={this.getInput().controlStyle}
+        panels={this.getInput().panels}
+        defaultControlWidth={this.getInput().defaultControlWidth}
+        setControlStyle={(controlStyle) => this.updateInput({ controlStyle })}
+        setDefaultControlWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+        setAllControlWidths={(defaultControlWidth) => {
+          Object.keys(this.getInput().panels).forEach(
+            (panelId) => (this.getInput().panels[panelId].width = defaultControlWidth)
+          );
+        }}
+        removeEmbeddable={(id) => this.removeEmbeddable(id)}
+        closePopover={closePopover}
+      />
+    );
+  };
+
+  /**
+   * Returns the toolbar button that is used for creating controls and managing control settings
+   * @return `SolutionToolbarPopover` button for input controls
+   */
+  public getToolbarButtons = () => {
+    return (
+      <SolutionToolbarPopover
+        ownFocus
+        label={ControlGroupStrings.getControlButtonTitle()}
+        iconType="arrowDown"
+        iconSide="right"
+        panelPaddingSize="none"
+        data-test-subj="dashboardControlsMenuButton"
+      >
+        {({ closePopover }: { closePopover: () => void }) => (
+          <EuiContextMenuPanel
+            items={[
+              this.getCreateControlButton('toolbar', closePopover),
+              <EuiHorizontalRule margin="none" />,
+              this.getEditControlGroupButton(closePopover),
+            ]}
+          />
+        )}
+      </SolutionToolbarPopover>
+    );
   };
 
   constructor(initialInput: ControlGroupInput, parent?: Container) {
@@ -99,6 +172,10 @@ export class ControlGroupContainer extends Container<
       );
     });
   }
+
+  public getPanelCount = () => {
+    return Object.keys(this.getInput().panels).length;
+  };
 
   private recalculateOutput = () => {
     const allFilters: Filter[] = [];

@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { APP_OWNER } from '../../../common/constants';
+import { getCasesLazy } from '../../client/ui/get_cases';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 
-import { getCasesLazy } from '../../methods';
 import { Wrapper } from '../wrappers';
 import { CasesRoutesProps } from './types';
 

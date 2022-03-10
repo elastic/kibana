@@ -107,6 +107,7 @@ export interface VisualizeEditorLayersContext {
   format?: string;
   label?: string;
   layerId?: string;
+  dropPartialBuckets?: boolean;
 }
 
 interface AxisExtents {
