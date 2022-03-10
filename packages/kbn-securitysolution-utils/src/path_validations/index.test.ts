@@ -20,8 +20,17 @@ describe('validateFilePathInput', () => {
   describe('windows', () => {
     const os = OperatingSystem.WINDOWS;
 
+    it('does not warn on valid filenames', () => {
+      expect(
+        validateFilePathInput({ os, value: 'C:\\Windows\\*\\FILENAME.EXE-1231205124.gz' })
+      ).not.toEqual(FILENAME_WILDCARD_WARNING);
+    });
+
     it('warns on wildcard in file name at the end of the path', () => {
       expect(validateFilePathInput({ os, value: 'c:\\path*.exe' })).toEqual(
+        FILENAME_WILDCARD_WARNING
+      );
+      expect(validateFilePathInput({ os, value: 'C:\\Windows\\*\\FILENAME.EXE-*.gz' })).toEqual(
         FILENAME_WILDCARD_WARNING
       );
     });
@@ -42,8 +51,16 @@ describe('validateFilePathInput', () => {
         ? OperatingSystem.MAC
         : OperatingSystem.LINUX;
 
+    it('does not warn on valid filenames', () => {
+      expect(validateFilePathInput({ os, value: '/opt/*/FILENAME.EXE-1231205124.gz' })).not.toEqual(
+        FILENAME_WILDCARD_WARNING
+      );
+    });
     it('warns on wildcard in file name at the end of the path', () => {
       expect(validateFilePathInput({ os, value: '/opt/bin*' })).toEqual(FILENAME_WILDCARD_WARNING);
+      expect(validateFilePathInput({ os, value: '/opt/FILENAME.EXE-*.gz' })).toEqual(
+        FILENAME_WILDCARD_WARNING
+      );
     });
 
     it('warns on windows paths', () => {

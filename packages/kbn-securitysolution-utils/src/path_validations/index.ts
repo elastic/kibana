@@ -39,11 +39,15 @@ export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
  * such as:
  * c:\home\lib\dmp.dmp
  * c:\home\lib\my-binary-app-+/ some/  x/ dmp.dmp
+ * c:\home\lib\my-binary-app-+/ some/  x/ dmp.and.dmp
+ * * c:\home\lib\my-binary-app-+/ some/  x/ dmp.and-a10.dmp
  * /home/lib/dmp.dmp
  * /home/lib/my-binary-app+-\ some\  x\ dmp.dmp
+ * /home/lib/my-binary-app+-\ some\  x\ dmp.and.dmp
+ * /home/lib/my-binary-app+-\ some\  x\ dmp.and-a10.dmp
  */
-export const WIN_EXEC_PATH = /(\\[-\w]+|\\[-\w]+[\.]+[\w]+)$/i;
-export const UNIX_EXEC_PATH = /(\/[-\w]+|\/[-\w]+[\.]+[\w]+)$/i;
+export const WIN_EXEC_PATH = /(\\[-\.\w ]+)$/i;
+export const UNIX_EXEC_PATH = /(\/[-\.\w ]+)$/i;
 
 export const validateFilePathInput = ({
   os,
