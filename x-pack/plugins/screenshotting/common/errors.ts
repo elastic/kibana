@@ -5,4 +5,11 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
 export class PdfWorkerOutOfMemoryError extends Error {}
+
+export class FailedToSpawnBrowserError extends Error {}
+
+export class BrowserClosedUnexpectedly extends Error {}
+
+export class FailedToCaptureScreenshot extends Error {}

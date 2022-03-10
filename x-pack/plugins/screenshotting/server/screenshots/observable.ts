@@ -9,6 +9,7 @@ import type { Transaction } from 'elastic-apm-node';
 import { defer, forkJoin, throwError, Observable } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import type { Headers, Logger } from 'src/core/server';
+import { errors } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';
 import type { Layout } from '../layouts';
@@ -245,16 +246,11 @@ export class ScreenshotObservableHandler {
           const elements =
             data.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
-          let screenshots = await getScreenshots(this.driver, this.logger, elements);
-
-          if (this.options.format?.type === 'pdf') {
-            screenshots = [
-              {
-                data: await this.pngsToPdf(screenshots, this.options.format, data.timeRange),
-                title: null,
-                description: null,
-              },
-            ];
+          let screenshots: Screenshot[] = [];
+          try {
+            screenshots = await getScreenshots(this.driver, this.logger, elements);
+          } catch (e) {
+            throw new errors.FailedToCaptureScreenshot(e.message);
           }
           const { timeRange, error: setupError, renderErrors } = data;
 
