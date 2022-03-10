@@ -53,8 +53,8 @@ const rule = {
   severity: 'Low',
   riskScore: '7',
   timelineTemplate: 'none',
-  runsEvery: '10s',
-  lookBack: '179999990s',
+  runsEvery: '24h',
+  lookBack: '49976h',
   timeline: 'None',
 };
 
