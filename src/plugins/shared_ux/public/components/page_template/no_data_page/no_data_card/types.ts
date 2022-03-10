@@ -27,3 +27,7 @@ export type NoDataCardProps = Partial<Omit<EuiCardProps, 'layout'>> & {
    */
   description?: string;
 };
+
+export type ElasticAgentCardProps = NoDataCardProps & {
+  category?: string;
+};

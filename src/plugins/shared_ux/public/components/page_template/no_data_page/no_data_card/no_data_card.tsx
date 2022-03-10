@@ -27,7 +27,7 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
   ...cardRest
 }) => {
   const footer = () => {
-    if (typeof button !== 'string') {
+    if (button && typeof button !== 'string') {
       return button;
     }
     return <EuiButton fill>{button || title}</EuiButton>;
