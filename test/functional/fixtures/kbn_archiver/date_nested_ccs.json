@@ -4,7 +4,7 @@
     "timeFieldName": "nested.timestamp",
     "title": "remote:date-nested"
   },
-  "coreMigrationVersion": "8.2.0",
+  "coreMigrationVersion": "8.1.1",
   "id": "remote:date-nested",
   "migrationVersion": {
     "index-pattern": "8.0.0"
