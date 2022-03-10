@@ -35,7 +35,7 @@ describe('uptimeOverviewNavigatorParams', () => {
       ip: '127.0.0.1',
     });
     expect(location.path).toEqual(
-      `${OVERVIEW_ROUTE}?search=host.ip: "127.0.0.1" OR host.name: "elastic.co"`
+      `${OVERVIEW_ROUTE}?search=host.name: "elastic.co" OR host.ip: "127.0.0.1"`
     );
   });
 
