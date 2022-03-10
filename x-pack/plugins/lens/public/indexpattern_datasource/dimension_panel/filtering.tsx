@@ -166,10 +166,10 @@ export function Filtering({
               isInvalid={!isQueryInputValid}
               error={queryInputError}
               fullWidth={true}
+              data-test-subj="indexPattern-filter-by-input"
             >
               <QueryInput
                 indexPatternTitle={indexPattern.title}
-                data-test-subj="indexPattern-filter-by-input"
                 value={queryInput}
                 onChange={setQueryInput}
                 isInvalid={!isQueryInputValid}

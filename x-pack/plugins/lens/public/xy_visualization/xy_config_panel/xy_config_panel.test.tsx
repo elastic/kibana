@@ -18,6 +18,7 @@ import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
 import { layerTypes } from '../../../common';
+import { XYDataLayerConfig } from '../../../common/expressions';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -205,7 +206,10 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           accessor="bar"
           groupId="left"
-          state={{ ...state, layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }] }}
+          state={{
+            ...state,
+            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
+          }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
