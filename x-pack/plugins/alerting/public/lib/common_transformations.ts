@@ -37,6 +37,7 @@ export type ApiAlert = Omit<
   | 'updated_at'
   | 'alert_type_id'
   | 'muted_instance_ids'
+  | 'snooze_end_time'
 > & {
   execution_status: ApiAlertExecutionStatus;
   actions: Array<AsApiContract<AlertAction>>;
@@ -44,6 +45,7 @@ export type ApiAlert = Omit<
   updated_at: string;
   rule_type_id: string;
   muted_alert_ids: string[];
+  snooze_end_time: string | null;
 };
 
 export function transformAlert(input: ApiAlert): Alert {

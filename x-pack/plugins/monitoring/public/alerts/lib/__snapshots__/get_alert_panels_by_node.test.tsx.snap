@@ -117,6 +117,7 @@ Array [
           "schedule": Object {
             "interval": "1m",
           },
+          "snoozeEndTime": null,
           "tags": Array [],
           "throttle": null,
           "updatedAt": 2020-12-08T00:00:00.000Z,
@@ -177,6 +178,7 @@ Array [
           "schedule": Object {
             "interval": "1m",
           },
+          "snoozeEndTime": null,
           "tags": Array [],
           "throttle": null,
           "updatedAt": 2020-12-08T00:00:00.000Z,
@@ -410,6 +412,7 @@ Array [
           "schedule": Object {
             "interval": "1m",
           },
+          "snoozeEndTime": null,
           "tags": Array [],
           "throttle": null,
           "updatedAt": 2020-12-08T00:00:00.000Z,
@@ -470,6 +473,7 @@ Array [
           "schedule": Object {
             "interval": "1m",
           },
+          "snoozeEndTime": null,
           "tags": Array [],
           "throttle": null,
           "updatedAt": 2020-12-08T00:00:00.000Z,
@@ -530,6 +534,7 @@ Array [
           "schedule": Object {
             "interval": "1m",
           },
+          "snoozeEndTime": null,
           "tags": Array [],
           "throttle": null,
           "updatedAt": 2020-12-08T00:00:00.000Z,
@@ -590,6 +595,7 @@ Array [
           "schedule": Object {
             "interval": "1m",
           },
+          "snoozeEndTime": null,
           "tags": Array [],
           "throttle": null,
           "updatedAt": 2020-12-08T00:00:00.000Z,
@@ -650,6 +656,7 @@ Array [
           "schedule": Object {
             "interval": "1m",
           },
+          "snoozeEndTime": null,
           "tags": Array [],
           "throttle": null,
           "updatedAt": 2020-12-08T00:00:00.000Z,
@@ -710,6 +717,7 @@ Array [
           "schedule": Object {
             "interval": "1m",
           },
+          "snoozeEndTime": null,
           "tags": Array [],
           "throttle": null,
           "updatedAt": 2020-12-08T00:00:00.000Z,

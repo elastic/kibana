@@ -79,6 +79,7 @@ const getTestUtils = (
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
                 mute_all: false,
+                snooze_end_time: null,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
                 ...(describeType === 'internal' ? { monitoring: response.body.monitoring } : {}),

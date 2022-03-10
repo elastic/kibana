@@ -299,7 +299,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           throttle: '1m',
           notifyWhen: 'onThrottleInterval',
           muteAll: false,
-          snooze_end_time: null,
+          snoozeEndTime: null,
           mutedInstanceIds: [],
           createdAt: match.createdAt,
           updatedAt: match.updatedAt,
