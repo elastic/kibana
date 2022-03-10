@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPluginServiceFactory } from '../types';
-import { SharedUXEditorsService } from '../editors';
-import { SharedUXPluginStartDeps } from '../../types';
+import type { DataView } from 'src/plugins/data_views/common';
+
+import type { SharedUXPluginStartDeps } from '../../types';
+import type { KibanaPluginServiceFactory } from '../types';
+import type { SharedUXEditorsService } from '../editors';
 
 export type EditorsServiceFactory = KibanaPluginServiceFactory<
-  SharedUXEditorsService,
+  SharedUXEditorsService<DataView>,
   SharedUXPluginStartDeps
 >;
 

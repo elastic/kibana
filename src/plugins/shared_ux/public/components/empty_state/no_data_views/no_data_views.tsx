@@ -8,18 +8,14 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import { DataView } from '../../../../../data_views/public';
 import { useEditors, usePermissions } from '../../../services';
-import type { SharedUXEditorsService } from '../../../services/editors';
 
 import { NoDataViews as NoDataViewsComponent } from './no_data_views.component';
 
 export interface Props {
-  onDataViewCreated: (dataView: DataView) => void;
+  onDataViewCreated: (dataView: unknown) => void;
   dataViewsDocLink: string;
 }
-
-type CloseDataViewEditorFn = ReturnType<SharedUXEditorsService['openDataViewEditor']>;
 
 /**
  * A service-enabled component that provides Kibana-specific functionality to the `NoDataViews`
@@ -33,13 +29,11 @@ type CloseDataViewEditorFn = ReturnType<SharedUXEditorsService['openDataViewEdit
 export const NoDataViews = ({ onDataViewCreated, dataViewsDocLink }: Props) => {
   const { canCreateNewDataView } = usePermissions();
   const { openDataViewEditor } = useEditors();
-  const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
+  const closeDataViewEditor = useRef(() => {});
 
   useEffect(() => {
     const cleanup = () => {
-      if (closeDataViewEditor?.current) {
-        closeDataViewEditor?.current();
-      }
+      closeDataViewEditor.current();
     };
 
     return () => {
@@ -48,7 +42,7 @@ export const NoDataViews = ({ onDataViewCreated, dataViewsDocLink }: Props) => {
     };
   }, []);
 
-  const setDataViewEditorRef = useCallback((ref: CloseDataViewEditorFn) => {
+  const setDataViewEditorRef = useCallback((ref) => {
     closeDataViewEditor.current = ref;
   }, []);
 

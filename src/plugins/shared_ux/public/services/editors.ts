@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataView } from '../../../data_views/common';
 
-export interface SharedUxDataViewEditorProps {
-  onSave: (dataView: DataView) => void;
+export interface DataViewEditorOptions<TDataView extends unknown = unknown> {
+  onSave: (dataView: TDataView) => void;
 }
-export interface SharedUXEditorsService {
-  openDataViewEditor: (options: SharedUxDataViewEditorProps) => () => void;
+
+export interface SharedUXEditorsService<TDataView extends unknown = unknown> {
+  openDataViewEditor: (options: DataViewEditorOptions<TDataView>) => () => void;
 }
