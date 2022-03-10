@@ -25,7 +25,7 @@ import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
 import { useLinkProps } from '../../../../../../../observability/public';
 import { getNodeDetailUrl } from '../../../../link_to';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
-import { uptimeOverviewLocatorID } from '../../../../../../../observability/public';
+import { navigateToUptime } from '../../lib/navigate_to_uptime';
 import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 
 interface Props {
@@ -165,13 +165,7 @@ export const NodeContextPopover = ({
                   defaultMessage="APM"
                 />
               </EuiTab>
-              <EuiTab
-                onClick={() =>
-                  share.url.locators
-                    .get(uptimeOverviewLocatorID)!
-                    .navigate({ [nodeType]: node.id, ip: node.ip })
-                }
-              >
+              <EuiTab onClick={() => navigateToUptime(share.url.locators, nodeType, node)}>
                 <EuiIcon type="popout" />{' '}
                 <FormattedMessage
                   id="xpack.infra.infra.nodeDetails.updtimeTabLabel"

@@ -26,7 +26,8 @@ import {
   SectionLink,
   ActionMenuDivider,
 } from '../../../../../../../observability/public';
-import { useLinkProps, uptimeOverviewLocatorID } from '../../../../../../../observability/public';
+import { useLinkProps } from '../../../../../../../observability/public';
+import { navigateToUptime } from '../../lib/navigate_to_uptime';
 import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 
 interface Props {
@@ -132,10 +133,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} in Uptime',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      onClick: () =>
-        share.url.locators
-          .get(uptimeOverviewLocatorID)!
-          .navigate({ [nodeType]: node.id, ip: node.ip }),
+      onClick: () => navigateToUptime(share.url.locators, nodeType, node),
       isDisabled: !showUptimeLink,
     };
 
