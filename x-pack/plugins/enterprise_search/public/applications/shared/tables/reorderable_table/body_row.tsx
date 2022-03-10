@@ -18,8 +18,9 @@ export interface BodyRowProps<Item> {
   item: Item;
   additionalProps?: object;
   // Cell to put in first column before other columns
-  leftAction?: React.ReactNode;
+  leftAction?: React.ReactNode | React.ReactNode[];
   errors?: string[];
+  rowIndicator?: string;
 }
 
 export const BodyRow = <Item extends object>({
@@ -29,12 +30,17 @@ export const BodyRow = <Item extends object>({
   leftAction,
   errors = [],
 }: BodyRowProps<Item>) => {
+  const leftActions: React.ReactNode[] = Array.isArray(leftAction) ? leftAction : [leftAction];
   return (
     <div className="reorderableTableRow">
       <EuiFlexGroup data-test-subj="row" alignItems="center" {...(additionalProps || {})}>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexStart">
-            {!!leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
+            {leftActions.map((action, actionIndex) => (
+              <Cell key={actionIndex} {...DRAGGABLE_UX_STYLE}>
+                {action}
+              </Cell>
+            ))}
             {columns.map((column, columnIndex) => (
               <Cell
                 key={`table_row_cell_${columnIndex}`}
