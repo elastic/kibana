@@ -13,7 +13,7 @@ import { ExpressionsPublicPlugin } from './plugin';
 
 // Kibana Platform.
 export { ExpressionsPublicPlugin as Plugin };
-export { ExpressionsSetup, ExpressionsStart } from './plugin';
+export type { ExpressionsSetup, ExpressionsStart } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ExpressionsPublicPlugin(initializerContext);
 }
