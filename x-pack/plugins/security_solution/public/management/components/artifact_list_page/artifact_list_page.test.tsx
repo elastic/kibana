@@ -7,7 +7,7 @@
 
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import React from 'react';
-import { trustedAppsAllHttpMocks } from '../../pages/mocks';
+import { trustedAppsAllHttpMocks, TrustedAppsGetListHttpMocksInterface } from '../../pages/mocks';
 import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
 import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/trusted_apps_api_client';
 import { artifactListPageLabels } from './translations';
@@ -124,7 +124,7 @@ describe('When using the ArtifactListPage component', () => {
 
   describe('and NO data exists', () => {
     let renderWithNoData: () => ReturnType<typeof render>;
-    let originalListApiResponseProvider: typeof mockedApi.responseProvider.trustedAppsList;
+    let originalListApiResponseProvider: TrustedAppsGetListHttpMocksInterface['trustedAppsList'];
 
     beforeEach(() => {
       originalListApiResponseProvider =
@@ -139,6 +139,8 @@ describe('When using the ArtifactListPage component', () => {
         });
 
         render();
+
+        return renderResult;
       };
     });
 
