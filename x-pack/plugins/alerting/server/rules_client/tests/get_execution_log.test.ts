@@ -503,7 +503,7 @@ describe('getExecutionLogForRule()', () => {
         getExecutionLogByIdParams({ sort: [{ foo: { order: 'desc' } }] })
       )
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Invalid sort field "foo" - must be one of [timestamp,duration]]`
+      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions]]`
     );
   });
 
