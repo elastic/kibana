@@ -230,7 +230,7 @@ const normalizBlocklistsPageLocation = (
         ? { pageSize: location.pageSize }
         : {}),
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
-      ...(!isDefaultOrMissing(location.itemId, undefined) ? { id: location.id } : {}),
+      ...(!isDefaultOrMissing(location.itemId, undefined) ? { id: location.itemId } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
       ...(!isDefaultOrMissing(location.includedPolicies, '')
         ? { includedPolicies: location.includedPolicies }
