@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import {
   EuiText,
@@ -20,6 +19,7 @@ import {
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 
+import { shallowEqual } from 'react-redux';
 import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
 import { Case } from '../../../common/ui/types';
 import { ActionConnector, ConnectorTypeFields } from '../../../common/api';
@@ -133,12 +133,24 @@ export const EditConnector = React.memo(
       schema,
     });
 
+    // by default save if disabled
+    const [enableSave, setEnableSave] = useState(false);
+
     const { setFieldValue, submit } = form;
 
     const [{ currentConnector, fields, editConnector }, dispatch] = useReducer(
       editConnectorReducer,
       { ...initialState, fields: caseFields }
     );
+
+    // only enable the save button if changes were made to the previous selected
+    // connector or its fields
+    useEffect(() => {
+      const enable =
+        (currentConnector !== undefined && currentConnector?.id !== selectedConnector) ||
+        !shallowEqual(fields, caseFields);
+      setEnableSave(enable);
+    }, [caseFields, currentConnector, fields, selectedConnector]);
 
     useEffect(() => {
       // Initialize the current connector with the connector information attached to the case if we can find that
@@ -330,6 +342,7 @@ export const EditConnector = React.memo(
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    disabled={!enableSave}
                     color="success"
                     data-test-subj="edit-connectors-submit"
                     fill
