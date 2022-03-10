@@ -8,7 +8,7 @@
 export default function ({ loadTestFile }) {
   describe('Collection', () => {
     loadTestFile(require.resolve('./kibana'));
-    // loadTestFile(require.resolve('./kibana_mb'));
+    loadTestFile(require.resolve('./kibana_mb'));
     loadTestFile(require.resolve('./kibana_exclusive'));
     // loadTestFile(require.resolve('./kibana_exclusive_mb'));
     loadTestFile(require.resolve('./es_and_kibana'));
