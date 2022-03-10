@@ -349,9 +349,16 @@ export class RulesClient {
     // Validate that schedule interval is not less than configured minimum
     const intervalInMs = parseDuration(data.schedule.interval);
     if (intervalInMs < this.minimumScheduleIntervalInMs) {
-      throw Boom.badRequest(
-        `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
-      );
+      if (this.minimumScheduleInterval.enforce) {
+        throw Boom.badRequest(
+          `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else {
+        // just log warning but allow rule to be created
+        this.logger.warn(
+          `Rule schedule interval ${data.schedule.interval} is below the configured minimum of ${this.minimumScheduleInterval.value}. Running rules at below the configured minimum may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+        );
+      }
     }
 
     // Extract saved object references for this rule
@@ -1026,9 +1033,16 @@ export class RulesClient {
     // Validate that schedule interval is not less than configured minimum
     const intervalInMs = parseDuration(data.schedule.interval);
     if (intervalInMs < this.minimumScheduleIntervalInMs) {
-      throw Boom.badRequest(
-        `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
-      );
+      if (this.minimumScheduleInterval.enforce) {
+        throw Boom.badRequest(
+          `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else {
+        // just log warning but allow rule to be updated
+        this.logger.warn(
+          `Rule schedule interval ${data.schedule.interval} is below the configured minimum of ${this.minimumScheduleInterval.value}. Running rules at below the configured minimum may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+        );
+      }
     }
 
     // Extract saved object references for this rule
