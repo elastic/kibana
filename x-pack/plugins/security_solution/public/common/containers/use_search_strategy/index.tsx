@@ -20,6 +20,7 @@ import * as i18n from './translations';
 import {
   FactoryQueryTypes,
   RequestBasicOptions,
+  StrategyRequestType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
 import { IKibanaSearchResponse } from '../../../../../../../src/plugins/data/common';
@@ -90,6 +91,7 @@ const searchComplete = <ResponseType extends IKibanaSearchResponse>(
   );
 };
 
+// TODO add unit tests
 export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   factoryQueryType,
   initialResult,
@@ -99,7 +101,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   /**
    * `result` initial value. It is used until the search strategy returns some data.
    */
-  initialResult: Omit<StrategyResponseType<QueryType>, 'rawResponse' | 'inspect'>;
+  initialResult: Omit<StrategyResponseType<QueryType>, 'rawResponse'>;
   /**
    * Message displayed to the user on a Toast when an erro happens.
    */
@@ -131,16 +133,9 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   }, [addError, error, errorMessage, factoryQueryType]);
 
   const searchCb = useCallback(
-    (
-      props: OptionalSignalArgs<
-        Omit<
-          UseSearchStrategyRequestArgs,
-          'data' | 'factoryQueryType' | 'getTransformChangesIfTheyExist'
-        >
-      >
-    ) => {
+    (props: OptionalSignalArgs<StrategyRequestType<QueryType>>) => {
       const asyncSearch = () => {
-        start({ ...props, data, factoryQueryType, getTransformChangesIfTheyExist });
+        start({ ...props, data, factoryQueryType, getTransformChangesIfTheyExist } as never); // This typescast is required because every StrategyRequestType instance has different fields.
       };
 
       asyncSearch();
@@ -170,4 +165,3 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
     inspect,
   };
 };
-// TODO add unit test
