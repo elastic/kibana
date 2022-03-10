@@ -98,6 +98,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   rowRenderers,
   start,
   scopeId,
+  sessionViewId,
   showCheckboxes,
   sort,
   timelineQuery,
@@ -153,11 +154,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-  const graphOverlay = useMemo(
-    () =>
-      graphEventId != null && graphEventId.length > 0 ? <GraphOverlay timelineId={id} /> : null,
-    [graphEventId, id]
-  );
+  const graphOverlay = useMemo(() => {
+    const shouldShowOverlay =
+      (graphEventId != null && graphEventId.length > 0) || sessionViewId !== null;
+    return shouldShowOverlay ? <GraphOverlay timelineId={id} /> : null;
+  }, [graphEventId, id, sessionViewId]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
@@ -271,6 +272,7 @@ const makeMapStateToProps = () => {
       kqlMode,
       sort,
       showCheckboxes,
+      sessionViewId,
     } = timeline;
 
     return {
@@ -288,6 +290,7 @@ const makeMapStateToProps = () => {
       query: getGlobalQuerySelector(state),
       sort,
       showCheckboxes,
+      sessionViewId,
       // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
       // `getTimeline` actually returns `TimelineModel | undefined`
       graphEventId,
@@ -333,6 +336,7 @@ export const StatefulEventsViewer = connector(
       prevProps.start === nextProps.start &&
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
+      prevProps.sessionViewId === nextProps.sessionViewId &&
       prevProps.start === nextProps.start &&
       prevProps.utilityBar === nextProps.utilityBar &&
       prevProps.additionalFilters === nextProps.additionalFilters &&
