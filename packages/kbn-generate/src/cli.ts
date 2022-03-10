@@ -19,7 +19,7 @@ import {
   isFailError,
   sortPackageJson,
 } from '@kbn/dev-utils';
-import { discoverPackages, generatePackagesBuildBazelFile } from '@kbn/packages';
+import { discoverBazelPackages, generatePackagesBuildBazelFile } from '@kbn/bazel-packages';
 import normalizePath from 'normalize-path';
 
 const ROOT_PKG_DIR = Path.resolve(REPO_ROOT, 'packages');
@@ -58,7 +58,8 @@ export function runGenerateCli() {
         string: ['dir'],
         help: `
           --dev          Generate a package which is intended for dev-only use and can access things like devDependencies
-          --web          Build webpack-compatible version of sources for this package
+          --web          Build webpack-compatible version of sources for this package. If your package is intended to be
+                          used in the browser and Node.js then you need to opt-into these sources being created.
           --dir          Directory where this package will live, defaults to [./packages]
           --force        If the packageDir already exists, delete it before generation
         `,
@@ -173,7 +174,7 @@ export function runGenerateCli() {
 
         await Fsp.writeFile(
           Path.resolve(REPO_ROOT, 'packages/BUILD.bazel'),
-          generatePackagesBuildBazelFile(await discoverPackages())
+          generatePackagesBuildBazelFile(await discoverBazelPackages())
         );
         log.info('Updated packages/BUILD.bazel');
 
