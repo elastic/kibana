@@ -359,7 +359,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         aggs: getExecutionLogAggregation({
-          numExecutions: 3600,
+          numExecutions: 1000,
           page: 1,
           perPage: 10,
           sortField: 'timestamp',
@@ -387,7 +387,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         aggs: getExecutionLogAggregation({
-          numExecutions: 3600,
+          numExecutions: 1000,
           page: 1,
           perPage: 10,
           sortField: 'timestamp',
@@ -405,7 +405,7 @@ describe('getExecutionLogForRule()', () => {
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
     await rulesClient.getExecutionLogForRule(
-      getExecutionLogByIdParams({ dateEnd: new Date(Date.now() - 1800000).toISOString() })
+      getExecutionLogByIdParams({ dateEnd: new Date(Date.now() - 2700000).toISOString() })
     );
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -415,13 +415,13 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         aggs: getExecutionLogAggregation({
-          numExecutions: 1800,
+          numExecutions: 900,
           page: 1,
           perPage: 10,
           sortField: 'timestamp',
           sortOrder: 'desc',
         }),
-        end: '2019-02-12T20:31:22.479Z',
+        end: '2019-02-12T20:16:22.479Z',
         start: '2019-02-12T20:01:22.479Z',
       },
       undefined,
@@ -443,7 +443,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         aggs: getExecutionLogAggregation({
-          numExecutions: 3600,
+          numExecutions: 1000,
           page: 1,
           perPage: 10,
           sortField: 'timestamp',
