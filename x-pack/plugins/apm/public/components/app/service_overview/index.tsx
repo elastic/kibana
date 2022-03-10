@@ -146,6 +146,7 @@ export function ServiceOverview() {
                 reportType="kpi-over-time"
                 title={'Request latency'}
                 withActions={['save', 'explore']}
+                legendIsVisible={false}
               />
             </EuiPanel>
           </EuiFlexItem>
