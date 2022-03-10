@@ -92,7 +92,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
           isCreate={false}
           width={panel.width}
           embeddable={embeddable}
-          factory={editableFactory}
           title={embeddable.getTitle()}
           onCancel={() => onCancel(flyoutInstance)}
           updateTitle={(newTitle) => (inputToReturn.title = newTitle)}

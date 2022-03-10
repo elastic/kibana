@@ -29,6 +29,9 @@ import {
   EuiForm,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { ControlGroupStrings } from '../control_group_strings';
@@ -39,14 +42,15 @@ import {
   IEditableControlFactory,
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
+import { pluginServices } from '../../services';
+import { EmbeddableFactoryDefinition } from '../../../../embeddable/public';
 
 interface EditControlProps {
-  factory: IEditableControlFactory;
   embeddable?: ControlEmbeddable;
-  width: ControlWidth;
   isCreate: boolean;
   title?: string;
-  onSave: () => void;
+  width: ControlWidth;
+  onSave: (type: string, factory: IEditableControlFactory) => void;
   onCancel: () => void;
   removeControl?: () => void;
   updateTitle: (title?: string) => void;
@@ -55,25 +59,63 @@ interface EditControlProps {
 }
 
 export const ControlEditor = ({
-  onTypeEditorChange,
+  embeddable,
+  isCreate,
+  title,
+  width,
+  onSave,
+  onCancel,
   removeControl,
   updateTitle,
   updateWidth,
-  embeddable,
-  isCreate,
-  onCancel,
-  factory,
-  onSave,
-  title,
-  width,
+  onTypeEditorChange,
 }: EditControlProps) => {
+  const { controls } = pluginServices.getServices();
+  const { getControlTypes, getControlFactory } = controls;
+
+  const [selectedType, setSelectedType] = useState(
+    !isCreate && embeddable ? embeddable.type : getControlTypes()[0]
+  );
+  const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentWidth, setCurrentWidth] = useState(width);
-
   const [controlEditorValid, setControlEditorValid] = useState(false);
-  const [defaultTitle, setDefaultTitle] = useState<string>();
 
-  const ControlTypeEditor = factory.controlEditorComponent;
+  let factory: IEditableControlFactory | EmbeddableFactoryDefinition;
+  const getControlTypeEditor = (type: string) => {
+    if (!factory) factory = getControlFactory(type);
+    const ControlTypeEditor = (factory as IEditableControlFactory).controlEditorComponent;
+    return ControlTypeEditor ? (
+      <ControlTypeEditor
+        onChange={onTypeEditorChange}
+        setValidState={setControlEditorValid}
+        initialInput={embeddable?.getInput()}
+        setDefaultTitle={(newDefaultTitle) => {
+          if (!currentTitle || currentTitle === defaultTitle) {
+            setCurrentTitle(newDefaultTitle);
+            updateTitle(newDefaultTitle);
+          }
+          setDefaultTitle(newDefaultTitle);
+        }}
+      />
+    ) : null;
+  };
+
+  const typeButtons = getControlTypes().map((type) => {
+    if (!factory) factory = getControlFactory(type);
+    return (
+      <EuiKeyPadMenuItem
+        id={`createControlButton_${type}`}
+        label={(factory as EmbeddableFactoryDefinition).getDisplayName()}
+        isSelected={selectedType === type}
+        onClick={() => {
+          setSelectedType(type);
+        }}
+      >
+        <EuiIcon type={(factory as EmbeddableFactoryDefinition).getIconType()} size="l" />
+      </EuiKeyPadMenuItem>
+    );
+  });
 
   return (
     <>
@@ -88,59 +130,52 @@ export const ControlEditor = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm>
-          <EuiSpacer size="l" />
-          {ControlTypeEditor && (
-            <ControlTypeEditor
-              onChange={onTypeEditorChange}
-              setValidState={setControlEditorValid}
-              initialInput={embeddable?.getInput()}
-              setDefaultTitle={(newDefaultTitle) => {
-                if (!currentTitle || currentTitle === defaultTitle) {
-                  setCurrentTitle(newDefaultTitle);
-                  updateTitle(newDefaultTitle);
-                }
-                setDefaultTitle(newDefaultTitle);
-              }}
-            />
-          )}
-          <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
-            <EuiFieldText
-              data-test-subj="control-editor-title-input"
-              placeholder={defaultTitle}
-              value={currentTitle}
-              onChange={(e) => {
-                updateTitle(e.target.value || defaultTitle);
-                setCurrentTitle(e.target.value);
-              }}
-            />
+          <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
+            <EuiKeyPadMenu>{typeButtons}</EuiKeyPadMenu>
           </EuiFormRow>
-          <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
-            <EuiButtonGroup
-              color="primary"
-              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-              options={CONTROL_WIDTH_OPTIONS}
-              idSelected={currentWidth}
-              onChange={(newWidth: string) => {
-                setCurrentWidth(newWidth as ControlWidth);
-                updateWidth(newWidth as ControlWidth);
-              }}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="l" />
-          {removeControl && (
-            <EuiButtonEmpty
-              aria-label={`delete-${title}`}
-              iconType="trash"
-              flush="left"
-              color="danger"
-              onClick={() => {
-                onCancel();
-                removeControl();
-              }}
-            >
-              {ControlGroupStrings.management.getDeleteButtonTitle()}
-            </EuiButtonEmpty>
-          )}
+          {selectedType ? (
+            <>
+              {getControlTypeEditor(selectedType)}
+              <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
+                <EuiFieldText
+                  data-test-subj="control-editor-title-input"
+                  placeholder={defaultTitle}
+                  value={currentTitle}
+                  onChange={(e) => {
+                    updateTitle(e.target.value || defaultTitle);
+                    setCurrentTitle(e.target.value);
+                  }}
+                />
+              </EuiFormRow>
+              <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
+                <EuiButtonGroup
+                  color="primary"
+                  legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+                  options={CONTROL_WIDTH_OPTIONS}
+                  idSelected={currentWidth}
+                  onChange={(newWidth: string) => {
+                    setCurrentWidth(newWidth as ControlWidth);
+                    updateWidth(newWidth as ControlWidth);
+                  }}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="l" />
+              {removeControl && (
+                <EuiButtonEmpty
+                  aria-label={`delete-${title}`}
+                  iconType="trash"
+                  flush="left"
+                  color="danger"
+                  onClick={() => {
+                    onCancel();
+                    removeControl();
+                  }}
+                >
+                  {ControlGroupStrings.management.getDeleteButtonTitle()}
+                </EuiButtonEmpty>
+              )}
+            </>
+          ) : null}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -150,9 +185,7 @@ export const ControlEditor = ({
               aria-label={`cancel-${title}`}
               data-test-subj="control-editor-cancel"
               iconType="cross"
-              onClick={() => {
-                onCancel();
-              }}
+              onClick={() => onCancel()}
             >
               {ControlGroupStrings.manageControl.getCancelTitle()}
             </EuiButtonEmpty>
@@ -164,7 +197,7 @@ export const ControlEditor = ({
               iconType="check"
               color="primary"
               disabled={!controlEditorValid}
-              onClick={() => onSave()}
+              onClick={() => onSave(selectedType, factory as IEditableControlFactory)}
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}
             </EuiButton>

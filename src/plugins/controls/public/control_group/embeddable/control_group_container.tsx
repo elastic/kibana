@@ -127,7 +127,6 @@ export class ControlGroupContainer extends Container<
           <EuiContextMenuPanel
             items={[
               this.getCreateControlButton('toolbar', closePopover),
-              <EuiHorizontalRule margin="none" />,
               this.getEditControlGroupButton(closePopover),
             ]}
           />
