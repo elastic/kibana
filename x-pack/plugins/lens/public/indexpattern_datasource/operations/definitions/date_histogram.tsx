@@ -48,6 +48,7 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
   params: {
     interval: string;
     ignoreTimeRange?: boolean;
+    includeEmptyRows?: boolean;
   };
 }
 
@@ -118,6 +119,7 @@ export const dateHistogramOperation: OperationDefinition<
       scale: 'interval',
       params: {
         interval: columnParams?.interval ?? autoInterval,
+        includeEmptyRows: true,
       },
     };
   },
@@ -159,8 +161,9 @@ export const dateHistogramOperation: OperationDefinition<
       useNormalizedEsInterval: !usedField?.aggregationRestrictions?.date_histogram,
       interval,
       drop_partials: false,
-      min_doc_count: 0,
+      min_doc_count: column.params?.includeEmptyRows ? 0 : 1,
       extended_bounds: extendedBoundsToAst({}),
+      extendToTimeRange: column.params?.includeEmptyRows,
     }).toAst();
   },
   paramEditor: function ParamEditor({
@@ -394,6 +397,25 @@ export const dateHistogramOperation: OperationDefinition<
             </EuiFormRow>
           </>
         )}
+        <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.includeEmptyRows', {
+              defaultMessage: 'Include empty rows',
+            })}
+            checked={Boolean(currentColumn.params.includeEmptyRows)}
+            onChange={() => {
+              updateLayer(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'includeEmptyRows',
+                  value: !currentColumn.params.includeEmptyRows,
+                })
+              );
+            }}
+            compressed
+          />
+        </EuiFormRow>
       </>
     );
   },
