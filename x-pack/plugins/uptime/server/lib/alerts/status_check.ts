@@ -367,9 +367,22 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           statusMessage,
           ...updateState(state, true),
         });
-
+        /* timestamp key is always undefined in monitorInfo. Where the key @timestamp has the wanted value, but not part of the its type (Ping)
+      The next line to avoid TS complaining about Property '@timestamp' does not exist on the type Ping.
+      */
+        const startDate: any = monitorInfo;
         alert.scheduleActions(MONITOR_STATUS.id, {
           [ALERT_REASON_MSG]: monitorSummary.reason,
+          [VIEW_IN_APP_URL]: getMonitorRouteFromMonitorId({
+            monitorId: monitorSummary.monitorId,
+            dateRangeEnd: 'now',
+            dateRangeStart: moment(new Date(startDate['@timestamp']))
+              .subtract('5', 'm')
+              .toISOString(),
+            filters: {
+              'observer.geo.name': [monitorSummary.observerLocation],
+            },
+          }),
         });
       }
       return updateState(state, downMonitorsByLocation.length > 0);
