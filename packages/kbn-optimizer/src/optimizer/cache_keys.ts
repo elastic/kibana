@@ -9,12 +9,10 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import Chalk from 'chalk';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/utils';
-import stripAnsi from 'strip-ansi';
+import { diffStrings } from '@kbn/dev-utils';
 
-import jestDiff from 'jest-diff';
 import jsonStable from 'json-stable-stringify';
 import { ascending, CacheableWorkerConfig } from '../common';
 
@@ -36,78 +34,7 @@ export function diffCacheKey(expected?: unknown, actual?: unknown) {
     return;
   }
 
-  return reformatJestDiff(jestDiff(expectedJson, actualJson));
-}
-
-export function reformatJestDiff(diff: string | null) {
-  const diffLines = diff?.split('\n') || [];
-
-  if (
-    diffLines.length < 4 ||
-    stripAnsi(diffLines[0]) !== '- Expected' ||
-    stripAnsi(diffLines[1]) !== '+ Received'
-  ) {
-    throw new Error(`unexpected diff format: ${diff}`);
-  }
-
-  const outputLines = [diffLines.shift(), diffLines.shift(), diffLines.shift()];
-
-  /**
-   * buffer which contains between 0 and 5 lines from the diff which aren't additions or
-   * deletions. The first three are the first three lines seen since the buffer was cleared
-   * and the last two lines are the last two lines seen.
-   *
-   * When flushContext() is called we write the first two lines to output, an elipses if there
-   * are five lines, and then the last two lines.
-   *
-   * At the very end we will write the last two lines of context if they're defined
-   */
-  const contextBuffer: string[] = [];
-
-  /**
-   * Convert a line to an empty line with elipses placed where the text on that line starts
-   */
-  const toElipses = (line: string) => {
-    return stripAnsi(line).replace(/^(\s*).*/, '$1...');
-  };
-
-  while (diffLines.length) {
-    const line = diffLines.shift()!;
-    const plainLine = stripAnsi(line);
-    if (plainLine.startsWith('+ ') || plainLine.startsWith('- ')) {
-      // write contextBuffer to the outputLines
-      if (contextBuffer.length) {
-        outputLines.push(
-          ...contextBuffer.slice(0, 2),
-          ...(contextBuffer.length === 5
-            ? [Chalk.dim(toElipses(contextBuffer[2])), ...contextBuffer.slice(3, 5)]
-            : contextBuffer.slice(2, 4))
-        );
-
-        contextBuffer.length = 0;
-      }
-
-      // add this line to the outputLines
-      outputLines.push(line);
-    } else {
-      // update the contextBuffer with this line which doesn't represent a change
-      if (contextBuffer.length === 5) {
-        contextBuffer[3] = contextBuffer[4];
-        contextBuffer[4] = line;
-      } else {
-        contextBuffer.push(line);
-      }
-    }
-  }
-
-  if (contextBuffer.length) {
-    outputLines.push(
-      ...contextBuffer.slice(0, 2),
-      ...(contextBuffer.length > 2 ? [Chalk.dim(toElipses(contextBuffer[2]))] : [])
-    );
-  }
-
-  return outputLines.join('\n');
+  return diffStrings(expectedJson, actualJson);
 }
 
 export interface OptimizerCacheKey {

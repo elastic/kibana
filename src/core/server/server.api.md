@@ -887,7 +887,7 @@ export { EcsEventOutcome }
 export { EcsEventType }
 
 // @public
-export type ElasticsearchClient = Omit<Client, 'connectionPool' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'>;
+export type ElasticsearchClient = Omit<Client, 'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'>;
 
 // @public
 export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'maxSockets' | 'compression' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
@@ -961,10 +961,6 @@ export interface ElasticsearchServiceSetup {
 export interface ElasticsearchServiceStart {
     readonly client: IClusterClient;
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
-    // @deprecated (undocumented)
-    legacy: {
-        readonly config$: Observable<ElasticsearchConfig>;
-    };
 }
 
 // @public (undocumented)
@@ -1129,8 +1125,6 @@ export interface HttpServicePreboot {
 
 // @public
 export interface HttpServiceSetup {
-    // @deprecated
-    auth: HttpAuth;
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() => IRouter<Context>;
@@ -2503,8 +2497,6 @@ export interface SavedObjectsImportFailure {
         icon?: string;
     };
     overwrite?: boolean;
-    // @deprecated (undocumented)
-    title?: string;
     // (undocumented)
     type: string;
 }
