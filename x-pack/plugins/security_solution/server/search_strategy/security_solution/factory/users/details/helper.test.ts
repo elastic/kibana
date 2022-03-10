@@ -8,10 +8,6 @@
 import { UserAggEsItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { fieldNameToAggField, formatUserItem } from './helpers';
 
-// fieldNameToAggField = (fieldName: string)
-
-// formatUserItem = (aggregations: UserAggEsItem): UserItem => {
-
 describe('helpers', () => {
   it('it convert field name to aggregation field name', () => {
     expect(fieldNameToAggField('host.os.family')).toBe('host_os_family');

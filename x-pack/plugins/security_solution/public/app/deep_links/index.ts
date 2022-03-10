@@ -258,13 +258,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         order: 9004,
         deepLinks: [
           {
-            id: SecurityPageName.authentications,
-            title: i18n.translate('xpack.securitySolution.search.users.allUsers', {
-              defaultMessage: 'All',
-            }),
-            path: `${USERS_PATH}/allUsers`,
-          },
-          {
             id: SecurityPageName.usersAnomalies,
             title: i18n.translate('xpack.securitySolution.search.users.anomalies', {
               defaultMessage: 'Anomalies',

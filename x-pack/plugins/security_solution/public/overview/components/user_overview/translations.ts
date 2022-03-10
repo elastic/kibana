@@ -12,7 +12,7 @@ export const USER_ID = i18n.translate('xpack.securitySolution.user.details.overv
 });
 
 export const USER_DOMAIN = i18n.translate(
-  'xpack.securitySolution.host.details.overview.userDomainTitle',
+  'xpack.securitySolution.user.details.overview.userDomainTitle',
   {
     defaultMessage: 'Domain',
   }
@@ -32,7 +32,7 @@ export const HOST_IP = i18n.translate(
   }
 );
 
-export const HOST_OS = i18n.translate('xpack.securitySolution.host.details.overview.osTitle', {
+export const HOST_OS = i18n.translate('xpack.securitySolution.user.details.overview.osTitle', {
   defaultMessage: 'Operating system',
 });
 
@@ -44,7 +44,7 @@ export const FIRST_SEEN = i18n.translate(
 );
 
 export const LAST_SEEN = i18n.translate(
-  'xpack.securitySolution.network.ipDetails.ipOverview.lastSeenTitle',
+  'xpack.securitySolution.user.ipDetails.ipOverview.lastSeenTitle',
   {
     defaultMessage: 'Last seen',
   }
