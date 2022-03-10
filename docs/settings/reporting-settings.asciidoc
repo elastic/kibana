@@ -114,16 +114,16 @@ deprecated:[8.0.0,This setting has no effect.] Specify the {time-units}[amount o
 
 For PDF and PNG reports, Reporting spawns a headless Chromium browser process on the server to load and capture a screenshot of the {kib} app. When installing {kib} on Linux and Windows platforms, the Chromium binary comes bundled with the {kib} download. For Mac platforms, the Chromium binary is downloaded the first time {kib} is started.
 
-`xpack.reporting.capture.browser.chromium.disableSandbox`::
+`xpack.screenshotting.browser.chromium.disableSandbox`::
 It is recommended that you research the feasibility of enabling unprivileged user namespaces. An exception is if you are running {kib} in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters. For more information, refer to <<reporting-chromium-sandbox>>. Defaults to `false` for all operating systems except Debian and Red Hat Linux, which use `true`.
 
-`xpack.reporting.capture.browser.chromium.proxy.enabled`::
-Enables the proxy for Chromium to use. When set to `true`, you must also specify the `xpack.reporting.capture.browser.chromium.proxy.server` setting. Defaults to `false`.
+`xpack.screenshotting.browser.chromium.proxy.enabled`::
+Enables the proxy for Chromium to use. When set to `true`, you must also specify the `xpack.screenshotting.browser.chromium.proxy.server` setting. Defaults to `false`.
 
-`xpack.reporting.capture.browser.chromium.proxy.server`::
+`xpack.screenshotting.browser.chromium.proxy.server`::
 The uri for the proxy server. Providing the username and password for the proxy server via the uri is not supported.
 
-`xpack.reporting.capture.browser.chromium.proxy.bypass`::
+`xpack.screenshotting.browser.chromium.proxy.bypass`::
 An array of hosts that should not go through the proxy server and should use a direct connection instead. Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".elastic.co:5601".
 
 [float]
@@ -136,13 +136,13 @@ If the Chromium browser is asked to send a request that violates the network pol
 
 NOTE: {kib} installations are not designed to be publicly accessible over the internet. The Reporting network policy and other capabilities of the Elastic Stack security features do not change this condition.
 
-`xpack.reporting.capture.networkPolicy`::
+`xpack.screenshotting.networkPolicy`::
 Capturing a screenshot from a {kib} page involves sending out requests for all the linked web assets. For example, a Markdown visualization can show an image from a remote server.
 
-`xpack.reporting.capture.networkPolicy.enabled`::
+`xpack.screenshotting.networkPolicy.enabled`::
 When `false`, disables the *Reporting* network policy. Defaults to `true`.
 
-`xpack.reporting.capture.networkPolicy.rules`::
+`xpack.screenshotting.networkPolicy.rules`::
 A policy is specified as an array of objects that describe what to allow or deny based on a host or protocol. If a host or protocol is not specified, the rule matches any host or protocol.
 
 The rule objects are evaluated sequentially from the beginning to the end of the array, and continue until there is a matching rule. If no rules allow a request, the request is denied.
@@ -150,14 +150,14 @@ The rule objects are evaluated sequentially from the beginning to the end of the
 [source,yaml]
 -------------------------------------------------------
 # Only allow requests to placeholder.com
-xpack.reporting.capture.networkPolicy:
+xpack.screenshotting.networkPolicy:
   rules: [ { allow: true, host: "placeholder.com" } ]
 -------------------------------------------------------
 
 [source,yaml]
 -------------------------------------------------------
 # Only allow requests to https://placeholder.com
-xpack.reporting.capture.networkPolicy:
+xpack.screenshotting.networkPolicy:
   rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ]
 -------------------------------------------------------
 
@@ -166,7 +166,7 @@ A final `allow` rule with no host or protocol allows all requests that are not e
 [source,yaml]
 -------------------------------------------------------
 # Denies requests from http://placeholder.com, but anything else is allowed.
-xpack.reporting.capture.networkPolicy:
+xpack.screenshotting.networkPolicy:
   rules: [{ allow: false, host: "placeholder.com", protocol: "http:" }, { allow: true }];
 -------------------------------------------------------
 
@@ -175,7 +175,7 @@ A network policy can be composed of multiple rules:
 [source,yaml]
 -------------------------------------------------------
 # Allow any request to http://placeholder.com but for any other host, https is required
-xpack.reporting.capture.networkPolicy
+xpack.screenshotting.networkPolicy
   rules: [
     { allow: true, host: "placeholder.com", protocol: "http:" },
     { allow: true, protocol: "https:" },
