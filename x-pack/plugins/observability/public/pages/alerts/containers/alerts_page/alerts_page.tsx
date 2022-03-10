@@ -45,6 +45,7 @@ interface RuleStatsState {
   muted: number;
   error: number;
 }
+
 export interface TopAlert {
   fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
@@ -69,7 +70,7 @@ const ALERT_STATUS_REGEX = new RegExp(
 );
 
 function AlertsPage() {
-  const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
+  const { core, plugins, ObservabilityPageTemplate, config } = usePluginContext();
   const [alertFilterStatus, setAlertFilterStatus] = useState('' as AlertStatusFilterButton);
   const { prepend } = core.http.basePath;
   const refetch = useRef<() => void>();
@@ -137,9 +138,9 @@ function AlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // In a future milestone we'll have a page dedicated to rule management in
-  // observability. For now link to the settings page.
-  const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
+  const manageRulesHref = config.unsafe.rules
+    ? prepend('/app/observability/rules')
+    : prepend('/insightsAndAlerting/triggersActions/alerts');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
@@ -214,7 +215,7 @@ function AlertsPage() {
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
   const kibana = useKibana<ObservabilityAppServices>();
-  const CasesContext = kibana.services.cases.getCasesContext();
+  const CasesContext = kibana.services.cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
 
   if (!hasAnyData && !isAllRequestsComplete) {
