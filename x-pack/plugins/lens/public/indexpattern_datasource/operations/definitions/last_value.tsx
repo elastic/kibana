@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -116,6 +117,13 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   };
 }
 
+function getExistsFilter(field: string) {
+  return {
+    query: `${field}: *`,
+    language: 'kuery',
+  };
+}
+
 export const lastValueOperation: OperationDefinition<
   LastValueIndexPatternColumn,
   'field',
@@ -143,6 +151,10 @@ export const lastValueOperation: OperationDefinition<
       sourceField: field.name,
       params: newParams,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
+      filter:
+        oldColumn.filter && isEqual(oldColumn.filter, getExistsFilter(oldColumn.sourceField))
+          ? getExistsFilter(field.name)
+          : oldColumn.filter,
     };
   },
   getPossibleOperationForField: ({ aggregationRestrictions, type }) => {
@@ -202,7 +214,7 @@ export const lastValueOperation: OperationDefinition<
       isBucketed: false,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
-      filter: getFilter(previousColumn, columnParams),
+      filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
         showArrayValues,
