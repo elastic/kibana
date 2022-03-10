@@ -31,7 +31,7 @@ import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Closing alerts', () => {
+describe('Closing alerts', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
