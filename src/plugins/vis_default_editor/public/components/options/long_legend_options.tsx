@@ -9,20 +9,16 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { SwitchOption } from './switch';
 
 const MAX_TRUNCATE_LINES = 5;
 const MIN_TRUNCATE_LINES = 1;
 
 export interface LongLegendOptionsProps {
-  setValue: (
-    paramName: 'maxLegendLines' | 'truncateLegend' | 'legendSize',
-    value?: boolean | number
-  ) => void;
+  setValue: (paramName: 'maxLegendLines' | 'truncateLegend', value: boolean | number) => void;
   truncateLegend: boolean;
   maxLegendLines?: number;
-  legendSize?: number;
   'data-test-subj'?: string;
 }
 
@@ -31,7 +27,6 @@ function LongLegendOptions({
   setValue,
   truncateLegend,
   maxLegendLines,
-  legendSize,
 }: LongLegendOptionsProps) {
   return (
     <>
@@ -68,54 +63,6 @@ function LongLegendOptions({
             );
           }}
         />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
-            id="visDefaultEditor.options.longLegends.legendSizeLabel"
-            defaultMessage="Legend size"
-          />
-        }
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem>
-            <EuiFieldNumber
-              placeholder={i18n.translate(
-                'visDefaultEditor.options.longLegends.legendSize.placeholder',
-                {
-                  defaultMessage: 'Auto',
-                }
-              )}
-              value={legendSize}
-              min={1}
-              step={1}
-              fullWidth
-              onChange={(e) => {
-                const value = Number(e.target.value) || undefined;
-                setValue('legendSize', value);
-              }}
-              append={i18n.translate(
-                'visDefaultEditor.options.longLegends.legendSize.fieldAppend',
-                {
-                  defaultMessage: 'px',
-                }
-              )}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip
-              type="questionInCircle"
-              content={
-                <FormattedMessage
-                  id="visDefaultEditor.options.longLegends.legendSize.tooltip"
-                  defaultMessage="Limited to max of 70% of the chart container.
-                  Vertical legends limited to min of 30% of chart width."
-                />
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiFormRow>
     </>
   );

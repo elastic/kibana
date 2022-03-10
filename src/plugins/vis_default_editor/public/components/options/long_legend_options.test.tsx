@@ -21,15 +21,15 @@ describe('LongLegendOptions', () => {
     };
   });
 
-  it('renders two EuiFieldNumber inputs for maxLegendLines and legendSize', () => {
+  it('renders the EuiFieldNumber', () => {
     component = mountWithIntl(<LongLegendOptions {...props} />);
-    expect(component.find(EuiFieldNumber).length).toBe(2);
+    expect(component.find(EuiFieldNumber).length).toBe(1);
   });
 
-  it('should call setValue when value is changes in the maxLegendLines input', () => {
+  it('should call setValue when value is changes in the number input', () => {
     component = mountWithIntl(<LongLegendOptions {...props} />);
     const numberField = component.find(EuiFieldNumber);
-    numberField.first().props().onChange!({
+    numberField.props().onChange!({
       target: {
         value: 3,
       },
@@ -38,22 +38,10 @@ describe('LongLegendOptions', () => {
     expect(props.setValue).toHaveBeenCalledWith('maxLegendLines', 3);
   });
 
-  it('should call setValue when value is changes in the legendSize input', () => {
-    component = mountWithIntl(<LongLegendOptions {...props} />);
-    const numberField = component.find(EuiFieldNumber);
-    numberField.at(1).props().onChange!({
-      target: {
-        value: 100,
-      },
-    } as unknown as React.ChangeEvent<HTMLInputElement>);
-
-    expect(props.setValue).toHaveBeenCalledWith('legendSize', 100);
-  });
-
-  it('maxLegendLines number should be disabled when truncate is false', () => {
+  it('input number should be disabled when truncate is false', () => {
     props.truncateLegend = false;
     component = mountWithIntl(<LongLegendOptions {...props} />);
-    const numberField = component.find(EuiFieldNumber).first();
+    const numberField = component.find(EuiFieldNumber);
 
     expect(numberField.props().disabled).toBeTruthy();
   });
