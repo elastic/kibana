@@ -23,8 +23,8 @@ export const ADD_A_CIS_INTEGRATION = i18n.translate('xpack.csp.benchmarks.add_a_
 });
 
 export const TABLE_COLUMN_HEADERS = {
-  INTEGRATION_NAME: i18n.translate('xpack.csp.benchmarks.table_column_headers.integration_name', {
-    defaultMessage: 'Integration Name',
+  BENCHMARK_RULES: i18n.translate('xpack.csp.benchmarks.table_column_headers.benchmark_rules', {
+    defaultMessage: 'Benchmark Rules',
   }),
   BENCHMARK: i18n.translate('xpack.csp.benchmarks.table_column_headers.benchmark', {
     defaultMessage: 'Benchmark',
@@ -45,3 +45,7 @@ export const TABLE_COLUMN_HEADERS = {
     defaultMessage: 'Created at',
   }),
 };
+
+export const SEARCH_PLACEHOLDER = i18n.translate('xpack.csp.benchmarks.searchPlaceholder', {
+  defaultMessage: 'e.g. benchmark name',
+});
