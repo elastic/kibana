@@ -32,6 +32,10 @@ const openInConsoleLabel = i18n.translate('inspector.requests.openInConsoleLabel
   defaultMessage: 'Open in Console',
 });
 
+const openInSearchProfilerLabel = i18n.translate('inspector.requests.openInSearchProfilerLabel', {
+  defaultMessage: 'Open in Search Profiler',
+});
+
 /**
  * @internal
  */
@@ -39,6 +43,7 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
   const { services } = useKibana<InspectorPluginStartDeps>();
 
   const navigateToUrl = services.application?.navigateToUrl;
+
   const devToolsDataUri = compressToEncodedURIComponent(`GET ${indexPattern}/_search\n${json}`);
   const consoleHref = services.share.url.locators
     .get('CONSOLE_APP_LOCATOR')
@@ -50,6 +55,19 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
   const handleDevToolsLinkClick = useCallback(
     () => consoleHref && navigateToUrl && navigateToUrl(consoleHref),
     [consoleHref, navigateToUrl]
+  );
+
+  const searchProfilerDataUri = compressToEncodedURIComponent(json);
+  const searchProfilerHref = services.share.url.locators
+    .get('SEARCH_PROFILER_LOCATOR')
+    ?.useUrl({ index: indexPattern, loadFrom: `data:text/plain,${searchProfilerDataUri}` });
+  // Check if both the Dev Tools UI and the SearchProfiler UI are enabled.
+  const canShowsearchProfiler =
+    services.application?.capabilities?.dev_tools.show && searchProfilerHref !== undefined;
+  const shouldShowsearchProfilerLink = !!(indexPattern && canShowsearchProfiler);
+  const handlesearchProfilerLinkClick = useCallback(
+    () => searchProfilerHref && navigateToUrl && navigateToUrl(searchProfilerHref),
+    [searchProfilerHref, navigateToUrl]
   );
 
   return (
@@ -86,6 +104,18 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
               data-test-subj="inspectorRequestOpenInConsoleButton"
             >
               {openInConsoleLabel}
+            </EuiButtonEmpty>
+          )}
+          {shouldShowsearchProfilerLink && (
+            <EuiButtonEmpty
+              size="xs"
+              flush="right"
+              iconType="search"
+              href={searchProfilerHref}
+              onClick={handlesearchProfilerLinkClick}
+              data-test-subj="inspectorRequestOpenInSearchProfilerButton"
+            >
+              {openInSearchProfilerLabel}
             </EuiButtonEmpty>
           )}
         </div>

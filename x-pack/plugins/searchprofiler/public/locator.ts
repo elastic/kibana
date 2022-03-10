@@ -12,6 +12,7 @@ export const SEARCH_PROFILER_LOCATOR_ID = 'SEARCH_PROFILER_LOCATOR';
 
 export interface SearchProfilerLocatorParams extends SerializableRecord {
   loadFrom: string;
+  index: string;
 }
 
 export class SearchProfilerLocatorDefinition
@@ -19,10 +20,12 @@ export class SearchProfilerLocatorDefinition
 {
   public readonly id = SEARCH_PROFILER_LOCATOR_ID;
 
-  public readonly getLocation = async ({ loadFrom }: SearchProfilerLocatorParams) => {
+  public readonly getLocation = async ({ loadFrom, index }: SearchProfilerLocatorParams) => {
     return {
       app: 'dev_tools',
-      path: `#/searchprofiler${loadFrom ? `?load_from=${loadFrom}` : ''}`,
+      path: `#/searchprofiler${index ? `?index=${index}` : ''}${
+        loadFrom ? `&load_from=${loadFrom}` : ''
+      }`,
       state: { loadFrom },
     };
   };
