@@ -127,7 +127,7 @@ Object {
                     "linear",
                   ],
                 },
-                "function": "lens_xy_layer",
+                "function": "lens_xy_data_layer",
                 "type": "function",
               },
             ],
