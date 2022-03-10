@@ -23,11 +23,11 @@ export class FetchLogViewError extends Error {
   }
 }
 
-export class FetchLogSourceStatusError extends Error {
+export class FetchLogViewStatusError extends Error {
   constructor(message: string, public cause?: Error) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'FetchLogSourceStatusError';
+    this.name = 'FetchLogViewStatusError';
   }
 }
 

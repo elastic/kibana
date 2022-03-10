@@ -16,6 +16,7 @@ import {
 } from '../../../common/http_api/log_views';
 import {
   FetchLogViewError,
+  FetchLogViewStatusError,
   LogView,
   LogViewAttributes,
   LogViewsStaticConfig,
@@ -83,7 +84,9 @@ export class LogViewsClient implements ILogViewsClient {
           if (err.status === 404) {
             return 'missing' as const;
           }
-          throw err;
+          throw new FetchLogViewStatusError(
+            `Failed to check status of log indices of "${resolvedLogView.indices}": ${err}`
+          );
         }
       );
 
