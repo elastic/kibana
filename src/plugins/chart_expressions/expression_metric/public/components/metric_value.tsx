@@ -43,6 +43,7 @@ export const MetricVisValue = ({
       style={autoScale && colorFullBackground ? {} : { backgroundColor: metric.bgColor }}
     >
       <div
+        data-test-subj="metric_value"
         className="mtrVis__value"
         style={{
           ...(style.spec as CSSProperties),
@@ -60,6 +61,7 @@ export const MetricVisValue = ({
       />
       {labelConfig.show && (
         <div
+          data-test-subj="metric_label"
           style={{
             ...(labelConfig.style.spec as CSSProperties),
             order: labelConfig.position === 'top' ? -1 : 2,
