@@ -10,8 +10,9 @@
 // but that inserts a div which messes up the layout of the flyout.
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { compressToEncodedURIComponent } from 'lz-string';
 
 import {
   EuiFlyout,
@@ -29,9 +30,8 @@ import {
 } from '@elastic/eui';
 import { ApplicationStart } from 'src/core/public';
 import type { UrlService } from 'src/plugins/share/common/url_service';
-import { useOpenInConsole } from './open_in_console';
 
-interface Props {
+export interface ViewApiRequestProps {
   title: string;
   description: string;
   request: string;
@@ -41,7 +41,7 @@ interface Props {
   canShowDevtools?: boolean;
 }
 
-export const ViewApiRequest: React.FunctionComponent<Props> = ({
+export const ViewApiRequest: React.FunctionComponent<ViewApiRequestProps> = ({
   title,
   description,
   request,
@@ -50,11 +50,22 @@ export const ViewApiRequest: React.FunctionComponent<Props> = ({
   urlService,
   canShowDevtools,
 }) => {
-  const { consolePreviewClick, consolePreviewLink } = useOpenInConsole({
-    request,
-    navigateToUrl,
-    urlService,
-  });
+  const getUrlParams = undefined;
+  const devToolsDataUri = compressToEncodedURIComponent(request);
+
+  // Generate a console preview link if we have a valid locator
+  const consolePreviewLink = urlService?.locators.get('CONSOLE_APP_LOCATOR')?.useUrl(
+    {
+      loadFrom: `data:text/plain,${devToolsDataUri}`,
+    },
+    getUrlParams,
+    [request]
+  );
+
+  const consolePreviewClick = useCallback(
+    () => consolePreviewLink && navigateToUrl && navigateToUrl(consolePreviewLink),
+    [consolePreviewLink, navigateToUrl]
+  );
 
   // Check if both the Dev Tools UI and the Console UI are enabled.
   const shouldShowDevToolsLink = canShowDevtools && consolePreviewLink !== undefined;
