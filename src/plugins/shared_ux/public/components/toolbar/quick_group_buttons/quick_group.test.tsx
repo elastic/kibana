@@ -9,8 +9,8 @@
 import React from 'react';
 import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 
-import { ServicesProvider, SharedUXServices } from '../../../../services';
-import { servicesFactory } from '../../../../services/mocks';
+import { ServicesProvider, SharedUXServices } from '../../../services';
+import { servicesFactory } from '../../../services/mocks';
 import { QuickButtonGroup } from './quick_group';
 
 describe('<QuickButtonGroup />', () => {

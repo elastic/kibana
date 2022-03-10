@@ -12,7 +12,7 @@ import { SolutionToolbarButton } from './primary';
 import mdx from './primary.mdx';
 
 export default {
-  title: 'Solution Toolbar Button',
+  title: 'Toolbar/Solution Toolbar Button',
   description: 'A button that is a part of the solution toolbar.',
   parameters: {
     docs: {

@@ -8,8 +8,8 @@
 
 import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ServicesProvider, SharedUXServices } from '../../../../services';
-import { servicesFactory } from '../../../../services/mocks';
+import { ServicesProvider, SharedUXServices } from '../../../services';
+import { servicesFactory } from '../../../services/mocks';
 
 import { SolutionToolbarButton } from './primary';
 

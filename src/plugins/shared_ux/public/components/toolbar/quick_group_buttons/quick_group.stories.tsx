@@ -13,7 +13,7 @@ import { QuickButtonGroup } from './quick_group';
 import mdx from './quick_group.mdx';
 
 export default {
-  title: 'Solution Toolbar Quick Button Group',
+  title: 'Toolbar/Solution Toolbar Quick Button Group',
   description: 'A collection of buttons that is a part of the solution toolbar.',
   parameters: {
     docs: {
@@ -66,7 +66,7 @@ ConnectedComponent.argTypes = {
     defaultValue: 2,
     control: {
       type: 'number',
-      min: 0,
+      min: 1,
       max: 5,
       step: 1,
     },

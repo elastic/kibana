@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { SolutionToolbarButton } from './solution_toolbar/button/primary';
-export { QuickButtonGroup } from './solution_toolbar/quick_group_buttons/quick_group';
+export { SolutionToolbarButton } from './button/primary';
+export { QuickButtonGroup } from './quick_group_buttons/quick_group';
