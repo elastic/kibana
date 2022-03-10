@@ -19,6 +19,7 @@ export const logViewOriginRT = rt.keyof({
   'infra-source-internal': null,
   'infra-source-fallback': null,
 });
+export type LogViewOrigin = rt.TypeOf<typeof logViewOriginRT>;
 
 // Kibana data views
 export const logDataViewReferenceRT = rt.type({

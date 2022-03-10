@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { fieldList } from 'src/plugins/data_views/common';
-import { ResolvedLogView } from './resolved_log_view';
+import { DataViewsContract, fieldList } from 'src/plugins/data_views/common';
+import { createStubDataView } from 'src/plugins/data_views/common/stubs';
+import { defaultLogViewsStaticConfig } from './defaults';
+import { ResolvedLogView, resolveLogView } from './resolved_log_view';
+import { LogViewAttributes } from './types';
 
-export const createResolvedLogViewMock = (): ResolvedLogView => ({
+export const createResolvedLogViewMock = (
+  resolvedLogViewOverrides: Partial<ResolvedLogView> = {}
+): ResolvedLogView => ({
   name: 'LOG VIEW',
   description: 'LOG VIEW DESCRIPTION',
   indices: 'log-indices-*',
@@ -36,4 +41,15 @@ export const createResolvedLogViewMock = (): ResolvedLogView => ({
       messageColumn: { id: 'MESSAGE_COLUMN_ID' },
     },
   ],
+  ...resolvedLogViewOverrides,
 });
+
+export const createResolvedLogViewMockFromAttributes = (logViewAttributes: LogViewAttributes) =>
+  resolveLogView(
+    logViewAttributes,
+    {
+      get: async () => createStubDataView({ spec: {} }),
+      getFieldsForWildcard: async () => [],
+    } as unknown as DataViewsContract,
+    defaultLogViewsStaticConfig
+  );
