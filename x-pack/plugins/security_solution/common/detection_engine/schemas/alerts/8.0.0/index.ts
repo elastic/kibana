@@ -109,7 +109,7 @@ export interface BaseFields800 {
   [ALERT_SEVERITY]: string;
   [ALERT_RISK_SCORE]: number;
   // TODO: version rule schemas and pull in 8.0.0 versioned rule schema to define alert rule parameters type
-  [ALERT_RULE_PARAMETERS]: object;
+  [ALERT_RULE_PARAMETERS]: { [key: string]: SearchTypes };
   [ALERT_RULE_ACTIONS]: RuleAlertAction[];
   [ALERT_RULE_AUTHOR]: string[];
   [ALERT_RULE_CREATED_AT]: string;
