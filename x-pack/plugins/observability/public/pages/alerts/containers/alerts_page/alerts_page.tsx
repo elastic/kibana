@@ -138,9 +138,9 @@ function AlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = config.unsafe.rules
+  const manageRulesHref = config.unsafe.rules.enabled
     ? prepend('/app/observability/rules')
-    : prepend('/insightsAndAlerting/triggersActions/alerts');
+    : prepend('/app/management/insightsAndAlerting/triggersActions/rules');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
@@ -215,7 +215,7 @@ function AlertsPage() {
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
   const kibana = useKibana<ObservabilityAppServices>();
-  const CasesContext = kibana.services.cases.getCasesContext();
+  const CasesContext = kibana.services.cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
 
   if (!hasAnyData && !isAllRequestsComplete) {
