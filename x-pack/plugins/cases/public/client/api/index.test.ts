@@ -35,5 +35,12 @@ describe('createClientAPI', () => {
         query: { owner: 'test' },
       });
     });
+
+    it('should accept an empty object with no owner', async () => {
+      await api.getRelatedCases('alert-id', {});
+      expect(http.get).toHaveBeenCalledWith('/api/cases/alerts/alert-id', {
+        query: {},
+      });
+    });
   });
 });
