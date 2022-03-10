@@ -14,7 +14,11 @@ import {
   IScopedClusterClient,
 } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../../security/server';
-import type { JobType, MlSavedObjectType } from '../../common/types/saved_objects';
+import type {
+  JobType,
+  MlSavedObjectType,
+  TrainedModelType,
+} from '../../common/types/saved_objects';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
@@ -396,12 +400,18 @@ export function jobSavedObjectServiceFactory(
     return { ...results };
   }
 
-  async function canCreateGlobalJobs(request: KibanaRequest) {
+  async function canCreateGlobalMlSavedObjects(
+    jobType: JobType | TrainedModelType,
+    request: KibanaRequest
+  ) {
     if (authorization === undefined) {
       return true;
     }
     const { authorizationCheck } = authorizationProvider(authorization);
-    return (await authorizationCheck(request)).canCreateJobsGlobally;
+    const { canCreateJobsGlobally, canCreateTrainedModelsGlobally } = await authorizationCheck(
+      request
+    );
+    return jobType === 'trained-model' ? canCreateTrainedModelsGlobally : canCreateJobsGlobally;
   }
 
   async function getTrainedModelObject(
@@ -751,7 +761,7 @@ export function jobSavedObjectServiceFactory(
     updateJobsSpaces,
     bulkCreateJobs,
     getAllJobObjectsForAllSpaces,
-    canCreateGlobalJobs,
+    canCreateGlobalMlSavedObjects,
     getTrainedModelObject,
     createTrainedModel,
     bulkCreateTrainedModel,

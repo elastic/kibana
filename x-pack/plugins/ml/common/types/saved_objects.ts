@@ -61,11 +61,11 @@ export interface SyncCheckResponse {
   result: boolean;
 }
 
-export interface DeleteJobCheckResponse {
-  [jobId: string]: DeleteJobPermission;
+export interface DeleteMLSpaceAwareItemCheckResponse {
+  [jobId: string]: DeleteMLSpaceAwareItemPermission;
 }
 
-export interface DeleteJobPermission {
+export interface DeleteMLSpaceAwareItemPermission {
   canDelete: boolean;
   canRemoveFromSpace: boolean;
 }

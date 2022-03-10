@@ -31,11 +31,14 @@ import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { ManagedJobsWarningCallout } from '../../jobs/jobs_list/components/confirm_modals/managed_jobs_warning_callout';
 
-const shouldUnTagJobLabel = i18n.translate('xpack.ml.deleteItemCheckModal.shouldUnTagLabel.job', {
-  defaultMessage: 'Remove job from current space',
-});
+const shouldUnTagJobLabel = i18n.translate(
+  'xpack.ml.deleteSpaceAwareItemCheckModal.shouldUnTagLabel.job',
+  {
+    defaultMessage: 'Remove job from current space',
+  }
+);
 const shouldUnTagModelLabel = i18n.translate(
-  'xpack.ml.deleteItemCheckModal.shouldUnTagLabel.model',
+  'xpack.ml.deleteSpaceAwareItemCheckModal.shouldUnTagLabel.model',
   {
     defaultMessage: 'Remove model from current space',
   }
@@ -82,25 +85,25 @@ function getModalContent(
     return {
       buttonText: (
         <FormattedMessage
-          id="xpack.ml.deleteItemCheckModal.buttonTextNoAction"
+          id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextNoAction"
           defaultMessage="Close"
         />
       ),
       modalText: (
         <EuiText>
           <FormattedMessage
-            id="xpack.ml.deleteItemCheckModal.modalTextNoAction"
+            id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextNoAction"
             defaultMessage="{ids} have different space permissions. "
             values={{ ids: ids.join(', ') }}
           />
           {jobType === 'trained-model' ? (
             <FormattedMessage
-              id="xpack.ml.deleteItemCheckModal.modalTextNoAction.model"
+              id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextNoAction.model"
               defaultMessage="When you delete multiple models, they must have the same permissions. Deselect the models and try deleting each model individually."
             />
           ) : (
             <FormattedMessage
-              id="xpack.ml.deleteItemCheckModal.modalTextNoAction.job"
+              id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextNoAction.job"
               defaultMessage="When you delete multiple jobs, they must have the same permissions. Deselect the jobs and try deleting each job individually."
             />
           )}
@@ -111,23 +114,26 @@ function getModalContent(
 
   const noActionContent: ModalContentReturnType = {
     buttonText: (
-      <FormattedMessage id="xpack.ml.deleteItemCheckModal.buttonTextClose" defaultMessage="Close" />
+      <FormattedMessage
+        id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextClose"
+        defaultMessage="Close"
+      />
     ),
     modalText: (
       <EuiText>
         <FormattedMessage
-          id="xpack.ml.deleteItemCheckModal.modalTextClose"
+          id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextClose"
           defaultMessage="{ids} cannot be deleted and cannot be removed from the current space. "
           values={{ ids: ids.join(', ') }}
         />
         {jobType === 'trained-model' ? (
           <FormattedMessage
-            id="xpack.ml.deleteItemCheckModal.modalTextClose.model"
+            id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextClose.model"
             defaultMessage="This model is assigned to the * space and you do not have access to all spaces."
           />
         ) : (
           <FormattedMessage
-            id="xpack.ml.deleteItemCheckModal.modalTextClose.job"
+            id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextClose.job"
             defaultMessage="This job is assigned to the * space and you do not have access to all spaces."
           />
         )}
@@ -140,13 +146,13 @@ function getModalContent(
       buttonText:
         jobType === 'trained-model' ? (
           <FormattedMessage
-            id="xpack.ml.deleteItemCheckModal.buttonTextCanDelete.model"
+            id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextCanDelete.model"
             defaultMessage="Continue to delete {length, plural, one {# model} other {# models}}"
             values={{ length: ids.length }}
           />
         ) : (
           <FormattedMessage
-            id="xpack.ml.deleteItemCheckModal.buttonTextCanDelete.job"
+            id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextCanDelete.job"
             defaultMessage="Continue to delete {length, plural, one {# job} other {# jobs}}"
             values={{ length: ids.length }}
           />
@@ -170,7 +176,7 @@ function getModalContent(
 
           <EuiText>
             <FormattedMessage
-              id="xpack.ml.deleteItemCheckModal.modalTextCanDelete"
+              id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextCanDelete"
               defaultMessage="{ids} can be deleted."
               values={{ ids: ids.join(', ') }}
             />
@@ -182,7 +188,7 @@ function getModalContent(
     return {
       buttonText: (
         <FormattedMessage
-          id="xpack.ml.deleteItemCheckModal.buttonTextCanUnTagConfirm"
+          id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextCanUnTagConfirm"
           defaultMessage="Remove from current space"
         />
       ),
@@ -202,7 +208,7 @@ function getModalContent(
 
           <EuiText>
             <FormattedMessage
-              id="xpack.ml.deleteItemCheckModal.modalTextCanUnTag"
+              id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextCanUnTag"
               defaultMessage="{ids} cannot be deleted but can be removed from the current space."
               values={{ ids: ids.join(', ') }}
             />
@@ -279,17 +285,20 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
     }
     Object.entries(resp).forEach(([id, { success, error }]) => {
       if (success === false) {
-        const title = i18n.translate('xpack.ml.deleteItemCheckModal.unTagErrorTitle', {
+        const title = i18n.translate('xpack.ml.deleteSpaceAwareItemCheckModal.unTagErrorTitle', {
           defaultMessage: 'Error updating {id}',
           values: { id },
         });
         displayErrorToast(error, title);
       } else {
         setHasUntagged(true);
-        const message = i18n.translate('xpack.ml.deleteItemCheckModal.unTagSuccessTitle', {
-          defaultMessage: 'Successfully updated {id}',
-          values: { id },
-        });
+        const message = i18n.translate(
+          'xpack.ml.deleteSpaceAwareItemCheckModal.unTagSuccessTitle',
+          {
+            defaultMessage: 'Successfully updated {id}',
+            values: { id },
+          }
+        );
         displaySuccessToast(message);
       }
     });
@@ -309,7 +318,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   };
 
   return (
-    <EuiModal onClose={onCloseCallback} data-test-subj="mlAnalyticsJobDeleteCheckOverlay">
+    <EuiModal onClose={onCloseCallback} data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlay">
       {isLoading === true && (
         <>
           <EuiModalBody>
@@ -326,7 +335,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
-                id="xpack.ml.deleteItemCheckModal.modalTitle"
+                id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTitle"
                 defaultMessage="Checking space permissions"
               />
             </EuiModalHeaderTitle>

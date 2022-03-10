@@ -16,7 +16,7 @@ import type {
 } from './service';
 import type {
   JobType,
-  DeleteJobCheckResponse,
+  DeleteMLSpaceAwareItemCheckResponse,
   TrainedModelType,
 } from '../../common/types/saved_objects';
 
@@ -278,14 +278,14 @@ export function checksFactory(
     ids: string[],
     spacesEnabled: boolean,
     resolveMlCapabilities: ResolveMlCapabilities
-  ) {
+  ): Promise<DeleteMLSpaceAwareItemCheckResponse> {
     if (
       jobType !== 'anomaly-detector' &&
       jobType !== 'data-frame-analytics' &&
       jobType !== 'trained-model'
     ) {
       throw Boom.badRequest(
-        'Job type must be "anomaly-detector", "data-frame-analytics" or "trained-model'
+        'Saved object type must be "anomaly-detector", "data-frame-analytics" or "trained-model'
       );
     }
 
@@ -299,26 +299,38 @@ export function checksFactory(
       (jobType === 'data-frame-analytics' && mlCapabilities.canDeleteDataFrameAnalytics === false)
     ) {
       // user does not have access to delete jobs.
-      return ids.reduce((results, jobId) => {
-        results[jobId] = {
+      return ids.reduce((results, id) => {
+        results[id] = {
           canDelete: false,
           canRemoveFromSpace: false,
         };
         return results;
-      }, {} as DeleteJobCheckResponse);
+      }, {} as DeleteMLSpaceAwareItemCheckResponse);
+    } else if (jobType === 'trained-model' && mlCapabilities.canDeleteTrainedModels === false) {
+      // user does not have access to delete trained models.
+      return ids.reduce((results, id) => {
+        results[id] = {
+          canDelete: false,
+          canRemoveFromSpace: false,
+        };
+        return results;
+      }, {} as DeleteMLSpaceAwareItemCheckResponse);
     }
 
     if (spacesEnabled === false) {
       // spaces are disabled, delete only no untagging
-      return ids.reduce((results, jobId) => {
-        results[jobId] = {
+      return ids.reduce((results, id) => {
+        results[id] = {
           canDelete: true,
           canRemoveFromSpace: false,
         };
         return results;
-      }, {} as DeleteJobCheckResponse);
+      }, {} as DeleteMLSpaceAwareItemCheckResponse);
     }
-    const canCreateGlobalJobs = await jobSavedObjectService.canCreateGlobalJobs(request);
+    const canCreateGlobalMlSavedObjects = await jobSavedObjectService.canCreateGlobalMlSavedObjects(
+      jobType,
+      request
+    );
 
     const savedObjects =
       jobType === 'trained-model'
@@ -345,10 +357,10 @@ export function checksFactory(
       }
 
       const { namespaces } = savedObject;
-      const isGlobalJob = namespaces.includes('*');
+      const isGlobalSavedObject = namespaces.includes('*');
 
       // job is in * space, user can see all spaces - delete and no option to untag
-      if (canCreateGlobalJobs && isGlobalJob) {
+      if (canCreateGlobalMlSavedObjects && isGlobalSavedObject) {
         results[id] = {
           canDelete: true,
           canRemoveFromSpace: false,
@@ -357,7 +369,7 @@ export function checksFactory(
       }
 
       // job is in * space, user cannot see all spaces - no untagging, no deleting
-      if (isGlobalJob) {
+      if (isGlobalSavedObject) {
         results[id] = {
           canDelete: false,
           canRemoveFromSpace: false,
@@ -384,7 +396,7 @@ export function checksFactory(
         canRemoveFromSpace,
       };
       return results;
-    }, {} as DeleteJobCheckResponse);
+    }, {} as DeleteMLSpaceAwareItemCheckResponse);
   }
 
   return { checkStatus, canDeleteMLSpaceAwareItems };
