@@ -112,6 +112,8 @@ describe('graph_visualization', () => {
     getAllIntersections: jest.fn(),
     removeEdgeFromSelection: jest.fn(),
     addEdgeToSelection: jest.fn(),
+    getEdgeSelection: jest.fn().mockImplementation(() => []),
+    clearEdgeSelection: jest.fn(),
   } as unknown as jest.Mocked<Workspace>;
 
   beforeEach(() => {
