@@ -53,7 +53,7 @@ export const StatusFilter: React.FunctionComponent<StatusFilterProps> = ({
             data-test-subj="ruleStatusFilterButton"
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.ruleStatusFilterLabel"
+              id="xpack.observability.rules.ruleStatusFilterLabel"
               defaultMessage="Status"
             />
           </EuiFilterButton>

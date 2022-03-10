@@ -99,7 +99,7 @@ export const DELETE_ACTION_TOOLTIP = i18n.translate(
 );
 
 export const DELETE_ACTION_ARIA_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteAriaLabel',
+  'xpack.observability.rules.rulesTable.columns.deleteAriaLabel',
   { defaultMessage: 'Delete' }
 );
 
