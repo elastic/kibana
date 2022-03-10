@@ -8,6 +8,7 @@
 import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { Query } from 'src/plugins/data/common';
+import memoizeOne from 'memoize-one';
 import type { VisualizeEditorLayersContext } from '../../../../../../src/plugins/visualizations/public';
 import type {
   DatasourceFixAction,
@@ -227,15 +228,12 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
+    const buildColumnFn = columnParams
+      ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
+      : operationDefinition.buildColumn({ ...baseOptions, layer });
 
     return updateDefaultLabels(
-      addOperationFn(
-        layer,
-        operationDefinition.buildColumn({ ...baseOptions, layer }),
-        columnId,
-        visualizationGroups,
-        targetGroup
-      ),
+      addOperationFn(layer, buildColumnFn, columnId, visualizationGroups, targetGroup),
       indexPattern
     );
   }
@@ -1411,6 +1409,35 @@ export function isReferenced(layer: IndexPatternLayer, columnId: string): boolea
     'references' in col ? col.references : []
   );
   return allReferences.includes(columnId);
+}
+
+const computeReferenceLookup = memoizeOne((layer: IndexPatternLayer): Record<string, string> => {
+  // speed up things for deep chains as in formula
+  const refLookup: Record<string, string> = {};
+  for (const [parentId, col] of Object.entries(layer.columns)) {
+    if ('references' in col) {
+      for (const colId of col.references) {
+        refLookup[colId] = parentId;
+      }
+    }
+  }
+  return refLookup;
+});
+
+/**
+ * Given a columnId, returns the visible root column id for it
+ * This is useful to map internal properties of referenced columns to the visible column
+ * @param layer
+ * @param columnId
+ * @returns id of the reference root
+ */
+export function getReferenceRoot(layer: IndexPatternLayer, columnId: string): string {
+  const refLookup = computeReferenceLookup(layer);
+  let currentId = columnId;
+  while (isReferenced(layer, currentId)) {
+    currentId = refLookup[currentId];
+  }
+  return currentId;
 }
 
 export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: string): string[] {
