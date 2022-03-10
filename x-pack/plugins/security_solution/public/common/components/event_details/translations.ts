@@ -22,10 +22,31 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.over
   defaultMessage: 'Overview',
 });
 
-export const HIGHLIGHTES_FIELDS = i18n.translate(
+export const HIGHLIGHTED_FIELDS = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.highlightedFields',
   {
     defaultMessage: 'Highlighted fields',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_FIELD = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.field',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_VALUE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.value',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_TOTAL_ALERTS = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.totalAlert',
+  {
+    defaultMessage: 'Similar count',
   }
 );
 

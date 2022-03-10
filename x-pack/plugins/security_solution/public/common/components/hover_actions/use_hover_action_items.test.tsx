@@ -22,6 +22,7 @@ describe('useHoverActionItems', () => {
     defaultFocusedButtonRef: null,
     field: 'kibana.alert.rule.name',
     handleHoverActionClicked: jest.fn(),
+    hideAddToTimeline: false,
     hideTopN: false,
     isCaseView: false,
     isObjectArray: false,
