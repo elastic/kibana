@@ -70,11 +70,10 @@ export class AddLayerPanel extends Component<Props, State> {
 
   _openWizard() {
     const selectedWizard = getWizardById(this.props.autoOpenLayerWizardId);
-
     if (selectedWizard) {
       this._onWizardSelect(selectedWizard);
-      this.props.clearAutoOpenLayerWizardId();
     }
+    this.props.clearAutoOpenLayerWizardId();
   }
 
   _previewLayers = (layerDescriptors: LayerDescriptor[]) => {

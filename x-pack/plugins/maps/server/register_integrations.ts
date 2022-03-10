@@ -41,11 +41,9 @@ export function registerIntegrations(
       defaultMessage: 'GeoJson',
     }),
     description: i18n.translate('xpack.maps.registerIntegrations.geojson.integrationDescription', {
-      defaultMessage: 'Upload GeoJson with Elastic Maps.',
+      defaultMessage: 'Upload GeoJson with Maps.',
     }),
-    uiInternalPath: core.http.basePath.prepend(
-      getFullPath(`?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`)
-    ),
+    uiInternalPath: `${getFullPath('')}#?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`,
     icons: [
       {
         type: 'eui',
@@ -64,12 +62,10 @@ export function registerIntegrations(
     description: i18n.translate(
       'xpack.maps.registerIntegrations.shapefile.integrationDescription',
       {
-        defaultMessage: 'Upload Shapefile with Elastic Maps.',
+        defaultMessage: 'Upload Shapefile with Maps.',
       }
     ),
-    uiInternalPath: core.http.basePath.prepend(
-      getFullPath(`?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`)
-    ),
+    uiInternalPath: `${getFullPath('')}#?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`,
     icons: [
       {
         type: 'eui',
