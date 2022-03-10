@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -263,12 +263,7 @@ export class Embeddable
     );
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
-    this.initializeSavedVis(initialInput)
-      .then(() => this.initializeOutput())
-      .then(() => {
-        this.isInitialized = true;
-        this.onContainerStateChanged(initialInput);
-      });
+    this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
     this.subscription = this.getUpdated$().subscribe(() =>
       this.onContainerStateChanged(this.input)
     );
@@ -435,6 +430,9 @@ export class Embeddable
     );
     this.expression = expression;
     this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
+
+    await this.initializeOutput();
+    this.isInitialized = true;
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
@@ -740,7 +738,7 @@ export class Embeddable
       this.deps.indexPatternService
     );
 
-    this.indexPatterns = indexPatterns;
+    this.indexPatterns = uniqBy(indexPatterns, 'id');
 
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
