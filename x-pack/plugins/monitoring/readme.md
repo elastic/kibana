@@ -9,6 +9,7 @@
 - [Architectural Overview](dev_docs/reference/architectural_overview.md)
 - [Terminology](dev_docs/reference/terminology.md)
 - [Data Collection modes](dev_docs/reference/data_collection_modes.md)
+- [Rules and Alerts](dev_docs/reference/rules_alerts.md)
 
 ## Tooling
 - [Debugging logging](dev_docs/how-to/debug_logging.md)
