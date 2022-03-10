@@ -891,6 +891,10 @@ describe('When using the ArtifactListPage component', () => {
           };
         });
 
+        act(() => {
+          userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
+        });
+
         clickSearchButton();
 
         await act(async () => {
@@ -900,6 +904,7 @@ describe('When using the ArtifactListPage component', () => {
         });
 
         await waitFor(() => {
+          // console.log(`\n\n${renderResult.getByTestId('testPage-list').outerHTML}\n\n\n`);
           expect(renderResult.getByTestId('testPage-list-noResults')).toBeTruthy();
         });
       });

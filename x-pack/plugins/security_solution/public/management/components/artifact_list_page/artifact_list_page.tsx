@@ -20,7 +20,7 @@ import { ArtifactEntryCard } from '../artifact_entry_card';
 import { ArtifactListPageLabels, artifactListPageLabels } from './translations';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
-import { SearchExceptions } from '../search_exceptions';
+import { SearchExceptions, SearchExceptionsProps } from '../search_exceptions';
 import {
   useArtifactCardPropsProvider,
   UseArtifactCardPropsProviderProps,
@@ -182,19 +182,25 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         [setUrlParams]
       );
 
-    const handleOnSearch = useCallback(
+    const handleOnSearch = useCallback<SearchExceptionsProps['onSearch']>(
       (filterValue: string, selectedPolicies: string, doHardRefresh) => {
+        const didFilterChange =
+          filterValue !== (filter ?? '') || selectedPolicies !== (includedPolicies ?? '');
+
         setUrlParams({
           // `undefined` will drop the param from the url
           filter: filterValue.trim() === '' ? undefined : filterValue,
           includedPolicies: selectedPolicies.trim() === '' ? undefined : selectedPolicies,
         });
 
-        if (doHardRefresh) {
+        // We don't want to trigger a refresh of the list twice because the URL above was already
+        // updated, so if the user explicitly clicked the `Refresh` button and nothing has changed
+        // in the filter, then trigger a refresh (since the url update did not actually trigger one)
+        if (doHardRefresh && !didFilterChange) {
           refetchListData();
         }
       },
-      [refetchListData, setUrlParams]
+      [filter, includedPolicies, refetchListData, setUrlParams]
     );
 
     const handleArtifactDeleteModalOnSuccess = useCallback(() => {

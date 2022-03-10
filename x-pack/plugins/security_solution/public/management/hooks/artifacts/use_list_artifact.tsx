@@ -48,12 +48,14 @@ export function useListArtifact(
 
   return useQuery<FoundExceptionListItemSchema, HttpFetchError>(
     [...customQueryIds, 'list', exceptionListApiClient, filterKuery, page, perPage],
-    () => {
-      return exceptionListApiClient.find({
+    async () => {
+      const result = await exceptionListApiClient.find({
         filter: filterKuery,
         perPage,
         page,
       });
+
+      return result;
     },
     {
       refetchIntervalInBackground: false,
