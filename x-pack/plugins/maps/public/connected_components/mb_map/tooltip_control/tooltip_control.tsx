@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   LngLat,
   Map as MbMap,
-  MapboxGeoJSONFeature,
+  GeoJSONFeature,
   MapMouseEvent,
   Point as MbPoint,
 } from '@kbn/mapbox-gl';
@@ -34,7 +34,7 @@ import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property
 
 function justifyAnchorLocation(
   mbLngLat: LngLat,
-  targetFeature: MapboxGeoJSONFeature
+  targetFeature: GeoJSONFeature
 ): [number, number] {
   let popupAnchorLocation: [number, number] = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
   if (targetFeature.geometry.type === 'Point') {
@@ -189,7 +189,7 @@ export class TooltipControl extends Component<Props, {}> {
   }
 
   _getTooltipFeatures(
-    mbFeatures: MapboxGeoJSONFeature[],
+    mbFeatures: GeoJSONFeature[],
     isLocked: boolean,
     tooltipId: string
   ): TooltipFeature[] {

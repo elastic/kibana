@@ -9,7 +9,7 @@
 import type {
   Map,
   LayerSpecification,
-  Style,
+  StyleSpecification,
   MapOptions,
   MapMouseEvent,
   MapSourceDataEvent,
@@ -19,6 +19,7 @@ import type {
   GeoJSONFeature,
   CustomLayerInterface,
 } from 'maplibre-gl';
+
 // @ts-expect-error
 import maplibreglDist from 'maplibre-gl/dist/maplibre-gl-csp';
 // @ts-expect-error
@@ -36,7 +37,7 @@ export { maplibregl };
 export type {
   Map,
   LayerSpecification,
-  Style,
+  StyleSpecification,
   MapOptions,
   MapMouseEvent,
   MapSourceDataEvent,
