@@ -6,6 +6,7 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { EuiTabProps } from '../../types';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { getDetailPanelProcess, getSelectedTabContent } from './helpers';
@@ -15,9 +16,11 @@ import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
 interface SessionViewDetailPanelDeps {
-  alerts: ProcessEvent[] | undefined;
   selectedProcess: Process;
+  alerts?: ProcessEvent[];
+  investigatedAlert?: ProcessEvent;
   onProcessSelected: (process: Process) => void;
+  onShowAlertDetails: (alertId: string) => void;
 }
 
 /**
@@ -26,46 +29,69 @@ interface SessionViewDetailPanelDeps {
 export const SessionViewDetailPanel = ({
   alerts,
   selectedProcess,
+  investigatedAlert,
   onProcessSelected,
+  onShowAlertDetails,
 }: SessionViewDetailPanelDeps) => {
   const [selectedTabId, setSelectedTabId] = useState('process');
   const processDetail = useMemo(() => getDetailPanelProcess(selectedProcess), [selectedProcess]);
 
   const getAlertCount = useCallback(() => {
     if (!alerts) {
-      return;
+      return 0;
     }
 
     return alerts.length >= ALERT_COUNT_THRESHOLD ? ALERT_COUNT_THRESHOLD + '+' : alerts.length;
   }, [alerts]);
 
-  const tabs: EuiTabProps[] = useMemo(
-    () => [
+  const tabs: EuiTabProps[] = useMemo(() => {
+    const hasAlerts = !!alerts?.length;
+
+    return [
       {
         id: 'process',
-        name: 'Process',
+        name: i18n.translate('xpack.sessionView.detailsPanel.process', {
+          defaultMessage: 'Process',
+        }),
         content: <DetailPanelProcessTab processDetail={processDetail} />,
       },
       {
         id: 'host',
-        name: 'Host',
+        name: i18n.translate('xpack.sessionView.detailsPanel.host', {
+          defaultMessage: 'Host',
+        }),
         content: <DetailPanelHostTab processHost={selectedProcess.events[0].host} />,
       },
       {
         id: 'alerts',
-        name: 'Alerts',
+        name: i18n.translate('xpack.sessionView.detailsPanel.alerts', {
+          defaultMessage: 'Alerts',
+        }),
         append: (
           <EuiNotificationBadge className="eui-alignCenter" size="m">
             {getAlertCount()}
           </EuiNotificationBadge>
         ),
-        content: alerts && (
-          <DetailPanelAlertTab alerts={alerts} onProcessSelected={onProcessSelected} />
+        disabled: !hasAlerts,
+        content: hasAlerts && (
+          <DetailPanelAlertTab
+            alerts={alerts}
+            onProcessSelected={onProcessSelected}
+            onShowAlertDetails={onShowAlertDetails}
+            investigatedAlert={investigatedAlert}
+          />
         ),
       },
-    ],
-    [alerts, getAlertCount, processDetail, selectedProcess.events, onProcessSelected]
-  );
+    ];
+  }, [
+    alerts,
+    getAlertCount,
+    processDetail,
+    selectedProcess.events,
+    onProcessSelected,
+    onShowAlertDetails,
+    investigatedAlert,
+  ]);
 
   const onSelectedTabChanged = useCallback((id: string) => {
     setSelectedTabId(id);

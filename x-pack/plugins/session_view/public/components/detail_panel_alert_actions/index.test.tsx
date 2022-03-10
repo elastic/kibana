@@ -6,56 +6,82 @@
  */
 
 import React from 'react';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { DetailPanelListItem } from './index';
+import { DetailPanelAlertActions } from './index';
+import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
+import userEvent from '@testing-library/user-event';
+import { ProcessImpl } from '../process_tree/hooks';
 
-const TEST_STRING = 'item title';
-const TEST_CHILD = <span>{TEST_STRING}</span>;
-const TEST_COPY_STRING = 'test copy button';
-const BUTTON_TEST_ID = 'sessionView:test-copy-button';
-const TEST_COPY = <button data-test-subj={BUTTON_TEST_ID}>{TEST_COPY_STRING}</button>;
-const LIST_ITEM_TEST_ID = 'sessionView:detail-panel-list-item';
-const WAIT_TIMEOUT = 500;
+export const BUTTON_TEST_ID = 'sessionView:detailPanelAlertActionsBtn';
+export const SHOW_DETAILS_TEST_ID = 'sessionView:detailPanelAlertActionShowDetails';
+export const JUMP_TO_PROCESS_TEST_ID = 'sessionView:detailPanelAlertActionJumpToProcess';
 
-describe('DetailPanelListItem component', () => {
+describe('DetailPanelAlertActions component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
+  let mockShowAlertDetails = jest.fn((uuid) => uuid);
+  let mockOnProcessSelected = jest.fn((process) => process);
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockShowAlertDetails = jest.fn((uuid) => uuid);
+    mockOnProcessSelected = jest.fn((process) => process);
   });
 
-  describe('When DetailPanelListItem is mounted', () => {
-    it('renders DetailPanelListItem correctly', async () => {
-      renderResult = mockedContext.render(<DetailPanelListItem>{TEST_CHILD}</DetailPanelListItem>);
+  describe('When DetailPanelAlertActions is mounted', () => {
+    it('renders a popover when button is clicked', async () => {
+      const mockEvent = mockAlerts[0];
 
-      expect(renderResult.queryByTestId(LIST_ITEM_TEST_ID)).toBeVisible();
-      expect(renderResult.queryByText(TEST_STRING)).toBeVisible();
-    });
-
-    it('renders copy element correctly', async () => {
       renderResult = mockedContext.render(
-        <DetailPanelListItem copy={TEST_COPY}>{TEST_CHILD}</DetailPanelListItem>
+        <DetailPanelAlertActions
+          event={mockEvent}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
       );
 
-      expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeNull();
-      fireEvent.mouseEnter(renderResult.getByTestId(LIST_ITEM_TEST_ID));
-      await waitFor(() => screen.queryByTestId(BUTTON_TEST_ID));
-      expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeVisible();
-
-      fireEvent.mouseLeave(renderResult.getByTestId(LIST_ITEM_TEST_ID));
-      expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeNull();
+      userEvent.click(renderResult.getByTestId(BUTTON_TEST_ID));
+      expect(renderResult.queryByTestId(SHOW_DETAILS_TEST_ID)).toBeTruthy();
+      expect(renderResult.queryByTestId(JUMP_TO_PROCESS_TEST_ID)).toBeTruthy();
+      expect(mockShowAlertDetails.mock.calls.length).toBe(0);
+      expect(mockOnProcessSelected.mock.calls.length).toBe(0);
     });
 
-    it('does not have mouse events when copy prop is not present', async () => {
-      renderResult = mockedContext.render(<DetailPanelListItem>{TEST_CHILD}</DetailPanelListItem>);
+    it('calls alert flyout callback when View details clicked', async () => {
+      const mockEvent = mockAlerts[0];
 
-      expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeNull();
-      fireEvent.mouseEnter(renderResult.getByTestId(LIST_ITEM_TEST_ID));
-      await waitFor(() => screen.queryByTestId(BUTTON_TEST_ID), { timeout: WAIT_TIMEOUT });
-      expect(renderResult.queryByTestId(BUTTON_TEST_ID)).toBeNull();
+      renderResult = mockedContext.render(
+        <DetailPanelAlertActions
+          event={mockEvent}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
+      );
+
+      userEvent.click(renderResult.getByTestId(BUTTON_TEST_ID));
+      userEvent.click(renderResult.getByTestId(SHOW_DETAILS_TEST_ID));
+      expect(mockShowAlertDetails.mock.calls.length).toBe(1);
+      expect(mockShowAlertDetails.mock.results[0].value).toBe(mockEvent.kibana?.alert.uuid);
+      expect(mockOnProcessSelected.mock.calls.length).toBe(0);
+    });
+
+    it('calls onProcessSelected when Jump to process clicked', async () => {
+      const mockEvent = mockAlerts[0];
+
+      renderResult = mockedContext.render(
+        <DetailPanelAlertActions
+          event={mockEvent}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
+      );
+
+      userEvent.click(renderResult.getByTestId(BUTTON_TEST_ID));
+      userEvent.click(renderResult.getByTestId(JUMP_TO_PROCESS_TEST_ID));
+      expect(mockOnProcessSelected.mock.calls.length).toBe(1);
+      expect(mockOnProcessSelected.mock.results[0].value).toBeInstanceOf(ProcessImpl);
+      expect(mockShowAlertDetails.mock.calls.length).toBe(0);
     });
   });
 });

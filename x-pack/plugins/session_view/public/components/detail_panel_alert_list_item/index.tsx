@@ -19,9 +19,15 @@ import {
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
+import {
+  ALERT_LIST_ITEM_TEST_ID,
+  ALERT_LIST_ITEM_TIMESTAMP,
+  ALERT_LIST_ITEM_ARGS,
+} from '../detail_panel_alert_tab/index.test';
 
 interface DetailPanelAlertsListItemDeps {
   event: ProcessEvent;
+  onShowAlertDetails: (alertId: string) => void;
   onProcessSelected: (process: Process) => void;
   isInvestigated?: boolean;
   minimal?: boolean;
@@ -33,6 +39,7 @@ interface DetailPanelAlertsListItemDeps {
 export const DetailPanelAlertListItem = ({
   event,
   onProcessSelected,
+  onShowAlertDetails,
   isInvestigated,
   minimal,
 }: DetailPanelAlertsListItemDeps) => {
@@ -49,7 +56,7 @@ export const DetailPanelAlertListItem = ({
   const forceState = !isInvestigated ? 'open' : undefined;
 
   return minimal ? (
-    <>
+    <div data-test-subj={ALERT_LIST_ITEM_TEST_ID}>
       <EuiSpacer size="xs" />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
@@ -62,6 +69,7 @@ export const DetailPanelAlertListItem = ({
             css={styles.minimalContextMenu}
             event={event}
             onProcessSelected={onProcessSelected}
+            onShowAlertDetails={onShowAlertDetails}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -75,10 +83,11 @@ export const DetailPanelAlertListItem = ({
         <EuiText size="xs">{args.join(' ')}</EuiText>
       </EuiPanel>
       <EuiHorizontalRule css={styles.minimalHR} margin="m" size="full" />
-    </>
+    </div>
   ) : (
     <EuiAccordion
       id={uuid}
+      data-test-subj={ALERT_LIST_ITEM_TEST_ID}
       arrowDisplay={isInvestigated ? 'right' : 'none'}
       buttonContent={
         <EuiText css={styles.alertTitle} size="s">
@@ -91,10 +100,16 @@ export const DetailPanelAlertListItem = ({
       initialIsOpen={true}
       forceState={forceState}
       css={styles.alertItem}
-      extraAction={<DetailPanelAlertActions event={event} onProcessSelected={onProcessSelected} />}
+      extraAction={
+        <DetailPanelAlertActions
+          event={event}
+          onProcessSelected={onProcessSelected}
+          onShowAlertDetails={onShowAlertDetails}
+        />
+      }
     >
       <EuiSpacer size="xs" />
-      <EuiText color="subdued" size="s">
+      <EuiText data-test-subj={ALERT_LIST_ITEM_TIMESTAMP} color="subdued" size="s">
         {timestamp}
       </EuiText>
       <EuiPanel
@@ -104,7 +119,9 @@ export const DetailPanelAlertListItem = ({
         hasShadow={false}
         borderRadius="m"
       >
-        <EuiText size="xs">{args.join(' ')}</EuiText>
+        <EuiText data-test-subj={ALERT_LIST_ITEM_ARGS} size="xs">
+          {args.join(' ')}
+        </EuiText>
       </EuiPanel>
       {isInvestigated && (
         <div css={styles.investigatedLabel}>

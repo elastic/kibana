@@ -41,6 +41,10 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     setSelectedProcess(process);
   }, []);
 
+  const onShowAlertDetails = useCallback((alertId: string) => {
+    // TODO: hook into callback for alert flyout.
+  }, []);
+
   const toggleDetailPanel = () => {
     setIsDetailOpen(!isDetailOpen);
   };
@@ -191,8 +195,10 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                 >
                   <SessionViewDetailPanel
                     alerts={alerts}
+                    investigatedAlert={jumpToEvent}
                     selectedProcess={selectedProcess}
                     onProcessSelected={onProcessSelected}
+                    onShowAlertDetails={onShowAlertDetails}
                   />
                 </EuiResizablePanel>
               </>

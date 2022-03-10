@@ -6,83 +6,228 @@
  */
 
 import React from 'react';
+
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessEventHost } from '../../../common/types/process_tree';
-import { DetailPanelHostTab } from './index';
+import { DetailPanelAlertTab } from './index';
+import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
+import { fireEvent } from '@testing-library/dom';
 
-const TEST_ARCHITECTURE = 'x86_64';
-const TEST_HOSTNAME = 'host-james-fleet-714-2';
-const TEST_ID = '48c1b3f1ac5da4e0057fc9f60f4d1d5d';
-const TEST_IP = '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809';
-const TEST_MAC = '42:01:0a:84:00:32';
-const TEST_NAME = 'name-james-fleet-714-2';
-const TEST_OS_FAMILY = 'family-centos';
-const TEST_OS_FULL = 'full-CentOS 7.9.2009';
-const TEST_OS_KERNEL = '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 UTC 2021';
-const TEST_OS_NAME = 'os-Linux';
-const TEST_OS_PLATFORM = 'platform-centos';
-const TEST_OS_VERSION = 'version-7.9.2009';
+export const ALERT_LIST_ITEM_TEST_ID = 'sessionView:detailPanelAlertListItem';
+export const ALERT_GROUP_ITEM_TEST_ID = 'sessionView:detailPanelAlertGroupItem';
+export const INVESTIGATED_ALERT_TEST_ID = 'sessionView:detailPanelInvestigatedAlert';
+export const VIEW_MODE_TOGGLE = 'sessionView:detailPanelAlertsViewMode';
+export const ALERT_LIST_ITEM_TIMESTAMP = 'sessionView:detailPanelAlertListItemTimestamp';
+export const ALERT_LIST_ITEM_ARGS = 'sessionView:detailPanelAlertListItemArgs';
+export const ALERT_GROUP_ITEM_COUNT = 'sessionView:detailPanelAlertGroupCount';
+export const ALERT_GROUP_ITEM_TITLE = 'sessionView:detailPanelAlertGroupTitle';
 
-const TEST_HOST: ProcessEventHost = {
-  architecture: TEST_ARCHITECTURE,
-  hostname: TEST_HOSTNAME,
-  id: TEST_ID,
-  ip: TEST_IP,
-  mac: TEST_MAC,
-  name: TEST_NAME,
-  os: {
-    family: TEST_OS_FAMILY,
-    full: TEST_OS_FULL,
-    kernel: TEST_OS_KERNEL,
-    name: TEST_OS_NAME,
-    platform: TEST_OS_PLATFORM,
-    version: TEST_OS_VERSION,
-  },
-};
+const ACCORDION_BUTTON_CLASS = '.euiAccordion__button';
+const VIEW_MODE_GROUP = 'groupView';
+const ARIA_EXPANDED_ATTR = 'aria-expanded';
 
-describe('DetailPanelHostTab component', () => {
+describe('DetailPanelAlertTab component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
+  let mockOnProcessSelected = jest.fn((process) => process);
+  let mockShowAlertDetails = jest.fn((alertId) => alertId);
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockOnProcessSelected = jest.fn((process) => process);
+    mockShowAlertDetails = jest.fn((alertId) => alertId);
   });
 
-  describe('When DetailPanelHostTab is mounted', () => {
-    it('renders DetailPanelHostTab correctly', async () => {
-      renderResult = mockedContext.render(<DetailPanelHostTab processHost={TEST_HOST} />);
+  describe('When DetailPanelAlertTab is mounted', () => {
+    it('renders a list of alerts for the session (defaulting to list view mode)', async () => {
+      renderResult = mockedContext.render(
+        <DetailPanelAlertTab
+          alerts={mockAlerts}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
+      );
 
-      expect(renderResult.queryByText('architecture')).toBeVisible();
-      expect(renderResult.queryByText('hostname')).toBeVisible();
-      expect(renderResult.queryByText('id')).toBeVisible();
-      expect(renderResult.queryByText('ip')).toBeVisible();
-      expect(renderResult.queryByText('mac')).toBeVisible();
-      expect(renderResult.queryByText('name')).toBeVisible();
-      expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
-      expect(renderResult.queryByText(TEST_HOSTNAME)).toBeVisible();
-      expect(renderResult.queryByText(TEST_ID)).toBeVisible();
-      expect(renderResult.queryByText(TEST_IP)).toBeVisible();
-      expect(renderResult.queryByText(TEST_MAC)).toBeVisible();
-      expect(renderResult.queryByText(TEST_NAME)).toBeVisible();
+      expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_TEST_ID).length).toBe(mockAlerts.length);
+      expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_TEST_ID)).toBeFalsy();
+      expect(renderResult.queryByTestId(INVESTIGATED_ALERT_TEST_ID)).toBeFalsy();
+      expect(
+        renderResult
+          .queryByTestId(VIEW_MODE_TOGGLE)
+          ?.querySelector('.euiButtonGroupButton-isSelected')?.textContent
+      ).toBe('List view');
+    });
 
-      // expand host os accordion
-      renderResult
-        .queryByTestId('sessionView:detail-panel-accordion')
-        ?.querySelector('button')
-        ?.click();
-      expect(renderResult.queryByText('os.family')).toBeVisible();
-      expect(renderResult.queryByText('os.full')).toBeVisible();
-      expect(renderResult.queryByText('os.kernel')).toBeVisible();
-      expect(renderResult.queryByText('os.name')).toBeVisible();
-      expect(renderResult.queryByText('os.platform')).toBeVisible();
-      expect(renderResult.queryByText('os.version')).toBeVisible();
-      expect(renderResult.queryByText(TEST_OS_FAMILY)).toBeVisible();
-      expect(renderResult.queryByText(TEST_OS_FULL)).toBeVisible();
-      expect(renderResult.queryByText(TEST_OS_KERNEL)).toBeVisible();
-      expect(renderResult.queryByText(TEST_OS_NAME)).toBeVisible();
-      expect(renderResult.queryByText(TEST_OS_PLATFORM)).toBeVisible();
-      expect(renderResult.queryByText(TEST_OS_VERSION)).toBeVisible();
+    it('renders a list of alerts grouped by rule when group-view clicked', async () => {
+      renderResult = mockedContext.render(
+        <DetailPanelAlertTab
+          alerts={mockAlerts}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
+      );
+
+      fireEvent.click(renderResult.getByTestId(VIEW_MODE_GROUP));
+
+      expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_TEST_ID).length).toBe(mockAlerts.length);
+      expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_TEST_ID)).toBeTruthy();
+      expect(renderResult.queryByTestId(INVESTIGATED_ALERT_TEST_ID)).toBeFalsy();
+      expect(
+        renderResult
+          .queryByTestId(VIEW_MODE_TOGGLE)
+          ?.querySelector('.euiButtonGroupButton-isSelected')?.textContent
+      ).toBe('Group view');
+    });
+
+    it('renders a sticky investigated alert (outside of main list) if one is set', async () => {
+      renderResult = mockedContext.render(
+        <DetailPanelAlertTab
+          alerts={mockAlerts}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+          investigatedAlert={mockAlerts[0]}
+        />
+      );
+
+      expect(renderResult.queryByTestId(INVESTIGATED_ALERT_TEST_ID)).toBeTruthy();
+
+      fireEvent.click(renderResult.getByTestId(VIEW_MODE_GROUP));
+
+      expect(renderResult.queryByTestId(INVESTIGATED_ALERT_TEST_ID)).toBeTruthy();
+    });
+
+    it('investigated alert should be collapsible', async () => {
+      renderResult = mockedContext.render(
+        <DetailPanelAlertTab
+          alerts={mockAlerts}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+          investigatedAlert={mockAlerts[0]}
+        />
+      );
+
+      expect(
+        renderResult
+          .queryByTestId(INVESTIGATED_ALERT_TEST_ID)
+          ?.querySelector(ACCORDION_BUTTON_CLASS)
+          ?.attributes.getNamedItem(ARIA_EXPANDED_ATTR)?.value
+      ).toBe('true');
+
+      const expandButton = renderResult
+        .queryByTestId(INVESTIGATED_ALERT_TEST_ID)
+        ?.querySelector(ACCORDION_BUTTON_CLASS);
+
+      if (expandButton) {
+        fireEvent.click(expandButton);
+      }
+
+      expect(
+        renderResult
+          .queryByTestId(INVESTIGATED_ALERT_TEST_ID)
+          ?.querySelector(ACCORDION_BUTTON_CLASS)
+          ?.attributes.getNamedItem(ARIA_EXPANDED_ATTR)?.value
+      ).toBe('false');
+    });
+
+    it('non investigated alert should NOT be collapsible', async () => {
+      renderResult = mockedContext.render(
+        <DetailPanelAlertTab
+          alerts={mockAlerts}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
+      );
+
+      expect(
+        renderResult
+          .queryAllByTestId(ALERT_LIST_ITEM_TEST_ID)[0]
+          ?.querySelector(ACCORDION_BUTTON_CLASS)
+          ?.attributes.getNamedItem(ARIA_EXPANDED_ATTR)?.value
+      ).toBe('true');
+
+      const expandButton = renderResult
+        .queryAllByTestId(ALERT_LIST_ITEM_TEST_ID)[0]
+        ?.querySelector(ACCORDION_BUTTON_CLASS);
+
+      if (expandButton) {
+        fireEvent.click(expandButton);
+      }
+
+      expect(
+        renderResult
+          .queryAllByTestId(ALERT_LIST_ITEM_TEST_ID)[0]
+          ?.querySelector(ACCORDION_BUTTON_CLASS)
+          ?.attributes.getNamedItem(ARIA_EXPANDED_ATTR)?.value
+      ).toBe('true');
+    });
+
+    it('grouped alerts should be expandable/collapsible (default to collapsed)', async () => {
+      renderResult = mockedContext.render(
+        <DetailPanelAlertTab
+          alerts={mockAlerts}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
+      );
+
+      fireEvent.click(renderResult.getByTestId(VIEW_MODE_GROUP));
+
+      expect(
+        renderResult
+          .queryAllByTestId(ALERT_GROUP_ITEM_TEST_ID)[0]
+          ?.querySelector(ACCORDION_BUTTON_CLASS)
+          ?.attributes.getNamedItem(ARIA_EXPANDED_ATTR)?.value
+      ).toBe('false');
+
+      const expandButton = renderResult
+        .queryAllByTestId(ALERT_GROUP_ITEM_TEST_ID)[0]
+        ?.querySelector(ACCORDION_BUTTON_CLASS);
+
+      if (expandButton) {
+        fireEvent.click(expandButton);
+      }
+
+      expect(
+        renderResult
+          .queryAllByTestId(ALERT_GROUP_ITEM_TEST_ID)[0]
+          ?.querySelector(ACCORDION_BUTTON_CLASS)
+          ?.attributes.getNamedItem(ARIA_EXPANDED_ATTR)?.value
+      ).toBe('true');
+    });
+
+    it('each alert list item should show a timestamp and process arguments', async () => {
+      renderResult = mockedContext.render(
+        <DetailPanelAlertTab
+          alerts={mockAlerts}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
+      );
+
+      expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_TIMESTAMP)[0]).toHaveTextContent(
+        mockAlerts[0]['@timestamp']
+      );
+
+      expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_ARGS)[0]).toHaveTextContent(
+        mockAlerts[0].process.args.join(' ')
+      );
+    });
+
+    it('each alert group should show a rule title and alert count', async () => {
+      renderResult = mockedContext.render(
+        <DetailPanelAlertTab
+          alerts={mockAlerts}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
+      );
+
+      fireEvent.click(renderResult.getByTestId(VIEW_MODE_GROUP));
+
+      expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_COUNT)).toHaveTextContent('2');
+      expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_TITLE)).toHaveTextContent(
+        mockAlerts[0].kibana?.alert.rule.name || ''
+      );
     });
   });
 });

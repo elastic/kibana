@@ -12,10 +12,12 @@ import { ProcessEvent, Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
 import { DetailPanelAlertGroupItem } from '../detail_panel_alert_group_item';
+import { INVESTIGATED_ALERT_TEST_ID, VIEW_MODE_TOGGLE } from './index.test';
 
 interface DetailPanelAlertTabDeps {
   alerts: ProcessEvent[];
   onProcessSelected: (process: Process) => void;
+  onShowAlertDetails: (alertId: string) => void;
   investigatedAlert?: ProcessEvent;
 }
 
@@ -32,6 +34,7 @@ export type AlertsGroup = {
 export const DetailPanelAlertTab = ({
   alerts,
   onProcessSelected,
+  onShowAlertDetails,
   investigatedAlert,
 }: DetailPanelAlertTabDeps) => {
   const styles = useStyles();
@@ -63,12 +66,10 @@ export const DetailPanelAlertTab = ({
     return groupBy(filteredAlerts, (event) => event.kibana?.alert.rule.uuid);
   }, [filteredAlerts]);
 
-  // TODO: testing
-  investigatedAlert = alerts[0];
-
   return (
     <div css={styles.container}>
       <EuiButtonGroup
+        data-test-subj={VIEW_MODE_TOGGLE}
         css={styles.viewMode}
         legend="wut"
         options={viewModes}
@@ -78,10 +79,11 @@ export const DetailPanelAlertTab = ({
         isFullWidth
       />
       {investigatedAlert && (
-        <div css={styles.stickyItem}>
+        <div css={styles.stickyItem} data-test-subj={INVESTIGATED_ALERT_TEST_ID}>
           <DetailPanelAlertListItem
             event={investigatedAlert}
             onProcessSelected={onProcessSelected}
+            onShowAlertDetails={onShowAlertDetails}
             isInvestigated={true}
           />
           <EuiHorizontalRule margin="m" size="full" />
@@ -97,6 +99,7 @@ export const DetailPanelAlertTab = ({
                 key={key}
                 event={event}
                 onProcessSelected={onProcessSelected}
+                onShowAlertDetails={onShowAlertDetails}
               />
             );
           })
@@ -108,6 +111,7 @@ export const DetailPanelAlertTab = ({
                 key={alertsByRule[0].kibana?.alert.rule.uuid}
                 alerts={alertsByRule}
                 onProcessSelected={onProcessSelected}
+                onShowAlertDetails={onShowAlertDetails}
               />
             );
           })}

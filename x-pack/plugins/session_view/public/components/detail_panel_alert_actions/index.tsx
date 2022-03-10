@@ -9,9 +9,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiContextMenuPanel, EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { ProcessImpl } from '../process_tree/hooks';
+import { BUTTON_TEST_ID, SHOW_DETAILS_TEST_ID, JUMP_TO_PROCESS_TEST_ID } from './index.test';
 
 interface DetailPanelAlertActionsDeps {
   event: ProcessEvent;
+  onShowAlertDetails: (alertId: string) => void;
   onProcessSelected: (process: Process) => void;
 }
 
@@ -20,6 +22,7 @@ interface DetailPanelAlertActionsDeps {
  */
 export const DetailPanelAlertActions = ({
   event,
+  onShowAlertDetails,
   onProcessSelected,
 }: DetailPanelAlertActionsDeps) => {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -41,9 +44,11 @@ export const DetailPanelAlertActions = ({
   };
 
   const onShowDetails = useCallback(() => {
-    // TODO: call into alert flyout
-    setPopover(false);
-  }, []);
+    if (event.kibana) {
+      onShowAlertDetails(event.kibana.alert.uuid);
+      setPopover(false);
+    }
+  }, [event, onShowAlertDetails]);
 
   if (!event.kibana) {
     return null;
@@ -52,13 +57,17 @@ export const DetailPanelAlertActions = ({
   const { uuid } = event.kibana.alert;
 
   const menuItems = [
-    <EuiContextMenuItem key="details" onClick={onShowDetails}>
+    <EuiContextMenuItem key="details" data-test-subj={SHOW_DETAILS_TEST_ID} onClick={onShowDetails}>
       <FormattedMessage
         id="xpack.sessionView.detailPanelAlertListItem.showDetailsAction"
         defaultMessage="View alert details"
       />
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key="jumpTo" onClick={onJumpToAlert}>
+    <EuiContextMenuItem
+      key="jumpTo"
+      data-test-subj={JUMP_TO_PROCESS_TEST_ID}
+      onClick={onJumpToAlert}
+    >
       <FormattedMessage
         id="xpack.sessionView.detailPanelAlertListItem.jumpToAlert"
         defaultMessage="Jump to alerted process"
@@ -75,6 +84,7 @@ export const DetailPanelAlertActions = ({
           size="s"
           iconType="boxesHorizontal"
           aria-label="More"
+          data-test-subj={BUTTON_TEST_ID}
           onClick={onToggleMenu}
         />
       }

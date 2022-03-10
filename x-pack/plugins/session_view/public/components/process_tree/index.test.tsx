@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mockData } from '../../../common/mocks/constants/session_view_process.mock';
+import { mockData, mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessImpl } from './hooks';
 import { ProcessTree } from './index';
@@ -26,6 +26,7 @@ describe('ProcessTree component', () => {
         <ProcessTree
           sessionEntityId="3d0192c6-7c54-5ee6-a110-3539a7cf42bc"
           data={mockData}
+          alerts={mockAlerts}
           isFetching={false}
           fetchNextPage={() => true}
           hasNextPage={false}
@@ -45,6 +46,7 @@ describe('ProcessTree component', () => {
         <ProcessTree
           sessionEntityId="3d0192c6-7c54-5ee6-a110-3539a7cf42bc"
           data={mockData}
+          alerts={mockAlerts}
           isFetching={false}
           fetchNextPage={() => true}
           hasNextPage={false}
@@ -71,6 +73,7 @@ describe('ProcessTree component', () => {
         <ProcessTree
           sessionEntityId="3d0192c6-7c54-5ee6-a110-3539a7cf42bc"
           data={mockData}
+          alerts={mockAlerts}
           isFetching={false}
           fetchNextPage={() => true}
           hasNextPage={false}

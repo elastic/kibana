@@ -35,7 +35,7 @@ describe('alerts_route.ts', () => {
 
       const body = await doSearch(client, 'asdf');
 
-      expect(body.alerts.length).toBe(0);
+      expect(body.events.length).toBe(0);
     });
 
     it('returns results for a particular session entity_id', async () => {
@@ -43,7 +43,7 @@ describe('alerts_route.ts', () => {
 
       const body = await doSearch(client, 'mockId');
 
-      expect(body.alerts.length).toBe(mockEvents.length);
+      expect(body.events.length).toBe(mockEvents.length);
     });
   });
 });
