@@ -17,10 +17,10 @@ import { calcualteFromBasedOnMetric } from './lib/calculate_from_based_on_metric
 import { getData } from './lib/get_data';
 
 type ConditionResult = InventoryMetricConditions & {
-  shouldFire: boolean[];
-  shouldWarn: boolean[];
+  shouldFire: boolean;
+  shouldWarn: boolean;
   currentValue: number;
-  isNoData: boolean[];
+  isNoData: boolean;
   isError: boolean;
 };
 
@@ -76,9 +76,9 @@ export const evaluateCondition = async ({
   const result = mapValues(currentValues, (value) => {
     return {
       ...condition,
-      shouldFire: [value.trigger],
-      shouldWarn: [value.warn],
-      isNoData: [value === null],
+      shouldFire: value.trigger,
+      shouldWarn: value.warn,
+      isNoData: value === null,
       isError: value === undefined,
       currentValue: value.value,
     };
