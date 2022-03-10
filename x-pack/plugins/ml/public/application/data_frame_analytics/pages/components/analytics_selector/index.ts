@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { AnalyticsIdSelector, AnalyticsSelectorIds } from './analytics_id_selector';
+export { AnalyticsIdSelector } from './analytics_id_selector';
+export type { AnalyticsSelectorIds } from './analytics_id_selector';
