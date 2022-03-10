@@ -25,11 +25,7 @@ export const createGridCell = (
 ) => {
   // Changing theme requires a full reload of the page, so we can cache here
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
-  return ({
-    rowIndex,
-    columnId,
-    setCellProps,
-  }: Omit<EuiDataGridCellValueElementProps, 'schema'>) => {
+  return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, minMaxByColumnId, getColorForValue } = useContext(DataContext);
     const rowValue = table?.rows[rowIndex]?.[columnId];
     const content = formatters[columnId]?.convert(rowValue, 'html');

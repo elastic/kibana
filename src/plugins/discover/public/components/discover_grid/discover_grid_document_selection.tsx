@@ -29,10 +29,7 @@ export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
   const routing = doc._routing ? doc._routing : '';
   return [doc._index, doc._id, routing].join('::');
 };
-export const SelectButton = ({
-  rowIndex,
-  setCellProps,
-}: Omit<EuiDataGridCellValueElementProps, 'schema'>) => {
+export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
   const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =
     useContext(DiscoverGridContext);
   const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);

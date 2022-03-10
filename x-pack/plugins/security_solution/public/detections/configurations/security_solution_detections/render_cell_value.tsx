@@ -17,7 +17,7 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
  * from the TGrid
  */
 export const RenderCellValue: React.FC<
-  Omit<EuiDataGridCellValueElementProps, 'schema'> & CellValueElementProps
+  EuiDataGridCellValueElementProps & CellValueElementProps
 > = ({
   browserFields,
   columnId,

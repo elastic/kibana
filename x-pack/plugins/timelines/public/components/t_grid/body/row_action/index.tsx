@@ -22,7 +22,7 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { getMappedNonEcsValue } from '../data_driven_columns';
 import { tGridActions } from '../../../../store/t_grid';
 
-type Props = Omit<EuiDataGridCellValueElementProps, 'schema'> & {
+type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
   data: TimelineItem[];
