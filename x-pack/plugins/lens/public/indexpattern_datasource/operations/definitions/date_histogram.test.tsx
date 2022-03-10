@@ -382,7 +382,7 @@ describe('date_histogram', () => {
       );
       expect(instance.find('[data-test-subj="lensDateHistogramValue"]').exists()).toBeFalsy();
       expect(instance.find('[data-test-subj="lensDateHistogramUnit"]').exists()).toBeFalsy();
-      expect(instance.find(EuiSwitch).prop('checked')).toBe(false);
+      expect(instance.find(EuiSwitch).at(0).prop('checked')).toBe(false);
     });
 
     it('should allow switching to manual interval', () => {
@@ -415,9 +415,12 @@ describe('date_histogram', () => {
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find(EuiSwitch).simulate('change', {
-        target: { checked: true },
-      });
+      instance
+        .find(EuiSwitch)
+        .at(0)
+        .simulate('change', {
+          target: { checked: true },
+        });
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0];
       expect(newLayer).toHaveProperty('columns.col1.params.interval', '30d');

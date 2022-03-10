@@ -111,7 +111,8 @@
                   "label": "@timestamp",
                   "operationType": "date_histogram",
                   "params": {
-                    "interval": "auto"
+                    "interval": "auto",
+                    "includeEmptyRows": false
                   },
                   "scale": "interval",
                   "sourceField": "@timestamp"
