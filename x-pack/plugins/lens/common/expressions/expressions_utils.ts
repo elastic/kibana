@@ -8,6 +8,9 @@
 import type { TablesAdapter } from '../../../../../src/plugins/expressions';
 import type { Datatable } from '../../../../../src/plugins/expressions';
 
-export const logDataTable = (tableAdapter: TablesAdapter, datatables: Datatable[]) => {
-  datatables.forEach((table, index) => tableAdapter.logDatatable(index.toString(), table));
+export const logDataTable = (
+  tableAdapter: TablesAdapter,
+  datatables: Record<string, Datatable> = {}
+) => {
+  Object.entries(datatables).forEach(([key, table]) => tableAdapter.logDatatable(key, table));
 };

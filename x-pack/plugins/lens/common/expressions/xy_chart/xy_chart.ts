@@ -159,7 +159,7 @@ export const xyChart: ExpressionFunctionDefinition<
   },
   fn(data: LensMultiTable, args: XYArgs, handlers) {
     if (handlers?.inspectorAdapters?.tables) {
-      logDataTable(handlers?.inspectorAdapters?.tables, Object.values(data.tables));
+      logDataTable(handlers.inspectorAdapters.tables, data.tables);
     }
     return {
       type: 'render',

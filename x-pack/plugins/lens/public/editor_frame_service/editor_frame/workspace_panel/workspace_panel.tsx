@@ -52,7 +52,6 @@ import {
   getUnknownVisualizationTypeError,
 } from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
-import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 import {
   onActiveDataChange,
   useLensDispatch,
@@ -68,10 +67,12 @@ import {
   selectSearchSessionId,
   selectAutoApplyEnabled,
   selectTriggerApplyChanges,
+  selectDatasourceLayers,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
+import type { Datatable } from '../../../../../../../src/plugins/expressions/public';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -381,6 +382,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (localState.expressionToRender === null) {
       return renderEmptyWorkspace();
     }
+
     return (
       <VisualizationWrapper
         expression={localState.expressionToRender}
@@ -391,6 +393,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
         application={core.application}
+        datasourceMap={datasourceMap}
         activeDatasourceId={activeDatasourceId}
       />
     );
@@ -455,6 +458,7 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent,
   application,
   activeDatasourceId,
+  datasourceMap,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -473,6 +477,7 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent: ReactExpressionRendererType;
   application: ApplicationStart;
   activeDatasourceId: string | null;
+  datasourceMap: DatasourceMap;
 }) => {
   const context = useLensSelector(selectExecutionContext);
   const searchContext: ExecutionContextSearch = useMemo(
@@ -487,16 +492,27 @@ export const VisualizationWrapper = ({
     [context]
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
-
+  const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
   const dispatchLens = useLensDispatch();
 
   const onData$ = useCallback(
-    (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
-      if (adapters && adapters.tables) {
-        dispatchLens(onActiveDataChange({ ...adapters.tables.tables }));
+    (data) => {
+      let tables: Record<string, Datatable> = {};
+      if (data?.value?.data) {
+        switch (data.value.data.type) {
+          case 'datatable':
+            const [layerId] = Object.keys(datasourceLayers);
+            tables[layerId] = { ...data.value.data };
+            break;
+          case 'lens_multitable':
+            tables = { ...data.value.data.tables };
+            break;
+        }
       }
+
+      dispatchLens(onActiveDataChange(tables));
     },
-    [dispatchLens]
+    [datasourceLayers, dispatchLens]
   );
 
   function renderFixAction(

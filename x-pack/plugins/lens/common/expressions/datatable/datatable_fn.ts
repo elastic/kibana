@@ -27,7 +27,7 @@ export const datatableFn =
   ): DatatableExpressionFunction['fn'] =>
   async (data, args, context) => {
     if (context?.inspectorAdapters?.tables) {
-      logDataTable(context?.inspectorAdapters?.tables, Object.values(data.tables));
+      logDataTable(context.inspectorAdapters.tables, data.tables);
     }
 
     let untransposedData: LensMultiTable | undefined;
