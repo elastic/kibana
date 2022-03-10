@@ -49,7 +49,7 @@ export const SessionViewDisplayOptions = ({
         checked: optionsStates?.verboseMode ? 'on' : undefined,
       },
     ],
-    [optionsStates, optionsStates.timestamp, optionsStates.verboseMode]
+    [optionsStates]
   );
 
   const toggleOptionButton = () => {

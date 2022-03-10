@@ -215,7 +215,7 @@ describe('ProcessTreeNode component', () => {
         );
 
         expect(renderResult.getByTestId('sessionView:processTreeNode').textContent).toContain(
-          'Nov 23, 2021 @ 07:25:04.210'
+          ']Nov 23, 2021 @ 07:25:04.210'
         );
       });
     });

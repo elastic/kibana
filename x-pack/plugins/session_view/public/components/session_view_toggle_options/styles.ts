@@ -20,7 +20,7 @@ export const useStyles = () => {
     return {
       selectable,
     };
-  }, [euiTheme]);
+  }, []);
 
   return cached;
 };
