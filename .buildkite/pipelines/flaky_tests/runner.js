@@ -188,12 +188,15 @@ for (const testSuite of testSuites) {
       });
     case 'cypress':
       const CYPRESS_SUITE = CI_GROUP;
-      const label =
-        groups.find((group) => group.key.includes(CYPRESS_SUITE))?.name || 'Unknown Cypress Suite';
-
+      const group = groups.find((group) => group.key.includes(CYPRESS_SUITE));
+      if (!group) {
+        throw new Error(
+          `Group configuration was not found in groups.json for the following cypress suite: {${CYPRESS_SUITE}}.`
+        );
+      }
       steps.push({
-        command: `.buildkite/scripts/steps/functional/${[CYPRESS_SUITE]}.sh`,
-        label,
+        command: `.buildkite/scripts/steps/functional/${CYPRESS_SUITE}.sh`,
+        label: group.name,
         agents: { queue: 'ci-group-6' },
         depends_on: 'build',
         parallelism: RUN_COUNT,
