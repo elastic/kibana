@@ -135,11 +135,6 @@ function DevToolsWrapper({
 
             const params = {
               element,
-              appBasePath: '',
-              onAppLeave: () => undefined,
-              setHeaderActionMenu: () => undefined,
-              // TODO: adapt to use Core's ScopedHistory
-              history: {} as any,
               location,
               theme$,
             };
