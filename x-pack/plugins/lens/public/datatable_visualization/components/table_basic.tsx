@@ -334,9 +334,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         columnConfig,
         DataContext,
         props.uiSettings,
-        props.args.fitRowToContent
+        props.args.fitRowToContent,
+        props.args.rowHeightLines
       ),
-    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
+    [
+      formatters,
+      columnConfig,
+      props.uiSettings,
+      props.args.fitRowToContent,
+      props.args.rowHeightLines,
+    ]
   );
 
   const columnVisibility = useMemo(
@@ -414,13 +421,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         <EuiDataGrid
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
-          rowHeightsOptions={
-            props.args.fitRowToContent
+          rowHeightsOptions={{
+            defaultHeight: props.args.fitRowToContent
+              ? 'auto'
+              : props.args.rowHeightLines
               ? {
-                  defaultHeight: 'auto',
+                  lineCount: props.args.rowHeightLines,
                 }
-              : undefined
-          }
+              : undefined,
+          }}
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}

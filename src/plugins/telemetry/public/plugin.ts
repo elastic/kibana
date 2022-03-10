@@ -31,6 +31,8 @@ import {
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
 import { PRIVACY_STATEMENT_URL } from '../common/constants';
+import { HomePublicPluginSetup } from '../../home/public';
+import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
 /**
  * Publicly exposed APIs from the Telemetry Service
@@ -82,6 +84,7 @@ export interface TelemetryPluginStart {
 
 interface TelemetryPluginSetupDependencies {
   screenshotMode: ScreenshotModePluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 /**
@@ -121,7 +124,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
   public setup(
     { http, notifications }: CoreSetup,
-    { screenshotMode }: TelemetryPluginSetupDependencies
+    { screenshotMode, home }: TelemetryPluginSetupDependencies
   ): TelemetryPluginSetup {
     const config = this.config;
     const currentKibanaVersion = this.currentKibanaVersion;
@@ -134,6 +137,18 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService);
+
+    if (home) {
+      home.welcomeScreen.registerOnRendered(() => {
+        if (this.telemetryService?.userCanChangeSettings) {
+          this.telemetryNotifications?.setOptedInNoticeSeen();
+        }
+      });
+
+      home.welcomeScreen.registerTelemetryNoticeRenderer(() =>
+        renderWelcomeTelemetryNotice(this.telemetryService!, http.basePath.prepend)
+      );
+    }
 
     return {
       telemetryService: this.getTelemetryServicePublicApis(),
