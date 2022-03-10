@@ -1019,7 +1019,7 @@ export const racFieldMappings: Record<string, string> = {
   'signal.rule.immutable': `${ALERT_RULE_PARAMETERS}.immutable`,
 };
 
-export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
+export const getField = (event: SimpleHit, field: string): SearchTypes | undefined => {
   if (isWrappedDetectionAlert(event)) {
     const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
     const parts = mappedField.split('.');
@@ -1027,11 +1027,11 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
       const params = get(event._source, ALERT_RULE_PARAMETERS);
       return get(params, parts[parts.length - 1]);
     }
-    return get(event._source, mappedField) as T;
+    return get(event._source, mappedField) as SearchTypes;
   } else if (isWrappedSignalHit(event)) {
     const mappedField = invert(racFieldMappings)[field] ?? field.replace('kibana.alert', 'signal');
-    return get(event._source, mappedField) as T;
+    return get(event._source, mappedField) as SearchTypes;
   } else if (isWrappedEventHit(event)) {
-    return get(event._source, field) as T;
+    return get(event._source, field) as SearchTypes;
   }
 };
