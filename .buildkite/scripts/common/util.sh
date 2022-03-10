@@ -24,7 +24,7 @@ verify_no_git_changes() {
   GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
   if [ "$GIT_CHANGES" ]; then
     if [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
-      NEW_COMMIT_MESSAGE="[CI] Automatically committing changed files from '$1'"
+      NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
       PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
 
       if [[ "$NEW_COMMIT_MESSAGE" == "$PREVIOUS_COMMIT_MESSAGE" ]]; then
