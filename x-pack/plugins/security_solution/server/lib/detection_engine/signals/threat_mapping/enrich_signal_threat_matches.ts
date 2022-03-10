@@ -77,7 +77,8 @@ export const buildEnrichments = ({
 export const enrichSignalThreatMatches = async (
   signals: SignalSearchResponse,
   getMatchedThreats: GetMatchedThreats,
-  indicatorPath: string
+  indicatorPath: string,
+  signalMatchesArg: any
 ): Promise<SignalSearchResponse> => {
   const signalHits = signals.hits.hits;
   if (signalHits.length === 0) {
@@ -85,13 +86,19 @@ export const enrichSignalThreatMatches = async (
   }
 
   const uniqueHits = groupAndMergeSignalMatches(signalHits);
-  const signalMatches = uniqueHits.map((signalHit) => extractNamedQueries(signalHit));
+  const signalMatches = signalMatchesArg
+    ? signalMatchesArg
+    : uniqueHits.map((signalHit) => ({
+        signalId: signalHit._id,
+        queries: extractNamedQueries(signalHit),
+      }));
   const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
-  const enrichmentsWithoutAtomic = signalMatches.map((queries) =>
+
+  const enrichmentsWithoutAtomic = signalMatches.map((signalMatch) =>
     buildEnrichments({
       indicatorPath,
-      queries,
+      queries: signalMatch.queries,
       threats: matchedThreats,
     })
   );

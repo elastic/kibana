@@ -6,20 +6,25 @@
  */
 
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
-
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
-import { CreateThreatSignalOptions } from './types';
+import { CreateEventSignalOptions } from './types';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
+import { getThreatList } from './get_threat_list';
+import { extractNamedQueries } from './utils';
+import {
+  groupAndMergeSignalMatches,
+  enrichSignalThreatMatches,
+} from './enrich_signal_threat_matches';
 
-export const createThreatSignal = async ({
+export const createEventSignal = async ({
   alertId,
   buildRuleMessage,
   bulkCreate,
   completeRule,
   currentResult,
-  currentThreatList,
+  currentEventList,
   eventsTelemetry,
   exceptionItems,
   filters,
@@ -37,11 +42,17 @@ export const createThreatSignal = async ({
   tuple,
   type,
   wrapHits,
-}: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  threatQuery,
+  threatFilters,
+  threatLanguage,
+  threatIndex,
+  threatListConfig,
+  threatIndicatorPath,
+}: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
-    threatList: currentThreatList,
-    entryKey: 'value',
+    threatList: currentEventList,
+    entryKey: 'field',
   });
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
@@ -54,9 +65,65 @@ export const createThreatSignal = async ({
     );
     return currentResult;
   } else {
+    // should we get all threat list? or only per page?
+    const threatList = await getThreatList({
+      esClient: services.scopedClusterClient.asCurrentUser,
+      exceptionItems,
+      threatFilters: [...threatFilters, threatFilter],
+      query: threatQuery,
+      language: threatLanguage,
+      index: threatIndex,
+      searchAfter: undefined,
+      logger,
+      buildRuleMessage,
+      threatListConfig,
+    });
+
+    const uniqueHits = groupAndMergeSignalMatches(threatList.hits.hits);
+    const threatMatches = uniqueHits.map((threatHit) =>
+      extractNamedQueries(threatHit).map((item) => {
+        const newField = item.value;
+        const newValue = item.field;
+        return {
+          ...item,
+          field: newField,
+          value: newValue,
+          signalId: item.id,
+          id: threatHit._id,
+        };
+      })
+    );
+    const signalMap = {};
+
+    threatMatches.forEach((queries) =>
+      queries.forEach((query) => {
+        if (signalMap[query.signalId]) {
+          signalMap[query.signalId].push(query);
+        } else {
+          signalMap[query.signalId] = [query];
+        }
+      })
+    );
+
+    const signalMatches = Object.entries(signalMap).map(([key, value]) => ({
+      signalId: key,
+      queries: value,
+    }));
+
+    const ids = signalMatches.map((item) => item.signalId);
+    const indexFilter = {
+      query: {
+        bool: {
+          filter: {
+            ids: { values: ids },
+          },
+        },
+      },
+    };
+
     const esFilter = await getFilter({
       type,
-      filters: [...filters, threatFilter],
+      filters: [...filters, indexFilter],
       language,
       query,
       savedId,
@@ -64,6 +131,8 @@ export const createThreatSignal = async ({
       index: inputIndex,
       lists: exceptionItems,
     });
+
+    logger.debug(buildRuleMessage(`${JSON.stringify(threatMatches)}`));
 
     logger.debug(
       buildRuleMessage(
@@ -76,7 +145,13 @@ export const createThreatSignal = async ({
       buildRuleMessage,
       bulkCreate,
       completeRule,
-      enrichment: threatEnrichment,
+      enrichment: (signals) =>
+        enrichSignalThreatMatches(
+          signals,
+          () => threatList.hits.hits,
+          threatIndicatorPath,
+          signalMatches
+        ),
       eventsTelemetry,
       exceptionsList: exceptionItems,
       filter: esFilter,
