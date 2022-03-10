@@ -30,7 +30,7 @@ export const DetailPanelAlertGroupItem = ({
   onProcessSelected,
   onShowAlertDetails,
 }: DetailPanelAlertsGroupItemDeps) => {
-  const styles = useStyles({});
+  const styles = useStyles();
 
   const alertsCount = useMemo(() => {
     return alerts.length >= ALERT_COUNT_THRESHOLD ? ALERT_COUNT_THRESHOLD + '+' : alerts.length;

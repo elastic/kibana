@@ -38,3 +38,7 @@ export const ALERTS_PER_PAGE = 1000;
 // when showing the count of alerts in details panel tab, if the number
 // exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  999+
 export const ALERT_COUNT_THRESHOLD = 999;
+
+// react-query caching keys
+export const QUERY_KEY_PROCESS_EVENTS = 'sessionViewProcessEvents';
+export const QUERY_KEY_ALERTS = 'sessionViewAlerts';

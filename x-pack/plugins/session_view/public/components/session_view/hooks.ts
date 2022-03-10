@@ -14,6 +14,8 @@ import {
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
   ALERTS_ROUTE,
+  QUERY_KEY_PROCESS_EVENTS,
+  QUERY_KEY_ALERTS,
 } from '../../../common/constants';
 
 export const useFetchSessionViewProcessEvents = (
@@ -25,7 +27,7 @@ export const useFetchSessionViewProcessEvents = (
   const jumpToCursor = jumpToEvent && jumpToEvent['@timestamp'];
 
   const query = useInfiniteQuery(
-    'sessionViewProcessEvents',
+    QUERY_KEY_PROCESS_EVENTS,
     async ({ pageParam = {} }) => {
       let { cursor } = pageParam;
       const { forward } = pageParam;
@@ -81,7 +83,7 @@ export const useFetchSessionViewProcessEvents = (
 export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
   const query = useQuery(
-    'sessionViewAlerts',
+    QUERY_KEY_ALERTS,
     async () => {
       const res = await http.get<ProcessEventResults>(ALERTS_ROUTE, {
         query: {

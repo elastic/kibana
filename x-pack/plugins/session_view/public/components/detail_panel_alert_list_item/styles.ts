@@ -9,12 +9,7 @@ import { useMemo } from 'react';
 import { useEuiTheme, transparentize } from '@elastic/eui';
 import { CSSObject, css } from '@emotion/react';
 
-interface StylesDeps {
-  minimal?: boolean;
-  isInvestigated?: boolean;
-}
-
-export const useStyles = ({ minimal = false, isInvestigated = false }: StylesDeps) => {
+export const useStyles = (minimal = false, isInvestigated = false) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {

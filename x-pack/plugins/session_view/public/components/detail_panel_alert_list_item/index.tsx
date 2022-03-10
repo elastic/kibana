@@ -43,7 +43,7 @@ export const DetailPanelAlertListItem = ({
   isInvestigated,
   minimal,
 }: DetailPanelAlertsListItemDeps) => {
-  const styles = useStyles({ minimal, isInvestigated });
+  const styles = useStyles(minimal, isInvestigated);
 
   if (!event.kibana) {
     return null;

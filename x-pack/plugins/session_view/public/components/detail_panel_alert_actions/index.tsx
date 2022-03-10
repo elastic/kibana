@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiContextMenuPanel, EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
@@ -35,13 +36,13 @@ export const DetailPanelAlertActions = ({
     setPopover(!isPopoverOpen);
   }, [isPopoverOpen]);
 
-  const onJumpToAlert = () => {
+  const onJumpToAlert = useCallback(() => {
     const process = new ProcessImpl(event.process.entity_id);
     process.addEvent(event);
 
     onProcessSelected(process);
     setPopover(false);
-  };
+  }, [event, onProcessSelected]);
 
   const onShowDetails = useCallback(() => {
     if (event.kibana) {
@@ -83,7 +84,9 @@ export const DetailPanelAlertActions = ({
           display="empty"
           size="s"
           iconType="boxesHorizontal"
-          aria-label="More"
+          aria-label={i18n.translate('xpack.sessionView.detailPanelAlertListItem.moreButton', {
+            defaultMessage: 'More',
+          })}
           data-test-subj={BUTTON_TEST_ID}
           onClick={onToggleMenu}
         />

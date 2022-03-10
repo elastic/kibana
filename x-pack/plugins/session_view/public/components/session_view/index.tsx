@@ -65,7 +65,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   const alertsQuery = useFetchSessionViewAlerts(sessionEntityId);
   const { data: alerts, error: alertsError, isFetching: alertsFetching } = alertsQuery;
 
-  const hasData = data && alerts && data.pages.length > 0 && data.pages[0].events.length > 0;
+  const hasData = alerts && data && data.pages?.[0].events.length > 0;
   const hasError = error || alertsError;
   const renderIsLoading = (isFetching || alertsFetching) && !data;
   const renderDetails = isDetailOpen && selectedProcess;
