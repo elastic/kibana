@@ -234,17 +234,18 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           </EuiButton>
         }
       >
-        {/* Flyout component is driven by URL params and may or may not be displayed based on those */}
-        <MaybeArtifactFlyout
-          apiClient={apiClient}
-          item={selectedItemForEdit}
-          onSuccess={handleArtifactFlyoutOnSuccess}
-          FormComponent={ArtifactFormComponent}
-          labels={labels}
-          size={flyoutSize}
-          submitHandler={onFormSubmit}
-          data-test-subj={getTestId('flyout')}
-        />
+        {isFlyoutOpened && (
+          <MaybeArtifactFlyout
+            apiClient={apiClient}
+            item={selectedItemForEdit}
+            onSuccess={handleArtifactFlyoutOnSuccess}
+            FormComponent={ArtifactFormComponent}
+            labels={labels}
+            size={flyoutSize}
+            submitHandler={onFormSubmit}
+            data-test-subj={getTestId('flyout')}
+          />
+        )}
 
         {selectedItemForDelete && (
           <ArtifactDeleteModal
