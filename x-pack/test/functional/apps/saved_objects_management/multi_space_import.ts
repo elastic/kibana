@@ -97,7 +97,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         name: 'third_space',
         disabledFeatures: [],
       });
-      // await kibanaServer.savedObjects.clean({types:['dashboard','index-pattern','visualization', 'map', 'lens']});
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
