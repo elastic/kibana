@@ -50,8 +50,20 @@ describe('getExecutionLogAggregation', () => {
         numExecutions: 5,
         page: 1,
         perPage: 10,
-        sortField: 'notsortable',
-        sortOrder: 'asc',
+        sort: [{ notsortable: { order: 'asc' } }],
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration]"`
+    );
+  });
+
+  test('should throw error when given one bad sort field', () => {
+    expect(() => {
+      getExecutionLogAggregation({
+        numExecutions: 5,
+        page: 1,
+        perPage: 10,
+        sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration]"`
@@ -64,8 +76,7 @@ describe('getExecutionLogAggregation', () => {
         numExecutions: 5,
         page: 0,
         perPage: 10,
-        sortField: 'timestamp',
-        sortOrder: 'asc',
+        sort: [{ timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(`"Invalid page field \\"0\\" - must be greater than 0"`);
   });
@@ -76,8 +87,7 @@ describe('getExecutionLogAggregation', () => {
         numExecutions: 1001,
         page: 1,
         perPage: 10,
-        sortField: 'timestamp',
-        sortOrder: 'asc',
+        sort: [{ timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"Invalid numExecutions requested \\"1001\\" - must be less than 1000"`
@@ -90,8 +100,7 @@ describe('getExecutionLogAggregation', () => {
         numExecutions: 5,
         page: 1,
         perPage: 0,
-        sortField: 'timestamp',
-        sortOrder: 'asc',
+        sort: [{ timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"Invalid perPage field \\"0\\" - must be greater than 0"`
@@ -104,8 +113,7 @@ describe('getExecutionLogAggregation', () => {
         numExecutions: 5,
         page: 2,
         perPage: 10,
-        sortField: 'timestamp',
-        sortOrder: 'asc',
+        sort: [{ timestamp: { order: 'asc' } }, { duration: { order: 'desc' } }],
       })
     ).toEqual({
       executionUuidCardinality: { cardinality: { field: 'kibana.alert.rule.execution.uuid' } },
@@ -114,7 +122,10 @@ describe('getExecutionLogAggregation', () => {
         aggs: {
           executionUuidSorted: {
             bucket_sort: {
-              sort: [{ 'ruleExecution>executeStartTime': { order: 'asc' } }],
+              sort: [
+                { 'ruleExecution>executeStartTime': { order: 'asc' } },
+                { 'ruleExecution>executionDuration': { order: 'desc' } },
+              ],
               from: 10,
               size: 10,
             },

@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
+import { flatMap, get } from 'lodash';
 import { parseDuration } from '.';
 import { AggregateEventsBySavedObjectResult } from '../../../event_log/server';
 
@@ -88,8 +89,7 @@ export interface IExecutionLogAggOptions {
   numExecutions: number;
   page: number;
   perPage: number;
-  sortField: string;
-  sortOrder: estypes.SortOrder;
+  sort: estypes.Sort;
 }
 
 const ExecutionLogSortFields: Record<string, string> = {
@@ -101,16 +101,18 @@ export function getExecutionLogAggregation({
   numExecutions,
   page,
   perPage,
-  sortField,
-  sortOrder,
+  sort,
 }: IExecutionLogAggOptions) {
-  // Check if valid sort field
-  if (!Object.keys(ExecutionLogSortFields).includes(sortField)) {
-    throw Boom.badRequest(
-      `Invalid sort field "${sortField}" - must be one of [${Object.keys(
-        ExecutionLogSortFields
-      ).join(',')}]`
-    );
+  // Check if valid sort fields
+  const sortFields = flatMap(sort as estypes.SortCombinations[], (s) => Object.keys(s));
+  for (const field of sortFields) {
+    if (!Object.keys(ExecutionLogSortFields).includes(field)) {
+      throw Boom.badRequest(
+        `Invalid sort field "${field}" - must be one of [${Object.keys(ExecutionLogSortFields).join(
+          ','
+        )}]`
+      );
+    }
   }
 
   // Check if valid page value
@@ -147,13 +149,12 @@ export function getExecutionLogAggregation({
         // Bucket sort to allow paging through executions
         executionUuidSorted: {
           bucket_sort: {
-            sort: [
-              {
-                [ExecutionLogSortFields[sortField]]: {
-                  order: sortOrder,
-                },
-              },
-            ],
+            sort: (sort as estypes.SortCombinations[]).map((s) =>
+              Object.keys(s).reduce(
+                (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, curr) }),
+                {}
+              )
+            ),
             from: (page - 1) * perPage,
             size: perPage,
           },

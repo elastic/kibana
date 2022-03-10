@@ -242,8 +242,7 @@ export interface GetExecutionLogByIdParams {
   filter?: string;
   page: number;
   perPage: number;
-  sortField: string;
-  sortOrder: estypes.SortOrder;
+  sort: estypes.Sort;
 }
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -655,8 +654,7 @@ export class RulesClient {
     filter,
     page,
     perPage,
-    sortField,
-    sortOrder,
+    sort,
   }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
@@ -690,8 +688,7 @@ export class RulesClient {
           numExecutions: getNumExecutions(parsedDateStart, parsedDateEnd, rule.schedule.interval),
           page,
           perPage,
-          sortField,
-          sortOrder,
+          sort,
         }),
       },
       rule.legacyId !== null ? [rule.legacyId] : undefined

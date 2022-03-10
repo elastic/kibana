@@ -281,8 +281,7 @@ function getExecutionLogByIdParams(overwrites = {}) {
     dateStart: new Date(Date.now() - 3600000).toISOString(),
     page: 1,
     perPage: 10,
-    sortField: 'timestamp',
-    sortOrder: 'desc' as estypes.SortOrder,
+    sort: [{ timestamp: { order: 'desc' } }] as estypes.Sort,
     ...overwrites,
   };
 }
@@ -362,8 +361,7 @@ describe('getExecutionLogForRule()', () => {
           numExecutions: 1000,
           page: 1,
           perPage: 10,
-          sortField: 'timestamp',
-          sortOrder: 'desc',
+          sort: [{ timestamp: { order: 'desc' } }],
         }),
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -390,8 +388,7 @@ describe('getExecutionLogForRule()', () => {
           numExecutions: 1000,
           page: 1,
           perPage: 10,
-          sortField: 'timestamp',
-          sortOrder: 'desc',
+          sort: [{ timestamp: { order: 'desc' } }],
         }),
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -418,8 +415,7 @@ describe('getExecutionLogForRule()', () => {
           numExecutions: 900,
           page: 1,
           perPage: 10,
-          sortField: 'timestamp',
-          sortOrder: 'desc',
+          sort: [{ timestamp: { order: 'desc' } }],
         }),
         end: '2019-02-12T20:16:22.479Z',
         start: '2019-02-12T20:01:22.479Z',
@@ -446,8 +442,7 @@ describe('getExecutionLogForRule()', () => {
           numExecutions: 1000,
           page: 1,
           perPage: 10,
-          sortField: 'timestamp',
-          sortOrder: 'desc',
+          sort: [{ timestamp: { order: 'desc' } }],
         }),
         filter: 'event.outcome: success',
         end: mockedDateString,
@@ -499,12 +494,14 @@ describe('getExecutionLogForRule()', () => {
     ).rejects.toMatchInlineSnapshot(`[Error: Invalid perPage field "-3" - must be greater than 0]`);
   });
 
-  test('invalid sortField value throws an error', async () => {
+  test('invalid sort value throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
     expect(
-      rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ sortField: 'foo' }))
+      rulesClient.getExecutionLogForRule(
+        getExecutionLogByIdParams({ sort: [{ foo: { order: 'desc' } }] })
+      )
     ).rejects.toMatchInlineSnapshot(
       `[Error: Invalid sort field "foo" - must be one of [timestamp,duration]]`
     );

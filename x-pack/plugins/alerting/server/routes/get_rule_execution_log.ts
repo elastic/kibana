@@ -16,34 +16,36 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
+const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
+
+const sortFieldSchema = schema.oneOf([
+  schema.object({ timestamp: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ duration: schema.object({ order: sortOrderSchema }) }),
+]);
+
+const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
+  defaultValue: [{ timestamp: { order: 'desc' } }],
+});
+
 const querySchema = schema.object({
   date_start: schema.string(),
   date_end: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
   per_page: schema.number({ defaultValue: 10, min: 1 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
-  sort_field: schema.oneOf([schema.literal('timestamp'), schema.literal('duration')], {
-    defaultValue: 'timestamp',
-  }),
-  sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-    defaultValue: 'desc',
-  }),
+  sort: sortFieldsSchema,
 });
 
 const rewriteReq: RewriteRequestCase<GetExecutionLogByIdParams> = ({
   date_start: dateStart,
   date_end: dateEnd,
   per_page: perPage,
-  sort_field: sortField,
-  sort_order: sortOrder,
   ...rest
 }) => ({
   ...rest,
   dateStart,
   dateEnd,
   perPage,
-  sortField,
-  sortOrder,
 });
 
 export const getRuleExecutionLogRoute = (

@@ -88,8 +88,7 @@ describe('getRuleExecutionLogRoute', () => {
           date_start: dateString,
           per_page: 10,
           page: 1,
-          sort_field: 'timestamp',
-          sort_order: 'desc',
+          sort: [{ timestamp: { order: 'desc' } }],
         },
       },
       ['ok']
@@ -104,8 +103,7 @@ describe('getRuleExecutionLogRoute', () => {
         id: '1',
         page: 1,
         perPage: 10,
-        sortField: 'timestamp',
-        sortOrder: 'desc',
+        sort: [{ timestamp: { order: 'desc' } }],
       },
     ]);
 
