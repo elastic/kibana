@@ -95,3 +95,5 @@ fi
 
 export BUILD_TS_REFS_DISABLE=true
 export DISABLE_BOOTSTRAP_VALIDATION=true
+
+export ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.1.1/manifest-latest-verified.json"
