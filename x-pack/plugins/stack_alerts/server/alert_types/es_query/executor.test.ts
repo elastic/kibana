@@ -21,17 +21,18 @@ describe('es_query executor', () => {
     timeField: '',
   };
   describe('tryToParseAsDate', () => {
-    it('should parse as date correctly', () => {
-      const expectedResult = '2018-12-31T19:00:00.000Z';
-      expect(expectedResult).toBe(tryToParseAsDate('2019-01-01T00:00:00'));
-      expect(expectedResult).toBe(tryToParseAsDate(1546282800000));
-    });
-
-    it('should not parse as date', () => {
-      expect(undefined).toBe(tryToParseAsDate(null));
-      expect(undefined).toBe(tryToParseAsDate(undefined));
-      expect(undefined).toBe(tryToParseAsDate('invalid date'));
-    });
+    it.each<[string | number]>([['2019-01-01T00:00:00.000Z'], [1546300800000]])(
+      'should parse as date correctly',
+      (value) => {
+        expect(tryToParseAsDate(value)).toBe('2019-01-01T00:00:00.000Z');
+      }
+    );
+    it.each<[string | null | undefined]>([[null], ['invalid date'], [undefined]])(
+      'should not parse as date',
+      (value) => {
+        expect(tryToParseAsDate(value)).toBe(undefined);
+      }
+    );
   });
 
   describe('getValidTimefieldSort', () => {
@@ -42,14 +43,14 @@ describe('es_query executor', () => {
         '2018-12-31T19:00:00.000Z',
         1546282800000,
       ]);
-      expect('2018-12-31T19:00:00.000Z').toEqual(result);
+      expect(result).toEqual('2018-12-31T19:00:00.000Z');
     });
   });
 
   describe('getSearchParams', () => {
     it('should return search params correctly', () => {
       const result = getSearchParams(defaultProps as OnlyEsQueryAlertParams);
-      expect('test-query').toBe(result.parsedQuery.query);
+      expect(result.parsedQuery.query).toBe('test-query');
     });
 
     it('should throw invalid query error', () => {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { Comparator } from '../../../common/comparator_types';
 
 export type ComparatorFn = (value: number, threshold: number[]) => boolean;
@@ -40,16 +40,3 @@ export function getHumanReadableComparator(comparator: Comparator) {
     ? humanReadableComparators.get(comparator)
     : comparator;
 }
-
-export const validateComparator =
-  (errorMessageId: string) =>
-  (comparator: string): string | undefined => {
-    if (ComparatorFnNames.has(comparator as Comparator)) return;
-
-    return i18n.translate(errorMessageId, {
-      defaultMessage: 'invalid thresholdComparator specified: {comparator}',
-      values: {
-        comparator,
-      },
-    });
-  };

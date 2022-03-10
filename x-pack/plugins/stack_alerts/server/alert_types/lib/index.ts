@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export {
-  ComparatorFns,
-  ComparatorFnNames,
-  getHumanReadableComparator,
-  validateComparator,
-} from './comparator';
+export { ComparatorFns, ComparatorFnNames, getHumanReadableComparator } from './comparator';
