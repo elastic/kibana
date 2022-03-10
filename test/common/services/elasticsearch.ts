@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import { systemIndicesSuperuser, createEsClientForFtrConfig } from '@kbn/test';

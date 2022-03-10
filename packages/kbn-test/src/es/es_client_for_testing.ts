@@ -10,7 +10,7 @@ import * as Url from 'url';
 import * as Fs from 'fs';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { Client as EsClient, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
+import { Client as EsClient, ClientOptions } from '@elastic/elasticsearch';
 import type { Config } from '../functional_test_runner';
 
 /** options for creating es instances used in functional testing scenarios */
@@ -50,8 +50,7 @@ export function createEsClientForTesting(options: EsClientForTestingOptions) {
     : options.esUrl;
 
   return new EsClient({
-    Connection: HttpConnection,
-    tls: isCloud ? undefined : { ca: Fs.readFileSync(CA_CERT_PATH) },
+    ssl: isCloud ? undefined : { ca: Fs.readFileSync(CA_CERT_PATH) },
 
     ...otherOptions,
 

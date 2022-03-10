@@ -40,29 +40,33 @@ export async function createSystemIndicesUser(ctx: FtrProviderContext) {
   await es.security.putRole({
     name: SYSTEM_INDICES_SUPERUSER_ROLE,
     refresh: 'wait_for',
-    cluster: ['all'],
-    indices: [
-      {
-        names: ['*'],
-        privileges: ['all'],
-        allow_restricted_indices: true,
-      },
-    ],
-    applications: [
-      {
-        application: '*',
-        privileges: ['*'],
-        resources: ['*'],
-      },
-    ],
-    run_as: ['*'],
+    body: {
+      cluster: ['all'],
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+          allow_restricted_indices: true,
+        },
+      ],
+      applications: [
+        {
+          application: '*',
+          privileges: ['*'],
+          resources: ['*'],
+        },
+      ],
+      run_as: ['*'],
+    },
   });
 
   await es.security.putUser({
     username: systemIndicesSuperuser.username,
     refresh: 'wait_for',
-    password: systemIndicesSuperuser.password,
-    roles: [SYSTEM_INDICES_SUPERUSER_ROLE],
+    body: {
+      password: systemIndicesSuperuser.password,
+      roles: [SYSTEM_INDICES_SUPERUSER_ROLE],
+    },
   });
 
   await es.close();
