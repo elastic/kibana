@@ -7,6 +7,6 @@
  */
 
 import { addDecorator } from '@storybook/react';
-import { servicesDecorator } from '@kbn/sharedux-storybook';
+import { servicesDecorator } from '../decorators';
 
 addDecorator(servicesDecorator);
