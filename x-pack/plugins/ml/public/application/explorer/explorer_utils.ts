@@ -256,19 +256,25 @@ export function getFieldsByJob() {
 export function getSelectionTimeRange(
   selectedCells: AppStateSelectedCells | undefined,
   interval: number,
-  bounds: Required<TimeRangeBounds>
+  bounds: TimeRangeBounds
 ): SelectionTimeRange {
   // Returns the time range of the cell(s) currently selected in the swimlane.
   // If no cell(s) are currently selected, returns the dashboard time range.
-  let earliestMs = bounds.min.valueOf();
-  let latestMs = bounds.max.valueOf();
+
+  // TODO check why this code always expect both min and max defined.
+  const requiredBounds = bounds as Required<TimeRangeBounds>;
+
+  let earliestMs = requiredBounds.min.valueOf();
+  let latestMs = requiredBounds.max.valueOf();
 
   if (selectedCells !== undefined && selectedCells.times !== undefined) {
     // time property of the cell data is an array, with the elements being
     // the start times of the first and last cell selected.
     earliestMs =
-      selectedCells.times[0] !== undefined ? selectedCells.times[0] * 1000 : bounds.min.valueOf();
-    latestMs = bounds.max.valueOf();
+      selectedCells.times[0] !== undefined
+        ? selectedCells.times[0] * 1000
+        : requiredBounds.min.valueOf();
+    latestMs = requiredBounds.max.valueOf();
     if (selectedCells.times[1] !== undefined) {
       // Subtract 1 ms so search does not include start of next bucket.
       latestMs = selectedCells.times[1] * 1000 - 1;
@@ -313,7 +319,7 @@ export function getSelectionJobIds(
 export function loadOverallAnnotations(
   selectedJobs: ExplorerJob[],
   interval: number,
-  bounds: Required<TimeRangeBounds>
+  bounds: TimeRangeBounds
 ): Promise<AnnotationsTable> {
   const jobIds = selectedJobs.map((d) => d.id);
   const timeRange = getSelectionTimeRange(undefined, interval, bounds);
