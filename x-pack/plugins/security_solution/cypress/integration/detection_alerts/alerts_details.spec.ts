@@ -26,7 +26,7 @@ import { getUnmappedRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe('Alert details with unmapped fields', () => {
+describe.skip('Alert details with unmapped fields', () => {
   beforeEach(() => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');

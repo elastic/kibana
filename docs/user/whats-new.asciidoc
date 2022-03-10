@@ -1,8 +1,6 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-coming::[8.1.0]
-
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
@@ -209,5 +207,69 @@ All new polygon layers now enable *Use vector tiles* by default.
 Vector tiles offer the best performance and smooth
 zooming over the alternative methods. You can change the scaling options
 in layer settings if you prefer the previous approach.
+
+[float]
+=== {ml-cap}
+
+[float]
+==== {ml-cap} UI enhancements: easier anomaly investigation, new side navigation
+
+8.1 contains a couple of enhancements on the {ml} UI.
+One of the enhancements helps the user interpret the results of their 
+{anomaly-jobs} and explore what else is happening around the time of an anomaly. 
+In the anomalies table a drilldown link to Discover is automatically available 
+to investigate the anomaly in the context of the source data. 
+For the charts in the Anomaly Explorer, synchronized `crosshair` lines are 
+provided on hover so that you can see what other anomalous behavior is occurring 
+at a point in time.
+
+[role="screenshot"]
+image::images/highlights-anomaly.gif[Anomaly Explorer charts]
+
+The top navigation bar is now replaced with side navigation. The side navigation 
+is collapsible, so views such as the Anomaly Explorer and Single Metric Viewer 
+can benefit from being viewed at full width if desired.
+
+[role="screenshot"]
+image::images/highlights-anomaly-explorer.png[Side navigation]
+
+[float]
+==== {transform-cap} enhancements
+
+You can now reset and re-run your {transform} from the beginning. 
+{transform-cap} counters will be reset to zero and if the destination index was 
+created by the transform it will also be deleted.
+
+Other features previously only available to API users are also added to the UI 
+for 8.1: the ability to configure an ingest pipeline to enrich the data 
+persisted to the destination index, and the terms aggregation is available in 
+the list of options when building the aggregations in the pivot {transform} 
+wizard.
+
+[role="screenshot"]
+image::images/highlights-transforms.png[Transforms UI]
+
+[float]
+==== {ml-cap} anomaly layers in Maps
+
+Maps introduces a new vector layer–you can add layers to your maps that display 
+points or lines for the anomalies in your geographic data.
+
+[role="screenshot"]
+image::images/highlights-anomaly-maps.png[Anomaly layers in Maps]
+
+[float]
+=== ResponseOps
+
+[float]
+==== Summary stats bar in Cases
+
+The new section at the top of the Cases view displays summary statistics for the 
+case, such as total numer of alerts, and counts of associated users and hosts. 
+The summarized information in the stats bar help the analyst to determine the 
+priority of a case and indicate effectiveness.
+
+[role="screenshot"]
+image::images/highlights-cases.png[Summary bar in Cases]
 
 // end::notable-highlights[]

@@ -5,16 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { css } from '@emotion/react';
+
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
+  EuiLink,
   EuiInMemoryTable,
   EuiPageHeader,
   EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
@@ -59,10 +57,6 @@ const securityDataView = i18n.translate(
 );
 
 const securitySolution = 'security-solution';
-
-const flexItemStyles = css`
-  justify-content: center;
-`;
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
@@ -124,26 +118,20 @@ export const IndexPatternTable = ({
           }>;
         }
       ) => (
-        <>
-          <EuiFlexGroup gutterSize="s" wrap>
-            <EuiFlexItem grow={false} css={flexItemStyles}>
-              <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
-                {name}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {index.id && index.id.indexOf(securitySolution) === 0 && (
-              <EuiFlexItem grow={false} css={flexItemStyles}>
-                <EuiBadge>{securityDataView}</EuiBadge>
-              </EuiFlexItem>
-            )}
-            {index.tags &&
-              index.tags.map(({ key: tagKey, name: tagName }) => (
-                <EuiFlexItem grow={false} css={flexItemStyles} key={tagKey}>
-                  <EuiBadge>{tagName}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-          </EuiFlexGroup>
-        </>
+        <div>
+          <EuiLink {...reactRouterNavigate(history, `patterns/${index.id}`)}>{name}</EuiLink>
+          {index.id && index.id.indexOf(securitySolution) === 0 && (
+            <>
+              &emsp;<EuiBadge>{securityDataView}</EuiBadge>
+            </>
+          )}
+          {index.tags &&
+            index.tags.map(({ key: tagKey, name: tagName }) => (
+              <>
+                &emsp;<EuiBadge key={tagKey}>{tagName}</EuiBadge>
+              </>
+            ))}
+        </div>
       ),
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
