@@ -53,7 +53,10 @@ export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,
   activeData: TableInspectorAdapter | undefined,
-  capabilities: RecursiveReadonly<Capabilities>
+  capabilities: RecursiveReadonly<{
+    navLinks: Capabilities['navLinks'];
+    discover: Capabilities['discover'];
+  }>
 ): { meta: LayerMetaInfo | undefined; isVisible: boolean; error: string | undefined } {
   const isVisible = Boolean(capabilities.navLinks?.discover && capabilities.discover?.show);
   // If Multiple tables, return

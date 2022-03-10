@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { isEqual, uniqBy } from 'lodash';
+import { isEqual } from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Filter } from '@kbn/es-query';
+import { DataViewBase, Filter } from '@kbn/es-query';
 import {
   ExecutionContextSearch,
   Query,
@@ -21,13 +21,14 @@ import {
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 
-import { Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
 import { RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   ExpressionRendererEvent,
@@ -131,7 +132,7 @@ export interface LensEmbeddableDeps {
     canSaveVisualizations: boolean;
     canSaveDashboards: boolean;
     navLinks: Capabilities['navLinks'];
-    discover?: Capabilities['discover'];
+    discover: Capabilities['discover'];
   };
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
@@ -161,7 +162,7 @@ function getViewUnderlyingDataArgs({
   activeDatasource,
   activeDatasourceState,
   activeData,
-  indexPatterns,
+  dataViews,
   capabilities,
   query,
   filters,
@@ -170,9 +171,9 @@ function getViewUnderlyingDataArgs({
   activeDatasource: Datasource;
   activeDatasourceState: unknown;
   activeData: TableInspectorAdapter | undefined;
-  indexPatterns: IndexPattern[];
+  dataViews: DataViewBase[] | undefined;
   capabilities: LensEmbeddableDeps['capabilities'];
-  query: Query;
+  query: Query | undefined;
   filters: Filter[];
   timeRange: TimeRange;
 }) {
@@ -191,7 +192,7 @@ function getViewUnderlyingDataArgs({
     query,
     filters,
     meta,
-    indexPatterns
+    dataViews
   );
 
   return {
@@ -248,9 +249,6 @@ export class Embeddable
 
   private viewUnderlyingDataArgs?: ViewUnderlyingDataArgs;
 
-  private waitVUDArgsLoaded: Promise<boolean>;
-  private markVUDArgsLoaded: (loaded: boolean) => void;
-
   constructor(
     private deps: LensEmbeddableDeps,
     initialInput: LensEmbeddableInput,
@@ -263,21 +261,6 @@ export class Embeddable
       },
       parent
     );
-
-    const _vudSubscription = new Subject<boolean>();
-
-    this.markVUDArgsLoaded = (loaded: boolean) => {
-      _vudSubscription.next(loaded);
-      _vudSubscription.complete();
-    };
-
-    this.waitVUDArgsLoaded = new Promise<boolean>((resolve) => {
-      const subscription = _vudSubscription.subscribe((loaded) => {
-        resolve(loaded);
-        subscription.unsubscribe();
-      });
-    });
-
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput)
@@ -477,7 +460,6 @@ export class Embeddable
         searchSessionId: containerState.searchSessionId,
       };
       this.embeddableTitle = this.getTitle();
-      this.updateViewUnderlyingDataArgs();
       isDirty = true;
     }
     return isDirty;
@@ -485,7 +467,6 @@ export class Embeddable
 
   private updateActiveData: ExpressionWrapperProps['onData$'] = (_, adapters) => {
     this.activeDataInfo.activeData = adapters?.tables?.tables;
-    this.updateViewUnderlyingDataArgs();
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
@@ -695,59 +676,56 @@ export class Embeddable
     }
   }
 
-  private async updateViewUnderlyingDataArgs() {
-    if (!this.activeDataInfo.activeData || !this.externalSearchContext) {
-      // This function is called both when activeData and externalSearchContext are loaded
-      // because we're not sure which one will load first. But, both must be loaded before
-      // we actually run this.
-      return;
+  private async loadViewUnderlyingDataArgs(): Promise<boolean> {
+    if (
+      !this.activeDataInfo.activeData ||
+      !this.externalSearchContext ||
+      !this.externalSearchContext.timeRange
+    ) {
+      return false;
     }
 
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (activeDatasourceId) {
-      this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
-      const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-
-      this.activeDataInfo.activeDatasourceState =
-        await this.activeDataInfo.activeDatasource.initialize(
-          docDatasourceState,
-          this.savedVis?.references
-        );
+    if (!activeDatasourceId) {
+      return false;
     }
 
+    this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
+    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+
+    this.activeDataInfo.activeDatasourceState =
+      await this.activeDataInfo.activeDatasource.initialize(
+        docDatasourceState,
+        this.savedVis?.references
+      );
+
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
-      activeDatasource: this.activeDataInfo.activeDatasource!,
+      activeDatasource: this.activeDataInfo.activeDatasource,
       activeDatasourceState: this.activeDataInfo.activeDatasourceState,
       activeData: this.activeDataInfo.activeData,
-      indexPatterns: this.indexPatterns!,
+      dataViews: this.indexPatterns,
       capabilities: this.deps.capabilities,
-      query: this.externalSearchContext.query!,
-      filters: this.externalSearchContext.filters!,
-      timeRange: this.externalSearchContext.timeRange!,
+      query: this.externalSearchContext.query,
+      filters: this.externalSearchContext.filters || [],
+      timeRange: this.externalSearchContext.timeRange,
     });
 
     const loaded = typeof viewUnderlyingDataArgs !== 'undefined';
-
     if (loaded) {
       this.viewUnderlyingDataArgs = viewUnderlyingDataArgs;
     }
-
-    this.markVUDArgsLoaded(loaded);
+    return loaded;
   }
 
   /**
    * Returns the necessary arguments to view the underlying data in discover.
    */
-  public async getViewUnderlyingDataArgs() {
-    const loaded = await this.waitVUDArgsLoaded;
-    if (loaded) {
-      return this.viewUnderlyingDataArgs;
-    }
+  public getViewUnderlyingDataArgs() {
+    return this.viewUnderlyingDataArgs;
   }
 
   public getCanViewUnderlyingData() {
-    // if loading the underlying data args fails
-    return this.waitVUDArgsLoaded;
+    return this.loadViewUnderlyingDataArgs();
   }
 
   async initializeOutput() {

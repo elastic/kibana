@@ -26,7 +26,7 @@ export const viewUnderlyingDataAction = (discover: DiscoverStart) =>
       return isCompatible;
     },
     execute: async (context: { embeddable: Embeddable }) => {
-      const args = await context.embeddable.getViewUnderlyingDataArgs();
+      const args = context.embeddable.getViewUnderlyingDataArgs()!;
       discover.locator?.navigate({
         ...args,
       });
