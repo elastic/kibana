@@ -93,7 +93,7 @@ describe('rule_form', () => {
   describe('rule_form create rule', () => {
     let wrapper: ReactWrapper<any>;
 
-    async function setup() {
+    async function setup(enforceMinimum = false) {
       const mocks = coreMock.createSetup();
       const { loadRuleTypes } = jest.requireMock('../../lib/rule_api');
       const ruleTypes: RuleType[] = [
@@ -185,7 +185,7 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: '1m' }}
+          config={{ minimumScheduleInterval: { value: '1m', enforce: enforceMinimum } }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
@@ -213,10 +213,17 @@ describe('rule_form', () => {
       expect(ruleTypeSelectOptions.exists()).toBeTruthy();
     });
 
-    it('renders minimum schedule interval', async () => {
-      await setup();
+    it('renders minimum schedule interval when enforce = true', async () => {
+      await setup(true);
       expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
         `Interval must be at least 1 minute.`
+      );
+    });
+
+    it('renders minimum schedule interval suggestion when enforce = false', async () => {
+      await setup();
+      expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
+        `Recommended interval should be at least 1 minute.`
       );
     });
 
@@ -365,7 +372,7 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: '1m' }}
+          config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
@@ -428,7 +435,7 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: '1m' }}
+          config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"

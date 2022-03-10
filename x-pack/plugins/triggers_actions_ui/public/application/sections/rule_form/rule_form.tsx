@@ -590,7 +590,7 @@ export const RuleForm = ({
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip', {
           defaultMessage:
-            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows. The xpack.alerting.minimumScheduleInterval setting defines the minimum value.',
+            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows. The xpack.alerting.rules.minimumScheduleInterval setting defines the minimum value.',
         })}
       />
     </>
@@ -674,12 +674,25 @@ export const RuleForm = ({
             helpText={
               errors['schedule.interval'].length > 0
                 ? ''
-                : i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
+                : config.minimumScheduleInterval?.enforce
+                ? i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
                     defaultMessage: 'Interval must be at least {minimum}.',
                     values: {
-                      minimum: formatDuration(config.minimumScheduleInterval ?? '1m', true),
+                      minimum: formatDuration(config.minimumScheduleInterval?.value ?? '1m', true),
                     },
                   })
+                : i18n.translate(
+                    'xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpTextWarn',
+                    {
+                      defaultMessage: 'Recommended interval should be at least {minimum}.',
+                      values: {
+                        minimum: formatDuration(
+                          config.minimumScheduleInterval?.value ?? '1m',
+                          true
+                        ),
+                      },
+                    }
+                  )
             }
             label={labelForRuleChecked}
             isInvalid={errors['schedule.interval'].length > 0}
