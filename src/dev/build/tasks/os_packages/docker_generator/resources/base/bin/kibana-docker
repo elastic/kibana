@@ -409,8 +409,4 @@ umask 0002
 # Therefore, we set this value here so that cgroup statistics are
 # available for the container this process will run in.
 
-/usr/share/kibana/bin/kibana --ops.cGroupOverrides.cpuPath=/ --ops.cGroupOverrides.cpuAcctPath=/ ${longopts} "$@" --port 6601 --path.data=/usr/share/kibana/data_tasks/ &
-
-/usr/share/kibana/bin/kibana --ops.cGroupOverrides.cpuPath=/ --ops.cGroupOverrides.cpuAcctPath=/ ${longopts} "$@" --xpack.task_manager.unsafe.exclude_task_types='["*"]' &
-
-wait -n
+exec /usr/share/kibana/bin/kibana --ops.cGroupOverrides.cpuPath=/ --ops.cGroupOverrides.cpuAcctPath=/ ${longopts} "$@"
