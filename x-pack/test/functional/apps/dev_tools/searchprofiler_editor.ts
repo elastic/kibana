@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { decompressFromEncodedURIComponent, compressToEncodedURIComponent } from 'lz-string';
+import { compressToEncodedURIComponent } from 'lz-string';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

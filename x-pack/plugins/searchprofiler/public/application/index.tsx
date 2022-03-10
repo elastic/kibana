@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
-import { HttpStart as Http, ToastsSetup, CoreTheme, AppMountParameters } from 'kibana/public';
+import { HttpStart as Http, ToastsSetup, CoreTheme } from 'kibana/public';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { LicenseStatus } from '../../common';
