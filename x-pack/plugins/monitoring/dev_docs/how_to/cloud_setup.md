@@ -15,8 +15,8 @@ To connect a locally running instance of kibana to the cloud cluster, you'll nee
 First, set your endpoint and password as shell variables:
 
 ```shell
-ELASTICSEARCH_ENDPOINT='<<<your elasticsearch endpoint>>>'
-ELASTIC_PASSWORD='<<<your elastic password>>>'
+ELASTICSEARCH_ENDPOINT='<<<elasticsearch endpoint shown on cloud.elastic.co>>>'
+ELASTIC_PASSWORD='<<<elastic password displayed during deployment creation>>>'
 ```
 
 Then create a `kibana_dev` user with the same password. `kibana_system` is already in use by the kibana launched by the elasticsearch service:
@@ -47,4 +47,4 @@ And start kibana with that config:
 yarn start --config config/kibana.cloud.yml
 ```
 
-Note that your local kibana will run data migrations and likely render the cloud-created kibana unusable once this is done.
+Note that your local kibana will run data migrations and probably render the cloud created kibana unusable after your local kibana starts up.
