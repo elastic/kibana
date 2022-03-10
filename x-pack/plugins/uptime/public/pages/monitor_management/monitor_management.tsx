@@ -66,7 +66,10 @@ export const MonitorManagementPage: React.FC = () => {
 
   return (
     <>
-      <MonitorListTabs invalidTotal={invalidTotal} onUpdate={onUpdate} />
+      <MonitorListTabs
+        invalidTotal={viewType === 'all' ? errorSummaries?.length ?? 0 : invalidTotal}
+        onUpdate={onUpdate}
+      />
       {viewType === 'all' ? (
         <AllMonitors
           pageState={pageState}
