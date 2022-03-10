@@ -158,7 +158,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
     kibanaVersion: '7.10.0',
-    minimumScheduleInterval: '1m',
+    minimumScheduleInterval: { value: '1m', enforce: false },
   });
 });
 
