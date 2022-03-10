@@ -866,7 +866,6 @@
     "xpack.lens.xyChart.addReferenceLineLayerLabel": "基準レイヤーの追加",
     "xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp": "一部のデータを追加して、基準レイヤーを有効にする",
     "xpack.lens.xyChart.axisExtent.custom": "カスタム",
-    "xpack.lens.xyChart.axisExtent.dataBounds": "データ境界",
     "xpack.lens.xyChart.axisExtent.disabledDataBoundsMessage": "折れ線グラフのみをデータ境界に合わせることができます",
     "xpack.lens.xyChart.axisExtent.full": "完全",
     "xpack.lens.xyChart.axisExtent.label": "境界",

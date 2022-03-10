@@ -872,7 +872,6 @@
     "xpack.lens.xyChart.addReferenceLineLayerLabel": "添加参考图层",
     "xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp": "添加一些数据以启用参考图层",
     "xpack.lens.xyChart.axisExtent.custom": "定制",
-    "xpack.lens.xyChart.axisExtent.dataBounds": "数据边界",
     "xpack.lens.xyChart.axisExtent.disabledDataBoundsMessage": "仅折线图可适应数据边界",
     "xpack.lens.xyChart.axisExtent.full": "实线",
     "xpack.lens.xyChart.axisExtent.label": "边界",
