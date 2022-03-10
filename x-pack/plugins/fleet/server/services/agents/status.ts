@@ -14,6 +14,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { AGENTS_PREFIX } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
+import { FleetUnauthorizedError } from '../../errors';
 
 import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
 
@@ -99,6 +100,20 @@ export async function getIncomingDataByAgentsId(
   agentsIds: string[]
 ) {
   try {
+    const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
+      body: {
+        index: [
+          {
+            names: [DATA_STREAM_INDEX_PATTERN],
+            privileges: ['read'],
+          },
+        ],
+      },
+    });
+    if (!hasAllPrivileges) {
+      throw new FleetUnauthorizedError('Missing permissions to read data streams indices');
+    }
+
     const searchResult = await esClient.search({
       index: DATA_STREAM_INDEX_PATTERN,
       allow_partial_search_results: true,

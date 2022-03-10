@@ -5,38 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { IncomingDataList } from '../../../public/applications/fleet/types';
-import { sendGetAgentIncomingData } from '../../hooks';
+import { useGetAgentIncomingData } from '../../hooks';
 interface Props {
   agentsIds: string[];
 }
 
 export const ConfirmIncomingData: React.FunctionComponent<Props> = ({ agentsIds }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [incomingData, setIncomingData] = useState<IncomingDataList[]>([]);
-
-  useEffect(() => {
-    const getIncomingData = async () => {
-      const { data } = await sendGetAgentIncomingData({ agentsIds });
-      if (data?.items) {
-        setIncomingData(data?.items);
-        setIsLoading(false);
-      }
-    };
-    if (agentsIds) {
-      getIncomingData();
-    }
-  }, [agentsIds]);
-
-  const enrolledAgents = incomingData.length;
-  const agentsWithData = incomingData.reduce((acc, curr) => {
-    const agentData = Object.values(curr)[0];
-    return !!agentData.data ? acc + 1 : acc;
-  }, 0);
+  const { enrolledAgents, agentsWithData, isLoading } = useGetAgentIncomingData(agentsIds);
 
   if (isLoading) {
     return (
