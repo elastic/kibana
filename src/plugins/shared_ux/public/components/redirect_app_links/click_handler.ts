@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ApplicationStart } from 'src/core/public';
-import { getClosestLink, hasActiveModifierKey } from './utils';
+import { getClosestLink, hasActiveModifierKey } from '../utility/utils';
 
 interface CreateCrossAppClickHandlerOptions {
   navigateToUrl: ApplicationStart['navigateToUrl'];

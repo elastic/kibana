@@ -8,7 +8,6 @@
 
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
 
 import { action } from '@storybook/addon-actions';
@@ -32,16 +31,11 @@ export const Component = () => {
       currentAppId$={new BehaviorSubject('test')}
     >
       <EuiButton
-        data-test-subj="homeAddData"
+        data-test-subj="storybookButton"
         fill
         iconType="plusInCircle"
         onClick={action('button pressed')}
-      >
-        <FormattedMessage
-          id="sharedUX.addData.addDataButtonLabel"
-          defaultMessage="Add integrations"
-        />
-      </EuiButton>
+      />
     </RedirectAppLinks>
   );
 };

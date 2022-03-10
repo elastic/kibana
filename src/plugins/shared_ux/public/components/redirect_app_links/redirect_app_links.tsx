@@ -11,9 +11,10 @@ import useObservable from 'react-use/lib/useObservable';
 import { ApplicationStart } from 'src/core/public';
 import { createNavigateToUrlClickHandler } from './click_handler';
 
-export interface RedirectAppLinksProps extends React.HTMLAttributes<HTMLDivElement> {
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  currentAppId$: ApplicationStart['currentAppId$'];
+type Props = React.HTMLAttributes<HTMLDivElement> &
+  Pick<ApplicationStart, 'navigateToUrl' | 'currentAppId$'>;
+
+export interface RedirectAppLinksProps extends Props {
   className?: string;
   'data-test-subj'?: string;
 }
