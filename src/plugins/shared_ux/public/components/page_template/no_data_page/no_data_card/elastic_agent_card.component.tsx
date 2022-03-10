@@ -50,18 +50,16 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
   title,
   ...cardRest
 }) => {
-  const noPermissionsLayout = (
-    <EuiCard
-      paddingSize="l"
-      image={ElasticAgentLogo}
-      title={<EuiTextColor color="default">{noPermissionTitle}</EuiTextColor>}
-      description={<EuiTextColor color="default">{noPermissionDescription}</EuiTextColor>}
-      isDisabled
-    />
-  );
-
   if (!canAccessFleet) {
-    return noPermissionsLayout;
+    return (
+      <EuiCard
+        paddingSize="l"
+        image={ElasticAgentLogo}
+        title={<EuiTextColor color="default">{noPermissionTitle}</EuiTextColor>}
+        description={<EuiTextColor color="default">{noPermissionDescription}</EuiTextColor>}
+        isDisabled
+      />
+    );
   }
 
   return (

@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { ElasticAgentCardComponent } from './elastic_agent_card.component';
 
-describe('ElasticAgentCard', () => {
+describe('ElasticAgentCardComponent', () => {
   test('renders', () => {
     const component = shallow(<ElasticAgentCardComponent canAccessFleet={true} />);
     expect(component).toMatchSnapshot();
