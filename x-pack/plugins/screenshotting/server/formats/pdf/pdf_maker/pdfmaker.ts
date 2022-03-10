@@ -10,8 +10,8 @@ import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
 import { MessageChannel, MessagePort, Worker } from 'worker_threads';
-import type { Layout } from '../../layouts';
-import { errors } from '../../../common';
+import type { Layout } from '../../../layouts';
+import { errors } from '../../../../common';
 import {
   headingHeight,
   pageMarginBottom,
@@ -146,8 +146,8 @@ export class PdfMaker {
   private getGeneratePdfRequestData(): GeneratePdfRequest['data'] {
     return {
       layout: {
-        hasFooter: this.layout.hasFooter,
         hasHeader: this.layout.hasHeader,
+        hasFooter: this.layout.hasFooter,
         orientation: this.layout.getPdfPageOrientation(),
         useReportingBranding: this.layout.useReportingBranding,
         pageSize: this.layout.getPdfPageSize({

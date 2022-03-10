@@ -40,12 +40,12 @@ export interface LayoutSelectorDictionary {
 /**
  * Screenshot layout parameters.
  */
-export type LayoutParams = Ensure<
+export type LayoutParams<ID extends string = string> = Ensure<
   {
     /**
      * Unique layout name.
      */
-    id?: string;
+    id?: ID;
 
     /**
      * Layout sizing.

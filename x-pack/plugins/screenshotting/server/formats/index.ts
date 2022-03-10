@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
-require('./worker.ts');
+export * from './pdf';
+export * from './png';

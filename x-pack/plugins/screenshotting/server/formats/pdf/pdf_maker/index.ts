@@ -7,46 +7,39 @@
 
 import type { Logger } from 'src/core/server';
 import { PdfMaker } from './pdfmaker';
-import type { Layout } from '../../layouts';
-import type { Screenshot } from '../get_screenshots';
+import type { Layout } from '../../../layouts';
 import { getTracker } from './tracker';
+import { ScreenshotResult } from '../../..';
 
 interface PngsToPdfArgs {
-  pngs: Screenshot[];
+  results: ScreenshotResult['results'];
   layout: Layout;
   logger: Logger;
   logo?: string;
   title?: string;
 }
-// const warnings = results.reduce<string[]>((found, current) => {
-//   if (current.error) {
-//     found.push(current.error.message);
-//   }
-//   if (current.renderErrors) {
-//     found.push(...current.renderErrors);
-//   }
-//   return found;
-// }, []);
 
 export async function pngsToPdf({
-  pngs,
+  results,
   layout,
   logo,
   title,
   logger,
-}: PngsToPdfArgs): Promise<Buffer> {
+}: PngsToPdfArgs): Promise<{ buffer: Buffer; pageCount: number }> {
   const pdfMaker = new PdfMaker(layout, logo, logger);
   const tracker = getTracker();
   if (title) {
     pdfMaker.setTitle(title);
   }
-  pngs.forEach((png) => {
-    tracker.startAddImage();
-    pdfMaker.addImage(png.data, {
-      title: png.title ?? undefined,
-      description: png.description ?? undefined,
+  results.forEach((result) => {
+    result.screenshots.forEach((png) => {
+      tracker.startAddImage();
+      pdfMaker.addImage(png.data, {
+        title: png.title ?? undefined,
+        description: png.description ?? undefined,
+      });
+      tracker.endAddImage();
     });
-    tracker.endAddImage();
   });
 
   let buffer: Uint8Array | null = null;
@@ -64,5 +57,5 @@ export async function pngsToPdf({
     tracker.end();
   }
 
-  return Buffer.from(buffer.buffer);
+  return { buffer: Buffer.from(buffer.buffer), pageCount: pdfMaker.getPageCount() };
 }

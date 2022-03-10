@@ -23,7 +23,7 @@ import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
-import { pngsToPdf } from './pdf_maker';
+import { pngsToPdf } from '../formats/pdf/pdf_maker';
 
 export interface PhaseTimeouts {
   /**
@@ -51,16 +51,6 @@ type Url = string;
 type UrlWithContext = [url: Url, context: Context];
 export type UrlOrUrlWithContext = Url | UrlWithContext;
 
-interface PngFormat {
-  type: 'png';
-}
-
-interface PdfFormat {
-  type: 'pdf';
-  title?: string;
-  logo?: string;
-}
-
 export interface ScreenshotObservableOptions {
   /**
    * The browser timezone that will be emulated in the browser instance.
@@ -83,16 +73,6 @@ export interface ScreenshotObservableOptions {
    * Every item can either be a string or a tuple containing a URL and a context.
    */
   urls: UrlOrUrlWithContext[];
-
-  /**
-   * Whether to output a series of PNGs or a PDF as the final result.
-   *
-   * @note When generating a PDF the screenshot results array will contain a single
-   * value.
-   *
-   * Defaults to: { type: 'png' }
-   */
-  format?: PngFormat | PdfFormat;
 }
 
 export interface ScreenshotObservableResult {
@@ -255,23 +235,6 @@ export class ScreenshotObservableHandler {
       switchMapTo(this.waitForElements()),
       switchMapTo(this.completeRender(apmTrans))
     );
-  }
-
-  private async pngsToPdf(pngs: Screenshot[], format: PdfFormat, timeRange: null | string) {
-    const { logo } = format;
-    const title = format.title ? format.title + (timeRange ? ` - ${timeRange}` : '') : undefined;
-    try {
-      return await pngsToPdf({
-        pngs,
-        title,
-        logo,
-        layout: this.layout,
-        logger: this.logger,
-      });
-    } catch (e) {
-      this.logger.error(`Could not generate the PDF buffer!`);
-      throw e;
-    }
   }
 
   public getScreenshots() {
