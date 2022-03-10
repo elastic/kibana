@@ -77,7 +77,10 @@ export function GraphVisualization({
 
   const edgeClick = (edge: WorkspaceEdge) => {
     // no multiple selection for now
-
+    const currentSelection = workspace.getEdgeSelection();
+    if (currentSelection.length && currentSelection[0] !== edge) {
+      workspace.clearEdgeSelection();
+    }
     if (!edge.isSelected) {
       workspace.addEdgeToSelection(edge);
     } else {
