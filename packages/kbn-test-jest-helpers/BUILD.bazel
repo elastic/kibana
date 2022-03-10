@@ -82,6 +82,7 @@ TYPES_DEPS = [
   "//packages/kbn-utils:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//axios",
+  "@npm//axe-core",
   "@npm//elastic-apm-node",
   "@npm//del",
   "@npm//exit-hook",

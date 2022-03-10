@@ -626,7 +626,7 @@ describe('Index Templates tab', () => {
             message: 'Template not found',
           };
 
-          httpRequestsMockHelpers.setLoadTemplateResponse(undefined, { body: error });
+          httpRequestsMockHelpers.setLoadTemplateResponse(undefined, error);
 
           await actions.clickTemplateAt(0);
 

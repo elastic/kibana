@@ -576,7 +576,7 @@ describe('<TemplateCreate />', () => {
         message: `There is already a template with name '${TEMPLATE_NAME}'`,
       };
 
-      httpRequestsMockHelpers.setCreateTemplateResponse(undefined, { body: error });
+      httpRequestsMockHelpers.setCreateTemplateResponse(undefined, error);
 
       await act(async () => {
         actions.clickNextButton();

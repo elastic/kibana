@@ -8,6 +8,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configureAxe } from 'jest-axe';
+import { Result } from 'axe-core';
 import { AXE_OPTIONS, AXE_CONFIG } from '@kbn/test';
 import { ReactWrapper } from './testbed/types';
 
@@ -18,9 +19,18 @@ const axeRunner = configureAxe({ globalOptions: { ...AXE_CONFIG } });
  * @param component
  */
 export const expectToBeAccessible = async (component: ReactWrapper): Promise<void> => {
+  const violations = await getA11yViolations(component);
+  expect(violations).toHaveLength(0);
+};
+
+/**
+ * Returns a11y violations as found by axe testing
+ * @param component
+ */
+export const getA11yViolations = async (component: ReactWrapper): Promise<Result[]> => {
   const axeResults = await axeRunner(component.html(), {
     ...AXE_OPTIONS,
     resultTypes: ['violations'],
   });
-  expect(axeResults.violations).toHaveLength(0);
+  return axeResults.violations;
 };

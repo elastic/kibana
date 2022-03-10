@@ -11,200 +11,12 @@ import { API_BASE_PATH } from '../../../common/constants';
 type HttpResponse = Record<string, any> | any[];
 
 export interface ResponseError {
-  statusCode: number;
-  message: string | Error;
-  attributes?: Record<string, any>;
+  status: number;
+  error: string;
+  message: string;
 }
 
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadTemplatesResponse = (response: HttpResponse = []) => {
-    server.respondWith('GET', `${API_BASE_PATH}/index_templates`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
-
-  const setLoadIndicesResponse = (response: HttpResponse = []) => {
-    server.respondWith('GET', `${API_BASE_PATH}/indices`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
-
-  const setReloadIndicesResponse = (response: HttpResponse = []) => {
-    server.respondWith('POST', `${API_BASE_PATH}/indices/reload`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
-
-  const setLoadDataStreamsResponse = (response: HttpResponse = []) => {
-    server.respondWith('GET', `${API_BASE_PATH}/data_streams`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
-
-  const setLoadDataStreamResponse = (response: HttpResponse = []) => {
-    server.respondWith('GET', `${API_BASE_PATH}/data_streams/:id`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
-
-  const setDeleteDataStreamResponse = (response: HttpResponse = []) => {
-    server.respondWith('POST', `${API_BASE_PATH}/delete_data_streams`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
-
-  const setDeleteTemplateResponse = (response: HttpResponse = []) => {
-    server.respondWith('POST', `${API_BASE_PATH}/delete_index_templates`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
-
-  const setLoadTemplateResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? error.body : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/index_templates/:id`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setCreateTemplateResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.body.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
-
-    server.respondWith('POST', `${API_BASE_PATH}/index_templates`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
-
-  const setUpdateTemplateResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
-
-    server.respondWith('PUT', `${API_BASE_PATH}/index_templates/:name`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
-
-  const setLoadIndexMappingResponse = (response?: HttpResponse, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ?? response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/mapping/:name`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setLoadIndexStatsResponse = (response?: HttpResponse, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ?? response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/stats/:name`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setLoadIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ?? response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/settings/:name`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setUpdateIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ?? response;
-
-    server.respondWith('PUT', `${API_BASE_PATH}/settings/:name`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setSimulateTemplateResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
-
-    server.respondWith('POST', `${API_BASE_PATH}/index_templates/simulate`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
-
-  const setLoadComponentTemplatesResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? error.body : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/component_templates`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setLoadNodesPluginsResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? error.body : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/nodes/plugins`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  return {
-    setLoadTemplatesResponse,
-    setLoadIndicesResponse,
-    setReloadIndicesResponse,
-    setLoadDataStreamsResponse,
-    setLoadDataStreamResponse,
-    setDeleteDataStreamResponse,
-    setDeleteTemplateResponse,
-    setLoadTemplateResponse,
-    setCreateTemplateResponse,
-    setUpdateTemplateResponse,
-    setLoadIndexSettingsResponse,
-    setLoadIndexMappingResponse,
-    setLoadIndexStatsResponse,
-    setUpdateIndexSettingsResponse,
-    setSimulateTemplateResponse,
-    setLoadComponentTemplatesResponse,
-    setLoadNodesPluginsResponse,
-  };
-};
-
 export const init = () => {
   const server = sinon.fakeServer.create();
   server.respondImmediately = true;
@@ -219,5 +31,90 @@ export const init = () => {
   return {
     server,
     httpRequestsMockHelpers,
+  };
+};
+
+const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
+  const setResponse = (
+    url: string,
+    method: string,
+    response: HttpResponse = [],
+    error?: ResponseError
+  ) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ?? response;
+
+    server.respondWith(method, `${API_BASE_PATH}${url}`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setLoadTemplatesResponse = (response: HttpResponse, error?: ResponseError) =>
+    setResponse('/index_templates', 'GET', response, error);
+
+  const setLoadIndicesResponse = (response: HttpResponse, error?: ResponseError) =>
+    setResponse('/indices', 'GET', response, error);
+
+  const setReloadIndicesResponse = (response: HttpResponse, error?: ResponseError) =>
+    setResponse('/indices/reload', 'POST', response, error);
+
+  const setLoadDataStreamsResponse = (response: HttpResponse, error?: ResponseError) =>
+    setResponse('/data_streams', 'GET', response, error);
+
+  const setLoadDataStreamResponse = (response: HttpResponse, error?: ResponseError) =>
+    setResponse('/data_streams/:id', 'GET', response, error);
+
+  const setDeleteDataStreamResponse = (response: HttpResponse, error?: ResponseError) =>
+    setResponse('/delete_data_streams', 'POST', response, error);
+
+  const setDeleteTemplateResponse = (response: HttpResponse, error?: ResponseError) =>
+    setResponse('/delete_index_templates', 'POST', response, error);
+
+  const setLoadTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
+    setResponse('/index_templates/:id', 'GET', response, error);
+
+  const setCreateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
+    setResponse('/index_templates', 'POST', response, error);
+
+  const setLoadIndexMappingResponse = (response?: HttpResponse, error?: ResponseError) =>
+    setResponse('/mapping/:name', 'GET', response, error);
+
+  const setLoadIndexStatsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    setResponse('/stats/:name', 'GET', response, error);
+
+  const setLoadIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    setResponse('/settings/:name', 'GET', response, error);
+
+  const setUpdateIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    setResponse('/settings/:name', 'PUT', response, error);
+
+  const setSimulateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
+    setResponse('/index_templates/simulate', 'POST', response, error);
+
+  const setLoadComponentTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    setResponse('/component_templates', 'GET', response, error);
+
+  const setLoadNodesPluginsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    setResponse('/nodes/plugins', 'GET', response, error);
+
+  return {
+    setLoadTemplatesResponse,
+    setLoadIndicesResponse,
+    setReloadIndicesResponse,
+    setLoadDataStreamsResponse,
+    setLoadDataStreamResponse,
+    setDeleteDataStreamResponse,
+    setDeleteTemplateResponse,
+    setLoadTemplateResponse,
+    setCreateTemplateResponse,
+    setLoadIndexSettingsResponse,
+    setLoadIndexMappingResponse,
+    setLoadIndexStatsResponse,
+    setUpdateIndexSettingsResponse,
+    setSimulateTemplateResponse,
+    setLoadComponentTemplatesResponse,
+    setLoadNodesPluginsResponse,
   };
 };
