@@ -117,6 +117,11 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
+      if (alertExecutionStore.numberOfTriggeredActions >= ruleType.executionConfig!.actions.max) {
+        alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
+        break;
+      }
+
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
       ) {
@@ -197,11 +202,6 @@ export function createExecutionHandler<
       });
 
       eventLogger.logEvent(event);
-
-      if (alertExecutionStore.numberOfTriggeredActions >= ruleType.executionConfig!.actions.max) {
-        alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
-        break;
-      }
     }
   };
 }
