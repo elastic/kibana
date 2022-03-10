@@ -37,6 +37,9 @@ import { mlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 import type { TimeBucketsInterval } from '../util/time_buckets';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
+// FIXME get rid of the static import
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
+import type { Refresh } from '../routing/use_refresh';
 
 interface SwimLanePagination {
   viewByFromPage: number;
@@ -74,6 +77,7 @@ export class AnomalyTimelineStateService {
   private _swimLaneBucketInterval$ = new BehaviorSubject<TimeBucketsInterval | null>(null);
 
   private _timeBounds$: Observable<TimeRangeBounds>;
+  private _refreshSubject$: Observable<Refresh>;
 
   constructor(
     private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
@@ -84,6 +88,7 @@ export class AnomalyTimelineStateService {
       startWith(null),
       map(() => this.timefilter.getBounds())
     );
+    this._refreshSubject$ = mlTimefilterRefresh$.pipe(startWith({ lastRefresh: 0 }));
     this._init();
   }
 
@@ -170,6 +175,7 @@ export class AnomalyTimelineStateService {
       this._swimLaneSeverity$,
       this.getContainerWidth$(),
       this._timeBounds$,
+      this._refreshSubject$,
     ])
       .pipe(
         tap(() => {
@@ -203,6 +209,7 @@ export class AnomalyTimelineStateService {
         this.getContainerWidth$(),
         this.getSelectedCells$(),
         this._timeBounds$,
+        this._refreshSubject$,
       ]) as Observable<
         [
           ExplorerJob[],
@@ -272,6 +279,7 @@ export class AnomalyTimelineStateService {
       this.getSwimLanePagination$(),
       this._topFieldValues$.pipe(distinctUntilChanged(isEqual)),
       this._timeBounds$,
+      this._refreshSubject$,
     ])
       .pipe(
         tap(() => {
