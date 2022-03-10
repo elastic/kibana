@@ -25,7 +25,7 @@ export type FilterSettings = Required<
 
 /**
  * Anomaly Explorer common state.
- * Contains related values from a global state after and applies required formatting.
+ * Manages related values in the URL state and applies required formatting.
  */
 export class AnomalyExplorerCommonStateService {
   private _selectedJobs$ = new BehaviorSubject<ExplorerJob[] | undefined>(undefined);
