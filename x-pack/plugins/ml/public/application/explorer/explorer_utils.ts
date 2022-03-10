@@ -93,11 +93,11 @@ export interface ChartRecord extends RecordForInfluencer {
 
 export interface OverallSwimlaneData extends SwimlaneData {
   /**
-   * Earliest timestampt in seconds
+   * Earliest timestamp in seconds
    */
   earliest: number;
   /**
-   * Latest timestampt in seconds
+   * Latest timestamp in seconds
    */
   latest: number;
 }

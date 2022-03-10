@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
 
   describe('anomaly explorer', function () {
-    this.tags(['mlqa', 'dima']);
+    this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
