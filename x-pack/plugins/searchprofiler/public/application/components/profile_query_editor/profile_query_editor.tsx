@@ -98,6 +98,7 @@ export const ProfileQueryEditor = memo(() => {
                 })}
               >
                 <EuiFieldText
+                  data-test-subj="indexName"
                   disabled={!licenseEnabled}
                   inputRef={(ref) => {
                     if (ref) {

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { decompressFromEncodedURIComponent, compressToEncodedURIComponent } from 'lz-string';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -69,6 +70,58 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await expectHasParseErrorsToBe(false)(okInput);
       await expectHasParseErrorsToBe(true)(notOkInput);
+    });
+
+    it('supports pre-configured search query', async () => {
+      const searchQuery = {
+        query: {
+          bool: {
+            should: [
+              {
+                match: {
+                  name: 'fred',
+                },
+              },
+              {
+                terms: {
+                  name: ['sue', 'sally'],
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          stats: {
+            stats: {
+              field: 'price',
+            },
+          },
+        },
+      };
+
+      // Since we're not actually running the query in the test,
+      // this index name is just an input placeholder and does not exist
+      const indexName = 'my_index';
+
+      const searchQueryURI = compressToEncodedURIComponent(JSON.stringify(searchQuery, null, 2));
+
+      await PageObjects.common.navigateToUrl(
+        'searchProfiler',
+        `/searchprofiler?index=${indexName}&load_from=${searchQueryURI}`,
+        {
+          useActualUrl: true,
+        }
+      );
+
+      const indexInput = await testSubjects.find('indexName');
+      const indexInputValue = await indexInput.getAttribute('value');
+
+      expect(indexInputValue).to.eql(indexName);
+
+      await retry.try(async () => {
+        const searchProfilerInput = JSON.parse(await aceEditor.getValue('searchProfilerEditor'));
+        expect(searchProfilerInput).to.eql(searchQuery);
+      });
     });
   });
 }

@@ -9,7 +9,13 @@
 import React, { useEffect, useRef } from 'react';
 import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
-import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import {
+  HashRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+  RouteComponentProps,
+} from 'react-router-dom';
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +45,7 @@ interface DevToolsWrapperProps {
   updateRoute: (newRoute: string) => void;
   theme$: Observable<CoreTheme>;
   appServices: AppServices;
+  location: RouteComponentProps['location'];
 }
 
 interface MountedDevToolDescriptor {

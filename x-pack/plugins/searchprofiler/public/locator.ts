@@ -21,12 +21,13 @@ export class SearchProfilerLocatorDefinition
   public readonly id = SEARCH_PROFILER_LOCATOR_ID;
 
   public readonly getLocation = async ({ loadFrom, index }: SearchProfilerLocatorParams) => {
+    const indexQueryParam = index ? `?index=${index}` : '';
+    const loadFromQueryParam = index && loadFrom ? `&load_from=${loadFrom}` : '';
+
     return {
       app: 'dev_tools',
-      path: `#/searchprofiler${index ? `?index=${index}` : ''}${
-        loadFrom ? `&load_from=${loadFrom}` : ''
-      }`,
-      state: { loadFrom },
+      path: `#/searchprofiler${indexQueryParam}${loadFromQueryParam}`,
+      state: { loadFrom, index },
     };
   };
 }
