@@ -7,6 +7,9 @@
  */
 
 const { execSync } = require('child_process');
+const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>} */ (
+  require('./groups.json').groups
+);
 
 const concurrency = 25;
 const defaultCount = concurrency * 2;
@@ -177,6 +180,24 @@ for (const testSuite of testSuites) {
         }_accessibility.sh`,
         label: `${IS_XPACK ? 'Default' : 'OSS'} Accessibility`,
         agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
+        depends_on: 'build',
+        parallelism: RUN_COUNT,
+        concurrency: concurrency,
+        concurrency_group: UUID,
+        concurrency_method: 'eager',
+      });
+    case 'cypress':
+      const CYPRESS_SUITE = CI_GROUP;
+      const group = groups.find((group) => group.key.includes(CYPRESS_SUITE));
+      if (!group) {
+        throw new Error(
+          `Group configuration was not found in groups.json for the following cypress suite: {${CYPRESS_SUITE}}.`
+        );
+      }
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${CYPRESS_SUITE}.sh`,
+        label: group.name,
+        agents: { queue: 'ci-group-6' },
         depends_on: 'build',
         parallelism: RUN_COUNT,
         concurrency: concurrency,
