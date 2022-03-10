@@ -5,12 +5,21 @@
  * 2.0.
  */
 import { useEffect, useState, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import type { IncomingDataList } from '../../common/types/rest_spec/agent';
 
-import { sendGetAgentIncomingData } from './index';
+import { sendGetAgentIncomingData, useLink } from './index';
 
-export const useGetAgentIncomingData = (agentsIds: string[]) => {
+export interface InstalledIntegrationPolicy {
+  name: string;
+  version: string;
+}
+
+export const useGetAgentIncomingData = (
+  agentsIds: string[],
+  installedPolicy: InstalledIntegrationPolicy
+) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [incomingData, setIncomingData] = useState<IncomingDataList[]>([]);
 
@@ -28,7 +37,7 @@ export const useGetAgentIncomingData = (agentsIds: string[]) => {
   }, [agentsIds]);
 
   const enrolledAgents = useMemo(() => incomingData.length, [incomingData.length]);
-  const agentsWithData = useMemo(
+  const numAgentsWithData = useMemo(
     () =>
       incomingData.reduce((acc, curr) => {
         const agentData = Object.values(curr)[0];
@@ -37,9 +46,28 @@ export const useGetAgentIncomingData = (agentsIds: string[]) => {
     [incomingData]
   );
 
+  let href;
+  let text;
+  const { getAbsolutePath, getHref } = useLink();
+  if (installedPolicy.name === 'apm') {
+    href = getAbsolutePath('/app/home#/tutorial/apm');
+    text = i18n.translate('xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText', {
+      defaultMessage: 'Install APM Agent',
+    });
+  } else {
+    href = getHref('integration_details_assets', {
+      pkgkey: `${installedPolicy.name}-${installedPolicy.version}`,
+    });
+    text = i18n.translate('xpack.fleet.epm.agentEnrollment.viewDataAssetsLabel', {
+      defaultMessage: 'View assets',
+    });
+  }
+  const linkButton = { href, text };
+
   return {
     enrolledAgents,
-    agentsWithData,
+    numAgentsWithData,
     isLoading,
+    linkButton,
   };
 };
