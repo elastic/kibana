@@ -13,11 +13,11 @@ export function validateHosts(value: string[]) {
   const urlIndexes: { [key: string]: number[] } = {};
   value.forEach((val, idx) => {
     try {
-      const urlParsed = new URL(val);
-      if (!val || val === '') {
+      if (!val) {
         throw new Error('Host URL required');
       }
-      else if (!['http:', 'https:'].includes(urlParsed.protocol)) {
+      const urlParsed = new URL(val);
+      if (!['http:', 'https:'].includes(urlParsed.protocol)) {
         throw new Error('Invalid protocol');
       }
     } catch (error) {
