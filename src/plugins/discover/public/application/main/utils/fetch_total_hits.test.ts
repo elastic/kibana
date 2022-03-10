@@ -51,10 +51,6 @@ describe('test fetchTotalHits', () => {
     expect(fetch$Mock.mock.calls[0][0].executionContext).toMatchInlineSnapshot(`
       Object {
         "description": "fetch total hits",
-        "id": "the-saved-search-id",
-        "name": "discover",
-        "type": "application",
-        "url": "/",
       }
     `);
   });

@@ -84,6 +84,7 @@ function sampleArgs() {
     ],
     sortingColumnId: '',
     sortingDirection: 'none',
+    rowHeightLines: 1,
   };
 
   return { data, args };
@@ -210,7 +211,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: true,
-        timeFieldName: 'a',
       },
     });
   });
@@ -256,7 +256,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'b',
       },
     });
   });
@@ -301,6 +300,7 @@ describe('DatatableComponent', () => {
       ],
       sortingColumnId: '',
       sortingDirection: 'none',
+      rowHeightLines: 1,
     };
 
     const wrapper = mountWithIntl(
@@ -341,7 +341,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'a',
       },
     });
   });

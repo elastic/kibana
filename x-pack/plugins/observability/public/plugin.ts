@@ -46,6 +46,7 @@ import { createNavigationRegistry, NavigationEntry } from './services/navigation
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -93,11 +94,20 @@ export class Plugin
       path: '/alerts',
       navLinkStatus: AppNavLinkStatus.hidden,
     },
+    {
+      id: 'rules',
+      title: i18n.translate('xpack.observability.rulesLinkTitle', {
+        defaultMessage: 'Rules',
+      }),
+      order: 8002,
+      path: '/rules',
+      navLinkStatus: AppNavLinkStatus.hidden,
+    },
     getCasesDeepLinks({
       basePath: casesPath,
       extend: {
         [CasesDeepLinkId.cases]: {
-          order: 8002,
+          order: 8003,
           navLinkStatus: AppNavLinkStatus.hidden,
         },
         [CasesDeepLinkId.casesCreate]: {
@@ -243,6 +253,7 @@ export class Plugin
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
+      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
     };
   }
 
@@ -272,6 +283,7 @@ export class Plugin
       createExploratoryViewUrl,
       getAppDataView: getAppDataView(pluginsStart.dataViews),
       ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
+      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
     };
   }
 }

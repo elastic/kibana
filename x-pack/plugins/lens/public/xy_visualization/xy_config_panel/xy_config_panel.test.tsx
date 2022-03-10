@@ -8,7 +8,8 @@
 import React from 'react';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
-import { LayerContextMenu, XyToolbar, DimensionEditor } from '.';
+import { XyToolbar } from '.';
+import { DimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../../types';
 import { State } from '../types';
@@ -17,6 +18,7 @@ import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
 import { layerTypes } from '../../../common';
+import { XYDataLayerConfig } from '../../../common/expressions';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -44,61 +46,6 @@ describe('XY Config panels', () => {
     frame.datasourceLayers = {
       first: createMockDatasource('test').publicAPIMock,
     };
-  });
-
-  describe('LayerContextMenu', () => {
-    test('enables stacked chart types even when there is no split series', () => {
-      const state = testState();
-      const component = mount(
-        <LayerContextMenu
-          layerId={state.layers[0].layerId}
-          frame={frame}
-          setState={jest.fn()}
-          state={{ ...state, layers: [{ ...state.layers[0], xAccessor: 'shazm' }] }}
-        />
-      );
-
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
-
-      expect(options!.map(({ id }) => id)).toEqual([
-        'bar',
-        'bar_stacked',
-        'bar_percentage_stacked',
-        'area',
-        'area_stacked',
-        'area_percentage_stacked',
-        'line',
-      ]);
-
-      expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
-    });
-
-    test('shows only horizontal bar options when in horizontal mode', () => {
-      const state = testState();
-      const component = mount(
-        <LayerContextMenu
-          layerId={state.layers[0].layerId}
-          frame={frame}
-          setState={jest.fn()}
-          state={{ ...state, layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }] }}
-        />
-      );
-
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
-
-      expect(options!.map(({ id }) => id)).toEqual([
-        'bar_horizontal',
-        'bar_horizontal_stacked',
-        'bar_horizontal_percentage_stacked',
-      ]);
-      expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
-    });
   });
 
   describe('XyToolbar', () => {
@@ -259,7 +206,10 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           accessor="bar"
           groupId="left"
-          state={{ ...state, layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }] }}
+          state={{
+            ...state,
+            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
+          }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}

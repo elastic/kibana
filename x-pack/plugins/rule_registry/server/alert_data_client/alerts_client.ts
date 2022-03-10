@@ -21,7 +21,7 @@ import {
   InlineScript,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
+import { AlertTypeParams } from '../../../alerting/server';
 import {
   ReadOperations,
   AlertingAuthorization,
@@ -39,6 +39,7 @@ import {
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
+import { getAuthzFilter, getSpacesFilter } from '../lib';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -369,14 +370,8 @@ export class AlertsClient {
     config: EsQueryConfig
   ) {
     try {
-      const { filter: authzFilter } = await this.authorization.getAuthorizationFilter(
-        AlertingAuthorizationEntity.Alert,
-        {
-          type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: { consumer: ALERT_RULE_CONSUMER, ruleTypeId: ALERT_RULE_TYPE_ID },
-        },
-        operation
-      );
+      const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
+      const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
       let esQuery;
       if (id != null) {
         esQuery = { query: `_id:${id}`, language: 'kuery' };
@@ -388,10 +383,7 @@ export class AlertsClient {
       const builtQuery = buildEsQuery(
         undefined,
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
-        [
-          authzFilter as unknown as Filter,
-          { query: { term: { [SPACE_IDS]: alertSpaceId } } } as unknown as Filter,
-        ],
+        [authzFilter, spacesFilter],
         config
       );
       if (query != null && typeof query === 'object') {

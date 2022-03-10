@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Filter } from '@kbn/es-query';
-import type {
+import {
   ExecutionContextSearch,
   Query,
   TimefilterContract,
@@ -70,6 +70,7 @@ import type { ErrorMessage } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps } from '../types';
 import type { SpacesPluginStart } from '../../../spaces/public';
+import { inferTimeField } from '../utils';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -529,7 +530,10 @@ export class Embeddable
     }
     if (isLensBrushEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: event.data,
+        data: {
+          ...event.data,
+          timeFieldName: event.data.timeFieldName || inferTimeField(event.data),
+        },
         embeddable: this,
       });
 
@@ -539,7 +543,10 @@ export class Embeddable
     }
     if (isLensFilterEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: event.data,
+        data: {
+          ...event.data,
+          timeFieldName: event.data.timeFieldName || inferTimeField(event.data),
+        },
         embeddable: this,
       });
       if (this.input.onFilter) {

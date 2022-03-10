@@ -149,10 +149,10 @@ describe('ES deprecations table', () => {
 
       await actions.searchBar.clickTypeFilterDropdownAt(0);
 
-      // We need to read the document "body" as the filter dropdown options are added there and not inside
-      // the component DOM tree.
+      // We need to read the document "body" as the filter dropdown (an EuiSelectable)
+      // is added in a portalled popover and not inside the component DOM tree.
       const clusterTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
-        '.euiFilterSelect__items .euiFilterSelectItem'
+        '.euiSelectableList .euiSelectableListItem'
       );
 
       expect(clusterTypeFilterButton).not.toBeNull();

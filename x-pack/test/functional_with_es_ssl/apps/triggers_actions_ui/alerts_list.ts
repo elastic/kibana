@@ -108,7 +108,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
       await searchClearButton.click();
       await find.byCssSelector(
-        '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
+        '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
       );
       const searchResultsAfterClear = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterClear.length).to.equal(2);
@@ -257,7 +257,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await testSubjects.click('deleteAlert');
+      await testSubjects.click('deleteRule');
       await testSubjects.existOrFail('deleteIdsConfirmation');
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
@@ -365,7 +365,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await createAlert({ supertest, objectRemover });
       await refreshAlertsList();
 
-      await testSubjects.existOrFail('alertsTable-P50ColumnName');
+      await testSubjects.existOrFail('rulesTable-P50ColumnName');
       await testSubjects.existOrFail('P50Percentile');
 
       await retry.try(async () => {
@@ -385,7 +385,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await searchClearButton.click();
         await testSubjects.missingOrFail('percentileSelectablePopover-selectable');
-        await testSubjects.existOrFail('alertsTable-P95ColumnName');
+        await testSubjects.existOrFail('rulesTable-P95ColumnName');
         await testSubjects.existOrFail('P95Percentile');
       });
     });
@@ -427,8 +427,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(refreshResults.map((item: any) => item.status).sort()).to.eql(['Error', 'Ok']);
       });
-      await testSubjects.click('alertStatusFilterButton');
-      await testSubjects.click('alertStatuserrorFilerOption'); // select Error status filter
+      await testSubjects.click('ruleStatusFilterButton');
+      await testSubjects.click('ruleStatuserrorFilerOption'); // select Error status filter
       await retry.try(async () => {
         const filterErrorOnlyResults =
           await pageObjects.triggersActionsUI.getAlertsListWithStatus();
@@ -453,7 +453,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       const alertsErrorBannerWhenNoErrors = await find.allByCssSelector(
-        '[data-test-subj="alertsErrorBanner"]'
+        '[data-test-subj="rulesErrorBanner"]'
       );
       expect(alertsErrorBannerWhenNoErrors).to.have.length(0);
 
@@ -461,7 +461,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await refreshAlertsList();
         const alertsErrorBannerExistErrors = await find.allByCssSelector(
-          '[data-test-subj="alertsErrorBanner"]'
+          '[data-test-subj="rulesErrorBanner"]'
         );
         expect(alertsErrorBannerExistErrors).to.have.length(1);
         expect(
@@ -472,21 +472,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       await refreshAlertsList();
-      expect(await testSubjects.getVisibleText('totalAlertsCount')).to.be('Showing: 2 of 2 rules.');
-      expect(await testSubjects.getVisibleText('totalActiveAlertsCount')).to.be('Active: 0');
-      expect(await testSubjects.getVisibleText('totalOkAlertsCount')).to.be('Ok: 1');
-      expect(await testSubjects.getVisibleText('totalErrorAlertsCount')).to.be('Error: 1');
-      expect(await testSubjects.getVisibleText('totalPendingAlertsCount')).to.be('Pending: 0');
-      expect(await testSubjects.getVisibleText('totalUnknownAlertsCount')).to.be('Unknown: 0');
+      expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('Showing: 2 of 2 rules.');
+      expect(await testSubjects.getVisibleText('totalActiveRulesCount')).to.be('Active: 0');
+      expect(await testSubjects.getVisibleText('totalOkRulesCount')).to.be('Ok: 1');
+      expect(await testSubjects.getVisibleText('totalErrorRulesCount')).to.be('Error: 1');
+      expect(await testSubjects.getVisibleText('totalPendingRulesCount')).to.be('Pending: 0');
+      expect(await testSubjects.getVisibleText('totalUnknownRulesCount')).to.be('Unknown: 0');
     });
 
     it('should filter alerts by the alert type', async () => {
       await createAlert({ supertest, objectRemover });
       const failingAlert = await createFailingAlert({ supertest, objectRemover });
       await refreshAlertsList();
-      await testSubjects.click('alertTypeFilterButton');
-      expect(await (await testSubjects.find('alertType0Group')).getVisibleText()).to.eql('Alerts');
-      await testSubjects.click('alertTypetest.failingFilterOption');
+      await testSubjects.click('ruleTypeFilterButton');
+      expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).to.eql('Alerts');
+      await testSubjects.click('ruleTypetest.failingFilterOption');
 
       await retry.try(async () => {
         const filterFailingAlertOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
@@ -529,7 +529,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(filterWithSlackOnlyResults[0].interval).to.equal('1 min');
         expect(filterWithSlackOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
-      await testSubjects.click('alertTypeFilterButton');
+      await testSubjects.click('ruleTypeFilterButton');
 
       // de-select action type filter
       await testSubjects.click('actionTypeFilterButton');

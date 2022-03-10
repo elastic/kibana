@@ -15,9 +15,15 @@ export {
 } from '../common/lib';
 export { onRedirectNoIndexPattern } from './data_views';
 
-export type { IIndexPatternFieldList, TypeMeta } from '../common';
+export type { IIndexPatternFieldList, TypeMeta, RuntimeType } from '../common';
 export type { DataViewSpec } from '../common';
-export { IndexPatternField, DataViewField, DataViewType, META_FIELDS } from '../common';
+export {
+  IndexPatternField,
+  DataViewField,
+  DataViewType,
+  META_FIELDS,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+} from '../common';
 
 export type { IndexPatternsContract } from './data_views';
 export type { DataViewListItem } from './data_views';

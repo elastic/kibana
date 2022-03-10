@@ -42,7 +42,7 @@ export function createUsageServices({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   return {
-    async waitForJobToFinish(downloadReportPath: string) {
+    async waitForJobToFinish(downloadReportPath: string, ignoreFailure?: boolean) {
       log.debug(`Waiting for job to finish: ${downloadReportPath}`);
       const JOB_IS_PENDING_CODE = 503;
 
@@ -65,8 +65,9 @@ export function createUsageServices({ getService }: FtrProviderContext) {
           }
         }, 1500);
       });
-
-      expect(statusCode).to.be(200);
+      if (!ignoreFailure) {
+        expect(statusCode).to.be(200);
+      }
     },
 
     /**

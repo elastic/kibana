@@ -12,7 +12,7 @@ import { CasesProvider, CasesContextProps } from '../components/cases_context';
 
 export type GetCreateCaseFlyoutProps = CreateCaseFlyoutProps & CasesContextProps;
 
-const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
+export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
   () => import('../components/create/flyout')
 );
 export const getCreateCaseFlyoutLazy = ({
@@ -34,4 +34,10 @@ export const getCreateCaseFlyoutLazy = ({
       />
     </Suspense>
   </CasesProvider>
+);
+
+export const getCreateCaseFlyoutLazyNoProvider = (props: CreateCaseFlyoutProps) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <CreateCaseFlyoutLazy {...props} />
+  </Suspense>
 );

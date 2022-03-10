@@ -18,8 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('When attempting to call an endpoint api with no authz', () => {
+  describe('When attempting to call an endpoint api with no authz', () => {
     let loadedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {

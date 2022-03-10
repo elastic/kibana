@@ -1292,11 +1292,13 @@ exports[`Inspector Data View component should render single table without select
                   >
                     <EuiFlexGroup
                       alignItems="center"
+                      className="eui-xScroll"
+                      gutterSize="s"
                       justifyContent="spaceBetween"
                       responsive={false}
                     >
                       <div
-                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow eui-xScroll"
                       >
                         <EuiFlexItem
                           grow={false}
@@ -2873,11 +2875,13 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                   >
                     <EuiFlexGroup
                       alignItems="center"
+                      className="eui-xScroll"
+                      gutterSize="s"
                       justifyContent="spaceBetween"
                       responsive={false}
                     >
                       <div
-                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow eui-xScroll"
                       >
                         <EuiFlexItem
                           grow={false}
