@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState, useMemo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
   EuiModalHeader,
@@ -18,18 +19,58 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ModelItemFull } from './models_list';
+import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
+import { useToastNotificationService } from '../../services/toast_notification_service';
+import { DeleteSpaceAwareItemCheckModal } from '../../components/delete_space_aware_item_check_modal';
 
 interface DeleteModelsModalProps {
   models: ModelItemFull[];
-  onClose: (deletionApproved?: boolean) => void;
+  onClose: (refreshList?: boolean) => void;
 }
 
 export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose }) => {
-  const modelsWithPipelines = models
-    .filter((model) => !!model.pipelines)
-    .map((model) => model.model_id);
+  const trainedModelsApiService = useTrainedModelsApiService();
+  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
-  return (
+  const [canDeleteModel, setCanDeleteModel] = useState(false);
+
+  const modelsWithPipelines = useMemo(
+    () => models.filter((model) => !!model.pipelines).map((model) => model.model_id),
+    [models]
+  );
+
+  const deleteModels = useCallback(async () => {
+    const modelsToDeleteIds = models.map((model) => model.model_id);
+
+    try {
+      await Promise.all(
+        modelsToDeleteIds.map((modelId) => trainedModelsApiService.deleteTrainedModel(modelId))
+      );
+      displaySuccessToast(
+        i18n.translate('xpack.ml.trainedModels.modelsList.successfullyDeletedMessage', {
+          defaultMessage:
+            '{modelsCount, plural, one {Model {modelsToDeleteIds}} other {# models}} {modelsCount, plural, one {has} other {have}} been successfully deleted',
+          values: {
+            modelsCount: modelsToDeleteIds.length,
+            modelsToDeleteIds: modelsToDeleteIds.join(', '),
+          },
+        })
+      );
+    } catch (error) {
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
+          defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
+          values: {
+            modelsCount: modelsToDeleteIds.length,
+          },
+        })
+      );
+    }
+    onClose(true);
+  }, [models, trainedModelsApiService]);
+
+  return canDeleteModel ? (
     <EuiModal
       onClose={onClose.bind(null, false)}
       initialFocus="[name=cancelModelDeletion]"
@@ -77,7 +118,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
         </EuiButtonEmpty>
 
         <EuiButton
-          onClick={onClose.bind(null, true)}
+          onClick={deleteModels.bind(null)}
           fill
           color="danger"
           data-test-subj="mlModelsDeleteModalConfirmButton"
@@ -89,5 +130,14 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
+  ) : (
+    <DeleteSpaceAwareItemCheckModal
+      ids={models.map(({ model_id: id }) => id)}
+      jobType="trained-model"
+      canDeleteCallback={setCanDeleteModel.bind(null, true)}
+      onCloseCallback={onClose.bind(null, true)}
+      refreshJobsCallback={() => {}}
+      hasManagedJob={false}
+    />
   );
 };

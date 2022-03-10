@@ -7,9 +7,18 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient, KibanaRequest } from 'kibana/server';
-import type { JobSavedObjectService, TrainedModelJob } from './service';
-import type { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
+import type { IScopedClusterClient, KibanaRequest, SavedObjectsFindResult } from 'kibana/server';
+import type {
+  JobSavedObjectService,
+  TrainedModelJob,
+  JobObject,
+  TrainedModelObject,
+} from './service';
+import type {
+  JobType,
+  DeleteJobCheckResponse,
+  TrainedModelType,
+} from '../../common/types/saved_objects';
 
 import type { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
 import type { ResolveMlCapabilities } from '../../common/types/capabilities';
@@ -263,15 +272,21 @@ export function checksFactory(
     };
   }
 
-  async function canDeleteJobs(
+  async function canDeleteMLSpaceAwareItems(
     request: KibanaRequest,
-    jobType: JobType,
-    jobIds: string[],
+    jobType: JobType | TrainedModelType,
+    ids: string[],
     spacesEnabled: boolean,
     resolveMlCapabilities: ResolveMlCapabilities
   ) {
-    if (jobType !== 'anomaly-detector' && jobType !== 'data-frame-analytics') {
-      throw Boom.badRequest('Job type must be "anomaly-detector" or "data-frame-analytics"');
+    if (
+      jobType !== 'anomaly-detector' &&
+      jobType !== 'data-frame-analytics' &&
+      jobType !== 'trained-model'
+    ) {
+      throw Boom.badRequest(
+        'Job type must be "anomaly-detector", "data-frame-analytics" or "trained-model'
+      );
     }
 
     const mlCapabilities = await resolveMlCapabilities(request);
@@ -284,7 +299,7 @@ export function checksFactory(
       (jobType === 'data-frame-analytics' && mlCapabilities.canDeleteDataFrameAnalytics === false)
     ) {
       // user does not have access to delete jobs.
-      return jobIds.reduce((results, jobId) => {
+      return ids.reduce((results, jobId) => {
         results[jobId] = {
           canDelete: false,
           canRemoveFromSpace: false,
@@ -295,7 +310,7 @@ export function checksFactory(
 
     if (spacesEnabled === false) {
       // spaces are disabled, delete only no untagging
-      return jobIds.reduce((results, jobId) => {
+      return ids.reduce((results, jobId) => {
         results[jobId] = {
           canDelete: true,
           canRemoveFromSpace: false,
@@ -305,27 +320,36 @@ export function checksFactory(
     }
     const canCreateGlobalJobs = await jobSavedObjectService.canCreateGlobalJobs(request);
 
-    const jobObjects = await Promise.all(
-      jobIds.map((id) => jobSavedObjectService.getJobObject(jobType, id))
-    );
+    const savedObjects =
+      jobType === 'trained-model'
+        ? await Promise.all(ids.map((id) => jobSavedObjectService.getTrainedModelObject(id)))
+        : await Promise.all(ids.map((id) => jobSavedObjectService.getJobObject(jobType, id)));
 
-    return jobIds.reduce((results, jobId) => {
-      const jobObject = jobObjects.find((j) => j?.attributes.job_id === jobId);
-      if (jobObject === undefined || jobObject.namespaces === undefined) {
+    return ids.reduce((results, id) => {
+      const savedObject =
+        jobType === 'trained-model'
+          ? (savedObjects as Array<SavedObjectsFindResult<TrainedModelObject> | undefined>).find(
+              (j) => j?.attributes.model_id === id
+            )
+          : (savedObjects as Array<SavedObjectsFindResult<JobObject> | undefined>).find(
+              (j) => j?.attributes.job_id === id
+            );
+
+      if (savedObject === undefined || savedObject.namespaces === undefined) {
         // job saved object not found
-        results[jobId] = {
+        results[id] = {
           canDelete: false,
           canRemoveFromSpace: false,
         };
         return results;
       }
 
-      const { namespaces } = jobObject;
+      const { namespaces } = savedObject;
       const isGlobalJob = namespaces.includes('*');
 
       // job is in * space, user can see all spaces - delete and no option to untag
       if (canCreateGlobalJobs && isGlobalJob) {
-        results[jobId] = {
+        results[id] = {
           canDelete: true,
           canRemoveFromSpace: false,
         };
@@ -334,7 +358,7 @@ export function checksFactory(
 
       // job is in * space, user cannot see all spaces - no untagging, no deleting
       if (isGlobalJob) {
-        results[jobId] = {
+        results[id] = {
           canDelete: false,
           canRemoveFromSpace: false,
         };
@@ -347,7 +371,7 @@ export function checksFactory(
 
       // job is in individual spaces, user cannot see all of them - untag only, no delete
       if (namespaces.includes('?')) {
-        results[jobId] = {
+        results[id] = {
           canDelete: false,
           canRemoveFromSpace,
         };
@@ -355,7 +379,7 @@ export function checksFactory(
       }
 
       // job is individual spaces, user can see all of them - delete and option to untag
-      results[jobId] = {
+      results[id] = {
         canDelete: true,
         canRemoveFromSpace,
       };
@@ -363,5 +387,5 @@ export function checksFactory(
     }, {} as DeleteJobCheckResponse);
   }
 
-  return { checkStatus, canDeleteJobs };
+  return { checkStatus, canDeleteMLSpaceAwareItems };
 }

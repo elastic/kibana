@@ -34,8 +34,8 @@ export interface SyncSavedObjectResponse {
   datafeedsRemoved: SyncResult;
 }
 
-export interface CanDeleteJobResponse {
-  [jobId: string]: {
+export interface CanDeleteMLSpaceAwareItemsResponse {
+  [id: string]: {
     canDelete: boolean;
     canRemoveFromSpace: boolean;
   };

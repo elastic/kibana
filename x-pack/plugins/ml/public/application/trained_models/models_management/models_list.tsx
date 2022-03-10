@@ -124,8 +124,7 @@ export const ModelsList: FC<Props> = ({
   const trainedModelsApiService = useTrainedModelsApiService();
   const savedObjectsApiService = useSavedObjectsApiService();
 
-  const { displayErrorToast, displayDangerToast, displaySuccessToast } =
-    useToastNotificationService();
+  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
@@ -135,7 +134,6 @@ export const ModelsList: FC<Props> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
   const navigateToPath = useNavigateToPath();
@@ -260,6 +258,7 @@ export const ModelsList: FC<Props> = ({
           defaultMessage: 'Fetch model stats failed',
         })
       );
+      return false;
     }
   }, []);
 
@@ -280,57 +279,6 @@ export const ModelsList: FC<Props> = ({
       name: v,
     }));
   }, [items]);
-
-  async function prepareModelsForDeletion(models: ModelItem[]) {
-    // Fetch model stats to check associated pipelines
-    if (await fetchModelsStats(models)) {
-      setModelsToDelete(models as ModelItemFull[]);
-    } else {
-      displayDangerToast(
-        i18n.translate('xpack.ml.trainedModels.modelsList.unableToDeleteModelsErrorMessage', {
-          defaultMessage: 'Unable to delete models',
-        })
-      );
-    }
-  }
-
-  /**
-   * Deletes the models marked for deletion.
-   */
-  async function deleteModels() {
-    const modelsToDeleteIds = modelsToDelete.map((model) => model.model_id);
-
-    try {
-      await Promise.all(
-        modelsToDeleteIds.map((modelId) => trainedModelsApiService.deleteTrainedModel(modelId))
-      );
-      setItems(
-        items.filter(
-          (model) => !modelsToDelete.some((toDelete) => toDelete.model_id === model.model_id)
-        )
-      );
-      displaySuccessToast(
-        i18n.translate('xpack.ml.trainedModels.modelsList.successfullyDeletedMessage', {
-          defaultMessage:
-            '{modelsCount, plural, one {Model {modelsToDeleteIds}} other {# models}} {modelsCount, plural, one {has} other {have}} been successfully deleted',
-          values: {
-            modelsCount: modelsToDeleteIds.length,
-            modelsToDeleteIds: modelsToDeleteIds.join(', '),
-          },
-        })
-      );
-    } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
-          defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
-          values: {
-            modelsCount: modelsToDeleteIds.length,
-          },
-        })
-      );
-    }
-  }
 
   /**
    * Table actions
@@ -512,8 +460,8 @@ export const ModelsList: FC<Props> = ({
           type: 'icon',
           color: 'danger',
           isPrimary: false,
-          onClick: async (model) => {
-            await prepareModelsForDeletion([model]);
+          onClick: (model) => {
+            setModelsToDelete([model as ModelItemFull]);
           },
           available: (item) => canDeleteTrainedModels && !isBuiltInModel(item),
           enabled: (item) => {
@@ -684,7 +632,10 @@ export const ModelsList: FC<Props> = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton color="danger" onClick={prepareModelsForDeletion.bind(null, selectedModels)}>
+          <EuiButton
+            color="danger"
+            onClick={setModelsToDelete.bind(null, selectedModels as ModelItemFull[])}
+          >
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel"
               defaultMessage="Delete"
@@ -806,11 +757,11 @@ export const ModelsList: FC<Props> = ({
       </div>
       {modelsToDelete.length > 0 && (
         <DeleteModelsModal
-          onClose={async (deletionApproved) => {
-            if (deletionApproved) {
-              await deleteModels();
-            }
+          onClose={(refreshList) => {
             setModelsToDelete([]);
+            if (refreshList) {
+              fetchModelsData();
+            }
           }}
           models={modelsToDelete}
         />

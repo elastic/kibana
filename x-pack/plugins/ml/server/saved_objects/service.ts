@@ -401,7 +401,7 @@ export function jobSavedObjectServiceFactory(
       return true;
     }
     const { authorizationCheck } = authorizationProvider(authorization);
-    return (await authorizationCheck(request)).canCreateGlobally;
+    return (await authorizationCheck(request)).canCreateJobsGlobally;
   }
 
   async function getTrainedModelObject(
