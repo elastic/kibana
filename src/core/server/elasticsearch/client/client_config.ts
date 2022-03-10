@@ -62,7 +62,7 @@ export function parseClientOptions(
     // fixes https://github.com/elastic/kibana/issues/101944
     disablePrototypePoisoningProtection: true,
     agent: {
-      maxSockets: config.maxSockets ?? Infinity,
+      maxSockets: config.maxSockets,
       keepAlive: config.keepAlive ?? true,
     },
     compression: config.compression,
