@@ -364,7 +364,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       await waitForEvents(createdRule.id, 'alerting', new Map([['execute', { gte: 2 }]]));
 
       // set the date end to date start - should filter out all execution logs
-      const earlierDateStart = new Date(Date.now() - 900000).toISOString();
+      const earlierDateStart = new Date(new Date(dateStart).getTime() - 900000).toISOString();
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
           createdRule.id
