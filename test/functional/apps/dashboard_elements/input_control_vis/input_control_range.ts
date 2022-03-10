@@ -11,8 +11,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
   const find = getService('find');
   const security = getService('security');
   const PageObjects = getPageObjects(['visualize']);
@@ -22,8 +22,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('input control range', () => {
     before(async () => {
       await PageObjects.visualize.initTests();
-      await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
+      await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin', 'superuser']);
       // await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
@@ -39,7 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visEditor.inputControlSubmit();
       const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
       expect(controlFilters).to.have.length(1);
-      // expect(await controlFilters[0].getVisibleText()).to.equal('hour_of_day: 7 to 10');
       expect(await controlFilters[0].getVisibleText()).to.equal('hour_of_day: Warning');
     });
 
@@ -51,7 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visEditor.inputControlSubmit();
       const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
       expect(controlFilters).to.have.length(2);
-      // expect(await controlFilters[1].getVisibleText()).to.equal('AvgTicketPrice: $400 to $999');
       expect(await controlFilters[1].getVisibleText()).to.equal('AvgTicketPrice: Warning');
     });
 
@@ -59,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
+      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await security.testUser.restoreDefaults();
     });
   });
