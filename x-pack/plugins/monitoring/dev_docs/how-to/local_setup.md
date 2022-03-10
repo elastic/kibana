@@ -24,7 +24,7 @@ This is definitely the simplest way to get some data to explore, but internal co
 
 ## Yarn and metricbeat collection
 
-To setup stack monitoring with [metricbeat collection](../reference/terminology.md#metricbeat-collection), first start elasticsearch with a trial license.
+To set up stack monitoring with [metricbeat collection](../reference/terminology.md#metricbeat-collection), first start elasticsearch with a trial license.
 
 ```shell
 yarn es snapshot --license trial
