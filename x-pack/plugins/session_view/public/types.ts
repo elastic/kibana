@@ -63,3 +63,12 @@ export interface DetailPanelProcessLeader {
   entryMetaSourceIp: string;
   executable: string;
 }
+
+export interface SessionViewStart {
+  getSessionViewTableProcessTree: ({
+    onOpenSessionView,
+  }: {
+    onOpenSessionView: (eventId: string) => void;
+  }) => JSX.Element;
+  getSessionView: (sessionEntityId: string) => JSX.Element;
+}

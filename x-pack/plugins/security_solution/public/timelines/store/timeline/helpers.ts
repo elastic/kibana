@@ -287,6 +287,46 @@ export const updateGraphEventId = ({
   };
 };
 
+export const updateSessionViewEventId = ({
+  id,
+  eventId,
+  timelineById,
+}: {
+  id: string;
+  eventId: string;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      sessionViewId: eventId,
+    },
+  };
+};
+
+export const updateSessionViewSessionId = ({
+  id,
+  eventId,
+  timelineById,
+}: {
+  id: string;
+  eventId: string;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      sessionViewSessionId: eventId,
+    },
+  };
+};
+
 const queryMatchCustomizer = (dp1: QueryMatch, dp2: QueryMatch) => {
   if (dp1.field === dp2.field && dp1.value === dp2.value && dp1.operator === dp2.operator) {
     return true;

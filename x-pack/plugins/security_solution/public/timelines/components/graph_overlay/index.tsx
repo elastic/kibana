@@ -28,12 +28,17 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
+import { useKibana } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
-import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
+import {
+  updateTimelineGraphEventId,
+  updateTimelineSessionViewEventId,
+  updateTimelineSessionViewSessionId,
+} from '../../../timelines/store/timeline/actions';
 import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import {
@@ -68,6 +73,12 @@ const StyledResolver = styled(Resolver)`
 
 const FullScreenButtonIcon = styled(EuiButtonIcon)`
   margin: 4px 0 4px 0;
+`;
+
+const ScrollableFlexItem = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
+  overflow: hidden;
+  width: 100%;
 `;
 
 interface OwnProps {
@@ -131,6 +142,14 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
   const graphEventId = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
   );
+  const { sessionView } = useKibana().services;
+  const sessionViewId = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewId
+  );
+  const sessionViewMain = useMemo(() => {
+    return sessionViewId !== null ? sessionView.getSessionView(sessionViewId) : null;
+  }, [sessionView, sessionViewId]);
+
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
   const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
@@ -180,6 +199,8 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
       }
     }
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
+    dispatch(updateTimelineSessionViewEventId({ id: timelineId, eventId: null }));
+    dispatch(updateTimelineSessionViewSessionId({ id: timelineId, eventId: null }));
   }, [dispatch, timelineId, setTimelineFullScreen, setGlobalFullScreen]);
 
   useEffect(() => {
@@ -219,7 +240,18 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
     [defaultDataView.patternList, isInTimeline, timelinePatterns]
   );
 
-  if (fullScreen && !isInTimeline) {
+  if (!isInTimeline && sessionViewId !== null) {
+    return (
+      <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
+            {i18n.CLOSE_SESSION}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>
+      </EuiFlexGroup>
+    );
+  } else if (fullScreen && !isInTimeline) {
     return (
       <FullScreenOverlayContainer data-test-subj="overlayContainer">
         <EuiHorizontalRule margin="none" />

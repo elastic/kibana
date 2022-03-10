@@ -105,6 +105,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
+      sessionViewId,
       showCheckboxes,
       sort,
     } = defaultModel,
@@ -155,11 +156,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-  const graphOverlay = useMemo(
-    () =>
-      graphEventId != null && graphEventId.length > 0 ? <GraphOverlay timelineId={id} /> : null,
-    [graphEventId, id]
-  );
+  const graphOverlay = useMemo(() => {
+    const shouldShowOverlay =
+      (graphEventId != null && graphEventId.length > 0) || sessionViewId !== null;
+    return shouldShowOverlay ? <GraphOverlay timelineId={id} /> : null;
+  }, [graphEventId, id, sessionViewId]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
