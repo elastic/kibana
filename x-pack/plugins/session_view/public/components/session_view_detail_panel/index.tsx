@@ -36,7 +36,7 @@ export const SessionViewDetailPanel = ({
   const [selectedTabId, setSelectedTabId] = useState('process');
   const processDetail = useMemo(() => getDetailPanelProcess(selectedProcess), [selectedProcess]);
 
-  const getAlertCount = useCallback(() => {
+  const alertsCount = useMemo(() => {
     if (!alerts) {
       return 0;
     }
@@ -69,7 +69,7 @@ export const SessionViewDetailPanel = ({
         }),
         append: (
           <EuiNotificationBadge className="eui-alignCenter" size="m">
-            {getAlertCount()}
+            {alertsCount}
           </EuiNotificationBadge>
         ),
         disabled: !hasAlerts,
@@ -85,7 +85,7 @@ export const SessionViewDetailPanel = ({
     ];
   }, [
     alerts,
-    getAlertCount,
+    alertsCount,
     processDetail,
     selectedProcess.events,
     onProcessSelected,

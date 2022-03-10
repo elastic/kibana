@@ -24,10 +24,6 @@ interface DetailPanelAlertTabDeps {
 const VIEW_MODE_LIST = 'listView';
 const VIEW_MODE_GROUP = 'groupView';
 
-export type AlertsGroup = {
-  [key: string]: ProcessEvent[];
-};
-
 /**
  * Host Panel of  session view detail panel.
  */

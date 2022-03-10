@@ -216,6 +216,7 @@ export const useProcessTree = ({
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
   const [processedPages, setProcessedPages] = useState<ProcessEventsPage[]>([]);
+  const [alertsProcessed, setAlertsProcessed] = useState(false);
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
@@ -255,10 +256,11 @@ export const useProcessTree = ({
   useEffect(() => {
     // currently we are loading a single page of alerts, with no pagination
     // so we only need to add these alert events to processMap once.
-    updateProcessMap(processMap, alerts);
-    // omitting processMap to avoid a infinite loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alerts]);
+    if (!alertsProcessed) {
+      updateProcessMap(processMap, alerts);
+      setAlertsProcessed(true);
+    }
+  }, [processMap, alerts, alertsProcessed]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));
