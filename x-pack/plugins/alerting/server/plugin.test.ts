@@ -40,7 +40,12 @@ describe('Alerting Plugin', () => {
         maxEphemeralActionsPerAlert: 10,
         defaultRuleTaskTimeout: '5m',
         cancelAlertsOnRuleTimeout: true,
-        minimumScheduleInterval: '1m',
+        rules: {
+          minimumScheduleInterval: {
+            value: '1m',
+            enforce: false,
+          },
+        },
       });
       plugin = new AlertingPlugin(context);
 
@@ -76,7 +81,12 @@ describe('Alerting Plugin', () => {
         maxEphemeralActionsPerAlert: 10,
         defaultRuleTaskTimeout: '5m',
         cancelAlertsOnRuleTimeout: true,
-        minimumScheduleInterval: '1m',
+        rules: {
+          minimumScheduleInterval: {
+            value: '1m',
+            enforce: false,
+          },
+        },
       });
       plugin = new AlertingPlugin(context);
 
@@ -111,7 +121,12 @@ describe('Alerting Plugin', () => {
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '5m',
         cancelAlertsOnRuleTimeout: true,
-        minimumScheduleInterval: '1m',
+        rules: {
+          minimumScheduleInterval: {
+            value: '1m',
+            enforce: false,
+          },
+        },
       });
       plugin = new AlertingPlugin(context);
 
@@ -125,7 +140,9 @@ describe('Alerting Plugin', () => {
         statusService: statusServiceMock.createSetupContract(),
       });
 
-      expect(setupContract.getConfig()).toEqual({ minimumScheduleInterval: '1m' });
+      expect(setupContract.getConfig()).toEqual({
+        minimumScheduleInterval: { value: '1m', enforce: false },
+      });
     });
 
     describe('registerType()', () => {
@@ -232,7 +249,12 @@ describe('Alerting Plugin', () => {
           maxEphemeralActionsPerAlert: 10,
           defaultRuleTaskTimeout: '5m',
           cancelAlertsOnRuleTimeout: true,
-          minimumScheduleInterval: '1m',
+          rules: {
+            minimumScheduleInterval: {
+              value: '1m',
+              enforce: false,
+            },
+          },
         });
         const plugin = new AlertingPlugin(context);
 
@@ -275,7 +297,12 @@ describe('Alerting Plugin', () => {
           maxEphemeralActionsPerAlert: 10,
           defaultRuleTaskTimeout: '5m',
           cancelAlertsOnRuleTimeout: true,
-          minimumScheduleInterval: '1m',
+          rules: {
+            minimumScheduleInterval: {
+              value: '1m',
+              enforce: false,
+            },
+          },
         });
         const plugin = new AlertingPlugin(context);
 
@@ -332,7 +359,12 @@ describe('Alerting Plugin', () => {
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '5m',
         cancelAlertsOnRuleTimeout: true,
-        minimumScheduleInterval: '1m',
+        rules: {
+          minimumScheduleInterval: {
+            value: '1m',
+            enforce: false,
+          },
+        },
       });
       const plugin = new AlertingPlugin(context);
 

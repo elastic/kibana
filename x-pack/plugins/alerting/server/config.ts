@@ -22,8 +22,16 @@ export const configSchema = schema.object({
   }),
   defaultRuleTaskTimeout: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
-  minimumScheduleInterval: schema.string({ validate: validateDurationSchema, defaultValue: '1m' }),
+  rules: schema.object({
+    minimumScheduleInterval: schema.object({
+      value: schema.string({
+        validate: validateDurationSchema,
+        defaultValue: '1m',
+      }),
+      enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
+    }),
+  }),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;
-export type PublicAlertingConfig = Pick<AlertingConfig, 'minimumScheduleInterval'>;
+export type AlertingRulesConfig = AlertingConfig['rules'];

@@ -57,7 +57,7 @@ import {
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
 import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
-import { AlertingConfig, PublicAlertingConfig } from './config';
+import { AlertingConfig, AlertingRulesConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
@@ -98,7 +98,7 @@ export interface PluginSetupContract {
     >
   ): void;
   getSecurityHealth: () => Promise<SecurityHealth>;
-  getConfig: () => PublicAlertingConfig;
+  getConfig: () => AlertingRulesConfig;
 }
 
 export interface PluginStartContract {
@@ -201,7 +201,7 @@ export class AlertingPlugin {
       taskRunnerFactory: this.taskRunnerFactory,
       licenseState: this.licenseState,
       licensing: plugins.licensing,
-      minimumScheduleInterval: this.config.minimumScheduleInterval,
+      minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -305,9 +305,7 @@ export class AlertingPlugin {
         );
       },
       getConfig: () => {
-        return {
-          minimumScheduleInterval: alertingConfig.minimumScheduleInterval,
-        };
+        return alertingConfig.rules;
       },
     };
   }
@@ -365,7 +363,7 @@ export class AlertingPlugin {
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
-      minimumScheduleInterval: this.config.minimumScheduleInterval,
+      minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {

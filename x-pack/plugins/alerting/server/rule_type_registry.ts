@@ -30,13 +30,14 @@ import {
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
+import { AlertingRulesConfig } from '.';
 
 export interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
   licenseState: ILicenseState;
   licensing: LicensingPluginSetup;
-  minimumScheduleInterval: string;
+  minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
 }
 
 export interface RegistryRuleType
@@ -130,7 +131,7 @@ export class RuleTypeRegistry {
   private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
-  private readonly minimumScheduleInterval: string;
+  private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly licensing: LicensingPluginSetup;
 
   constructor({
@@ -220,7 +221,7 @@ export class RuleTypeRegistry {
       }
 
       const defaultIntervalInMs = parseDuration(ruleType.defaultScheduleInterval);
-      const minimumIntervalInMs = parseDuration(this.minimumScheduleInterval);
+      const minimumIntervalInMs = parseDuration(this.minimumScheduleInterval.value);
       if (defaultIntervalInMs < minimumIntervalInMs) {
         throw new Error(
           i18n.translate(
@@ -230,7 +231,7 @@ export class RuleTypeRegistry {
                 'Rule type "{id}" cannot specify a default interval less than {minimumInterval}.',
               values: {
                 id: ruleType.id,
-                minimumInterval: this.minimumScheduleInterval,
+                minimumInterval: this.minimumScheduleInterval.value,
               },
             }
           )
