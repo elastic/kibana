@@ -80,8 +80,8 @@ describe('SpaceListInternal', () => {
   function getButton(wrapper: ReactWrapper) {
     return wrapper.find('EuiButtonEmpty');
   }
-  function getListClickTarget(wrapper: ReactWrapper) {
-    return wrapper.find('[data-test-subj="space-avatar-default"]');
+  async function getListClickTarget(wrapper: ReactWrapper) {
+    return (await wrapper.find('[data-test-subj="space-avatar-alpha"]')).first();
   }
 
   describe('using default properties', () => {
@@ -244,7 +244,7 @@ describe('SpaceListInternal', () => {
         expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(getButton(wrapper)).toHaveLength(0);
 
-        getListClickTarget(wrapper).simulate('click');
+        (await getListClickTarget(wrapper)).simulate('click');
         expect(props.listOnClick).toHaveBeenCalledTimes(1);
       });
 
@@ -264,7 +264,7 @@ describe('SpaceListInternal', () => {
         expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(button.text()).toEqual('show less');
 
-        getListClickTarget(wrapper).simulate('click');
+        (await getListClickTarget(wrapper)).simulate('click');
         expect(props.listOnClick).toHaveBeenCalledTimes(1);
       });
 
