@@ -16,7 +16,6 @@ import type { EncryptedTelemetryPayload } from '../../common/types';
 import { isReportIntervalExpired } from '../../common/is_report_interval_expired';
 
 export class TelemetrySender {
-  private readonly telemetryService: TelemetryService;
   private lastReported?: number;
   private readonly storage: Storage;
   private sendIfDue$?: Subscription;
@@ -26,8 +25,10 @@ export class TelemetrySender {
     return 60 * (1000 * Math.min(Math.pow(2, retryCount), 64)); // 120s, 240s, 480s, 960s, 1920s, 3840s, 3840s, 3840s
   }
 
-  constructor(telemetryService: TelemetryService) {
-    this.telemetryService = telemetryService;
+  constructor(
+    private readonly telemetryService: TelemetryService,
+    private readonly refreshConfig: () => Promise<void>
+  ) {
     this.storage = new Storage(window.localStorage);
 
     const attributes = this.storage.get(LOCALSTORAGE_KEY);
@@ -79,8 +80,11 @@ export class TelemetrySender {
    * @returns `true` if a new report should be sent. `false` otherwise.
    */
   private shouldSendReport = async (): Promise<boolean> => {
-    if (this.isActiveWindow() && this.telemetryService.canSendTelemetry()) {
-      return await this.isReportDue();
+    if (this.isActiveWindow()) {
+      await this.refreshConfig();
+      if (this.telemetryService.canSendTelemetry()) {
+        return await this.isReportDue();
+      }
     }
 
     return false;
