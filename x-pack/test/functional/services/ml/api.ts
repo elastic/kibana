@@ -18,7 +18,11 @@ import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constan
 import { DataFrameTaskStateType } from '../../../../plugins/ml/common/types/data_frame_analytics';
 import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/common/constants/data_frame_analytics';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
+import {
+  JobType,
+  ML_JOB_SAVED_OBJECT_TYPE,
+  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+} from '../../../../plugins/ml/common/types/saved_objects';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
@@ -1002,7 +1006,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove })
         .expect(200);
 
-      expect(body).to.eql({ [jobId]: { success: true, type: 'ml-job' } });
+      expect(body).to.eql({ [jobId]: { success: true, type: ML_JOB_SAVED_OBJECT_TYPE } });
     },
 
     async assertJobSpaces(jobId: string, jobType: JobType, expectedSpaces: string[]) {
@@ -1021,6 +1025,42 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         // section should be missing or if it exists, it should not show the jobId
         if (jobType in body) {
           expect(body[jobType]).to.not.have.property(jobId);
+        }
+      }
+    },
+
+    async updateTrainedModelSpaces(
+      modelId: string,
+      spacesToAdd: string[],
+      spacesToRemove: string[],
+      space?: string
+    ) {
+      const { body } = await kbnSupertest
+        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/update_trained_models_spaces`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send({ modelIds: [modelId], spacesToAdd, spacesToRemove })
+        .expect(200);
+
+      expect(body).to.eql({
+        [modelId]: { success: true, type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE },
+      });
+    },
+
+    async assertTrainedModelSpaces(modelId: string, expectedSpaces: string[]) {
+      const { body } = await kbnSupertest
+        .get('/api/ml/saved_objects/trained_models_spaces')
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+      if (expectedSpaces.length > 0) {
+        // Should list expected spaces correctly
+        expect(body).to.have.property('trainedModels');
+        expect(body.trainedModels).to.have.property(modelId);
+        expect(body.trainedModels[modelId]).to.eql(expectedSpaces);
+      } else {
+        // The job is expected to be not connected to any space. So either the 'trainedModels'
+        // section should be missing or if it exists, it should not show the modelId
+        if ('trainedModels' in body) {
+          expect(body.trainedModels).to.not.have.property(modelId);
         }
       }
     },
