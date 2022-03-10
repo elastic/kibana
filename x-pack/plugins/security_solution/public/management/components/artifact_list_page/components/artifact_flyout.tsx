@@ -152,6 +152,7 @@ export interface ArtifactFlyoutProps {
   apiClient: ExceptionsListApiClient;
   FormComponent: React.ComponentType<ArtifactFormComponentProps>;
   onSuccess(): void;
+  onClose(): void;
   submitHandler?: (
     item: ArtifactFormComponentOnChangeCallbackProps['item'],
     mode: ArtifactFormComponentProps['mode']
@@ -176,6 +177,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     item,
     FormComponent,
     onSuccess,
+    onClose,
     submitHandler,
     labels: _labels = {},
     'data-test-subj': dataTestSubj,
@@ -251,7 +253,9 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
 
       // `undefined` will cause params to be dropped from url
       setUrlParams({ itemId: undefined, show: undefined }, true);
-    }, [isSubmittingData, setUrlParams]);
+
+      onClose();
+    }, [isSubmittingData, onClose, setUrlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
       ({ item: updatedItem, isValid }) => {

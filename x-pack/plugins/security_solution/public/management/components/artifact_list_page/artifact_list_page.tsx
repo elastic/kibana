@@ -208,7 +208,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setSelectedItemForDelete(undefined);
     }, []);
 
+    const handleArtifactFlyoutOnClose = useCallback(() => {
+      setSelectedItemForEdit(undefined);
+    }, []);
+
     const handleArtifactFlyoutOnSuccess = useCallback(() => {
+      setSelectedItemForEdit(undefined);
       refetchListData();
     }, [refetchListData]);
 
@@ -239,6 +244,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             apiClient={apiClient}
             item={selectedItemForEdit}
             onSuccess={handleArtifactFlyoutOnSuccess}
+            onClose={handleArtifactFlyoutOnClose}
             FormComponent={ArtifactFormComponent}
             labels={labels}
             size={flyoutSize}
