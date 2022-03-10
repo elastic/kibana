@@ -39,7 +39,7 @@ verify_no_git_changes() {
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
       git add -u -- . ':!.bazelrc'
-      git commit -m
+      git commit -m "$NEW_COMMIT_MESSAGE"
       git push
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
