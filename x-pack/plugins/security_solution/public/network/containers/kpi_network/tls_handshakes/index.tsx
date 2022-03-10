@@ -30,7 +30,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiTlsHandshakesQuery';
+export const ID = 'networkKpiTlsHandshakesQuery';
 
 export interface NetworkKpiTlsHandshakesArgs {
   tlsHandshakes: number;

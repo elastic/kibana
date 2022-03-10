@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiLoadingSpinner, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -38,8 +38,9 @@ export const NetworkKpiBaseComponent = React.memo<{
   from: string;
   to: string;
   narrowDateRange: UpdateDateRange;
+  setQuerySkip: (skip: boolean) => void;
 }>(
-  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange }) => {
+  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange, setQuerySkip }) => {
     const { cases } = useKibana().services;
     const CasesContext = cases.getCasesContext();
     const userPermissions = useGetUserCasesPermissions();
@@ -51,18 +52,10 @@ export const NetworkKpiBaseComponent = React.memo<{
       id,
       from,
       to,
-      narrowDateRange
+      narrowDateRange,
+      setQuerySkip,
+      loading
     );
-
-    if (loading) {
-      return (
-        <FlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </FlexGroup>
-      );
-    }
 
     return (
       <EuiFlexGroup wrap>

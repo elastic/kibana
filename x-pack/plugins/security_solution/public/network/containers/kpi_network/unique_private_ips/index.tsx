@@ -31,7 +31,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiUniquePrivateIpsQuery';
+export const ID = 'networkKpiUniquePrivateIpsQuery';
 
 export interface NetworkKpiUniquePrivateIpsArgs {
   uniqueDestinationPrivateIps: number;

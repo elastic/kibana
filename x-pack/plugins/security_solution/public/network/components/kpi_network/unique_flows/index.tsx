@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { kpiUniqueFlowIds } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_flow_ids';
-import { useNetworkKpiUniqueFlows } from '../../../containers/kpi_network/unique_flows';
+import { useNetworkKpiUniqueFlows, ID } from '../../../containers/kpi_network/unique_flows';
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
+import { useQueryToggle } from '../../../../common/components/query_toggle';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
@@ -37,12 +38,14 @@ const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip && !toggleStatus);
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniqueFlows({
     filterQuery,
     endDate: to,
     indexNames,
     startDate: from,
-    skip,
+    skip: querySkip,
   });
 
   return (
@@ -57,6 +60,7 @@ const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
     />
   );
 };

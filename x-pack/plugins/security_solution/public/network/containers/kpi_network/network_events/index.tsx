@@ -30,7 +30,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiNetworkEventsQuery';
+export const ID = 'networkKpiNetworkEventsQuery';
 
 export interface NetworkKpiNetworkEventsArgs {
   networkEvents: number;

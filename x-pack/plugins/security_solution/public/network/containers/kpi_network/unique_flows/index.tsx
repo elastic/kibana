@@ -29,7 +29,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiUniqueFlowsQuery';
+export const ID = 'networkKpiUniqueFlowsQuery';
 
 export interface NetworkKpiUniqueFlowsArgs {
   uniqueFlowId: number;

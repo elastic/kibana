@@ -30,7 +30,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiDnsQuery';
+export const ID = 'networkKpiDnsQuery';
 
 export interface NetworkKpiDnsArgs {
   dnsQueries: number;

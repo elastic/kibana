@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { useNetworkKpiUniquePrivateIps } from '../../../containers/kpi_network/unique_private_ips';
+import {
+  useNetworkKpiUniquePrivateIps,
+  ID,
+} from '../../../containers/kpi_network/unique_private_ips';
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
@@ -17,6 +20,7 @@ import { kpiUniquePrivateIpsSourceMetric } from '../../../../common/components/v
 import { kpiUniquePrivateIpsDestinationMetric } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_destination_metric';
 import { kpiUniquePrivateIpsArea } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_area';
 import { kpiUniquePrivateIpsBar } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_bar';
+import { useQueryToggle } from '../../../../common/components/query_toggle';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];
@@ -62,12 +66,14 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip && !toggleStatus);
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniquePrivateIps({
     filterQuery,
     endDate: to,
     indexNames,
     startDate: from,
-    skip,
+    skip: querySkip,
   });
 
   return (
@@ -82,6 +88,7 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
     />
   );
 };

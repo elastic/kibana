@@ -7,16 +7,18 @@
 
 import { ScaleType, Rotation, BrushEndListener, ElementClickListener } from '@elastic/charts';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiIcon,
   EuiTitle,
   IconType,
 } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -34,6 +36,7 @@ import { InspectButton } from '../inspect';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { LensAttributes } from '../visualization_actions/types';
+import { useQueryToggle } from '../query_toggle';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -78,11 +81,13 @@ export interface StatItems {
 export interface StatItemsProps extends StatItems {
   areaChart?: ChartSeriesData[];
   barChart?: ChartSeriesData[];
+  loading: boolean;
   from: string;
   id: string;
   narrowDateRange: UpdateDateRange;
   to: string;
   showInspectButton?: boolean;
+  setQuerySkip: (skip: boolean) => void;
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
@@ -168,39 +173,34 @@ export const addValueToBarChart = (
     ];
   }, []);
 };
-
+const StyledTitle = styled.h6`
+  color: #993366;
+  line-height: 200%;
+`;
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
   data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse,
   id: string,
   from: string,
   to: string,
-  narrowDateRange: UpdateDateRange
-): StatItemsProps[] => {
-  const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
-
-  useEffect(() => {
-    setStatItemsProps(
-      mappings.map((stat) => {
-        return {
-          ...stat,
-          areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
-          barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
-          fields: addValueToFields(stat.fields, data),
-          id,
-          key: `kpi-summary-${stat.key}`,
-          statKey: `${stat.key}`,
-          from,
-          to,
-          narrowDateRange,
-        };
-      })
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
-
-  return statItemsProps;
-};
+  narrowDateRange: UpdateDateRange,
+  setQuerySkip: (skip: boolean) => void,
+  loading: boolean
+): StatItemsProps[] =>
+  mappings.map((stat) => ({
+    ...stat,
+    areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
+    barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
+    fields: addValueToFields(stat.fields, data),
+    id,
+    key: `kpi-summary-${stat.key}`,
+    statKey: `${stat.key}`,
+    from,
+    to,
+    narrowDateRange,
+    setQuerySkip,
+    loading,
+  }));
 
 export const StatItemsComponent = React.memo<StatItemsProps>(
   ({
@@ -213,6 +213,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     from,
     grow,
     id,
+    loading = false,
     showInspectButton,
     index,
     narrowDateRange,
@@ -220,7 +221,9 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     to,
     barChartLensAttributes,
     areaChartLensAttributes,
+    setQuerySkip,
   }) => {
+    console.log(`statItem ${id} loading: ${loading}`);
     const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
@@ -238,104 +241,145 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       [from, to]
     );
 
+    const { toggleStatus, setToggleStatus } = useQueryToggle(id);
+
+    const toggleQuery = useCallback(
+      (status: boolean) => {
+        setToggleStatus(status);
+        // toggle on = skipQuery false
+        console.log('toggleQuery');
+        setQuerySkip(!status);
+      },
+      [setQuerySkip, setToggleStatus]
+    );
+
     return (
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
         <EuiPanel hasBorder>
           <EuiFlexGroup gutterSize={'none'}>
             <EuiFlexItem>
-              <EuiTitle size="xxxs">
-                <h6>{description}</h6>
-              </EuiTitle>
+              <EuiFlexGroup gutterSize={'none'}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="text"
+                    size="xs"
+                    display="empty"
+                    title={toggleStatus ? 'Open' : 'Closed'}
+                    aria-label={toggleStatus ? 'Open' : 'Closed'}
+                    iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
+                    onClick={() => toggleQuery(!toggleStatus)}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="xxxs">
+                    <StyledTitle>{description}</StyledTitle>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-            {showInspectButton && (
+            {showInspectButton && toggleStatus && !loading && (
               <EuiFlexItem grow={false}>
                 <InspectButton queryId={id} title={`KPI ${description}`} inspectIndex={index} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
+          {loading && (
+            <EuiFlexGroup justifyContent="center" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="l" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+          {toggleStatus && !loading && (
+            <>
+              <EuiFlexGroup>
+                {fields.map((field) => (
+                  <FlexItem key={`stat-items-field-${field.key}`}>
+                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                      {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
+                        <FlexItem grow={false}>
+                          <EuiIcon
+                            type={field.icon}
+                            color={field.color}
+                            size="l"
+                            data-test-subj="stat-icon"
+                          />
+                        </FlexItem>
+                      )}
 
-          <EuiFlexGroup>
-            {fields.map((field) => (
-              <FlexItem key={`stat-items-field-${field.key}`}>
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
-                    <FlexItem grow={false}>
-                      <EuiIcon
-                        type={field.icon}
-                        color={field.color}
-                        size="l"
-                        data-test-subj="stat-icon"
+                      <FlexItem>
+                        <HoverVisibilityContainer
+                          targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}
+                        >
+                          <StatValue>
+                            <p data-test-subj="stat-title">
+                              {field.value != null
+                                ? field.value.toLocaleString()
+                                : getEmptyTagValue()}{' '}
+                              {field.description}
+                            </p>
+                          </StatValue>
+                          {field.lensAttributes && timerange && (
+                            <VisualizationActions
+                              vizType={`${field.key}-metric`}
+                              lensAttributes={field.lensAttributes}
+                              queryId={id}
+                              inspectIndex={index}
+                              timerange={timerange}
+                              title={`KPI ${description}`}
+                              className="viz-actions"
+                            />
+                          )}
+                        </HoverVisibilityContainer>
+                      </FlexItem>
+                    </EuiFlexGroup>
+                  </FlexItem>
+                ))}
+              </EuiFlexGroup>
+
+              {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
+              <EuiFlexGroup>
+                {enableBarChart && (
+                  <FlexItem>
+                    <BarChart
+                      barChart={barChart}
+                      configs={barchartConfigs()}
+                      visualizationActionsOptions={{
+                        lensAttributes: barChartLensAttributes,
+                        queryId: id,
+                        inspectIndex: index,
+                        timerange,
+                        title: `KPI ${description}`,
+                        vizType: 'bar_horizontal_stacked',
+                      }}
+                    />
+                  </FlexItem>
+                )}
+
+                {enableAreaChart && from != null && to != null && (
+                  <>
+                    <FlexItem>
+                      <AreaChart
+                        areaChart={areaChart}
+                        configs={areachartConfigs({
+                          xTickFormatter: histogramDateTimeFormatter([from, to]),
+                          onBrushEnd: narrowDateRange,
+                        })}
+                        visualizationActionsOptions={{
+                          lensAttributes: areaChartLensAttributes,
+                          queryId: id,
+                          inspectIndex: index,
+                          timerange,
+                          title: `KPI ${description}`,
+                          vizType: 'area',
+                        }}
                       />
                     </FlexItem>
-                  )}
-
-                  <FlexItem>
-                    <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
-                      <StatValue>
-                        <p data-test-subj="stat-title">
-                          {field.value != null ? field.value.toLocaleString() : getEmptyTagValue()}{' '}
-                          {field.description}
-                        </p>
-                      </StatValue>
-                      {field.lensAttributes && timerange && (
-                        <VisualizationActions
-                          vizType={`${field.key}-metric`}
-                          lensAttributes={field.lensAttributes}
-                          queryId={id}
-                          inspectIndex={index}
-                          timerange={timerange}
-                          title={`KPI ${description}`}
-                          className="viz-actions"
-                        />
-                      )}
-                    </HoverVisibilityContainer>
-                  </FlexItem>
-                </EuiFlexGroup>
-              </FlexItem>
-            ))}
-          </EuiFlexGroup>
-
-          {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
-          <EuiFlexGroup>
-            {enableBarChart && (
-              <FlexItem>
-                <BarChart
-                  barChart={barChart}
-                  configs={barchartConfigs()}
-                  visualizationActionsOptions={{
-                    lensAttributes: barChartLensAttributes,
-                    queryId: id,
-                    inspectIndex: index,
-                    timerange,
-                    title: `KPI ${description}`,
-                    vizType: 'bar_horizontal_stacked',
-                  }}
-                />
-              </FlexItem>
-            )}
-
-            {enableAreaChart && from != null && to != null && (
-              <>
-                <FlexItem>
-                  <AreaChart
-                    areaChart={areaChart}
-                    configs={areachartConfigs({
-                      xTickFormatter: histogramDateTimeFormatter([from, to]),
-                      onBrushEnd: narrowDateRange,
-                    })}
-                    visualizationActionsOptions={{
-                      lensAttributes: areaChartLensAttributes,
-                      queryId: id,
-                      inspectIndex: index,
-                      timerange,
-                      title: `KPI ${description}`,
-                      vizType: 'area',
-                    }}
-                  />
-                </FlexItem>
-              </>
-            )}
-          </EuiFlexGroup>
+                  </>
+                )}
+              </EuiFlexGroup>
+            </>
+          )}
         </EuiPanel>
       </FlexItem>
     );
@@ -350,6 +394,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     prevProps.index === nextProps.index &&
     prevProps.narrowDateRange === nextProps.narrowDateRange &&
     prevProps.statKey === nextProps.statKey &&
+    prevProps.loading === nextProps.loading &&
     prevProps.to === nextProps.to &&
     deepEqual(prevProps.areaChart, nextProps.areaChart) &&
     deepEqual(prevProps.barChart, nextProps.barChart) &&

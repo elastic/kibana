@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { useNetworkKpiNetworkEvents } from '../../../containers/kpi_network/network_events';
+import { ID, useNetworkKpiNetworkEvents } from '../../../containers/kpi_network/network_events';
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { kpiNetworkEvents } from '../../../../common/components/visualization_actions/configs/network/kpi_network_events';
+import { useQueryToggle } from '../../../../common/components/query_toggle';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis1 = euiVisColorPalette[1];
@@ -42,12 +43,14 @@ const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip && !toggleStatus);
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiNetworkEvents({
     filterQuery,
     endDate: to,
     indexNames,
     startDate: from,
-    skip,
+    skip: querySkip,
   });
 
   return (
@@ -62,6 +65,7 @@ const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
     />
   );
 };
