@@ -7,14 +7,11 @@
 
 import { groupBy } from 'lodash';
 import type { Logger } from 'src/core/server';
-import type { LayoutParams, LayoutTypes } from '../../../common';
+import { LayoutParams, LayoutTypes } from '../../../common';
 import { ScreenshotResult, ScreenshotOptions } from '../../screenshots';
 import { pngsToPdf } from './pdf_maker';
 
-type LayoutID =
-  | typeof LayoutTypes.PRESERVE_LAYOUT
-  | typeof LayoutTypes.CANVAS
-  | typeof LayoutTypes.PRINT;
+const supportedLayouts = [LayoutTypes.PRESERVE_LAYOUT, LayoutTypes.CANVAS, LayoutTypes.PRINT];
 
 /**
  * PDFs can be a single, long page or they can be multiple pages. For example:
@@ -22,11 +19,14 @@ type LayoutID =
  * => When creating a PDF intended for print multiple PNGs will be spread out across pages
  * => When creating a PDF from a Canvas workpad, each page in the workpad will be placed on a separate page
  */
-export type PdfLayoutParams = LayoutParams<LayoutID>;
+export type PdfLayoutParams = LayoutParams<typeof supportedLayouts[number]>;
 
 export interface PdfScreenshotOptions extends ScreenshotOptions {
   title?: string;
   logo?: string;
+  /**
+   * We default to the "print" layout if no ID is specified for the layout
+   */
   layout: PdfLayoutParams;
 }
 

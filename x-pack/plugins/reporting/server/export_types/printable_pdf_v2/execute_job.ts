@@ -9,6 +9,7 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
+import type { PdfScreenshotOptions } from '../../types';
 import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders, getCustomLogo } from '../common';
@@ -39,7 +40,12 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
             logo,
             browserTimezone,
             headers,
-            layout,
+            layout: {
+              ...layout,
+              // TODO: We do not do a runtime check for supported layout id types for now. But technically
+              // we should.
+              id: layout.id as PdfScreenshotOptions['layout']['id'],
+            },
           });
         }),
         tap(({ buffer }) => {

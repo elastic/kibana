@@ -40,7 +40,7 @@ export interface LayoutSelectorDictionary {
 /**
  * Screenshot layout parameters.
  */
-export type LayoutParams<ID extends string = string> = Ensure<
+export type LayoutParams<ID = string> = Ensure<
   {
     /**
      * Unique layout name.
@@ -69,7 +69,7 @@ export type LayoutParams<ID extends string = string> = Ensure<
  * Supported layout types.
  */
 export const LayoutTypes = {
-  PRESERVE_LAYOUT: 'preserve_layout',
-  PRINT: 'print',
-  CANVAS: 'canvas', // no margins or branding in the layout
+  PRESERVE_LAYOUT: 'preserve_layout' as 'preserve_layout',
+  PRINT: 'print' as 'print',
+  CANVAS: 'canvas' as 'canvas', // no margins or branding in the layout
 };

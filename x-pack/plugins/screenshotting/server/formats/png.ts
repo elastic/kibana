@@ -6,9 +6,11 @@
  */
 
 import { ScreenshotResult, ScreenshotOptions } from '../screenshots';
-import type { LayoutParams, LayoutTypes } from '../../common';
+import { LayoutParams, LayoutTypes } from '../../common';
 
-export type PngLayoutParams = LayoutParams<typeof LayoutTypes.PRESERVE_LAYOUT>;
+const supportedLayouts = [LayoutTypes.PRESERVE_LAYOUT];
+
+export type PngLayoutParams = LayoutParams<typeof supportedLayouts[number]>;
 
 export interface PngScreenshotOptions extends ScreenshotOptions {
   layout: PngLayoutParams;

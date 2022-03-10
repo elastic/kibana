@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from 'kibana/server';
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import type { ReportingCore } from '../../../';
