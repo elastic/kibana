@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('input control range', () => {
     before(async () => {
       await PageObjects.visualize.initTests();
-      await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin', 'superuser']);
+      await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       // await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
