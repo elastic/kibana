@@ -17,6 +17,7 @@ import {
   EuiPopoverFooter,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiConfirmModal,
   prettyDuration,
   ShortDate,
 } from '@elastic/eui';
@@ -116,6 +117,8 @@ export function SavedQueryManagementList({
   const kibana = useKibana<IDataPluginServices>();
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [selectedSavedQuery, setSelectedSavedQuery] = useState(null as SavedQuery | null);
+  const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState(null as SavedQuery | null);
+  const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
   const { uiSettings } = kibana.services;
   const format = uiSettings.get('dateFormat');
@@ -149,7 +152,12 @@ export function SavedQueryManagementList({
     setSelectedSavedQuery(savedQueryToSelect);
   }, []);
 
-  const handleDelete = useCallback(
+  const handleDelete = useCallback((savedQueryToDelete: SavedQuery) => {
+    setShowDeletionConfirmationModal(true);
+    setToBeDeletedSavedQuery(savedQueryToDelete);
+  }, []);
+
+  const onDelete = useCallback(
     (savedQueryToDelete: string) => {
       const onDeleteSavedQuery = async (savedQueryId: string) => {
         cancelPendingListingRequest.current();
@@ -204,7 +212,7 @@ export function SavedQueryManagementList({
           (selectedSavedQuery && savedQuery.id === selectedSavedQuery.id)
             ? 'on'
             : undefined,
-        append: (
+        append: !!showSaveQuery && (
           <EuiButtonIcon
             css={css`
               opacity: 0.2;
@@ -219,7 +227,7 @@ export function SavedQueryManagementList({
             iconType="trash"
             aria-label={`Delete ${savedQuery.attributes.title}`}
             title={`Delete ${savedQuery.attributes.title}`}
-            onClick={() => handleDelete(savedQuery.id)}
+            onClick={() => handleDelete(savedQuery)}
             color="danger"
           />
         ),
@@ -309,6 +317,36 @@ export function SavedQueryManagementList({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter>
+      {showDeletionConfirmationModal && toBeDeletedSavedQuery && (
+        <EuiConfirmModal
+          title={i18n.translate('data.search.searchBar.savedQueryPopoverConfirmDeletionTitle', {
+            defaultMessage: 'Delete "{savedQueryName}"?',
+            values: {
+              savedQueryName: toBeDeletedSavedQuery.attributes.title,
+            },
+          })}
+          confirmButtonText={i18n.translate(
+            'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
+          cancelButtonText={i18n.translate(
+            'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          onConfirm={() => {
+            onDelete(toBeDeletedSavedQuery.id);
+            setShowDeletionConfirmationModal(false);
+          }}
+          buttonColor="danger"
+          onCancel={() => {
+            setShowDeletionConfirmationModal(false);
+          }}
+        />
+      )}
     </>
   );
 
