@@ -109,7 +109,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   unit,
 }) => {
   const dispatch = useDispatch();
-  const { timelines: timelinesUi, cases: casesUi } = useKibana().services;
+  const { timelines: timelinesUi, cases } = useKibana().services;
   const {
     browserFields,
     dataViewId,
@@ -184,7 +184,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   });
 
   const casesPermissions = useGetUserCasesPermissions();
-  const CasesContext = casesUi.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
 
   return (
     <>
