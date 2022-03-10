@@ -93,7 +93,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   panelHeight = DEFAULT_PANEL_HEIGHT,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
-  showInspectButton = true,
+  showInspectButton = false,
   showLegend,
   showSpacer = true,
   stackByOptions,

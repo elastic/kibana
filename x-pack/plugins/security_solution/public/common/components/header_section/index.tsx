@@ -100,19 +100,15 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
             )}
           </EuiFlexItem>
 
-          {id && (
-            <>
-              {showInspectButton && (
-                <EuiFlexItem grow={false}>
-                  <InspectButton
-                    isDisabled={isInspectDisabled}
-                    queryId={id}
-                    multiple={inspectMultiple}
-                    title={title}
-                  />
-                </EuiFlexItem>
-              )}
-            </>
+          {id && showInspectButton && (
+            <EuiFlexItem grow={false}>
+              <InspectButton
+                isDisabled={isInspectDisabled}
+                queryId={id}
+                multiple={inspectMultiple}
+                title={title}
+              />
+            </EuiFlexItem>
           )}
 
           {headerFilters && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}

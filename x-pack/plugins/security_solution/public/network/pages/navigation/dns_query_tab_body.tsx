@@ -110,7 +110,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         setQuery={setQuery}
         showLegend={true}
         startDate={startDate}
-        showInspectButton={false}
         {...dnsHistogramConfigs}
       />
       <NetworkDnsTableManage

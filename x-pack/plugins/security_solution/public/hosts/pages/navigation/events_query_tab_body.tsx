@@ -111,7 +111,6 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
           startDate={startDate}
           id={EVENTS_HISTOGRAM_ID}
           indexNames={indexNames}
-          showInspectButton={false}
           {...histogramConfigs}
         />
       )}

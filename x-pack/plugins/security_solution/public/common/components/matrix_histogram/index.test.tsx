@@ -155,8 +155,21 @@ describe('Matrix Histogram Component', () => {
     });
   });
 
+  describe('Inspect button', () => {
+    test("it doesn't render Inspect button by default", () => {
+      const testProps = {
+        ...mockMatrixOverTimeHistogramProps,
+        lensAttributes: dnsTopDomainsAttrs,
+      };
+      wrapper = mount(<MatrixHistogram {...testProps} />, {
+        wrappingComponent: TestProviders,
+      });
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(false);
+    });
+  });
+
   describe('VisualizationActions', () => {
-    test('it renders a VisualizationActions if lensAttributes is provided', () => {
+    test('it renders VisualizationActions if lensAttributes is provided', () => {
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
         lensAttributes: dnsTopDomainsAttrs,

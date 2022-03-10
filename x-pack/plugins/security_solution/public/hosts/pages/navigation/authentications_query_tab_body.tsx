@@ -106,7 +106,6 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
         indexNames={indexNames}
         setQuery={setQuery}
         startDate={startDate}
-        showInspectButton={false}
         {...histogramConfigs}
       />
 
