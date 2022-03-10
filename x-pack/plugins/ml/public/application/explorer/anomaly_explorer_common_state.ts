@@ -75,7 +75,7 @@ export class AnomalyExplorerCommonStateService {
 
   public getSelectedJobs$(): Observable<ExplorerJob[]> {
     return this._selectedJobs$.pipe(
-      skipWhile((v) => !v),
+      skipWhile((v) => !v || !v.length),
       distinctUntilChanged(isEqual)
     );
   }
