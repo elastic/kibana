@@ -60,10 +60,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
 
 const DEFAULT_PANEL_HEIGHT = 300;
 
-const HeaderChildrenFlexItem = styled(EuiFlexItem)`
-  margin-left: 24px;
-`;
-
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
   flex-direction: column;
@@ -272,7 +268,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                   />
                 )}
               </EuiFlexItem>
-              <HeaderChildrenFlexItem grow={false}>{headerChildren}</HeaderChildrenFlexItem>
+              <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
             </EuiFlexGroup>
           </HeaderSection>
 
