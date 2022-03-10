@@ -17,6 +17,7 @@ const previouslyRegisteredTypes = [
   'api_key_pending_invalidation',
   'apm-indices',
   'apm-server-schema',
+  'apm-service-group',
   'apm-services-telemetry',
   'apm-telemetry',
   'app_search_telemetry',

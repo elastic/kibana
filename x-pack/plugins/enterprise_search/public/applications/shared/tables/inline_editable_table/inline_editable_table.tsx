@@ -93,7 +93,6 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   description,
   isLoading,
   lastItemWarning,
-  defaultItem,
   noItemsMessage = () => null,
   uneditableItems,
   ...rest
