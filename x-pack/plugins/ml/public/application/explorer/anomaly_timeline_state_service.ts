@@ -442,11 +442,10 @@ export class AnomalyTimelineStateService {
 
     viewByOptions.push(VIEW_BY_JOB_LABEL);
     let viewBySwimlaneOptions = viewByOptions;
-
-    let viewBySwimlaneFieldName;
+    let viewBySwimlaneFieldName: string | undefined;
 
     if (viewBySwimlaneOptions.indexOf(currentViewBySwimlaneFieldName!) !== -1) {
-      // Set the swimlane viewBy to that stored in the state (URL) if set.
+      // Set the swim lane viewBy to that stored in the state (URL) if set.
       // This means we reset it to the current state because it was set by the listener
       // on initialization.
       viewBySwimlaneFieldName = currentViewBySwimlaneFieldName;
@@ -523,6 +522,9 @@ export class AnomalyTimelineStateService {
       // only replace viewBySwimlaneOptions with filteredOptions if we found a relevant matching field
       if (filteredOptions.length > 1) {
         viewBySwimlaneOptions = filteredOptions;
+        if (!viewBySwimlaneOptions.includes(viewBySwimlaneFieldName!)) {
+          viewBySwimlaneFieldName = viewBySwimlaneOptions[0];
+        }
       }
     }
 
