@@ -9,6 +9,7 @@ import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
+import { ResolvedLogViewField } from '../../../../../common/log_views';
 import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
@@ -26,7 +27,6 @@ import {
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { ObjectEntries } from '../../../../../common/utility_types';
-import { LogIndexField } from '../../../../containers/logs/log_source';
 import { useSourceId } from '../../../../containers/source_id';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { LogViewProvider, useLogViewContext } from '../../../../hooks/use_log_view';
@@ -54,7 +54,7 @@ const DEFAULT_BASE_EXPRESSION = {
 const DEFAULT_FIELD = 'log.level';
 
 const createDefaultCriterion = (
-  availableFields: LogIndexField[],
+  availableFields: ResolvedLogViewField[],
   value: ExpressionCriteria['value']
 ) =>
   availableFields.some((availableField) => availableField.name === DEFAULT_FIELD)
@@ -62,7 +62,7 @@ const createDefaultCriterion = (
     : { field: undefined, comparator: undefined, value: undefined };
 
 const createDefaultCountRuleParams = (
-  availableFields: LogIndexField[]
+  availableFields: ResolvedLogViewField[]
 ): PartialCountRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
@@ -73,7 +73,7 @@ const createDefaultCountRuleParams = (
 });
 
 const createDefaultRatioRuleParams = (
-  availableFields: LogIndexField[]
+  availableFields: ResolvedLogViewField[]
 ): PartialRatioRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {

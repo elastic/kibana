@@ -29,9 +29,9 @@ import {
   LogEntryContext,
 } from '../../../common/log_entry';
 import {
-  LogSourceColumnConfiguration,
-  logSourceFieldColumnConfigurationRT,
-} from '../../../common/log_sources';
+  LogViewColumnConfiguration,
+  logViewFieldColumnConfigurationRT,
+} from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   LogEntriesSearchRequestParams,
@@ -180,7 +180,7 @@ const { asyncInitialRequestRT, asyncRecoveredRequestRT, asyncRequestRT } = creat
 
 const getLogEntryFromHit =
   (
-    columnDefinitions: LogSourceColumnConfiguration[],
+    columnDefinitions: LogViewColumnConfiguration[],
     messageFormattingRules: CompiledLogMessageFormattingRule
   ) =>
   (hit: LogEntryHit): LogEntry => {
@@ -253,11 +253,11 @@ function getResponseCursors(entries: LogEntry[]) {
 const VIEW_IN_CONTEXT_FIELDS = ['log.file.path', 'host.name', 'container.id'];
 
 const getRequiredFields = (
-  columns: LogSourceColumnConfiguration[],
+  columns: LogViewColumnConfiguration[],
   messageFormattingRules: CompiledLogMessageFormattingRule
 ): string[] => {
   const fieldsFromColumns = columns.reduce<string[]>((accumulatedFields, logColumn) => {
-    if (logSourceFieldColumnConfigurationRT.is(logColumn)) {
+    if (logViewFieldColumnConfigurationRT.is(logColumn)) {
       return [...accumulatedFields, logColumn.fieldColumn.field];
     }
     return accumulatedFields;
