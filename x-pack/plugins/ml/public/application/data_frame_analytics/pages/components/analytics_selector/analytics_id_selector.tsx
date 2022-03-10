@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { BUILT_IN_MODEL_TAG } from '../../../../../../common/constants/data_frame_analytics';
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
 import { GetDataFrameAnalyticsResponse } from '../../../../services/ml_api_service/data_frame_analytics';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
@@ -193,15 +194,21 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
     selectable: (item: TableItem) => {
       const selectedId = selected?.job_id || selected?.model_id;
       let itemId;
+      let isBuiltInModel = false;
       if (isDataFrameAnalyticsConfigs(item)) {
         itemId = item?.id;
       } else {
         itemId = item?.model_id;
+        isBuiltInModel = item.tags.includes(BUILT_IN_MODEL_TAG);
       }
-      return selected === undefined || selectedId === itemId;
+      return (selected === undefined || selectedId === itemId) && !isBuiltInModel;
     },
     onSelectionChange: (selectedItem: TableItem[]) => {
       const item = selectedItem[0];
+      if (!item) {
+        setSelected(undefined);
+        return;
+      }
       let config:
         | DataFrameAnalyticsConfig['analysis']
         | TrainedModelConfigResponse['inference_config'];
