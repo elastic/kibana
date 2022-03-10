@@ -739,7 +739,23 @@ export type SafeEndpointEvent = Partial<{
     }>;
     pid: ECSField<number>;
     hash: Hashes;
+    working_directory: ECSField<string>;
     parent: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    session_leader: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    entry_leader: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    group_leader: Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
       pid: ECSField<number>;
