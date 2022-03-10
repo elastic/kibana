@@ -308,7 +308,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   const hasActiveFilter = isDefined(swimLaneSeverity);
 
-  if (noJobsSelected && !isDataLoading) {
+  if (noJobsSelected && !loading) {
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps}>
         <ExplorerNoJobsSelected />
