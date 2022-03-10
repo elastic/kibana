@@ -60,10 +60,10 @@ export const LAST_RUN_COLUMN_TITLE = i18n.translate(
   }
 );
 
-export const NAME_COLUMN_TITLE = i18n.translate(
+export const RULE_COLUMN_TITLE = i18n.translate(
   'xpack.observability.rules.rulesTable.columns.nameTitle',
   {
-    defaultMessage: 'Name',
+    defaultMessage: 'Rule',
   }
 );
 

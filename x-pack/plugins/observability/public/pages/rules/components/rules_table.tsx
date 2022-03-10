@@ -24,9 +24,9 @@ export function RulesTable({
   onSortChange,
   isLoading,
 }: RulesTableProps) {
-  // if initial load, show spinner
-  const getRulesList = () => {
-    return (
+  return (
+    <section data-test-subj="rulesList">
+      <EuiSpacer size="xs" />
       <>
         <EuiSpacer size="xs" />
 
@@ -58,13 +58,6 @@ export function RulesTable({
           }}
         />
       </>
-    );
-  };
-
-  return (
-    <section data-test-subj="rulesList">
-      <EuiSpacer size="xs" />
-      {getRulesList()}
     </section>
   );
 }

@@ -23,7 +23,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { RulesTable } from './components/rules_table';
 import { Name } from './components/name';
-import { StatusFilter } from './components/status_filter';
+import { LastResponseFilter } from './components/last_response_filter';
 import { StatusContext } from './components/status_context';
 import { ExecutionStatus } from './components/execution_status';
 import { LastRun } from './components/last_run';
@@ -42,7 +42,7 @@ import { DEFAULT_SEARCH_PAGE_SIZE, convertRulesToTableItems } from './config';
 import {
   LAST_RESPONSE_COLUMN_TITLE,
   LAST_RUN_COLUMN_TITLE,
-  NAME_COLUMN_TITLE,
+  RULE_COLUMN_TITLE,
   STATUS_COLUMN_TITLE,
   ACTIONS_COLUMN_TITLE,
   EDIT_ACTION_ARIA_LABEL,
@@ -68,7 +68,7 @@ export function RulesPage() {
     field: 'name',
     direction: 'asc',
   });
-  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<string[]>([]);
+  const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
 
@@ -77,7 +77,7 @@ export function RulesPage() {
   };
 
   const { rulesState, setRulesState, reload } = useFetchRules({
-    ruleStatusesFilter,
+    ruleLastResponseFilter,
     page,
     sort,
   });
@@ -92,7 +92,7 @@ export function RulesPage() {
     return [
       {
         field: 'name',
-        name: NAME_COLUMN_TITLE,
+        name: RULE_COLUMN_TITLE,
         sortable: true,
         truncateText: true,
         width: '30%',
@@ -215,10 +215,10 @@ export function RulesPage() {
       />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <StatusFilter
-            key="rule-status-filter"
-            selectedStatuses={ruleStatusesFilter}
-            onChange={(ids: string[]) => setRuleStatusesFilter(ids)}
+          <LastResponseFilter
+            key="rule-lastResponse-filter"
+            selectedStatuses={ruleLastResponseFilter}
+            onChange={(ids: string[]) => setRuleLastResponseFilter(ids)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

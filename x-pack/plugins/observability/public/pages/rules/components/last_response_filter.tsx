@@ -20,7 +20,7 @@ import { AlertExecutionStatuses, AlertExecutionStatusValues } from '../../../../
 import { getHealthColor, rulesStatusesTranslationsMapping } from '../config';
 import { StatusFilterProps } from '../types';
 
-export const StatusFilter: React.FunctionComponent<StatusFilterProps> = ({
+export const LastResponseFilter: React.FunctionComponent<StatusFilterProps> = ({
   selectedStatuses,
   onChange,
 }: StatusFilterProps) => {
@@ -53,8 +53,8 @@ export const StatusFilter: React.FunctionComponent<StatusFilterProps> = ({
             data-test-subj="ruleStatusFilterButton"
           >
             <FormattedMessage
-              id="xpack.observability.rules.ruleStatusFilterLabel"
-              defaultMessage="Status"
+              id="xpack.observability.rules.ruleLastResponseFilterLabel"
+              defaultMessage="Last response"
             />
           </EuiFilterButton>
         }

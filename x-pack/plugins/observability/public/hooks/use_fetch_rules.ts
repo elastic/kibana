@@ -19,7 +19,7 @@ interface RuleState {
   totalItemCount: number;
 }
 
-export function useFetchRules({ ruleStatusesFilter, page, sort }: FetchRulesProps) {
+export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRulesProps) {
   const { core } = usePluginContext();
   const { http } = core;
 
@@ -38,7 +38,7 @@ export function useFetchRules({ ruleStatusesFilter, page, sort }: FetchRulesProp
         http,
         page,
         typesFilter: OBSERVABILITY_RULE_TYPES,
-        ruleStatusesFilter,
+        ruleStatusesFilter: ruleLastResponseFilter,
         sort,
       });
       setRulesState({
@@ -54,7 +54,7 @@ export function useFetchRules({ ruleStatusesFilter, page, sort }: FetchRulesProp
   useEffect(() => {
     fetchRules();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(ruleStatusesFilter), page, sort]);
+  }, [JSON.stringify(ruleLastResponseFilter), page, sort]);
 
   return {
     rules: rulesState.data,
