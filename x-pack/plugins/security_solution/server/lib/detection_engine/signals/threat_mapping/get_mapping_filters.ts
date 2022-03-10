@@ -9,7 +9,7 @@ import type { Filter } from '@kbn/es-query';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 interface ShouldExist {
-  bool: { should: Array<{ exists: string }> };
+  bool: { should: Array<{ exists: { field: string } }> };
 }
 
 export const getMappingFilters = (threatMapping: ThreatMapping) => {
@@ -25,8 +25,8 @@ export const getMappingFilters = (threatMapping: ThreatMapping) => {
         bool: { should: [] },
       };
       threatMap.entries.forEach((entry) => {
-        eventShouldClause.bool.should.push({ exists: entry.field });
-        indicatorShouldClause.bool.should.push({ exists: entry.value });
+        eventShouldClause.bool.should.push({ exists: { field: entry.field } });
+        indicatorShouldClause.bool.should.push({ exists: { field: entry.value } });
       });
       acc.eventMappingFilters.push({ meta: {}, query: { bool: { filter: [eventShouldClause] } } });
       acc.indicatorMappingFilters.push({

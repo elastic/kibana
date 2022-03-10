@@ -62,31 +62,10 @@ describe('getMappingFilters', () => {
                 bool: {
                   should: [
                     {
-                      exists: 'source.ip',
+                      exists: { field: 'source.ip' },
                     },
                     {
-                      exists: 'host.name',
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
-      {
-        meta: {},
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      exists: 'destination.ip',
-                    },
-                    {
-                      exists: 'destination.port',
+                      exists: { field: 'host.name' },
                     },
                   ],
                 },
@@ -104,7 +83,28 @@ describe('getMappingFilters', () => {
                 bool: {
                   should: [
                     {
-                      exists: 'source.port',
+                      exists: { field: 'destination.ip' },
+                    },
+                    {
+                      exists: { field: 'destination.port' },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        meta: {},
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      exists: { field: 'source.port' },
                     },
                   ],
                 },
@@ -125,31 +125,10 @@ describe('getMappingFilters', () => {
                 bool: {
                   should: [
                     {
-                      exists: 'threat.indicator.ip',
+                      exists: { field: 'threat.indicator.ip' },
                     },
                     {
-                      exists: 'threat.host.name',
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
-      {
-        meta: {},
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      exists: 'threat.indicator.ip',
-                    },
-                    {
-                      exists: 'threat.destination.port',
+                      exists: { field: 'threat.host.name' },
                     },
                   ],
                 },
@@ -167,7 +146,28 @@ describe('getMappingFilters', () => {
                 bool: {
                   should: [
                     {
-                      exists: 'source.port',
+                      exists: { field: 'threat.indicator.ip' },
+                    },
+                    {
+                      exists: { field: 'threat.destination.port' },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        meta: {},
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      exists: { field: 'source.port' },
                     },
                   ],
                 },
