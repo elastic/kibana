@@ -26,6 +26,7 @@ import { useStyles } from './styles';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
 import { AlertButton, ChildrenProcessesButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
+import { KIBANA_DATE_FORMAT } from '../../../common/constants';
 interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
@@ -43,7 +44,7 @@ export function ProcessTreeNode({
   isSessionLeader = false,
   depth = 0,
   onProcessSelected,
-  timeStampOn,
+  timeStampOn = true,
   verboseModeOn = true,
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
@@ -128,10 +129,7 @@ export function ProcessTreeNode({
     : 'sessionView:processTreeNodeForkIcon';
   const processIcon = hasExec ? 'console' : 'branch';
 
-  const timeStampsNormal = formatDate(
-    process.getDetails().process.start,
-    'MMM DD, YYYY @ hh:mm:ss.SSS'
-  );
+  const timeStampsNormal = formatDate(process.getDetails().process.start, KIBANA_DATE_FORMAT);
 
   return (
     <div>
@@ -166,7 +164,7 @@ export function ProcessTreeNode({
                     [exit_code: {exitCode}]
                   </small>
                 )}
-                {timeStampOn ? <span css={styles.timeStamp}>{timeStampsNormal}</span> : null}&nbsp;
+                {timeStampOn && <span css={styles.timeStamp}>{timeStampsNormal}</span>};
               </span>
             </span>
           )}

@@ -14,45 +14,42 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
 } from '@elastic/eui';
-
-interface OptionsField {
-  label: string;
-  value: string;
-  checked: 'on' | 'off' | undefined;
-}
-interface StateField {
-  timeStamp: boolean;
-  verboseMode: boolean;
-}
+import { FormattedMessage } from '@kbn/i18n-react';
+import { OptionsField, StateField } from '../../../common/types/session_view';
+import { useStyles } from './styles';
 
 export const SessionViewDisplayOptions = ({
   onChange,
   optionsStates,
 }: {
   onChange: (vars) => void;
-  // optionsStates: {timeStamp: boolean; verboseMode: boolean};
   optionsStates: StateField;
 }) => {
   const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
+
+  const styles = useStyles();
+
+  const timestampString = 'Timestamp';
+  const verboseModeString = 'Verbose mode';
 
   const optionsList: OptionsField[] = useMemo(
     () => [
       {
         label: i18n.translate('xpack.sessionView.sessionViewToggle.sessionViewToggleOptions', {
-          defaultMessage: 'Timestamp',
+          defaultMessage: timestampString,
         }),
-        value: 'Timestamp',
-        checked: optionsStates?.timeStamp ? 'on' : undefined,
+        value: timestampString,
+        checked: optionsStates?.timestamp ? 'on' : undefined,
       },
       {
         label: i18n.translate('xpack.sessionView.sessionViewToggle.sessionViewToggleOptions', {
-          defaultMessage: 'Verbose mode',
+          defaultMessage: verboseModeString,
         }),
-        value: 'Verbose mode',
+        value: verboseModeString,
         checked: optionsStates?.verboseMode ? 'on' : undefined,
       },
     ],
-    [optionsStates, optionsStates.timeStamp, optionsStates.verboseMode]
+    [optionsStates, optionsStates.timestamp, optionsStates.verboseMode]
   );
 
   const toggleOptionButton = () => {
@@ -71,22 +68,24 @@ export const SessionViewDisplayOptions = ({
         onClick={toggleOptionButton}
         size="m"
         aria-label="Option"
-        data-test-subj="sessionViewOptionButton"
+        data-test-subj="sessionView:sessionViewOptionButton"
       />
     </EuiFlexItem>
   );
 
-  const handleSelect = (vars: [OptionsField]) => {
-    const initialState = { ...optionsStates };
-    const endingState = vars.reduce((prev: StateField, curr: OptionsField) => {
-      if (curr.value === 'Timestamp') {
-        prev.timeStamp = curr.checked === 'on';
-      } else if (curr.value === 'Verbose mode') {
-        prev.verboseMode = curr.checked === 'on';
-      }
-      return prev;
-    }, initialState);
-    onChange(endingState);
+  const handleSelect = (options: [OptionsField]) => {
+    const updateOptionState = options.reduce(
+      (chosenOptionStates: StateField, listedOptionStates: OptionsField) => {
+        if (listedOptionStates.value === timestampString) {
+          chosenOptionStates.timestamp = listedOptionStates.checked === 'on';
+        } else if (listedOptionStates.value === verboseModeString) {
+          chosenOptionStates.verboseMode = listedOptionStates.checked === 'on';
+        }
+        return chosenOptionStates;
+      },
+      { ...optionsStates }
+    );
+    onChange(updateOptionState);
   };
 
   return (
@@ -98,8 +97,13 @@ export const SessionViewDisplayOptions = ({
       >
         <EuiSelectable options={optionsList} onChange={handleSelect}>
           {(list) => (
-            <div style={{ width: 240 }}>
-              <EuiPopoverTitle>Display options</EuiPopoverTitle>
+            <div css={styles.selectable}>
+              <EuiPopoverTitle>
+                <FormattedMessage
+                  defaultMessage="Display options"
+                  id="xpack.sessionView.sessionViewToggle.sessionViewToggleTitle"
+                />
+              </EuiPopoverTitle>
               {list}
             </div>
           )}

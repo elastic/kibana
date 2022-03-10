@@ -54,7 +54,6 @@ describe('ProcessTree component', () => {
         />
       );
       expect(renderResult.queryByText('cat')).toBeFalsy();
-      expect(renderResult.queryByText('cmd/config.ini')).toBeTruthy();
 
       const selectionArea = renderResult.queryAllByTestId('sessionView:processTreeNode');
       const result = selectionArea.map((a) => a?.getAttribute('data-id'));
@@ -79,7 +78,6 @@ describe('ProcessTree component', () => {
         />
       );
       expect(renderResult.queryByText('cat')).toBeTruthy();
-      expect(renderResult.queryAllByText('cmd/config.ini')).toBeTruthy();
 
       const selectionArea = renderResult.queryAllByTestId('sessionView:processTreeNode');
       const result = selectionArea.map((a) => a?.getAttribute('data-id'));

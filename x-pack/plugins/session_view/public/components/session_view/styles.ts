@@ -28,7 +28,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
 
     const searchBar: CSSObject = {
       position: 'relative',
-      marginLeft: `${euiTheme.size.xs} !important`, //
+      marginLeft: `${euiTheme.size.xs} !important`,
       marginRight: `${euiTheme.size.xs} !important`,
     };
 

@@ -17,6 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
+import { StateField } from '../../../common/types/session_view';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_toggle_options';
@@ -45,7 +46,10 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
-  const [optionsStates, setOptionsStates] = useState({ timeStamp: true, verboseMode: true });
+  const [optionsStates, setOptionsStates] = useState<StateField>({
+    timestamp: true,
+    verboseMode: true,
+  });
 
   const {
     data,
@@ -64,8 +68,8 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   const toggleDetailPanel = () => {
     setIsDetailOpen(!isDetailOpen);
   };
-  const handleOptionChange = (value) => {
-    setOptionsStates(value);
+  const handleOptionChange = (checkedOptions: StateField) => {
+    setOptionsStates(checkedOptions);
   };
 
   if (!isFetching && !hasData) {
@@ -119,7 +123,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
             <EuiButton
               onClick={toggleDetailPanel}
               iconType="list"
-              data-test-subj="sessionViewDetailPanelToggle"
+              data-test-subj="sessionView:sessionViewDetailPanelToggle"
             >
               <FormattedMessage
                 id="xpack.sessionView.buttonOpenDetailPanel"
@@ -184,7 +188,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                     fetchNextPage={fetchNextPage}
                     fetchPreviousPage={fetchPreviousPage}
                     setSearchResults={setSearchResults}
-                    timeStampOn={optionsStates.timeStamp}
+                    timeStampOn={optionsStates.timestamp}
                     verboseModeOn={optionsStates.verboseMode}
                   />
                 </div>
