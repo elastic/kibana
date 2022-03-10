@@ -204,7 +204,7 @@ describe('agent policy', () => {
     });
   });
 
-  describe('updateAllAgentPoliciesBeforeDeletingOutput', () => {
+  describe('removeOutputFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
       ReturnType<typeof agentPolicyService['update']>
     >;
@@ -239,11 +239,7 @@ describe('agent policy', () => {
         ],
       } as any);
 
-      await agentPolicyService.updateAllAgentPoliciesBeforeDeletingOutput(
-        soClient,
-        esClient,
-        'output-id-123'
-      );
+      await agentPolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
 
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(

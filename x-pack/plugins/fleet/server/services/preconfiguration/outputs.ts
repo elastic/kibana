@@ -99,6 +99,7 @@ export async function cleanPreconfiguredOutputs(
     }
 
     if (output.is_default) {
+      logger.info(`Updating default preconfigured output ${output.id} is no longer preconfigured`);
       await outputService.update(
         soClient,
         output.id,
@@ -108,6 +109,7 @@ export async function cleanPreconfiguredOutputs(
         }
       );
     } else if (output.is_default_monitoring) {
+      logger.info(`Updating default preconfigured output ${output.id} is no longer preconfigured`);
       await outputService.update(
         soClient,
         output.id,

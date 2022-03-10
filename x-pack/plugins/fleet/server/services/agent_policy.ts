@@ -414,7 +414,13 @@ class AgentPolicyService {
     return res;
   }
 
-  public async updateAllAgentPoliciesBeforeDeletingOutput(
+  /**
+   * Remove an output from all agent policies that are using it, and replace the output by the default ones.
+   * @param soClient
+   * @param esClient
+   * @param outputId
+   */
+  public async removeOutputFromAll(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     outputId: string

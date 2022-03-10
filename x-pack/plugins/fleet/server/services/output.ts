@@ -242,7 +242,7 @@ class OutputService {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
 
-    await agentPolicyService.updateAllAgentPoliciesBeforeDeletingOutput(
+    await agentPolicyService.removeOutputFromAll(
       soClient,
       appContextService.getInternalUserESClient(),
       id

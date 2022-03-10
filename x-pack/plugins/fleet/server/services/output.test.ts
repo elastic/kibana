@@ -149,7 +149,7 @@ function getMockedSoClient(
 
 describe('Output Service', () => {
   beforeEach(() => {
-    mockedAgentPolicyService.updateAllAgentPoliciesBeforeDeletingOutput.mockReset();
+    mockedAgentPolicyService.removeOutputFromAll.mockReset();
   });
   describe('create', () => {
     it('work with a predefined id', async () => {
@@ -454,12 +454,12 @@ describe('Output Service', () => {
       expect(soClient.delete).toBeCalled();
     });
 
-    it('Call updateAllAgentPoliciesBeforeDeletingOutput before deleting the output', async () => {
+    it('Call removeOutputFromAll before deleting the output', async () => {
       const soClient = getMockedSoClient();
       await outputService.delete(soClient, 'existing-preconfigured-default-output', {
         fromPreconfiguration: true,
       });
-      expect(mockedAgentPolicyService.updateAllAgentPoliciesBeforeDeletingOutput).toBeCalled();
+      expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalled();
       expect(soClient.delete).toBeCalled();
     });
   });
