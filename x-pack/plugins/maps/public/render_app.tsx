@@ -18,7 +18,6 @@ import {
   getToasts,
   getEmbeddableService,
   getDocLinks,
-  getSharedUXPluginContext,
 } from './kibana_services';
 import {
   createKbnUrlStateStorage,
@@ -92,22 +91,18 @@ export async function renderApp(
       mapEmbeddableInput = valueInput as MapByValueInput;
     }
 
-    const UXServicesContext = getSharedUXPluginContext();
-
     return (
-      <UXServicesContext>
-        <MapPage
-          mapEmbeddableInput={mapEmbeddableInput}
-          embeddableId={embeddableId}
-          onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
-          stateTransfer={stateTransfer}
-          originatingApp={originatingApp}
-          originatingPath={originatingPath}
-          history={history}
-          key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
-        />
-      </UXServicesContext>
+      <MapPage
+        mapEmbeddableInput={mapEmbeddableInput}
+        embeddableId={embeddableId}
+        onAppLeave={onAppLeave}
+        setHeaderActionMenu={setHeaderActionMenu}
+        stateTransfer={stateTransfer}
+        originatingApp={originatingApp}
+        originatingPath={originatingPath}
+        history={history}
+        key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
+      />
     );
   }
 

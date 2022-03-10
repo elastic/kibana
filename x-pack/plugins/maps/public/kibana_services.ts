@@ -11,22 +11,17 @@ import type { MapsPluginStartDependencies } from './plugin';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/common/ems_settings';
 import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
 import { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
-import { plugin, SharedUXPluginStart } from '../../../../src/plugins/shared_ux/public';
 
 let coreStart: CoreStart;
 let pluginsStart: MapsPluginStartDependencies;
 let mapsEms: MapsEmsPluginPublicStart;
 let emsSettings: EMSSettings;
-let sharedUXPluginContext: SharedUXPluginStart;
 
 export function setStartServices(core: CoreStart, plugins: MapsPluginStartDependencies) {
   coreStart = core;
   pluginsStart = plugins;
   mapsEms = plugins.mapsEms;
   emsSettings = mapsEms.createEMSSettings();
-
-  const sharedUXPlugin = plugin();
-  sharedUXPluginContext = sharedUXPlugin.start(coreStart, plugins);
 }
 
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
@@ -63,7 +58,7 @@ export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getUsageCollection = () => pluginsStart.usageCollection;
-export const getSharedUXPluginContext = () => sharedUXPluginContext.ServicesContext;
+export const getSharedUXPluginContext = () => pluginsStart.sharedUX.ServicesContext;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
