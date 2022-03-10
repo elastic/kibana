@@ -43,7 +43,7 @@ export const resolveLogView = async (
 
 const resolveLegacyReference = async (
   logViewAttributes: LogViewAttributes,
-  dateViewsService: DataViewsContract,
+  dataViewsService: DataViewsContract,
   config: LogViewsStaticConfig
 ): Promise<ResolvedLogView> => {
   if (logViewAttributes.logIndices.type !== 'index_name') {
@@ -52,7 +52,7 @@ const resolveLegacyReference = async (
 
   const indices = logViewAttributes.logIndices.indexName;
 
-  const fields = await dateViewsService
+  const fields = await dataViewsService
     .getFieldsForWildcard({
       pattern: indices,
       allowNoIndex: true,
