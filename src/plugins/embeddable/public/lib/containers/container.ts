@@ -9,7 +9,7 @@
 import uuid from 'uuid';
 import { isEqual, xor } from 'lodash';
 import { merge, Subscription } from 'rxjs';
-import { pairwise, first, debounceTime } from 'rxjs/operators';
+import { pairwise, take, delay } from 'rxjs/operators';
 
 import {
   Embeddable,
@@ -25,7 +25,7 @@ import {
   ContainerInput,
   ContainerOutput,
   PanelState,
-  EmbeddableContainerInitializeSettings,
+  EmbeddableContainerSettings,
 } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
@@ -53,16 +53,16 @@ export abstract class Container<
     output: TContainerOutput,
     protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: IContainer,
-    initializeSettings?: EmbeddableContainerInitializeSettings
+    settings?: EmbeddableContainerSettings
   ) {
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
 
-    // initialize all children on the first input change. Debounced by 1ms so it is run after the constructor is finished.
+    // initialize all children on the first input change. Delayed so it is run after the constructor is finished.
     this.getInput$()
-      .pipe(debounceTime(1), first())
+      .pipe(delay(0), take(1))
       .subscribe(() => {
-        this.initializeChildEmbeddables(input, initializeSettings);
+        this.initializeChildEmbeddables(input, settings);
       });
 
     // on all subsequent input changes, diff and update children on changes.
@@ -283,7 +283,7 @@ export abstract class Container<
 
   private async initializeChildEmbeddables(
     initialInput: TContainerInput,
-    initializeSettings?: EmbeddableContainerInitializeSettings
+    initializeSettings?: EmbeddableContainerSettings
   ) {
     let initializeOrder = Object.keys(initialInput.panels);
     if (initializeSettings?.childIdInitializeOrder) {
@@ -297,7 +297,7 @@ export abstract class Container<
     }
 
     for (const id of initializeOrder) {
-      if (initializeSettings?.awaitEachChild) {
+      if (initializeSettings?.initializeSequentially) {
         const embeddable = await this.onPanelAdded(initialInput.panels[id]);
         if (embeddable && !isErrorEmbeddable(embeddable)) {
           await this.untilEmbeddableLoaded(id);

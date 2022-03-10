@@ -60,7 +60,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
     />
   );
 
-  await nextTick();
+  await new Promise((r) => setTimeout(r, 1));
   component.update();
 
   // Due to the way embeddables mount themselves on the dom node, they are not forced to be
@@ -89,7 +89,7 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
     <EmbeddableChildPanel container={container} embeddableId={'1'} PanelComponent={testPanel} />
   );
 
-  await nextTick();
+  await new Promise((r) => setTimeout(r, 1));
   component.update();
 
   expect(

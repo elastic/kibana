@@ -40,12 +40,12 @@ import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
 import { createEmbeddablePanelMock } from '../mocks';
-import { EmbeddableContainerInitializeSettings } from '../lib/containers/i_container';
+import { EmbeddableContainerSettings } from '../lib/containers/i_container';
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
   embeddableInput = {},
-  initializeSettings?: EmbeddableContainerInitializeSettings
+  settings?: EmbeddableContainerSettings
 ) {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
@@ -77,7 +77,7 @@ async function creatHelloWorldContainerAndEmbeddable(
       getEmbeddableFactory: start.getEmbeddableFactory,
       panelComponent: testPanel,
     },
-    initializeSettings
+    settings
   );
 
   const embeddable = await container.addNewEmbeddable<
@@ -139,8 +139,10 @@ describe('container initialization', () => {
       { childIdInitializeOrder }
     );
 
-    // @ts-ignore
-    const onPanelAddedMock = jest.spyOn(container, 'onPanelAdded');
+    const onPanelAddedMock = jest.spyOn(
+      container as unknown as { onPanelAdded: () => {} },
+      'onPanelAdded'
+    );
 
     await new Promise((r) => setTimeout(r, 1));
     for (const [index, orderedId] of childIdInitializeOrder.entries()) {
@@ -164,8 +166,10 @@ describe('container initialization', () => {
     );
     const expectedInitializeOrder = ['789', '123', '456'];
 
-    // @ts-ignore
-    const onPanelAddedMock = jest.spyOn(container, 'onPanelAdded');
+    const onPanelAddedMock = jest.spyOn(
+      container as unknown as { onPanelAdded: () => {} },
+      'onPanelAdded'
+    );
 
     await new Promise((r) => setTimeout(r, 1));
     for (const [index, orderedId] of expectedInitializeOrder.entries()) {
@@ -185,11 +189,13 @@ describe('container initialization', () => {
         panels,
       },
       {},
-      { childIdInitializeOrder, awaitEachChild: true }
+      { childIdInitializeOrder, initializeSequentially: true }
     );
-    // @ts-ignore
-    const onPanelAddedMock = jest.spyOn(container, 'onPanelAdded');
-    // @ts-ignore
+    const onPanelAddedMock = jest.spyOn(
+      container as unknown as { onPanelAdded: () => {} },
+      'onPanelAdded'
+    );
+
     const untilEmbeddableLoadedMock = jest.spyOn(container, 'untilEmbeddableLoaded');
 
     await new Promise((r) => setTimeout(r, 10));

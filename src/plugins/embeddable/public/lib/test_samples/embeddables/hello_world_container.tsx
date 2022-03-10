@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
 import { EmbeddableStart } from '../../../plugin';
-import { EmbeddableContainerInitializeSettings } from '../../containers/i_container';
+import { EmbeddableContainerSettings } from '../../containers/i_container';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 
@@ -42,7 +42,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
   constructor(
     input: ContainerInput<{ firstName: string; lastName: string }>,
     private readonly options: HelloWorldContainerOptions,
-    initializeSettings?: EmbeddableContainerInitializeSettings
+    initializeSettings?: EmbeddableContainerSettings
   ) {
     super(
       input,

@@ -159,7 +159,7 @@ export class ControlGroupContainer extends Container<
         childIdInitializeOrder: Object.values(initialInput.panels)
           .sort((a, b) => (a.order > b.order ? 1 : -1))
           .map((panel) => panel.explicitInput.id),
-        awaitEachChild: true,
+        initializeSequentially: true,
       }
     );
 
