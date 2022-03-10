@@ -8,7 +8,8 @@
 
 import { Position } from '@elastic/charts';
 import { EmptySizeRatios, LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable } from '../../../../visualizations/common/utils';
+import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
+import { validateOptions } from '../../../../charts/common';
 import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -25,22 +26,22 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   help: strings.getPieVisFunctionName(),
   args: {
     metric: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: strings.getMetricArgHelp(),
       required: true,
     },
     buckets: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: strings.getBucketsArgHelp(),
       multi: true,
     },
     splitColumn: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: strings.getSplitColumnArgHelp(),
       multi: true,
     },
     splitRow: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: strings.getSplitRowArgHelp(),
       multi: true,
     },
@@ -57,6 +58,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     },
     legendPosition: {
       types: ['string'],
+      default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
     },
@@ -119,6 +121,20 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     if (args.splitColumn && args.splitRow) {
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
+
+    validateAccessor(args.metric, context.columns);
+    if (args.buckets) {
+      args.buckets.forEach((bucket) => validateAccessor(bucket, context.columns));
+    }
+    if (args.splitColumn) {
+      args.splitColumn.forEach((splitColumn) => validateAccessor(splitColumn, context.columns));
+    }
+    if (args.splitRow) {
+      args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
+    }
+
+    validateOptions(args.legendDisplay, LegendDisplay, errors.invalidLegendDisplayError);
+    validateOptions(args.legendPosition, Position, errors.invalidLegendPositionError);
 
     const visConfig: PartitionVisParams = {
       ...args,
