@@ -131,7 +131,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils
-            .getMuteAllRequest(createdAlert.id)
+            .getSnoozeRequest(createdAlert.id)
             .send({ snooze_end_time: FUTURE_SNOOZE_TIME });
 
           switch (scenario.id) {
@@ -156,7 +156,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
