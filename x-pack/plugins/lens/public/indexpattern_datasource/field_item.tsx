@@ -500,11 +500,11 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           {isUsingSampling
             ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
                 defaultMessage:
-                  'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
+                  'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
               })
             : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
                 defaultMessage:
-                  'No data was found for this field. Adding this field to the configuration will result in a blank chart.',
+                  'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
               })}
         </EuiText>
       </>

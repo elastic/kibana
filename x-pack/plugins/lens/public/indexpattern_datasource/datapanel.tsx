@@ -395,7 +395,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         helpText: isUsingSampling
           ? i18n.translate('xpack.lens.indexPattern.allFieldsSamplingLabelHelp', {
               defaultMessage:
-                'Available fields have data in the first 500 documents that match your filters. To view all fields, expand Empty fields. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+                'Available fields contain the data in the first 500 documents that match your filters. To view all fields, expand Empty fields. You are unable to create visualizations with full text, geographic, flattened, and object fields.',
             })
           : i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
               defaultMessage:
