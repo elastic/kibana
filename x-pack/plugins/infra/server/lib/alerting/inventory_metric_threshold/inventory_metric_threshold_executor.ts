@@ -222,6 +222,9 @@ const formatThreshold = (metric: SnapshotMetricType, value: number) => {
         if (metricFormatter.formatter === 'percent') {
           v = Number(v) / 100;
         }
+        if (metricFormatter.formatter === 'bits') {
+          v = Number(v) / 8;
+        }
         return formatter(v);
       })
     : value;
