@@ -14,6 +14,7 @@ import { getEmsFileLayers } from '../util';
 import { getEmsUnavailableMessage } from './ems_unavailable_message';
 
 interface Props {
+  isColumnCompressed?: boolean;
   onChange: (emsFileId: string) => void;
   value: string | null;
 }
@@ -98,6 +99,7 @@ export class EMSFileSelect extends Component<Props, State> {
           defaultMessage: 'EMS boundaries',
         })}
         helpText={this.state.emsFileOptions.length === 0 ? getEmsUnavailableMessage() : null}
+        display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
       >
         {this._renderSelect()}
       </EuiFormRow>

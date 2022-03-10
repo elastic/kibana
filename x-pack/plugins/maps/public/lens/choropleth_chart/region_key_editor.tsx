@@ -53,6 +53,7 @@ export function RegionKeyEditor(props: Props) {
         label={i18n.translate('xpack.maps.choropleth.joinFieldLabel', {
           defaultMessage: 'Join field',
         })}
+        display="columnCompressed"
       >
         <EuiComboBox
           singleSelection={true}
@@ -67,6 +68,7 @@ export function RegionKeyEditor(props: Props) {
   return (
     <>
       <EMSFileSelect
+        isColumnCompressed
         value={props.state.emsLayerId ? props.state.emsLayerId : null}
         onChange={onEmsLayerSelect}
       />
