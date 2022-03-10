@@ -22,7 +22,7 @@ import type {
 import { defineRoutes } from './routes';
 import { cspRuleAssetType } from './saved_objects/cis_1_4_1/csp_rule_type';
 import { initializeCspRules } from './saved_objects/cis_1_4_1/initialize_rules';
-
+import { initializeCspLatestFindingsIndex } from './create_index/create_latest_index';
 export interface CspAppContext {
   logger: Logger;
   service: CspAppService;
@@ -68,7 +68,7 @@ export class CspPlugin
     });
 
     initializeCspRules(core.savedObjects.createInternalRepository());
-
+    initializeCspLatestFindingsIndex(core.elasticsearch.client.asInternalUser, this.logger);
     return {};
   }
   public stop() {}

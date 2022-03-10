@@ -212,14 +212,22 @@ describe('benchmarks API', () => {
       });
     });
 
+<<<<<<< HEAD
     it('should format request by benchmark_name', async () => {
+=======
+    it('should format request by benchmark_filter', async () => {
+>>>>>>> 7acda0a5cf6 (create indices for benchmark score and latest findings)
       const mockAgentPolicyService = createPackagePolicyServiceMock();
 
       await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
         page: 1,
         per_page: 100,
+<<<<<<< HEAD
         sort_order: 'desc',
         benchmark_name: 'my_cis_benchmark',
+=======
+        benchmark_filter: 'my_cis_benchmark',
+>>>>>>> 7acda0a5cf6 (create indices for benchmark score and latest findings)
       });
 
       expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
