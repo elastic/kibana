@@ -80,7 +80,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     output?.ssl?.certificate_authorities ?? [],
-    undefined, // TODO validate certificate
+    undefined,
     isPreconfigured
   );
   const sslCertificateInput = useInput(
@@ -165,6 +165,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             ssl: {
               certificate: sslCertificateInput.value,
               key: sslKeyInput.value,
+              certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                (val) => val !== ''
+              ),
             },
           }
         : {
@@ -217,9 +220,11 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     logstashHostsInput.value,
     caTrustedFingerprintInput.value,
     sslCertificateInput.value,
+    sslCertificateAuthoritiesInput.value,
     sslKeyInput.value,
     nameInput.value,
     typeInput.value,
+
     notifications.toasts,
     onSucess,
     output,
