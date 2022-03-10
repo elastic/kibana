@@ -23,10 +23,14 @@ async function navigate({
 }) {
   const searchParams: string[] = [];
 
-  if (ip) searchParams.push(formatSearchKey('host.ip', ip));
   if (host) searchParams.push(formatSearchKey('host.name', host));
   if (container) searchParams.push(formatSearchKey('container.id', container));
   if (pod) searchParams.push(formatSearchKey('kubernetes.pod.uid', pod));
+
+  if (ip) {
+    const root = host ? 'host' : 'monitor';
+    searchParams.push(formatSearchKey(`${root}.ip`, ip));
+  }
 
   const searchString = searchParams.join(' OR ');
 
