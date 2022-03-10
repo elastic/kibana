@@ -123,6 +123,13 @@ export function getExecutionLogAggregation({
     throw Boom.badRequest(`Invalid perPage field "${perPage}" - must be greater than 0`);
   }
 
+  // Check if valid num executions
+  if (numExecutions > DEFAULT_MAX_BUCKETS_LIMIT) {
+    throw Boom.badRequest(
+      `Invalid numExecutions requested "${numExecutions}" - must be less than ${DEFAULT_MAX_BUCKETS_LIMIT}`
+    );
+  }
+
   return {
     // Get total number of executions
     executionUuidCardinality: {
