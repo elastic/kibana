@@ -363,6 +363,7 @@ export const lastValueOperation: OperationDefinition<
               label={i18n.translate('xpack.lens.indexPattern.lastValue.showArrayValues', {
                 defaultMessage: 'Show array values',
               })}
+              compressed={true}
               checked={Boolean(currentColumn.params.showArrayValues)}
               disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
               onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
