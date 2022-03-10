@@ -39,7 +39,7 @@ export const PipelineRequestFlyout: FunctionComponent<Props> = ({
   }, [form]);
 
   const { name, ...pipelineBody } = pipeline;
-  const endpoint = `PUT _ingest/pipeline/${name || '<pipelineNameeee>'}`;
+  const endpoint = `PUT _ingest/pipeline/${name || '<pipelineName>'}`;
   const request = `${endpoint}\n${JSON.stringify(pipelineBody, null, 2)}`;
 
   const title = name

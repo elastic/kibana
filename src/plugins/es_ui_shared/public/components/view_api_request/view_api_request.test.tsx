@@ -10,6 +10,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
+import { compressToEncodedURIComponent } from 'lz-string';
 
 import { ViewApiRequest } from './view_api_request';
 import type { UrlService } from 'src/plugins/share/common/url_service';
@@ -56,6 +57,7 @@ describe('ViewApiRequest', () => {
     });
 
     test('has openInConsole when all optional props are supplied', async () => {
+      const encodedRequest = compressToEncodedURIComponent(payload.request);
       const component = mountWithI18nProvider(
         <ViewApiRequest
           {...payload}
@@ -67,7 +69,7 @@ describe('ViewApiRequest', () => {
 
       const openInConsole = findTestSubject(component, 'apiRequestFlyoutOpenInConsoleButton');
       expect(openInConsole.length).toEqual(1);
-      expect(openInConsole.props().href).toContain('devToolsUrl_data:text/plain');
+      expect(openInConsole.props().href).toEqual(`devToolsUrl_data:text/plain,${encodedRequest}`);
     });
   });
 });
