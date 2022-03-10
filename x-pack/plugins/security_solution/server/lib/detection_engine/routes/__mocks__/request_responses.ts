@@ -402,6 +402,7 @@ export const getAlertMock = <T extends RuleParams>(
   updatedBy: 'elastic',
   apiKeyOwner: 'elastic',
   muteAll: false,
+  snoozeEndTime: null,
   mutedInstanceIds: [],
   scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
   executionStatus: {
@@ -665,6 +666,7 @@ export const legacyGetNotificationResult = (): LegacyRuleNotificationAlertType =
   updatedBy: 'elastic',
   createdAt: new Date('2020-03-21T11:15:13.530Z'),
   muteAll: false,
+  snoozeEndTime: null,
   mutedInstanceIds: [],
   scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
   updatedAt: new Date('2020-03-21T12:37:08.730Z'),

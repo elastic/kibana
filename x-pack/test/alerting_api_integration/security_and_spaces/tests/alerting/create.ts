@@ -122,6 +122,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 updated_by: user.username,
                 api_key_owner: user.username,
                 mute_all: false,
+                snooze_end_time: null,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
               });

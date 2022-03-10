@@ -58,6 +58,7 @@ type NewMonitorStatusAlert = Omit<
   | 'apiKey'
   | 'apiKeyOwner'
   | 'muteAll'
+  | 'snoozeEndTime'
   | 'mutedInstanceIds'
   | 'executionStatus'
   | 'ruleTypeId'

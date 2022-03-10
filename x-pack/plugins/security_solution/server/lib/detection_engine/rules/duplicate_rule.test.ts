@@ -70,6 +70,7 @@ describe('duplicateRule', () => {
           createdBy: 'kibana',
           updatedBy: 'kibana',
           muteAll: false,
+          snoozeEndTime: null,
           mutedInstanceIds: [],
           updatedAt: new Date(2021, 0),
           createdAt: new Date(2021, 0),

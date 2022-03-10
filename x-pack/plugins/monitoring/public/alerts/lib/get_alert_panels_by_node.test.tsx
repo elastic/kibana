@@ -51,6 +51,7 @@ const mockAlert = {
   apiKeyOwner: null,
   throttle: null,
   muteAll: false,
+  snoozeEndTime: null,
   mutedInstanceIds: [],
   executionStatus: {
     status: AlertExecutionStatusValues[0],
