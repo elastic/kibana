@@ -15,7 +15,7 @@ import { IFieldType } from '../../../../../data_views/common';
 
 interface Props {
   value?: string | number;
-  field: IFieldType;
+  field?: IFieldType;
   onChange: (value: string | number | boolean) => void;
   onBlur?: (value: string | number | boolean) => void;
   placeholder: string;
@@ -23,22 +23,26 @@ interface Props {
   controlOnly?: boolean;
   className?: string;
   fullWidth?: boolean;
+  disabled?: boolean;
+  compressed?: boolean;
 }
 
 class ValueInputTypeUI extends Component<Props> {
   public render() {
     const value = this.props.value;
-    const type = this.props.field.type;
+    const type = this.props.field ? this.props.field.type : 'string';
     let inputElement: React.ReactNode;
     switch (type) {
       case 'string':
         inputElement = (
           <EuiFieldText
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
-            isInvalid={!validateParams(value, this.props.field)}
+            isInvalid={this.props.field ? !validateParams(value, this.props.field) : false}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -48,7 +52,9 @@ class ValueInputTypeUI extends Component<Props> {
       case 'number_range':
         inputElement = (
           <EuiFieldNumber
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
             placeholder={this.props.placeholder}
             value={typeof value === 'string' ? parseFloat(value) : value}
             onChange={this.onChange}
@@ -61,12 +67,16 @@ class ValueInputTypeUI extends Component<Props> {
       case 'date_range':
         inputElement = (
           <EuiFieldText
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
             onBlur={this.onBlur}
-            isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
+            isInvalid={
+              this.props.field && !isEmpty(value) && !validateParams(value, this.props.field)
+            }
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -77,10 +87,13 @@ class ValueInputTypeUI extends Component<Props> {
         inputElement = (
           <EuiFieldText
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
-            isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
+            isInvalid={
+              this.props.field && !isEmpty(value) && !validateParams(value, this.props.field)
+            }
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -110,6 +123,8 @@ class ValueInputTypeUI extends Component<Props> {
             onChange={this.onBoolChange}
             className={this.props.className}
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
+            compressed={this.props.compressed}
           />
         );
         break;

@@ -65,6 +65,7 @@ export type FilterMeta = {
   key?: string;
   params?: any;
   value?: string;
+  isFromSavedQuery?: boolean;
 };
 
 // eslint-disable-next-line
@@ -80,6 +81,7 @@ export type Filter = {
 export type Query = {
   query: string | { [key: string]: any };
   language: string;
+  isFromSavedQuery?: boolean;
 };
 
 /**

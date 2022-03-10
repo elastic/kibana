@@ -12,17 +12,18 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 
 import {
+  // EuiTextArea,
+  EuiOutsideClickDetector,
+  PopoverAnchorPosition,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiIconProps,
+  EuiFieldSearch,
   EuiLink,
-  EuiOutsideClickDetector,
   EuiPortal,
-  EuiTextArea,
   htmlIdGenerator,
-  PopoverAnchorPosition,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEqual, isFunction } from 'lodash';
@@ -154,7 +155,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
   private isFocusWithin = false;
 
   private getQueryString = () => {
-    return toUser(this.props.query.query);
+    return toUser(!this.props.query.isFromSavedQuery ? this.props.query.query : '');
   };
 
   private fetchIndexPatterns = debounce(async () => {
@@ -290,7 +291,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     }
   };
 
-  private onInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  private onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = this.formatTextAreaValue(event.target.value);
     this.onQueryStringChange(value);
     if (event.target.value === '') {
@@ -682,10 +683,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
-    const containerClassName = classNames(
-      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
-      this.props.className
-    );
+    const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
     const inputClassName = classNames(
       'kbnQueryBar__textarea',
       this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null,
@@ -693,7 +691,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textarea--hasAppend' : null
     );
     const inputWrapClassName = classNames(
-      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap',
+      'kbnQueryBar__textareaWrap',
       this.props.prepend ? 'kbnQueryBar__textareaWrap--hasPrepend' : null,
       !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textareaWrap--hasAppend' : null
     );
@@ -714,11 +712,54 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
             data-skip-axe="aria-required-children"
           >
             <div role="search" className={inputWrapClassName} ref={this.assignQueryInputDivRef}>
-              <EuiTextArea
+              {/* <EuiTextArea
                 placeholder={
                   this.props.placeholder ||
                   i18n.translate('data.query.queryBar.searchInputPlaceholder', {
-                    defaultMessage: 'Search',
+                    defaultMessage: 'Start typing to search or filter...',
+                  })
+                }
+                value={this.forwardNewValueIfNeeded(this.getQueryString())}
+                inputRef={(node: any) => {
+                  if (node) {
+                    this.inputRef = node;
+                  }
+                }}
+                data-test-subj={this.props.dataTestSubj || 'queryInput'}
+                isInvalid={this.props.isInvalid}
+                onChange={this.onInputChange}
+                fullWidth
+                autoFocus={
+                  this.props.onChangeQueryInputFocus ? false : !this.props.disableAutoFocus
+                }
+              /> */}
+              <input
+                type="search"
+                placeholder={
+                  this.props.placeholder ||
+                  i18n.translate('data.query.queryBar.searchInputPlaceholder', {
+                    defaultMessage: 'Start typing to search or filter...',
+                  })
+                }
+                value={this.forwardNewValueIfNeeded(this.getQueryString())}
+                ref={(node: any) => {
+                  if (node) {
+                    this.inputRef = node;
+                  }
+                }}
+                data-test-subj={this.props.dataTestSubj || 'queryInput'}
+                // invalid={this.props.isInvalid}
+                onChange={this.onInputChange}
+                // fullWidth
+                autoFocus={
+                  this.props.onChangeQueryInputFocus ? false : !this.props.disableAutoFocus
+                }
+              />
+              {/* <EuiTextArea
+                placeholder={
+                  this.props.placeholder ||
+                  i18n.translate('data.query.queryBar.searchInputPlaceholder', {
+                    defaultMessage: 'Start typing to search or filter...',
                   })
                 }
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
@@ -754,7 +795,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                 isInvalid={this.props.isInvalid}
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
-              </EuiTextArea>
+              </EuiTextArea> */}
               {this.props.iconType ? (
                 <div className="euiFormControlLayoutIcons">
                   <EuiIcon
@@ -798,7 +839,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-        {this.props.disableLanguageSwitcher ? null : (
+        {/* {this.props.disableLanguageSwitcher ? null : (
           <QueryLanguageSwitcher
             language={this.props.query.language}
             anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
@@ -806,7 +847,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
             nonKqlMode={this.props.nonKqlMode}
             nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           />
-        )}
+        )} */}
       </div>
     );
   }

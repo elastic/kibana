@@ -34,6 +34,7 @@ export class QueryStringManager {
     return {
       query: '',
       language: this.getDefaultLanguage(),
+      isFromSavedQuery: false,
     };
   }
 
@@ -44,6 +45,7 @@ export class QueryStringManager {
       return {
         query,
         language: this.getDefaultLanguage(),
+        isFromSavedQuery: false,
       };
     } else {
       return query;

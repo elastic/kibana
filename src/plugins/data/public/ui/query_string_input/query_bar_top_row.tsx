@@ -8,8 +8,9 @@
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, ReactNode } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -21,10 +22,18 @@ import {
   EuiFieldText,
   prettyDuration,
   EuiIconProps,
-  EuiSuperUpdateButton,
   OnRefreshProps,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
+import {
+  IDataPluginServices,
+  IIndexPattern,
+  TimeRange,
+  TimeHistoryContract,
+  Query,
+  SavedQueryService,
+} from '../..';
+import { mapAndFlattenFilters } from '../../query/filter_manager/lib/map_and_flatten_filters';
 import { useKibana, withKibana } from '../../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';
 import { UI_SETTINGS } from '../../../common';
@@ -32,18 +41,23 @@ import { getQueryLog } from '../../query';
 import type { PersistedLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../../utils/shallow_equal';
+import { AddFilterModal, FilterGroup } from './add_filter_modal';
+import { SavedQueryMeta } from '../saved_query_form';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
-const SuperUpdateButton = React.memo(
-  EuiSuperUpdateButton as any
-) as unknown as typeof EuiSuperUpdateButton;
+const SuperUpdateButton = React.memo(EuiButtonIcon as any) as unknown as typeof EuiButtonIcon;
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 
 // @internal
 export interface QueryBarTopRowProps {
+  filters: Filter[];
+  multipleFilters: Filter[];
+  onFiltersUpdated?: (filters: Filter[]) => void;
+  onMultipleFiltersUpdated?: (filters: Filter[]) => void;
+  applySelectedSavedQueries?: () => void;
   customSubmitButton?: any;
   dataTestSubj?: string;
   dateRangeFrom?: string;
@@ -73,6 +87,13 @@ export interface QueryBarTopRowProps {
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
+  savedQueryManagement?: JSX.Element;
+  toggleAddFilterModal?: (value: boolean) => void;
+  isAddFilterModalOpen?: boolean;
+  addFilterMode?: string;
+  onNewFiltersSave: (savedQueryMeta: SavedQueryMeta) => void;
+  savedQueryService: SavedQueryService;
+  filterBar?: ReactNode;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -304,6 +325,7 @@ export const QueryBarTopRow = React.memo(
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
             className="kbnQueryBar__datePicker"
+            width="auto"
           />
         </EuiFlexItem>
       );
@@ -314,12 +336,14 @@ export const QueryBarTopRow = React.memo(
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <SuperUpdateButton
-          needsUpdate={props.isDirty}
+          display="fill"
           isDisabled={isDateRangeInvalid}
-          isLoading={props.isLoading}
-          onClick={onClickSubmitButton}
-          fill={props.fillSubmitButton}
+          iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
+          aria-label="Update"
           data-test-subj="querySubmitButton"
+          onClick={onClickSubmitButton}
+          size="m"
+          color={props.isDirty ? 'success' : 'primary'}
         />
       );
 
@@ -341,25 +365,135 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderQueryInput()) return;
 
       return (
-        <EuiFlexItem>
-          <QueryStringInput
-            disableAutoFocus={props.disableAutoFocus}
-            indexPatterns={props.indexPatterns!}
-            prepend={props.prepend}
-            query={props.query!}
-            screenTitle={props.screenTitle}
-            onChange={onQueryChange}
-            onChangeQueryInputFocus={onChangeQueryInputFocus}
-            onSubmit={onInputSubmit}
-            persistedLog={persistedLog}
-            dataTestSubj={props.dataTestSubj}
-            placeholder={props.placeholder}
-            isClearable={props.isClearable}
-            iconType={props.iconType}
-            nonKqlMode={props.nonKqlMode}
-            nonKqlModeHelpText={props.nonKqlModeHelpText}
-            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-          />
+        <>
+          <EuiFlexItem grow={false}>{props.prepend}</EuiFlexItem>
+          <EuiFlexItem className="globalFilterGroup__filterFlexItem">
+            <EuiFlexGroup
+              className={'globalFilterBar'}
+              wrap={true}
+              responsive={false}
+              gutterSize="xs"
+              alignItems="center"
+              tabIndex={-1}
+            >
+              {props.filterBar}
+              <QueryStringInput
+                disableAutoFocus={props.disableAutoFocus}
+                indexPatterns={props.indexPatterns!}
+                query={props.query!}
+                screenTitle={props.screenTitle}
+                onChange={onQueryChange}
+                onChangeQueryInputFocus={onChangeQueryInputFocus}
+                onSubmit={onInputSubmit}
+                persistedLog={persistedLog}
+                dataTestSubj={props.dataTestSubj}
+                placeholder={props.placeholder}
+                isClearable={props.isClearable}
+                iconType={props.iconType}
+                nonKqlMode={props.nonKqlMode}
+                nonKqlModeHelpText={props.nonKqlModeHelpText}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </>
+      );
+    }
+
+    const onAddFilterClick = () => props.toggleAddFilterModal?.(!props.isAddFilterModalOpen);
+
+    function onAddMultipleFilters(selectedFilters: Filter[]) {
+      const filters = [...props.filters, ...selectedFilters];
+      props?.onFiltersUpdated?.(filters);
+
+      const maxGroupId = props.multipleFilters.length
+        ? Math.max.apply(
+            Math,
+            props.multipleFilters.map((f) => f.groupId)
+          )
+        : 0;
+      const maxId = props.multipleFilters.length
+        ? Math.max.apply(
+            Math,
+            props.multipleFilters.map((f) => f.id)
+          )
+        : -1;
+      const multipleFilters = [
+        ...props.multipleFilters,
+        ...selectedFilters.map((filter, idx) => ({
+          ...filter,
+          groupId: maxGroupId + 1 + idx,
+          id: maxId + 1 + idx,
+          subGroupId: 1,
+          relationship: undefined,
+          groupsCount: 0,
+        })),
+      ];
+      props?.onMultipleFiltersUpdated?.(multipleFilters);
+      props.toggleAddFilterModal?.(false);
+    }
+
+    function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
+      const mappedFilters = mapAndFlattenFilters(buildFilters);
+      const mergedFilters = mappedFilters.map((filter, idx) => {
+        return {
+          ...filter,
+          groupId: selectedFilters[idx].groupId,
+          id: selectedFilters[idx].id,
+          relationship: selectedFilters[idx].relationship,
+          subGroupId: selectedFilters[idx].subGroupId,
+        };
+      });
+
+      props.toggleAddFilterModal?.(false);
+      props?.onMultipleFiltersUpdated?.([...props.multipleFilters, ...mergedFilters]);
+
+      const filters = [...props.filters, ...buildFilters];
+      props?.onFiltersUpdated?.(filters);
+    }
+
+    function applySavedQueries() {
+      props.toggleAddFilterModal?.(false);
+      props?.applySelectedSavedQueries?.();
+    }
+
+    function renderAddFilter() {
+      const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
+      const [indexPattern] = props?.indexPatterns || [];
+      const index = indexPattern && indexPattern.id;
+      const newFilter = buildEmptyFilter(isPinned, index);
+
+      const button = (
+        <EuiButtonIcon
+          display="fill"
+          iconType="plusInCircleFilled"
+          aria-label="Add filter"
+          data-test-subj="addFilter"
+          onClick={onAddFilterClick}
+          size="m"
+          color="text"
+        />
+      );
+
+      return (
+        <EuiFlexItem grow={false}>
+          {button}
+          {props.isAddFilterModalOpen && (
+            <AddFilterModal
+              onCancel={() => props.toggleAddFilterModal?.(false)}
+              filter={newFilter}
+              indexPatterns={props.indexPatterns!}
+              onSubmit={onAddMultipleFilters}
+              onMultipleFiltersSubmit={onAddMultipleFiltersANDOR}
+              multipleFilters={props.multipleFilters}
+              applySavedQueries={applySavedQueries}
+              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              savedQueryManagement={props.savedQueryManagement}
+              initialAddFilterMode={props.addFilterMode}
+              saveFilters={props.onNewFiltersSave}
+              savedQueryService={props.savedQueryService}
+            />
+          )}
         </EuiFlexItem>
       );
     }
@@ -376,6 +510,7 @@ export const QueryBarTopRow = React.memo(
         justifyContent="flexEnd"
       >
         {renderQueryInput()}
+        {renderAddFilter()}
         <SharingMetaFields
           from={currentDateRange.from}
           to={currentDateRange.to}

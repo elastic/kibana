@@ -16,7 +16,7 @@ import { UI_SETTINGS } from '../../../../common';
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   indexPattern: IIndexPattern;
-  field: IFieldType;
+  field?: IFieldType;
   timeRangeForSuggestionsOverride?: boolean;
 }
 
@@ -42,6 +42,10 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   };
 
   public componentDidMount() {
+    this.updateSuggestions();
+  }
+
+  public componentDidUpdate(prevProps: T) {
     this.updateSuggestions();
   }
 
@@ -74,7 +78,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
     this.abortController = new AbortController();
     const { indexPattern, field, timeRangeForSuggestionsOverride } = this
       .props as PhraseSuggestorProps;
-    if (!field || !this.isSuggestingValues()) {
+    if (!field || !this.isSuggestingValues() || !indexPattern) {
       return;
     }
     this.setState({ isLoading: true });

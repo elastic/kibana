@@ -11,11 +11,28 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { get, isEqual } from 'lodash';
-import { EuiIconProps } from '@elastic/eui';
+import {
+  EuiIconProps,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiButton,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
 import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Query, Filter } from '@kbn/es-query';
+import {
+  Query,
+  Filter,
+  enableFilter,
+  disableFilter,
+  pinFilter,
+  toggleFilterDisabled,
+  toggleFilterNegated,
+  unpinFilter,
+} from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
@@ -25,6 +42,9 @@ import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
+import { FilterSetMenu } from '../saved_query_management/filter_set_menu';
+
+const LOCAL_STORAGE_TIMEFILTER_OVERRIDE_MODAL_HIDDEN = 'TIMEFILTER_OVERRIDE_MODAL_HIDDEN';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -88,11 +108,21 @@ interface State {
   isFiltersVisible: boolean;
   showSaveQueryModal: boolean;
   showSaveNewQueryModal: boolean;
+  openFilterSetPopover: boolean;
   showSavedQueryPopover: boolean;
+  selectedSavedQueries: SavedQuery[];
+  finalSelectedSavedQueries: SavedQuery[];
+  multipleFilters: Filter[];
   currentProps?: SearchBarProps;
   query?: Query;
   dateRangeFrom: string;
   dateRangeTo: string;
+  isAddFilterModalOpen?: boolean;
+  isEditFilterModalOpen?: boolean;
+  addFilterMode?: string;
+  editFilterMode?: string;
+  filtersIdsFromSavedQueries?: string[];
+  overrideTimeFilterModalShow: boolean;
 }
 
 class SearchBarUI extends Component<SearchBarProps, State> {
@@ -116,6 +146,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
+        // isFromSavedQuery: nextProps.query.isFromSavedQuery ?? false,
       };
     } else if (
       nextProps.query &&
@@ -168,11 +199,32 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     isFiltersVisible: true,
     showSaveQueryModal: false,
     showSaveNewQueryModal: false,
+    openFilterSetPopover: false,
     showSavedQueryPopover: false,
     currentProps: this.props,
+    selectedSavedQueries: [],
+    finalSelectedSavedQueries: [],
+    multipleFilters: this.props.filters?.length
+      ? [
+          ...this.props.filters.map((filter: Filter, idx: number) => ({
+            ...filter,
+            groupId: idx + 1,
+            id: idx,
+            subGroupId: 1,
+            relationship: undefined,
+            groupsCount: 1,
+          })),
+        ]
+      : [],
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
+    isAddFilterModalOpen: false,
+    isEditFilterModalOpen: false,
+    addFilterMode: 'quick_form',
+    editFilterMode: 'quick_form',
+    filtersIdsFromSavedQueries: [],
+    overrideTimeFilterModalShow: false,
   };
 
   public isDirty = () => {
@@ -219,16 +271,22 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   }
 
-  public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
-    if (!this.state.query) return;
+  public onSave = async (
+    savedQueryMeta: SavedQueryMeta,
+    saveAsNew = false,
+    query = this.state.query
+  ) => {
+    if (!query) return;
 
     const savedQueryAttributes: SavedQueryAttributes = {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
-      query: this.state.query,
+      query,
     };
 
-    if (savedQueryMeta.shouldIncludeFilters) {
+    if (savedQueryMeta.filters !== undefined) {
+      savedQueryAttributes.filters = savedQueryMeta.filters;
+    } else {
       savedQueryAttributes.filters = this.props.filters;
     }
 
@@ -251,7 +309,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     try {
       let response;
-      if (this.props.savedQuery && !saveAsNew) {
+      if (!saveAsNew) {
         response = await this.savedQueryService.updateQuery(
           savedQueryMeta.id!,
           savedQueryAttributes
@@ -267,9 +325,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.setState({
         showSaveQueryModal: false,
         showSaveNewQueryModal: false,
+        openFilterSetPopover: false,
       });
 
-      if (this.props.onSaved) {
+      if (!savedQueryMeta.filters && this.props.onSaved) {
         this.props.onSaved(response);
       }
     } catch (error) {
@@ -332,23 +391,284 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   };
 
-  public onLoadSavedQuery = (savedQuery: SavedQuery) => {
-    const dateRangeFrom = get(savedQuery, 'attributes.timefilter.from', this.state.dateRangeFrom);
-    const dateRangeTo = get(savedQuery, 'attributes.timefilter.to', this.state.dateRangeTo);
-
+  public onLoadSavedQuery = (savedQueries: SavedQuery[]) => {
+    // Should I take under consideration the existing queries here?
     this.setState({
-      query: savedQuery.attributes.query,
-      dateRangeFrom,
-      dateRangeTo,
+      selectedSavedQueries: [...savedQueries],
     });
+  };
 
-    if (this.props.onSavedQueryUpdated) {
-      this.props.onSavedQueryUpdated(savedQuery);
+  public onMultipleFiltersUpdated = (filters: Filter[]) => {
+    this.setState({ multipleFilters: filters });
+    // console.dir(filters);
+  };
+
+  public onFilterBadgeSave = (groupId: number, alias: string) => {
+    const multipleFilters = this.state.multipleFilters.map((filter: any) => {
+      if (Number(filter.groupId) === groupId)
+        return {
+          ...filter,
+          meta: {
+            ...filter.meta,
+            alias,
+          },
+        };
+      return filter;
+    });
+    this.setState({ multipleFilters });
+  };
+
+  public applyTimeFilterOverrideModal = (selectedQueries?: SavedQuery[]) => {
+    const queries = [...(selectedQueries || []), ...this.state.selectedSavedQueries];
+    this.setState({ finalSelectedSavedQueries: queries });
+    const selectedQueriesHaveTimeFilter = queries.some(
+      (query: SavedQuery) => query.attributes.timefilter
+    );
+    if (
+      !Boolean(this.services.storage.get(LOCAL_STORAGE_TIMEFILTER_OVERRIDE_MODAL_HIDDEN)) &&
+      selectedQueriesHaveTimeFilter
+    ) {
+      this.setState({ overrideTimeFilterModalShow: true });
+    } else {
+      this.applySelectedSavedQueries(queries);
     }
   };
 
+  public timeFilterOverrideModalApplyQueries = (notShowAgain: boolean) => {
+    if (notShowAgain) {
+      this.services.storage.set(LOCAL_STORAGE_TIMEFILTER_OVERRIDE_MODAL_HIDDEN, true);
+    }
+    this.setState({ overrideTimeFilterModalShow: false });
+    this.applySelectedSavedQueries(this.state.selectedSavedQueries);
+  };
+
+  public applySelectedSavedQueries = (selectedSavedQueries: SavedQuery[]) => {
+    const filters: Filter[] = [];
+    const finalQueryFromSelectedSavedObjects: Query = {
+      language: 'kuery',
+      query: '',
+      isFromSavedQuery: true,
+    };
+    let dateRangeFrom = this.state.dateRangeFrom;
+    let dateRangeTo = this.state.dateRangeTo;
+
+    selectedSavedQueries.forEach((savedQuery, idx) => {
+      let savedQueryHasQueryIdx = 0;
+      if (savedQuery.attributes.filters) {
+        const updatedWithIconFilters = savedQuery.attributes.filters.map((filter) => {
+          return {
+            ...filter,
+            meta: {
+              ...filter.meta,
+              isFromSavedQuery: true,
+            },
+          };
+        });
+        filters.push(...updatedWithIconFilters);
+      }
+      if (savedQuery.attributes.query && savedQuery.attributes.query.query) {
+        const existingQuery = finalQueryFromSelectedSavedObjects.query;
+        const updatedQuery =
+          savedQueryHasQueryIdx !== 0
+            ? existingQuery.concat(' and ', savedQuery.attributes.query.query)
+            : savedQuery.attributes.query.query;
+        finalQueryFromSelectedSavedObjects.query = updatedQuery;
+        savedQueryHasQueryIdx++;
+      }
+      if (savedQuery.attributes.timefilter) {
+        dateRangeFrom = savedQuery.attributes.timefilter.from || dateRangeFrom;
+        dateRangeTo = savedQuery.attributes.timefilter.to || dateRangeTo;
+      }
+    });
+
+    this.props?.onQuerySubmit?.({
+      query: finalQueryFromSelectedSavedObjects,
+      dateRange: {
+        from: dateRangeFrom,
+        to: dateRangeTo,
+      },
+    });
+
+    // remove filters from state if it is included in selected saved filters
+    const existingFiltersWithoutDuplicate = this.props.filters?.filter(
+      (existingFilter) =>
+        !filters.find((savedFilter) => isEqual(savedFilter.query, existingFilter.query))
+    );
+    const existingMFiltersWithoutDuplicate = this.state.multipleFilters?.filter(
+      (existingFilter) =>
+        !filters.find((savedFilter) => isEqual(savedFilter.query, existingFilter.query))
+    );
+
+    this.setState({ multipleFilters: existingMFiltersWithoutDuplicate });
+    this.props?.onFiltersUpdated?.([...existingFiltersWithoutDuplicate!, ...filters!]);
+  };
+
+  public applySelectedQuery = (selectedSavedQuery: SavedQuery) => {
+    this.applyTimeFilterOverrideModal([selectedSavedQuery]);
+  };
+
+  public removeSelectedSavedQuery = (savedQuery: SavedQuery) => {
+    const selectedSavedQueries: SavedQuery[] = this.state.finalSelectedSavedQueries;
+    const updatedSelectedSavedQueries = selectedSavedQueries.filter(
+      (sq) => sq.id !== savedQuery.id
+    );
+    this.applySelectedSavedQueries(updatedSelectedSavedQueries);
+    this.setState({
+      selectedSavedQueries: [...updatedSelectedSavedQueries],
+      finalSelectedSavedQueries: [...updatedSelectedSavedQueries],
+    });
+  };
+
+  public onEnableAll = () => {
+    const filters = this.props?.filters?.map(enableFilter);
+    const multipleFilters = this.state.multipleFilters?.map(enableFilter);
+    this.setState({ multipleFilters });
+    this.props?.onFiltersUpdated?.(filters!);
+  };
+
+  public onDisableAll = () => {
+    const filters = this.props?.filters?.map(disableFilter);
+    const multipleFilters = this.state.multipleFilters?.map(disableFilter);
+    this.setState({ multipleFilters });
+    this.props?.onFiltersUpdated?.(filters!);
+  };
+
+  public onPinAll = () => {
+    const filters = this.props?.filters?.map(pinFilter);
+    this.props.onFiltersUpdated?.(filters!);
+  };
+
+  public onUnpinAll = () => {
+    const filters = this.props?.filters?.map(unpinFilter);
+    this.props.onFiltersUpdated?.(filters!);
+  };
+
+  public onToggleAllNegated = () => {
+    const filters = this.props?.filters?.map(toggleFilterNegated);
+    const multipleFilterExpressions = this.state.multipleFilters as Filter[];
+    const multipleFilters = multipleFilterExpressions?.map((filter) => {
+      return { ...filter, groupNegated: true };
+    });
+    this.setState({ multipleFilters });
+    this.props.onFiltersUpdated?.(filters!);
+  };
+
+  public onToggleAllDisabled = () => {
+    const filters = this.props?.filters?.map(toggleFilterDisabled);
+    this.props.onFiltersUpdated?.(filters!);
+  };
+
+  public onRemoveAll = () => {
+    this.setState({ selectedSavedQueries: [], finalSelectedSavedQueries: [], multipleFilters: [] });
+    this.props.onFiltersUpdated?.([]);
+  };
+
+  public toggleAddFilterModal = (value: boolean, addFilterMode?: string) => {
+    this.setState({
+      isAddFilterModalOpen: value,
+      addFilterMode: addFilterMode || 'quick_form',
+    });
+  };
+
+  public toggleEditFilterModal = (value: boolean, editFilterMode?: string) => {
+    this.setState({
+      isEditFilterModalOpen: value,
+      editFilterMode: editFilterMode || 'quick_form',
+    });
+  };
+
+  public toggleFilterSetPopover = (value: boolean) => {
+    this.setState({
+      openFilterSetPopover: value,
+    });
+  };
+
   public render() {
+    const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
+      <SavedQueryManagementComponent
+        showSaveQuery={this.props.showSaveQuery}
+        loadedSavedQuery={this.props.savedQuery}
+        onSave={this.onInitiateSave}
+        onSaveAsNew={this.onInitiateSaveNew}
+        onLoad={this.onLoadSavedQuery}
+        savedQueryService={this.savedQueryService}
+        onClearSavedQuery={this.props.onClearSavedQuery}
+        selectedSavedQueries={this.state.finalSelectedSavedQueries}
+      >
+        {(list) => list}
+      </SavedQueryManagementComponent>
+    );
+
+    const saveQueryFormComponent = (
+      <SaveQueryForm
+        savedQueryService={this.savedQueryService}
+        onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
+        onClose={() => this.setState({ openFilterSetPopover: false })}
+        showFilterOption={this.props.showFilterBar}
+        showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
+      />
+    );
+
+    const filterMenu = (
+      <FilterSetMenu
+        nonKqlMode={this.props.nonKqlMode}
+        nonKqlModeHelpText={this.props.nonKqlModeHelpText}
+        language={this.state.query!.language}
+        onEnableAll={this.onEnableAll}
+        onDisableAll={this.onDisableAll}
+        onToggleAllNegated={this.onToggleAllNegated}
+        onRemoveAll={this.onRemoveAll}
+        services={this.services}
+        onQueryChange={this.onQueryBarSubmit}
+        dateRangeFrom={this.state.dateRangeFrom}
+        dateRangeTo={this.state.dateRangeTo}
+        toggleAddFilterModal={this.toggleAddFilterModal}
+        savedQueryService={this.savedQueryService}
+        applySelectedQuery={this.applySelectedQuery}
+        saveQueryFormComponent={saveQueryFormComponent}
+        toggleFilterSetPopover={this.toggleFilterSetPopover}
+        openFilterSetPopover={this.state.openFilterSetPopover}
+      />
+    );
+
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
+
+    let filterBar;
+    if (this.shouldRenderFilterBar()) {
+      const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
+      });
+
+      filterBar = (
+        // <div id="GlobalFilterGroup" className={filterGroupClasses}>
+        <FilterBar
+          className="globalFilterGroup__filterBar"
+          filters={this.props.filters!}
+          onFiltersUpdated={this.props.onFiltersUpdated}
+          indexPatterns={this.props.indexPatterns!}
+          appName={this.services.appName}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          selectedSavedQueries={this.state.finalSelectedSavedQueries}
+          removeSelectedSavedQuery={this.removeSelectedSavedQuery}
+          onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
+          multipleFilters={this.state.multipleFilters}
+          toggleEditFilterModal={this.toggleEditFilterModal}
+          isEditFilterModalOpen={this.state.isEditFilterModalOpen}
+          editFilterMode={this.state.editFilterMode}
+          savedQueryService={this.savedQueryService}
+          onFilterSave={(savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
+            console.log(this.state.query);
+            return this.onSave(savedQueryMeta, saveAsNew, {
+              language: this.state.query!.language,
+              query: '',
+            });
+          }}
+          onFilterBadgeSave={this.onFilterBadgeSave}
+        />
+        // </div>
+      );
+    }
 
     let queryBar;
     if (this.shouldRenderQueryBar()) {
@@ -356,20 +676,18 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         <QueryBarTopRow
           timeHistory={this.props.timeHistory}
           query={this.state.query}
+          filters={this.props.filters!}
+          onFiltersUpdated={this.props.onFiltersUpdated}
+          onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
+          multipleFilters={this.state.multipleFilters}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
+          prepend={this.props.showFilterBar ? filterMenu : undefined}
+          savedQueryManagement={savedQueryManagement}
+          applySelectedSavedQueries={this.applyTimeFilterOverrideModal}
           fillSubmitButton={this.props.fillSubmitButton || false}
-          prepend={
-            this.props.showFilterBar && this.state.query
-              ? this.renderSavedQueryManagement(
-                  this.props.onClearSavedQuery,
-                  this.props.showSaveQuery,
-                  this.props.savedQuery
-                )
-              : undefined
-          }
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
@@ -392,28 +710,58 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           nonKqlMode={this.props.nonKqlMode}
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          toggleAddFilterModal={this.toggleAddFilterModal}
+          isAddFilterModalOpen={this.state.isAddFilterModalOpen}
+          addFilterMode={this.state.addFilterMode}
+          filterBar={filterBar}
+          onNewFiltersSave={(savedQueryMeta) =>
+            this.onSave(savedQueryMeta, true, {
+              language: this.state.query!.language,
+              query: '',
+            })
+          }
+          savedQueryService={this.savedQueryService}
         />
       );
     }
 
-    let filterBar;
-    if (this.shouldRenderFilterBar()) {
-      const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
-      });
+    // move this to a separate file
+    if (this.state.overrideTimeFilterModalShow) {
+      return (
+        <EuiModal
+          onClose={() => this.setState({ overrideTimeFilterModalShow: false })}
+          style={{ width: 450 }}
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <h1>Overriding time filter</h1>
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
 
-      filterBar = (
-        <div id="GlobalFilterGroup" className={filterGroupClasses}>
-          <FilterBar
-            className="globalFilterGroup__filterBar"
-            filters={this.props.filters!}
-            onFiltersUpdated={this.props.onFiltersUpdated}
-            indexPatterns={this.props.indexPatterns!}
-            appName={this.services.appName}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          />
-        </div>
+          <EuiModalBody>
+            Saved filters that also contain time filters will override the currently selected time
+            filter
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton
+              onClick={() =>
+                this.setState({ overrideTimeFilterModalShow: false, finalSelectedSavedQueries: [] })
+              }
+            >
+              Cancel
+            </EuiButton>
+            <EuiButton
+              onClick={() => this.timeFilterOverrideModalApplyQueries(true)}
+              color="warning"
+            >
+              Never Show again
+            </EuiButton>
+            <EuiButton onClick={() => this.timeFilterOverrideModalApplyQueries(false)} fill>
+              OK
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
       );
     }
 
@@ -424,8 +772,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return (
       <div className={globalQueryBarClasses} data-test-subj="globalQueryBar">
         {queryBar}
-        {filterBar}
-
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
             savedQuery={this.props.savedQuery ? this.props.savedQuery : undefined}
@@ -457,14 +803,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     ) => {
       const savedQueryManagement = onClearSavedQuery && (
         <SavedQueryManagementComponent
-          showSaveQuery={showSaveQuery}
-          loadedSavedQuery={savedQuery}
+          showSaveQuery={this.props.showSaveQuery}
+          loadedSavedQuery={this.props.savedQuery}
           onSave={this.onInitiateSave}
           onSaveAsNew={this.onInitiateSaveNew}
           onLoad={this.onLoadSavedQuery}
           savedQueryService={this.savedQueryService}
           onClearSavedQuery={onClearSavedQuery}
-        />
+          selectedSavedQueries={this.state.finalSelectedSavedQueries}
+        >
+          {(list) => list}
+        </SavedQueryManagementComponent>
       );
 
       return savedQueryManagement;

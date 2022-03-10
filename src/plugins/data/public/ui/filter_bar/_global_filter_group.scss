@@ -23,12 +23,36 @@
   min-height: $euiSizeL + $euiSizeXS; // same height as the badges
 }
 
+.globalFilterBar {
+  & > *:not(:first-child) {
+    &:before {
+      content: 'AND';
+      color: $euiColorPrimaryText;
+    }
+  }
+  & > .globalFilterGroup__editFilter {
+    &:before {
+      content: '';
+    }
+  }
+}
+
 // sass-lint:disable quotes
 .globalFilterGroup__branch {
   padding: $euiSizeS $euiSizeM 0 0;
   background-repeat: no-repeat;
   background-position: $euiSizeM ($euiSizeS * -1);
   background-image: url("data:image/svg+xml,%0A%3Csvg width='28px' height='28px' viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='#{hexToRGB($euiColorLightShade)}'%3E%3Crect x='14' y='27' width='14' height='1'%3E%3C/rect%3E%3C/g%3E%3C/svg%3E");
+}
+
+.globalFilterGroup--hasFilters {
+  min-height: $euiSizeXXL;
+}
+
+.globalFilterGroup__filterBar {
+  position: absolute;
+  left: $euiSizeS;
+  right: $euiSizeS;
 }
 
 .globalFilterGroup__wrapper {
@@ -39,11 +63,19 @@
 
 .globalFilterGroup__filterFlexItem {
   overflow: hidden;
-  padding-bottom: 2px; // Allow the shadows of the pills to show
+  // padding-bottom: 2px; // Allow the shadows of the pills to show
+  @include euiFormControlDefaultShadow;
+  @include euiFormControlText;
+  border-radius: $euiFormControlBorderRadius;
+  padding: 0 $euiFormControlCompressedPadding;
 }
 
 .globalFilterBar__flexItem {
   max-width: calc(100% - #{$euiSizeXS}); // Width minus margin around each flex itm
+
+  flex-direction: row;
+  align-items: center;
+  gap: $euiSizeS;
 }
 
 @include euiBreakpoint('xs', 's') {

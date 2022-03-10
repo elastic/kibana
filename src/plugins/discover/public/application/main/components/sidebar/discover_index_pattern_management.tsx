@@ -55,76 +55,61 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
   };
 
   return (
-    <EuiPopover
-      panelPaddingSize="none"
-      isOpen={isAddIndexPatternFieldPopoverOpen}
-      closePopover={() => {
-        setIsAddIndexPatternFieldPopoverOpen(false);
-      }}
-      ownFocus
-      data-test-subj="discover-addRuntimeField-popover"
-      button={
-        <EuiButtonIcon
-          color="text"
-          iconType="boxesHorizontal"
-          data-test-subj="discoverIndexPatternActions"
-          aria-label={i18n.translate('discover.fieldChooser.indexPatterns.actionsPopoverLabel', {
-            defaultMessage: 'Data view settings',
-          })}
+    // <EuiPopover
+    //   panelPaddingSize="s"
+    //   isOpen={isAddIndexPatternFieldPopoverOpen}
+    //   closePopover={() => {
+    //     setIsAddIndexPatternFieldPopoverOpen(false);
+    //   }}
+    //   ownFocus
+    //   data-test-subj="discover-addRuntimeField-popover"
+    //   button={
+    //     <EuiButtonIcon
+    //       color="text"
+    //       iconType="boxesHorizontal"
+    //       data-test-subj="discoverIndexPatternActions"
+    //       aria-label={i18n.translate('discover.fieldChooser.indexPatterns.actionsPopoverLabel', {
+    //         defaultMessage: 'Data view settings',
+    //       })}
+    //       onClick={() => {
+    //         setIsAddIndexPatternFieldPopoverOpen(!isAddIndexPatternFieldPopoverOpen);
+    //       }}
+    //     />
+    //   }
+    // >
+    <EuiContextMenuPanel
+      size="s"
+      items={[
+        <EuiContextMenuItem
+          key="add"
+          icon="indexOpen"
+          data-test-subj="indexPattern-add-field"
           onClick={() => {
-            setIsAddIndexPatternFieldPopoverOpen(!isAddIndexPatternFieldPopoverOpen);
+            setIsAddIndexPatternFieldPopoverOpen(false);
+            addField();
           }}
-        />
-      }
-    >
-      <EuiContextMenuPanel
-        size="m"
-        title="Data view"
-        items={[
-          <EuiContextMenuItem
-            key="add"
-            icon="indexOpen"
-            data-test-subj="indexPattern-add-field"
-            onClick={() => {
-              setIsAddIndexPatternFieldPopoverOpen(false);
-              addField();
-            }}
-          >
-            {i18n.translate('discover.fieldChooser.indexPatterns.addFieldButton', {
-              defaultMessage: 'Add field',
-            })}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            key="manage"
-            icon="indexSettings"
-            data-test-subj="indexPattern-manage-field"
-            onClick={() => {
-              setIsAddIndexPatternFieldPopoverOpen(false);
-              core.application.navigateToApp('management', {
-                path: `/kibana/indexPatterns/patterns/${props.selectedIndexPattern?.id}`,
-              });
-            }}
-          >
-            {i18n.translate('discover.fieldChooser.indexPatterns.manageFieldButton', {
-              defaultMessage: 'Manage settings',
-            })}
-          </EuiContextMenuItem>,
-          <EuiHorizontalRule style={{ margin: '0px' }} />,
-          <EuiContextMenuItem
-            key="new"
-            icon="plusInCircleFilled"
-            data-test-subj="dataview-create-new"
-            onClick={() => {
-              setIsAddIndexPatternFieldPopoverOpen(false);
-              createNewDataView();
-            }}
-          >
-            {i18n.translate('discover.fieldChooser.dataViews.createNewDataView', {
-              defaultMessage: 'Create new data view',
-            })}
-          </EuiContextMenuItem>,
-        ]}
-      />
-    </EuiPopover>
+        >
+          {i18n.translate('discover.fieldChooser.indexPatterns.addFieldButton', {
+            defaultMessage: 'Add field to data view...',
+          })}
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          key="manage"
+          icon="indexSettings"
+          data-test-subj="indexPattern-manage-field"
+          onClick={() => {
+            setIsAddIndexPatternFieldPopoverOpen(false);
+            core.application.navigateToApp('management', {
+              path: `/kibana/indexPatterns/patterns/${props.selectedIndexPattern?.id}`,
+            });
+          }}
+        >
+          {i18n.translate('discover.fieldChooser.indexPatterns.manageFieldButton', {
+            defaultMessage: 'Manage data view fields...',
+          })}
+        </EuiContextMenuItem>,
+      ]}
+    />
+    // </EuiPopover>
   );
 }

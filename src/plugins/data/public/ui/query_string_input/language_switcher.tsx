@@ -8,16 +8,20 @@
 
 import {
   EuiButtonEmpty,
+  EuiContextMenuItem,
   EuiForm,
   EuiFormRow,
   EuiIcon,
   EuiLink,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   PopoverAnchorPosition,
+  toSentenceCase,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -77,75 +81,105 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
     </EuiButtonEmpty>
   );
 
+  // NEW returns individual context menu items
   return (
-    <EuiPopover
-      id="queryLanguageSwitcherPopover"
-      anchorClassName="euiFormControlLayout__append"
-      anchorPosition={anchorPosition || 'downRight'}
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      repositionOnScroll
-      ownFocus={true}
-      initialFocus={'[role="switch"]'}
-    >
-      <EuiPopoverTitle>
-        <FormattedMessage
-          id="data.query.queryBar.syntaxOptionsTitle"
-          defaultMessage="Syntax options"
-        />
-      </EuiPopoverTitle>
-      <div style={{ width: '350px' }}>
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="data.query.queryBar.syntaxOptionsDescription"
-              defaultMessage="The {docsLink} (KQL) offers a simplified query
+    <div>
+      <EuiContextMenuItem
+        key="KQL"
+        icon={language === 'kuery' ? 'check' : 'empty'}
+        onClick={() => {
+          onSelectLanguage('kuery');
+        }}
+      >
+        KQL
+      </EuiContextMenuItem>
+      <EuiContextMenuItem
+        key={nonKqlMode}
+        icon={language === 'kuery' ? 'empty' : 'check'}
+        onClick={() => {
+          onSelectLanguage(nonKqlMode);
+        }}
+      >
+        {toSentenceCase(nonKqlMode)}
+      </EuiContextMenuItem>
+      <EuiHorizontalRule margin="none" />
+      <EuiContextMenuItem
+        key={'documentation'}
+        icon={'documentation'}
+        href={kueryQuerySyntaxDocs}
+        target="_blank"
+      >
+        Documentation
+      </EuiContextMenuItem>
+    </div>
+  );
+
+  return (
+    // <EuiPopover
+    //   id="queryLanguageSwitcherPopover"
+    //   anchorClassName="euiFormControlLayout__append"
+    //   anchorPosition={anchorPosition || 'downRight'}
+    //   button={button}
+    //   isOpen={isPopoverOpen}
+    //   closePopover={() => setIsPopoverOpen(false)}
+    //   repositionOnScroll
+    //   ownFocus={true}
+    //   initialFocus={'[role="switch"]'}
+    // >
+    //   <EuiPopoverTitle>
+    //     <FormattedMessage
+    //       id="data.query.queryBar.syntaxOptionsTitle"
+    //       defaultMessage="Syntax options"
+    //     />
+    //   </EuiPopoverTitle>
+    <div>
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="data.query.queryBar.syntaxOptionsDescription"
+            defaultMessage="The {docsLink} (KQL) offers a simplified query
               syntax and support for scripted fields. KQL also provides autocomplete.
               If you turn off KQL, {nonKqlModeHelpText}"
-              values={{
-                docsLink: (
-                  <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
-                    {kqlFullName}
-                  </EuiLink>
-                ),
-                nonKqlModeHelpText:
-                  nonKqlModeHelpText ||
-                  i18n.translate(
-                    'data.query.queryBar.syntaxOptionsDescription.nonKqlModeHelpText',
-                    {
-                      defaultMessage: 'Kibana uses Lucene.',
-                    }
-                  ),
-              }}
-            />
-          </p>
-        </EuiText>
+            values={{
+              docsLink: (
+                <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
+                  {kqlFullName}
+                </EuiLink>
+              ),
+              nonKqlModeHelpText:
+                nonKqlModeHelpText ||
+                i18n.translate('data.query.queryBar.syntaxOptionsDescription.nonKqlModeHelpText', {
+                  defaultMessage: 'Kibana uses Lucene.',
+                }),
+            }}
+          />
+        </p>
+      </EuiText>
 
-        <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
 
-        <EuiForm>
-          <EuiFormRow label={kqlFullName}>
-            <EuiSwitch
-              id="queryEnhancementOptIn"
-              name="popswitch"
-              label={
-                language === 'kuery' ? (
-                  <FormattedMessage id="data.query.queryBar.kqlOnLabel" defaultMessage="On" />
-                ) : (
-                  <FormattedMessage id="data.query.queryBar.kqlOffLabel" defaultMessage="Off" />
-                )
-              }
-              checked={language === 'kuery'}
-              onChange={() => {
-                const newLanguage = language === 'kuery' ? nonKqlMode : 'kuery';
-                onSelectLanguage(newLanguage);
-              }}
-              data-test-subj="languageToggle"
-            />
-          </EuiFormRow>
-        </EuiForm>
-      </div>
-    </EuiPopover>
+      <EuiForm>
+        <EuiFormRow label={kqlFullName}>
+          <EuiSwitch
+            id="queryEnhancementOptIn"
+            name="popswitch"
+            label={
+              language === 'kuery' ? (
+                <FormattedMessage id="data.query.queryBar.kqlOnLabel" defaultMessage="On" />
+              ) : (
+                <FormattedMessage id="data.query.queryBar.kqlOffLabel" defaultMessage="Off" />
+              )
+            }
+            checked={language === 'kuery'}
+            onChange={() => {
+              const newLanguage = language === 'kuery' ? nonKqlMode : 'kuery';
+              onSelectLanguage(newLanguage);
+            }}
+            data-test-subj="languageToggle"
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </div>
+    // {/* </EuiPopover> */}
   );
 });

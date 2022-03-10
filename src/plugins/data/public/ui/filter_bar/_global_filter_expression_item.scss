@@ -1,0 +1,31 @@
+.globalFilterExpression__value {
+  color: makeHighContrastColor($euiColorSuccessText, $euiColorLightShade);
+}
+
+.globalFilterExpression__value--number {
+  color: makeHighContrastColor($euiColorDangerText, $euiColorLightShade);
+}
+
+.globalFilterExpression__relationship {
+  padding: $euiSizeXS;
+}
+
+.globalFilterExpression__groupNegate {
+  padding: $euiSizeXS;
+}
+
+.globalFilterExpression-isDisabled {
+  color: $euiColorDarkShade;
+  background-color: transparentize($euiColorLightShade, .5);
+  text-decoration: line-through;
+  font-weight: $euiFontWeightRegular;
+  font-style: italic;
+}
+
+.globalFilterExpression__flexItem {
+  margin: $euiSizeXS;
+}
+
+.globalFilterExpression__saveIcon {
+  margin-right: $euiSizeXS;
+}

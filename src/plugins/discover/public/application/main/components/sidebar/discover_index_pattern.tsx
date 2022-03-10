@@ -11,6 +11,7 @@ import { SavedObject } from 'kibana/public';
 import { DataView, DataViewAttributes } from 'src/plugins/data/common';
 import { IndexPatternRef } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
+import { DiscoverServices } from '../../../../build_services';
 
 export interface DiscoverIndexPatternProps {
   /**
@@ -22,8 +23,18 @@ export interface DiscoverIndexPatternProps {
    */
   onChangeIndexPattern: (id: string) => void;
   /**
-   * currently selected index pattern
+   * Discover plugin services;
    */
+  services: DiscoverServices;
+  /**
+   * Read from the Fields API
+   */
+  useNewFieldsApi?: boolean;
+  /**
+   * Callback to execute on edit field action
+   * @param fieldName
+   */
+  editField: (fieldName?: string) => void;
   selectedIndexPattern: DataView;
 }
 
@@ -34,6 +45,9 @@ export function DiscoverIndexPattern({
   indexPatternList,
   onChangeIndexPattern,
   selectedIndexPattern,
+  services,
+  useNewFieldsApi,
+  editField,
 }: DiscoverIndexPatternProps) {
   const options: IndexPatternRef[] = (indexPatternList || []).map((entity) => ({
     id: entity.id,
@@ -69,6 +83,10 @@ export function DiscoverIndexPattern({
           setSelected(indexPattern);
         }
       }}
+      services={services}
+      selectedIndexPattern={selectedIndexPattern}
+      useNewFieldsApi={useNewFieldsApi}
+      editField={editField}
     />
   );
 }
