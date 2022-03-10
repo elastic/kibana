@@ -14,6 +14,8 @@ import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptio
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
 
+const DEFAULT_OPTIONS = Object.freeze({});
+
 export function useListArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   options: Partial<{
@@ -21,25 +23,31 @@ export function useListArtifact(
     page: number;
     perPage: number;
     policies: string[];
-  }> = {},
+    excludedPolicies: string[];
+  }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
-  customQueryOptions: UseQueryOptions<FoundExceptionListItemSchema, HttpFetchError> = {}
+  customQueryOptions: Partial<
+    UseQueryOptions<FoundExceptionListItemSchema, HttpFetchError>
+  > = DEFAULT_OPTIONS,
+  customQueryIds: string[] = []
 ): QueryObserverResult<FoundExceptionListItemSchema, HttpFetchError> {
   const {
     filter = '',
     page = MANAGEMENT_DEFAULT_PAGE + 1,
     perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
-    policies,
+    policies = [],
+    excludedPolicies = [],
   } = options;
   const filterKuery = useMemo<string | undefined>(() => {
     return parsePoliciesAndFilterToKql({
       kuery: parseQueryFilterToKQL(filter, searchableFields),
-      policies: policies ?? [],
+      policies,
+      excludedPolicies,
     });
-  }, [filter, searchableFields, policies]);
+  }, [filter, searchableFields, policies, excludedPolicies]);
 
   return useQuery<FoundExceptionListItemSchema, HttpFetchError>(
-    ['list', exceptionListApiClient, filterKuery, page, perPage],
+    [...customQueryIds, 'list', exceptionListApiClient, filterKuery, page, perPage],
     () => {
       return exceptionListApiClient.find({
         filter: filterKuery,
