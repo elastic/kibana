@@ -35,7 +35,7 @@ export const createRateAggsBuckets = (
   id: string,
   field: string
 ) => {
-  const { firstBucketRange, secondBucketRange, intervalInSeconds } = calculateRateTimeranges({
+  const { firstBucketRange, secondBucketRange } = calculateRateTimeranges({
     to: timeframe.end,
     from: timeframe.start,
   });

@@ -6,15 +6,13 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { difference } from 'lodash';
 import moment from 'moment';
 import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
-import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { createTimerange } from './create_timerange';
-import { getData, GetDataResponse } from './get_data';
+import { getData } from './get_data';
 
 export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];

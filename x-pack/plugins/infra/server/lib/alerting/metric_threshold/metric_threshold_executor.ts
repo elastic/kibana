@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { first, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import moment from 'moment';
 import {
   ActionGroupIdsOf,
