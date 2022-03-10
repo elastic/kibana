@@ -69,6 +69,7 @@ describe('CollapsedItemActions', () => {
       throttle: '1m',
       notifyWhen: 'onActiveAlert',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       executionStatus: {
         status: 'active',

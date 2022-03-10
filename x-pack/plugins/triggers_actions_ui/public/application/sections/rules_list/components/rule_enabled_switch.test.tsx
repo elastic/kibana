@@ -28,6 +28,7 @@ describe('RuleEnabledSwitch', () => {
       apiKeyOwner: null,
       throttle: '1m',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       executionStatus: {
         status: 'active',
@@ -72,6 +73,7 @@ describe('RuleEnabledSwitch', () => {
             apiKeyOwner: null,
             throttle: '1m',
             muteAll: false,
+            snoozeEndTime: null,
             mutedInstanceIds: [],
             executionStatus: {
               status: 'active',

@@ -398,6 +398,7 @@ function mockRule(overloads: Partial<Rule> = {}): Rule {
     throttle: null,
     notifyWhen: null,
     muteAll: false,
+    snoozeEndTime: null,
     mutedInstanceIds: [],
     executionStatus: {
       status: 'unknown',

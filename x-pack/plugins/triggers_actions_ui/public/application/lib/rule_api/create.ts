@@ -12,7 +12,7 @@ import { transformRule } from './common_transformations';
 
 type RuleCreateBody = Omit<
   RuleUpdates,
-  'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
+  'createdBy' | 'updatedBy' | 'muteAll' | 'snoozeEndTime' | 'mutedInstanceIds' | 'executionStatus'
 >;
 const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ruleTypeId,

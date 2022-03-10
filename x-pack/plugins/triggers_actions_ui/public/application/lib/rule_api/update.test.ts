@@ -37,6 +37,7 @@ describe('updateRule', () => {
       createdBy: null,
       updatedBy: null,
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       executionStatus: {
         status: 'unknown',

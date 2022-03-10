@@ -169,6 +169,7 @@ describe('rule_edit', () => {
       updatedBy: 'elastic',
       createdAt: new Date(),
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       updatedAt: new Date(),
       executionStatus: {

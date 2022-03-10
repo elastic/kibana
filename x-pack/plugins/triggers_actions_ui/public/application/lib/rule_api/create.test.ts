@@ -51,7 +51,13 @@ describe('createRule', () => {
     };
     const ruleToCreate: Omit<
       RuleUpdates,
-      'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
+      | 'createdBy'
+      | 'updatedBy'
+      | 'muteAll'
+      | 'snoozeEndTime'
+      | 'mutedInstanceIds'
+      | 'executionStatus'
+      | 'snoozeEndTime'
     > = {
       params: {
         aggType: 'count',
