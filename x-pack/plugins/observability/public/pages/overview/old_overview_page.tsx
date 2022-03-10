@@ -89,7 +89,7 @@ export function OverviewPage({ routeParams }: Props) {
     return refetch.current && refetch.current();
   }, []);
 
-  const CasesContext = cases.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
 
   if (hasAnyData === undefined) {
