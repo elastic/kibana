@@ -35,12 +35,18 @@ verify_no_git_changes() {
         exit 1
       fi
 
+      echo "'$1' caused changes to the following files:"
+      echo "$GIT_CHANGES"
+      echo ""
+      echo "Auto-committing these changes now. A new build should start soon if successful."
+
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
       git add -u -- . ':!.bazelrc'
       git commit -m "$NEW_COMMIT_MESSAGE"
       git push
+      exit 1
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
       echo -e "$GIT_CHANGES\n"
