@@ -12,6 +12,8 @@ import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/commo
 import { USER } from '../../../../functional/services/ml/security_common';
 import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
 
+const NUMBER_OF_CAPABILITIES = 36;
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
@@ -45,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should have the right number of capabilities', async () => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER);
-        expect(Object.keys(capabilities).length).to.eql(32);
+        expect(Object.keys(capabilities).length).to.eql(NUMBER_OF_CAPABILITIES);
       });
 
       it('should get viewer capabilities', async () => {
@@ -84,6 +86,10 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateAnnotation: true,
           canDeleteAnnotation: true,
           canViewMlNodes: false,
+          canGetTrainedModels: true,
+          canCreateTrainedModels: false,
+          canDeleteTrainedModels: false,
+          canStartStopTrainedModels: false,
         });
       });
 
@@ -123,6 +129,10 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateAnnotation: true,
           canDeleteAnnotation: true,
           canViewMlNodes: true,
+          canGetTrainedModels: true,
+          canCreateTrainedModels: true,
+          canDeleteTrainedModels: true,
+          canStartStopTrainedModels: true,
         });
       });
     });

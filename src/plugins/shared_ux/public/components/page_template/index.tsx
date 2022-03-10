@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-packages'],
-};
+export { NoDataCard } from './no_data_page/no_data_card';
