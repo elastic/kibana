@@ -6,7 +6,6 @@
  */
 
 import * as rt from 'io-ts';
-import { logSourceColumnConfigurationRT } from '../log_sources';
 
 export interface LogViewsStaticConfig {
   messageFields: string[];
@@ -39,14 +38,39 @@ export type LogIndexNameReference = rt.TypeOf<typeof logIndexNameReferenceRT>;
 export const logIndexReferenceRT = rt.union([logDataViewReferenceRT, logIndexNameReferenceRT]);
 export type LogIndexReference = rt.TypeOf<typeof logIndexReferenceRT>;
 
-export const logViewColumnConfigurationRT = logSourceColumnConfigurationRT;
+const logViewCommonColumnConfigurationRT = rt.strict({
+  id: rt.string,
+});
+
+const logViewTimestampColumnConfigurationRT = rt.strict({
+  timestampColumn: logViewCommonColumnConfigurationRT,
+});
+
+const logViewMessageColumnConfigurationRT = rt.strict({
+  messageColumn: logViewCommonColumnConfigurationRT,
+});
+
+export const logViewFieldColumnConfigurationRT = rt.strict({
+  fieldColumn: rt.intersection([
+    logViewCommonColumnConfigurationRT,
+    rt.strict({
+      field: rt.string,
+    }),
+  ]),
+});
+
+export const logViewColumnConfigurationRT = rt.union([
+  logViewTimestampColumnConfigurationRT,
+  logViewMessageColumnConfigurationRT,
+  logViewFieldColumnConfigurationRT,
+]);
 export type LogViewColumnConfiguration = rt.TypeOf<typeof logViewColumnConfigurationRT>;
 
 export const logViewAttributesRT = rt.strict({
   name: rt.string,
   description: rt.string,
   logIndices: logIndexReferenceRT,
-  logColumns: rt.array(logSourceColumnConfigurationRT),
+  logColumns: rt.array(logViewColumnConfigurationRT),
 });
 export type LogViewAttributes = rt.TypeOf<typeof logViewAttributesRT>;
 
