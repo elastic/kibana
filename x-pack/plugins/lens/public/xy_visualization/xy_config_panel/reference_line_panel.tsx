@@ -27,27 +27,31 @@ export const ReferenceLinePanel = (
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
-    layer: XYReferenceLineLayerConfig;
   }
 ) => {
-  const layer = props.layer;
   const { state, setState, layerId, accessor } = props;
 
   const isHorizontal = isHorizontalChart(state.layers);
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: state,
     onChange: setState,
   });
 
-  const index = localState.layers.findIndex((l) => l.layerId === layerId);
+  const localLayer = localState.layers.find(
+    (l) => l.layerId === layerId
+  ) as XYReferenceLineLayerConfig;
+  const localConfig = localLayer?.yConfig?.find(
+    (yAxisConfig) => yAxisConfig.forAccessor === accessor
+  );
 
   const setConfig = useCallback(
     (yConfig: Partial<YConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }
-      const newYConfigs = [...(layer.yConfig || [])];
+      const newYConfigs = [...(localLayer.yConfig || [])];
       const existingIndex = newYConfigs.findIndex(
         (yAxisConfig) => yAxisConfig.forAccessor === accessor
       );
@@ -59,30 +63,24 @@ export const ReferenceLinePanel = (
           ...yConfig,
         });
       }
-      setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));
+      setLocalState(updateLayer(localState, { ...localLayer, yConfig: newYConfigs }, index));
     },
-    [accessor, index, localState, layer, setLocalState]
+    [accessor, index, localState, localLayer, setLocalState]
   );
-
-  const currentConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
 
   return (
     <>
       <MarkerDecorationSettings
         isHorizontal={isHorizontal}
         setConfig={setConfig}
-        currentConfig={currentConfig}
+        currentConfig={localConfig}
       />
       <LineStyleSettings
         isHorizontal={isHorizontal}
         setConfig={setConfig}
-        currentConfig={currentConfig}
+        currentConfig={localConfig}
       />
-      <FillSetting
-        isHorizontal={isHorizontal}
-        setConfig={setConfig}
-        currentConfig={currentConfig}
-      />
+      <FillSetting isHorizontal={isHorizontal} setConfig={setConfig} currentConfig={localConfig} />
       <ColorPicker
         {...props}
         setConfig={setConfig}

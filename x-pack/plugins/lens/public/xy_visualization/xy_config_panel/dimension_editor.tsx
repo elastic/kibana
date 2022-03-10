@@ -37,25 +37,30 @@ export const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(
   props: VisualizationDimensionEditorProps<State> & {
-    layer: XYDataLayerConfig;
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
   }
 ) {
-  const { state, setState, layerId, accessor, layer } = props;
+  const { state, setState, layerId, accessor } = props;
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: props.state,
     onChange: props.setState,
   });
-  const index = localState.layers.findIndex((l) => l.layerId === layerId);
+
+  const localLayer = localState.layers.find((l) => l.layerId === layerId) as XYDataLayerConfig;
+  const localYConfig = localLayer?.yConfig?.find(
+    (yAxisConfig) => yAxisConfig.forAccessor === accessor
+  );
+  const axisMode = localYConfig?.axisMode || 'auto';
 
   const setConfig = useCallback(
     (yConfig: Partial<YConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }
-      const newYConfigs = [...(layer.yConfig || [])];
+      const newYConfigs = [...(localLayer.yConfig || [])];
       const existingIndex = newYConfigs.findIndex(
         (yAxisConfig) => yAxisConfig.forAccessor === accessor
       );
@@ -67,24 +72,19 @@ export function DimensionEditor(
           ...yConfig,
         });
       }
-      setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));
+      setLocalState(updateLayer(localState, { ...localLayer, yConfig: newYConfigs }, index));
     },
-    [accessor, index, localState, layer, setLocalState]
+    [accessor, index, localState, localLayer, setLocalState]
   );
-
-  const axisMode =
-    (layer.yConfig &&
-      layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
-    'auto';
 
   if (props.groupId === 'breakdown') {
     return (
       <>
         <PalettePicker
           palettes={props.paletteService}
-          activePalette={layer.palette}
+          activePalette={localLayer?.palette}
           setPalette={(newPalette) => {
-            setState(updateLayer(state, { ...layer, palette: newPalette }, index));
+            setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
           }}
         />
       </>
@@ -95,7 +95,7 @@ export function DimensionEditor(
 
   return (
     <>
-      <ColorPicker {...props} disabled={Boolean(layer.splitAccessor)} setConfig={setConfig} />
+      <ColorPicker {...props} disabled={Boolean(localLayer.splitAccessor)} setConfig={setConfig} />
 
       <EuiFormRow
         display="columnCompressed"

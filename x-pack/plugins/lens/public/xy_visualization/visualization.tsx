@@ -449,9 +449,9 @@ export const getXyVisualization = ({
     };
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
-      <ReferenceLinePanel {...allProps} layer={layer} />
+      <ReferenceLinePanel {...allProps} />
     ) : (
-      <DimensionEditor {...allProps} layer={layer} />
+      <DimensionEditor {...allProps} />
     );
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
