@@ -215,7 +215,7 @@ function AlertsPage() {
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
   const kibana = useKibana<ObservabilityAppServices>();
-  const CasesContext = kibana.services.cases.getCasesContext();
+  const CasesContext = kibana.services.cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
 
   if (!hasAnyData && !isAllRequestsComplete) {
