@@ -1,4 +1,3 @@
-role="xpack"]
 [[xmatters-action-type]]
 === xMatters connector and action
 ++++
