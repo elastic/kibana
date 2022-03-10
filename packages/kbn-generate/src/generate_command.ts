@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-generate'],
-};
+import { Command } from '@kbn/dev-utils';
+
+import { Render } from './lib/render';
+
+export interface ContextExtensions {
+  render: Render;
+}
+
+export type GenerateCommand = Command<ContextExtensions>;
