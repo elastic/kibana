@@ -1,6 +1,6 @@
 The Stack Monitoring plugin uses standard Kibana testing constructs.
 
-See [The Kibana Testing guide](https://www.elastic.co/guide/en/kibana/master/development-tests.html) for details on how to run the various test suites.
+See the [Kibana Testing guide](https://www.elastic.co/guide/en/kibana/master/development-tests.html) for details on how to run the various test suites.
 
 We mainly use:
 1. Jest unit tests - located in sibling files to the source code 
