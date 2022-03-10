@@ -1362,8 +1362,6 @@
     "core.euiDataGridSchema.jsonSortTextDesc": "大-小",
     "core.euiDataGridSchema.numberSortTextAsc": "低-高",
     "core.euiDataGridSchema.numberSortTextDesc": "高-低",
-    "core.euiDataGridToolbar.fullScreenButton": "全画面",
-    "core.euiDataGridToolbar.fullScreenButtonActive": "全画面を終了",
     "core.euiDatePopoverButton.outdatedTitle": "更新が必要：{title}",
     "core.euiDisplaySelector.buttonText": "表示オプション",
     "core.euiDisplaySelector.densityLabel": "密度",

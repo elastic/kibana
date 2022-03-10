@@ -1368,8 +1368,6 @@
     "core.euiDataGridSchema.jsonSortTextDesc": "大-小",
     "core.euiDataGridSchema.numberSortTextAsc": "低-高",
     "core.euiDataGridSchema.numberSortTextDesc": "高-低",
-    "core.euiDataGridToolbar.fullScreenButton": "全屏",
-    "core.euiDataGridToolbar.fullScreenButtonActive": "退出全屏",
     "core.euiDatePopoverButton.invalidTitle": "无效日期：{title}",
     "core.euiDatePopoverButton.outdatedTitle": "需要更新：{title}",
     "core.euiDisplaySelector.buttonText": "显示选项",

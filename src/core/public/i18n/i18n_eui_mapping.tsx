@@ -487,18 +487,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Descending size label',
       }
     ),
-    'euiDataGridToolbar.fullScreenButton': i18n.translate(
-      'core.euiDataGridToolbar.fullScreenButton',
-      {
-        defaultMessage: 'Full screen',
-      }
-    ),
-    'euiDataGridToolbar.fullScreenButtonActive': i18n.translate(
-      'core.euiDataGridToolbar.fullScreenButtonActive',
-      {
-        defaultMessage: 'Exit full screen',
-      }
-    ),
     'euiDatePopoverButton.invalidTitle': ({ title }: EuiValues) =>
       i18n.translate('core.euiDatePopoverButton.invalidTitle', {
         defaultMessage: 'Invalid date: {title}',
@@ -589,6 +577,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'ARIA label on a button that removes any entry in a form field',
       }
     ),
+    'euiFullscreenSelector.fullscreenButton': i18n.translate(
+      'core.euiFullscreenSelector.fullscreenButton',
+      {
+        defaultMessage: 'Fullscreen',
+      }
+    ),
+    'euiFullscreenSelector.fullscreenButtonActive': i18n.translate(
+      'core.euiFullscreenSelector.fullscreenButtonActive',
+      {
+        defaultMessage: 'Exit fullscreen',
+      }
+    ),
     'euiHeaderLinks.appNavigation': i18n.translate('core.euiHeaderLinks.appNavigation', {
       defaultMessage: 'App menu',
       description: 'ARIA label on a `nav` element',
@@ -601,12 +601,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiImage.closeImage': ({ alt }: EuiValues) =>
       i18n.translate('core.euiImage.closeImage', {
-        defaultMessage: 'Close full screen {alt} image',
+        defaultMessage: 'Close fullscreen {alt} image',
         values: { alt },
       }),
     'euiImage.openImage': ({ alt }: EuiValues) =>
       i18n.translate('core.euiImage.openImage', {
-        defaultMessage: 'Open full screen {alt} image',
+        defaultMessage: 'Open fullscreen {alt} image',
         values: { alt },
       }),
     'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
