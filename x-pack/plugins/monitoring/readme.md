@@ -1,5 +1,7 @@
 # Documentation for Stack Monitoring developers
 
+This plugin provides the Stack Monitoring kibana application.
+
 ## Getting started
 - [Local setup](dev_docs/how_to/local_setup.md)
 - [Cloud setup](dev_docs/how_to/cloud_setup.md)
