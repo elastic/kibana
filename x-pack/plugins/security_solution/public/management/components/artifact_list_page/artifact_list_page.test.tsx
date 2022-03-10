@@ -230,17 +230,13 @@ describe('When using the ArtifactListPage component', () => {
     it('should display `Cancel` button enabled', async () => {
       await renderAndWaitForFlyout();
 
-      expect(
-        (renderResult.getByTestId('testPage-flyout-cancelButton') as HTMLButtonElement).disabled
-      ).toBe(false);
+      expect(renderResult.getByTestId('testPage-flyout-cancelButton')).toBeEnabled();
     });
 
     it('should display `Submit` button as disabled', async () => {
       await renderAndWaitForFlyout();
 
-      expect(
-        (renderResult.getByTestId('testPage-flyout-submitButton') as HTMLButtonElement).disabled
-      ).toBe(true);
+      expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
     });
 
     it.each([
@@ -304,9 +300,7 @@ describe('When using the ArtifactListPage component', () => {
       it('should enable the `Submit` button', async () => {
         await renderAndWaitForFlyout();
 
-        expect(
-          (renderResult.getByTestId('testPage-flyout-submitButton') as HTMLButtonElement).disabled
-        ).toBe(false);
+        expect(renderResult.getByTestId('testPage-flyout-submitButton')).toBeEnabled();
       });
 
       describe('and user clicks submit', () => {
@@ -335,12 +329,8 @@ describe('When using the ArtifactListPage component', () => {
         });
 
         it('should disable all buttons while an update is in flight', () => {
-          expect((getByTestId('testPage-flyout-cancelButton') as HTMLButtonElement).disabled).toBe(
-            true
-          );
-          expect((getByTestId('testPage-flyout-submitButton') as HTMLButtonElement).disabled).toBe(
-            true
-          );
+          expect(getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
+          expect(getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
         });
 
         it('should display loading indicator on Submit while an update is in flight', () => {
@@ -410,17 +400,9 @@ describe('When using the ArtifactListPage component', () => {
         it.skip('should re-enable `Cancel` and `Submit` buttons', async () => {
           await renderAndWaitForFlyout();
 
-          const cancelButtonDisabledState = (
-            renderResult.getByTestId('testPage-flyout-cancelButton') as HTMLButtonElement
-          ).disabled;
+          expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
 
-          expect(cancelButtonDisabledState).toBe(false);
-
-          const submitButtonDisabledState = (
-            renderResult.getByTestId('testPage-flyout-submitButton') as HTMLButtonElement
-          ).disabled;
-
-          expect(submitButtonDisabledState).toBe(false);
+          expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
         });
 
         // FIXME:PT investigate test failure
@@ -466,13 +448,9 @@ describe('When using the ArtifactListPage component', () => {
         it('should use custom submit handler when submit button is used', async () => {
           expect(handleSubmitCallback).toHaveBeenCalled();
 
-          expect(
-            (renderResult.getByTestId('testPage-flyout-cancelButton') as HTMLButtonElement).disabled
-          ).toBe(true);
+          expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
 
-          expect(
-            (renderResult.getByTestId('testPage-flyout-submitButton') as HTMLButtonElement).disabled
-          ).toBe(true);
+          expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
         });
 
         it('should catch and show error if one is encountered', async () => {
@@ -761,8 +739,8 @@ describe('When using the ArtifactListPage component', () => {
         });
 
         it('should show Cancel and Delete buttons enabled', async () => {
-          expect(cancelButton.disabled).toBe(false);
-          expect(submitButton.disabled).toBe(false);
+          expect(cancelButton).toBeEnabled();
+          expect(submitButton).toBeEnabled();
         });
 
         it('should close modal if Cancel/Close buttons are clicked', async () => {
@@ -780,8 +758,8 @@ describe('When using the ArtifactListPage component', () => {
           });
 
           await waitFor(() => {
-            expect(cancelButton.disabled).toBe(true);
-            expect(submitButton.disabled).toBe(true);
+            expect(cancelButton).toBeEnabled();
+            expect(submitButton).toBeEnabled();
           });
 
           deferred.resolve(); // cleanup
@@ -824,8 +802,8 @@ describe('When using the ArtifactListPage component', () => {
             expect.stringMatching(/^Unable to remove .*\. Reason: oh oh/)
           );
           expect(renderResult.getByTestId('testPage-deleteModal')).toBeTruthy();
-          expect(cancelButton.disabled).toBe(true);
-          expect(submitButton.disabled).toBe(true);
+          expect(cancelButton).toBeEnabled();
+          expect(submitButton).toBeEnabled();
         });
       });
     });
@@ -901,14 +879,25 @@ describe('When using the ArtifactListPage component', () => {
       });
 
       it('should show a no results found message if filter did not return any results', async () => {
-        mockedApi.responseProvider.trustedAppsList.mockReturnValueOnce({
-          page: 1,
-          per_page: 10,
-          total: 0,
-          data: [],
+        let apiNoResultsDone = false;
+        mockedApi.responseProvider.trustedAppsList.mockImplementationOnce(() => {
+          apiNoResultsDone = true;
+
+          return {
+            page: 1,
+            per_page: 10,
+            total: 0,
+            data: [],
+          };
         });
 
         clickSearchButton();
+
+        await act(async () => {
+          await waitFor(() => {
+            expect(apiNoResultsDone).toBe(true);
+          });
+        });
 
         await waitFor(() => {
           expect(renderResult.getByTestId('testPage-list-noResults')).toBeTruthy();
