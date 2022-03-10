@@ -185,7 +185,6 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}
-      showInspectButton={false}
       showLegend={showLegend}
       skip={filterQuery === undefined}
       startDate={from}

@@ -24,5 +24,4 @@ export interface VisualizationActionsProps {
   stackByField?: string;
   timerange: { from: string; to: string };
   title: React.ReactNode;
-  vizType?: string | null;
 }

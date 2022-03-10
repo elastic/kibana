@@ -128,7 +128,6 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
       indexNames={indexNames}
       setQuery={setQuery}
       startDate={from}
-      showInspectButton={false}
       {...alertsByCategoryHistogramConfigs}
     />
   );

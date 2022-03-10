@@ -32,6 +32,9 @@ const Wrapper = styled.div`
     top: 0;
     right: 0;
   }
+  &.histogram-viz-actions {
+    padding: ${({ theme }) => theme.eui.paddingSizes.s};
+  }
 `;
 
 export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
@@ -43,7 +46,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   inspectIndex = 0,
   isInspectButtonDisabled,
   isMultipleQuery,
-  vizType,
   lensAttributes,
   onCloseInspect,
   queryId,
@@ -78,7 +80,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     stackByField,
   });
 
-  const dataTestSubj = ['stat', queryId, vizType].filter((i) => i != null).join('-');
+  const dataTestSubj = `stat-${queryId}`;
 
   const { disabled: isAddToExistingCaseDisabled, onAddToExistingCaseClicked } =
     useAddToExistingCase({
@@ -221,11 +223,11 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   const button = useMemo(
     () => (
       <EuiButtonIcon
+        aria-label={MORE_ACTIONS}
         className={HISTOGRAM_ACTIONS_BUTTON_CLASS}
+        data-test-subj={dataTestSubj}
         iconType="boxesHorizontal"
         onClick={onButtonClick}
-        data-test-subj={dataTestSubj}
-        aria-label={MORE_ACTIONS}
       />
     ),
     [dataTestSubj, onButtonClick]
@@ -243,7 +245,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   );
 
   return (
-    <Wrapper className={className} data-test-subj={`${dataTestSubj}-wrapper`}>
+    <Wrapper className={className}>
       {isSaveModalVisible && initialInput != null && (
         <LensSaveModalComponent initialInput={initialInput} onClose={closeSaveModalVisible} />
       )}
