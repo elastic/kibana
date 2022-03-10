@@ -208,6 +208,7 @@ export class AnomalyTimelineStateService {
         this.getSwimLaneCardinality$(),
         this.getContainerWidth$(),
         this.getSelectedCells$(),
+        this.getSwimLaneBucketInterval$(),
         this._timeBounds$,
         this._refreshSubject$,
       ]) as Observable<
@@ -218,7 +219,8 @@ export class AnomalyTimelineStateService {
           SwimLanePagination,
           number,
           number,
-          AppStateSelectedCells
+          AppStateSelectedCells,
+          TimeBucketsInterval
         ]
       >
     )
@@ -232,6 +234,7 @@ export class AnomalyTimelineStateService {
             swimLaneCardinality,
             swimlaneContainerWidth,
             selectedCells,
+            swimLaneBucketInterval,
           ]) => {
             if (!selectedCells?.showTopFieldValues) {
               return of([]);
@@ -244,7 +247,7 @@ export class AnomalyTimelineStateService {
 
             const timerange = getSelectionTimeRange(
               selectedCells,
-              this.getSwimLaneBucketInterval()!.asSeconds(),
+              swimLaneBucketInterval.asSeconds(),
               this.timefilter.getBounds()
             );
 
@@ -254,7 +257,7 @@ export class AnomalyTimelineStateService {
                 timerange.latestMs,
                 selectedJobs,
                 viewBySwimlaneFieldName!,
-                swimLaneCardinality,
+                ANOMALY_SWIM_LANE_HARD_LIMIT,
                 swimLanePagination.viewByPerPage,
                 swimLanePagination.viewByFromPage,
                 swimlaneContainerWidth,
