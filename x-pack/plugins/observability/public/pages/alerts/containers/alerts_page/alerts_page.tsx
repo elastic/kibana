@@ -140,7 +140,7 @@ function AlertsPage() {
 
   const manageRulesHref = config.unsafe.rules.enabled
     ? prepend('/app/observability/rules')
-    : prepend('/insightsAndAlerting/triggersActions/alerts');
+    : prepend('/app/management/insightsAndAlerting/triggersActions/rules');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
