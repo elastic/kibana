@@ -37,6 +37,13 @@ function registerZooming(element: SVGSVGElement) {
     );
 }
 
+function makeEdgeId(edge: WorkspaceEdge) {
+  return `${makeNodeId(edge.source.data.field, edge.source.data.term)}-${makeNodeId(
+    edge.target.data.field,
+    edge.target.data.term
+  )}`;
+}
+
 export function GraphVisualization({
   workspace,
   selectSelected,
@@ -71,11 +78,16 @@ export function GraphVisualization({
   const edgeClick = (edge: WorkspaceEdge) => {
     // no multiple selection for now
 
-    workspace.clearEdgeSelection();
-    workspace.addEdgeToSelection(edge);
+    if (!edge.isSelected) {
+      workspace.addEdgeToSelection(edge);
+    } else {
+      workspace.removeEdgeFromSelection(edge);
+    }
     onSetControl('edgeSelection');
 
-    workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
+    if (edge.isSelected) {
+      workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
+    }
   };
 
   return (
@@ -97,13 +109,7 @@ export function GraphVisualization({
         <g>
           {workspace.edges &&
             workspace.edges.map((edge) => (
-              <g
-                key={`${makeNodeId(edge.source.data.field, edge.source.data.term)}-${makeNodeId(
-                  edge.target.data.field,
-                  edge.target.data.term
-                )}`}
-                className="gphEdge--wrapper"
-              >
+              <g key={makeEdgeId(edge)} className="gphEdge--wrapper">
                 {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
                 <line
                   x1={edge.topSrc.kx}

@@ -239,15 +239,6 @@ function GraphWorkspace(options) {
     self.selectedEdges = self.selectedEdges.filter((e) => e !== edge);
   };
 
-  this.clearEdgeSelection = function () {
-    for (const edge of self.selectedEdges) {
-      edge.isSelected = false;
-    }
-    self.selectedEdges = [];
-  };
-
-  this.getEdgeSelection = () => [...self.selectedEdges];
-
   this.deleteSelection = function () {
     let allAndGrouped = self.returnUnpackedGroupeds(self.selectedNodes);
 

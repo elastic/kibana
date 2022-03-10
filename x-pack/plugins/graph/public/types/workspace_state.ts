@@ -149,8 +149,6 @@ export interface Workspace {
 
   addEdgeToSelection(edge: WorkspaceEdge): void;
   removeEdgeFromSelection(edge: WorkspaceEdge): void;
-  clearEdgeSelection(): void;
-  getEdgeSelection(): WorkspaceEdge[];
 }
 
 export type ExploreRequest = any;
