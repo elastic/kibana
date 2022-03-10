@@ -6,13 +6,14 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
 import { UpdateDateRange } from '../../../../common/components/charts/common';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
+import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
-import { useTotalUsersKpi } from '../../../containers/kpis/total_users';
 import * as i18n from './translations';
 
 const euiVisColorPalette = euiPaletteColorBlind();
@@ -44,6 +45,8 @@ export interface UsersKpiProps {
   skip: boolean;
 }
 
+const QUERY_ID = 'TotalUsersKpiQuery';
+
 const UsersKpiHostsComponent: React.FC<UsersKpiProps> = ({
   filterQuery,
   from,
@@ -53,18 +56,31 @@ const UsersKpiHostsComponent: React.FC<UsersKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const [loading, { refetch, id, inspect, ...data }] = useTotalUsersKpi({
-    filterQuery,
-    endDate: to,
-    indexNames,
-    startDate: from,
-    skip,
-  });
+  const { loading, result, search, refetch, inspect } =
+    useSearchStrategy<UsersQueries.kpiTotalUsers>({
+      factoryQueryType: UsersQueries.kpiTotalUsers,
+      initialResult: { users: 0, usersHistogram: [] },
+      errorMessage: i18n.ERROR_USERS_KPI,
+    });
+
+  useEffect(() => {
+    if (!skip) {
+      search({
+        filterQuery,
+        defaultIndex: indexNames,
+        timerange: {
+          interval: '12h',
+          from,
+          to,
+        },
+      });
+    }
+  }, [search, from, to, filterQuery, indexNames, skip]);
 
   return (
     <KpiBaseComponentManage
-      data={data}
-      id={id}
+      data={result}
+      id={QUERY_ID}
       inspect={inspect}
       loading={loading}
       fieldsMapping={fieldsMapping}

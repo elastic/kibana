@@ -10,3 +10,10 @@ import { i18n } from '@kbn/i18n';
 export const USERS = i18n.translate('xpack.securitySolution.kpiUsers.totalUsers.title', {
   defaultMessage: 'Users',
 });
+
+export const ERROR_USERS_KPI = i18n.translate(
+  'xpack.securitySolution.kpiUsers.totalUsers.errorSearchDescription',
+  {
+    defaultMessage: `An error has occurred on total users kpi search`,
+  }
+);
