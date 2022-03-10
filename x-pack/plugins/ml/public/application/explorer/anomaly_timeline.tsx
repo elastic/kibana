@@ -12,13 +12,13 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiPopover,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -337,15 +337,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             onResize={onResize}
             isLoading={loading}
             noDataWarning={
-              <EuiEmptyPrompt
-                titleSize="xxs"
-                style={{ padding: 0 }}
-                title={
-                  <h2>
-                    <NoOverallData />
-                  </h2>
-                }
-              />
+              <EuiText textAlign={'center'}>
+                <h5>
+                  <NoOverallData />
+                </h5>
+              </EuiText>
             }
             showTimeline={false}
             showLegend={false}
@@ -381,28 +377,24 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               }}
               isLoading={loading || viewBySwimlaneDataLoading}
               noDataWarning={
-                <EuiEmptyPrompt
-                  titleSize="xxs"
-                  style={{ padding: 0 }}
-                  title={
-                    <h2>
-                      {typeof viewBySwimlaneFieldName === 'string' ? (
-                        viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
-                          <FormattedMessage
-                            id="xpack.ml.explorer.noResultForSelectedJobsMessage"
-                            defaultMessage="No results found for selected {jobsCount, plural, one {job} other {jobs}}"
-                            values={{ jobsCount: selectedJobs?.length ?? 1 }}
-                          />
-                        ) : (
-                          <ExplorerNoInfluencersFound
-                            viewBySwimlaneFieldName={viewBySwimlaneFieldName}
-                            showFilterMessage={filterActive === true}
-                          />
-                        )
-                      ) : null}
-                    </h2>
-                  }
-                />
+                <EuiText textAlign={'center'}>
+                  <h5>
+                    {typeof viewBySwimlaneFieldName === 'string' ? (
+                      viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
+                        <FormattedMessage
+                          id="xpack.ml.explorer.noResultForSelectedJobsMessage"
+                          defaultMessage="No results found for selected {jobsCount, plural, one {job} other {jobs}}"
+                          values={{ jobsCount: selectedJobs?.length ?? 1 }}
+                        />
+                      ) : (
+                        <ExplorerNoInfluencersFound
+                          viewBySwimlaneFieldName={viewBySwimlaneFieldName}
+                          showFilterMessage={filterActive === true}
+                        />
+                      )
+                    ) : null}
+                  </h5>
+                </EuiText>
               }
             />
           )}
