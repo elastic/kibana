@@ -254,7 +254,10 @@ function expressionHelper(
   const groups = getSortedGroups(datasource, layer);
 
   const operations = groups
-    .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
+    .map((columnId) => ({
+      columnId,
+      operation: datasource.getOperationForColumnId(columnId) as Operation | null,
+    }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
   if (!layer.metric || !operations.length) {

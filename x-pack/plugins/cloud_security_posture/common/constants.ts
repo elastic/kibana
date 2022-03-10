@@ -8,6 +8,7 @@
 export const STATS_ROUTE_PATH = '/api/csp/stats';
 export const FINDINGS_ROUTE_PATH = '/api/csp/findings';
 export const BENCHMARKS_ROUTE_PATH = '/api/csp/benchmarks';
+export const UPDATE_RULES_CONFIG_ROUTE_PATH = '/api/csp/update_rules_config';
 
 export const CSP_KUBEBEAT_INDEX_PATTERN = 'logs-cis_kubernetes_benchmark.findings*';
 export const AGENT_LOGS_INDEX_PATTERN = '.logs-cis_kubernetes_benchmark.metadata*';
@@ -23,7 +24,6 @@ export const RULE_FAILED = `failed`;
 export const INTERNAL_FEATURE_FLAGS = {
   showBenchmarks: false,
   showTrendLineMock: false,
-  showClusterMetaMock: false,
   showManageRulesMock: false,
   showRisksMock: false,
 } as const;

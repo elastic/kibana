@@ -7,9 +7,10 @@
 
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
-import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
+import { checksFactory, syncSavedObjectsFactory, JobSavedObjectStatus } from '../saved_objects';
 import {
-  jobsAndSpaces,
+  updateJobsSpaces,
+  updateTrainedModelsSpaces,
   jobsAndCurrentSpace,
   syncJobObjects,
   syncCheckSchema,
@@ -17,7 +18,7 @@ import {
   jobTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import { JobType } from '../../common/types/saved_objects';
+import type { JobType, TrainedModelType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -39,7 +40,7 @@ export function savedObjectsRoutes(
       path: '/api/ml/saved_objects/status',
       validate: false,
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, response, jobSavedObjectService }) => {
@@ -74,7 +75,11 @@ export function savedObjectsRoutes(
         query: syncJobObjects,
       },
       options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+        tags: [
+          'access:ml:canCreateJob',
+          'access:ml:canCreateDataFrameAnalytics',
+          'access:ml:canCreateTrainedModels',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
@@ -107,7 +112,11 @@ export function savedObjectsRoutes(
         query: syncJobObjects,
       },
       options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+        tags: [
+          'access:ml:canCreateJob',
+          'access:ml:canCreateDataFrameAnalytics',
+          'access:ml:canCreateTrainedModels',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
@@ -140,14 +149,18 @@ export function savedObjectsRoutes(
         body: syncCheckSchema,
       },
       options: {
-        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
+        tags: [
+          'access:ml:canGetJobs',
+          'access:ml:canGetDataFrameAnalytics',
+          'access:ml:canGetTrainedModels',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
       try {
         const { jobType } = request.body;
         const { isSyncNeeded } = syncSavedObjectsFactory(client, jobSavedObjectService);
-        const result = await isSyncNeeded(jobType as JobType);
+        const result = await isSyncNeeded(jobType as JobType | TrainedModelType);
 
         return response.ok({
           body: { result },
@@ -163,15 +176,15 @@ export function savedObjectsRoutes(
    *
    * @api {post} /api/ml/saved_objects/update_jobs_spaces Update what spaces jobs are assigned to
    * @apiName UpdateJobsSpaces
-   * @apiDescription Update a list of jobs to add and/or remove them from given spaces
+   * @apiDescription Update a list of jobs to add and/or remove them from given spaces.
    *
-   * @apiSchema (body) jobsAndSpaces
+   * @apiSchema (body) updateJobsSpaces
    */
   router.post(
     {
       path: '/api/ml/saved_objects/update_jobs_spaces',
       validate: {
-        body: jobsAndSpaces,
+        body: updateJobsSpaces,
       },
       options: {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
@@ -200,9 +213,47 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
+   * @api {post} /api/ml/saved_objects/update_trained_models_spaces Update what spaces trained models are assigned to
+   * @apiName UpdateTrainedModelsSpaces
+   * @apiDescription Update a list of trained models to add and/or remove them from given spaces.
+   *
+   * @apiSchema (body) updateTrainedModelsSpaces
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/update_trained_models_spaces',
+      validate: {
+        body: updateTrainedModelsSpaces,
+      },
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+      try {
+        const { modelIds, spacesToAdd, spacesToRemove } = request.body;
+
+        const body = await jobSavedObjectService.updateTrainedModelsSpaces(
+          modelIds,
+          spacesToAdd,
+          spacesToRemove
+        );
+
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
    * @api {post} /api/ml/saved_objects/remove_job_from_current_space Remove jobs from the current space
    * @apiName RemoveJobsFromCurrentSpace
-   * @apiDescription Remove a list of jobs from the current space
+   * @apiDescription Remove a list of jobs from the current space.
    *
    * @apiSchema (body) jobsAndCurrentSpace
    */
@@ -262,15 +313,19 @@ export function savedObjectsRoutes(
       path: '/api/ml/saved_objects/jobs_spaces',
       validate: false,
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
       try {
         const { checkStatus } = checksFactory(client, jobSavedObjectService);
-        const allStatuses = Object.values((await checkStatus()).savedObjects).flat();
-
-        const body = allStatuses
+        const savedObjects = (await checkStatus()).savedObjects;
+        const jobStatus = (
+          Object.entries(savedObjects)
+            .filter(([type]) => type === 'anomaly-detector' || type === 'data-frame-analytics')
+            .map(([, status]) => status)
+            .flat() as JobSavedObjectStatus[]
+        )
           .filter((s) => s.checks.jobExists)
           .reduce((acc, cur) => {
             const type = cur.type;
@@ -282,7 +337,46 @@ export function savedObjectsRoutes(
           }, {} as { [id: string]: { [id: string]: string[] | undefined } });
 
         return response.ok({
-          body,
+          body: jobStatus,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
+   * @api {get} /api/ml/saved_objects/trained_models_spaces Get all trained models and their spaces
+   * @apiName TrainedModelsSpaces
+   * @apiDescription List all trained models and their spaces.
+   *
+   */
+  router.get(
+    {
+      path: '/api/ml/saved_objects/trained_models_spaces',
+      validate: false,
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
+      try {
+        const { checkStatus } = checksFactory(client, jobSavedObjectService);
+        const savedObjects = (await checkStatus()).savedObjects;
+        const modelStatus = savedObjects['trained-model']
+          .filter((s) => s.checks.trainedModelExists)
+          .reduce(
+            (acc, cur) => {
+              acc.trainedModels[cur.modelId] = cur.namespaces;
+              return acc;
+            },
+            { trainedModels: {} } as { trainedModels: { [id: string]: string[] | undefined } }
+          );
+
+        return response.ok({
+          body: modelStatus,
         });
       } catch (e) {
         return response.customError(wrapError(e));
