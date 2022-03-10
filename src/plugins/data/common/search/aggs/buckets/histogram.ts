@@ -211,7 +211,7 @@ export const getHistogramBucketAgg = ({
 
           if (aggConfig.params.has_extended_bounds && (min || min === 0) && (max || max === 0)) {
             output.params.extended_bounds = { min, max };
-          } else if (aggConfig.getAutoBounds()) {
+          } else if (aggConfig.params.autoExtendBounds && aggConfig.getAutoBounds()) {
             output.params.extended_bounds = aggConfig.getAutoBounds();
           }
         },
