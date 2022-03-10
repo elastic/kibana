@@ -217,7 +217,6 @@ describe('XY Config panels', () => {
       const component = mount(
         <DimensionEditor
           layerId={state.layers[0].layerId}
-          layer={state.layers[0] as XYDataLayerConfig}
           frame={frame}
           setState={jest.fn()}
           accessor="bar"
@@ -245,7 +244,6 @@ describe('XY Config panels', () => {
       const component = mount(
         <DimensionEditor
           layerId={state.layers[0].layerId}
-          layer={state.layers[0] as XYDataLayerConfig}
           frame={frame}
           setState={jest.fn()}
           accessor="bar"
@@ -282,7 +280,6 @@ describe('XY Config panels', () => {
       const component = mount(
         <DimensionEditor
           layerId={state.layers[0].layerId}
-          layer={state.layers[0] as XYDataLayerConfig}
           frame={{
             ...frame,
             activeData: {
@@ -324,7 +321,6 @@ describe('XY Config panels', () => {
 
       const component = mount(
         <DimensionEditor
-          layer={state.layers[0] as XYDataLayerConfig}
           layerId={state.layers[0].layerId}
           frame={{
             ...frame,
