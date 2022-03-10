@@ -20,7 +20,7 @@ import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
 import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
-import { getByAlias } from '../util';
+import { ALL_NAMESPACES, getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
 import {
   MigrateFunctionsObject,
@@ -227,7 +227,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const functions = this.container.get().functions;
     for (const link of ast.chain) {
       const { function: fnName, arguments: fnArgs } = link;
-      const fn = getByAlias(functions, fnName);
+      const fn = getByAlias(functions, fnName, ALL_NAMESPACES);
 
       if (fn) {
         // if any of arguments are expressions we should migrate those first
@@ -258,7 +258,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
         (newAst: ExpressionAstExpression, funcAst: ExpressionAstFunction, index: number) => {
           const realIndex = index + additionalFunctions;
           const { function: fnName, arguments: fnArgs } = funcAst;
-          const fn = getByAlias(functions, fnName);
+          const fn = getByAlias(functions, fnName, ALL_NAMESPACES);
           if (!fn) {
             return newAst;
           }
