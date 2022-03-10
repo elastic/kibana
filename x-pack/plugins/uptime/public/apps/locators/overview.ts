@@ -23,7 +23,7 @@ async function navigate({
 }) {
   const searchParams: string[] = [];
 
-  if (ip) searchParams.push(formatSearchKey('monitor.ip', ip));
+  if (ip) searchParams.push(formatSearchKey('host.ip', ip));
   if (host) searchParams.push(formatSearchKey('host.name', host));
   if (container) searchParams.push(formatSearchKey('container.id', container));
   if (pod) searchParams.push(formatSearchKey('kubernetes.pod.uid', pod));
