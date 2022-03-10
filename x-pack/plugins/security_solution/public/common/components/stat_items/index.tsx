@@ -279,7 +279,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                       </StatValue>
                       {field.lensAttributes && timerange && (
                         <VisualizationActions
-                          vizType={`${field.key}-metric`}
                           lensAttributes={field.lensAttributes}
                           queryId={id}
                           inspectIndex={index}
@@ -308,7 +307,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                     inspectIndex: index,
                     timerange,
                     title: `KPI ${description}`,
-                    vizType: 'bar_horizontal_stacked',
                   }}
                 />
               </FlexItem>
@@ -329,7 +327,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                       inspectIndex: index,
                       timerange,
                       title: `KPI ${description}`,
-                      vizType: 'area',
                     }}
                   />
                 </FlexItem>
