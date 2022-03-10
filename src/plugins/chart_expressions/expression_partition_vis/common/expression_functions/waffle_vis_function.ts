@@ -8,7 +8,7 @@
 
 import { Position } from '@elastic/charts';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable } from '../../../../visualizations/common/utils';
+import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
 import { validateOptions } from '../../../../charts/common';
 import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
 import {
@@ -94,6 +94,17 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
   fn(context, args, handlers) {
     if (args.splitColumn && args.splitRow) {
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
+    }
+
+    validateAccessor(args.metric, context.columns);
+    if (args.bucket) {
+      validateAccessor(args.bucket, context.columns);
+    }
+    if (args.splitColumn) {
+      args.splitColumn.forEach((splitColumn) => validateAccessor(splitColumn, context.columns));
+    }
+    if (args.splitRow) {
+      args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
 
     validateOptions(args.legendDisplay, LegendDisplay, errors.invalidLegendDisplayError);
