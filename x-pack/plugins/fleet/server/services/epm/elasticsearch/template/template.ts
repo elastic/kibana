@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -479,7 +480,7 @@ const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClien
       alias: dataStreamName,
     });
   } catch (error) {
-    throw new Error(`cannot rollover data stream ${dataStreamName} - ${error}`);
+    throw new Error(`cannot rollover data stream [${dataStreamName}] due to error: ${error}`);
   }
 };
 
@@ -506,13 +507,16 @@ const updateExistingDataStream = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }) => {
-  const {
-    template: { mappings, settings },
-  } = await esClient.indices.simulateTemplate({
-    name: dataStreamNameToIndexTemplateName(dataStreamName),
-  });
-
+  let settings: IndicesIndexSettings;
   try {
+    const simulateResult = await retryTransientEsErrors(() =>
+      esClient.indices.simulateTemplate({
+        name: dataStreamNameToIndexTemplateName(dataStreamName),
+      })
+    );
+
+    settings = simulateResult.template.settings;
+    const mappings = simulateResult.template.mappings;
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
     // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
     // to skip updating and assume the value in the index mapping is correct
