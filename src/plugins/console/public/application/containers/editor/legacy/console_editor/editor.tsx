@@ -105,7 +105,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
     const loadBufferFromRemote = (url: string) => {
       const coreEditor = editor.getCoreEditor();
-
+    
       if (/^https?:\/\//.test(url)) {
         const loadFrom: Record<string, any> = {
           url,
@@ -121,7 +121,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
         // Fire and forget.
         $.ajax(loadFrom).done(async (data) => {
-          await editor.update(data, true);
+          await editor.update(`${initialTextValue }\n ${data}` , true);
           editor.moveToNextRequestEdge(false);
           coreEditor.clearSelection();
           editor.highlightCurrentRequestsAndUpdateActionBar();
