@@ -693,11 +693,13 @@ export class Embeddable
     this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
 
-    this.activeDataInfo.activeDatasourceState =
-      await this.activeDataInfo.activeDatasource.initialize(
-        docDatasourceState,
-        this.savedVis?.references
-      );
+    if (!this.activeDataInfo.activeDatasourceState) {
+      this.activeDataInfo.activeDatasourceState =
+        await this.activeDataInfo.activeDatasource.initialize(
+          docDatasourceState,
+          this.savedVis?.references
+        );
+    }
 
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
       activeDatasource: this.activeDataInfo.activeDatasource,
