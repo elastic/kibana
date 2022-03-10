@@ -7,7 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import React, { useState, useEffect } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiPopover,
   EuiHorizontalRule,
@@ -17,13 +19,13 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPanel,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DataViewListItem } from 'src/plugins/data_views/public';
 import { IDataPluginServices } from '../../';
 import { useKibana } from '../../../../kibana_react/public';
 import type { ChangeDataViewTriggerProps } from './index';
-
-import './dataview_picker.scss';
 
 const POPOVER_CONTENT_WIDTH = 280;
 
@@ -44,10 +46,14 @@ export function ChangeDataView({
   currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
 }) {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const kibana = useKibana<IDataPluginServices>();
   const { application, data } = kibana.services;
+
+  // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
+  const searchListInputId = useGeneratedHtmlId({ prefix: 'dataviewPickerListSearchInput' });
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -57,28 +63,22 @@ export function ChangeDataView({
     fetchDataViews();
   }, [data]);
 
-  // be careful to only add color with a value, otherwise it will fallbacks to "primary"
-  const colorProp = isMissingCurrent
-    ? {
-        color: 'danger' as const,
-      }
-    : {};
-
   const createTrigger = function () {
-    const { label, title, ...rest } = trigger;
+    const { label, title, 'data-test-subj': dataTestSubj, ...rest } = trigger;
     return (
       <EuiButton
-        title={title}
-        className="dataviewPicker__trigger"
+        css={css`
+          max-width: ${POPOVER_CONTENT_WIDTH}px;
+        `}
+        data-test-subj={classNames('changeDataView-button', dataTestSubj)}
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
-        fullWidth
         color={isMissingCurrent ? 'danger' : 'primary'}
         iconSide="right"
         iconType="arrowDown"
-        {...colorProp}
+        title={title}
         {...rest}
       >
-        <strong>{label}</strong>
+        {label}
       </EuiButton>
     );
   };
@@ -93,9 +93,9 @@ export function ChangeDataView({
         }}
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverIsOpen(false)}
-        display="block"
-        panelPaddingSize="s"
-        ownFocus
+        panelPaddingSize="none"
+        initialFocus={`#${searchListInputId}`}
+        buffer={8}
       >
         <div style={{ width: POPOVER_CONTENT_WIDTH }}>
           {onAddField && (
@@ -159,6 +159,7 @@ export function ChangeDataView({
               setPopoverIsOpen(false);
             }}
             searchProps={{
+              id: searchListInputId,
               compressed: true,
               placeholder: i18n.translate('data.query.queryBar.indexPattern.findDataView', {
                 defaultMessage: 'Find a data view',
@@ -167,7 +168,13 @@ export function ChangeDataView({
             }}
           >
             {(list, search) => (
-              <EuiPanel color="transparent" paddingSize="s">
+              <EuiPanel
+                css={css`
+                  padding-bottom: 0;
+                `}
+                color="transparent"
+                paddingSize="s"
+              >
                 {search}
                 {list}
               </EuiPanel>
@@ -176,23 +183,21 @@ export function ChangeDataView({
           {onDataViewCreated && (
             <>
               <EuiHorizontalRule margin="none" />
-              <EuiContextMenuPanel
-                size="s"
-                items={[
-                  <EuiContextMenuItem
-                    key="new"
-                    icon="plusInCircleFilled"
-                    onClick={() => {
-                      setPopoverIsOpen(false);
-                      onDataViewCreated();
-                    }}
-                  >
-                    {i18n.translate('data.query.queryBar.indexPattern.addNewDataView', {
-                      defaultMessage: 'New data view...',
-                    })}
-                  </EuiContextMenuItem>,
-                ]}
-              />
+              <EuiContextMenuItem
+                css={css`
+                  color: ${euiTheme.colors.primaryText};
+                `}
+                data-test-subj="dataview-create-new"
+                icon="plusInCircleFilled"
+                onClick={() => {
+                  setPopoverIsOpen(false);
+                  onDataViewCreated();
+                }}
+              >
+                {i18n.translate('data.query.queryBar.indexPattern.addNewDataView', {
+                  defaultMessage: 'New data view...',
+                })}
+              </EuiContextMenuItem>
             </>
           )}
         </div>
