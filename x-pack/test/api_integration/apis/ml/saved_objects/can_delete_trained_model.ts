@@ -72,6 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.updateTrainedModelSpaces(modelIdSpace1, [idSpace2], [], idSpace1);
       await ml.api.assertTrainedModelSpaces(modelIdSpace1, [idSpace1, idSpace2]);
 
+      // mode the model to the * space
       await ml.api.updateTrainedModelSpaces(modelIdStarSpace, ['*'], [idSpace1], idSpace1);
       await ml.api.assertTrainedModelSpaces(modelIdStarSpace, ['*']);
 

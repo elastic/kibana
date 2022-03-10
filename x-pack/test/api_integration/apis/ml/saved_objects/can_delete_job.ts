@@ -58,6 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.updateJobSpaces(adJobIdSpace12, 'anomaly-detector', [idSpace2], [], idSpace1);
       await ml.api.assertJobSpaces(adJobIdSpace12, 'anomaly-detector', [idSpace1, idSpace2]);
 
+      // move the job to the * space
       await ml.api.updateJobSpaces(
         adJobIdStarSpace,
         'anomaly-detector',
