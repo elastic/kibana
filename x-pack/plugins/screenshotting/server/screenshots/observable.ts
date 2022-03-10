@@ -24,7 +24,6 @@ import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
-import { pngsToPdf } from '../formats/pdf/pdf_maker';
 
 export interface PhaseTimeouts {
   /**
