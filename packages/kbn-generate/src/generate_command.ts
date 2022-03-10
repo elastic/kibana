@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { prepareLogTable } from './prepare_log_table';
-export type { Dimension } from './prepare_log_table';
-export {
-  findAccessorOrFail,
-  getAccessorByDimension,
-  validateAccessor,
-  getColumnByAccessor,
-  isVisDimension,
-  getAccessor,
-  getFormatByAccessor,
-} from './accessors';
+import { Command } from '@kbn/dev-utils';
+
+import { Render } from './lib/render';
+
+export interface ContextExtensions {
+  render: Render;
+}
+
+export type GenerateCommand = Command<ContextExtensions>;
