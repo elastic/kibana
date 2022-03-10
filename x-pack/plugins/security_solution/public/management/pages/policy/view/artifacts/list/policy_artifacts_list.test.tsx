@@ -61,7 +61,7 @@ describe('Policy details artifacts list', () => {
           <PolicyArtifactsList
             policy={policy}
             apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
-            searcheableFields={[...SEARCHABLE_FIELDS]}
+            searchableFields={[...SEARCHABLE_FIELDS]}
             labels={POLICY_ARTIFACT_LIST_LABELS}
             onDeleteActionCallback={handleOnDeleteActionCallbackMock}
             externalPrivileges={externalPrivileges}

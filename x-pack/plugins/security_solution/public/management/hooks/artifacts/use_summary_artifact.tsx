@@ -14,7 +14,7 @@ const DEFAULT_OPTIONS = Object.freeze({});
 
 export function useSummaryArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  searcheableFields: string[],
+  searchableFields: string[],
   options: {
     filter: string;
     policies: string[];
@@ -32,7 +32,7 @@ export function useSummaryArtifact(
       return exceptionListApiClient.summary(
         parsePoliciesAndFilterToKql({
           policies,
-          kuery: parseQueryFilterToKQL(filter, searcheableFields),
+          kuery: parseQueryFilterToKQL(filter, searchableFields),
         })
       );
     },

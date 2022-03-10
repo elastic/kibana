@@ -163,7 +163,7 @@ export const PolicyTabs = React.memo(() => {
               policyItem={policyItem}
               labels={trustedAppsLabels}
               getExceptionsListApiClient={getTrustedAppsApiClientInstance}
-              searcheableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
+              searchableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
               getArtifactPath={getTrustedAppsListPath}
               getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
             />
@@ -182,7 +182,7 @@ export const PolicyTabs = React.memo(() => {
               policyItem={policyItem}
               labels={eventFiltersLabels}
               getExceptionsListApiClient={getEventFiltersApiClientInstance}
-              searcheableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
+              searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
               getArtifactPath={getEventFiltersListPath}
               getPolicyArtifactsPath={getPolicyEventFiltersPath}
             />
@@ -205,7 +205,7 @@ export const PolicyTabs = React.memo(() => {
                   policyItem={policyItem}
                   labels={hostIsolationExceptionsLabels}
                   getExceptionsListApiClient={getHostIsolationExceptionsApiClientInstance}
-                  searcheableFields={HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS}
+                  searchableFields={HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS}
                   getArtifactPath={getHostIsolationExceptionsListPath}
                   getPolicyArtifactsPath={getPolicyHostIsolationExceptionsPath}
                   externalPrivileges={privileges.canIsolateHost}

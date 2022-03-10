@@ -67,7 +67,7 @@ describe('Policy artifacts layout', () => {
             getExceptionsListApiClient={() =>
               EventFiltersApiClient.getInstance(mockedContext.coreStart.http)
             }
-            searcheableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
+            searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
             getArtifactPath={getEventFiltersListPath}
             getPolicyArtifactsPath={getPolicyEventFiltersPath}
             externalPrivileges={externalPrivileges}
@@ -88,7 +88,7 @@ describe('Policy artifacts layout', () => {
         getExceptionsListApiClient={() =>
           EventFiltersApiClient.getInstance(mockedContext.coreStart.http)
         }
-        searcheableFields={[...EVENT_FILTERS_SEARCHABLE_FIELDS]}
+        searchableFields={[...EVENT_FILTERS_SEARCHABLE_FIELDS]}
         getArtifactPath={getEventFiltersListPath}
         getPolicyArtifactsPath={getPolicyEventFiltersPath}
       />

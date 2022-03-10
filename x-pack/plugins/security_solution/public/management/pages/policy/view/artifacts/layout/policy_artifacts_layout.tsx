@@ -40,7 +40,7 @@ interface PolicyArtifactsLayoutProps {
   /** A list of labels for the given policy artifact page. Not all have to be defined, only those that should override the defaults */
   labels: PolicyArtifactsPageLabels;
   getExceptionsListApiClient: () => ExceptionsListApiClient;
-  searcheableFields: readonly string[];
+  searchableFields: readonly string[];
   getArtifactPath: (
     location?:
       | Partial<EventFiltersPageLocation>
@@ -56,7 +56,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     policyItem,
     labels: _labels = {},
     getExceptionsListApiClient,
-    searcheableFields,
+    searchableFields,
     getArtifactPath,
     getPolicyArtifactsPath,
     externalPrivileges = true,
@@ -87,14 +87,14 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
       {
         policies: policyItem ? [policyItem.id, 'all'] : [],
       },
-      searcheableFields
+      searchableFields
     );
 
     const {
       data: allArtifacts,
       isLoading: isLoadingAllArtifacts,
       isRefetching: isRefetchingAllArtifacts,
-    } = useListArtifact(exceptionsListApiClient, {}, searcheableFields, {}, ['allExisting']);
+    } = useListArtifact(exceptionsListApiClient, {}, searchableFields, {}, ['allExisting']);
 
     const handleOnClickAssignButton = useCallback(() => {
       navigateCallback({ show: 'list' });
@@ -156,7 +156,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             <PolicyArtifactsFlyout
               policyItem={policyItem}
               apiClient={exceptionsListApiClient}
-              searcheableFields={[...searcheableFields]}
+              searchableFields={[...searchableFields]}
               onClose={handleOnCloseFlyout}
               labels={labels}
             />
@@ -205,7 +205,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
           <PolicyArtifactsFlyout
             policyItem={policyItem}
             apiClient={exceptionsListApiClient}
-            searcheableFields={[...searcheableFields]}
+            searchableFields={[...searchableFields]}
             onClose={handleOnCloseFlyout}
             labels={labels}
           />
@@ -231,7 +231,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
           <PolicyArtifactsList
             policy={policyItem}
             apiClient={exceptionsListApiClient}
-            searcheableFields={[...searcheableFields]}
+            searchableFields={[...searchableFields]}
             labels={labels}
             onDeleteActionCallback={handleOnDeleteActionCallback}
             externalPrivileges={externalPrivileges}
