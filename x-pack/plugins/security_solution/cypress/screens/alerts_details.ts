@@ -40,7 +40,7 @@ export const OVERVIEW_RULE =
   '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=rule\\.name]';
 
 export const OVERVIEW_SEVERITY =
-  '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=rule\\.severity]';
+  '[data-test-subj="eventDetails"] [data-test-subj=severity]';
 
 export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj$=status]';
 
@@ -48,7 +48,7 @@ export const OVERVIEW_THRESHOLD_COUNT =
   '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=threshold_result\\.count]';
 
 export const OVERVIEW_THRESHOLD_VALUE =
-  '[data-test-subj="eventDetails"] [data-test-subj$=threshold_result\\.terms]';
+  '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=threshold_result\\.terms\\.field]';
 
 export const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 
