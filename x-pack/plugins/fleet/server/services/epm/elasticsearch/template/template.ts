@@ -266,6 +266,7 @@ function generateKeywordMapping(field: Field): IndexTemplateMapping {
   }
   if (field.dimension) {
     mapping.time_series_dimension = field.dimension;
+    delete mapping.ignore_above;
   }
   return mapping;
 }
