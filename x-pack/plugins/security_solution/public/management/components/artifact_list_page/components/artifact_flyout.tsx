@@ -170,7 +170,7 @@ export interface ArtifactFlyoutProps {
 /**
  * Show the flyout based on URL params
  */
-export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
+export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
   ({
     apiClient,
     item,
@@ -405,4 +405,4 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     );
   }
 );
-MaybeArtifactFlyout.displayName = 'MaybeArtifactFlyout';
+ArtifactFlyout.displayName = 'ArtifactFlyout';

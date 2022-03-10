@@ -26,7 +26,7 @@ import {
   UseArtifactCardPropsProviderProps,
 } from './hooks/use_artifact_card_props_provider';
 import { NoDataEmptyState } from './components/no_data_empty_state';
-import { ArtifactFlyoutProps, MaybeArtifactFlyout } from './components/artifact_flyout';
+import { ArtifactFlyoutProps, ArtifactFlyout } from './components/artifact_flyout';
 import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
 import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
@@ -235,7 +235,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         }
       >
         {isFlyoutOpened && (
-          <MaybeArtifactFlyout
+          <ArtifactFlyout
             apiClient={apiClient}
             item={selectedItemForEdit}
             onSuccess={handleArtifactFlyoutOnSuccess}
