@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export type { LayoutParams } from './layout';
-export { LayoutTypes } from './layout';
+/* eslint-disable max-classes-per-file */
 
-import * as errors from './errors';
-export { errors };
+export class FailedToSpawnBrowserError extends Error {}
+
+export class BrowserClosedUnexpectedly extends Error {}
+
+export class FailedToCaptureScreenshot extends Error {}
