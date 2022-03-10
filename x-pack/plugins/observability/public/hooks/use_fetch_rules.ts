@@ -57,10 +57,6 @@ export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRules
   }, [JSON.stringify(ruleLastResponseFilter), page, sort]);
 
   return {
-    rules: rulesState.data,
-    error: rulesState.error,
-    isLoading: rulesState.isLoading,
-    totalItemCount: rulesState.totalItemCount,
     rulesState,
     reload: fetchRules,
     setRulesState,
