@@ -448,10 +448,10 @@ export function QueryBarMenu({
     {
       id: 4,
       title: i18n.translate('data.filter.options.loadCurrentFilterSetLabel', {
-        defaultMessage: 'Load filter set...',
+        defaultMessage: 'Load filter set',
       }),
       width: 400,
-      content: <div style={{ padding: 8 }}>{manageFilterSetComponent}</div>,
+      content: <div>{manageFilterSetComponent}</div>,
     },
   ] as EuiContextMenuPanelDescriptor[];
 

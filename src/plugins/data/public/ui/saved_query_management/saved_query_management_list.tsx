@@ -14,14 +14,53 @@ import {
   EuiPanel,
   EuiSelectable,
   EuiText,
-  EuiSpacer,
+  EuiPopoverFooter,
+  EuiButtonIcon,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { css } from '@emotion/react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
+import { SavedQueryAttributes } from '../../query';
 
+function itemTitle(attributes: SavedQueryAttributes) {
+  let label = attributes.title;
+
+  if (attributes.description) {
+    label += `; ${attributes.description}`;
+  }
+
+  if (attributes.timefilter) {
+    label += `; ${attributes.timefilter.from} -> ${attributes.timefilter.to}`;
+  }
+
+  return label;
+}
+
+function itemLabel(attributes: SavedQueryAttributes) {
+  let label: React.ReactNode = attributes.title;
+
+  if (attributes.description) {
+    label = (
+      <>
+        {label} <EuiIcon type="iInCircle" color="subdued" size="s" />
+      </>
+    );
+  }
+
+  if (attributes.timefilter) {
+    label = (
+      <>
+        {label} <EuiIcon type="clock" color="subdued" size="s" />
+      </>
+    );
+  }
+
+  return label;
+}
 interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
@@ -126,10 +165,29 @@ export function SavedQueryManagementList({
         : [...savedQueriesWithoutCurrent];
     return savedQueriesReordered.map((savedQuery) => ({
       key: savedQuery.id,
-      label: savedQuery.attributes.title,
+      label: itemLabel(savedQuery.attributes),
+      title: itemTitle(savedQuery.attributes),
       value: savedQuery.id,
       checked: !!loadedSavedQuery && savedQuery.id === loadedSavedQuery.id ? 'on' : undefined,
-      append: <EuiIcon type="trash" onClick={() => handleDelete(savedQuery.id)} />,
+      append: (
+        <EuiButtonIcon
+          css={css`
+            opacity: 0.2;
+            filter: grayscale(100%);
+
+            &:hover,
+            &:focus:focus-visible {
+              opacity: 1;
+              filter: grayscale(0%);
+            }
+          `}
+          iconType="trash"
+          aria-label={`Delete ${savedQuery.attributes.title}`}
+          title={`Delete ${savedQuery.attributes.title}`}
+          onClick={() => handleDelete(savedQuery.id)}
+          color="danger"
+        />
+      ),
     })) as unknown as SelectableProps[];
   };
 
@@ -137,9 +195,6 @@ export function SavedQueryManagementList({
     <>
       {savedQueries.length > 0 ? (
         <>
-          <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
-            <p>{savedQueryDescriptionText}</p>
-          </EuiText>
           <div className="kbnSavedQueryManagement__listWrapper">
             <EuiSelectable<SelectableProps>
               aria-label="Basic example"
@@ -161,15 +216,16 @@ export function SavedQueryManagementList({
                 }),
               }}
               listProps={{
-                rowHeight: 40,
                 isVirtualized: true,
               }}
             >
               {(list, search) => (
-                <EuiPanel color="transparent" paddingSize="s">
-                  {search}
+                <>
+                  <EuiPanel style={{ paddingBottom: 0 }} color="transparent" paddingSize="s">
+                    {search}
+                  </EuiPanel>
                   {list}
-                </EuiPanel>
+                </>
               )}
             </EuiSelectable>
           </div>
@@ -179,41 +235,44 @@ export function SavedQueryManagementList({
           <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
             <p>{noSavedQueriesDescriptionText}</p>
           </EuiText>
-          <EuiSpacer size="s" />
         </>
       )}
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="s"
-        alignItems="center"
-        justifyContent="flexEnd"
-        responsive={false}
-        wrap={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            fill
-            onClick={handleLoad}
-            disabled={!selectedSavedQuery}
-            aria-label={i18n.translate(
-              'data.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
-              {
-                defaultMessage: 'Apply filter set',
-              }
-            )}
-            data-test-subj="saved-query-management-apply-changes-button"
-          >
-            {hasFiltersOrQuery
-              ? i18n.translate('data.search.searchBar.savedQueryPopoverApplyFilterSetLabel', {
-                  defaultMessage: 'Replace with selected filter set',
-                })
-              : i18n.translate('data.search.searchBar.savedQueryPopoverApplyFilterSetLabel', {
+      <EuiPopoverFooter paddingSize="s">
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              // TODO: Need basePath
+              // href={basePath.prepend(`/app/management/kibana/objects?initialQuery=type:("query")`)}
+              size="s"
+            >
+              Manage
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              fill
+              onClick={handleLoad}
+              disabled={!selectedSavedQuery}
+              aria-label={i18n.translate(
+                'data.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                {
                   defaultMessage: 'Apply filter set',
-                })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                }
+              )}
+              data-test-subj="saved-query-management-apply-changes-button"
+            >
+              {hasFiltersOrQuery
+                ? i18n.translate('data.search.searchBar.savedQueryPopoverApplyFilterSetLabel', {
+                    defaultMessage: 'Replace with selected filter set',
+                  })
+                : i18n.translate('data.search.searchBar.savedQueryPopoverApplyFilterSetLabel', {
+                    defaultMessage: 'Apply filter set',
+                  })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
     </>
   );
 
