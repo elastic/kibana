@@ -132,9 +132,17 @@ export interface FieldHook<T = unknown, I = T> {
   readonly isValidating: boolean;
   readonly isValidated: boolean;
   readonly isChangingValue: boolean;
+  /**
+   * Validations declared on the field can have a specific "type" added (if not specified
+   * the `field` type is set by default). When we validate a field, all errors are added into
+   * a common "errors" array.
+   * Use this handler to retrieve error messages for a specific error code or validation type.
+   */
   getErrorsMessages: (args?: {
-    validationType?: 'field' | string;
+    /** The errorCode to return error messages from. It takes precedence over "validationType" */
     errorCode?: string;
+    /** The validation type to return error messages from */
+    validationType?: 'field' | string;
   }) => string | null;
   /**
    * Form <input /> "onChange" event handler
@@ -145,11 +153,15 @@ export interface FieldHook<T = unknown, I = T> {
   /**
    * Handler to change the field value
    *
-   * @param value The new value to assign to the field. If you provide a callback, you wil receive
-   * the previous value and you need to return the next value.
+   * @param value The new value to assign to the field. If a callback is provided, the new value
+   * must be returned synchronously.
    */
   setValue: (value: I | ((prevValue: I) => I)) => void;
   setErrors: (errors: ValidationError[]) => void;
+  /**
+   * Clear field errors. One of multiple validation types can be specified.
+   * If no type is specified the default `field` type will be cleared.
+   */
   clearErrors: (type?: string | string[]) => void;
   /**
    * Validate a form field, running all its validations.
@@ -163,8 +175,10 @@ export interface FieldHook<T = unknown, I = T> {
     onlyBlocking?: boolean;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
-  // Flag to indicate if the field value will be included in the form data outputted
-  // when calling form.getFormData();
+  /**
+   * (Used internally). Flag to indicate if the field value will be included in the form data outputted
+   * when submitting the form or calling `form.getFormData()`.
+   */
   __isIncludedInOutput: boolean;
   __serializeValue: (internalValue?: I) => T;
 }
@@ -227,7 +241,7 @@ export type ValidationFunc<
   V = unknown
 > = (
   data: ValidationFuncArg<I, V>
-) => ValidationError<E> | void | undefined | ValidationCancelablePromise;
+) => ValidationError<E> | void | undefined | ValidationCancelablePromise<E>;
 
 export type ValidationResponsePromise<E extends string = string> = Promise<
   ValidationError<E> | void | undefined

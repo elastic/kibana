@@ -52,7 +52,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   );
 
   // We create this stable reference to be able to initialize our "defaultValueDeserialized" ref below
-  // as we can't initialize useRef by calling a function (e.g. const myRef = useRef(initDefaultValue()))
+  // as we can't initialize useRef by calling a function (e.g. useRef(initDefaultValue()))
   const defaultValueMemoized = useMemo<I | undefined>(() => {
     return initDefaultValue(defaultValue);
   }, [defaultValue, initDefaultValue]);
@@ -122,7 +122,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
    * We can't initialize a React ref by calling a function (in this case
    * useRef(new Subject())) the function is called on every render and would
    * create a new "Subject" instance.
-   * We use this handler to access the ref and initialize it if needed.
+   * We use this handler to access the ref and initialize it on first access.
    */
   const getFormData$ = useCallback((): Subject<FormData> => {
     if (formData$.current === null) {
@@ -151,7 +151,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       }
 
       if (errorMessage === null) {
-        // We strip out previous error message
+        // The field at this path is now valid, we strip out any previous error message
         const { [path]: discard, ...next } = prev;
         errorMessagesRef.current = next;
         return next;
