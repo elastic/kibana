@@ -36,13 +36,9 @@ const XmattersActionConnectorFields: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isUrlInvalid: boolean =
-    errors.secretsUrl !== undefined &&
-    errors.secretsUrl.length > 0 &&
-    secretsUrl !== undefined &&
-    errors.configUrl !== undefined &&
-    errors.configUrl.length > 0 &&
-    configUrl !== undefined;
+  const isUrlInvalid: boolean = usesBasic
+    ? errors.configUrl !== undefined && errors.configUrl.length > 0 && configUrl !== undefined
+    : errors.secretsUrl !== undefined && errors.secretsUrl.length > 0 && secretsUrl !== undefined;
   const isPasswordInvalid: boolean =
     password !== undefined && errors.password !== undefined && errors.password.length > 0;
   const isUserInvalid: boolean =

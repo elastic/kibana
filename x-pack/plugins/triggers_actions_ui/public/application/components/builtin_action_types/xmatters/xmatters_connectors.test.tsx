@@ -22,7 +22,7 @@ describe('XmattersActionConnectorFields renders', () => {
       isPreconfigured: false,
       name: 'xmatters',
       config: {
-        url: 'http:\\test',
+        configUrl: 'http:\\test',
         usesBasic: true,
       },
     } as XmattersActionConnector;
@@ -40,6 +40,66 @@ describe('XmattersActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="xmattersUrlText"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="xmattersUserInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="xmattersPasswordInput"]').length > 0).toBeTruthy();
+  });
+
+  test('should show only basic auth info when basic selected', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.xmatters',
+      isPreconfigured: false,
+      name: 'xmatters',
+      config: {
+        configUrl: 'http:\\test',
+        usesBasic: true,
+      },
+    } as XmattersActionConnector;
+    const wrapper = mountWithIntl(
+      <XmattersActionConnectorFields
+        action={actionConnector}
+        errors={{ url: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="xmattersUrlText"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="xmattersUserInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="xmattersPasswordInput"]').length > 0).toBeTruthy();
+  });
+
+  test('should show only url auth info when url selected', () => {
+    const actionConnector = {
+      secrets: {
+        secretsUrl: 'http:\\test',
+      },
+      id: 'test',
+      actionTypeId: '.xmatters',
+      isPreconfigured: false,
+      name: 'xmatters',
+      config: {
+        usesBasic: false,
+      },
+    } as XmattersActionConnector;
+    const wrapper = mountWithIntl(
+      <XmattersActionConnectorFields
+        action={actionConnector}
+        errors={{ url: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="xmattersUrlText"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="xmattersUserInput"]').length === 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="xmattersPasswordInput"]').length === 0).toBeTruthy();
   });
 
   test('should display a message on create to remember credentials', () => {
@@ -77,7 +137,7 @@ describe('XmattersActionConnectorFields renders', () => {
       isPreconfigured: false,
       name: 'xmatters',
       config: {
-        url: 'http:\\test',
+        configUrl: 'http:\\test',
         usesBasic: true,
       },
     } as XmattersActionConnector;
@@ -108,7 +168,7 @@ describe('XmattersActionConnectorFields renders', () => {
       isMissingSecrets: true,
       name: 'xmatters',
       config: {
-        url: 'http:\\test',
+        configUrl: 'http:\\test',
         usesBasic: true,
       },
     } as XmattersActionConnector;
@@ -129,8 +189,6 @@ describe('XmattersActionConnectorFields renders', () => {
   test('should display a message on edit to re-enter credentials, URL Auth', () => {
     const actionConnector = {
       secrets: {
-        user: '',
-        password: '',
         secretsUrl: 'http:\\test?apiKey=someKey',
       },
       id: 'test',
