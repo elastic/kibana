@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { getBadgeColorFromAlertStatus } from './helpers';
@@ -16,6 +16,7 @@ interface ProcessTreeAlertDeps {
   isInvestigated: boolean;
   isSelected: boolean;
   onClick: (alert: ProcessEventAlert | null) => void;
+  selectAlert: (alertUuid: string) => void;
 }
 
 export const ProcessTreeAlert = ({
@@ -23,14 +24,22 @@ export const ProcessTreeAlert = ({
   isInvestigated,
   isSelected,
   onClick,
+  selectAlert,
 }: ProcessTreeAlertDeps) => {
   const styles = useStyles({ isInvestigated, isSelected });
 
-  if (!alert.kibana) {
+  const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
+
+  useEffect(() => {
+    if (isInvestigated && isSelected && uuid) {
+      selectAlert(uuid);
+    }
+  }, [isInvestigated, isSelected, uuid, selectAlert]);
+
+  if (!(alert.kibana && rule)) {
     return null;
   }
 
-  const { uuid, rule, workflow_status: status } = alert.kibana.alert;
   const { name } = rule;
 
   const handleClick = () => {
@@ -42,6 +51,7 @@ export const ProcessTreeAlert = ({
       key={uuid}
       size="s"
       css={styles.alert}
+      data-id={uuid}
       data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}`}
       onClick={handleClick}
     >

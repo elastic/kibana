@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, MouseEvent } from 'react';
+import React, { useState, useEffect, useRef, MouseEvent, useCallback } from 'react';
 import { useStyles } from './styles';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { ProcessTreeAlert } from '../process_tree_alert';
@@ -24,8 +24,38 @@ export function ProcessTreeAlerts({
   isProcessSelected = false,
   onAlertSelected,
 }: ProcessTreeAlertsDeps) {
-  const styles = useStyles();
   const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(null);
+  const styles = useStyles();
+
+  useEffect(() => {
+    const jumpToAlert = alerts.find((alert) => alert.kibana?.alert.uuid === jumpToAlertID);
+    if (jumpToAlertID && jumpToAlert) {
+      setSelectedAlert(jumpToAlert.kibana?.alert!);
+    }
+  }, [jumpToAlertID, alerts]);
+
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  const selectAlert = useCallback((alertUuid: string) => {
+    if (!scrollerRef?.current) {
+      return;
+    }
+
+    const alertEl = scrollerRef.current.querySelector<HTMLElement>(`[data-id="${alertUuid}"]`);
+
+    if (alertEl) {
+      const cTop = scrollerRef.current.scrollTop;
+      const cBottom = cTop + scrollerRef.current.clientHeight;
+
+      const eTop = alertEl.offsetTop;
+      const eBottom = eTop + alertEl.clientHeight;
+      const isVisible = eTop >= cTop && eBottom <= cBottom;
+
+      if (!isVisible) {
+        alertEl.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, []);
 
   if (alerts.length === 0) {
     return null;
@@ -37,7 +67,11 @@ export function ProcessTreeAlerts({
   };
 
   return (
-    <div css={styles.container} data-test-subj="sessionView:sessionViewAlertDetails">
+    <div
+      ref={scrollerRef}
+      css={styles.container}
+      data-test-subj="sessionView:sessionViewAlertDetails"
+    >
       {alerts.map((alert: ProcessEvent, idx: number) => {
         const alertUuid = alert.kibana?.alert.uuid || null;
 
@@ -48,6 +82,7 @@ export function ProcessTreeAlerts({
             isInvestigated={jumpToAlertID === alertUuid}
             isSelected={isProcessSelected && selectedAlert?.uuid === alertUuid}
             onClick={handleAlertClick}
+            selectAlert={selectAlert}
           />
         );
       })}

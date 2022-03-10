@@ -11,5 +11,5 @@ const STATUS_TO_COLOR_MAP: Record<string, string> = {
   closed: 'default',
 };
 
-export const getBadgeColorFromAlertStatus = (status: string) =>
+export const getBadgeColorFromAlertStatus = (status: string | undefined) =>
   STATUS_TO_COLOR_MAP[status || 'closed'];

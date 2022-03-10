@@ -32,6 +32,7 @@ describe('ProcessTreeAlerts component', () => {
           isInvestigated={false}
           isSelected={false}
           onClick={jest.fn()}
+          selectAlert={jest.fn()}
         />
       );
 
@@ -48,6 +49,7 @@ describe('ProcessTreeAlerts component', () => {
           isInvestigated={false}
           isSelected={false}
           onClick={mockFn}
+          selectAlert={jest.fn()}
         />
       );
 
