@@ -73,11 +73,17 @@ export class AnomalyTimelineStateService {
   private _isViewBySwimLaneLoading$ = new BehaviorSubject(true);
   private _swimLaneBucketInterval$ = new BehaviorSubject<TimeBucketsInterval | null>(null);
 
+  private _timeBounds$: Observable<TimeRangeBounds>;
+
   constructor(
     private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
     private anomalyTimelineService: AnomalyTimelineService,
     private timefilter: TimefilterContract
   ) {
+    this._timeBounds$ = this.timefilter.getTimeUpdate$().pipe(
+      startWith(null),
+      map(() => this.timefilter.getBounds())
+    );
     this._init();
   }
 
@@ -148,6 +154,7 @@ export class AnomalyTimelineStateService {
         distinctUntilChanged(isEqual)
       ),
       this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
+      this._timeBounds$,
     ]).subscribe(([pagination, influencersFilerQuery]) => {
       let resultPaginaiton: SwimLanePagination = pagination;
       if (influencersFilerQuery) {
@@ -162,6 +169,7 @@ export class AnomalyTimelineStateService {
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this._swimLaneSeverity$,
       this.getContainerWidth$(),
+      this._timeBounds$,
     ])
       .pipe(
         tap(() => {
@@ -194,6 +202,7 @@ export class AnomalyTimelineStateService {
         this.getSwimLaneCardinality$(),
         this.getContainerWidth$(),
         this.getSelectedCells$(),
+        this._timeBounds$,
       ]) as Observable<
         [
           ExplorerJob[],
@@ -262,6 +271,7 @@ export class AnomalyTimelineStateService {
       this.getViewBySwimlaneFieldName$(),
       this.getSwimLanePagination$(),
       this._topFieldValues$.pipe(distinctUntilChanged(isEqual)),
+      this._timeBounds$,
     ])
       .pipe(
         tap(() => {
@@ -311,7 +321,7 @@ export class AnomalyTimelineStateService {
       this._viewBySwimlaneFieldName$,
       this._swimLaneUrlState$,
       this.getSwimLaneBucketInterval$(),
-      this.timefilter.getTimeUpdate$().pipe(startWith(null)),
+      this._timeBounds$,
     ])
       .pipe(
         map(([viewByFieldName, swimLaneUrlState, swimLaneBucketInterval]) => {
