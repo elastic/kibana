@@ -20,6 +20,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
 import { getAddPath, getSourcesPath } from '../../../../routes';
@@ -29,7 +31,6 @@ import { hasMultipleConnectorOptions } from '../../../../utils';
 import {
   CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP,
   CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP,
-  CONFIGURED_SOURCES_CONNECT_BUTTON,
   CONFIGURED_SOURCES_EMPTY_STATE,
   CONFIGURED_SOURCES_TITLE,
   CONFIGURED_SOURCES_EMPTY_BODY,
@@ -112,7 +113,19 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                         hasMultipleConnectorOptions(sourceData) ? '' : 'connect'
                       }`}
                     >
-                      {CONFIGURED_SOURCES_CONNECT_BUTTON}
+                      {!connected
+                        ? i18n.translate(
+                            'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectButton',
+                            {
+                              defaultMessage: 'Connect',
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectAnotherButton',
+                            {
+                              defaultMessage: 'Connect another',
+                            }
+                          )}
                     </EuiButtonEmptyTo>
                   )) || (
                     <EuiButtonEmpty className="eui-fullWidth" isDisabled>

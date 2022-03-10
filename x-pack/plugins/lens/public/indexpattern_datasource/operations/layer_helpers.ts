@@ -228,15 +228,12 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
+    const buildColumnFn = columnParams
+      ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
+      : operationDefinition.buildColumn({ ...baseOptions, layer });
 
     return updateDefaultLabels(
-      addOperationFn(
-        layer,
-        operationDefinition.buildColumn({ ...baseOptions, layer }),
-        columnId,
-        visualizationGroups,
-        targetGroup
-      ),
+      addOperationFn(layer, buildColumnFn, columnId, visualizationGroups, targetGroup),
       indexPattern
     );
   }

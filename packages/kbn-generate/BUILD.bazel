@@ -27,7 +27,7 @@ NPM_MODULE_EXTRA_FILES = glob(["templates/**/*"]) + [
 
 RUNTIME_DEPS = [
   "//packages/kbn-dev-utils",
-  "//packages/kbn-packages",
+  "//packages/kbn-bazel-packages",
   "//packages/kbn-utils",
   "@npm//ejs",
   "@npm//normalize-path",
@@ -35,7 +35,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-dev-utils:npm_module_types",
-  "//packages/kbn-packages:npm_module_types",
+  "//packages/kbn-bazel-packages:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
   "@npm//ejs",
   "@npm//normalize-path",
