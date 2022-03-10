@@ -121,6 +121,40 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
+    it('should have populated the new component template with the correct mapping', async () => {
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName2}@mappings`,
+        },
+        { meta: true }
+      );
+      expect(resMappings.statusCode).equal(200);
+      expect(
+        resMappings.body.component_templates[0].component_template.template.mappings.properties
+      ).eql({
+        '@timestamp': {
+          type: 'date',
+        },
+        test_logs2: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
+        data_stream: {
+          properties: {
+            dataset: {
+              type: 'constant_keyword',
+            },
+            namespace: {
+              type: 'constant_keyword',
+            },
+            type: {
+              type: 'constant_keyword',
+            },
+          },
+        },
+      });
+    });
     it('should have installed the new versionized pipelines', async function () {
       const res = await es.ingest.getPipeline(
         {
@@ -169,7 +203,7 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(resPipeline2.statusCode).equal(404);
     });
-    it('should have updated the component templates', async function () {
+    it('should have updated the logs component templates', async function () {
       const resMappings = await es.transport.request<any>(
         {
           method: 'GET',
@@ -258,6 +292,40 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         ],
+      });
+    });
+    it('should have updated the metrics mapping component template', async function () {
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${metricsTemplateName}@mappings`,
+        },
+        { meta: true }
+      );
+      expect(resMappings.statusCode).equal(200);
+      expect(
+        resMappings.body.component_templates[0].component_template.template.mappings.properties
+      ).eql({
+        '@timestamp': {
+          type: 'date',
+        },
+        metrics_test_name2: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
+        data_stream: {
+          properties: {
+            dataset: {
+              type: 'constant_keyword',
+            },
+            namespace: {
+              type: 'constant_keyword',
+            },
+            type: {
+              type: 'constant_keyword',
+            },
+          },
+        },
       });
     });
     it('should have updated the kibana assets', async function () {
