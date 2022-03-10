@@ -36,13 +36,6 @@ import {
   ReduxEmbeddableWrapperPropsWithChildren,
   SolutionToolbarPopover,
 } from '../../../../presentation_util/public';
-import {
-  Container,
-  EmbeddableFactory,
-  EmbeddableFactoryNotFoundError,
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-} from '../../../../embeddable/public';
 import { pluginServices } from '../../services';
 import { DataView } from '../../../../data_views/public';
 import { ControlGroupStrings } from '../control_group_strings';
@@ -52,6 +45,7 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
+import { Container, EmbeddableFactory, isErrorEmbeddable } from '../../../../embeddable/public';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
@@ -161,16 +155,18 @@ export class ControlGroupContainer extends Container<
       { embeddableLoaded: {} },
       pluginServices.getServices().controls.getControlFactory,
       parent,
-
-      // stop the parent container from building all embeddables immediately so we can build them in order
-      true
+      {
+        childIdInitializeOrder: Object.values(initialInput.panels)
+          .sort((a, b) => (a.order > b.order ? 1 : -1))
+          .map((panel) => panel.explicitInput.id),
+        awaitEachChild: true,
+      }
     );
 
     this.recalculateFilters$ = new Subject();
 
     // set up order cache so that it is aligned on input changes.
     this.childOrderCache = this.getEmbeddableOrderCache();
-    this.initializeChildrenInOrder();
 
     // when all children are ready setup subscriptions
     this.untilReady().then(() => {
@@ -255,36 +251,6 @@ export class ControlGroupContainer extends Container<
       this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
     );
   };
-
-  private initializeChildrenInOrder = async () => {
-    const { panels } = this.getInput();
-    for (const childId of this.childOrderCache.idsInOrder) {
-      await this.createEmbeddableFromPanel(panels[childId]);
-      await this.untilEmbeddableLoaded(childId);
-    }
-  };
-
-  private async createEmbeddableFromPanel(panel: ControlPanelState) {
-    this.updateOutput({
-      embeddableLoaded: {
-        ...this.output.embeddableLoaded,
-        [panel.explicitInput.id]: false,
-      },
-    });
-    const inputForChild = this.getInputForChild(panel.explicitInput.id);
-    try {
-      const factory = this.getFactory(panel.type);
-      if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
-
-      const embeddable = await factory.create(inputForChild, this);
-      if (embeddable && !embeddable.deferEmbeddableLoad) {
-        this.setChildLoaded(embeddable);
-      }
-      return embeddable;
-    } catch (e) {
-      return new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
-    }
-  }
 
   private getPrecedingFilters = (id: string) => {
     let filters: Filter[] = [];
