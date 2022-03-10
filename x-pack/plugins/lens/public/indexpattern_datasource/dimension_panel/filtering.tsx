@@ -66,14 +66,18 @@ export function Filtering({
   helpMessage: string | null;
 }) {
   const inputFilter = selectedColumn.filter;
-  const { inputValue: queryInput, handleInputChange: setQueryInput } = useDebouncedValue<Query>({
-    value: inputFilter ?? defaultFilter,
-    onChange: (query) => {
+  const onChange = useCallback(
+    (query) => {
       const { isValid } = validateQuery(query, indexPattern);
       if (isValid && !isEqual(inputFilter, query)) {
         updateLayer(setFilter(columnId, layer, query));
       }
     },
+    [columnId, indexPattern, inputFilter, layer, updateLayer]
+  );
+  const { inputValue: queryInput, handleInputChange: setQueryInput } = useDebouncedValue<Query>({
+    value: inputFilter ?? defaultFilter,
+    onChange,
   });
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(isInitiallyOpen);
 
