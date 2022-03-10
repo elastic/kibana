@@ -88,7 +88,7 @@ import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/aler
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
-import { registerClusterCollector, registerNodeCollector } from './monitoring';
+import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 
 export interface PluginSetupContract {
@@ -167,6 +167,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private usageCounter?: UsageCounter;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
+  private inMemoryMetrics: InMemoryMetrics;
   private kibanaIndex?: string;
 
   constructor(initContext: PluginInitializerContext) {
@@ -177,6 +178,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     );
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
+    this.inMemoryMetrics = new InMemoryMetrics(initContext.logger.get('in_memory_metrics'));
   }
 
   public setup(
@@ -204,6 +206,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     const actionExecutor = new ActionExecutor({
       isESOCanEncrypt: this.isESOCanEncrypt,
+      inMemoryMetrics: this.inMemoryMetrics,
     });
 
     // get executions count
@@ -289,6 +292,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     if (plugins.monitoringCollection) {
       registerNodeCollector({
         monitoringCollection: plugins.monitoringCollection,
+        inMemoryMetrics: this.inMemoryMetrics,
       });
       registerClusterCollector({
         monitoringCollection: plugins.monitoringCollection,

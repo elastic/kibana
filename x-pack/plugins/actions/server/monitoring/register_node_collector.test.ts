@@ -8,33 +8,31 @@ import { monitoringCollectionMock } from '../../../monitoring_collection/server/
 import { Metric } from '../../../monitoring_collection/server';
 import { registerNodeCollector } from './register_node_collector';
 import { NodeActionsMetric } from './types';
-import { getAllInMemoryMetrics, IN_MEMORY_METRICS } from '.';
-
-jest.mock('./in_memory_metrics');
+import { IN_MEMORY_METRICS } from '.';
+import { inMemoryMetricsMock } from './in_memory_metrics.mock';
 
 describe('registerNodeCollector()', () => {
   const monitoringCollection = monitoringCollectionMock.createSetup();
-
-  afterEach(() => {
-    (getAllInMemoryMetrics as jest.Mock).mockClear();
-  });
+  const inMemoryMetrics = inMemoryMetricsMock.create();
 
   it('should get in memory action metrics', async () => {
     const metrics: Record<string, Metric<unknown>> = {};
     monitoringCollection.registerMetric.mockImplementation((metric) => {
       metrics[metric.type] = metric;
     });
-    registerNodeCollector({ monitoringCollection });
+    registerNodeCollector({ monitoringCollection, inMemoryMetrics });
 
     const metricTypes = Object.keys(metrics);
     expect(metricTypes.length).toBe(1);
     expect(metricTypes[0]).toBe('node_actions');
 
-    (getAllInMemoryMetrics as jest.Mock).mockImplementation(() => {
-      return {
-        [IN_MEMORY_METRICS.ACTION_FAILURES]: 2,
-        [IN_MEMORY_METRICS.ACTION_EXECUTIONS]: 10,
-      };
+    (inMemoryMetrics.getInMemoryMetric as jest.Mock).mockImplementation((metric) => {
+      switch (metric) {
+        case IN_MEMORY_METRICS.ACTION_FAILURES:
+          return 2;
+        case IN_MEMORY_METRICS.ACTION_EXECUTIONS:
+          return 10;
+      }
     });
 
     const result = (await metrics.node_actions.fetch()) as NodeActionsMetric;

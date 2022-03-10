@@ -5,13 +5,15 @@
  * 2.0.
  */
 import { MonitoringCollectionSetup } from '../../../monitoring_collection/server';
-import { NodeRulesMetric } from './types';
-import { getAllInMemoryMetrics, IN_MEMORY_METRICS } from '.';
+import { IN_MEMORY_METRICS } from '.';
+import { InMemoryMetrics } from './in_memory_metrics';
 
 export function registerNodeCollector({
   monitoringCollection,
+  inMemoryMetrics,
 }: {
   monitoringCollection: MonitoringCollectionSetup;
+  inMemoryMetrics: InMemoryMetrics;
 }) {
   monitoringCollection.registerMetric({
     type: 'node_rules',
@@ -24,14 +26,10 @@ export function registerNodeCollector({
       },
     },
     fetch: async () => {
-      const inMemoryMetrics = getAllInMemoryMetrics();
-
-      const metrics: NodeRulesMetric = {
-        failures: inMemoryMetrics[IN_MEMORY_METRICS.RULE_FAILURES],
-        executions: inMemoryMetrics[IN_MEMORY_METRICS.RULE_EXECUTIONS],
+      return {
+        failures: inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.RULE_FAILURES),
+        executions: inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS),
       };
-
-      return metrics;
     },
   });
 }

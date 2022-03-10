@@ -5,36 +5,47 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
+
 export enum IN_MEMORY_METRICS {
   ACTION_EXECUTIONS = 'actionExecutions',
   ACTION_FAILURES = 'actionFailures',
 }
 
-const inMemoryMetrics: Record<IN_MEMORY_METRICS, number | null> = {
-  [IN_MEMORY_METRICS.ACTION_EXECUTIONS]: 0,
-  [IN_MEMORY_METRICS.ACTION_FAILURES]: 0,
-};
+export class InMemoryMetrics {
+  private logger: Logger;
+  private inMemoryMetrics: Record<IN_MEMORY_METRICS, number | null> = {
+    [IN_MEMORY_METRICS.ACTION_EXECUTIONS]: 0,
+    [IN_MEMORY_METRICS.ACTION_FAILURES]: 0,
+  };
 
-export function incrementInMemoryMetric(metric: IN_MEMORY_METRICS) {
-  if (!inMemoryMetrics.hasOwnProperty(metric)) {
-    return;
+  constructor(logger: Logger) {
+    this.logger = logger;
   }
 
-  if (inMemoryMetrics[metric] === null) {
-    return;
+  public increment(metric: IN_MEMORY_METRICS) {
+    if (this.inMemoryMetrics[metric] === null) {
+      this.logger.info(
+        `Metric ${metric} is null because the counter ran over the max safe integer value, skipping increment.`
+      );
+      return;
+    }
+
+    if ((this.inMemoryMetrics[metric] as number) >= Number.MAX_SAFE_INTEGER) {
+      this.inMemoryMetrics[metric] = null;
+      this.logger.info(
+        `Metric ${metric} has reached the max safe integer value and will no longer be used, skipping increment.`
+      );
+    } else {
+      (this.inMemoryMetrics[metric] as number)++;
+    }
   }
 
-  if ((inMemoryMetrics[metric] as number) >= Number.MAX_SAFE_INTEGER) {
-    inMemoryMetrics[metric] = null;
-  } else {
-    (inMemoryMetrics[metric] as number)++;
+  public getInMemoryMetric(metric: IN_MEMORY_METRICS) {
+    return this.inMemoryMetrics[metric];
   }
-}
 
-export function getInMemoryMetric(metric: IN_MEMORY_METRICS) {
-  return inMemoryMetrics[metric];
-}
-
-export function getAllInMemoryMetrics() {
-  return inMemoryMetrics;
+  public getAllInMemoryMetrics() {
+    return this.inMemoryMetrics;
+  }
 }
