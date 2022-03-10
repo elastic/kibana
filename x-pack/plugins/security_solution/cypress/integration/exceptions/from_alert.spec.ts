@@ -71,6 +71,7 @@ describe('From alert', () => {
 
     goToExceptionsTab();
     removeException();
+    esArchiverLoad('auditbeat_for_exceptions2');
     goToAlertsTab();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
