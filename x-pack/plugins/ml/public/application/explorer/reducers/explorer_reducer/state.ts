@@ -35,7 +35,6 @@ export interface ExplorerState {
   selectedJobs: ExplorerJob[] | null;
   tableData: AnomaliesTableData;
   tableQueryString: string;
-  showCharts: boolean;
 }
 
 function getDefaultIndexPattern() {
@@ -72,6 +71,5 @@ export function getExplorerDefaultState(): ExplorerState {
       showViewSeriesLink: false,
     },
     tableQueryString: '',
-    showCharts: true,
   };
 }

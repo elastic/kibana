@@ -68,13 +68,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = { ...state, ...payload };
       break;
 
-    case EXPLORER_ACTION.SET_SHOW_CHARTS:
-      nextState = {
-        ...state,
-        showCharts: payload,
-      };
-      break;
-
     default:
       nextState = state;
   }

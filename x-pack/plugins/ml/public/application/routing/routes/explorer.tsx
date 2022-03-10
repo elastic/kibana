@@ -113,7 +113,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     (job) => jobIds.includes(job.id) && job.isRunning === true
   );
 
-  const explorerAppState = useObservable(explorerService.appState$);
   const explorerState = useObservable(explorerService.state$);
 
   const refresh = useRefresh();
@@ -196,16 +195,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     };
   }, []);
 
-  /**
-   * TODO get rid of the intermediate state in explorerService.
-   * URL state should be the only source of truth for related props.
-   */
-  useEffect(() => {
-    if (explorerUrlState.mlShowCharts !== undefined) {
-      explorerService.setShowCharts(explorerUrlState.mlShowCharts);
-    }
-  }, []);
-
   const [explorerData, loadExplorerData] = useExplorerData();
 
   useEffect(() => {
@@ -216,6 +205,11 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
+
+  const showCharts = useObservable(
+    anomalyExplorerContext.anomalyExplorerCommonStateService.getShowCharts$(),
+    anomalyExplorerContext.anomalyExplorerCommonStateService.getShowCharts()
+  );
 
   const selectedCells = useObservable(
     anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells$()
@@ -280,11 +274,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     null
   );
 
-  if (
-    explorerState === undefined ||
-    refresh === undefined ||
-    explorerAppState?.mlShowCharts === undefined
-  ) {
+  if (explorerState === undefined || refresh === undefined) {
     return null;
   }
 
@@ -308,7 +298,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
             {...{
               explorerState,
               overallSwimlaneData,
-              showCharts: explorerState.showCharts,
+              showCharts,
               severity: tableSeverity.val,
               stoppedPartitions,
               invalidTimeRangeError,

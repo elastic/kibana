@@ -25,7 +25,6 @@ export const EXPLORER_ACTION = {
   SET_CHARTS: 'setCharts',
   SET_CHARTS_DATA_LOADING: 'setChartsDataLoading',
   SET_EXPLORER_DATA: 'setExplorerData',
-  SET_SHOW_CHARTS: 'setShowCharts',
 };
 
 export const FILTER_ACTION = {

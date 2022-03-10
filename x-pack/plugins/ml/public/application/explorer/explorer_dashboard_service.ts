@@ -12,13 +12,12 @@
 
 import { isEqual } from 'lodash';
 import { from, isObservable, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, flatMap, map, scan, shareReplay } from 'rxjs/operators';
+import { distinctUntilChanged, flatMap, scan, shareReplay } from 'rxjs/operators';
 import { DeepPartial } from '../../../common/types/common';
 import { jobSelectionActionCreator } from './actions';
 import type { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from './explorer_constants';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
-import type { ExplorerAppState } from '../../../common/types/locator';
 
 type ExplorerAction = Action | Observable<ActionPayload>;
 export const explorerAction$ = new Subject<ExplorerAction>();
@@ -45,22 +44,6 @@ const explorerState$: Observable<ExplorerState> = explorerFilteredAction$.pipe(
   shareReplay(1)
 );
 
-const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
-  map((state: ExplorerState): ExplorerAppState => {
-    const appState: ExplorerAppState = {
-      mlExplorerFilter: {},
-      mlExplorerSwimlane: {},
-    };
-
-    if (state.showCharts !== undefined) {
-      appState.mlShowCharts = state.showCharts;
-    }
-
-    return appState;
-  }),
-  distinctUntilChanged(isEqual)
-);
-
 const setExplorerDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
   type: EXPLORER_ACTION.SET_EXPLORER_DATA,
   payload,
@@ -68,7 +51,6 @@ const setExplorerDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
 
 // Export observable state and action dispatchers as service
 export const explorerService = {
-  appState$: explorerAppState$,
   state$: explorerState$,
   clearExplorerData: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_EXPLORER_DATA });
@@ -90,9 +72,6 @@ export const explorerService = {
   },
   setChartsDataLoading: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS_DATA_LOADING });
-  },
-  setShowCharts: (payload: boolean) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_SHOW_CHARTS, payload });
   },
 };
 

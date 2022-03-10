@@ -30,7 +30,6 @@ import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { ExplorerNoJobsSelected, ExplorerNoResultsFound } from './components';
 import { InfluencersList } from '../components/influencers_list';
-import { explorerService } from './explorer_dashboard_service';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
@@ -511,10 +510,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                 </EuiFlexItem>
                 {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
                   <EuiFlexItem grow={false}>
-                    <CheckboxShowCharts
-                      showCharts={showCharts}
-                      setShowCharts={explorerService.setShowCharts}
-                    />
+                    <CheckboxShowCharts />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

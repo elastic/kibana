@@ -29,8 +29,8 @@ export type FilterSettings = Required<
  */
 export class AnomalyExplorerCommonStateService {
   private _selectedJobs$ = new BehaviorSubject<ExplorerJob[] | undefined>(undefined);
-
   private _filterSettings$ = new BehaviorSubject<FilterSettings>(this._getDefaultFilterSettings());
+  private _showCharts$ = new BehaviorSubject<boolean>(true);
 
   private _getDefaultFilterSettings(): FilterSettings {
     return {
@@ -59,6 +59,14 @@ export class AnomalyExplorerCommonStateService {
         };
         this._filterSettings$.next(result);
       });
+
+    this.anomalyExplorerUrlStateService
+      .getPageUrlState$()
+      .pipe(
+        map((urlState) => urlState?.mlShowCharts ?? true),
+        distinctUntilChanged()
+      )
+      .subscribe(this._showCharts$);
   }
 
   public setSelectedJobs(explorerJobs: ExplorerJob[] | undefined) {
@@ -104,5 +112,17 @@ export class AnomalyExplorerCommonStateService {
 
   public clearFilterSettings() {
     this.anomalyExplorerUrlStateService.updateUrlState({ mlExplorerFilter: {} });
+  }
+
+  public getShowCharts$(): Observable<boolean> {
+    return this._showCharts$.asObservable();
+  }
+
+  public getShowCharts(): boolean {
+    return this._showCharts$.getValue();
+  }
+
+  public setShowCharts(update: boolean) {
+    this.anomalyExplorerUrlStateService.updateUrlState({ mlShowCharts: update });
   }
 }
