@@ -11,13 +11,18 @@ import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { Embeddable } from '../embeddable';
 import type { DiscoverStart } from '../../../../../src/plugins/discover/public';
 
-const ACTION_VIEW_UNDERLYING_DATA = 'ACTION_VIEW_UNDERLYING_DATA';
+const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 
-export const viewUnderlyingDataAction = (discover: DiscoverStart) =>
+export const createOpenInDiscoverAction = (discover: DiscoverStart) =>
   createAction<{ embeddable: IEmbeddable }>({
-    type: ACTION_VIEW_UNDERLYING_DATA,
-    id: ACTION_VIEW_UNDERLYING_DATA,
-    getDisplayName: () => 'Open in Discover',
+    type: ACTION_OPEN_IN_DISCOVER,
+    id: ACTION_OPEN_IN_DISCOVER,
+    order: 4,
+    getIconType: () => 'popout',
+    getDisplayName: () =>
+      i18n.translate('xpack.lens.actions.openInDiscover', {
+        defaultMessage: 'Open in Discover',
+      }),
     isCompatible: async (context: { embeddable: IEmbeddable }) => {
       let isCompatible = false;
       if (context.embeddable instanceof Embeddable) {

@@ -82,7 +82,7 @@ import type {
   LensTopNavMenuEntryGenerator,
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
-import { viewUnderlyingDataAction } from './trigger_actions/view_underlying_data_action';
+import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
@@ -439,7 +439,7 @@ export class LensPlugin {
 
     startDependencies.uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      viewUnderlyingDataAction(startDependencies.discover!)
+      createOpenInDiscoverAction(startDependencies.discover!)
     );
 
     return {
