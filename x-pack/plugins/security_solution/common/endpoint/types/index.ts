@@ -740,6 +740,7 @@ export type SafeEndpointEvent = Partial<{
     }>;
     pid: ECSField<number>;
     hash: Hashes;
+    working_directory: ECSField<string>;
     parent: Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
