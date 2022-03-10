@@ -9,7 +9,37 @@ import {
   getNumExecutions,
   getExecutionLogAggregation,
   formatExecutionLogResult,
+  formatSortForBucketSort,
+  formatSortForTermSort,
 } from './get_execution_log_aggregation';
+
+describe('formatSortForBucketSort', () => {
+  test('should correctly format array of sort combinations for bucket sorting', () => {
+    expect(
+      formatSortForBucketSort([
+        { timestamp: { order: 'desc' } },
+        { execution_duration: { order: 'asc' } },
+      ])
+    ).toEqual([
+      { 'ruleExecution>executeStartTime': { order: 'desc' } },
+      { 'ruleExecution>executionDuration': { order: 'asc' } },
+    ]);
+  });
+});
+
+describe('formatSortForTermSort', () => {
+  test('should correctly format array of sort combinations for bucket sorting', () => {
+    expect(
+      formatSortForTermSort([
+        { timestamp: { order: 'desc' } },
+        { execution_duration: { order: 'asc' } },
+      ])
+    ).toEqual([
+      { 'ruleExecution>executeStartTime': 'desc' },
+      { 'ruleExecution>executionDuration': 'asc' },
+    ]);
+  });
+});
 
 describe('getNumExecutions', () => {
   test('should calculate the expected number of executions in a given date range with a given schedule interval', () => {
@@ -118,7 +148,14 @@ describe('getExecutionLogAggregation', () => {
     ).toEqual({
       executionUuidCardinality: { cardinality: { field: 'kibana.alert.rule.execution.uuid' } },
       executionUuid: {
-        terms: { field: 'kibana.alert.rule.execution.uuid', size: 5 },
+        terms: {
+          field: 'kibana.alert.rule.execution.uuid',
+          size: 5,
+          order: [
+            { 'ruleExecution>executeStartTime': 'asc' },
+            { 'ruleExecution>executionDuration': 'desc' },
+          ],
+        },
         aggs: {
           executionUuidSorted: {
             bucket_sort: {

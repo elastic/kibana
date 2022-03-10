@@ -148,17 +148,13 @@ export function getExecutionLogAggregation({
       terms: {
         field: EXECUTION_UUID_FIELD,
         size: numExecutions,
+        order: formatSortForTermSort(sort),
       },
       aggs: {
         // Bucket sort to allow paging through executions
         executionUuidSorted: {
           bucket_sort: {
-            sort: (sort as estypes.SortCombinations[]).map((s) =>
-              Object.keys(s).reduce(
-                (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, curr) }),
-                {}
-              )
-            ),
+            sort: formatSortForBucketSort(sort),
             from: (page - 1) * perPage,
             size: perPage,
           },
@@ -320,4 +316,22 @@ export function getNumExecutions(dateStart: Date, dateEnd: Date, ruleSchedule: s
   const numExecutions = Math.ceil(durationInMillis / scheduleMillis);
 
   return Math.min(numExecutions < 0 ? 0 : numExecutions, DEFAULT_MAX_BUCKETS_LIMIT);
+}
+
+export function formatSortForBucketSort(sort: estypes.Sort) {
+  return (sort as estypes.SortCombinations[]).map((s) =>
+    Object.keys(s).reduce(
+      (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, curr) }),
+      {}
+    )
+  );
+}
+
+export function formatSortForTermSort(sort: estypes.Sort) {
+  return (sort as estypes.SortCombinations[]).map((s) =>
+    Object.keys(s).reduce(
+      (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, `${curr}.order`) }),
+      {}
+    )
+  );
 }
