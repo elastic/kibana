@@ -41,6 +41,7 @@ export interface UsageStats {
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableInfrastructureView': boolean;
+  'observability:enableServiceGroups': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -59,6 +60,7 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
+  'securitySolution:enableCcsWarning': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
