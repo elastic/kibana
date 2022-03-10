@@ -124,10 +124,10 @@ describe('After an upgrade, the threshold rule', () => {
     expandFirstAlert();
 
     // TODO: The ones commented out, need data-test-subj attributes added
-    //cy.get(OVERVIEW_STATUS).should('have.text', 'open');
-    //cy.get(OVERVIEW_RULE).should('have.text', alert.rule);
+    // cy.get(OVERVIEW_STATUS).should('have.text', 'open');
+    // cy.get(OVERVIEW_RULE).should('have.text', alert.rule);
     cy.get(OVERVIEW_SEVERITY).should('have.text', alert.severity);
-    //cy.get(OVERVIEW_RISK_SCORE).should('have.text', alert.riskScore);
+    // cy.get(OVERVIEW_RISK_SCORE).should('have.text', alert.riskScore);
     cy.get(OVERVIEW_HOST_NAME).should('have.text', alert.hostName);
     cy.get(OVERVIEW_THRESHOLD_COUNT).should('have.text', alert.thresholdCount);
     cy.get(OVERVIEW_THRESHOLD_VALUE).should('have.text', alert.hostName);

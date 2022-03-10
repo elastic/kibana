@@ -39,8 +39,7 @@ export const OVERVIEW_RISK_SCORE =
 export const OVERVIEW_RULE =
   '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=rule\\.name]';
 
-export const OVERVIEW_SEVERITY =
-  '[data-test-subj="eventDetails"] [data-test-subj=severity]';
+export const OVERVIEW_SEVERITY = '[data-test-subj="eventDetails"] [data-test-subj=severity]';
 
 export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj$=status]';
 
