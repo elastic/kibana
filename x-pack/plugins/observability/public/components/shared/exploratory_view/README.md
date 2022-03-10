@@ -5,6 +5,12 @@ The view is populated using configs stored as json within the view for each data
 
 This readme file contains few of the concepts being used in the component.
 
+Basic workflow for how exploratory view works, it looks like this
+
+
+![Exploratory view workflow](https://i.imgur.com/Kgyfd29.png)
+
+
 ## Report Type
 
 The exploratory view report type controls how the data is visualized in the lens embeddable. The report type defines a set of constraits over the x and y axis. For example, the `kpi-over-time` report type is a time series chart type that plots key performance indicators over time, while the `data-distrubtion` chart plots the percentage of documents over key performance indicators. Current available data types can be found at `exploratory_view/configurations/constants`.
