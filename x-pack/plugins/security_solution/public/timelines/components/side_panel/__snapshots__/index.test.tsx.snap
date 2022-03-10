@@ -358,6 +358,7 @@ Array [
       role="dialog"
     >
       <button
+        aria-label="Close this dialog"
         data-test-subj="euiFlyoutCloseButton"
         onClick={[Function]}
         type="button"
@@ -645,6 +646,7 @@ Array [
     role="dialog"
   >
     <button
+      aria-label="Close this dialog"
       data-test-subj="euiFlyoutCloseButton"
       onClick={[Function]}
       type="button"
