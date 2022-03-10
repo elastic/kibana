@@ -18,7 +18,7 @@ yarn start
 
 Open kibana and navigate to "Stack Monitoring" (sidebar, homepage, or search bar). You should see a page like this.
 
-![Stack Monitoring overview page with Elasticsearch and Kibana panels using internal collection](../images/ek-internal-collection-overview.png)
+![Stack Monitoring overview page with Elasticsearch and Kibana panels using internal collection](../images/ek_internal_collection_overview.png)
 
 This is definitely the simplest way to get some data to explore, but internal collection is a deprecated collection mode, so next we'll use metricbeat collection.
 
