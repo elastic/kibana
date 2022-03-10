@@ -7,13 +7,13 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { AllCasesSelectorModalProps } from '../components/all_cases/selector_modal';
-import { CasesProvider, CasesContextProps } from '../components/cases_context';
+import { AllCasesSelectorModalProps } from '../../components/all_cases/selector_modal';
+import { CasesProvider, CasesContextProps } from '../../components/cases_context';
 
 export type GetAllCasesSelectorModalProps = AllCasesSelectorModalProps & CasesContextProps;
 
 const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
-  () => import('../components/all_cases/selector_modal')
+  () => import('../../components/all_cases/selector_modal')
 );
 export const getAllCasesSelectorModalLazy = ({
   owner,

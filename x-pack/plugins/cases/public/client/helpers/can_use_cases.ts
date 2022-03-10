@@ -6,7 +6,7 @@
  */
 
 import type { ApplicationStart } from 'kibana/public';
-import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 export type CasesOwners = typeof SECURITY_SOLUTION_OWNER | typeof OBSERVABILITY_OWNER;
 
