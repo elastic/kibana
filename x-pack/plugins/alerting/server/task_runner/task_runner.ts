@@ -479,20 +479,6 @@ export class TaskRunner<
     if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
-      await scheduleActionsForRecoveredAlerts<
-        InstanceState,
-        InstanceContext,
-        RecoveryActionGroupId
-      >({
-        recoveryActionGroup: this.ruleType.recoveryActionGroup,
-        recoveredAlerts,
-        executionHandler,
-        mutedAlertIdsSet,
-        logger: this.logger,
-        ruleLabel,
-        alertExecutionStore,
-      });
-
       const alertsWithExecutableActions = Object.entries(alertsWithScheduledActions).filter(
         ([alertName, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) => {
           const throttled = alert.isThrottled(throttle);
@@ -526,6 +512,20 @@ export class TaskRunner<
             this.executeAlert(alertId, alert, executionHandler, alertExecutionStore)
         )
       );
+
+      await scheduleActionsForRecoveredAlerts<
+        InstanceState,
+        InstanceContext,
+        RecoveryActionGroupId
+      >({
+        recoveryActionGroup: this.ruleType.recoveryActionGroup,
+        recoveredAlerts,
+        executionHandler,
+        mutedAlertIdsSet,
+        logger: this.logger,
+        ruleLabel,
+        alertExecutionStore,
+      });
     } else {
       if (muteAll) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is muted.`);

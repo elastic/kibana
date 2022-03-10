@@ -1047,10 +1047,10 @@ describe('Task Runner', () => {
         4,
         generateEventLog({
           action: EVENT_LOG_ACTIONS.executeAction,
-          savedObjects: [generateAlertSO('1'), generateActionSO('2')],
-          actionGroupId: 'recovered',
-          instanceId: '2',
-          actionId: '2',
+          savedObjects: [generateAlertSO('1'), generateActionSO('1')],
+          actionGroupId: 'default',
+          instanceId: '1',
+          actionId: '1',
         })
       );
 
@@ -1058,10 +1058,10 @@ describe('Task Runner', () => {
         5,
         generateEventLog({
           action: EVENT_LOG_ACTIONS.executeAction,
-          savedObjects: [generateAlertSO('1'), generateActionSO('1')],
-          actionGroupId: 'default',
-          instanceId: '1',
-          actionId: '1',
+          savedObjects: [generateAlertSO('1'), generateActionSO('2')],
+          actionGroupId: 'recovered',
+          instanceId: '2',
+          actionId: '2',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1148,8 +1148,8 @@ describe('Task Runner', () => {
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
       expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('1');
-      expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('2');
+      expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('2');
+      expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('1');
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
   );
