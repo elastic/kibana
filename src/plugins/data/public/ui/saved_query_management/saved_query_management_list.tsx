@@ -120,7 +120,7 @@ export function SavedQueryManagementList({
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState(null as SavedQuery | null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
-  const { uiSettings } = kibana.services;
+  const { uiSettings, http } = kibana.services;
   const format = uiSettings.get('dateFormat');
 
   useEffect(() => {
@@ -285,8 +285,9 @@ export function SavedQueryManagementList({
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              // TODO: Need basePath
-              // href={basePath.prepend(`/app/management/kibana/objects?initialQuery=type:("query")`)}
+              href={http.basePath.prepend(
+                `/app/management/kibana/objects?initialQuery=type:("query")`
+              )}
               size="s"
             >
               Manage
