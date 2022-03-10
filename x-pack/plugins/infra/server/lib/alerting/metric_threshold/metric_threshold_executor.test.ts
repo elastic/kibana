@@ -711,19 +711,7 @@ describe('The metric threshold alert type', () => {
             isNoData: false,
           },
         },
-        {
-          '*': {
-            ...baseNonCountCriterion,
-            comparator: Comparator.LT_OR_EQ,
-            threshold: [2.5],
-            metric: 'test.metric.2',
-            currentValue: 3.0,
-            timestamp: new Date().toISOString(),
-            shouldFire: false,
-            shouldWarn: false,
-            isNoData: false,
-          },
-        },
+        {},
       ]);
       const instanceID = '*';
       await execute(Comparator.LT_OR_EQ, [1.0], [2.5]);

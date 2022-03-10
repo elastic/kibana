@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
 import {
   Aggregators,
   Comparator,
@@ -87,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [10000],
-                comparator: Comparator.LT_OR_EQ,
+                comparator: Comparator.GT_OR_EQ,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -112,12 +113,12 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [10000],
-                comparator: '<=',
+                comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 20895,
                 timestamp: '2021-10-19T00:53:59.997Z',
-                shouldFire: false,
+                shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
               },
@@ -661,6 +662,82 @@ export default function ({ getService }: FtrProviderContext) {
                 metric: 'value',
                 currentValue: null,
                 timestamp: '2021-01-01T00:30:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+              },
+            },
+          ]);
+        });
+
+        it('should NOT resport any alerts when missing group recovers', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [100],
+                comparator: Comparator.GT,
+                aggType: Aggregators.SUM,
+                metric: 'value',
+              } as NonCountMetricExpressionParams,
+            ],
+            groupBy: ['env'],
+          };
+          const timeFrame = { end: moment(gauge.midpoint).add(10, 'm').valueOf() };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            moment(gauge.midpoint).subtract(1, 'm').valueOf(),
+            timeFrame,
+            ['dev']
+          );
+          expect(results).to.eql([{}]);
+        });
+
+        it('should report no data when both groups stop reporting', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['env'],
+          };
+          const timeFrame = { end: moment(gauge.max).add(6, 'm').valueOf() };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            gauge.max,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              prod: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'sum',
+                metric: 'value',
+                currentValue: null,
+                timestamp: '2021-01-01T01:06:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+              },
+              dev: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'sum',
+                metric: 'value',
+                currentValue: null,
+                timestamp: '2021-01-01T01:06:00.000Z',
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,

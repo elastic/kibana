@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import moment from 'moment';
+import { isEmpty } from 'lodash';
 import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
@@ -79,15 +80,17 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const evaluations: Record<string, Evaluation> = {};
       for (const key of Object.keys(currentValues)) {
         const result = currentValues[key];
-        evaluations[key] = {
-          ...criterion,
-          metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
-          currentValue: result.value,
-          timestamp: moment(calculatedTimerange.end).toISOString(),
-          shouldFire: result.trigger,
-          shouldWarn: result.warn,
-          isNoData: result.value === null,
-        };
+        if (result.trigger || result.warn || result.value === null) {
+          evaluations[key] = {
+            ...criterion,
+            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
+            currentValue: result.value,
+            timestamp: moment(calculatedTimerange.end).toISOString(),
+            shouldFire: result.trigger,
+            shouldWarn: result.warn,
+            isNoData: result.value === null,
+          };
+        }
       }
       return evaluations;
     })

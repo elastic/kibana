@@ -153,11 +153,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = alertResults.every((result) => result[group].shouldFire);
-      const shouldAlertWarn = alertResults.every((result) => result[group].shouldWarn);
+      const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
+      const shouldAlertWarn = alertResults.every((result) => result[group]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some((result) => result[group].isNoData);
+      const isNoData = alertResults.some((result) => result[group]?.isNoData);
 
       if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
         nextMissingGroups.add(group);
