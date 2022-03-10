@@ -163,32 +163,39 @@ export function SavedQueryManagementList({
       loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
         ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
         : [...savedQueriesWithoutCurrent];
-    return savedQueriesReordered.map((savedQuery) => ({
-      key: savedQuery.id,
-      label: itemLabel(savedQuery.attributes),
-      title: itemTitle(savedQuery.attributes),
-      value: savedQuery.id,
-      checked: !!loadedSavedQuery && savedQuery.id === loadedSavedQuery.id ? 'on' : undefined,
-      append: (
-        <EuiButtonIcon
-          css={css`
-            opacity: 0.2;
-            filter: grayscale(100%);
 
-            &:hover,
-            &:focus:focus-visible {
-              opacity: 1;
-              filter: grayscale(0%);
-            }
-          `}
-          iconType="trash"
-          aria-label={`Delete ${savedQuery.attributes.title}`}
-          title={`Delete ${savedQuery.attributes.title}`}
-          onClick={() => handleDelete(savedQuery.id)}
-          color="danger"
-        />
-      ),
-    })) as unknown as SelectableProps[];
+    return savedQueriesReordered.map((savedQuery) => {
+      return {
+        key: savedQuery.id,
+        label: itemLabel(savedQuery.attributes),
+        title: itemTitle(savedQuery.attributes),
+        value: savedQuery.id,
+        checked:
+          (loadedSavedQuery && savedQuery.id === loadedSavedQuery.id) ||
+          (selectedSavedQuery && savedQuery.id === selectedSavedQuery.id)
+            ? 'on'
+            : undefined,
+        append: (
+          <EuiButtonIcon
+            css={css`
+              opacity: 0.2;
+              filter: grayscale(100%);
+
+              &:hover,
+              &:focus:focus-visible {
+                opacity: 1;
+                filter: grayscale(0%);
+              }
+            `}
+            iconType="trash"
+            aria-label={`Delete ${savedQuery.attributes.title}`}
+            title={`Delete ${savedQuery.attributes.title}`}
+            onClick={() => handleDelete(savedQuery.id)}
+            color="danger"
+          />
+        ),
+      };
+    }) as unknown as SelectableProps[];
   };
 
   const listComponent = (
