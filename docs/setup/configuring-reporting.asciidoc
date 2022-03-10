@@ -41,7 +41,7 @@ If you are using Ubuntu/Debian systems, install the following packages:
 * `libfontconfig1`
 * `libnss3`
 
-If the system is missing dependencies, *Reporting* fails in a non-deterministic way. {kib} runs a self-test at server startup, and
+If the system is missing dependencies, a screenshot report job may fail in a non-deterministic way. {kib} runs a self-test at server startup, and
 if it encounters errors, logs them in the Console. The error message does not include
 information about why Chromium failed to run. The most common error message is `Error: connect ECONNREFUSED`, which indicates
 that {kib} could not connect to the Chromium process.
@@ -119,27 +119,37 @@ NOTE: If you have a Basic license, sub-feature privileges are unavailable. For d
 
 Grant users custom Reporting roles, other roles that grant read access to the data in {es}, and at least read access in the applications where users can generate reports.
 
-[source, sh]
+[source, json]
 ---------------------------------------------------------------
-POST /_security/role/custom_reporting_user
+PUT localhost:5601/api/security/role/custom_reporting_user
 {
-  metadata: {},
-  elasticsearch: { cluster: [], indices: [], run_as: [] },
-  kibana: [
+  "elasticsearch": { "cluster": [], "indices": [], "run_as": [] },
+  "kibana": [
     {
-      base: [],
-      feature: {
-        dashboard: [
-          'generate_report', <1>
-          'download_csv_report' <2>
+      "base": [],
+      "feature": {
+        "dashboard": [
+          "minimal_read",
+          "generate_report", <1>
+          "download_csv_report" <2>
         ],
-        discover: ['generate_report'], <3>
-        canvas: ['generate_report'], <4>
-        visualize: ['generate_report'], <5>
+        "discover": [
+          "minimal_read",
+          "generate_report" <3>
+        ],
+        "canvas": [
+          "minimal_read",
+          "generate_report" <4>
+        ],
+        "visualize": [
+          "minimal_read",
+          "generate_report" <5>
+        ]
       },
-      spaces: ['*'],
+      "spaces": [ "*" ]
     }
-  ]
+  ],
+  "metadata": {} // optional
 }
 ---------------------------------------------------------------
 // CONSOLE
@@ -159,24 +169,24 @@ With a Basic license, you can grant users access with custom roles to {report-fe
 [role="screenshot"]
 image::user/reporting/images/kibana-privileges-with-reporting-basic.png["Kibana privileges with Reporting options, Basic license"]
 
-With a Basic license, sub-feature application privileges are unavailable, but you can use the {ref}/security-api-put-role.html[role API] to grant access to the {report-features}:
+With a Basic license, sub-feature application privileges are unavailable, but you can use the {ref}/security-api-put-role.html[role API] to grant access to CSV {report-features}:
 
 [source, sh]
 ---------------------------------------------------------------
-POST /_security/role/custom_reporting_user
+PUT localhost:5601/api/security/role/custom_reporting_user
 {
-  metadata: {},
-  elasticsearch: { cluster: [], indices: [], run_as: [] },
-  kibana: [
+  "elasticsearch": { "cluster": [], "indices": [], "run_as": [] },
+  "kibana": [
     {
-      spaces": ['*'],
-      base": [],
-      feature: {
-        discover: [ 'all' ] <1>
-        dashboard: [ 'all' ] <2>
-      }
+      "base": [],
+      "feature": {
+        "dashboard": [ "all" ], <1>
+        "discover": [ "all" ], <2>
+      },
+      "spaces": [ "*" ]
     }
-  ]
+  ],
+  "metadata": {} // optional
 }
 ---------------------------------------------------------------
 // CONSOLE
