@@ -68,8 +68,15 @@ export function GraphVisualization({
     onSetControl('mergeTerms');
   };
 
-  const edgeClick = (edge: WorkspaceEdge) =>
+  const edgeClick = (edge: WorkspaceEdge) => {
+    // no multiple selection for now
+
+    workspace.clearEdgeSelection();
+    workspace.addEdgeToSelection(edge);
+    onSetControl('edgeSelection');
+
     workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
+  };
 
   return (
     <svg
