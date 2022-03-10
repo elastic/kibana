@@ -18,6 +18,8 @@ import {
   VisState716,
   VisStatePost715,
   VisStatePre715,
+  VisState810,
+  VisState820,
 } from './types';
 import { CustomPaletteParams, layerTypes } from '../../common';
 import { PaletteOutput } from 'src/plugins/charts/common';
@@ -1775,6 +1777,124 @@ describe('Lens migrations', () => {
       ).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({ parentFormat: { id: 'terms' } }),
+        })
+      );
+    });
+  });
+
+  describe('8.2.0 rename fitRowToContent to new detailed rowHeight and rowHeightLines', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    function getExample(fitToContent: boolean) {
+      return {
+        type: 'lens',
+        id: 'mocked-saved-object-id',
+        attributes: {
+          visualizationType: 'lnsDatatable',
+          title: 'Lens visualization',
+          references: [
+            {
+              id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              name: 'indexpattern-datasource-current-indexpattern',
+              type: 'index-pattern',
+            },
+            {
+              id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              name: 'indexpattern-datasource-layer-cddd8f79-fb20-4191-a3e7-92484780cc62',
+              type: 'index-pattern',
+            },
+          ],
+          state: {
+            datasourceStates: {
+              indexpattern: {
+                layers: {
+                  'cddd8f79-fb20-4191-a3e7-92484780cc62': {
+                    indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                    columns: {
+                      '221f0abf-6e54-4c61-9316-4107ad6fa500': {
+                        label: 'Top values of category.keyword',
+                        dataType: 'string',
+                        operationType: 'terms',
+                        scale: 'ordinal',
+                        sourceField: 'category.keyword',
+                        isBucketed: true,
+                        params: {
+                          size: 5,
+                          orderBy: {
+                            type: 'column',
+                            columnId: 'c6f07a26-64eb-4871-ad62-c7d937230e33',
+                          },
+                          orderDirection: 'desc',
+                          otherBucket: true,
+                          missingBucket: false,
+                          parentFormat: {
+                            id: 'terms',
+                          },
+                        },
+                      },
+                      'c6f07a26-64eb-4871-ad62-c7d937230e33': {
+                        label: 'Count of records',
+                        dataType: 'number',
+                        operationType: 'count',
+                        isBucketed: false,
+                        scale: 'ratio',
+                        sourceField: '___records___',
+                      },
+                    },
+                    columnOrder: [
+                      '221f0abf-6e54-4c61-9316-4107ad6fa500',
+                      'c6f07a26-64eb-4871-ad62-c7d937230e33',
+                    ],
+                    incompleteColumns: {},
+                  },
+                },
+              },
+            },
+            visualization: {
+              columns: [
+                {
+                  isTransposed: false,
+                  columnId: '221f0abf-6e54-4c61-9316-4107ad6fa500',
+                },
+                {
+                  isTransposed: false,
+                  columnId: 'c6f07a26-64eb-4871-ad62-c7d937230e33',
+                },
+              ],
+              layerId: 'cddd8f79-fb20-4191-a3e7-92484780cc62',
+              layerType: 'data',
+              fitRowToContent: fitToContent,
+            },
+            filters: [],
+            query: {
+              query: '',
+              language: 'kuery',
+            },
+          },
+        },
+      } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+    }
+
+    it('should migrate enabled fitRowToContent to new rowHeight: "auto"', () => {
+      const result = migrations['8.2.0'](getExample(true), context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape810<VisState810>, LensDocShape810<VisState820>>
+      >;
+
+      expect(result.attributes.state.visualization as VisState820).toEqual(
+        expect.objectContaining({
+          rowHeight: 'auto',
+        })
+      );
+    });
+
+    it('should migrate disabled fitRowToContent to new rowHeight: "single"', () => {
+      const result = migrations['8.2.0'](getExample(false), context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape810<VisState810>, LensDocShape810<VisState820>>
+      >;
+
+      expect(result.attributes.state.visualization as VisState820).toEqual(
+        expect.objectContaining({
+          rowHeight: 'single',
+          rowHeightLines: 1,
         })
       );
     });
