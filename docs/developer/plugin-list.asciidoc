@@ -61,6 +61,10 @@ as uiSettings within the code.
 |Create data views from within Kibana apps.
 
 
+|{kib-repo}blob/{branch}/src/plugins/data_view_field_editor/README.md[dataViewFieldEditor]
+|The reusable field editor across Kibana!
+
+
 |{kib-repo}blob/{branch}/src/plugins/data_view_management[dataViewManagement]
 |WARNING: Missing README.
 
