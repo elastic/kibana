@@ -40,6 +40,7 @@ import {
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
+import { createFetchStartTime } from './create_fetch_start_time';
 import {
   CommonAlertFieldName,
   CommonAlertIdFieldName,
@@ -70,6 +71,7 @@ export interface LifecycleAlertServices<
   ActionGroupIds extends string = never
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
+  fetchAlertStartTime: (instanceId: string) => Promise<string | null>;
 }
 
 export type LifecycleRuleExecutor<
@@ -167,6 +169,7 @@ export const createLifecycleExecutor =
         currentAlerts[id] = fields;
         return alertFactory.create(id);
       },
+      fetchAlertStartTime: createFetchStartTime(ruleDataClient, commonRuleFields),
     };
 
     const nextWrappedState = await wrappedExecutor({

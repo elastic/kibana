@@ -64,7 +64,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
   >(async ({ services, params }) => {
     const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
-    const { alertWithLifecycle, savedObjectsClient } = services;
+    const { alertWithLifecycle, savedObjectsClient /* fetchAlertStartTime */ } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
         id,
@@ -191,6 +191,16 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             : FIRED_ACTIONS.id;
 
         const alert = alertFactory(`${group}`, reason);
+        /**
+         * Here we call fetchAlertStartTime(instanceId) which will return the ALERT_START time
+         * from the existing alert stored in the AlertAsData index OR it will return
+         * null if it doesn't exist
+         *
+         * const alertStartTime = await fetchAlertStartTime(`${group}`);
+         * const endTime = moment();
+         * const startTime = alertStartTime || endTime.clone().subtract(timeSize, timeUnit);
+         * const viewInAppUrl = createViewInAppURL(startTime.valueOf(), endTime.valueOf(), whateverElse...);
+         */
         alert.scheduleActions(
           /**
            * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
