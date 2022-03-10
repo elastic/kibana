@@ -6,19 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
+import { FC } from 'react';
 
-/**
- * Creates the Shared UX plugin.
- */
-export function plugin() {
-  return new SharedUXPlugin();
-}
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export {
-  ExitFullScreenButton,
-  LazyExitFullScreenButton,
-  NoDataViewsPage,
-  LazyNoDataViewsPage,
-} from '@kbn/sharedux-components';
+export type SharedUXServicesContext = FC<{}>;

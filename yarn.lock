@@ -3117,6 +3117,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sharedux-components@link:bazel-bin/packages/kbn-sharedux-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sharedux-services@link:bazel-bin/packages/kbn-sharedux-services":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sharedux-storybook@link:bazel-bin/packages/kbn-sharedux-storybook":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sharedux-utility@link:bazel-bin/packages/kbn-sharedux-utility":
+  version "0.0.0"
+  uid ""
+
 "@kbn/spec-to-console@link:bazel-bin/packages/kbn-spec-to-console":
   version "0.0.0"
   uid ""
@@ -6083,6 +6099,22 @@
   uid ""
 
 "@types/kbn__server-route-repository@link:bazel-bin/packages/kbn-server-route-repository/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__sharedux-components@link:bazel-bin/packages/kbn-sharedux-components/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__sharedux-services@link:bazel-bin/packages/kbn-sharedux-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__sharedux-storybook@link:bazel-bin/packages/kbn-sharedux-storybook/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__sharedux-utility@link:bazel-bin/packages/kbn-sharedux-utility/npm_module_types":
   version "0.0.0"
   uid ""
 

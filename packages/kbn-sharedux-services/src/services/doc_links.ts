@@ -6,19 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
-
-/**
- * Creates the Shared UX plugin.
- */
-export function plugin() {
-  return new SharedUXPlugin();
+export interface SharedUXDocLinksService {
+  dataViewsDocsLink: string;
 }
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export {
-  ExitFullScreenButton,
-  LazyExitFullScreenButton,
-  NoDataViewsPage,
-  LazyNoDataViewsPage,
-} from '@kbn/sharedux-components';

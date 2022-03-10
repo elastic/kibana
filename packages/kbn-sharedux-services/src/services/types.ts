@@ -6,19 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
-
 /**
- * Creates the Shared UX plugin.
+ * A factory function for creating one or more services.
+ *
+ * The `S` generic determines the shape of the API being produced.
+ * The `Parameters` generic determines what parameters are expected to
+ * create the service.
  */
-export function plugin() {
-  return new SharedUXPlugin();
-}
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export {
-  ExitFullScreenButton,
-  LazyExitFullScreenButton,
-  NoDataViewsPage,
-  LazyNoDataViewsPage,
-} from '@kbn/sharedux-components';
+export type ServiceFactory<S, Parameters = void> = (params: Parameters) => S;

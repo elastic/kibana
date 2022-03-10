@@ -6,19 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
+import { addDecorator } from '@storybook/react';
+import { servicesDecorator } from '@kbn/sharedux-storybook';
 
-/**
- * Creates the Shared UX plugin.
- */
-export function plugin() {
-  return new SharedUXPlugin();
-}
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export {
-  ExitFullScreenButton,
-  LazyExitFullScreenButton,
-  NoDataViewsPage,
-  LazyNoDataViewsPage,
-} from '@kbn/sharedux-components';
+addDecorator(servicesDecorator);

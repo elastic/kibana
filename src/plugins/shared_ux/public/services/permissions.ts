@@ -6,6 +6,18 @@
  * Side Public License, v 1.
  */
 
-export interface SharedUXUserPermissionsService {
-  canCreateNewDataView: boolean;
-}
+import { SharedUXUserPermissionsService } from '@kbn/sharedux-services';
+import { KibanaPluginServiceFactory } from './types';
+import { SharedUXPluginStartDeps } from '../types';
+
+export type UserPermissionsServiceFactory = KibanaPluginServiceFactory<
+  SharedUXUserPermissionsService,
+  SharedUXPluginStartDeps
+>;
+
+/**
+ * A factory function for creating a Kibana-based implementation of `SharedUXPermissionsService`.
+ */
+export const userPermissionsServiceFactory: UserPermissionsServiceFactory = ({ startPlugins }) => ({
+  canCreateNewDataView: startPlugins.dataViewEditor.userPermissions.editDataView(),
+});
