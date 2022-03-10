@@ -23,8 +23,7 @@ You can create connectors in *Management > {stack-manage-app} > {rules-ui}*, as
 described in <<action-types>>. Alternatively, you can create them in
 *Management > {stack-manage-app} > Cases*:
 
-. Click *Edit external connection*. Alternatively, select a case then click
-*Add connector*.
+. Click *Edit external connection*.
 +
 [role="screenshot"]
 image::images/cases-connectors.png[]
