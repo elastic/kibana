@@ -310,10 +310,11 @@ export class AnomalyTimelineStateService {
     combineLatest([
       this._viewBySwimlaneFieldName$,
       this._swimLaneUrlState$,
+      this.getSwimLaneBucketInterval$(),
       this.timefilter.getTimeUpdate$().pipe(startWith(null)),
     ])
       .pipe(
-        map(([viewByFieldName, swimLaneUrlState]) => {
+        map(([viewByFieldName, swimLaneUrlState, swimLaneBucketInterval]) => {
           if (!swimLaneUrlState?.selectedType) {
             return;
           }
@@ -321,7 +322,7 @@ export class AnomalyTimelineStateService {
           let times: AnomalyExplorerSwimLaneUrlState['selectedTimes'] =
             swimLaneUrlState.selectedTimes ?? swimLaneUrlState.selectedTime!;
           if (typeof times === 'number') {
-            times = [times, times + this.getSwimLaneBucketInterval()!.asSeconds()];
+            times = [times, times + swimLaneBucketInterval!.asSeconds()];
           }
 
           let lanes = swimLaneUrlState.selectedLanes ?? swimLaneUrlState.selectedLane!;
@@ -684,7 +685,7 @@ export class AnomalyTimelineStateService {
   }
 
   public getSwimLaneBucketInterval$(): Observable<TimeBucketsInterval | null> {
-    return this._swimLaneBucketInterval$.asObservable();
+    return this._swimLaneBucketInterval$.pipe(skipWhile((v) => !v));
   }
 
   public getSwimLaneBucketInterval(): TimeBucketsInterval | null {
