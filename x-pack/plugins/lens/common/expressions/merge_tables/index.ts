@@ -51,7 +51,10 @@ export const mergeTables: ExpressionFunctionDefinition<
   fn(input, { layerIds, tables }, context) {
     const resultTables: Record<string, Datatable> = {};
 
-    context.inspectorAdapters?.tables?.reset();
+    if (context.inspectorAdapters?.tables) {
+      context.inspectorAdapters.tables.reset();
+      context.inspectorAdapters.tables.allowCsvExport = true;
+    }
 
     tables.forEach((table, index) => {
       resultTables[layerIds[index]] = table;

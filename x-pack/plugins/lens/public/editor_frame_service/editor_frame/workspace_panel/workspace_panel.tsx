@@ -497,8 +497,8 @@ export const VisualizationWrapper = ({
 
   const onData$ = useCallback(
     (data) => {
-      let tables: Record<string, Datatable> = {};
       if (data?.value?.data) {
+        let tables: Record<string, Datatable> = {};
         switch (data.value.data.type) {
           case 'datatable':
             const [layerId] = Object.keys(datasourceLayers);
@@ -508,9 +508,8 @@ export const VisualizationWrapper = ({
             tables = { ...data.value.data.tables };
             break;
         }
+        dispatchLens(onActiveDataChange(tables));
       }
-
-      dispatchLens(onActiveDataChange(tables));
     },
     [datasourceLayers, dispatchLens]
   );

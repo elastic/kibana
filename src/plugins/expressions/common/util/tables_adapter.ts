@@ -7,7 +7,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { Datatable } from '../expression_types/specs';
+import type { Datatable } from '../expression_types/specs';
 
 export class TablesAdapter extends EventEmitter {
   private _tables: { [key: string]: Datatable } = {};
