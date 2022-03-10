@@ -9,7 +9,6 @@ import { getException } from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
 
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../screens/alerts';
-import { RULE_STATUS } from '../../screens/create_new_rule';
 
 import { addExceptionFromFirstAlert, goToClosedAlerts, goToOpenedAlerts } from '../../tasks/alerts';
 import { createCustomRule } from '../../tasks/api_calls/rules';
