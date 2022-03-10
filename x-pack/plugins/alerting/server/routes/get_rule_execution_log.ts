@@ -20,7 +20,11 @@ const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('des
 
 const sortFieldSchema = schema.oneOf([
   schema.object({ timestamp: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ duration: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ execution_duration: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ total_search_duration: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ es_search_duration: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ schedule_delay: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ num_triggered_actions: schema.object({ order: sortOrderSchema }) }),
 ]);
 
 const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {

@@ -94,7 +94,11 @@ export interface IExecutionLogAggOptions {
 
 const ExecutionLogSortFields: Record<string, string> = {
   timestamp: 'ruleExecution>executeStartTime',
-  duration: 'ruleExecution>executionDuration',
+  execution_duration: 'ruleExecution>executionDuration',
+  total_search_duration: 'ruleExecution>totalSearchDuration',
+  es_search_duration: 'ruleExecution>esSearchDuration',
+  schedule_delay: 'ruleExecution>scheduleDelay',
+  num_triggered_actions: 'ruleExecution>numTriggeredActions',
 };
 
 export function getExecutionLogAggregation({

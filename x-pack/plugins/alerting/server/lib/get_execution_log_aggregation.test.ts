@@ -53,7 +53,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions]"`
     );
   });
 
@@ -66,7 +66,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions]"`
     );
   });
 
@@ -113,7 +113,7 @@ describe('getExecutionLogAggregation', () => {
         numExecutions: 5,
         page: 2,
         perPage: 10,
-        sort: [{ timestamp: { order: 'asc' } }, { duration: { order: 'desc' } }],
+        sort: [{ timestamp: { order: 'asc' } }, { execution_duration: { order: 'desc' } }],
       })
     ).toEqual({
       executionUuidCardinality: { cardinality: { field: 'kibana.alert.rule.execution.uuid' } },
