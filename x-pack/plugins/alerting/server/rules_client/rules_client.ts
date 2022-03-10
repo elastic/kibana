@@ -602,7 +602,7 @@ export class RulesClient {
             page: 1,
             per_page: 10000,
             start: parsedDateStart.toISOString(),
-            sort_order: 'desc',
+            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
             end: dateNow.toISOString(),
           },
           rule.legacyId !== null ? [rule.legacyId] : undefined
@@ -614,7 +614,7 @@ export class RulesClient {
             page: 1,
             per_page: numberOfExecutions ?? 60,
             filter: 'event.provider: alerting AND event.action:execute',
-            sort_order: 'desc',
+            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
             end: dateNow.toISOString(),
           },
           rule.legacyId !== null ? [rule.legacyId] : undefined
