@@ -86,7 +86,7 @@ export const getData = async (
   );
   const { body } = await esClient.search<undefined, ResponseAggregations>(request);
   if (body.aggregations) {
-    return handleResponse(body.aggregations, previousNodes);
+    return handleResponse(body.aggregations as unknown as ResponseAggregations, previousNodes);
   }
   return previousNodes;
 };
