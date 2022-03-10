@@ -244,7 +244,7 @@ export const dateHistogramOperation: OperationDefinition<
               'xpack.lens.indexPattern.dateHistogram.dropPartialBucketsHelp',
               {
                 defaultMessage:
-                  'Drop partial buckets is disabled as these can be computed only for time field bound to global time picker in the top right.',
+                  'Drop partial buckets is disabled as these can be computed only for a time field bound to global time picker in the top right.',
               }
             )}
             condition={!bindToGlobalTimePickerValue}
