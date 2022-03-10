@@ -25,7 +25,11 @@ import {
   NonCountMetricExpressionParams,
 } from '../../../../common/alerting/metrics';
 import { InfraSources } from '../../sources';
-import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
+import {
+  createMetricThresholdExecutor,
+  FIRED_ACTIONS,
+  NO_DATA_ACTIONS,
+} from './metric_threshold_executor';
 import { Evaluation } from './lib/evaluate_rule';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
@@ -357,37 +361,6 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceIdA).action.group).toBe('a');
       expect(mostRecentAction(instanceIdB).action.group).toBe('b');
     });
-    test('reports previous groups and the groupBy parameter in its state', async () => {
-      setEvaluationResults([
-        {
-          a: {
-            ...baseNonCountCriterion,
-            comparator: Comparator.GT,
-            threshold: [0.75],
-            metric: 'test.metric.1',
-            currentValue: 1.0,
-            timestamp: new Date().toISOString(),
-            shouldFire: true,
-            shouldWarn: false,
-            isNoData: false,
-          },
-          b: {
-            ...baseNonCountCriterion,
-            comparator: Comparator.GT,
-            threshold: [0.75],
-            metric: 'test.metric.1',
-            currentValue: 3,
-            timestamp: new Date().toISOString(),
-            shouldFire: true,
-            shouldWarn: false,
-            isNoData: false,
-          },
-        },
-      ]);
-      const stateResult = await execute(Comparator.GT, [0.75]);
-      expect(stateResult.groups).toEqual(expect.arrayContaining(['a', 'b']));
-      expect(stateResult.groupBy).toEqual(['something']);
-    });
     test('persists previous groups that go missing, until the groupBy param changes', async () => {
       setEvaluationResults([
         {
@@ -427,7 +400,7 @@ describe('The metric threshold alert type', () => {
         },
       ]);
       const stateResult1 = await execute(Comparator.GT, [0.75], ['something'], 'test.metric.2');
-      expect(stateResult1.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      expect(stateResult1.missingGroups).toEqual(expect.arrayContaining([]));
       setEvaluationResults([
         {
           a: {
@@ -472,7 +445,7 @@ describe('The metric threshold alert type', () => {
         'test.metric.1',
         stateResult1
       );
-      expect(stateResult2.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      expect(stateResult2.missingGroups).toEqual(expect.arrayContaining(['c']));
       setEvaluationResults([
         {
           a: {
@@ -506,7 +479,7 @@ describe('The metric threshold alert type', () => {
         'test.metric.1',
         stateResult2
       );
-      expect(stateResult3.groups).toEqual(expect.arrayContaining(['a', 'b']));
+      expect(stateResult3.missingGroups).toEqual(expect.arrayContaining([]));
     });
 
     const executeWithFilter = (
@@ -577,7 +550,7 @@ describe('The metric threshold alert type', () => {
         JSON.stringify({ query: 'q' }),
         'test.metric.2'
       );
-      expect(stateResult1.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      expect(stateResult1.missingGroups).toEqual(expect.arrayContaining([]));
       setEvaluationResults([
         {
           a: {
@@ -622,7 +595,7 @@ describe('The metric threshold alert type', () => {
         'test.metric.1',
         stateResult1
       );
-      expect(stateResult2.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      expect(stateResult2.missingGroups).toEqual(expect.arrayContaining(['c']));
       setEvaluationResults([
         {
           a: {
@@ -656,7 +629,7 @@ describe('The metric threshold alert type', () => {
         'test.metric.1',
         stateResult2
       );
-      expect(stateResult3.groups).toEqual(expect.arrayContaining(['a', 'b']));
+      expect(stateResult3.groups).toEqual(expect.arrayContaining([]));
     });
   });
 
@@ -1642,7 +1615,7 @@ expect.extend({
     };
   },
   toBeNoDataAction(action?: Action) {
-    const pass = action?.id === FIRED_ACTIONS.id && action?.action.alertState === 'NO DATA';
+    const pass = action?.id === NO_DATA_ACTIONS.id && action?.action.alertState === 'NO DATA';
     const message = () => `expected ${action} to be a NO DATA action`;
     return {
       message,
