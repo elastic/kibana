@@ -60,6 +60,23 @@ describe('basic context', () => {
     expectTemplate('    {{~!-- long-comment --}}      blah').toCompileTo('      blah');
   });
 
+  it('boolean', () => {
+    const string = '{{#goodbye}}GOODBYE {{/goodbye}}cruel {{world}}!';
+    expectTemplate(string)
+      .withInput({
+        goodbye: true,
+        world: 'world',
+      })
+      .toCompileTo('GOODBYE cruel world!');
+
+    expectTemplate(string)
+      .withInput({
+        goodbye: false,
+        world: 'world',
+      })
+      .toCompileTo('cruel world!');
+  });
+
   it('zeros', () => {
     expectTemplate('num1: {{num1}}, num2: {{num2}}')
       .withInput({
@@ -202,6 +219,18 @@ describe('basic context', () => {
     expectTemplate('{{person/name}}').withInput({ person: {} }).toCompileTo('');
   });
 
+  it('this keyword in paths', () => {
+    expectTemplate('{{#goodbyes}}{{this}}{{/goodbyes}}')
+      .withInput({ goodbyes: ['goodbye', 'Goodbye', 'GOODBYE'] })
+      .toCompileTo('goodbyeGoodbyeGOODBYE');
+
+    expectTemplate('{{#hellos}}{{this/text}}{{/hellos}}')
+      .withInput({
+        hellos: [{ text: 'hello' }, { text: 'Hello' }, { text: 'HELLO' }],
+      })
+      .toCompileTo('helloHelloHELLO');
+  });
+
   it('this keyword nested inside path', () => {
     expectTemplate('{{#hellos}}{{text/this/foo}}{{/hellos}}').toThrow(
       'Invalid path: text/this - 1:13'
@@ -214,9 +243,35 @@ describe('basic context', () => {
       .toCompileTo('bar');
   });
 
+  it('this keyword in helpers', () => {
+    const helpers = {
+      foo(value: any) {
+        return 'bar ' + value;
+      },
+    };
+
+    expectTemplate('{{#goodbyes}}{{foo this}}{{/goodbyes}}')
+      .withInput({ goodbyes: ['goodbye', 'Goodbye', 'GOODBYE'] })
+      .withHelpers(helpers)
+      .toCompileTo('bar goodbyebar Goodbyebar GOODBYE');
+
+    expectTemplate('{{#hellos}}{{foo this/text}}{{/hellos}}')
+      .withInput({
+        hellos: [{ text: 'hello' }, { text: 'Hello' }, { text: 'HELLO' }],
+      })
+      .withHelpers(helpers)
+      .toCompileTo('bar hellobar Hellobar HELLO');
+  });
+
   it('pass string literals', () => {
     expectTemplate('{{"foo"}}').toCompileTo('');
     expectTemplate('{{"foo"}}').withInput({ foo: 'bar' }).toCompileTo('bar');
+
+    expectTemplate('{{#"foo"}}{{.}}{{/"foo"}}')
+      .withInput({
+        foo: ['bar', 'baz'],
+      })
+      .toCompileTo('barbaz');
   });
 
   it('pass number literals', () => {

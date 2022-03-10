@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import Handlebars from '.';
 import { expectTemplate } from './__jest__/test_bench';
 
 describe('builtin helpers', () => {
@@ -32,6 +33,10 @@ describe('builtin helpers', () => {
       expectTemplate('{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!')
         .withInput(undefined)
         .toCompileTo('cruel !');
+    });
+
+    it('each on implicit context', () => {
+      expectTemplate('{{#each}}{{text}}! {{/each}}cruel world!').toThrow(Handlebars.Exception);
     });
   });
 
