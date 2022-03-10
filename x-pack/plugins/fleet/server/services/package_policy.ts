@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, partition } from 'lodash';
+import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
@@ -358,7 +358,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy> {
     const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
@@ -386,7 +386,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       assignStreamIdToInput(oldPackagePolicy.id, input)
     );
 
-    inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs);
+    inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
     let elasticsearch: PackagePolicy['elasticsearch'];
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
@@ -1119,21 +1119,25 @@ async function _compilePackageStream(
   return { ...stream };
 }
 
-function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: PackagePolicyInput[]) {
+function enforceFrozenInputs(
+  oldInputs: PackagePolicyInput[],
+  newInputs: PackagePolicyInput[],
+  force = false
+) {
   const resultInputs = [...newInputs];
 
   for (const input of resultInputs) {
     const oldInput = oldInputs.find((i) => i.type === input.type);
     if (oldInput?.keep_enabled) input.enabled = oldInput.enabled;
     if (input.vars && oldInput?.vars) {
-      input.vars = _enforceFrozenVars(oldInput.vars, input.vars);
+      input.vars = _enforceFrozenVars(oldInput.vars, input.vars, force);
     }
     if (input.streams && oldInput?.streams) {
       for (const stream of input.streams) {
         const oldStream = oldInput.streams.find((s) => s.id === stream.id);
         if (oldStream?.keep_enabled) stream.enabled = oldStream.enabled;
         if (stream.vars && oldStream?.vars) {
-          stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars);
+          stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars, force);
         }
       }
     }
@@ -1144,12 +1148,21 @@ function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: Package
 
 function _enforceFrozenVars(
   oldVars: Record<string, PackagePolicyConfigRecordEntry>,
-  newVars: Record<string, PackagePolicyConfigRecordEntry>
+  newVars: Record<string, PackagePolicyConfigRecordEntry>,
+  force = false
 ) {
   const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
   for (const [key, val] of Object.entries(newVars)) {
     if (oldVars[key]?.frozen) {
-      resultVars[key] = oldVars[key];
+      if (force) {
+        resultVars[key] = val;
+      } else if (!isEqual(oldVars[key].value, val.value) || oldVars[key].type !== val.type) {
+        throw new PackagePolicyValidationError(
+          `${key} is a frozen variable and cannot be modified`
+        );
+      } else {
+        resultVars[key] = oldVars[key];
+      }
     } else {
       resultVars[key] = val;
     }
@@ -1206,7 +1219,7 @@ export interface PackagePolicyServiceInterface {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy>;
 
