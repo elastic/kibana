@@ -11,7 +11,7 @@ import { FieldLabels, RECORDS_FIELD, ReportTypes } from '../constants';
 import { LOG_RATE as LOG_RATE_FIELD } from '../constants/field_names/infra_logs';
 import { LOG_RATE as LOG_RATE_LABEL } from '../constants/labels';
 
-export function getLogsKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getLogsKPIConfig(configProps: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.KPI,
     defaultSeriesType: 'bar',
