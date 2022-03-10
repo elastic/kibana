@@ -17,16 +17,53 @@ import {
   EuiPopoverFooter,
   EuiButtonIcon,
   EuiButtonEmpty,
+  prettyDuration,
+  ShortDate,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { css } from '@emotion/react';
 import { sortBy } from 'lodash';
-import { SavedQuery, SavedQueryService } from '../..';
+import { useKibana } from '../../../../kibana_react/public';
+import { SavedQuery, SavedQueryService, IDataPluginServices } from '../..';
 import { SavedQueryAttributes } from '../../query';
 
-function itemTitle(attributes: SavedQueryAttributes) {
+interface Props {
+  showSaveQuery?: boolean;
+  loadedSavedQuery?: SavedQuery;
+  savedQueryService: SavedQueryService;
+  onLoad: (savedQuery: SavedQuery) => void;
+  onClearSavedQuery: () => void;
+  onClose: () => void;
+  hasFiltersOrQuery: boolean;
+}
+
+interface SelectableProps {
+  key?: string;
+  label: string;
+  value?: string;
+  checked?: 'on' | 'off' | undefined;
+}
+
+interface DurationRange {
+  end: ShortDate;
+  label?: string;
+  start: ShortDate;
+}
+
+const commonDurationRanges: DurationRange[] = [
+  { start: 'now/d', end: 'now/d', label: 'Today' },
+  { start: 'now/w', end: 'now/w', label: 'This week' },
+  { start: 'now/M', end: 'now/M', label: 'This month' },
+  { start: 'now/y', end: 'now/y', label: 'This year' },
+  { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
+  { start: 'now/w', end: 'now', label: 'Week to date' },
+  { start: 'now/M', end: 'now', label: 'Month to date' },
+  { start: 'now/y', end: 'now', label: 'Year to date' },
+];
+
+function itemTitle(attributes: SavedQueryAttributes, format: string) {
   let label = attributes.title;
 
   if (attributes.description) {
@@ -34,7 +71,12 @@ function itemTitle(attributes: SavedQueryAttributes) {
   }
 
   if (attributes.timefilter) {
-    label += `; ${attributes.timefilter.from} -> ${attributes.timefilter.to}`;
+    label += `; ${prettyDuration(
+      attributes.timefilter?.from,
+      attributes.timefilter?.to,
+      commonDurationRanges,
+      format
+    )}`;
   }
 
   return label;
@@ -61,22 +103,6 @@ function itemLabel(attributes: SavedQueryAttributes) {
 
   return label;
 }
-interface Props {
-  showSaveQuery?: boolean;
-  loadedSavedQuery?: SavedQuery;
-  savedQueryService: SavedQueryService;
-  onLoad: (savedQuery: SavedQuery) => void;
-  onClearSavedQuery: () => void;
-  onClose: () => void;
-  hasFiltersOrQuery: boolean;
-}
-
-interface SelectableProps {
-  key?: string;
-  label: string;
-  value?: string;
-  checked?: 'on' | 'off' | undefined;
-}
 
 export function SavedQueryManagementList({
   showSaveQuery,
@@ -87,9 +113,12 @@ export function SavedQueryManagementList({
   onClose,
   hasFiltersOrQuery,
 }: Props) {
+  const kibana = useKibana<IDataPluginServices>();
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [selectedSavedQuery, setSelectedSavedQuery] = useState(null as SavedQuery | null);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
+  const { uiSettings } = kibana.services;
+  const format = uiSettings.get('dateFormat');
 
   useEffect(() => {
     const fetchCountAndSavedQueries = async () => {
@@ -168,7 +197,7 @@ export function SavedQueryManagementList({
       return {
         key: savedQuery.id,
         label: itemLabel(savedQuery.attributes),
-        title: itemTitle(savedQuery.attributes),
+        title: itemTitle(savedQuery.attributes, format),
         value: savedQuery.id,
         checked:
           (loadedSavedQuery && savedQuery.id === loadedSavedQuery.id) ||
