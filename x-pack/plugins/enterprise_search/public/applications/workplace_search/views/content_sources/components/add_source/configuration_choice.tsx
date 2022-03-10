@@ -118,7 +118,14 @@ export const ConfigurationChoice: React.FC<ConfigurationIntroProps> = ({
                   defaultMessage: 'Custom connector',
                 }
               )}
-              betaBadgeProps={{ label: 'Beta' }}
+              betaBadgeProps={{
+                label: i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.betaLabel',
+                  {
+                    defaultMessage: 'Beta',
+                  }
+                ),
+              }}
             >
               <EuiFlexGroup
                 justifyContent="center"

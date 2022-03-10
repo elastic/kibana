@@ -82,7 +82,18 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
             >
               <EuiCard
                 title=""
-                betaBadgeProps={isBeta ? { label: 'Beta' } : undefined}
+                betaBadgeProps={
+                  isBeta
+                    ? {
+                        label: i18n.translate(
+                          'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSourcesList.betaBadge',
+                          {
+                            defaultMessage: 'Beta',
+                          }
+                        ),
+                      }
+                    : undefined
+                }
                 paddingSize="none"
                 hasBorder
               >
