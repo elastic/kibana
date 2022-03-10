@@ -87,20 +87,6 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(200);
       expect(res.body.items.length).to.be(30);
-
-      const packageInfoRes = await supertest
-        .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
-
-      delete packageInfoRes.body.item.latestVersion;
-      delete packageInfoRes.body.item.savedObject.attributes.install_started_at;
-      delete packageInfoRes.body.item.savedObject.version;
-      delete packageInfoRes.body.item.savedObject.updated_at;
-      delete packageInfoRes.body.item.savedObject.coreMigrationVersion;
-      delete packageInfoRes.body.item.savedObject.migrationVersion;
-
-      expectSnapshot(packageInfoRes.body.item).toMatch();
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {
