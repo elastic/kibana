@@ -7,11 +7,11 @@
 
 import { Moment } from 'moment';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
+import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import {
   InventoryItemType,
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
-import { InventoryMetricConditions } from '../types';
 import { isRate } from './is_rate';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 
