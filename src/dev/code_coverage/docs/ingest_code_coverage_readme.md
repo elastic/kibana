@@ -1,18 +1,13 @@
 
 # Massage and Ingest Code Coverage Json Summary and Send to ES 
 
-## Currently, we have 4 indexes 
+## Currently, we have 2 indexes 
 
 ### 2 for the Code Coverage Job
-https://kibana-ci.elastic.co/job/elastic+kibana+code-coverage/
+https://buildkite.com/elastic/kibana-code-coverage-main
 1. kibana_code_coverage
 2. kibana_total_code_coverage
 
-### 2 for the R & D Job
-https://kibana-ci.elastic.co/job/elastic+kibana+qa-research/
-1. qa_research_code_coverage
-2. qa_research_total_code_coverage
- 
 ## How it works 
 
 It starts with buildkite
