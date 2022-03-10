@@ -15744,7 +15744,6 @@
     "xpack.ml.management.jobsList.noPermissionToAccessLabel": "Accès refusé",
     "xpack.ml.management.jobsList.syncFlyoutButton": "Synchroniser les objets enregistrés",
     "xpack.ml.management.jobsListTitle": "Tâches de Machine Learning",
-    "xpack.ml.management.jobsSpacesList.objectNoun": "tâche",
     "xpack.ml.management.jobsSpacesList.updateSpaces.error": "Erreur lors de la mise à jour de {id}",
     "xpack.ml.management.syncSavedObjectsFlyout.closeButton": "Fermer",
     "xpack.ml.management.syncSavedObjectsFlyout.datafeedsAdded.description": "Si des objets enregistrés n'ont pas d'ID de flux de données pour les tâches de détection des anomalies, l'ID sera ajouté.",

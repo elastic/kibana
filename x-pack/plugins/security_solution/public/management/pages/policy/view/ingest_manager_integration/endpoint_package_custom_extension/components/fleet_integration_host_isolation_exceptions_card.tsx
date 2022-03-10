@@ -142,7 +142,7 @@ export const FleetIntegrationHostIsolationExceptionsCard = memo<{
             <h5>
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostIsolationExceptions.fleetIntegration.title"
-                defaultMessage="Host isolation exceptions applications"
+                defaultMessage="Host isolation exceptions"
               />
             </h5>
           </EuiText>
