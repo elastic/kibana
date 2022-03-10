@@ -14,19 +14,8 @@ export interface PngScreenshotOptions extends ScreenshotOptions {
   layout: PngLayoutParams;
 }
 
-export interface PngScreenshotResult extends Omit<ScreenshotResult, 'results'> {
-  result: {
-    data: Buffer[];
-  };
-}
+export type PngScreenshotResult = ScreenshotResult;
 
 export async function toPng(screenshotResult: ScreenshotResult): Promise<PngScreenshotResult> {
-  return {
-    ...screenshotResult,
-    result: {
-      data: screenshotResult.results.flatMap((result) =>
-        result.screenshots.map((screenshot) => screenshot.data)
-      ),
-    },
-  };
+  return screenshotResult as PngScreenshotResult;
 }

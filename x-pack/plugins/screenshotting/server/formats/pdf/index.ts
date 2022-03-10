@@ -34,6 +34,8 @@ export interface PdfScreenshotResult extends Omit<ScreenshotResult, 'results'> {
   metadata: { pageCount: number };
   result: {
     data: Buffer;
+    errors: Error[];
+    renderErrors: string[];
   };
 }
 
@@ -70,6 +72,12 @@ export function toPdf({ title, logo, logger }: ScreenshotsResultsToPdfArgs) {
         metadata: { pageCount },
         result: {
           data: buffer,
+          errors: screenshotResult.results.flatMap((result) =>
+            result.error ? [result.error] : []
+          ),
+          renderErrors: screenshotResult.results.flatMap((result) =>
+            result.renderErrors ? [...result.renderErrors] : []
+          ),
         },
       };
     } catch (e) {

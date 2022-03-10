@@ -29,6 +29,7 @@ import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './
 import { Semaphore } from './semaphore';
 
 export type { UrlOrUrlWithContext } from './observable';
+export type { ScreenshotObservableResult } from './observable';
 
 export interface ScreenshotOptions extends ScreenshotObservableOptions {
   layout: LayoutParams;
