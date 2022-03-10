@@ -28,6 +28,8 @@ import type {
   PdfScreenshotResult,
   PngScreenshotResult,
   ScreenshottingStart,
+  PngScreenshotOptions as BasePngScreenshotOptions,
+  PdfScreenshotOptions as BasePdfScreenshotOptions,
   UrlOrUrlWithContext,
 } from '../../screenshotting/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
@@ -362,7 +364,7 @@ export class ReportingCore {
     return startDeps.esClient;
   }
 
-  private getScreenshotConfigOptions(options: PdfScreenshotOptions | PngScreenshotOptions) {
+  private mapToScreenshotConfigOptions(options: PdfScreenshotOptions | PngScreenshotOptions) {
     const config = this.getConfig();
     return {
       timeouts: {
@@ -388,7 +390,7 @@ export class ReportingCore {
       switchMap(({ screenshotting }) => {
         return screenshotting.getScreenshotsPdf({
           ...options,
-          ...this.getScreenshotConfigOptions(options),
+          ...(this.mapToScreenshotConfigOptions(options) as BasePdfScreenshotOptions),
         });
       })
     );
@@ -399,7 +401,7 @@ export class ReportingCore {
       switchMap(({ screenshotting }) => {
         return screenshotting.getScreenshotsPng({
           ...options,
-          ...this.getScreenshotConfigOptions(options),
+          ...(this.mapToScreenshotConfigOptions(options) as BasePngScreenshotOptions),
         });
       })
     );

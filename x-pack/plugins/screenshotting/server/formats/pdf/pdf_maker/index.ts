@@ -9,7 +9,7 @@ import type { Logger } from 'src/core/server';
 import { PdfMaker } from './pdfmaker';
 import type { Layout } from '../../../layouts';
 import { getTracker } from './tracker';
-import { ScreenshotResult } from '../../..';
+import { ScreenshotResult } from '../../../screenshots';
 
 interface PngsToPdfArgs {
   results: ScreenshotResult['results'];
