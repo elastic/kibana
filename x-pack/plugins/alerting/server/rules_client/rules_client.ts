@@ -184,6 +184,11 @@ export type BulkUpdateAction =
       action: 'add' | 'delete' | 'set';
       field: 'params.index';
       value: string[];
+    }
+  | {
+      action: 'add' | 'set';
+      field: 'actions';
+      value: NormalizedAlertAction[];
     };
 
 export interface BulkUpdateOptions {
@@ -193,7 +198,6 @@ export interface BulkUpdateOptions {
   data: {
     name?: string;
     schedule?: IntervalSchedule;
-    actions?: NormalizedAlertAction[];
     params?: RuleTypeParams;
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
@@ -1226,13 +1230,24 @@ export class RulesClient {
               apiKeysToInvalidate.push(rule.attributes.apiKey);
             }
 
-            // apply actions to rule attributes
-            const attributes = actions.reduce(
-              (acc, action) => this.applyBulkUpdateActionToRule(action, acc),
-              rule.attributes
-            );
+            const ruleType = this.ruleTypeRegistry.get(rule.attributes.alertTypeId);
 
-            const ruleType = this.ruleTypeRegistry.get(attributes.alertTypeId);
+            let attributes = rule.attributes;
+            let ruleActions = {
+              actions: this.injectReferencesIntoActions(
+                rule.id,
+                rule.attributes.actions,
+                rule.references || []
+              ),
+            };
+            for (const action of actions) {
+              if (action.field === 'actions') {
+                await this.validateActions(ruleType, action.value);
+                ruleActions = this.applyBulkUpdateAction(action, ruleActions);
+              }
+
+              attributes = this.applyBulkUpdateAction(action, attributes);
+            }
 
             // validate rule params
             const validatedAlertTypeParams = validateRuleTypeParams(
@@ -1250,23 +1265,13 @@ export class RulesClient {
               }
             }
 
-            // validate actions
-            if (data.actions) {
-              await this.validateActions(ruleType, data.actions);
-            }
-
             const {
-              actions: ruleActions,
+              actions: rawAlertActions,
               references,
               params: updatedParams,
             } = await this.extractReferences(
               ruleType,
-              data.actions ??
-                this.injectReferencesIntoActions(
-                  rule.id,
-                  rule.attributes.actions,
-                  rule.references || []
-                ),
+              ruleActions.actions,
               validatedAlertTypeParams
             );
 
@@ -1292,7 +1297,7 @@ export class RulesClient {
               ...data,
               ...apiKeyAttributes,
               params: updatedParams as RawRule['params'],
-              actions: ruleActions,
+              actions: rawAlertActions,
               notifyWhen,
               updatedBy: username,
               updatedAt: new Date().toISOString(),
@@ -2284,7 +2289,7 @@ export class RulesClient {
     return alertAttributes;
   }
 
-  private applyBulkUpdateActionToRule(action: BulkUpdateAction, rule: RawRule) {
+  private applyBulkUpdateAction<R extends object>(action: BulkUpdateAction, rule: R) {
     const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
       Array.from(new Set([...arr, ...items]));
 
@@ -2300,21 +2305,18 @@ export class RulesClient {
 
       case 'add':
         if (get(rule, action.field)) {
-          set(
-            rule,
-            action.field,
-            addItemsToArray(get(rule, action.field) as typeof action.value, action.value)
-          );
+          // typescript complains on set value typings
+          if (action.field === 'actions') {
+            set(rule, action.field, addItemsToArray(get(rule, action.field), action.value));
+          } else {
+            set(rule, action.field, addItemsToArray(get(rule, action.field), action.value));
+          }
         }
         break;
 
       case 'delete':
         if (get(rule, action.field)) {
-          set(
-            rule,
-            action.field,
-            deleteItemsFromArray(get(rule, action.field) as typeof action.value, action.value)
-          );
+          set(rule, action.field, deleteItemsFromArray(get(rule, action.field), action.value));
         }
         break;
     }
