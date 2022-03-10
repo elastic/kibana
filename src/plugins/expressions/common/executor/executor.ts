@@ -256,12 +256,13 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ) => ExpressionAstFunction | ExpressionAstExpression
   ): ExpressionAstExpression {
     let additionalFunctions = 0;
+    const functions = this.container.get().functions;
     return (
       ast.chain.reduce<ExpressionAstExpression>(
         (newAst: ExpressionAstExpression, funcAst: ExpressionAstFunction, index: number) => {
           const realIndex = index + additionalFunctions;
           const { function: fnName, arguments: fnArgs } = funcAst;
-          const fn = getByAlias(this.getFunctions(), fnName);
+          const fn = getByAlias(functions, fnName);
           if (!fn) {
             return newAst;
           }
@@ -338,7 +339,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   public getAllMigrations() {
     const uniqueVersions = new Set(
-      Object.values(this.getFunctions())
+      Object.values(this.container.get().functions)
         .map((fn) => Object.keys(fn.migrations))
         .flat(1)
     );
