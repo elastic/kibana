@@ -138,7 +138,7 @@ export function ExploratoryView({
                 </EuiFlexGroup>
 
                 <EuiResizablePanel
-                  initialSize={40}
+                  initialSize={50}
                   minSize={'30%'}
                   mode={'collapsible'}
                   id="chartPanel"
@@ -154,7 +154,7 @@ export function ExploratoryView({
                 </EuiResizablePanel>
 
                 <EuiResizablePanel
-                  initialSize={60}
+                  initialSize={50}
                   minSize="10%"
                   mode={'main'}
                   id="seriesPanel"
@@ -184,7 +184,7 @@ export function ExploratoryView({
   );
 }
 const LensWrapper = styled.div<{ height: string }>`
-  min-height: 400px;
+  min-height: 500px;
   height: ${(props) => props.height};
 
   &&& > div {

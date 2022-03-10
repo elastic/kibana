@@ -137,6 +137,7 @@ export enum DataTypes {
   UX = 'ux',
   MOBILE = 'mobile',
   METRICS = 'infra_metrics',
+  APM = 'apm',
 }
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';

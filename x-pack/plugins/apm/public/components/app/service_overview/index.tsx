@@ -32,6 +32,7 @@ import { AggregatedTransactionsBadge } from '../../shared/aggregated_transaction
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { replace } from '../../shared/links/url_helpers';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -57,6 +58,10 @@ export function ServiceOverview() {
       transactionType: transactionTypeFromUrl,
     },
   } = useApmParams('/services/{serviceName}/overview');
+
+  const { observability } = useApmPluginContext();
+
+  const ExploratoryViewComponent = observability.ExploratoryViewEmbeddable;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -105,6 +110,43 @@ export function ServiceOverview() {
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
               <LatencyChart height={latencyChartHeight} kuery={kuery} />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel hasBorder={true} style={{ height: 300 }}>
+              <ExploratoryViewComponent
+                attributes={[
+                  {
+                    name: 'Request latency',
+                    time: {
+                      from: 'now-15m',
+                      to: 'now',
+                    },
+                    reportDefinitions: {
+                      'service.name': ['apm-server'],
+                    },
+                    operationType: 'average',
+                    dataType: 'apm',
+                    selectedMetricField: 'transaction.duration.us',
+                  },
+                  {
+                    name: 'Request latency previous',
+                    time: {
+                      from: 'now-30m',
+                      to: 'now-15m',
+                    },
+                    reportDefinitions: {
+                      'service.name': ['apm-server'],
+                    },
+                    operationType: 'average',
+                    dataType: 'apm',
+                    selectedMetricField: 'transaction.duration.us',
+                  },
+                ]}
+                reportType="kpi-over-time"
+                title={'Request latency'}
+                withActions={['save', 'explore']}
+              />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>

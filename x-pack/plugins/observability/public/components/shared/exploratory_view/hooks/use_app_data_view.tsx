@@ -73,6 +73,10 @@ export function DataViewContextProvider({ children }: ProviderProps) {
               indices = resultMetrics?.indices;
               break;
             case 'apm':
+              const resultApmData = await getDataHandler('apm')!.hasData();
+              hasDataT = Boolean(resultApmData?.hasData);
+              indices = getApmDataViewTitle(resultApmData?.indices);
+              break;
             case 'mobile':
               const resultApm = await getDataHandler('apm')!.hasData();
               hasDataT = Boolean(resultApm?.hasData);

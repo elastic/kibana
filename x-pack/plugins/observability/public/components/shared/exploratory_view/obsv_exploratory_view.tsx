@@ -30,6 +30,7 @@ import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config
 import { getMobileDeviceDistributionConfig } from './configurations/mobile/device_distribution_config';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getMetricsKPIConfig } from './configurations/infra_metrics/kpi_over_time_config';
+import { getAPMKPITrendsLensConfig } from './configurations/apm/kpi_over_time_config';
 
 export const DataTypesLabels = {
   [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
@@ -53,6 +54,10 @@ export const DataTypesLabels = {
       defaultMessage: 'Mobile experience',
     }
   ),
+
+  [DataTypes.APM]: i18n.translate('xpack.observability.overview.exploratoryView.apmLabel', {
+    defaultMessage: 'APM',
+  }),
 };
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   {
@@ -70,6 +75,10 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   {
     id: DataTypes.MOBILE,
     label: DataTypesLabels[DataTypes.MOBILE],
+  },
+  {
+    id: DataTypes.APM,
+    label: DataTypesLabels[DataTypes.APM],
   },
 ];
 
@@ -92,6 +101,7 @@ export const obsvReportConfigMap = {
     getMobileDeviceDistributionConfig,
   ],
   [DataTypes.METRICS]: [getMetricsKPIConfig],
+  [DataTypes.APM]: [getAPMKPITrendsLensConfig],
 };
 
 export function ObservabilityExploratoryView() {
