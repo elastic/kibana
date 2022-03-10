@@ -148,7 +148,7 @@ export const SpaceListInternal = ({
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;
-  //         <span data-test-subj="spacesListClickTarget">
+
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">

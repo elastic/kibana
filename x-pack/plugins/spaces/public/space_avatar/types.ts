@@ -34,9 +34,18 @@ export interface SpaceAvatarProps {
    */
   isDisabled?: boolean;
 
+  /**
+   * Callback to be invoked when the avatar is clicked.
+   */
   onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
 
+  /**
+   * Callback to be invoked when the avatar is clicked via keyboard.
+   */
   onKeyPress?: (event: React.KeyboardEvent<HTMLDivElement>) => void;
 
+  /**
+   * Style props for the avatar.
+   */
   style?: React.CSSProperties;
 }
