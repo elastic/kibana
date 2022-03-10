@@ -7,11 +7,13 @@
 
 import React, { Component, Fragment } from 'react';
 import {
-  EuiButton,
-  EuiEmptyPrompt,
+  EuiButtonEmpty,
   EuiListGroup,
   EuiPanel,
   EuiSpacer,
+  EuiText,
+  EuiTextAlign,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -119,24 +121,37 @@ export class CustomIconsPanel extends Component<Props, State> {
 
   private _renderCustomIconsList = () => {
     const addIconButton = (
-      <EuiButton
-        fill
-        onClick={() => this._handleNewIcon()}
-        data-test-subj="mapsCustomIconPanel-add"
-      >
-        <FormattedMessage
-          id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
-          defaultMessage="Add custom icon"
-        />
-      </EuiButton>
+      <Fragment>
+        <EuiTextAlign textAlign="center">
+          <EuiButtonEmpty
+            size="xs"
+            iconType="plusInCircleFilled"
+            onClick={() => this._handleNewIcon()}
+            data-test-subj="mapsCustomIconPanel-add"
+          >
+            <FormattedMessage
+              id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
+              defaultMessage="Add"
+            />
+          </EuiButtonEmpty>
+        </EuiTextAlign>
+      </Fragment>
     );
     if (!this.props.settings.customIcons.length) {
       return (
-        <EuiEmptyPrompt
-          title={<h2>This map does not have any custom icons yet</h2>}
-          titleSize={'xs'}
-          actions={[addIconButton]}
-        />
+        <Fragment>
+          <EuiText size="s" textAlign="center">
+            <p>
+              <EuiTextColor color="subdued">
+                <FormattedMessage
+                  id="mapSettingsPanel.customIcons.emptyState.description"
+                  defaultMessage="Add a custom icon that can be used in layers in this map."
+                />
+              </EuiTextColor>
+            </p>
+          </EuiText>
+          {addIconButton}
+        </Fragment>
       );
     }
 
@@ -165,7 +180,6 @@ export class CustomIconsPanel extends Component<Props, State> {
     return (
       <Fragment>
         <EuiListGroup listItems={customIconsList} />
-        <EuiSpacer size="m" />
         {addIconButton}
       </Fragment>
     );
@@ -179,13 +193,12 @@ export class CustomIconsPanel extends Component<Props, State> {
             <h5>
               <FormattedMessage
                 id="xpack.maps.mapSettingsPanel.customIconsTitle"
-                defaultMessage="Custom Icons"
+                defaultMessage="Custom icons"
               />
             </h5>
           </EuiTitle>
           <EuiSpacer size="m" />
           {this._renderCustomIconsList()}
-          <EuiSpacer size="m" />
         </EuiPanel>
         {this._showModal()}
       </Fragment>
