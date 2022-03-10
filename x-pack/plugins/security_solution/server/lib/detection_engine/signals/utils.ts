@@ -1027,11 +1027,11 @@ export const getField = (event: SimpleHit, field: string): SearchTypes | undefin
       const params = get(event._source, ALERT_RULE_PARAMETERS);
       return get(params, parts[parts.length - 1]);
     }
-    return get(event._source, mappedField) as SearchTypes;
+    return get(event._source, mappedField) as SearchTypes | undefined;
   } else if (isWrappedSignalHit(event)) {
     const mappedField = invert(racFieldMappings)[field] ?? field.replace('kibana.alert', 'signal');
-    return get(event._source, mappedField) as SearchTypes;
+    return get(event._source, mappedField) as SearchTypes | undefined;
   } else if (isWrappedEventHit(event)) {
-    return get(event._source, field) as SearchTypes;
+    return get(event._source, field) as SearchTypes | undefined;
   }
 };

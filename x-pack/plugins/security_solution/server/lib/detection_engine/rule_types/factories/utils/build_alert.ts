@@ -43,7 +43,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
-import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
+import { BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
 import {
   getField,
   getValidDateFromDoc,
@@ -80,7 +80,10 @@ import {
 } from '../../../schemas/rule_converters';
 import { transformTags } from '../../../routes/rules/utils';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
+import {
+  AncestorLatest,
+  BaseFieldsLatest,
+} from '../../../../../../common/detection_engine/schemas/alerts';
 
 export const generateAlertId = (alert: BaseFieldsLatest) => {
   return createHash('sha256')
@@ -98,16 +101,16 @@ export const generateAlertId = (alert: BaseFieldsLatest) => {
  * alert's ancestors array.
  * @param doc The parent event
  */
-export const buildParent = (doc: SimpleHit): Ancestor => {
+export const buildParent = (doc: SimpleHit): AncestorLatest => {
   const isSignal: boolean = isWrappedSignalHit(doc) || isWrappedDetectionAlert(doc);
-  const parent: Ancestor = {
+  const parent: AncestorLatest = {
     id: doc._id,
     type: isSignal ? 'signal' : 'event',
     index: doc._index,
-    depth: isSignal ? getField(doc, ALERT_DEPTH) ?? 1 : 0,
+    depth: isSignal ? (getField(doc, ALERT_DEPTH) as number | undefined) ?? 1 : 0,
   };
   if (isSignal) {
-    parent.rule = getField(doc, ALERT_RULE_UUID);
+    parent.rule = getField(doc, ALERT_RULE_UUID) as string | undefined;
   }
   return parent;
 };
@@ -117,9 +120,10 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
  * creating an array of N+1 ancestors.
  * @param doc The parent event for which to extend the ancestry.
  */
-export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
+export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
   const newAncestor = buildParent(doc);
-  const existingAncestors: Ancestor[] = getField(doc, ALERT_ANCESTORS) ?? [];
+  const existingAncestors: AncestorLatest[] =
+    (getField(doc, ALERT_ANCESTORS) as AncestorLatest[] | undefined) ?? [];
   return [...existingAncestors, newAncestor];
 };
 
@@ -143,7 +147,10 @@ export const buildAlert = (
 ): BaseFieldsLatest => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
-  const ancestors = docs.reduce((acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)), []);
+  const ancestors = docs.reduce(
+    (acc: AncestorLatest[], doc) => acc.concat(buildAncestors(doc)),
+    []
+  );
 
   const { output_index: outputIndex, ...commonRuleParams } = commonParamsCamelToSnake(
     completeRule.ruleParams
