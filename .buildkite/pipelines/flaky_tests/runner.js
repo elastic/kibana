@@ -7,6 +7,9 @@
  */
 
 const { execSync } = require('child_process');
+const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>} */ (
+  require('./groups.json').groups
+);
 
 const concurrency = 25;
 const defaultCount = concurrency * 2;
@@ -184,10 +187,13 @@ for (const testSuite of testSuites) {
         concurrency_method: 'eager',
       });
     case 'cypress':
-      const cypressSuites = ['not_used', 'security_solution', 'osquery_cypress', 'fleet_cypress'];
+      const CYPRESS_SUITE = CI_GROUP;
+      const label =
+        groups.find((group) => group.key.includes(CYPRESS_SUITE))?.name || 'Unknown Cypress Suite';
+
       steps.push({
-        command: `.buildkite/scripts/steps/functional/${cypressSuites[CI_GROUP]}.sh`,
-        label: 'Default Cypress',
+        command: `.buildkite/scripts/steps/functional/${[CYPRESS_SUITE]}.sh`,
+        label,
         agents: { queue: 'ci-group-6' },
         depends_on: 'build',
         parallelism: RUN_COUNT,

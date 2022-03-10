@@ -14,9 +14,16 @@
       "name": "OSS Accessibility"
     },
     {
-      "key": "xpack/cypress",
-      "name": "Default Cypress",
-      "ciGroups": 3
+      "key": "xpack/cypress/security_solution",
+      "name": "Security Solution - Cypress"
+    },
+    {
+      "key": "xpack/cypress/osquery_cypress",
+      "name": "Osquery - Cypress"
+    },
+    {
+      "key": "xpack/cypress/fleet_cypress",
+      "name": "Fleet - Cypress"
     },
     {
       "key": "xpack/cigroup",
