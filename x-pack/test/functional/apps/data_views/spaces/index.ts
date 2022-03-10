@@ -43,9 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // click manage spaces on first entry
       // first avatar is in header, so we want the second one
-      await (await testSubjects.findAll('space-avatar-default', 10000))[1].click();
-
-      await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 5));
+      await (await testSubjects.findAll('space-avatar-default', 1000))[1].click();
 
       // select custom space
       await testSubjects.click('sts-space-selector-row-custom_space');
