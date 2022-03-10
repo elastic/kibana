@@ -23,3 +23,4 @@ export type {
   PngScreenshotOptions,
   PngScreenshotResult,
 } from './formats';
+export type { UrlOrUrlWithContext } from './screenshots';

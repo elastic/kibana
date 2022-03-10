@@ -7,8 +7,8 @@
 
 import { groupBy } from 'lodash';
 import type { Logger } from 'src/core/server';
-import { ScreenshotOptions, ScreenshotResult } from '../..';
 import type { LayoutParams, LayoutTypes } from '../../../common';
+import { ScreenshotResult, ScreenshotOptions } from '../../screenshots';
 import { pngsToPdf } from './pdf_maker';
 
 type LayoutID =

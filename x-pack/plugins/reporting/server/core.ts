@@ -28,6 +28,7 @@ import type {
   PdfScreenshotResult,
   PngScreenshotResult,
   ScreenshottingStart,
+  UrlOrUrlWithContext,
 } from '../../screenshotting/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
@@ -378,7 +379,7 @@ export class ReportingCore {
 
       urls: options.urls.map((url) =>
         typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-      ),
+      ) as UrlOrUrlWithContext[],
     };
   }
 

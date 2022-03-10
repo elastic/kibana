@@ -28,6 +28,8 @@ import { ScreenshotObservableHandler } from './observable';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 import { Semaphore } from './semaphore';
 
+export type { UrlOrUrlWithContext } from './observable';
+
 export interface ScreenshotOptions extends ScreenshotObservableOptions {
   layout: LayoutParams;
 

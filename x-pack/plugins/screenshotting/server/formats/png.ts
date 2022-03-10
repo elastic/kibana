@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScreenshotOptions, ScreenshotResult } from '..';
+import { ScreenshotResult, ScreenshotOptions } from '../screenshots';
 import type { LayoutParams, LayoutTypes } from '../../common';
 
 export type PngLayoutParams = LayoutParams<typeof LayoutTypes.PRESERVE_LAYOUT>;
