@@ -19,6 +19,6 @@ export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
 export {
   ExitFullScreenButton,
   LazyExitFullScreenButton,
-  NoDataViewsPage,
-  LazyNoDataViewsPage,
+  NoDataViews,
+  LazyNoDataViews,
 } from '@kbn/sharedux-components';
