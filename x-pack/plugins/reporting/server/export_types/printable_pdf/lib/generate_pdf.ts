@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Logger } from 'kibana/server';
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { PdfScreenshotOptions } from '../../../types';
 import type { PdfMetrics } from '../../../../common/types';
-import { getTracker } from './tracker';
+import { getTracker } from '../../common/pdf_tracker';
 
 interface PdfResult {
   buffer: Uint8Array | null;
@@ -32,10 +31,9 @@ export function generatePdfObservable(
         tracker.setCpuUsage(metrics.cpu);
         tracker.setMemoryUsage(metrics.memory);
       }
-      tracker.endScreenshots();
-      tracker.startSetup();
     }),
     mergeMap(async ({ metrics, result, metadata }) => {
+      tracker.endScreenshots();
       const warnings: string[] = [];
       if (result.errors) {
         warnings.push(...result.errors.map((error) => error.message));
