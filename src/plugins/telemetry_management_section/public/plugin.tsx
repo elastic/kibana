@@ -25,7 +25,7 @@ export interface TelemetryManagementSectionPluginDepsSetup {
 
 export class TelemetryManagementSectionPlugin {
   public setup(
-    core: CoreSetup<{ docLinks: DocLinksStart }>,
+    core: CoreSetup,
     {
       advancedSettings,
       telemetry: { telemetryService },

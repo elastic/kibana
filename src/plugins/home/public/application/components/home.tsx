@@ -29,7 +29,6 @@ export interface HomeProps {
   localStorage: Storage;
   urlBasePath: string;
   hasUserDataView: () => Promise<boolean>;
-  onSkip?: () => void;
 }
 
 interface State {
