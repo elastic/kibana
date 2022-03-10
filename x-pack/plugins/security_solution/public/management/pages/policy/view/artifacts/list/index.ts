@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-import { PolicySettingsAction } from './policy_settings_action';
-
-export type PolicyDetailsAction = PolicySettingsAction;
+export { PolicyArtifactsList } from './policy_artifacts_list';
+export { POLICY_ARTIFACT_LIST_LABELS } from './translations';

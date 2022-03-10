@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-import { PolicySettingsAction } from './policy_settings_action';
-
-export type PolicyDetailsAction = PolicySettingsAction;
+export { PolicyArtifactsDeleteModal } from './policy_artifacts_delete_modal';
+export { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
