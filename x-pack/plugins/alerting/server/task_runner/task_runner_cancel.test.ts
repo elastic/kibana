@@ -35,6 +35,7 @@ import { IEventLogger } from '../../../event_log/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -96,6 +97,7 @@ describe('Task Runner Cancel', () => {
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
+  const inMemoryMetrics = inMemoryMetricsMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -214,7 +216,8 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     const promise = taskRunner.run();
@@ -388,10 +391,15 @@ describe('Task Runner Cancel', () => {
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
-    const taskRunner = new TaskRunner(ruleType, mockedTaskInstance, {
-      ...taskRunnerFactoryInitializerParams,
-      cancelAlertsOnRuleTimeout: false,
-    });
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      {
+        ...taskRunnerFactoryInitializerParams,
+        cancelAlertsOnRuleTimeout: false,
+      },
+      inMemoryMetrics
+    );
 
     const promise = taskRunner.run();
     await Promise.resolve();
@@ -428,7 +436,8 @@ describe('Task Runner Cancel', () => {
         cancelAlertsOnRuleTimeout: false,
       },
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     const promise = taskRunner.run();
@@ -458,7 +467,8 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     const promise = taskRunner.run();

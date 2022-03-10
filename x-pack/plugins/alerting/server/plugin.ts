@@ -207,6 +207,7 @@ export class AlertingPlugin {
       licenseState: this.licenseState,
       licensing: plugins.licensing,
       minimumScheduleInterval: this.config.minimumScheduleInterval,
+      inMemoryMetrics: this.inMemoryMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 

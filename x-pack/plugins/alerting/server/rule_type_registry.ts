@@ -30,6 +30,7 @@ import {
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
+import { InMemoryMetrics } from './monitoring';
 
 export interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
@@ -37,6 +38,7 @@ export interface ConstructorOptions {
   licenseState: ILicenseState;
   licensing: LicensingPluginSetup;
   minimumScheduleInterval: string;
+  inMemoryMetrics: InMemoryMetrics;
 }
 
 export interface RegistryRuleType
@@ -132,6 +134,7 @@ export class RuleTypeRegistry {
   private readonly licenseState: ILicenseState;
   private readonly minimumScheduleInterval: string;
   private readonly licensing: LicensingPluginSetup;
+  private readonly inMemoryMetrics: InMemoryMetrics;
 
   constructor({
     taskManager,
@@ -139,12 +142,14 @@ export class RuleTypeRegistry {
     licenseState,
     licensing,
     minimumScheduleInterval,
+    inMemoryMetrics,
   }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
     this.licenseState = licenseState;
     this.licensing = licensing;
     this.minimumScheduleInterval = minimumScheduleInterval;
+    this.inMemoryMetrics = inMemoryMetrics;
   }
 
   public has(id: string) {
@@ -266,7 +271,7 @@ export class RuleTypeRegistry {
             InstanceContext,
             ActionGroupIds,
             RecoveryActionGroupId | RecoveredActionGroupId
-          >(normalizedRuleType, context),
+          >(normalizedRuleType, context, this.inMemoryMetrics),
       },
     });
     // No need to notify usage on basic alert types
