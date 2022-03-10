@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useContext, useCallback, useRef } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
@@ -66,9 +66,12 @@ import {
   selectDatasourceStates,
   selectActiveDatasourceId,
   selectSearchSessionId,
+  selectAutoApplyEnabled,
+  selectTriggerApplyChanges,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField } from '../../../utils';
+import { setChangesApplied } from '../../../state_management/lens_slice';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -88,6 +91,7 @@ interface WorkspaceState {
     fixAction?: DatasourceFixAction<unknown>;
   }>;
   expandError: boolean;
+  expressionToRender: string | null | undefined;
 }
 
 const dropProps = {
@@ -136,12 +140,21 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const visualization = useLensSelector(selectVisualization);
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+  const triggerApply = useLensSelector(selectTriggerApplyChanges);
 
-  const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
+    expressionToRender: undefined,
   });
+
+  // const expressionToRender = useRef<null | undefined | string>();
+  const initialRenderComplete = useRef<boolean>();
+
+  const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
+
+  const { datasourceLayers } = framePublicAPI;
 
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
@@ -186,7 +199,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
-  const expression = useMemo(() => {
+  const _expression = useMemo(() => {
     if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
       try {
         const ast = buildExpression({
@@ -238,10 +251,32 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization.activeId,
   ]);
 
-  const expressionExists = Boolean(expression);
   useEffect(() => {
-    dispatchLens(setSaveable(expressionExists));
-  }, [expressionExists, dispatchLens]);
+    dispatchLens(setSaveable(Boolean(_expression)));
+  }, [_expression, dispatchLens]);
+
+  useEffect(() => {
+    if (!autoApplyEnabled) {
+      dispatchLens(setChangesApplied(_expression === localState.expressionToRender));
+    }
+  });
+
+  useEffect(() => {
+    if (shouldApplyExpression) {
+      setLocalState((s) => ({ ...s, expressionToRender: _expression }));
+    }
+  }, [_expression, shouldApplyExpression]);
+
+  const expressionExists = Boolean(localState.expressionToRender);
+  useEffect(() => {
+    // null signals an empty workspace which should count as an initial render
+    if (
+      (expressionExists || localState.expressionToRender === null) &&
+      !initialRenderComplete.current
+    ) {
+      initialRenderComplete.current = true;
+    }
+  }, [expressionExists, localState.expressionToRender]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -291,7 +326,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
       trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
-      switchToSuggestion(dispatchLens, suggestionForDraggedField, true);
+      switchToSuggestion(dispatchLens, suggestionForDraggedField, { clearStagedPreview: true });
     }
   }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 
@@ -343,12 +378,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderVisualization = () => {
-    if (expression === null) {
+    if (localState.expressionToRender === null) {
       return renderEmptyWorkspace();
     }
     return (
       <VisualizationWrapper
-        expression={expression}
+        expression={localState.expressionToRender}
         framePublicAPI={framePublicAPI}
         lensInspector={lensInspector}
         onEvent={onEvent}
@@ -360,8 +395,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       />
     );
   };
-
-  const element = expression !== null ? renderVisualization() : renderEmptyWorkspace();
 
   const dragDropContext = useContext(DragContext);
 
@@ -392,7 +425,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         order={dropProps.order}
       >
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {element}
+          {renderVisualization()}
         </EuiPageContentBody>
       </DragDrop>
     );

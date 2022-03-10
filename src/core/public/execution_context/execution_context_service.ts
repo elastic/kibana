@@ -72,13 +72,10 @@ export class ExecutionContextService
     this.contract = {
       context$: this.context$.asObservable(),
       clear: () => {
-        this.context$.next({});
+        this.context$.next(this.getDefaultContext());
       },
       set: (c: KibanaExecutionContext) => {
-        const newVal = {
-          ...this.context$.value,
-          ...c,
-        };
+        const newVal = this.mergeContext(c);
         if (!isEqual(newVal, this.context$.value)) {
           this.context$.next(newVal);
         }
@@ -123,10 +120,16 @@ export class ExecutionContextService
     return omitBy(context, isUndefined);
   }
 
-  private mergeContext(context: KibanaExecutionContext = {}): KibanaExecutionContext {
+  private getDefaultContext() {
     return {
       name: this.appId,
       url: window.location.pathname,
+    };
+  }
+
+  private mergeContext(context: KibanaExecutionContext = {}): KibanaExecutionContext {
+    return {
+      ...this.getDefaultContext(),
       ...this.context$.value,
       ...context,
     };
