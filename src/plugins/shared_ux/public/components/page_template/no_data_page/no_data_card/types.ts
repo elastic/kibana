@@ -25,7 +25,7 @@ export type NoDataCardProps = Partial<Omit<EuiCardProps, 'layout'>> & {
   /**
    * Description for the card. If not provided, the default will be used.
    */
-  description?: string;
+  description?: string | ReactNode;
 };
 
 export type ElasticAgentCardProps = NoDataCardProps & {

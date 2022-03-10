@@ -8,7 +8,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCard, EuiTextColor } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
 import { ElasticAgentCardProps } from './types';
 import { NoDataCard } from './no_data_card';
 import ElasticAgentLogo from './assets/elastic_agent_card.svg';
@@ -52,8 +52,7 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
 }) => {
   if (!canAccessFleet) {
     return (
-      <EuiCard
-        paddingSize="l"
+      <NoDataCard
         image={ElasticAgentLogo}
         title={<EuiTextColor color="default">{noPermissionTitle}</EuiTextColor>}
         description={<EuiTextColor color="default">{noPermissionDescription}</EuiTextColor>}

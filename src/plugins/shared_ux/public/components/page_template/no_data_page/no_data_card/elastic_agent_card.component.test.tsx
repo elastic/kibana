@@ -9,6 +9,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { ElasticAgentCardComponent } from './elastic_agent_card.component';
+import { NoDataCard } from './no_data_card';
 
 describe('ElasticAgentCardComponent', () => {
   test('renders', () => {
@@ -16,9 +17,16 @@ describe('ElasticAgentCardComponent', () => {
     expect(component).toMatchSnapshot();
   });
 
+  test('renders with canAccessFleet false', () => {
+    const component = shallow(<ElasticAgentCardComponent canAccessFleet={false} />);
+    expect(component.find(NoDataCard).props().isDisabled).toBe(true);
+    expect(component).toMatchSnapshot();
+  });
+
   describe('props', () => {
     test('recommended', () => {
       const component = shallow(<ElasticAgentCardComponent recommended canAccessFleet={true} />);
+      expect(component.find(NoDataCard).props().recommended).toBe(true);
       expect(component).toMatchSnapshot();
     });
 
@@ -26,20 +34,15 @@ describe('ElasticAgentCardComponent', () => {
       const component = shallow(
         <ElasticAgentCardComponent button="Button" canAccessFleet={true} />
       );
+      expect(component.find(NoDataCard).props().button).toBe('Button');
       expect(component).toMatchSnapshot();
     });
 
     test('href', () => {
       const component = shallow(
-        <ElasticAgentCardComponent button="Button" canAccessFleet={true} href={'some path'} />
+        <ElasticAgentCardComponent canAccessFleet={true} href={'some path'} />
       );
-      expect(component).toMatchSnapshot();
-    });
-
-    test('category', () => {
-      const component = shallow(
-        <ElasticAgentCardComponent category="custom" canAccessFleet={true} />
-      );
+      expect(component.find(NoDataCard).props().href).toBe('some path');
       expect(component).toMatchSnapshot();
     });
   });
