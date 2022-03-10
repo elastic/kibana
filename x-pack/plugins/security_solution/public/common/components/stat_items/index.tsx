@@ -18,7 +18,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -223,7 +223,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     areaChartLensAttributes,
     setQuerySkip,
   }) => {
-    console.log(`statItem ${id} loading: ${loading}`);
     const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
@@ -247,7 +246,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       (status: boolean) => {
         setToggleStatus(status);
         // toggle on = skipQuery false
-        console.log('toggleQuery');
         setQuerySkip(!status);
       },
       [setQuerySkip, setToggleStatus]

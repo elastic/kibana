@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiLoadingSpinner, EuiFlexGroup } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 

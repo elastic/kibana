@@ -175,5 +175,13 @@ export const useNetworkKpiUniquePrivateIps = ({
     };
   }, [networkKpiUniquePrivateIpsRequest, networkKpiUniquePrivateIpsSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   return [loading, networkKpiUniquePrivateIpsResponse];
 };

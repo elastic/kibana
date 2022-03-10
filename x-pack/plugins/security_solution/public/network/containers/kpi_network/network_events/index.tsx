@@ -163,5 +163,13 @@ export const useNetworkKpiNetworkEvents = ({
     };
   }, [networkKpiNetworkEventsRequest, networkKpiNetworkEventsSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   return [loading, networkKpiNetworkEventsResponse];
 };

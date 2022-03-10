@@ -11,6 +11,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
+  EuiLoadingSpinner,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
@@ -22,7 +23,13 @@ import {
   BUTTON_CLASS as INPECT_BUTTON_CLASS,
 } from '../../../../common/components/inspect';
 
-import { HostsKpiBaseComponentLoader } from '../common';
+const HostsKpiBaseComponentLoader: React.FC = () => (
+  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="hostsKpiLoader">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="xl" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 import * as i18n from './translations';
 
 import { useInspectQuery } from '../../../../common/hooks/use_inspect_query';

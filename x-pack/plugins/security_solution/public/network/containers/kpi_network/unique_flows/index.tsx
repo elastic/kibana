@@ -155,5 +155,13 @@ export const useNetworkKpiUniqueFlows = ({
     };
   }, [networkKpiUniqueFlowsRequest, networkKpiUniqueFlowsSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   return [loading, networkKpiUniqueFlowsResponse];
 };
