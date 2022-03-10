@@ -10,7 +10,7 @@ import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { IconType, EuiTableSortingType } from '@elastic/eui';
+import { IconType } from '@elastic/eui';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
