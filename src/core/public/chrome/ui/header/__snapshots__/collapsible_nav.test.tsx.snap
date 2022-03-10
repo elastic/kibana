@@ -404,6 +404,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         role={null}
       >
         <button
+          aria-label="Close this dialog"
           data-test-subj="euiFlyoutCloseButton"
           onClick={[Function]}
           type="button"

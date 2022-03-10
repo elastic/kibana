@@ -580,7 +580,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFullscreenSelector.fullscreenButton': i18n.translate(
       'core.euiFullscreenSelector.fullscreenButton',
       {
-        defaultMessage: 'Fullscreen',
+        defaultMessage: 'Enter fullscreen',
       }
     ),
     'euiFullscreenSelector.fullscreenButtonActive': i18n.translate(
