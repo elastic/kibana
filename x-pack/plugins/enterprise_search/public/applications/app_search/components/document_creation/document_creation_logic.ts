@@ -45,6 +45,9 @@ interface DocumentCreationActions {
   setActiveJsonTab(activeJsonTab: ActiveJsonTab): { activeJsonTab: ActiveJsonTab };
   setTextInput(textInput: string): { textInput: string };
   setFileInput(fileInput: File | null): { fileInput: File | null };
+  setAvailableElasticsearchIndices(availableElasticsearchIndices: object[]): {
+    availableElasticsearchIndices: object[];
+  };
   setWarnings(warnings: string[]): { warnings: string[] };
   setErrors(errors: string[] | string): { errors: string[] };
   setSummary(summary: DocumentCreationSummary): { summary: DocumentCreationSummary };
@@ -55,6 +58,7 @@ interface DocumentCreationActions {
   onElasticsearchIndicesLoaded(args: { availableElasticsearchIndices: object[] }): {
     availableElasticsearchIndices: object[];
   };
+  submitElasticsearchIndex(): void;
 }
 
 export const DocumentCreationLogic = kea<
@@ -69,6 +73,9 @@ export const DocumentCreationLogic = kea<
     setActiveJsonTab: (activeJsonTab) => ({ activeJsonTab }),
     setTextInput: (textInput) => ({ textInput }),
     setFileInput: (fileInput) => ({ fileInput }),
+    setAvailableElasticsearchIndices: (availableElasticsearchIndices) => ({
+      availableElasticsearchIndices,
+    }),
     setWarnings: (warnings) => ({ warnings }),
     setErrors: (errors) => ({ errors }),
     setSummary: (summary) => ({ summary }),
@@ -79,6 +86,7 @@ export const DocumentCreationLogic = kea<
     onElasticsearchIndicesLoaded: ({ availableElasticsearchIndices }) => ({
       availableElasticsearchIndices,
     }),
+    submitElasticsearchIndex: () => null,
   }),
   reducers: () => ({
     isDocumentCreationOpen: [
@@ -130,6 +138,7 @@ export const DocumentCreationLogic = kea<
       {
         onSubmitFile: () => true,
         onSubmitJson: () => true,
+        submitElasticsearchIndex: () => true,
         setErrors: () => false,
         setSummary: () => false,
         setActiveJsonTab: () => false,
@@ -163,6 +172,8 @@ export const DocumentCreationLogic = kea<
       [],
       {
         onElasticsearchIndicesLoaded: (_, { availableElasticsearchIndices }) =>
+          availableElasticsearchIndices,
+        setAvailableElasticsearchIndices: (_, { availableElasticsearchIndices }) =>
           availableElasticsearchIndices,
       },
     ],
@@ -305,5 +316,29 @@ export const DocumentCreationLogic = kea<
       await sleep;
       actions.onElasticsearchIndicesLoaded({ availableElasticsearchIndices: selectableOptions });
     },
+    submitElasticsearchIndex: async () => {
+      const sleep = new Promise((resolve) =>
+        setTimeout(() => {
+          resolve('');
+        }, 2000)
+      );
+      await sleep;
+      const summary: DocumentCreationSummary = {
+        errors: [],
+        validDocuments: { total: 123123, examples: [] },
+        invalidDocuments: { total: 0, examples: [] },
+        newSchemaFields: [],
+      };
+      actions.setSummary(summary);
+      actions.setCreationStep(DocumentCreationStep.ShowSummary);
+    },
+  }),
+  selectors: () => ({
+    isElasticsearchIndexSelected: [
+      (state) => [state.availableElasticsearchIndices],
+      (indices) => {
+        return !!indices.find((indice) => indice.checked === 'on');
+      },
+    ],
   }),
 });
