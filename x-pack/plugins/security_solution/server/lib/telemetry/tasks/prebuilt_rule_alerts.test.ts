@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { createTelemetryDetectionRuleAlertsTaskConfig } from './detection_rule_alerts';
+import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_alerts';
 import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
 
 describe('security telemetry - detection rule alerts task test', () => {
@@ -23,7 +23,7 @@ describe('security telemetry - detection rule alerts task test', () => {
     };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const mockTelemetryReceiver = createMockTelemetryReceiver();
-    const telemetryDetectionRuleAlertsTaskConfig = createTelemetryDetectionRuleAlertsTaskConfig(1);
+    const telemetryDetectionRuleAlertsTaskConfig = createTelemetryPrebuiltRuleAlertsTaskConfig(1);
 
     await telemetryDetectionRuleAlertsTaskConfig.runTask(
       'test-id',

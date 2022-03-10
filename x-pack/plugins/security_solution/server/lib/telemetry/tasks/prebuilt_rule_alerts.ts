@@ -12,10 +12,12 @@ import type { ESClusterInfo, ESLicense } from '../types';
 import { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
 import { batchTelemetryRecords } from '../helpers';
+import { TelemetryEvent } from '../types';
+import { copyAllowlistedFields, prebuiltRuleAllowlistFields } from '../filterlists/index';
 
-export function createTelemetryDetectionRuleAlertsTaskConfig(maxTelemetryBatch: number) {
+export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
   return {
-    type: 'security:telemetry-detection-rule-alerts',
+    type: 'security:telemetry-prebuilt-rule-alerts',
     title: 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry',
     interval: '1m',
     timeout: '10m',
@@ -42,26 +44,33 @@ export function createTelemetryDetectionRuleAlertsTaskConfig(maxTelemetryBatch: 
             ? licenseInfoPromise.value
             : ({} as ESLicense | undefined);
 
-        // Prebuilt Alerts Telemetry: Detection Rules
-        logger.debug(
-          `Cluster: ${clusterInfo.cluster_uuid} / ${clusterInfo.cluster_name} / License Info: ${licenseInfo?.uid}`
-        );
-
         const telemetryEvents = await receiver.fetchPrebuiltRuleAlerts();
         if (telemetryEvents.length === 0) {
           logger.debug('no prebuilt rule alerts retrieved');
           return 0;
         }
 
-        // TODO:@pjhampton - run telemetry events though new filterlist
+        const processedAlerts = telemetryEvents.map(
+          (event: TelemetryEvent): TelemetryEvent =>
+            copyAllowlistedFields(prebuiltRuleAllowlistFields, event)
+        );
 
-        logger.debug(`sending ${telemetryEvents.length} elastic prebuilt alerts`);
-        const batches = batchTelemetryRecords(telemetryEvents, maxTelemetryBatch);
+        const enrichedAlerts = processedAlerts.map(
+          (event: TelemetryEvent): TelemetryEvent => ({
+            ...event,
+            licence_id: licenseInfo?.uid,
+            cluster_uuid: clusterInfo?.cluster_uuid,
+            cluster_name: clusterInfo?.cluster_name,
+          })
+        );
+
+        logger.debug(`sending ${enrichedAlerts.length} elastic prebuilt alerts`);
+        const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
         }
 
-        return telemetryEvents.length;
+        return enrichedAlerts.length;
       } catch (err) {
         logger.warn('could not complete prebuilt alerts telemetry task');
         return 0;

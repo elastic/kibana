@@ -307,7 +307,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           endpoint_metadata: {
             terms: {
               field: 'agent.id',
-              size: this.max_records,
+              size: this.maxRecords,
             },
             aggs: {
               latest_metadata: {
@@ -604,7 +604,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       await this.esClient.closePointInTime({ id: pitId });
     } catch (error) {
       // Don't fail due to a bad point in time closure. We have seen failures in e2e tests during nominal operations.
-      this.logger.warn(
+      this.logger.debug(
         `Error trying to close point in time: "${pitId}", it will expire within "${keepAlive}". Error is: "${error}"`
       );
     }
