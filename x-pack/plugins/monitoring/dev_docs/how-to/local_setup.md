@@ -71,8 +71,10 @@ docker run --name filebeat \
 
 # Complete docker setup
 
-We also maintain an internal docker-compose setup for running a full stack with monitoring enabled for all components. See https://github.com/elastic/observability-dev/tree/main/tools/docker-testing-cluster for more details.
+We also maintain an internal docker-compose setup for running a full stack with monitoring enabled for all components.
 
-# Running components from source
+See (internal) https://github.com/elastic/observability-dev/tree/main/tools/docker-testing-cluster for more details.
 
-WIP porting from https://github.com/elastic/observability-dev/blob/main/docs/monitoring/monitoring-simulation-notes.md
+# Running more stack components from source
+
+See (internal) https://github.com/elastic/observability-dev/blob/main/docs/monitoring/monitoring-simulation-notes.md for details.
