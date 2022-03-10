@@ -20,11 +20,9 @@ import { ConfigType, createConfig } from './config';
 import { Screenshots } from './screenshots';
 import { getChromiumPackage } from './utils';
 import {
-  PngLayoutParams,
   PngScreenshotOptions,
   PngScreenshotResult,
   PdfScreenshotOptions,
-  PdfLayoutParams,
   PdfScreenshotResult,
   toPng,
   toPdf,
