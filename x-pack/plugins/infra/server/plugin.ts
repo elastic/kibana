@@ -155,7 +155,7 @@ export class InfraServerPlugin
       }),
       logEntries: new InfraLogEntriesDomain(new InfraKibanaLogEntriesAdapter(framework), {
         framework,
-        sources,
+        getStartServices: () => core.getStartServices(),
       }),
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
     };

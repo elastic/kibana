@@ -7,7 +7,6 @@
 
 import { Logger, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import type { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
-import { LogIndexReference as LogSourceLogIndexReference } from '../../../common/log_sources';
 import {
   defaultLogViewAttributes,
   LogIndexReference,
@@ -18,7 +17,8 @@ import {
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import type { InfraSource, IInfraSources } from '../../lib/sources';
+import { LogIndexReference as SourceConfigurationLogIndexReference } from '../../../common/source_configuration/source_configuration';
+import type { IInfraSources, InfraSource } from '../../lib/sources';
 import {
   extractLogViewSavedObjectReferences,
   logViewSavedObjectName,
@@ -157,7 +157,7 @@ export const getAttributesFromSourceConfiguration = ({
 });
 
 const getLogIndicesFromSourceConfigurationLogIndices = (
-  logIndices: LogSourceLogIndexReference
+  logIndices: SourceConfigurationLogIndexReference
 ): LogIndexReference =>
   logIndices.type === 'index_pattern'
     ? {
