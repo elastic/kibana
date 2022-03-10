@@ -152,15 +152,11 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   public getFunctions(namespace?: string): Record<string, ExpressionFunction> {
-    if (namespace) {
-      const fns = Object.entries(this.container.get().functions);
-      const filtered = fns.filter(
-        ([key, value]) => !value.namespace || value.namespace === namespace
-      );
-      return Object.fromEntries(filtered);
-    } else {
-      return { ...this.container.get().functions };
-    }
+    const fns = Object.entries(this.container.get().functions);
+    const filtered = fns.filter(
+      ([key, value]) => !value.namespace || value.namespace === namespace
+    );
+    return Object.fromEntries(filtered);
   }
 
   public registerType(
