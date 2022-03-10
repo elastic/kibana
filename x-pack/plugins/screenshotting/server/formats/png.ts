@@ -14,7 +14,7 @@ export interface PngScreenshotOptions extends ScreenshotOptions {
   layout: PngLayoutParams;
 }
 
-export type PngScreenshotResult = ScreenshotResult;
+export type PngScreenshotResult = Omit<ScreenshotResult, 'layout'>;
 
 export async function toPng(screenshotResult: ScreenshotResult): Promise<PngScreenshotResult> {
   return screenshotResult as PngScreenshotResult;

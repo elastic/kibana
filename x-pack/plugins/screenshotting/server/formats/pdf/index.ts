@@ -30,7 +30,7 @@ export interface PdfScreenshotOptions extends ScreenshotOptions {
   layout: PdfLayoutParams;
 }
 
-export interface PdfScreenshotResult extends Omit<ScreenshotResult, 'results'> {
+export interface PdfScreenshotResult extends Omit<ScreenshotResult, 'results' | 'layout'> {
   metadata: { pageCount: number };
   result: {
     data: Buffer;
