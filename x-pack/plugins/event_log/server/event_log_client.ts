@@ -29,7 +29,7 @@ const optionalDateFieldSchema = schema.maybe(
   })
 );
 
-const sortFieldSchema = schema.object({
+const sortSchema = schema.object({
   sort_field: schema.oneOf([
     schema.literal('@timestamp'),
     schema.literal('event.start'),
@@ -42,16 +42,14 @@ const sortFieldSchema = schema.object({
   sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
 });
 
-const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
-  defaultValue: [{ sort_field: '@timestamp', sort_order: 'asc' }],
-});
-
 export const queryOptionsSchema = schema.object({
   per_page: schema.number({ defaultValue: 10, min: 0 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
   start: optionalDateFieldSchema,
   end: optionalDateFieldSchema,
-  sort: sortFieldsSchema,
+  sort: schema.arrayOf(sortSchema, {
+    defaultValue: [{ sort_field: '@timestamp', sort_order: 'asc' }],
+  }),
   filter: schema.maybe(schema.string()),
 });
 
