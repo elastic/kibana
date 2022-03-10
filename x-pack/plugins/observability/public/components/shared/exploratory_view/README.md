@@ -23,15 +23,17 @@ In most cases, there will be a 1-1 relation between apps and data types.
 
 Once we have index pattern string for each data type, a respective `dataView` is created. If there is an existing dataView for an index pattern, we will fetch and reuse it.
 
-After the dataView is created we also set field formats to promote human-readibility. For example, we set format for monitor duration field, which is monitor.duration.us, from microseconds to seconds for browser monitors.
+After the dataView is created we also set field formats to promote human-readability. For example, we set format for monitor duration field, which is monitor.duration.us, from microseconds to seconds for browser monitors.
 
 ### Visualization Configuration
 
-Each data type may have one or more visualization configuration. The data type to visualization configuration can be found in [`exploratory_view/obs_exploratory_view`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability/public/components/shared/exploratory_view/obsv_exploratory_view.tsx#L86)
+Each of data type may have one or more visualization configuration. The data type to visualization configuration can be found in [`exploratory_view/obs_exploratory_view`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability/public/components/shared/exploratory_view/obsv_exploratory_view.tsx#L86)
 
-Each visualizaiton configuration is mapped to a single report type.
+Each visualization configuration is mapped to a single report type.
 
-Visualization configurations are used to define what the UI we display for each report type and data type combination in the series builder. Visualization configuration define UI options and display, including available metrics, available filters, available breakdown options, definitons for human-readable labels, and more. The configuration also defines any custom base filters, which usually get pushed to a query, but are not displayed on the UI. You can also set more custom options on the configuration like colors which get used while rendering the chart.
+Visualization configurations are used to define what the UI we display for each report type and data type combination in the series builder. 
+Visualization configuration define UI options and display, including available `metrics`, available `filters`, available `breakdown` options, definitions for human-readable `labels`, and more.
+The configuration also defines any custom base filters, which usually get pushed to a query, but are not displayed on the UI. You can also set more custom options on the configuration like colors which get used while rendering the chart.
 
 Visualization configuration can be found at [`exploratory_view/configurations`](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability/public/components/shared/exploratory_view/configurations), where each data type typically has a folder that holds one or more visualization configurations. 
 
