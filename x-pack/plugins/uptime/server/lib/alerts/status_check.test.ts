@@ -243,6 +243,7 @@ describe('status check alert', () => {
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
             "reason": "First from harrisburg failed 234 times in the last 15 mins. Alert when > 5.",
+            "viewInAppUrl": "/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D"
           },
         ]
       `);
@@ -313,6 +314,7 @@ describe('status check alert', () => {
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
             "reason": "First from harrisburg failed 234 times in the last 15m. Alert when > 5.",
+            "viewInAppUrl": "/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D"
           },
         ]
       `);
