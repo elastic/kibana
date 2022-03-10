@@ -34,14 +34,11 @@ describe('From alert', () => {
 
   beforeEach(() => {
     cleanKibana();
+    esArchiverLoad('auditbeat_for_exceptions');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createCustomRule({ ...getNewRule(), index: ['exceptions-*'] }, 'rule_testing');
     reload();
     goToRuleDetails();
-
-    cy.get(RULE_STATUS).should('have.text', '—');
-
-    esArchiverLoad('auditbeat_for_exceptions');
     enablesRule();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
