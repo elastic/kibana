@@ -100,28 +100,32 @@ export function createUsageServices({ getService }: FtrProviderContext) {
       );
     },
 
-    expectRecentPdfAppStats(stats: UsageStats, app: keyof AvailableTotal['app'], count: number) {
-      expect(stats.reporting.last_7_days.printable_pdf.app![app]).to.be(count);
+    expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
+      expect(
+        stats.reporting.last_7_days.printable_pdf.app![app as keyof AvailableTotal['app']]
+      ).to.be(count);
     },
 
-    expectAllTimePdfAppStats(stats: UsageStats, app: keyof AvailableTotal['app'], count: number) {
-      expect(stats.reporting.printable_pdf.app![app]).to.be(count);
+    expectAllTimePdfAppStats(stats: UsageStats, app: string, count: number) {
+      expect(stats.reporting.printable_pdf.app![app as keyof AvailableTotal['app']]).to.be(count);
     },
 
-    expectRecentPdfLayoutStats(stats: UsageStats, layout: keyof LayoutCounts, count: number) {
-      expect(stats.reporting.last_7_days.printable_pdf.layout![layout]).to.be(count);
+    expectRecentPdfLayoutStats(stats: UsageStats, layout: string, count: number) {
+      expect(stats.reporting.last_7_days.printable_pdf.layout![layout as keyof LayoutCounts]).to.be(
+        count
+      );
     },
 
-    expectAllTimePdfLayoutStats(stats: UsageStats, layout: keyof LayoutCounts, count: number) {
-      expect(stats.reporting.printable_pdf.layout![layout]).to.be(count);
+    expectAllTimePdfLayoutStats(stats: UsageStats, layout: string, count: number) {
+      expect(stats.reporting.printable_pdf.layout![layout as keyof LayoutCounts]).to.be(count);
     },
 
-    expectRecentJobTypeTotalStats(stats: UsageStats, jobType: BaseJobTypes, count: number) {
-      expect(stats.reporting.last_7_days[jobType].total).to.be(count);
+    expectRecentJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
+      expect(stats.reporting.last_7_days[jobType as BaseJobTypes].total).to.be(count);
     },
 
-    expectAllTimeJobTypeTotalStats(stats: UsageStats, jobType: BaseJobTypes, count: number) {
-      expect(stats.reporting[jobType].total).to.be(count);
+    expectAllTimeJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
+      expect(stats.reporting[jobType as BaseJobTypes].total).to.be(count);
     },
 
     getCompletedReportCount(stats: UsageStats) {
