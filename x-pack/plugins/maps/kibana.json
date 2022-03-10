@@ -22,7 +22,8 @@
     "mapsEms",
     "savedObjects",
     "share",
-    "presentationUtil"
+    "presentationUtil",
+    "sharedUX"
   ],
   "optionalPlugins": [
     "customIntegrations",
@@ -40,7 +41,6 @@
   ],
   "requiredBundles": [
     "kibanaReact",
-    "sharedUX",
     "kibanaUtils",
     "usageCollection",
     "home"

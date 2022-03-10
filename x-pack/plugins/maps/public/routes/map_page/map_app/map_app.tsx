@@ -23,6 +23,7 @@ import {
   getSpacesApi,
   getTimeFilter,
   getToasts,
+  getSharedUXPluginContext,
 } from '../../../kibana_services';
 import {
   AppStateManager,
@@ -478,21 +479,25 @@ export class MapApp extends React.Component<Props, State> {
       return null;
     }
 
+    const ServicesContext = getSharedUXPluginContext();
+
     return (
-      <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
-        {this._renderTopNav()}
-        <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
-        <div id="react-maps-root">
-          {this._renderLegacyUrlConflict()}
-          <MapContainer
-            addFilters={this._addFilter}
-            title={this.props.savedMap.getAttributes().title}
-            description={this.props.savedMap.getAttributes().description}
-            waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this.props.savedMap.getStore())}
-            isSharable
-          />
+      <ServicesContext>
+        <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
+          {this._renderTopNav()}
+          <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
+          <div id="react-maps-root">
+            {this._renderLegacyUrlConflict()}
+            <MapContainer
+              addFilters={this._addFilter}
+              title={this.props.savedMap.getAttributes().title}
+              description={this.props.savedMap.getAttributes().description}
+              waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this.props.savedMap.getStore())}
+              isSharable
+            />
+          </div>
         </div>
-      </div>
+      </ServicesContext>
     );
   }
 }
