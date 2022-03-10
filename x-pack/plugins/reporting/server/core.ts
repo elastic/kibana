@@ -24,7 +24,11 @@ import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
-import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
+import type {
+  PdfScreenshotResult,
+  PngScreenshotResult,
+  ScreenshottingStart,
+} from '../../screenshotting/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import type { SpacesPluginSetup } from '../../spaces/server';
@@ -37,7 +41,7 @@ import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import type { ReportingPluginRouter, ScreenshotOptions } from './types';
+import type { ReportingPluginRouter, PngScreenshotOptions, PdfScreenshotOptions } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -357,30 +361,44 @@ export class ReportingCore {
     return startDeps.esClient;
   }
 
-  public getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult> {
+  private getScreenshotConfigOptions(options: PdfScreenshotOptions | PngScreenshotOptions) {
+    const config = this.getConfig();
+    return {
+      timeouts: {
+        loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
+        openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
+        waitForElements: durationToNumber(config.get('capture', 'timeouts', 'waitForElements')),
+        renderComplete: durationToNumber(config.get('capture', 'timeouts', 'renderComplete')),
+      },
+
+      layout: {
+        zoom: config.get('capture', 'zoom'),
+        ...options.layout,
+      },
+
+      urls: options.urls.map((url) =>
+        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+      ),
+    };
+  }
+
+  public getScreenshotsPdf(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        const config = this.getConfig();
-        return screenshotting.getScreenshots({
+        return screenshotting.getScreenshotsPdf({
           ...options,
+          ...this.getScreenshotConfigOptions(options),
+        });
+      })
+    );
+  }
 
-          timeouts: {
-            loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
-            openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
-            waitForElements: durationToNumber(config.get('capture', 'timeouts', 'waitForElements')),
-            renderComplete: durationToNumber(config.get('capture', 'timeouts', 'renderComplete')),
-          },
-
-          layout: {
-            zoom: config.get('capture', 'zoom'),
-            ...options.layout,
-          },
-
-          urls: options.urls.map((url) =>
-            typeof url === 'string'
-              ? url
-              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-          ),
+  public getScreenshotsPng(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult> {
+    return Rx.defer(() => this.getPluginStartDeps()).pipe(
+      switchMap(({ screenshotting }) => {
+        return screenshotting.getScreenshotsPng({
+          ...options,
+          ...this.getScreenshotConfigOptions(options),
         });
       })
     );
