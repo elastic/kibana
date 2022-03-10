@@ -258,7 +258,9 @@ export const push = async (
         owner: myCase.attributes.owner,
       });
 
-      await changeAlertsStatusToClose(myCase.id, caseService, alertsService);
+      if (myCase.attributes.settings.syncAlerts) {
+        await changeAlertsStatusToClose(myCase.id, caseService, alertsService);
+      }
     }
 
     await userActionService.createUserAction({
