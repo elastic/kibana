@@ -426,15 +426,15 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         ...monitorSummary,
         statusMessage,
       });
-      console.log(monitorInfo);
+
       alert.scheduleActions(MONITOR_STATUS.id, {
         [ALERT_REASON_MSG]: monitorSummary.reason,
         [VIEW_IN_APP_URL]: getMonitorRouteFromMonitorId({
-          monitorId: getInstanceId(monitorInfo, monIdByLoc),
+          monitorId: monitorSummary.monitorId,
           dateRangeEnd: 'now',
           dateRangeStart: monitorInfo['@timestamp'],
           filters: {
-            'observer.geo.name': monitorSummary.observerLocation,
+            'observer.geo.name': [monitorSummary.observerLocation],
           },
         }),
       });
