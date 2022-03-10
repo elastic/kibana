@@ -52,6 +52,47 @@ List of fields from an index pattern, UI will use this to populate breakdown opt
 #### Labels
 You can set key/value map for your field labels. UI will use these to set labels for data view fields.
 
+Sample config
+```
+{
+    reportType: ReportTypes.KPI,
+    defaultSeriesType: 'bar_stacked',
+    xAxisColumn: {
+      sourceField: '@timestamp',
+    },
+    yAxisColumns: [
+      {
+        sourceField: REPORT_METRIC_FIELD,
+        operationType: 'median',
+      },
+    ],
+    hasOperationType: false,
+    filterFields: ['observer.geo.name', 'monitor.type', 'tags'], // these fields get's resolved from relevant dataView
+    breakdownFields: [
+      'observer.geo.name',
+      'monitor.type',
+      'monitor.name',
+      PERCENTILE,
+    ], // these fields get's resolved from relevant dataView
+    baseFilters: [],
+    palette: { type: 'palette', name: 'status' },
+    definitionFields: [
+      { field: 'monitor.name', nested: SYNTHETICS_STEP_NAME, singleSelection: true },
+      { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
+    ],
+    metricOptions: [
+      {
+        label: MONITORS_DURATION_LABEL,
+        field: 'monitor.duration.us',
+        columnType: OPERATION_COLUMN,
+      }
+    ],
+    labels: { ...FieldLabels, [SUMMARY_UP]: UP_LABEL, [SUMMARY_DOWN]: DOWN_LABEL },
+  }
+```
+
+
+
 ## Lens Embeddable
 
 Lens embeddable is what actually renders the chart in exploratory view.
@@ -62,3 +103,51 @@ Based on configuration, exploratory view generates layers and columns.
 
 Add a link to lens embeddable readme
 
+#### Example
+A simple usage of lens embeddable example and playground options
+[embedded_lens_example](../../../../../../examples/embedded_lens_example)
+
+## Exploratory view Embeddable
+
+Primary purpose of exploratory view is to embed it in observability solutions like uptime to replace
+existing static visualizations,
+
+For that purpose, all the configuration options we define in exploratory view, they can be used as an embeddable
+via a component that is exposed using observability plugin contract,
+usage looks like this
+
+`const ExploratoryViewComponent = props.plugins.observability.ExploratoryViewEmbeddable;
+`
+
+```            
+            <ExploratoryViewComponent
+              attributes={[
+                {
+                  name: 'Monitors response duration',
+                  time: {
+                    from: 'now-5d',
+                    to: 'now',
+                  },
+                  reportDefinitions: {
+                    'monitor.id': ['test-id'],
+                  },
+                  breakdown: 'monitor.type',
+                  operationType: 'average',
+                  dataType: 'synthetics',
+                  seriesType: 'line',
+                  selectedMetricField: 'monitor.duration.us',
+                },
+              ]}
+              reportType="kpi-over-time"
+              title={'Monitor response duration'}
+              withActions={['save', 'explore']}
+            />
+```
+
+there is an example in kibana example which you can view using
+`yarn start --run-examples` and view the code at [Exploratory view embeddable](../../../../../../examples/exploratory_view_example)
+
+#### Example
+A simple usage of lens embeddable example and playground options, run kibana with
+`yarn start --run-example` to see this example in action
+source code is defined at [embedded_lens_example](../../../../../../examples/embedded_lens_example)
