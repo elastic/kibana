@@ -164,6 +164,19 @@ export class SettingsPageObject extends FtrService {
     return await this.testSubjects.find('saveIndexPatternButton');
   }
 
+  async getSaveDataViewButtonActive() {
+    await this.retry.try(async () => {
+      expect(
+        (
+          await this.find.allByCssSelector(
+            '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
+          )
+        ).length
+      ).to.be(1);
+    });
+    return await this.testSubjects.find('saveIndexPatternButton');
+  }
+
   async getCreateButton() {
     return await this.find.displayedByCssSelector('[type="submit"]');
   }
@@ -344,7 +357,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickIndexPatternByName(name: string) {
-    const indexLink = await this.find.byXPath(`//a[descendant::*[text()='${name}']]`);
+    const indexLink = await this.find.byXPath(`//a[text()='${name}']`);
     await indexLink.click();
   }
 
@@ -790,7 +803,7 @@ export class SettingsPageObject extends FtrService {
     await this.flyout.ensureClosed('scriptedFieldsHelpFlyout');
   }
 
-  async executeScriptedField(script: string, additionalField: string) {
+  async executeScriptedField(script: string, additionalField?: string) {
     this.log.debug('execute Scripted Fields help');
     await this.closeScriptedFieldHelp(); // ensure script help is closed so script input is not blocked
     await this.setScriptedFieldScript(script);
@@ -801,7 +814,7 @@ export class SettingsPageObject extends FtrService {
       await this.testSubjects.click('runScriptButton');
       await this.testSubjects.waitForDeleted('.euiLoadingSpinner');
     }
-    let scriptResults;
+    let scriptResults: string = '';
     await this.retry.try(async () => {
       scriptResults = await this.testSubjects.getVisibleText('scriptedFieldPreview');
     });
