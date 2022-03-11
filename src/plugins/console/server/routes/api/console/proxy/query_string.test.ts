@@ -62,11 +62,11 @@ describe('Console Proxy Route', () => {
       });
       describe('contains special characters', () => {
         it('correctly encodes plus sign', async () => {
-          const urlPath = '_search?q=create_date:[2022-03-10T08:00:00.000+08:00 TO *]'
+          let path = '_search?q=create_date:[2022-03-10T08:00:00.000+08:00 TO *]';
 
-          let [path, query] = urlPath.split('?');
+          const [p, query] = path.split('?');
           if (/\+/g.test(query)) {
-            path = `${path}?${query.replace(/\+/g, '%2b')}`;
+            path = `${p}?${query.replace(/\+/g, '%2b')}`;
           }
           const { status } = await request('GET', path);
           expect(status).toBe(200);
