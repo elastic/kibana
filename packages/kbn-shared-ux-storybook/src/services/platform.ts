@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { SharedUxPlatformService, ServiceFactory } from '@kbn/shared-ux-services';
 import { action } from '@storybook/addon-actions';
+import { ServiceFactory, SharedUxPlatformService } from '@kbn/shared-ux-services';
 
 /**
- * A factory function for creating a Storybook-based implementation of `SharedUXPlatformService`.
+ * A factory function for creating a Storybook implementation of `SharedUxPlatformService`.
  */
 export type PlatformServiceFactory = ServiceFactory<SharedUxPlatformService, {}>;
 
 /**
- * A factory function for creating a Storybook-based implementation of `SharedUXPlatformService`.
+ * A factory function for creating a Storybook implementation of `SharedUxPlatformService`.
  */
 export const platformServiceFactory: PlatformServiceFactory = () => ({
   setIsFullscreen: action('setIsChromeVisible'),
