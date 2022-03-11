@@ -68,6 +68,10 @@ export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
       border: `${border.width.thin} solid ${transparentize(theme.euiColorVis3, 0.48)}`,
     };
 
+    const userChangedButtonUsername: CSSObject = {
+      textTransform: 'capitalize',
+    };
+
     const expandedIcon = isExpanded ? 'arrowUp' : 'arrowDown';
 
     return {
@@ -76,6 +80,7 @@ export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
       alertButton,
       alertsCountNumber,
       userChangedButton,
+      userChangedButtonUsername,
       expandedIcon,
     };
   }, [euiTheme, isExpanded]);

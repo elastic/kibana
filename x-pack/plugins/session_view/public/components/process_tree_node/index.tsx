@@ -141,7 +141,7 @@ export function ProcessTreeNode({
   const shouldRenderChildren = childrenExpanded && children && children.length > 0;
   const childrenTreeDepth = depth + 1;
 
-  const showRootEscalation = user.name === 'root' && user.id !== parent.user.id;
+  const showUserEscalation = user.id !== parent.user.id;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'consoleApp' : 'compute';
   const hasExec = process.hasExec();
@@ -193,15 +193,16 @@ export function ProcessTreeNode({
             </span>
           )}
 
-          {showRootEscalation && (
+          {showUserEscalation && (
             <EuiButton
               data-test-subj="sessionView:processTreeNodeRootEscalationFlag"
               css={buttonStyles.userChangedButton}
             >
               <FormattedMessage
                 id="xpack.sessionView.execUserChange"
-                defaultMessage="Exec user change: Root"
+                defaultMessage="Exec user change: "
               />
+              <span css={buttonStyles.userChangedButtonUsername}>{user.name}</span>
             </EuiButton>
           )}
           {!isSessionLeader && childCount > 0 && (
