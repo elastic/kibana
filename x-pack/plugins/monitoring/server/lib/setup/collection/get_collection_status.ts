@@ -566,14 +566,26 @@ export const getCollectionStatus = async (
         ),
       };
     }
-    // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
+    // If there are multiple buckets, they are partially upgraded if a single mb index exists
     else {
+      // if there is more than one metricbeat index, remove them
+      const mbBuckets = indexBuckets.filter((item) => {
+        return item.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+      });
+      let singleMbBuckets = [];
+      if (mbBuckets.length > 1) {
+        singleMbBuckets = indexBuckets.filter((item) => {
+          return item.key !== mbBuckets[0].key;
+        });
+      } else {
+        singleMbBuckets = indexBuckets;
+      }
       const considerAllInstancesMigrated =
         product.name === ELASTICSEARCH_SYSTEM_ID &&
         clusterUuid === liveClusterUuid &&
         !liveClusterInternalCollectionEnabled;
       const internalTimestamps: number[] = [];
-      for (const indexBucket of indexBuckets) {
+      for (const indexBucket of singleMbBuckets) {
         const isFullyMigrated =
           considerAllInstancesMigrated ||
           indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
