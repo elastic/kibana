@@ -8,7 +8,8 @@
 
 import React from 'react';
 import { DecoratorFn } from '@storybook/react';
-import { ServicesProvider } from '../public/services';
+import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
+
 import { servicesFactory } from '../public/services/storybook';
 
 /**
@@ -16,5 +17,5 @@ import { servicesFactory } from '../public/services/storybook';
  * implementations to stories.
  */
 export const servicesDecorator: DecoratorFn = (storyFn) => (
-  <ServicesProvider {...servicesFactory({})}>{storyFn()}</ServicesProvider>
+  <SharedUxServicesProvider {...servicesFactory({})}>{storyFn()}</SharedUxServicesProvider>
 );

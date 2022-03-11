@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../types';
-import { SharedUXDocLinksService } from '../doc_links';
-
-export type DockLinksServiceFactory = PluginServiceFactory<SharedUXDocLinksService>;
+import type { ServiceFactory } from '../../types';
+import type { SharedUxDocLinksService } from '../doc_links';
 
 /**
- * A factory function for creating a Jest-based implementation of `SharedUXDocLinksService`.
+ * A factory function for creating a stubbed implementation of `SharedUxDocLinksService`.
+ */
+export type DockLinksServiceFactory = ServiceFactory<SharedUxDocLinksService>;
+
+/**
+ * A factory function for creating a stubbed implementation of `SharedUxDocLinksService`.
  */
 export const docLinksServiceFactory: DockLinksServiceFactory = () => ({
-  dataViewsDocsLink: 'docs',
+  dataViewsDocLink: 'docs',
 });

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { PluginServiceFactory } from '../types';
-import type { SharedUXPlatformService } from '../platform';
+import type { ServiceFactory } from '../../types';
+import type { SharedUxPlatformService } from '../platform';
 
 /**
- * A factory function for creating a Jest-based implementation of `SharedUXPlatformService`.
+ * A factory function for creating a Jest-based implementation of `SharedUxPlatformService`.
  */
-export type MockPlatformServiceFactory = PluginServiceFactory<SharedUXPlatformService>;
+export type MockPlatformServiceFactory = ServiceFactory<SharedUxPlatformService>;
 
 /**
- * A factory function for creating a Jest-based implementation of `SharedUXPlatformService`.
+ * A factory function for creating a Jest-based implementation of `SharedUxPlatformService`.
  */
 export const platformServiceFactory: MockPlatformServiceFactory = () => ({
   setIsFullscreen: jest.fn(),

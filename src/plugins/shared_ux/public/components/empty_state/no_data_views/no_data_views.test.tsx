@@ -12,18 +12,21 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButton } from '@elastic/eui';
 
-import { ServicesProvider, SharedUXServices } from '../../../services';
-import { servicesFactory } from '../../../services/mocks';
+import {
+  SharedUxServicesProvider,
+  SharedUxServices,
+  mockServicesFactory,
+} from '@kbn/shared-ux-services';
 import { NoDataViews } from './no_data_views';
 
 describe('<NoDataViewsPageTest />', () => {
-  let services: SharedUXServices;
+  let services: SharedUxServices;
   let mount: (element: JSX.Element) => ReactWrapper;
 
   beforeEach(() => {
-    services = servicesFactory();
+    services = mockServicesFactory();
     mount = (element: JSX.Element) =>
-      mountWithIntl(<ServicesProvider {...services}>{element}</ServicesProvider>);
+      mountWithIntl(<SharedUxServicesProvider {...services}>{element}</SharedUxServicesProvider>);
   });
 
   afterEach(() => {
@@ -31,12 +34,7 @@ describe('<NoDataViewsPageTest />', () => {
   });
 
   test('on dataView created', () => {
-    const component = mount(
-      <NoDataViews
-        onDataViewCreated={jest.fn()}
-        dataViewsDocLink={services.docLinks.dataViewsDocsLink}
-      />
-    );
+    const component = mount(<NoDataViews onDataViewCreated={jest.fn()} />);
 
     expect(services.editors.openDataViewEditor).not.toHaveBeenCalled();
     component.find(EuiButton).simulate('click');

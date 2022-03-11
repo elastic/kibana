@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../types';
-import { SharedUXEditorsService } from '../editors';
+import type { ServiceFactory } from '../../types';
+import type { SharedUxEditorsService } from '../editors';
 
 /**
- * A factory function for creating a simple stubbed implementation of `SharedUXEditorsService`.
+ * A factory function for creating a simple stubbed implementation of `SharedUxEditorsService`.
  */
-export type EditorsServiceFactory = PluginServiceFactory<SharedUXEditorsService>;
+export type EditorsServiceFactory = ServiceFactory<SharedUxEditorsService>;
 
 /**
- * A factory function for creating a simple stubbed implementation of `SharedUXEditorsService`.
+ * A factory function for creating a simple stubbed implementation of `SharedUxEditorsService`.
  */
 export const editorsServiceFactory: EditorsServiceFactory = () => ({
   openDataViewEditor: () => () => {},

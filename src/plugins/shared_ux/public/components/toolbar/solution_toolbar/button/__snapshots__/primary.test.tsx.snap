@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<SolutionToolbarButton /> is rendered 1`] = `
-<ServicesProvider
+<SharedUxServicesProvider
   docLinks={
     Object {
-      "dataViewsDocsLink": "dummy link",
+      "dataViewsDocLink": "dummy link",
     }
   }
   editors={
@@ -74,5 +74,5 @@ exports[`<SolutionToolbarButton /> is rendered 1`] = `
       </EuiButtonDisplay>
     </EuiButton>
   </SolutionToolbarButton>
-</ServicesProvider>
+</SharedUxServicesProvider>
 `;

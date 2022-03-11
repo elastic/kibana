@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../types';
-import { SharedUXUserPermissionsService } from '../permissions';
+import { SharedUxUserPermissionsService, ServiceFactory } from '@kbn/shared-ux-services';
 
-export type SharedUXUserPermissionsServiceFactory =
-  PluginServiceFactory<SharedUXUserPermissionsService>;
+export type SharedUXUserPermissionsServiceFactory = ServiceFactory<SharedUxUserPermissionsService>;
 
 /**
  * A factory function for creating a storybook implementation of `SharedUXUserPermissionsService`.

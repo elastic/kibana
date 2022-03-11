@@ -6,19 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
-
 /**
- * Creates the Shared UX plugin.
+ * A service providing links to documentation about various features in Kibana.
  */
-export function plugin() {
-  return new SharedUXPlugin();
+export interface SharedUxDocLinksService {
+  dataViewsDocLink: string;
 }
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export {
-  ExitFullScreenButton,
-  LazyExitFullScreenButton,
-  NoDataViews,
-  LazyNoDataViews,
-} from './components';

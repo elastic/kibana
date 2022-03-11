@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../types';
-import { SharedUXUserPermissionsService } from '../permissions';
-
-export type MockUserPermissionsServiceFactory =
-  PluginServiceFactory<SharedUXUserPermissionsService>;
+import type { ServiceFactory } from '../../types';
+import type { SharedUxUserPermissionsService } from '../permissions';
 
 /**
- * A factory function for creating a Jest-based implementation of `SharedUXUserPermissionsService`.
+ * A factory function for creating a Jest-based implementation of `SharedUxUserPermissionsService`.
+ */
+export type MockUserPermissionsServiceFactory = ServiceFactory<SharedUxUserPermissionsService>;
+
+/**
+ * A factory function for creating a Jest-based implementation of `SharedUxUserPermissionsService`.
  */
 export const userPermissionsServiceFactory: MockUserPermissionsServiceFactory = () => ({
   canCreateNewDataView: true,

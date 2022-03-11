@@ -43,7 +43,7 @@ export const SolutionToolbarButton = withSuspense(LazySolutionToolbarButton);
  * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the
  * `withSuspense` HOC to load this component.
  */
-export const LazyNoDataViewsPage = React.lazy(() =>
+export const LazyNoDataViews = React.lazy(() =>
   import('./empty_state/no_data_views').then(({ NoDataViews }) => ({
     default: NoDataViews,
   }))
@@ -54,4 +54,4 @@ export const LazyNoDataViewsPage = React.lazy(() =>
  * be used directly by consumers and will load the `LazyNoDataViewsPage` component lazily with
  * a predefined fallback and error boundary.
  */
-export const NoDataViewsPage = withSuspense(LazyNoDataViewsPage);
+export const NoDataViews = withSuspense(LazyNoDataViews);
