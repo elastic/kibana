@@ -52,6 +52,7 @@ import {
   getUnknownVisualizationTypeError,
 } from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
+import type { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 import {
   onActiveDataChange,
   useLensDispatch,
@@ -496,19 +497,20 @@ export const VisualizationWrapper = ({
   const dispatchLens = useLensDispatch();
 
   const onData$ = useCallback(
-    (data) => {
-      if (data?.value?.data) {
-        let tables: Record<string, Datatable> = {};
-        switch (data.value.data.type) {
-          case 'datatable':
-            const [layerId] = Object.keys(datasourceLayers);
-            tables[layerId] = { ...data.value.data };
-            break;
-          case 'lens_multitable':
-            tables = { ...data.value.data.tables };
-            break;
-        }
-        dispatchLens(onActiveDataChange(tables));
+    (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+      if (adapters && adapters.tables) {
+        const [defaultLayerId] = Object.keys(datasourceLayers);
+
+        dispatchLens(
+          onActiveDataChange(
+            Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+              (acc, [key, value]) => ({
+                [key === 'default' ? defaultLayerId : key]: value,
+              }),
+              {}
+            )
+          )
+        );
       }
     },
     [datasourceLayers, dispatchLens]
