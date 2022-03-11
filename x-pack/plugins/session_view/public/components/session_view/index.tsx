@@ -65,12 +65,12 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   const renderIsLoading = isFetching && !data;
   const renderDetails = isDetailOpen && selectedProcess;
 
-  const toggleDetailPanel = () => {
+  const toggleDetailPanel = useCallback(() => {
     setIsDetailOpen(!isDetailOpen);
-  };
-  const handleOptionChange = (checkedOptions: StateField) => {
+  }, [isDetailOpen]);
+  const handleOptionChange = useCallback((checkedOptions: StateField) => {
     setOptionsStates(checkedOptions);
-  };
+  }, []);
 
   if (!isFetching && !hasData) {
     return (

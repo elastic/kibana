@@ -164,7 +164,15 @@ export function ProcessTreeNode({
                     [exit_code: {exitCode}]
                   </small>
                 )}
-                {timeStampOn && <span css={styles.timeStamp}>{timeStampsNormal}</span>};
+                {timeStampOn && (
+                  <span
+                    data-test-subj="sessionView:processTreeNodeTimestamp"
+                    css={styles.timeStamp}
+                  >
+                    {timeStampsNormal}
+                  </span>
+                )}
+                ;
               </span>
             </span>
           )}

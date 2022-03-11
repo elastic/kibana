@@ -132,6 +132,24 @@ describe('ProcessTreeNode component', () => {
       // cleanup
       windowGetSelectionSpy.mockRestore();
     });
+
+    it('When Timestamp is ON, it shows Timestamp', async () => {
+      // set a mock where Timestamp is turned OFF
+      renderResult = mockedContext.render(
+        <ProcessTreeNode timeStampOn={true} process={processMock} />
+      );
+
+      expect(renderResult.getByTestId('sessionView:processTreeNodeTimestamp')).toBeTruthy();
+    });
+
+    it('When Timestamp is OFF, it doesnt show Timestamp', async () => {
+      // set a mock where Timestamp is turned OFF
+      renderResult = mockedContext.render(
+        <ProcessTreeNode timeStampOn={false} process={processMock} />
+      );
+
+      expect(renderResult.queryByTestId('sessionView:processTreeNodeTimestamp')).toBeFalsy();
+    });
     describe('Alerts', () => {
       it('renders Alert button when process has alerts', async () => {
         renderResult = mockedContext.render(
@@ -194,29 +212,6 @@ describe('ProcessTreeNode component', () => {
         expect(
           renderResult.getByTestId('sessionView:processNodeSearchHighlight').textContent
         ).toEqual('/vagrant');
-      });
-    });
-    describe('Timestamp', () => {
-      it('When Timestamp is OFF, it doesnt show Timestamp', () => {
-        // set a mock where Timestamp is turned OFF
-        renderResult = mockedContext.render(
-          <ProcessTreeNode timeStampOn={false} process={processMock} />
-        );
-
-        expect(renderResult.getByTestId('sessionView:processTreeNode').textContent).not.toContain(
-          'Nov 23, 2021 @ 07:25:04.210'
-        );
-      });
-
-      it('When Timestamp is ON, it shows Timestamp', () => {
-        // set a mock where Timestamp is turned ON
-        renderResult = mockedContext.render(
-          <ProcessTreeNode timeStampOn={true} process={processMock} />
-        );
-
-        expect(renderResult.getByTestId('sessionView:processTreeNode').textContent).toContain(
-          ']Nov 23, 2021 @ 07:25:04.210'
-        );
       });
     });
   });
