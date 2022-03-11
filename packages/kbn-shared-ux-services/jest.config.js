@@ -6,19 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
-
-/**
- * Creates the Shared UX plugin.
- */
-export function plugin() {
-  return new SharedUXPlugin();
-}
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export {
-  ExitFullScreenButton,
-  LazyExitFullScreenButton,
-  NoDataViews,
-  LazyNoDataViews,
-} from '@kbn/shared-ux-components';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-shared-ux-services'],
+};

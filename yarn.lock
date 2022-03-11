@@ -3117,19 +3117,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/sharedux-components@link:bazel-bin/packages/kbn-sharedux-components":
+"@kbn/shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components":
   version "0.0.0"
   uid ""
 
-"@kbn/sharedux-services@link:bazel-bin/packages/kbn-sharedux-services":
+"@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
   version "0.0.0"
   uid ""
 
-"@kbn/sharedux-storybook@link:bazel-bin/packages/kbn-sharedux-storybook":
+"@kbn/shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook":
   version "0.0.0"
   uid ""
 
-"@kbn/sharedux-utility@link:bazel-bin/packages/kbn-sharedux-utility":
+"@kbn/shared-ux-utility@link:bazel-bin/packages/kbn-shared-ux-utility":
   version "0.0.0"
   uid ""
 
@@ -6102,19 +6102,19 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__sharedux-components@link:bazel-bin/packages/kbn-sharedux-components/npm_module_types":
+"@types/kbn__shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__sharedux-services@link:bazel-bin/packages/kbn-sharedux-services/npm_module_types":
+"@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__sharedux-storybook@link:bazel-bin/packages/kbn-sharedux-storybook/npm_module_types":
+"@types/kbn__shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__sharedux-utility@link:bazel-bin/packages/kbn-sharedux-utility/npm_module_types":
+"@types/kbn__shared-ux-utility@link:bazel-bin/packages/kbn-shared-ux-utility/npm_module_types":
   version "0.0.0"
   uid ""
 

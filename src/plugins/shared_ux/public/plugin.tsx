@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { SharedUXServicesProvider } from '@kbn/sharedux-services';
+import { SharedUXServicesProvider } from '@kbn/shared-ux-services';
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import {

@@ -1,3 +1,0 @@
-# @kbn/sharedux-storybook
-
-> TODO

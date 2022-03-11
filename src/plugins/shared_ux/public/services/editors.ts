@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXEditorsService } from '@kbn/sharedux-services';
+import { SharedUXEditorsService } from '@kbn/shared-ux-services';
 
 import { KibanaPluginServiceFactory } from './types';
 import { SharedUXPluginStartDeps } from '../types';

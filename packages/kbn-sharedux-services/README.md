@@ -1,3 +1,0 @@
-# @kbn/sharedux-services
-
-> TODO
