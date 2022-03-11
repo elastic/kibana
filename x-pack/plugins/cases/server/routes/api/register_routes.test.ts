@@ -19,6 +19,7 @@ import { CasesRouter } from '../../types';
 import { createCasesRoute } from './create_cases_route';
 import { registerRoutes } from './register_routes';
 import { CaseRoute } from './types';
+import { extractWarningValueFromWarningHeader } from './utils';
 
 describe('registerRoutes', () => {
   let router: jest.Mocked<CasesRouter>;
@@ -105,6 +106,7 @@ describe('registerRoutes', () => {
         { headers },
         { customError, badRequest }
       );
+
       return result;
     };
 
@@ -129,6 +131,26 @@ describe('registerRoutes', () => {
       method: 'get',
       path: '/error',
     });
+  };
+
+  const initAndSimulateDeprecationEndpoint = async (headers?: Record<string, unknown>) => {
+    const { simulateRequest } = initApi([
+      ...routes,
+      createCasesRoute({
+        method: 'get',
+        path: '/deprecated',
+        options: { deprecated: true },
+        handler: async () => response.ok(),
+      }),
+    ]);
+
+    const res = await simulateRequest({
+      method: 'get',
+      path: '/deprecated',
+      headers,
+    });
+
+    return res;
   };
 
   beforeEach(() => {
@@ -244,6 +266,40 @@ describe('registerRoutes', () => {
         counterName: 'GET /error',
         counterType: 'error',
       });
+    });
+
+    it('increases the deprecation counters correctly', async () => {
+      await initAndSimulateDeprecationEndpoint();
+
+      expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'GET /deprecated',
+        counterType: 'deprecated',
+      });
+    });
+  });
+
+  describe('deprecation', () => {
+    it('logs the deprecation message if it is not a kibana request', async () => {
+      await initAndSimulateDeprecationEndpoint();
+
+      expect(logger.warn).toHaveBeenCalledWith('The endpoint GET /deprecated is deprecated.');
+    });
+
+    it('does NOT log the deprecation message if it is a kibana request', async () => {
+      await initAndSimulateDeprecationEndpoint({
+        'kbn-version': '8.2.0',
+        referer: 'https://example.com',
+      });
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('adds the warning header', async () => {
+      response.ok.mockReturnValue({ status: 200, options: {} });
+      const res = await initAndSimulateDeprecationEndpoint();
+      const warningHeader = res.options.headers.warning;
+      const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+      expect(warningValue).toBe('Deprecated endpoint');
     });
   });
 

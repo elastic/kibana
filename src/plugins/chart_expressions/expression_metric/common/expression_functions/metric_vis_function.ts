@@ -9,20 +9,14 @@
 import { i18n } from '@kbn/i18n';
 
 import { visType } from '../types';
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/utils';
-import { ColorMode } from '../../../../charts/common';
+import {
+  prepareLogTable,
+  Dimension,
+  validateAccessor,
+} from '../../../../visualizations/common/utils';
+import { ColorMode, validateOptions } from '../../../../charts/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
-
-const validateOptions = (
-  value: string,
-  availableOptions: Record<string, string>,
-  getErrorMessage: () => string
-) => {
-  if (!Object.values(availableOptions).includes(value)) {
-    throw new Error(getErrorMessage());
-  }
-};
 
 const errors = {
   invalidColorModeError: () =>
@@ -120,7 +114,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       default: LabelPosition.BOTTOM,
     },
     metric: {
-      types: ['vis_dimension'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionMetricVis.function.metric.help', {
         defaultMessage: 'metric dimension configuration',
       }),
@@ -128,7 +122,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: true,
     },
     bucket: {
-      types: ['vis_dimension'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionMetricVis.function.bucket.help', {
         defaultMessage: 'bucket dimension configuration',
       }),
@@ -159,6 +153,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
 
     validateOptions(args.colorMode, ColorMode, errors.invalidColorModeError);
     validateOptions(args.labelPosition, LabelPosition, errors.invalidLabelPositionError);
+
+    args.metric.forEach((metric) => validateAccessor(metric, input.columns));
+    validateAccessor(args.bucket, input.columns);
 
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [
