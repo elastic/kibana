@@ -1,8 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ViewApiRequest is rendered 1`] = `
+exports[`ViewApiRequestFlyout is rendered 1`] = `
 <div
   data-eui="EuiFlyout"
+  data-test-subj="apiRequestFlyout"
   role="dialog"
 >
   <button
