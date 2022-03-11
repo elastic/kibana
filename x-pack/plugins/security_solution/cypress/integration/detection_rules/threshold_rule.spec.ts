@@ -51,14 +51,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
-import {
-  changeRowsPerPageTo100,
-  filterByCustomRules,
-  goToCreateNewRule,
-  goToRuleDetails,
-  waitForRulesTableToBeLoaded,
-} from '../../tasks/alerts_detection_rules';
+import { filterByCustomRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
