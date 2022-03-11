@@ -349,10 +349,10 @@ export default function ({
     });
   }
 
-  function getConditionalTemplate(term: { value?: string; context?: AutoCompleteContext}) {
+  function getConditionalTemplate(term: { value?: string; context?: AutoCompleteContext }) {
     const context = term.context;
     if (context?.endpoint && term.value) {
-      const {data_autocomplete_rules: autocompleteRules} = context.endpoint;
+      const { data_autocomplete_rules: autocompleteRules } = context.endpoint;
       if (autocompleteRules && autocompleteRules[term.value]) {
         const currentLineNumber = editor.getCurrentPosition().lineNumber;
         const rules = (autocompleteRules[term.value] as any).__one_of ?? [];
@@ -375,17 +375,19 @@ export default function ({
     return getStartLineNumber(currentLine - 1, endLine, rules);
   }
 
-  function matchCondition(rules: Array<{
-    __condition?: { lines_regex: string | RegExp }, __template: unknown
-  }> = [], condition: string) {
-    return rules.find(
-      (rule) => {
-        if (rule.__condition && rule.__condition.lines_regex) {
-          return new RegExp(rule.__condition.lines_regex, 'm').test(condition);
-        }
-        return false;
+  function matchCondition(
+    rules: Array<{
+      __condition?: { lines_regex: string | RegExp };
+      __template: unknown;
+    }> = [],
+    condition: string
+  ) {
+    return rules.find((rule) => {
+      if (rule.__condition && rule.__condition.lines_regex) {
+        return new RegExp(rule.__condition.lines_regex, 'm').test(condition);
       }
-    );
+      return false;
+    });
   }
 
   function applyTerm(term: {
