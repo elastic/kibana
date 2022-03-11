@@ -155,10 +155,14 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
             alertActionGroupName: 'success',
             signalId: 'abcd-1234:abcd-1234',
             severity: 'High',
+            ruleName: 'SomeRule',
+            date: '',
+            spaceId: '',
           },
         })
         .expect(200);
 
+      expect(proxyHaveBeenCalled).to.equal(true);
       expect(result).to.eql({
         status: 'ok',
         connector_id: simulatedActionId,
@@ -166,10 +170,11 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           alertActionGroupName: 'success',
           signalId: 'abcd-1234:abcd-1234',
           severity: 'High',
+          ruleName: 'SomeRule',
+          date: '',
+          spaceId: '',
         },
       });
-
-      expect(proxyHaveBeenCalled).to.equal(true);
     });
 
     it('should handle a 40x xmatters error', async () => {
@@ -181,6 +186,9 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
             alertActionGroupName: 'respond-with-400',
             signalId: 'abcd-1234:abcd-1234',
             severity: 'High',
+            ruleName: 'SomeRule',
+            date: '',
+            spaceId: '',
           },
         })
         .expect(200);
@@ -197,6 +205,9 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
             alertActionGroupName: 'respond-with-429',
             signalId: 'abcd-1234:abcd-1234',
             severity: 'High',
+            ruleName: 'SomeRule',
+            date: '',
+            spaceId: '',
           },
         })
         .expect(200);
@@ -216,6 +227,9 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
             alertActionGroupName: 'respond-with-502',
             signalId: 'abcd-1234:abcd-1234',
             severity: 'High',
+            ruleName: 'SomeRule',
+            date: '',
+            spaceId: '',
           },
         })
         .expect(200);
