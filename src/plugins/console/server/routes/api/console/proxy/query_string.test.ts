@@ -60,6 +60,26 @@ describe('Console Proxy Route', () => {
           expect(args.uri.href).toBe('http://localhost:9200/index/id?pretty=true');
         });
       });
+      describe('contains special characters', () => {
+        it('correctly encodes plus sign', async () => {
+          const urlPath = '_search?q=create_date:[2022-03-10T08:00:00.000+08:00 TO *]'
+
+          let [path, query] = urlPath.split('?');
+          if (/\+/g.test(query)) {
+            path = `${path}?${query.replace(/\+/g, '%2b')}`;
+          }
+          const { status } = await request('GET', path);
+          expect(status).toBe(200);
+          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
+        });
+
+        it('correctly encodes other characters', async () => {
+          const path = `_search?q="(new york city) OR (big apple)"`;
+          const { status } = await request('GET', path);
+          expect(status).toBe(200);
+          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
+        });
+      });
     });
   });
 });
