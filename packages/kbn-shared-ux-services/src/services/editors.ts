@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-export interface DataViewEditorOptions<TDataView extends unknown = unknown> {
-  onSave: (dataView: TDataView) => void;
+type DataView = unknown;
+
+export interface DataViewEditorOptions {
+  onSave: (dataView: DataView) => void;
 }
 
-export interface SharedUXEditorsService<TDataView extends unknown = unknown> {
-  openDataViewEditor: (options: DataViewEditorOptions<TDataView>) => () => void;
+export interface SharedUXEditorsService {
+  openDataViewEditor: (options: DataViewEditorOptions) => () => void;
 }
