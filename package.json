@@ -318,6 +318,7 @@
     "p-map": "^4.0.0",
     "p-retry": "^4.2.0",
     "papaparse": "^5.2.0",
+    "parse-domain": "^4.1.0",
     "pdfmake": "^0.2.4",
     "peggy": "^1.2.0",
     "pluralize": "3.1.0",

@@ -16697,6 +16697,11 @@ ip-regex@^2.1.0:
   resolved "https://registry.yarnpkg.com/ip-regex/-/ip-regex-2.1.0.tgz#fa78bf5d2e6913c911ce9f819ee5146bb6d844e9"
   integrity sha1-+ni/XS5pE8kRzp+BnuUUa7bYROk=
 
+ip-regex@^4.0.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/ip-regex/-/ip-regex-4.3.0.tgz#687275ab0f57fa76978ff8f4dddc8a23d5990db5"
+  integrity sha512-B9ZWJxHHOHUhUjCPrMpLD4xEq35bUTClHM1S6CBU5ixQnkZmwipwgc96vAd7AAGM9TGHvJR+Uss+/Ak6UphK+Q==
+
 ip@^1.1.0, ip@^1.1.5:
   version "1.1.5"
   resolved "https://registry.yarnpkg.com/ip/-/ip-1.1.5.tgz#bdded70114290828c0a039e72ef25f5aaec4354a"
@@ -17035,6 +17040,13 @@ is-interactive@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-interactive/-/is-interactive-1.0.0.tgz#cea6e6ae5c870a7b0a0004070b7b587e0252912e"
   integrity sha512-2HvIEKRoqS62guEC+qBjpvRubdX910WCMuJTZ+I9yvqKU2/12eSL549HMwtabb4oupdj2sMP50k+XJfB/8JE6w==
+
+is-ip@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/is-ip/-/is-ip-3.1.0.tgz#2ae5ddfafaf05cb8008a62093cf29734f657c5d8"
+  integrity sha512-35vd5necO7IitFPjd/YBeqwWnyDWbuLH9ZXQdMfDA8TEo7pv5X8yfrvVO3xbJbLUlERCMvf6X0hTUamQxCYJ9Q==
+  dependencies:
+    ip-regex "^4.0.0"
 
 is-lambda@^1.0.1:
   version "1.0.1"
@@ -21750,6 +21762,15 @@ parse-data-uri@^0.2.0:
   integrity sha1-vwTYUd1ch7CrI45dAazklLYEtMk=
   dependencies:
     data-uri-to-buffer "0.0.3"
+
+parse-domain@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/parse-domain/-/parse-domain-4.1.0.tgz#b2baae57db49f6fb805bb2dba7103ebf981a8ab7"
+  integrity sha512-zas79foMEsbMbIcJoPx26+NISWa3jTzZykOW9mXfRzvgadHvAHGd7qcCc1FbSWbD1I4qP71UWAxlTgu7Uq6IQg==
+  dependencies:
+    is-ip "^3.1.0"
+    node-fetch "^2.6.1"
+    punycode "^2.1.1"
 
 parse-entities@^1.1.0:
   version "1.2.1"
