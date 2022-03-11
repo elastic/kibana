@@ -27149,7 +27149,6 @@
     "xpack.transform.home.breadcrumbTitle": "转换",
     "xpack.transform.indexPreview.copyClipboardTooltip": "将索引预览的开发控制台语句复制到剪贴板。",
     "xpack.transform.indexPreview.copyRuntimeFieldsClipboardTooltip": "将运行时字段的开发控制台语句复制到剪贴板。",
-    "xpack.transform.invalidRuntimeFieldMessage": "运行时字段无效",
     "xpack.transform.latestPreview.latestPreviewIncompleteConfigCalloutBody": "请选择至少一个唯一键和排序字段。",
     "xpack.transform.licenseCheckErrorMessage": "许可证检查失败",
     "xpack.transform.list.emptyPromptButtonText": "创建您的首个转换",

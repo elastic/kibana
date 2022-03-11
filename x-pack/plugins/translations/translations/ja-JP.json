@@ -27118,7 +27118,6 @@
     "xpack.transform.home.breadcrumbTitle": "変換",
     "xpack.transform.indexPreview.copyClipboardTooltip": "インデックスプレビューの開発コンソールステートメントをクリップボードにコピーします。",
     "xpack.transform.indexPreview.copyRuntimeFieldsClipboardTooltip": "ランタイムフィールドの開発コンソールステートメントをクリップボードにコピーします。",
-    "xpack.transform.invalidRuntimeFieldMessage": "無効なランタイムフィールド",
     "xpack.transform.latestPreview.latestPreviewIncompleteConfigCalloutBody": "1 つ以上の一意キーと並べ替えフィールドを選択してください。",
     "xpack.transform.licenseCheckErrorMessage": "ライセンス確認失敗",
     "xpack.transform.list.emptyPromptButtonText": "初めての変換を作成してみましょう。",
