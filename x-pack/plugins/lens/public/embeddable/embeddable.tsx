@@ -28,7 +28,6 @@ import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { RecursiveReadonly } from '@kbn/utility-types';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   ExpressionRendererEvent,
@@ -232,12 +231,12 @@ export class Embeddable
     );
   }
 
-  private externalSearchContext?: {
+  private externalSearchContext: {
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
     searchSessionId?: string;
-  };
+  } = {};
 
   private activeDataInfo: {
     activeData?: TableInspectorAdapter;
@@ -445,10 +444,10 @@ export class Embeddable
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
     if (
-      !isEqual(containerState.timeRange, this.externalSearchContext?.timeRange) ||
-      !isEqual(containerState.query, this.externalSearchContext?.query) ||
-      !isEqual(cleanedFilters, this.externalSearchContext?.filters) ||
-      this.externalSearchContext?.searchSessionId !== containerState.searchSessionId ||
+      !isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
+      !isEqual(containerState.query, this.externalSearchContext.query) ||
+      !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
+      this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
       this.embeddableTitle !== this.getTitle()
     ) {
       this.externalSearchContext = {
@@ -675,11 +674,9 @@ export class Embeddable
   }
 
   private async loadViewUnderlyingDataArgs(): Promise<boolean> {
-    if (
-      !this.activeDataInfo.activeData ||
-      !this.externalSearchContext ||
-      !this.externalSearchContext.timeRange
-    ) {
+    const mergedSearchContext = this.getMergedSearchContext();
+
+    if (!this.activeDataInfo.activeData || !mergedSearchContext.timeRange) {
       return false;
     }
 
@@ -705,9 +702,9 @@ export class Embeddable
       activeData: this.activeDataInfo.activeData,
       dataViews: this.indexPatterns,
       capabilities: this.deps.capabilities,
-      query: this.externalSearchContext.query,
-      filters: this.externalSearchContext.filters || [],
-      timeRange: this.externalSearchContext.timeRange,
+      query: this.savedVis?.state.query, // TODO merge with container query!
+      filters: mergedSearchContext.filters || [],
+      timeRange: mergedSearchContext.timeRange,
     });
 
     const loaded = typeof viewUnderlyingDataArgs !== 'undefined';
