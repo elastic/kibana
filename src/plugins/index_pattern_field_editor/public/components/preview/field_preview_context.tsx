@@ -167,7 +167,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     [documents, currentIdx]
   );
 
-  const currentDocIndex = currentDocument?._index;
   const currentDocId: string = currentDocument?._id ?? '';
   const totalDocs = documents.length;
   const { name, document, script, format, type } = params;
