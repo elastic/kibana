@@ -12,7 +12,7 @@ import type { CspPage, CspNavigationItem } from './types';
 export const allNavigationItems: Record<CspPage, CspNavigationItem> = {
   dashboard: { name: TEXT.DASHBOARD, path: '/dashboard' },
   findings: { name: TEXT.FINDINGS, path: '/findings' },
-  rules: { name: 'Rules', path: '/rules', disabled: true },
+  rules: { name: 'Rules', path: '/rules', disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks },
   benchmarks: {
     name: TEXT.MY_BENCHMARKS,
     path: '/benchmarks',

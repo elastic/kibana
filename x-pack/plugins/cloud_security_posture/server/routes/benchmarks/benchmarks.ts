@@ -8,17 +8,20 @@ import { uniq, map } from 'lodash';
 import type { IRouter, SavedObjectsClientContract } from 'src/core/server';
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { string } from 'io-ts';
 import {
   PackagePolicyServiceInterface,
   AgentPolicyServiceInterface,
   AgentService,
 } from '../../../../fleet/server';
-import { GetAgentPoliciesResponseItem, PackagePolicy, AgentPolicy } from '../../../../fleet/common';
+import {
+  GetAgentPoliciesResponseItem,
+  PackagePolicy,
+  AgentPolicy,
+  ListWithKuery,
+} from '../../../../fleet/common';
 import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 
-// TODO: use the same method from common/ once PR 106 is merged
 export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
 
@@ -52,9 +55,21 @@ const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): str
   return kquery;
 };
 
+const addSortToQuery = (
+  baseQuery: ListWithKuery,
+  queryParams: BenchmarksQuerySchema
+): ListWithKuery =>
+  queryParams.sort_field
+    ? {
+        ...baseQuery,
+        sortField: queryParams.sort_field,
+        sortOrder: queryParams.sort_order,
+      }
+    : baseQuery;
+
 export const getPackagePolicies = async (
   soClient: SavedObjectsClientContract,
-  packagePolicyService: PackagePolicyServiceInterface | undefined,
+  packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
   queryParams: BenchmarksQuerySchema
 ): Promise<PackagePolicy[]> => {
@@ -64,12 +79,17 @@ export const getPackagePolicies = async (
 
   const packageNameQuery = getPackageNameQuery(packageName, queryParams.benchmark_name);
 
-  const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
+  const baseQuery = {
     kuery: packageNameQuery,
     page: queryParams.page,
     perPage: queryParams.per_page,
-  })) ?? { items: [] as PackagePolicy[] };
+  };
 
+  const query = addSortToQuery(baseQuery, queryParams);
+
+  const { items: packagePolicies } = (await packagePolicyService?.list(soClient, query)) ?? {
+    items: [] as PackagePolicy[],
+  };
   return packagePolicies;
 };
 
@@ -133,16 +153,20 @@ const createBenchmarks = (
   agentPolicies: GetAgentPoliciesResponseItem[],
   packagePolicies: PackagePolicy[]
 ): Benchmark[] =>
-  agentPolicies
-    .flatMap((agentPolicy) =>
-      agentPolicy.package_policies.map((agentPackagePolicy) => {
-        const id = string.is(agentPackagePolicy) ? agentPackagePolicy : agentPackagePolicy.id;
-        const packagePolicy = packagePolicies.find((pkgPolicy) => pkgPolicy.id === id);
-        if (!packagePolicy) return;
-        return createBenchmarkEntry(agentPolicy, packagePolicy);
+  packagePolicies.flatMap((packagePolicy) => {
+    return agentPolicies
+      .map((agentPolicy) => {
+        const agentPkgPolicies = agentPolicy.package_policies as string[];
+        const isExistsOnAgent = agentPkgPolicies.find(
+          (pkgPolicy) => pkgPolicy === packagePolicy.id
+        );
+        if (isExistsOnAgent) {
+          return createBenchmarkEntry(agentPolicy, packagePolicy);
+        }
+        return;
       })
-    )
-    .filter(isNonNullable);
+      .filter(isNonNullable);
+  });
 
 export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
@@ -159,8 +183,7 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
         const agentPolicyService = cspContext.service.agentPolicyService;
         const packagePolicyService = cspContext.service.packagePolicyService;
 
-        // TODO: This validate can be remove after #2819 will be merged
-        if (!agentPolicyService || !agentService) {
+        if (!agentPolicyService || !agentService || !packagePolicyService) {
           throw new Error(`Failed to get Fleet services`);
         }
 
@@ -198,6 +221,16 @@ export const benchmarksInputSchema = rt.object({
    * The number of objects to include in each page
    */
   per_page: rt.number({ defaultValue: DEFAULT_BENCHMARKS_PER_PAGE, min: 0 }),
+  /**
+   *  Once of PackagePolicy fields for sorting the found objects.
+   *  Sortable fields: id, name, policy_id, namespace, updated_at, updated_by, created_at, created_by,
+   *  package.name,  package.title, package.version
+   */
+  sort_field: rt.maybe(rt.string()),
+  /**
+   * The order to sort by
+   */
+  sort_order: rt.oneOf([rt.literal('asc'), rt.literal('desc')], { defaultValue: 'desc' }),
   /**
    * Benchmark filter
    */

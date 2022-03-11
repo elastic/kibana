@@ -9,6 +9,7 @@ import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
 import type { SeriesType, XYLayerConfig, YConfig, ValidLayer } from '../../common/expressions';
 import { visualizationTypes } from './types';
+import { getDataLayers, isDataLayer } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -30,8 +31,8 @@ export function isStackedChart(seriesType: SeriesType) {
   return seriesType.includes('stacked');
 }
 
-export function isHorizontalChart(layers: Array<{ seriesType: SeriesType }>) {
-  return layers.every((l) => isHorizontalSeries(l.seriesType));
+export function isHorizontalChart(layers: XYLayerConfig[]) {
+  return getDataLayers(layers).every((l) => isHorizontalSeries(l.seriesType));
 }
 
 export function getIconForSeries(type: SeriesType): EuiIconType {
@@ -45,7 +46,7 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
 }
 
 export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
-  if (layer.splitAccessor) {
+  if (isDataLayer(layer) && layer.splitAccessor) {
     return null;
   }
   return (
@@ -55,13 +56,14 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
 
 export const getColumnToLabelMap = (layer: XYLayerConfig, datasource: DatasourcePublicAPI) => {
   const columnToLabel: Record<string, string> = {};
-
-  layer.accessors.concat(layer.splitAccessor ? [layer.splitAccessor] : []).forEach((accessor) => {
-    const operation = datasource.getOperationForColumnId(accessor);
-    if (operation?.label) {
-      columnToLabel[accessor] = operation.label;
-    }
-  });
+  layer.accessors
+    .concat(isDataLayer(layer) && layer.splitAccessor ? [layer.splitAccessor] : [])
+    .forEach((accessor) => {
+      const operation = datasource.getOperationForColumnId(accessor);
+      if (operation?.label) {
+        columnToLabel[accessor] = operation.label;
+      }
+    });
   return columnToLabel;
 };
 
