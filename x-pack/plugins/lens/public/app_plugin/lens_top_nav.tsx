@@ -36,10 +36,16 @@ import {
   handleIndexPatternChange,
   refreshIndexPatternsList,
 } from '../utils';
+import {
+  combineQueryAndFilters,
+  getLayerMetaInfo,
+  getShowUnderlyingDataLabel,
+} from './show_underlying_data';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
   enableExportToCSV: boolean;
+  showOpenInDiscover?: boolean;
   showCancel: boolean;
   isByValueMode: boolean;
   allowByValue: boolean;
@@ -54,6 +60,7 @@ function getLensTopNavConfig(options: {
     showCancel,
     allowByValue,
     enableExportToCSV,
+    showOpenInDiscover,
     showSaveAndReturn,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
@@ -95,6 +102,21 @@ function getLensTopNavConfig(options: {
         values: { contextOriginatingApp },
       }),
       disableButton: false,
+    });
+  }
+
+  if (showOpenInDiscover) {
+    topNavMenu.push({
+      label: getShowUnderlyingDataLabel(),
+      run: () => {},
+      testId: 'lnsApp_openInDiscover',
+      description: i18n.translate('xpack.lens.app.openInDiscoverAriaLabel', {
+        defaultMessage: 'Open underlying data in Discover',
+      }),
+      disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
+      tooltip: tooltips.showUnderlyingDataWarning,
+      target: '_blank',
+      href: actions.getUnderlyingDataUrl(),
     });
   }
 
@@ -191,6 +213,7 @@ export const LensTopNavMenu = ({
     uiSettings,
     application,
     attributeService,
+    discover,
     dashboardFeatureFlag,
     dataViewFieldEditor,
     dataViewEditor,
@@ -315,6 +338,26 @@ export const LensTopNavMenu = ({
     filters,
     initialContext,
   ]);
+
+  const layerMetaInfo = useMemo(() => {
+    if (!activeDatasourceId || !discover) {
+      return;
+    }
+    return getLayerMetaInfo(
+      datasourceMap[activeDatasourceId],
+      datasourceStates[activeDatasourceId].state,
+      activeData,
+      application.capabilities
+    );
+  }, [
+    activeData,
+    activeDatasourceId,
+    datasourceMap,
+    datasourceStates,
+    discover,
+    application.capabilities,
+  ]);
+
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({
       showSaveAndReturn:
@@ -324,6 +367,7 @@ export const LensTopNavMenu = ({
             (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
         ) || Boolean(initialContextIsEmbedded),
       enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
+      showOpenInDiscover: Boolean(layerMetaInfo?.isVisible),
       isByValueMode: getIsByValueMode(),
       allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
       showCancel: Boolean(isLinkedToOriginatingApp),
@@ -345,6 +389,9 @@ export const LensTopNavMenu = ({
             }
           }
           return undefined;
+        },
+        showUnderlyingDataWarning: () => {
+          return layerMetaInfo?.error;
         },
       },
       actions: {
@@ -413,6 +460,31 @@ export const LensTopNavMenu = ({
             redirectToOrigin();
           }
         },
+        getUnderlyingDataUrl: () => {
+          if (!layerMetaInfo) {
+            return;
+          }
+          const { error, meta } = layerMetaInfo;
+          // If Discover is not available, return
+          // If there's no data, return
+          if (error || !discover || !meta) {
+            return;
+          }
+          const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+            query,
+            filters,
+            meta,
+            indexPatterns
+          );
+
+          return discover.locator!.getRedirectUrl({
+            indexPatternId: meta.id,
+            timeRange: data.query.timefilter.timefilter.getTime(),
+            filters: newFilters,
+            query: newQuery,
+            columns: meta.columns,
+          });
+        },
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
@@ -423,6 +495,7 @@ export const LensTopNavMenu = ({
     initialContextIsEmbedded,
     isSaveable,
     activeData,
+    layerMetaInfo,
     getIsByValueMode,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
@@ -439,6 +512,11 @@ export const LensTopNavMenu = ({
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,
+    discover,
+    query,
+    filters,
+    indexPatterns,
+    data.query.timefilter.timefilter,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

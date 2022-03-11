@@ -51,7 +51,7 @@ export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'co
   changeIndexPattern: (
     id: string,
     state: IndexPatternPrivateState,
-    setState: StateSetter<IndexPatternPrivateState>
+    setState: StateSetter<IndexPatternPrivateState, { applyImmediately?: boolean }>
   ) => void;
   charts: ChartsPluginSetup;
   core: CoreStart;
