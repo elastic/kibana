@@ -70,8 +70,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
           end: endDate?.utc().toISOString(),
           page: 1,
           per_page: 0,
-          sort_field: '@timestamp',
-          sort_order: 'desc',
+          sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
           filter: `event.action:execute-start`,
         }
       );
@@ -82,8 +81,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
         end: endDate?.utc().toISOString(),
         page: 1,
         per_page: 10000, // TODO: Possibly constrain to 5x MAX_EXECUTION_EVENTS_DISPLAYED (i.e. max events per execution)
-        sort_field: '@timestamp',
-        sort_order: 'desc',
+        sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         filter: filters,
       });
 
