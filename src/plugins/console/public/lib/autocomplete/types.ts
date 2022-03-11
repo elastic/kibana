@@ -24,7 +24,7 @@ export interface AutoCompleteContext {
     bodyAutocompleteRootComponents: unknown;
     id?: string;
     documentation?: string;
-    data_autocomplete_rules?: Record<string, any> | null;
+    data_autocomplete_rules?: Record<string, unknown> | null;
   };
   urlPath?: null | unknown;
   urlParamsTokenPath?: Array<Record<string, string>> | null;
