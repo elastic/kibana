@@ -12,9 +12,10 @@ import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState } from '../types';
 import { FormatFactory } from '../../../common';
-import { YConfig } from '../../../common/expressions';
-import { FillStyle } from '../../../common/expressions/xy_chart';
-
+import {
+  YConfig,
+  FillStyle,
+} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { ColorPicker } from './color_picker';
 import { updateLayer } from '.';
 import { useDebouncedValue } from '../../shared_components';
@@ -56,6 +57,7 @@ export const ReferenceLinePanel = (
         newYConfigs.push({
           forAccessor: accessor,
           ...yConfig,
+          type: 'lens_xy_yConfig',
         });
       }
       setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));

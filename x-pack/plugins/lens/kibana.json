@@ -24,6 +24,7 @@
     "expressionHeatmap"
   ],
   "optionalPlugins": [
+    "expressionXY",
     "usageCollection",
     "taskManager",
     "globalSearch",

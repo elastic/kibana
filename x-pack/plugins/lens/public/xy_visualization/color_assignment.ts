@@ -11,19 +11,15 @@ import type { Datatable } from 'src/plugins/expressions';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { FormatFactory, LayerType } from '../../common';
-import type { XYLayerConfig } from '../../common/expressions';
+import { FormatFactory } from '../../common';
 import { isDataLayer, isReferenceLayer } from './visualization_helpers';
+import {
+  DataLayerConfigResult,
+  ReferenceLineLayerConfigResult,
+  XYLayerConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
-
-interface LayerColorConfig {
-  palette?: PaletteOutput;
-  splitAccessor?: string;
-  accessors: string[];
-  layerId: string;
-  layerType: LayerType;
-}
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
@@ -31,19 +27,19 @@ export type ColorAssignments = Record<
   string,
   {
     totalSeriesCount: number;
-    getRank(sortedLayer: LayerColorConfig, seriesKey: string, yAccessor: string): number;
+    getRank(sortedLayer: DataLayerConfigResult, seriesKey: string, yAccessor: string): number;
   }
 >;
 
 export function getColorAssignments(
-  layers: LayerColorConfig[],
+  layers: XYLayerConfig[],
   data: { tables: Record<string, Datatable> },
   formatFactory: FormatFactory
 ): ColorAssignments {
-  const layersPerPalette: Record<string, LayerColorConfig[]> = {};
+  const layersPerPalette: Record<string, DataLayerConfigResult[]> = {};
 
   layers
-    .filter((layer) => isDataLayer(layer))
+    .filter((layer): layer is DataLayerConfigResult => isDataLayer(layer))
     .forEach((layer) => {
       const palette = layer.palette?.name || 'default';
       if (!layersPerPalette[palette]) {
@@ -82,7 +78,7 @@ export function getColorAssignments(
     );
     return {
       totalSeriesCount,
-      getRank(sortedLayer: LayerColorConfig, seriesKey: string, yAccessor: string) {
+      getRank(sortedLayer: DataLayerConfigResult, seriesKey: string, yAccessor: string) {
         const layerIndex = paletteLayers.findIndex((l) => sortedLayer.layerId === l.layerId);
         const currentSeriesPerLayer = seriesPerLayer[layerIndex];
         const splitRank = currentSeriesPerLayer.splits.indexOf(seriesKey);
@@ -102,7 +98,7 @@ export function getColorAssignments(
   });
 }
 
-const getReferenceLineAccessorColorConfig = (layer: XYLayerConfig) => {
+const getReferenceLineAccessorColorConfig = (layer: ReferenceLineLayerConfigResult) => {
   return layer.accessors.map((accessor) => {
     const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     return {

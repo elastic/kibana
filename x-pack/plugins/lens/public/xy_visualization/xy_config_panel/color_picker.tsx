@@ -109,6 +109,7 @@ export const ColorPicker = ({
           newYConfigs.push({
             forAccessor: accessor,
             color: output.hex,
+            type: 'lens_xy_yConfig',
           });
         }
         setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));

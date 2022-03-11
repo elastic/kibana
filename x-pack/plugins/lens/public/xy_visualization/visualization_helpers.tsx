@@ -11,11 +11,12 @@ import { DatasourcePublicAPI, OperationMetadata, VisualizationType } from '../ty
 import { State, visualizationTypes, XYState } from './types';
 import { isHorizontalChart } from './state_helpers';
 import {
+  DataLayerConfigResult,
+  ReferenceLineLayerConfigResult,
   SeriesType,
   XYDataLayerConfig,
   XYLayerConfig,
-  XYReferenceLineLayerConfig,
-} from '../../common/expressions';
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '..';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
@@ -127,20 +128,22 @@ export function checkScaleOperation(
   };
 }
 
-export const isDataLayer = (layer: Pick<XYLayerConfig, 'layerType'>): layer is XYDataLayerConfig =>
+export const isDataLayer = (layer: XYLayerConfig): layer is DataLayerConfigResult =>
   layer.layerType === layerTypes.DATA || !layer.layerType;
 
 export const getDataLayers = (layers: XYLayerConfig[]) =>
-  (layers || []).filter((layer): layer is XYDataLayerConfig => isDataLayer(layer));
+  (layers || []).filter((layer): layer is DataLayerConfigResult => isDataLayer(layer));
 
 export const getFirstDataLayer = (layers: XYLayerConfig[]) =>
-  (layers || []).find((layer): layer is XYDataLayerConfig => isDataLayer(layer));
+  (layers || []).find((layer): layer is DataLayerConfigResult => isDataLayer(layer));
 
-export const isReferenceLayer = (layer: XYLayerConfig): layer is XYReferenceLineLayerConfig =>
+export const isReferenceLayer = (layer: XYLayerConfig): layer is ReferenceLineLayerConfigResult =>
   layer.layerType === layerTypes.REFERENCELINE;
 
 export const getReferenceLayers = (layers: XYLayerConfig[]) =>
-  (layers || []).filter((layer): layer is XYReferenceLineLayerConfig => isReferenceLayer(layer));
+  (layers || []).filter((layer): layer is ReferenceLineLayerConfigResult =>
+    isReferenceLayer(layer)
+  );
 
 export function getVisualizationType(state: State): VisualizationType | 'mixed' {
   if (!state.layers.length) {
@@ -241,9 +244,23 @@ export function newLayerState(
   layerId: string,
   layerType: LayerType = layerTypes.DATA
 ): XYLayerConfig {
+  if (layerType === 'data') {
+    return {
+      type: 'lens_xy_data_layer',
+      layerId,
+      seriesType,
+      accessors: [],
+      layerType,
+      yScaleType: 'linear',
+      xScaleType: 'linear',
+      isHistogram: false,
+      palette: { type: 'palette', name: 'default' },
+    };
+  }
+
   return {
+    type: 'lens_xy_referenceLine_layer',
     layerId,
-    seriesType,
     accessors: [],
     layerType,
   };
@@ -257,7 +274,7 @@ export function getLayersByType(state: State, byType?: string) {
 
 export function validateLayersForDimension(
   dimension: string,
-  layers: XYDataLayerConfig[],
+  layers: DataLayerConfigResult[],
   missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
   | { valid: true }

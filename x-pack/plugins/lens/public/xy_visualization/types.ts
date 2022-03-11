@@ -27,7 +27,7 @@ import type {
   AxesSettingsConfig,
   FittingFunction,
   LabelsOrientationConfig,
-} from '../../common/expressions';
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import type { ValueLabelConfig } from '../../common/types';
 
 // Persisted parts of the state

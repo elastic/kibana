@@ -21,7 +21,13 @@ import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
 import { State, visualizationTypes, XYSuggestion } from './types';
-import { SeriesType, XYDataLayerConfig, XYLayerConfig, YAxisMode } from '../../common/expressions';
+import {
+  SeriesType,
+  XYDataLayerConfig,
+  XYLayerConfig,
+  YAxisMode,
+  YConfigResult,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
@@ -136,6 +142,11 @@ export const getXyVisualization = ({
             seriesType: defaultSeriesType,
             showGridlines: false,
             layerType: layerTypes.DATA,
+            type: 'lens_xy_data_layer',
+            xScaleType: 'linear',
+            yScaleType: 'linear',
+            isHistogram: false,
+            palette: { name: 'default', type: 'palette' },
           },
         ],
       }
@@ -291,11 +302,12 @@ export const getXyVisualization = ({
       return prevState;
     }
     const axisMode = axisPosition as YAxisMode;
-    const yConfig = metrics.map((metric, idx) => {
+    const yConfig = metrics.map<YConfigResult>((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],
         ...(axisMode && { axisMode }),
+        type: 'lens_xy_yConfig',
       };
     });
     const newLayer = {

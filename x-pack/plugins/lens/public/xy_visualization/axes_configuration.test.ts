@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataLayerArgs } from '../../common/expressions';
+import { DataLayerConfigResult } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
@@ -219,7 +219,8 @@ describe('axes_configuration', () => {
     },
   };
 
-  const sampleLayer: DataLayerArgs = {
+  const sampleLayer: DataLayerConfigResult = {
+    type: 'lens_xy_data_layer',
     layerId: 'first',
     layerType: layerTypes.DATA,
     seriesType: 'line',
@@ -271,7 +272,12 @@ describe('axes_configuration', () => {
   it('should map right series to right axis', () => {
     const formatFactory = jest.fn();
     const groups = getAxesConfiguration(
-      [{ ...sampleLayer, yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }] }],
+      [
+        {
+          ...sampleLayer,
+          yConfig: [{ type: 'lens_xy_yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
+        },
+      ],
       false,
       tables,
       formatFactory
@@ -289,7 +295,7 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
+          yConfig: [{ type: 'lens_xy_yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
       false,
@@ -313,7 +319,7 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
+          yConfig: [{ type: 'lens_xy_yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
       false,

@@ -8,8 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { fittingFunctionDefinitions } from '../../../../common/expressions';
-import type { FittingFunction } from '../../../../common/expressions';
+import { fittingFunctionDefinitions } from './fitting_function_definitions';
+import type { FittingFunction } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 export interface MissingValuesOptionProps {
   fittingFunction?: FittingFunction;
@@ -65,7 +65,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
               };
             })}
             valueOfSelected={fittingFunction || 'None'}
-            onChange={(value) => onFittingFnChange(value)}
+            onChange={(value: FittingFunction) => onFittingFnChange(value)}
             itemLayoutAlign="top"
             hasDividers
           />

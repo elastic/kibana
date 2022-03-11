@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { LEGACY_TIME_AXIS } from 'src/plugins/charts/common';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
+import moment from 'moment';
+import { CoreSetup, CoreStart, IUiSettingsClient } from '../../../../core/public';
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
   xyChartFunction,
@@ -20,11 +25,28 @@ import {
   referenceLineLayerConfigFunction,
   axisTitlesVisibilityConfigFunction,
 } from '../common';
+import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
 
-export class ExpressionXyPlugin
-  implements Plugin<ExpressionXyPluginSetup, ExpressionXyPluginStart>
-{
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionXyPluginSetup {
+export interface XYPluginStartDependencies {
+  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  charts: ChartsPluginStart;
+}
+
+export function getTimeZone(uiSettings: IUiSettingsClient) {
+  const configuredTimeZone = uiSettings.get('dateFormat:tz');
+  if (configuredTimeZone === 'Browser') {
+    return moment.tz.guess();
+  }
+
+  return configuredTimeZone;
+}
+
+export class ExpressionXyPlugin {
+  public setup(
+    core: CoreSetup<XYPluginStartDependencies>,
+    { expressions, charts }: SetupDeps
+  ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
@@ -35,6 +57,37 @@ export class ExpressionXyPlugin
     expressions.registerFunction(referenceLineLayerConfigFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyChartFunction);
+
+    const getStartDeps: GetStartDepsFn = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      const {
+        data,
+        fieldFormats,
+        charts: { activeCursor, theme, palettes },
+      } = deps;
+
+      const paletteService = await palettes.getPalettes();
+
+      const { theme: kibanaTheme } = coreStart;
+      const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
+
+      return {
+        data,
+        formatFactory: fieldFormats.deserialize,
+        kibanaTheme,
+        theme,
+        activeCursor,
+        paletteService,
+        useLegacyTimeAxis,
+        timeZone: getTimeZone(core.uiSettings),
+      };
+    };
+
+    expressions.registerRenderer(
+      getXyChartRenderer({
+        getStartDeps,
+      })
+    );
   }
 
   public start(core: CoreStart): ExpressionXyPluginStart {}

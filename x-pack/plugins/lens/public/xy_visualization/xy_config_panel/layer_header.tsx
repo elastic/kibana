@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
 import type { VisualizationLayerWidgetProps, VisualizationType } from '../../types';
 import { State, visualizationTypes } from '../types';
-import { SeriesType, XYDataLayerConfig } from '../../../common/expressions';
+import {
+  DataLayerConfigResult,
+  SeriesType,
+} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { StaticHeader } from '../../shared_components';
@@ -44,8 +47,9 @@ function ReferenceLayerHeader() {
 function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const { state, layerId } = props;
-  const index = state.layers.findIndex((l) => l.layerId === layerId);
-  const layer = state.layers[index] as XYDataLayerConfig;
+  const layers = state.layers as DataLayerConfigResult[];
+  const index = layers.findIndex((l) => l.layerId === layerId);
+  const layer = layers[index];
   const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
   const horizontalOnly = isHorizontalChart(state.layers);
 

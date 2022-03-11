@@ -8,8 +8,13 @@
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation, VisualizeEditorContext, Suggestion, OperationDescriptor } from '../types';
-import type { State, XYSuggestion } from './types';
-import type { SeriesType, XYDataLayerConfig, XYLayerConfig } from '../../common/expressions';
+import type { State, XYState, XYSuggestion } from './types';
+import type {
+  DataLayerConfigResult,
+  SeriesType,
+  XYDataLayerConfig,
+  XYLayerConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
@@ -19,7 +24,7 @@ import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_format
 import { Datatable } from 'src/plugins/expressions';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
-function exampleState(): State {
+function exampleState(): XYState {
   return {
     legend: { position: Position.Bottom, isVisible: true },
     valueLabels: 'hide',
@@ -32,7 +37,12 @@ function exampleState(): State {
         splitAccessor: 'd',
         xAccessor: 'a',
         accessors: ['b', 'c'],
-      } as XYDataLayerConfig,
+        xScaleType: 'linear',
+        yScaleType: 'linear',
+        isHistogram: false,
+        type: 'lens_xy_data_layer',
+        palette: { type: 'palette', name: 'default' },
+      },
     ],
   };
 }
@@ -100,12 +110,12 @@ describe('xy_visualization', () => {
   });
 
   describe('#getVisualizationTypeId', () => {
-    function mixedState(...types: SeriesType[]) {
+    function mixedState(...types: SeriesType[]): XYState {
       const state = exampleState();
       return {
         ...state,
         layers: types.map((t, i) => ({
-          ...(state.layers[0] as XYDataLayerConfig),
+          ...(state.layers[0] as DataLayerConfigResult),
           layerId: `layer_${i}`,
           seriesType: t,
         })),
@@ -187,6 +197,11 @@ describe('xy_visualization', () => {
             splitAccessor: 'e',
             xAccessor: 'f',
             accessors: ['g', 'h'],
+            xScaleType: 'linear',
+            yScaleType: 'linear',
+            isHistogram: false,
+            type: 'lens_xy_data_layer',
+            palette: { type: 'palette', name: 'default' },
           },
         ],
       };
@@ -278,6 +293,11 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
+                xScaleType: 'linear',
+                yScaleType: 'linear',
+                isHistogram: false,
+                type: 'lens_xy_data_layer',
+                palette: { type: 'palette', name: 'default' },
               },
             ],
           },
@@ -307,6 +327,11 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
+                xScaleType: 'linear',
+                yScaleType: 'linear',
+                isHistogram: false,
+                type: 'lens_xy_data_layer',
+                palette: { type: 'palette', name: 'default' },
               },
             ],
           },
@@ -334,6 +359,7 @@ describe('xy_visualization', () => {
                 layerId: 'referenceLine',
                 layerType: layerTypes.REFERENCELINE,
                 accessors: [],
+                type: 'lens_xy_referenceLine_layer',
               },
             ],
           },
@@ -415,6 +441,11 @@ describe('xy_visualization', () => {
               seriesType: 'line',
               xAccessor: undefined,
               accessors: ['a'],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
           ],
         },
@@ -633,6 +664,11 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
+                xScaleType: 'linear',
+                yScaleType: 'linear',
+                isHistogram: false,
+                type: 'lens_xy_data_layer',
+                palette: { type: 'palette', name: 'default' },
               },
             ],
           },
@@ -789,7 +825,7 @@ describe('xy_visualization', () => {
                 ...baseState.layers[0],
                 accessors: ['a'],
                 seriesType: 'bar_percentage_stacked',
-              } as XYDataLayerConfig,
+              } as XYLayerConfig,
             ],
           },
           frame,
@@ -1008,12 +1044,18 @@ describe('xy_visualization', () => {
               splitAccessor: undefined,
               xAccessor: undefined,
               accessors: ['a'],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
             {
               layerId: 'referenceLine',
               layerType: layerTypes.REFERENCELINE,
               accessors: [],
-              yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
+              yConfig: [{ axisMode: 'left', forAccessor: 'a', type: 'lens_xy_yConfig' }],
+              type: 'lens_xy_referenceLine_layer',
             },
           ],
         };
@@ -1059,7 +1101,9 @@ describe('xy_visualization', () => {
 
       it('should return a group for the vertical right axis', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].yConfig = [{ axisMode: 'right', forAccessor: 'a' }];
+        state.layers[0].yConfig = [
+          { axisMode: 'right', forAccessor: 'a', type: 'lens_xy_yConfig' },
+        ];
         state.layers[1].yConfig![0].axisMode = 'right';
 
         const options = xyVisualization.getConfiguration({
@@ -1141,13 +1185,13 @@ describe('xy_visualization', () => {
         (state.layers[0] as XYDataLayerConfig).accessors = ['a', 'b'];
         // invert them on purpose
         (state.layers[0] as XYDataLayerConfig).yConfig = [
-          { axisMode: 'right', forAccessor: 'b' },
-          { axisMode: 'left', forAccessor: 'a' },
+          { axisMode: 'right', forAccessor: 'b', type: 'lens_xy_yConfig' },
+          { axisMode: 'left', forAccessor: 'a', type: 'lens_xy_yConfig' },
         ];
         state.layers[1].yConfig = [
-          { forAccessor: 'c', axisMode: 'bottom' },
-          { forAccessor: 'b', axisMode: 'right' },
-          { forAccessor: 'a', axisMode: 'left' },
+          { forAccessor: 'c', axisMode: 'bottom', type: 'lens_xy_yConfig' },
+          { forAccessor: 'b', axisMode: 'right', type: 'lens_xy_yConfig' },
+          { forAccessor: 'a', axisMode: 'left', type: 'lens_xy_yConfig' },
         ];
         // set the xAccessor as number histogram
         frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
@@ -1321,7 +1365,7 @@ describe('xy_visualization', () => {
                 ...baseState.layers[0],
                 splitAccessor: undefined,
                 ...layerConfigOverride,
-              } as XYDataLayerConfig,
+              } as XYLayerConfig,
             ],
           },
           frame,
@@ -1358,6 +1402,7 @@ describe('xy_visualization', () => {
               {
                 forAccessor: 'b',
                 color: 'red',
+                type: 'lens_xy_yConfig',
               },
             ],
           },
@@ -1503,6 +1548,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
           ],
         })
@@ -1519,6 +1569,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
             {
               layerId: 'second',
@@ -1526,6 +1581,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
           ],
         })
@@ -1542,6 +1602,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
             {
               layerId: 'second',
@@ -1550,6 +1615,11 @@ describe('xy_visualization', () => {
               xAccessor: undefined,
               accessors: ['a'],
               splitAccessor: 'a',
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
           ],
         })
@@ -1567,6 +1637,11 @@ describe('xy_visualization', () => {
               xAccessor: undefined,
               accessors: [],
               splitAccessor: 'a',
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
           ],
         })
@@ -1583,6 +1658,11 @@ describe('xy_visualization', () => {
               xAccessor: undefined,
               accessors: [],
               splitAccessor: 'a',
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
             {
               layerId: 'second',
@@ -1591,6 +1671,11 @@ describe('xy_visualization', () => {
               xAccessor: undefined,
               accessors: [],
               splitAccessor: 'a',
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
           ],
         })
@@ -1607,6 +1692,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
             {
               layerId: 'second',
@@ -1614,6 +1704,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: undefined,
               accessors: ['a'],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
           ],
         })
@@ -1635,6 +1730,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
             {
               layerId: 'second',
@@ -1643,6 +1743,11 @@ describe('xy_visualization', () => {
               xAccessor: undefined,
               accessors: [],
               splitAccessor: 'a',
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
             {
               layerId: 'third',
@@ -1651,6 +1756,11 @@ describe('xy_visualization', () => {
               xAccessor: undefined,
               accessors: [],
               splitAccessor: 'a',
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
           ],
         })
@@ -1672,6 +1782,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
             {
               layerId: 'second',
@@ -1679,6 +1794,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
             {
               layerId: 'third',
@@ -1686,6 +1806,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
           ],
         })
@@ -1710,6 +1835,11 @@ describe('xy_visualization', () => {
                 splitAccessor: 'd',
                 xAccessor: 'a',
                 accessors: ['b'], // just use a single accessor to avoid too much noise
+                xScaleType: 'linear',
+                yScaleType: 'linear',
+                isHistogram: false,
+                type: 'lens_xy_data_layer',
+                palette: { type: 'palette', name: 'default' },
               },
             ],
           },
@@ -1758,6 +1888,11 @@ describe('xy_visualization', () => {
                 splitAccessor: 'd',
                 xAccessor: 'a',
                 accessors: ['b'],
+                xScaleType: 'linear',
+                yScaleType: 'linear',
+                isHistogram: false,
+                type: 'lens_xy_data_layer',
+                palette: { type: 'palette', name: 'default' },
               },
               {
                 layerId: 'second',
@@ -1766,6 +1901,11 @@ describe('xy_visualization', () => {
                 splitAccessor: 'd',
                 xAccessor: 'e',
                 accessors: ['b'],
+                xScaleType: 'linear',
+                yScaleType: 'linear',
+                isHistogram: false,
+                type: 'lens_xy_data_layer',
+                palette: { type: 'palette', name: 'default' },
               },
             ],
           },
@@ -1814,6 +1954,11 @@ describe('xy_visualization', () => {
                 splitAccessor: 'd',
                 xAccessor: 'a',
                 accessors: ['b'],
+                xScaleType: 'linear',
+                yScaleType: 'linear',
+                isHistogram: false,
+                type: 'lens_xy_data_layer',
+                palette: { type: 'palette', name: 'default' },
               },
               {
                 layerId: 'second',
@@ -1822,6 +1967,11 @@ describe('xy_visualization', () => {
                 splitAccessor: 'd',
                 xAccessor: 'e',
                 accessors: ['b'],
+                xScaleType: 'linear',
+                yScaleType: 'linear',
+                isHistogram: false,
+                type: 'lens_xy_data_layer',
+                palette: { type: 'palette', name: 'default' },
               },
             ],
           },
@@ -1885,6 +2035,11 @@ describe('xy_visualization', () => {
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['b'],
+              xScaleType: 'linear',
+              yScaleType: 'linear',
+              isHistogram: false,
+              type: 'lens_xy_data_layer',
+              palette: { type: 'palette', name: 'default' },
             },
           ],
         },

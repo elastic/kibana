@@ -15,7 +15,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AxesSettingsConfig } from '../../common/expressions';
+import { AxesSettingsConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { useDebouncedValue } from './';
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 

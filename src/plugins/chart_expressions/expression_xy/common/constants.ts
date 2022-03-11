@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-
 export const XY_CHART = 'lens_xy_chart';
 export const Y_CONFIG = 'lens_xy_yConfig';
 export const MULTITABLE = 'lens_multitable';
@@ -103,51 +101,3 @@ export const ValueLabelModes = {
   INSIDE: 'inside',
   OUTSIDE: 'outside',
 } as const;
-
-export const fittingFunctionDefinitions = [
-  {
-    id: FittingFunctions.NONE,
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.none', {
-      defaultMessage: 'Hide',
-    }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.none', {
-      defaultMessage: 'Do not fill gaps',
-    }),
-  },
-  {
-    id: FittingFunctions.ZERO,
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.zero', {
-      defaultMessage: 'Zero',
-    }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.zero', {
-      defaultMessage: 'Fill gaps with zeros',
-    }),
-  },
-  {
-    id: FittingFunctions.LINEAR,
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.linear', {
-      defaultMessage: 'Linear',
-    }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.linear', {
-      defaultMessage: 'Fill gaps with a line',
-    }),
-  },
-  {
-    id: FittingFunctions.CARRY,
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.carry', {
-      defaultMessage: 'Last',
-    }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.carry', {
-      defaultMessage: 'Fill gaps with the last value',
-    }),
-  },
-  {
-    id: FittingFunctions.LOOKAHEAD,
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.lookahead', {
-      defaultMessage: 'Next',
-    }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.lookahead', {
-      defaultMessage: 'Fill gaps with the next value',
-    }),
-  },
-];

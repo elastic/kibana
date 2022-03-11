@@ -12,11 +12,12 @@ import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type {
+  ReferenceLineLayerConfigResult,
   ValidLayer,
   XYLayerConfig,
   XYReferenceLineLayerConfig,
   YConfig,
-} from '../../common/expressions';
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
@@ -125,7 +126,7 @@ export const buildExpression = (
   attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
   const validLayers = state.layers
-    .filter((layer): layer is ValidLayer => Boolean(layer.accessors.length))
+    .filter<ValidLayer>((layer): layer is ValidLayer => Boolean(layer.accessors.length))
     .map((layer) => {
       if (!datasourceLayers) {
         return layer;
@@ -324,7 +325,7 @@ export const buildExpression = (
 };
 
 const referenceLineLayerToExpression = (
-  layer: XYReferenceLineLayerConfig,
+  layer: ReferenceLineLayerConfigResult,
   datasourceLayer: DatasourcePublicAPI
 ): Ast => {
   return {

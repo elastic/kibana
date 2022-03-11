@@ -18,7 +18,7 @@ import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
 import { layerTypes } from '../../../common';
-import { XYDataLayerConfig } from '../../../common/expressions';
+import { DataLayerConfigResult } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -36,6 +36,11 @@ describe('XY Config panels', () => {
           splitAccessor: 'baz',
           xAccessor: 'foo',
           accessors: ['bar'],
+          xScaleType: 'linear',
+          yScaleType: 'linear',
+          isHistogram: false,
+          type: 'lens_xy_data_layer',
+          palette: { type: 'palette', name: 'default' },
         },
       ],
     };
@@ -64,7 +69,12 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'bar' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'bar', type: 'lens_xy_yConfig' }],
+              },
+            ],
           }}
         />
       );
@@ -80,7 +90,12 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'foo', type: 'lens_xy_yConfig' }],
+              },
+            ],
           }}
         />
       );
@@ -100,7 +115,12 @@ describe('XY Config panels', () => {
           state={{
             ...state,
             hideEndzones: true,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'foo', type: 'lens_xy_yConfig' }],
+              },
+            ],
           }}
         />
       );
@@ -208,7 +228,7 @@ describe('XY Config panels', () => {
           groupId="left"
           state={{
             ...state,
-            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
+            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as DataLayerConfigResult],
           }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
@@ -276,6 +296,11 @@ describe('XY Config panels', () => {
                 splitAccessor: undefined,
                 xAccessor: 'foo',
                 accessors: ['bar'],
+                xScaleType: 'linear',
+                yScaleType: 'linear',
+                isHistogram: false,
+                type: 'lens_xy_data_layer',
+                palette: { type: 'palette', name: 'default' },
               },
             ],
           }}
@@ -316,7 +341,12 @@ describe('XY Config panels', () => {
                 splitAccessor: undefined,
                 xAccessor: 'foo',
                 accessors: ['bar'],
-                yConfig: [{ forAccessor: 'bar', color: 'red' }],
+                yConfig: [{ forAccessor: 'bar', color: 'red', type: 'lens_xy_yConfig' }],
+                xScaleType: 'linear',
+                yScaleType: 'linear',
+                isHistogram: false,
+                type: 'lens_xy_data_layer',
+                palette: { type: 'palette', name: 'default' },
               },
             ],
           }}

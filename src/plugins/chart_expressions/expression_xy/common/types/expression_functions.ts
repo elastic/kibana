@@ -9,7 +9,7 @@
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import { Datatable } from '../../../../expressions';
-import { PaletteOutput } from '../../../charts/common';
+import { PaletteOutput } from '../../../../charts/common';
 import {
   AxisExtentModes,
   FillStyles,
@@ -87,7 +87,7 @@ export interface XYDataLayerConfig {
   splitAccessor?: string;
   palette?: PaletteOutput;
 }
-export interface ValidLayer extends XYDataLayerConfig {
+export interface ValidLayer extends DataLayerConfigResult {
   xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
 }
 
@@ -156,7 +156,7 @@ export interface XYArgs {
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
   valueLabels: ValueLabelMode;
-  layers: DataLayerConfigResult[] | ReferenceLineLayerConfigResult[];
+  layers: Array<DataLayerConfigResult | ReferenceLineLayerConfigResult>;
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -178,7 +178,7 @@ export type ReferenceLineLayerArgs = XYReferenceLineLayerConfig & {
   columnToLabel?: string;
 };
 
-export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;
+export type XYLayerConfig = DataLayerConfigResult | ReferenceLineLayerConfigResult;
 
 export interface LensMultiTable {
   type: typeof MULTITABLE;

@@ -12,7 +12,7 @@ import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State } from '../types';
 import { FormatFactory } from '../../../common';
-import { YAxisMode } from '../../../common/expressions';
+import { YAxisMode } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
 import { ReferenceLinePanel } from './reference_line_panel';
@@ -138,6 +138,7 @@ export function DimensionEditor(
               newYAxisConfigs.push({
                 forAccessor: accessor,
                 axisMode: newMode,
+                type: 'lens_xy_yConfig',
               });
             }
             setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));

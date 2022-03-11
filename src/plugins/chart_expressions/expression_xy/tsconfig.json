@@ -16,5 +16,8 @@
     { "path": "../../charts/tsconfig.json" },
     { "path": "../../../core/tsconfig.json" },
     { "path": "../../expressions/tsconfig.json" },
+    { "path": "../../data/tsconfig.json"},
+    { "path": "../../ui_actions/tsconfig.json" },
+    { "path": "../../field_formats/tsconfig.json"},
   ]
 }

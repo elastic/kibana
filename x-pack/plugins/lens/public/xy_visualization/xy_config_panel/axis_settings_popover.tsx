@@ -19,7 +19,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from '../../../common/expressions';
+import {
+  XYLayerConfig,
+  AxesSettingsConfig,
+  AxisExtentConfig,
+} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import {
   ToolbarPopover,
   useDebouncedValue,

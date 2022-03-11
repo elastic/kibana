@@ -17,7 +17,11 @@ import {
   TableChangeType,
 } from '../types';
 import { State, XYState, visualizationTypes } from './types';
-import type { SeriesType, XYDataLayerConfig } from '../../common/expressions';
+import type {
+  DataLayerConfigResult,
+  SeriesType,
+  XYLayerConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
@@ -498,26 +502,33 @@ function buildSuggestion({
     splitBy = xValue;
     xValue = undefined;
   }
-  const existingLayer: XYDataLayerConfig | {} =
-    getExistingLayer(currentState, layerId) || ({} as XYDataLayerConfig);
+  const existingLayer = getExistingLayer(currentState, layerId) || null;
   const accessors = yValues.map((col) => col.columnId);
-  const newLayer = {
-    ...existingLayer,
-    palette: mainPalette || ('palette' in existingLayer ? existingLayer.palette : undefined),
+  const newLayer: DataLayerConfigResult = {
+    ...(existingLayer || {}),
+    palette:
+      mainPalette ||
+      (existingLayer && 'palette' in existingLayer
+        ? (existingLayer as DataLayerConfigResult).palette
+        : { type: 'palette', name: '' }),
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
     splitAccessor: splitBy?.columnId,
     accessors,
     yConfig:
-      'yConfig' in existingLayer && existingLayer.yConfig
+      existingLayer && 'yConfig' in existingLayer && existingLayer.yConfig
         ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
     layerType: layerTypes.DATA,
+    xScaleType: (existingLayer as DataLayerConfigResult).xScaleType ?? 'linear',
+    yScaleType: (existingLayer as DataLayerConfigResult).yScaleType ?? 'linear',
+    isHistogram: (existingLayer as DataLayerConfigResult).isHistogram ?? false,
+    type: 'lens_xy_data_layer',
   };
 
   // Maintain consistent order for any layers that were saved
-  const keptLayers = currentState
+  const keptLayers: XYLayerConfig[] = currentState
     ? currentState.layers
         // Remove layers that aren't being suggested
         .filter((layer) => keptLayerIds.includes(layer.layerId))
@@ -564,7 +575,8 @@ function buildSuggestion({
       yRight: true,
     },
     preferredSeriesType: seriesType,
-    layers: Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
+    layers:
+      existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
   };
 
   return {

@@ -8,7 +8,13 @@
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { layerTypes } from '../../common';
-import type { XYDataLayerConfig, XYLayerConfig, YConfig } from '../../common/expressions';
+import type {
+  DataLayerConfigResult,
+  XYDataLayerConfig,
+  XYLayerConfig,
+  YAxisMode,
+  YConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import type { AccessorConfig, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
@@ -68,7 +74,7 @@ export function getGroupsRelatedToData<T extends ReferenceLineBase>(
  * Returns a dictionary with the groups filled in all the data layers
  */
 export function getGroupsAvailableInData(
-  dataLayers: XYDataLayerConfig[],
+  dataLayers: DataLayerConfigResult[],
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   tables: Record<string, Datatable> | undefined
 ) {
@@ -84,7 +90,7 @@ export function getGroupsAvailableInData(
 }
 
 export function getStaticValue(
-  dataLayers: XYDataLayerConfig[],
+  dataLayers: DataLayerConfigResult[],
   groupId: 'x' | 'yLeft' | 'yRight',
   { activeData }: Pick<FramePublicAPI, 'activeData'>,
   layerHasNumberHistogram: (layer: XYDataLayerConfig) => boolean
@@ -120,7 +126,7 @@ export function getStaticValue(
 
 function getAccessorCriteriaForGroup(
   groupId: 'x' | 'yLeft' | 'yRight',
-  dataLayers: XYDataLayerConfig[],
+  dataLayers: DataLayerConfigResult[],
   activeData: FramePublicAPI['activeData']
 ) {
   switch (groupId) {
@@ -333,20 +339,26 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
     ? newLayer.yConfig?.find(({ forAccessor }) => forAccessor === previousColumn)
     : false;
   if (!hasYConfig) {
+    const axisMode: YAxisMode =
+      groupId === 'xReferenceLine'
+        ? 'bottom'
+        : groupId === 'yReferenceLineRight'
+        ? 'right'
+        : 'left';
+
     newLayer.yConfig = [
       ...(newLayer.yConfig || []),
-      {
-        // override with previous styling,
-        ...previousYConfig,
-        // but keep the new group & id config
-        forAccessor: columnId,
-        axisMode:
-          groupId === 'xReferenceLine'
-            ? 'bottom'
-            : groupId === 'yReferenceLineRight'
-            ? 'right'
-            : 'left',
-      },
+      ...(previousYConfig
+        ? [
+            {
+              // override with previous styling,
+              ...previousYConfig,
+              // but keep the new group & id config
+              forAccessor: columnId,
+              axisMode,
+            },
+          ]
+        : []),
     ];
   }
   return {

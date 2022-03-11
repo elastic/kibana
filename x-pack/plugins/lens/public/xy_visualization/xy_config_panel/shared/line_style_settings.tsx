@@ -14,8 +14,11 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
-import { YConfig } from '../../../../common/expressions';
-import { LineStyle } from '../../../../common/expressions/xy_chart';
+import {
+  LineStyle,
+  YConfig,
+} from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
+
 import { idPrefix } from '../dimension_editor';
 
 export const LineStyleSettings = ({
