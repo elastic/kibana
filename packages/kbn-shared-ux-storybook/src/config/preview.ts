@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { addDecorator } from '@storybook/react';
+import { servicesDecorator } from '../decorators';
 
-module.exports = defaultConfig;
+addDecorator(servicesDecorator);

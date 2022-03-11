@@ -3121,6 +3121,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook":
+  version "0.0.0"
+  uid ""
+
 "@kbn/spec-to-console@link:bazel-bin/packages/kbn-spec-to-console":
   version "0.0.0"
   uid ""
@@ -6091,6 +6095,10 @@
   uid ""
 
 "@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook/npm_module_types":
   version "0.0.0"
   uid ""
 

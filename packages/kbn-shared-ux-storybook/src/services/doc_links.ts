@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { SharedUxDocLinksService, ServiceFactory } from '@kbn/shared-ux-services';
-
-export type SharedUXDockLinksServiceFactory = ServiceFactory<SharedUxDocLinksService>;
+import { ServiceFactory, SharedUxDocLinksService } from '@kbn/shared-ux-services';
 
 /**
- * A factory function for creating a Jest-based implementation of `SharedUXDocLinksService`.
+ * A factory function for creating a Storybook implementation of `SharedUxDocLinksService`.
  */
-export const docLinksServiceFactory: SharedUXDockLinksServiceFactory = () => ({
+export type SharedUxDocLinksServiceFactory = ServiceFactory<SharedUxDocLinksService>;
+
+/**
+ * A factory function for creating a Storybook implementation of `SharedUxDocLinksService`.
+ */
+export const docLinksServiceFactory: SharedUxDocLinksServiceFactory = () => ({
   dataViewsDocLink: 'https://www.elastic.co/guide/en/kibana/master/data-views.html',
 });

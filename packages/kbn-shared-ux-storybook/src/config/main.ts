@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { addDecorator } from '@storybook/react';
-import { servicesDecorator } from './decorators';
+import { defaultConfig } from '@kbn/storybook';
 
-addDecorator(servicesDecorator);
+module.exports = {
+  ...defaultConfig,
+  stories: [
+    '../../../kbn-shared-ux*/**/*.stories.+(tsx|mdx)',
+    '../../../../src/plugins/shared_ux/**/*.stories.+(tsx|mdx)',
+  ],
+};

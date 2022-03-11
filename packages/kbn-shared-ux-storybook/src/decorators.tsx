@@ -8,9 +8,10 @@
 
 import React from 'react';
 import { DecoratorFn } from '@storybook/react';
+
 import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
 
-import { servicesFactory } from '../public/services/storybook';
+import { servicesFactory } from './services';
 
 /**
  * A Storybook decorator that provides the Shared UX `ServicesProvider` with Storybook-specific

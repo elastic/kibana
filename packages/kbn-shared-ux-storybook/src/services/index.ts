@@ -6,14 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { SharedUxServices, ServiceFactory } from '@kbn/shared-ux-services';
+import type { ServiceFactory, SharedUxServices } from '@kbn/shared-ux-services';
+
 import { platformServiceFactory } from './platform';
 import { editorsServiceFactory } from './editors';
 import { userPermissionsServiceFactory } from './permissions';
 import { docLinksServiceFactory } from './doc_links';
 
+export { platformServiceFactory } from './platform';
+export { editorsServiceFactory } from './editors';
+export { userPermissionsServiceFactory } from './permissions';
+export { docLinksServiceFactory } from './doc_links';
+
 /**
- * A factory function for creating a Storybook-based implementation of `SharedUXServices`.
+ * A factory function for creating a Storybook implementation of `SharedUxServices`.
  */
 export const servicesFactory: ServiceFactory<SharedUxServices, {}> = (params) => ({
   platform: platformServiceFactory(params),
