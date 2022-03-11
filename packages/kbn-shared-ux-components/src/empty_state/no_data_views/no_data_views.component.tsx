@@ -23,7 +23,7 @@ export interface Props {
   emptyPromptColor?: EuiEmptyPromptProps['color'];
 }
 
-const createDataViewText = i18n.translate('sharedUX.noDataViewsPage.addDataViewText', {
+const createDataViewText = i18n.translate('sharedUXComponents.noDataViewsPage.addDataViewText', {
   defaultMessage: 'Create Data View',
 });
 
@@ -62,12 +62,12 @@ export const NoDataViews = ({
       title={
         <h2>
           <FormattedMessage
-            id="sharedUX.noDataViews.youHaveData"
+            id="sharedUXComponents.noDataViews.youHaveData"
             defaultMessage="You have data in Elasticsearch."
           />
           <br />
           <FormattedMessage
-            id="sharedUX.noDataViews.nowCreate"
+            id="sharedUXComponents.noDataViews.nowCreate"
             defaultMessage="Now, create a data view."
           />
         </h2>
@@ -75,7 +75,7 @@ export const NoDataViews = ({
       body={
         <p>
           <FormattedMessage
-            id="sharedUX.noDataViews.dataViewExplanation"
+            id="sharedUXComponents.noDataViews.dataViewExplanation"
             defaultMessage="Kibana requires a data view to identify which data streams,
             indices, and index aliases you want to explore. A data view can point to a
             specific index, for example, your log data from yesterday, or all indices

@@ -38,17 +38,17 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "//packages/kbn-i18n",
+  "//packages/kbn-i18n-react",
+  "//packages/kbn-shared-ux-services",
+  "//packages/kbn-shared-ux-storybook",
+  "//packages/kbn-shared-ux-utility",
   "@npm//react",
   "@npm//@elastic/eui",
   "@npm//@emotion/react",
   "@npm//@emotion/css",
   "@npm//classnames",
   "@npm//@storybook/addon-actions",
-  "//packages/kbn-shared-ux-services",
-  "//packages/kbn-shared-ux-storybook",
-  "//packages/kbn-shared-ux-utility",
-  "//packages/kbn-i18n",
-  "//packages/kbn-i18n-react",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -61,6 +61,11 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
+  "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-i18n-react:npm_module_types",
+  "//packages/kbn-shared-ux-services:npm_module_types",
+  "//packages/kbn-shared-ux-storybook:npm_module_types",
+  "//packages/kbn-shared-ux-utility:npm_module_types",
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
@@ -69,11 +74,6 @@ TYPES_DEPS = [
   "@npm//@emotion/css",
   "@npm//@storybook/addon-actions",
   "@npm//@types/classnames",
-  "//packages/kbn-shared-ux-services:npm_module_types",
-  "//packages/kbn-shared-ux-storybook:npm_module_types",
-  "//packages/kbn-shared-ux-utility:npm_module_types",
-  "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-i18n-react:npm_module_types",
 ]
 
 jsts_transpiler(
