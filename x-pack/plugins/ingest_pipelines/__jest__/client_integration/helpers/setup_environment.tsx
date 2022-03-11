@@ -11,6 +11,7 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { LocationDescriptorObject } from 'history';
 import { HttpSetup } from 'kibana/public';
 
+import { MockUrlService } from 'src/plugins/share/common/mocks';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { sharePluginMock } from '../../../../../../src/plugins/share/public/mocks';
 import {
@@ -53,6 +54,11 @@ const appServices = {
   fileUpload: {
     getMaxBytes: jest.fn().mockReturnValue(100),
     getMaxBytesFormatted: jest.fn().mockReturnValue('100'),
+  },
+  navigateToUrl: jest.fn(),
+  capabilities: { dev_tools: { show: true } },
+  share: {
+    url: new MockUrlService(),
   },
 };
 

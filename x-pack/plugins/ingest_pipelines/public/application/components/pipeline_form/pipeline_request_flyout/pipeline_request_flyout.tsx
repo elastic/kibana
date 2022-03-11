@@ -9,7 +9,7 @@ import React, { useState, useEffect, FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Pipeline } from '../../../../../common/types';
-import { useFormContext, ViewApiRequest, useKibana } from '../../../../shared_imports';
+import { useFormContext, ViewApiRequestFlyout, useKibana } from '../../../../shared_imports';
 
 import { ReadProcessorsFunction } from '../types';
 
@@ -52,7 +52,7 @@ export const PipelineRequestFlyout: FunctionComponent<Props> = ({
       });
 
   return (
-    <ViewApiRequest
+    <ViewApiRequestFlyout
       title={title}
       description={i18n.translate('xpack.ingestPipelines.requestFlyout.descriptionText', {
         defaultMessage: 'This Elasticsearch request will create or update the pipeline.',

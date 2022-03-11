@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ViewApiRequest } from './view_api_request';
+export { ViewApiRequestFlyout } from './view_api_request_flyout';

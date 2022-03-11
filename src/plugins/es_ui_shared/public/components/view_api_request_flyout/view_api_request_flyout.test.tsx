@@ -12,7 +12,7 @@ import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 import { compressToEncodedURIComponent } from 'lz-string';
 
-import { ViewApiRequest } from './view_api_request';
+import { ViewApiRequestFlyout } from './view_api_request_flyout';
 import type { UrlService } from 'src/plugins/share/common/url_service';
 
 const payload = {
@@ -32,15 +32,15 @@ const urlService = {
   },
 } as any as UrlService;
 
-describe('ViewApiRequest', () => {
+describe('ViewApiRequestFlyout', () => {
   test('is rendered', () => {
-    const component = mountWithI18nProvider(<ViewApiRequest {...payload} />);
+    const component = mountWithI18nProvider(<ViewApiRequestFlyout {...payload} />);
     expect(takeMountedSnapshot(component)).toMatchSnapshot();
   });
 
   describe('props', () => {
     test('on closeFlyout', async () => {
-      const component = mountWithI18nProvider(<ViewApiRequest {...payload} />);
+      const component = mountWithI18nProvider(<ViewApiRequestFlyout {...payload} />);
 
       await act(async () => {
         findTestSubject(component, 'apiRequestFlyoutClose').simulate('click');
@@ -50,7 +50,9 @@ describe('ViewApiRequest', () => {
     });
 
     test('doesnt have openInConsole when some optional props are not supplied', async () => {
-      const component = mountWithI18nProvider(<ViewApiRequest {...payload} canShowDevtools />);
+      const component = mountWithI18nProvider(
+        <ViewApiRequestFlyout {...payload} canShowDevtools />
+      );
 
       const openInConsole = findTestSubject(component, 'apiRequestFlyoutOpenInConsoleButton');
       expect(openInConsole.length).toEqual(0);
@@ -59,7 +61,7 @@ describe('ViewApiRequest', () => {
     test('has openInConsole when all optional props are supplied', async () => {
       const encodedRequest = compressToEncodedURIComponent(payload.request);
       const component = mountWithI18nProvider(
-        <ViewApiRequest
+        <ViewApiRequestFlyout
           {...payload}
           canShowDevtools
           navigateToUrl={jest.fn()}

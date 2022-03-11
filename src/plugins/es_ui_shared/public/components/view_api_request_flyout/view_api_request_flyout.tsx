@@ -31,7 +31,7 @@ import {
 import { ApplicationStart } from 'src/core/public';
 import type { UrlService } from 'src/plugins/share/common/url_service';
 
-export interface ViewApiRequestProps {
+interface ViewApiRequestFlyoutProps {
   title: string;
   description: string;
   request: string;
@@ -41,7 +41,7 @@ export interface ViewApiRequestProps {
   canShowDevtools?: boolean;
 }
 
-export const ViewApiRequest: React.FunctionComponent<ViewApiRequestProps> = ({
+export const ViewApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps> = ({
   title,
   description,
   request,
@@ -71,7 +71,7 @@ export const ViewApiRequest: React.FunctionComponent<ViewApiRequestProps> = ({
   const shouldShowDevToolsLink = canShowDevtools && consolePreviewLink !== undefined;
 
   return (
-    <EuiFlyout maxWidth={480} onClose={closeFlyout}>
+    <EuiFlyout maxWidth={480} onClose={closeFlyout} data-test-subj="apiRequestFlyout">
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2 data-test-subj="apiRequestFlyoutTitle">{title}</h2>
