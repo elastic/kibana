@@ -7,7 +7,7 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import { Operation, VisualizeEditorContext, Suggestion } from '../types';
+import { Operation, VisualizeEditorContext, Suggestion, OperationDescriptor } from '../types';
 import type { State, XYSuggestion } from './types';
 import type { SeriesType, XYDataLayerConfig, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
@@ -246,10 +246,10 @@ describe('xy_visualization', () => {
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd' },
-        { columnId: 'a' },
-        { columnId: 'b' },
-        { columnId: 'c' },
+        { columnId: 'd', fields: [] },
+        { columnId: 'a', fields: [] },
+        { columnId: 'b', fields: [] },
+        { columnId: 'c', fields: [] },
       ]);
 
       frame.datasourceLayers = {
@@ -365,10 +365,10 @@ describe('xy_visualization', () => {
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd' },
-        { columnId: 'a' },
-        { columnId: 'b' },
-        { columnId: 'c' },
+        { columnId: 'd', fields: [] },
+        { columnId: 'a', fields: [] },
+        { columnId: 'b', fields: [] },
+        { columnId: 'c', fields: [] },
       ]);
 
       frame.datasourceLayers = {
@@ -434,6 +434,49 @@ describe('xy_visualization', () => {
         name: 'temperature',
         type: 'palette',
       });
+    });
+
+    it('sets the context configuration correctly for reference lines', () => {
+      const newContext = {
+        ...context,
+        metrics: [
+          {
+            agg: 'static_value',
+            fieldName: 'document',
+            isFullReference: true,
+            color: '#68BC00',
+            params: {
+              value: '10',
+            },
+          },
+        ],
+      };
+      const state = xyVisualization?.updateLayersConfigurationFromContext?.({
+        prevState: {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'line',
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+          ],
+        },
+        layerId: 'first',
+        context: newContext,
+      });
+      expect(state?.layers[0]).toHaveProperty('seriesType', 'area');
+      expect(state?.layers[0]).toHaveProperty('layerType', 'referenceLine');
+      expect(state?.layers[0].yConfig).toStrictEqual([
+        {
+          axisMode: 'right',
+          color: '#68BC00',
+          forAccessor: 'a',
+          fill: 'below',
+        },
+      ]);
     });
   });
 
@@ -601,10 +644,10 @@ describe('xy_visualization', () => {
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd' },
-        { columnId: 'a' },
-        { columnId: 'b' },
-        { columnId: 'c' },
+        { columnId: 'd', fields: [] },
+        { columnId: 'a', fields: [] },
+        { columnId: 'b', fields: [] },
+        { columnId: 'c', fields: [] },
       ]);
 
       frame.datasourceLayers = {
@@ -658,10 +701,10 @@ describe('xy_visualization', () => {
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd' },
-        { columnId: 'a' },
-        { columnId: 'b' },
-        { columnId: 'c' },
+        { columnId: 'd', fields: [] },
+        { columnId: 'a', fields: [] },
+        { columnId: 'b', fields: [] },
+        { columnId: 'c', fields: [] },
       ]);
 
       frame.datasourceLayers = {
@@ -1085,6 +1128,8 @@ describe('xy_visualization', () => {
               isBucketed: true,
               scale: 'interval',
               label: 'date_histogram',
+              isStaticValue: false,
+              hasTimeShift: false,
             };
           }
           return null;
@@ -1112,6 +1157,8 @@ describe('xy_visualization', () => {
               isBucketed: true,
               scale: 'interval',
               label: 'date_histogram',
+              isStaticValue: false,
+              hasTimeShift: false,
             };
           }
           return null;
@@ -1153,6 +1200,8 @@ describe('xy_visualization', () => {
               isBucketed: true,
               scale: 'interval',
               label: 'histogram',
+              isStaticValue: false,
+              hasTimeShift: false,
             };
           }
           return null;
@@ -1182,6 +1231,8 @@ describe('xy_visualization', () => {
               isBucketed: true,
               scale: 'ordinal',
               label: 'top values',
+              isStaticValue: false,
+              hasTimeShift: false,
             };
           }
           return null;
@@ -1209,6 +1260,8 @@ describe('xy_visualization', () => {
               isBucketed: true,
               scale: 'ordinal',
               label: 'top values',
+              isStaticValue: false,
+              hasTimeShift: false,
             };
           }
           return null;
@@ -1440,8 +1493,8 @@ describe('xy_visualization', () => {
 
       it('should respect the order of accessors coming from datasource', () => {
         mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-          { columnId: 'c' },
-          { columnId: 'b' },
+          { columnId: 'c', fields: [] },
+          { columnId: 'b', fields: [] },
         ]);
         const paletteGetter = jest.spyOn(paletteServiceMock, 'get');
         // overrite palette with a palette returning first blue, then green as color
@@ -1475,7 +1528,7 @@ describe('xy_visualization', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -1725,7 +1778,7 @@ describe('xy_visualization', () => {
           ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown as Operation)
+            } as unknown as OperationDescriptor)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
@@ -1733,7 +1786,7 @@ describe('xy_visualization', () => {
           ? ({
               dataType: 'number',
               scale: 'interval',
-            } as unknown as Operation)
+            } as unknown as OperationDescriptor)
           : null
       );
       expect(
@@ -1781,7 +1834,7 @@ describe('xy_visualization', () => {
           ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown as Operation)
+            } as unknown as OperationDescriptor)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
@@ -1789,7 +1842,7 @@ describe('xy_visualization', () => {
           ? ({
               dataType: 'string',
               scale: 'ordinal',
-            } as unknown as Operation)
+            } as unknown as OperationDescriptor)
           : null
       );
       expect(
@@ -1835,10 +1888,10 @@ describe('xy_visualization', () => {
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd' },
-        { columnId: 'a' },
-        { columnId: 'b' },
-        { columnId: 'c' },
+        { columnId: 'd', fields: [] },
+        { columnId: 'a', fields: [] },
+        { columnId: 'b', fields: [] },
+        { columnId: 'c', fields: [] },
       ]);
 
       frame.datasourceLayers = {
