@@ -73,6 +73,7 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
+import { esArchiverLoad } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
@@ -101,8 +102,6 @@ describe('Detection rules, threshold', () => {
     createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-    changeRowsPerPageTo100();
 
     const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
@@ -165,36 +164,38 @@ describe('Detection rules, threshold', () => {
     cy.get(ALERT_GRID_CELL).contains(rule.name);
   });
 
-  it.skip('Preview results of keyword using "host.name"', () => {
-    rule.index = [...rule.index, '.siem-signals*'];
+  it('Preview results of keyword using "host.name"', () => {
+    esArchiverLoad('overview');
+    rule.index = ['.alerts-security.alerts-*'];
 
-    createCustomRuleEnabled(getNewRule());
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+    createCustomRuleEnabled({
+      ...getNewRule(),
+      index: ['auditbeat-8.0.0-2019.08.30-000021'],
+    });
     selectThresholdRuleType();
     fillDefineThresholdRule(rule);
     previewResults();
 
-    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '3 unique hits');
+    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '1 unique hit');
   });
 
-  it.skip('Preview results of "ip" using "source.ip"', () => {
+  it('Preview results of "ip" using "source.ip"', () => {
     const previewRule: ThresholdRule = {
       ...rule,
+      index: ['.alerts-security.alerts-*'],
       thresholdField: 'source.ip',
       threshold: '1',
     };
-    previewRule.index = [...previewRule.index, '.siem-signals*'];
 
-    createCustomRuleEnabled(getNewRule());
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+    esArchiverLoad('overview');
+    createCustomRuleEnabled({
+      ...getNewRule(),
+      index: ['auditbeat-8.0.0-2019.08.30-000021'],
+    });
     selectThresholdRuleType();
     fillDefineThresholdRule(previewRule);
     previewResults();
 
-    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '10 unique hits');
+    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '1 unique hit');
   });
 });
