@@ -10,7 +10,7 @@ exports[`<DocumentationLink /> is rendered correctly 1`] = `
     >
       <FormattedMessage
         defaultMessage="Want to learn more?"
-        id="sharedUX.noDataViews.learnMore"
+        id="sharedUXComponents.noDataViews.learnMore"
         values={Object {}}
       />
     </dt>
@@ -26,7 +26,7 @@ exports[`<DocumentationLink /> is rendered correctly 1`] = `
     >
       <FormattedMessage
         defaultMessage="Read the docs"
-        id="sharedUX.noDataViews.readDocumentation"
+        id="sharedUXComponents.noDataViews.readDocumentation"
         values={Object {}}
       />
     </EuiLink>
