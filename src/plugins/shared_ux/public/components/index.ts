@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { withSuspense } from './utility';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
 /**
  * The Lazily-loaded `ExitFullScreenButton` component.  Consumers should use `React.Suspennse` or the
