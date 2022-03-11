@@ -83,11 +83,7 @@ export class ExpressionXyPlugin {
       };
     };
 
-    expressions.registerRenderer(
-      getXyChartRenderer({
-        getStartDeps,
-      })
-    );
+    expressions.registerRenderer(getXyChartRenderer({ getStartDeps }));
   }
 
   public start(core: CoreStart): ExpressionXyPluginStart {}
