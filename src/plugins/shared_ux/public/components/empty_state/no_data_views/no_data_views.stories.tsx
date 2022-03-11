@@ -8,8 +8,6 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
-import { docLinksServiceFactory } from '../../../services/storybook/doc_links';
-
 import { NoDataViews as NoDataViewsComponent, Props } from './no_data_views.component';
 import { NoDataViews } from './no_data_views';
 
@@ -26,12 +24,7 @@ export default {
 };
 
 export const ConnectedComponent = () => {
-  return (
-    <NoDataViews
-      onDataViewCreated={action('onDataViewCreated')}
-      dataViewsDocLink={docLinksServiceFactory().dataViewsDocsLink}
-    />
-  );
+  return <NoDataViews onDataViewCreated={action('onDataViewCreated')} />;
 };
 
 type Params = Pick<Props, 'canCreateNewDataView' | 'dataViewsDocLink'>;
@@ -44,9 +37,5 @@ PureComponent.argTypes = {
   canCreateNewDataView: {
     control: 'boolean',
     defaultValue: true,
-  },
-  dataViewsDocLink: {
-    options: [docLinksServiceFactory().dataViewsDocsLink, undefined],
-    control: { type: 'radio' },
   },
 };

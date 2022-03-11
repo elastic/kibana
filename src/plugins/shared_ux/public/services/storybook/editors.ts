@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { SharedUxEditorsService, ServiceFactory } from '@kbn/shared-ux-services';
 import { action } from '@storybook/addon-actions';
-import { PluginServiceFactory } from '../types';
-import { SharedUxDataViewEditorProps, SharedUXEditorsService } from '../editors';
 
-export type SharedUXEditorsServiceFactory = PluginServiceFactory<SharedUXEditorsService>;
+export type SharedUXEditorsServiceFactory = ServiceFactory<SharedUxEditorsService>;
 
 /**
  * A factory function for creating a storybook implementation of `SharedUXEditorsService`.
  */
 export const editorsServiceFactory: SharedUXEditorsServiceFactory = () => ({
-  openDataViewEditor: action('openEditor') as SharedUXEditorsService['openDataViewEditor'] as (
-    options: SharedUxDataViewEditorProps
-  ) => () => void,
+  openDataViewEditor: action('openEditor') as SharedUxEditorsService['openDataViewEditor'],
 });

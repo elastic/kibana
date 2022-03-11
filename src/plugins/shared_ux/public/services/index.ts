@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SharedUXServices } from '..';
-import type { SharedUXPluginStartDeps } from '../../types';
-import type { KibanaPluginServiceFactory } from '../types';
+import { SharedUxServices } from '@kbn/shared-ux-services';
+
+import type { SharedUXPluginStartDeps } from '../types';
+import type { KibanaPluginServiceFactory } from './types';
+
 import { platformServiceFactory } from './platform';
 import { userPermissionsServiceFactory } from './permissions';
 import { editorsServiceFactory } from './editors';
@@ -18,7 +20,7 @@ import { docLinksServiceFactory } from './doc_links';
  * A factory function for creating a Kibana-based implementation of `SharedUXServices`.
  */
 export const servicesFactory: KibanaPluginServiceFactory<
-  SharedUXServices,
+  SharedUxServices,
   SharedUXPluginStartDeps
 > = (params) => ({
   platform: platformServiceFactory(params),

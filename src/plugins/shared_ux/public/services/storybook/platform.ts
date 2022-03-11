@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { SharedUxPlatformService, ServiceFactory } from '@kbn/shared-ux-services';
 import { action } from '@storybook/addon-actions';
-
-import { PluginServiceFactory } from '../types';
-import { SharedUXPlatformService } from '../platform';
 
 /**
  * A factory function for creating a Storybook-based implementation of `SharedUXPlatformService`.
  */
-export type PlatformServiceFactory = PluginServiceFactory<SharedUXPlatformService, {}>;
+export type PlatformServiceFactory = ServiceFactory<SharedUxPlatformService, {}>;
 
 /**
  * A factory function for creating a Storybook-based implementation of `SharedUXPlatformService`.

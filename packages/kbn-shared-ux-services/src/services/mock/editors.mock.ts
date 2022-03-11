@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../types';
-import { SharedUXEditorsService } from '../editors';
-
-export type MockEditorsServiceFactory = PluginServiceFactory<SharedUXEditorsService>;
+import type { ServiceFactory } from '../../types';
+import type { SharedUxEditorsService } from '../editors';
 
 /**
- * A factory function for creating a Jest-based implementation of `SharedUXEditorsService`.
+ * A factory function for creating a Jest-based implementation of `SharedUxEditorsService`.
+ */
+export type MockEditorsServiceFactory = ServiceFactory<SharedUxEditorsService>;
+
+/**
+ * A factory function for creating a Jest-based implementation of `SharedUxEditorsService`.
  */
 export const editorsServiceFactory: MockEditorsServiceFactory = () => ({
   openDataViewEditor: jest.fn(),

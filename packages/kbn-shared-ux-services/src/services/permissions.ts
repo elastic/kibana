@@ -6,19 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
-
 /**
- * Creates the Shared UX plugin.
+ * A service providing permissions information, typically for the current user.
  */
-export function plugin() {
-  return new SharedUXPlugin();
+export interface SharedUxUserPermissionsService {
+  canCreateNewDataView: boolean;
 }
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export {
-  ExitFullScreenButton,
-  LazyExitFullScreenButton,
-  NoDataViews,
-  LazyNoDataViews,
-} from './components';

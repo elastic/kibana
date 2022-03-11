@@ -10,8 +10,9 @@ import React, { useCallback, useEffect } from 'react';
 import { useEuiTheme, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { usePlatformService } from '@kbn/shared-ux-services';
+
 import { ExitFullScreenButton as Component } from './exit_full_screen_button.component';
-import { usePlatformService } from '../../services';
 
 /**
  * Props for the service-enabled Exit Full Screen button component.

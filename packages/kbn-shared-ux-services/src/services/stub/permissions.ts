@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../types';
-import { SharedUXUserPermissionsService } from '../permissions';
+import type { ServiceFactory } from '../../types';
+import type { SharedUxUserPermissionsService } from '../permissions';
 
 /**
- * A factory function for creating a simple stubbed implementation of `SharedUXUserPermissionsService`.
+ * A factory function for creating a simple stubbed implementation of `SharedUxUserPermissionsService`.
  */
-export type UserPermissionsServiceFactory = PluginServiceFactory<SharedUXUserPermissionsService>;
+export type UserPermissionsServiceFactory = ServiceFactory<SharedUxUserPermissionsService>;
 
 /**
- * A factory function for creating a simple stubbed implementation of `SharedUXUserPermissionsService`.
+ * A factory function for creating a simple stubbed implementation of `SharedUxUserPermissionsService`.
  */
 export const userPermissionsServiceFactory: UserPermissionsServiceFactory = () => ({
   canCreateNewDataView: true,

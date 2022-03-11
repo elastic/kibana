@@ -6,19 +6,29 @@
  * Side Public License, v 1.
  */
 
-import type { SharedUXServices } from '../.';
-import { PluginServiceFactory } from '../types';
+import type { SharedUxServices, ServiceFactory } from '../../types';
+
 import { platformServiceFactory } from './platform';
 import { userPermissionsServiceFactory } from './permissions';
 import { editorsServiceFactory } from './editors';
 import { docLinksServiceFactory } from './doc_links';
 
 /**
- * A factory function for creating a simple stubbed implemetation of `SharedUXServices`.
+ * A factory function for creating simple stubbed implementations of all `SharedUxServices`.
  */
-export const servicesFactory: PluginServiceFactory<SharedUXServices> = () => ({
+export const stubServicesFactory: ServiceFactory<SharedUxServices> = () => ({
   platform: platformServiceFactory(),
   permissions: userPermissionsServiceFactory(),
   editors: editorsServiceFactory(),
   docLinks: docLinksServiceFactory(),
 });
+
+/**
+ * A collection of stubbed service factories.
+ */
+export const stubServiceFactories = {
+  docLinksServiceFactory,
+  editorsServiceFactory,
+  platformServiceFactory,
+  userPermissionsServiceFactory,
+};

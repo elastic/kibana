@@ -8,18 +8,18 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 
+import { useEditors, usePermissions, useDocLinks } from '@kbn/shared-ux-services';
+import type { SharedUxEditorsService } from '@kbn/shared-ux-services';
+
 import { DataView } from '../../../../../data_views/public';
-import { useEditors, usePermissions } from '../../../services';
-import type { SharedUXEditorsService } from '../../../services/editors';
 
 import { NoDataViews as NoDataViewsComponent } from './no_data_views.component';
 
 export interface Props {
   onDataViewCreated: (dataView: DataView) => void;
-  dataViewsDocLink: string;
 }
 
-type CloseDataViewEditorFn = ReturnType<SharedUXEditorsService['openDataViewEditor']>;
+type CloseDataViewEditorFn = ReturnType<SharedUxEditorsService['openDataViewEditor']>;
 
 /**
  * A service-enabled component that provides Kibana-specific functionality to the `NoDataViews`
@@ -30,9 +30,10 @@ type CloseDataViewEditorFn = ReturnType<SharedUXEditorsService['openDataViewEdit
  *
  * See shared-ux/public/services for information.
  */
-export const NoDataViews = ({ onDataViewCreated, dataViewsDocLink }: Props) => {
+export const NoDataViews = ({ onDataViewCreated }: Props) => {
   const { canCreateNewDataView } = usePermissions();
   const { openDataViewEditor } = useEditors();
+  const { dataViewsDocLink } = useDocLinks();
   const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
 
   useEffect(() => {
@@ -59,7 +60,7 @@ export const NoDataViews = ({ onDataViewCreated, dataViewsDocLink }: Props) => {
 
     const ref = openDataViewEditor({
       onSave: (dataView) => {
-        onDataViewCreated(dataView);
+        onDataViewCreated(dataView as DataView);
       },
     });
 

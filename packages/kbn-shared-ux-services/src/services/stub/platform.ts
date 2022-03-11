@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../types';
-import { SharedUXPlatformService } from '../platform';
+import type { ServiceFactory } from '../../types';
+import type { SharedUxPlatformService } from '../platform';
 
 /**
- * A factory function for creating a simple stubbed implementation of `SharedUXPlatformService`.
+ * A factory function for creating a simple stubbed implementation of `SharedUxPlatformService`.
  */
-export type PlatformServiceFactory = PluginServiceFactory<SharedUXPlatformService>;
+export type PlatformServiceFactory = ServiceFactory<SharedUxPlatformService>;
 
 /**
- * A factory function for creating a simple stubbed implementation of `SharedUXPlatformService`.
+ * A factory function for creating a simple stubbed implementation of `SharedUxPlatformService`.
  */
 export const platformServiceFactory: PlatformServiceFactory = () => ({
   setIsFullscreen: (_isFullscreen) => {},
