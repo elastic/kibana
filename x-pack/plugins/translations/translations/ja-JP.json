@@ -15582,7 +15582,7 @@
     "xpack.ingestPipelines.pipelineEditor.scriptForm.processorInvalidJsonError": "無効なJSON",
     "xpack.ingestPipelines.pipelineEditor.scriptForm.sourceFieldAriaLabel": "ソーススクリプトJSONエディター",
     "xpack.ingestPipelines.pipelineEditor.scriptForm.sourceFieldHelpText": "実行するインラインスクリプト。",
-    "xpack.ingestPipelines.pipelineEditor.scriptForm.sourceFieldLabel": "送信元",
+    "xpack.ingestPipelines.pipelineEditor.scriptForm.sourceFieldLabel": "ソース",
     "xpack.ingestPipelines.pipelineEditor.scriptForm.sourceRequiredError": "値が必要です。",
     "xpack.ingestPipelines.pipelineEditor.scriptForm.storedScriptIDFieldHelpText": "実行するストアドスクリプトのID。",
     "xpack.ingestPipelines.pipelineEditor.scriptForm.storedScriptIDFieldLabel": "ストアドスクリプトID",
