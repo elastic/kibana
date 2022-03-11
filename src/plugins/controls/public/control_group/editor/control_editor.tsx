@@ -103,6 +103,7 @@ export const ControlEditor = ({
 
   const typeButtons = getControlTypes().map((type) => {
     if (!factory) factory = getControlFactory(type);
+    const icon = (factory as EmbeddableFactoryDefinition).getIconType?.();
     return (
       <EuiKeyPadMenuItem
         id={`createControlButton_${type}`}
@@ -112,7 +113,7 @@ export const ControlEditor = ({
           setSelectedType(type);
         }}
       >
-        <EuiIcon type={(factory as EmbeddableFactoryDefinition).getIconType()} size="l" />
+        <EuiIcon type={!icon || icon === 'empty' ? 'controlsHorizontal' : icon} size="l" />
       </EuiKeyPadMenuItem>
     );
   });

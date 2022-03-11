@@ -13,7 +13,7 @@ import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
 import { EMPTY, merge, pipe, Subscription } from 'rxjs';
 import { distinctUntilChanged, debounceTime, catchError, switchMap, map } from 'rxjs/operators';
-import { EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
+import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
   ControlGroupInput,

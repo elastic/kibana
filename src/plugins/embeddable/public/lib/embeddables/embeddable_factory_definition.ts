@@ -18,10 +18,7 @@ export type EmbeddableFactoryDefinition<
   T extends SavedObjectAttributes = SavedObjectAttributes
 > =
   // Required parameters
-  Pick<
-    EmbeddableFactory<I, O, E, T>,
-    'create' | 'type' | 'isEditable' | 'getDisplayName' | 'getIconType'
-  > &
+  Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> &
     // Optional parameters
     Partial<
       Pick<
@@ -37,6 +34,7 @@ export type EmbeddableFactoryDefinition<
         | 'inject'
         | 'migrations'
         | 'grouping'
+        | 'getIconType'
         | 'getDescription'
       >
     >;
