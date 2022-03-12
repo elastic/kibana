@@ -52,7 +52,7 @@ describe('CTI Link Panel', () => {
 
     it('renders dashboard module as expected when there are events in the selected time period', () => {
       loginAndWaitForPage(OVERVIEW_URL);
-      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON}`).should('exist');
+      cy.get(`${OVERVIEW_CTI_LINKS}`).should('exist');
       cy.get(OVERVIEW_CTI_LINKS).should('not.contain.text', 'Anomali');
       cy.get(OVERVIEW_CTI_LINKS).should('contain.text', 'AbuseCH malware');
       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 indicator');
