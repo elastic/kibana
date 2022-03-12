@@ -101,8 +101,10 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
-  executionConfig: {
-    actions: { max: 1000 },
+  config: {
+    execution: {
+      actions: { max: 1000 },
+    },
   },
 };
 

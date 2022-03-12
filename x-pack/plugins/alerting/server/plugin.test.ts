@@ -49,9 +49,11 @@ const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
   actionGroups: [],
   defaultActionGroupId: 'default',
   producer: 'test',
-  executionConfig: {
-    actions: {
-      max: 1000,
+  config: {
+    execution: {
+      actions: {
+        max: 1000,
+      },
     },
   },
   async executor() {},
@@ -134,8 +136,10 @@ describe('Alerting Plugin', () => {
       const ruleType = { ...sampleRuleType };
       setupContract.registerType(ruleType);
 
-      expect(ruleType.executionConfig).toEqual({
-        actions: { max: 123 },
+      expect(ruleType.config).toEqual({
+        execution: {
+          actions: { max: 123 },
+        },
       });
     });
 
@@ -156,12 +160,14 @@ describe('Alerting Plugin', () => {
       const ruleType = { ...sampleRuleType };
       setupContract.registerType(ruleType);
 
-      expect(ruleType.executionConfig).toEqual({
-        id: sampleRuleType.id,
-        actions: {
-          max: 123,
+      expect(ruleType.config).toEqual({
+        execution: {
+          id: sampleRuleType.id,
+          actions: {
+            max: 123,
+          },
+          timeout: '1d',
         },
-        timeout: '1d',
       });
     });
 

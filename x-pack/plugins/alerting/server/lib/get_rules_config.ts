@@ -6,21 +6,23 @@
  */
 
 import { omit } from 'lodash';
-import { RuleExecutionConfig, RuleTypeConfig } from '../config';
+import { RulesConfig, RuleTypeConfig } from '../config';
 
-export const getRuleExecutionConfig = ({
-  executionConfig,
+export const getRulesConfig = ({
+  config,
   ruleTypeId,
 }: {
-  executionConfig: RuleExecutionConfig;
+  config: RulesConfig;
   ruleTypeId: string;
 }): RuleTypeConfig => {
-  const ruleTypeConfig = executionConfig.ruleTypeOverrides?.find(
+  const ruleTypeConfig = config.execution.ruleTypeOverrides?.find(
     (ruleType) => ruleType.id === ruleTypeId
   );
 
   return {
-    ...omit(executionConfig, 'ruleTypeOverrides'),
-    ...ruleTypeConfig,
-  } as RuleTypeConfig;
+    execution: {
+      ...omit(config.execution, 'ruleTypeOverrides'),
+      ...ruleTypeConfig,
+    },
+  };
 };

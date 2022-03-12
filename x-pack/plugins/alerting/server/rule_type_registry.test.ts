@@ -52,8 +52,10 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       });
       expect(registry.has('foo')).toEqual(true);
@@ -76,8 +78,10 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -112,8 +116,10 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -139,8 +145,10 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -169,8 +177,10 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         defaultScheduleInterval: 'foobar',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -199,8 +209,10 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         defaultScheduleInterval: '10s',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -233,8 +245,10 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -265,8 +279,10 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         minimumLicenseRequired: 'basic',
         isExportable: true,
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -301,8 +317,10 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         minimumLicenseRequired: 'basic',
         isExportable: true,
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -341,8 +359,10 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -370,8 +390,10 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         ruleTaskTimeout: '20m',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -405,8 +427,10 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -431,8 +455,10 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       });
       expect(() =>
@@ -450,8 +476,10 @@ describe('Create Lifecycle', () => {
           isExportable: true,
           executor: jest.fn(),
           producer: 'alerts',
-          executionConfig: {
-            actions: { max: 1000 },
+          config: {
+            execution: {
+              actions: { max: 1000 },
+            },
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Rule type \\"test\\" is already registered."`);
@@ -475,8 +503,10 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       });
       const ruleType = registry.get('test');
@@ -497,12 +527,14 @@ describe('Create Lifecycle', () => {
           "params": Array [],
           "state": Array [],
         },
-        "defaultActionGroupId": "default",
-        "executionConfig": Object {
-          "actions": Object {
-            "max": 1000,
+        "config": Object {
+          "execution": Object {
+            "actions": Object {
+              "max": 1000,
+            },
           },
         },
+        "defaultActionGroupId": "default",
         "executor": [MockFunction],
         "id": "test",
         "isExportable": true,
@@ -550,8 +582,10 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         executor: jest.fn(),
         producer: 'alerts',
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       });
       const result = registry.list();
@@ -647,8 +681,10 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        executionConfig: {
-          actions: { max: 1000 },
+        config: {
+          execution: {
+            actions: { max: 1000 },
+          },
         },
       });
     });
@@ -683,8 +719,10 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alerts',
-    executionConfig: {
-      actions: { max: 1000 },
+    config: {
+      execution: {
+        actions: { max: 1000 },
+      },
     },
   };
 

@@ -42,7 +42,7 @@ import {
   AlertExecutionStatusWarningReasons,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
-import { RuleExecutionConfig } from './config';
+import { RulesConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -170,7 +170,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  executionConfig?: RuleExecutionConfig;
+  config?: RulesConfig;
 }
 export type UntypedRuleType = RuleType<
   AlertTypeParams,
