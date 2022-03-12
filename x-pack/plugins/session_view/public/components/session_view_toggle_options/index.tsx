@@ -22,7 +22,7 @@ export const SessionViewDisplayOptions = ({
   onChange,
   optionsStates,
 }: {
-  onChange: (vars) => void;
+  onChange: (vars:StateField) => void;
   optionsStates: StateField;
 }) => {
   const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
