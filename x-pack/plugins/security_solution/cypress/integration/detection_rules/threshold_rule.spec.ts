@@ -53,7 +53,6 @@ import {
 import { getDetails } from '../../tasks/rule_details';
 import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo100,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -101,8 +100,6 @@ describe('Detection rules, threshold', () => {
     createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-    changeRowsPerPageTo100();
 
     const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {

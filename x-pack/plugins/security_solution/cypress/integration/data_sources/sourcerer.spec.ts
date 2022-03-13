@@ -125,7 +125,7 @@ describe('Sourcerer', () => {
       isSourcererSelection(`auditbeat-*`);
       isNotSourcererSelection('beats*');
       addIndexToDefault('beats*');
-      isHostsStatValue('4 ');
+      isHostsStatValue('1 ');
       openSourcerer();
       openAdvancedSettings();
       isSourcererSelection(`auditbeat-*`);

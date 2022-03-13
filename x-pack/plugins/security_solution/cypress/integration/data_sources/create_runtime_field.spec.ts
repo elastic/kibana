@@ -31,7 +31,7 @@ describe('Create DataView runtime field', () => {
     loginAndWaitForPage(ALERTS_URL);
     createCustomRuleEnabled(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate(500);
+    waitForAlertsToPopulate();
     openEventsViewerFieldsBrowser();
 
     createField(fieldName);

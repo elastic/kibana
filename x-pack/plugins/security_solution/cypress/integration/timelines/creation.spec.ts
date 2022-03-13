@@ -100,7 +100,7 @@ describe('Timelines', (): void => {
 
     it('should update timeline after adding eql', () => {
       cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
-      const eql = 'any where process.name == "which"';
+      const eql = 'any where process.name == "zsh"';
       addEqlToTimeline(eql);
 
       cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);

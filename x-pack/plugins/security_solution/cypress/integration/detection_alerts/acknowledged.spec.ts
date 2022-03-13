@@ -22,18 +22,25 @@ import {
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Marking alerts as acknowledged', () => {
+  before(() => {
+    esArchiverLoad('auditbeat_big');
+  });
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
     createCustomRuleEnabled(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate(500);
+    waitForAlertsToPopulate();
+  });
+  after(() => {
+    esArchiverUnload('auditbeat_big');
   });
 
   it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
@@ -71,7 +78,7 @@ describe('Marking alerts as acknowledged with read only role', () => {
     loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
     createCustomRuleEnabled(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate(100);
+    waitForAlertsToPopulate();
   });
 
   it('Mark one alert as acknowledged when more than one open alerts are selected', () => {

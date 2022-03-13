@@ -43,11 +43,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import {
-  changeRowsPerPageTo100,
-  filterByCustomRules,
-  goToRuleDetails,
-} from '../../tasks/alerts_detection_rules';
+import { filterByCustomRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -62,6 +58,7 @@ import {
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 describe('Detection rules, EQL', () => {
   const expectedUrls = getEqlRule().referenceUrls.join('');
@@ -69,7 +66,7 @@ describe('Detection rules, EQL', () => {
   const expectedTags = getEqlRule().tags.join('');
   const expectedMitre = formatMitreAttackDescription(getEqlRule().mitre);
   const expectedNumberOfRules = 1;
-  const expectedNumberOfAlerts = '7 alerts';
+  const expectedNumberOfAlerts = '1 alert';
 
   beforeEach(() => {
     cleanKibana();
@@ -93,8 +90,6 @@ describe('Detection rules, EQL', () => {
     createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-    changeRowsPerPageTo100();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -161,8 +156,11 @@ describe('Detection rules, EQL', () => {
 
 describe('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
-  const expectedNumberOfSequenceAlerts = '1 alert';
+  const expectedNumberOfSequenceAlerts = '2 alerts';
 
+  before(() => {
+    esArchiverLoad('auditbeat_big');
+  });
   beforeEach(() => {
     cleanKibana();
     createTimeline(getEqlSequenceRule().timeline).then((response) => {
@@ -175,6 +173,9 @@ describe('Detection rules, sequence EQL', () => {
       }).as('rule');
     });
   });
+  after(() => {
+    esArchiverUnload('auditbeat_big');
+  });
 
   it('Creates and enables a new EQL rule with a sequence', function () {
     loginAndWaitForPageWithoutDateRange(RULE_CREATION);
@@ -185,8 +186,6 @@ describe('Detection rules, sequence EQL', () => {
     createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-    changeRowsPerPageTo100();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);

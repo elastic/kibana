@@ -73,7 +73,6 @@ import {
 } from '../../screens/rule_details';
 
 import {
-  changeRowsPerPageTo100,
   deleteFirstRule,
   deleteRuleFromDetailsPage,
   deleteSelectedRules,
@@ -146,8 +145,6 @@ describe('Custom detection rules creation', () => {
     createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-    changeRowsPerPageTo100();
 
     cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
 

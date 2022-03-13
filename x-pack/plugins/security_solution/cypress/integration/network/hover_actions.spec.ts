@@ -20,8 +20,9 @@ import {
   openHoverActions,
 } from '../../tasks/network/flows';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
-const testDomain = 'endpoint-dev-es.app.elstc.co';
+const testDomain = 'myTest';
 
 describe('Hover actions', () => {
   const onBeforeLoadCallback = (win: Cypress.AUTWindow) => {
@@ -31,6 +32,11 @@ describe('Hover actions', () => {
 
   before(() => {
     cleanKibana();
+    esArchiverLoad('network');
+  });
+
+  after(() => {
+    esArchiverUnload('network');
   });
 
   beforeEach(() => {

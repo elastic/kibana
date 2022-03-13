@@ -23,7 +23,7 @@ describe('Alerts timeline', () => {
     loginAndWaitForPage(ALERTS_URL);
     createCustomRuleEnabled(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate(500);
+    waitForAlertsToPopulate();
   });
 
   it('Investigate alert in default timeline', () => {

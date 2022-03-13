@@ -14,22 +14,27 @@ import {
   SHOW_TOP_FIELD,
 } from '../../screens/network/flows';
 import { cleanKibana } from '../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 import { loginAndWaitForPage } from '../../tasks/login';
 import { openHoverActions } from '../../tasks/network/flows';
 
 import { NETWORK_URL } from '../../urls/navigation';
 
-const testDomainOne = 'endpoint-dev-es.app.elstc.co';
-const testDomainTwo = 'endpoint2-dev-es.app.elstc.co';
+const testDomainOne = 'myTest';
+const testDomainTwo = 'myTest2';
 
 describe('Overflow items', () => {
   context('Network stats and tables', () => {
     before(() => {
       cleanKibana();
+      esArchiverLoad('network');
     });
     beforeEach(() => {
       loginAndWaitForPage(NETWORK_URL);
+    });
+    after(() => {
+      esArchiverUnload('network');
     });
 
     it('Shows more items in the popover', () => {

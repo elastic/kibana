@@ -30,7 +30,7 @@ describe('Alerts timeline', () => {
     loginAndWaitForPage(ALERTS_URL, ROLES.platform_engineer);
     createCustomRuleEnabled(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate(500);
+    waitForAlertsToPopulate();
 
     // Then we login as read-only user to test.
     login(ROLES.reader);

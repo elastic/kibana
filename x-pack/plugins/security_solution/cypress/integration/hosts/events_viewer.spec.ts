@@ -36,6 +36,7 @@ import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
 import { HOSTS_URL } from '../../urls/navigation';
 import { resetFields } from '../../tasks/timeline';
 import { cleanKibana } from '../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -48,9 +49,17 @@ const defaultHeadersInDefaultEcsCategory = [
 ];
 
 describe('Events Viewer', () => {
+  before(() => {
+    cleanKibana();
+    esArchiverLoad('auditbeat_big');
+  });
+
+  after(() => {
+    esArchiverUnload('auditbeat_big');
+  });
+
   context('Fields rendering', () => {
     before(() => {
-      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -79,7 +88,6 @@ describe('Events Viewer', () => {
 
   context('Events viewer query modal', () => {
     before(() => {
-      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -93,7 +101,6 @@ describe('Events Viewer', () => {
 
   context('Events viewer fields behaviour', () => {
     before(() => {
-      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -124,7 +131,6 @@ describe('Events Viewer', () => {
 
   context('Events behavior', () => {
     before(() => {
-      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();

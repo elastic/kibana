@@ -24,25 +24,32 @@ import {
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Opening alerts', () => {
+  before(() => {
+    esArchiverLoad('auditbeat_big');
+  });
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
     createCustomRuleEnabled(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate(500);
-    selectNumberOfAlerts(5);
+    waitForAlertsToPopulate();
+    selectNumberOfAlerts(3);
 
-    cy.get(SELECTED_ALERTS).should('have.text', `Selected 5 alerts`);
+    cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
 
     closeAlerts();
     waitForAlerts();
     refreshPage();
+  });
+  after(() => {
+    esArchiverUnload('auditbeat_big');
   });
 
   it('Open one alert when more than one closed alerts are selected', () => {
