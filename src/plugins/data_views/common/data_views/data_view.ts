@@ -82,7 +82,6 @@ export class DataView implements IIndexPattern {
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
   private runtimeFieldMap: Record<string, RuntimeFieldSpec>;
-  public readonly updatedAt;
 
   /**
    * prevents errors when index pattern exists before indices
@@ -116,7 +115,6 @@ export class DataView implements IIndexPattern {
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
     this.namespaces = spec.namespaces || [];
-    this.updatedAt = spec.updatedAt;
   }
 
   /**

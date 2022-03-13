@@ -13,6 +13,7 @@ import {
   EuiInMemoryTable,
   EuiPageHeader,
   EuiSpacer,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
@@ -158,7 +159,25 @@ export const IndexPatternTable = ({
     onDelete: () => loadDataViews(),
   });
 
-  const columns = [
+  const alertColumn = {
+    name: 'Actions',
+    field: 'id',
+    actions: [
+      {
+        // todo translate
+        name: 'Delete',
+        description: 'Delete this data view',
+        icon: 'trash',
+        color: 'danger',
+        type: 'icon',
+        onClick: (dataView: RemoveDataViewProps) => removeHandler([dataView]),
+        isPrimary: true,
+        'data-test-subj': 'action-delete',
+      },
+    ],
+  };
+
+  const columns: Array<EuiBasicTableColumn<IndexPatternTableItem>> = [
     {
       field: 'title',
       name: i18n.translate('indexPatternManagement.dataViewTable.nameColumn', {
@@ -199,30 +218,11 @@ export const IndexPatternTable = ({
         );
       },
     },
-    // todo
-    {
-      field: 'type',
-      name: 'Date Modified',
-      render: () => '2022-2-20',
-    },
-    {
-      name: 'Actions',
-      field: 'id',
-      actions: [
-        {
-          // todo translate
-          name: 'Delete',
-          description: 'Delete this data view',
-          icon: 'trash',
-          color: 'danger',
-          type: 'icon',
-          onClick: (dataView: RemoveDataViewProps) => removeHandler([dataView]),
-          isPrimary: true,
-          'data-test-subj': 'action-delete',
-        },
-      ],
-    },
   ];
+
+  if (dataViews.getCanSaveSync()) {
+    columns.push(alertColumn);
+  }
 
   const createButton = canSave ? (
     <EuiButton
@@ -279,7 +279,7 @@ export const IndexPatternTable = ({
         <EuiInMemoryTable
           allowNeutralSort={false}
           itemId="id"
-          isSelectable={true}
+          isSelectable={dataViews.getCanSaveSync()}
           items={indexPatterns}
           columns={columns}
           pagination={pagination}
