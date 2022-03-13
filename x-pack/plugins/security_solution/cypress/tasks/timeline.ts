@@ -281,7 +281,9 @@ export const openTimelineInspectButton = () => {
 
 export const openTimelineFromSettings = () => {
   const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
+  cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').pipe(click);
+  cy.get(OPEN_TIMELINE_ICON).should('be.visible');
   cy.get(OPEN_TIMELINE_ICON).pipe(click);
 };
 

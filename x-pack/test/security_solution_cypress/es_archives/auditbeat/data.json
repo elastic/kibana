@@ -44,7 +44,7 @@
           "82:70:c6:b2:3c:04",
           "82:71:a6:c2:3c:01"
         ],
-        "name" : "test.local"
+        "name" : "siem-kibana"
       },
       "agent" : {
         "type" : "auditbeat",

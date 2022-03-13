@@ -43,7 +43,7 @@ import { closeTimeline, openTimelineById } from '../../tasks/timeline';
 const usersToCreate = [secReadCasesAllUser];
 const rolesToCreate = [secReadCasesAll];
 const siemDataViewTitle = 'Security Default Data View';
-const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,beats*,siem-read*,.kibana*,fakebeat-*'];
+const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
 describe('Sourcerer', () => {
   before(() => {
@@ -123,13 +123,13 @@ describe('Sourcerer', () => {
     it('adds a pattern to the default index and correctly filters out auditbeat-*', () => {
       openSourcerer();
       isSourcererSelection(`auditbeat-*`);
-      isNotSourcererSelection('beats*');
-      addIndexToDefault('beats*');
+      isNotSourcererSelection('*beat*');
+      addIndexToDefault('*beat*');
       isHostsStatValue('1 ');
       openSourcerer();
       openAdvancedSettings();
       isSourcererSelection(`auditbeat-*`);
-      isSourcererSelection('beats*');
+      isSourcererSelection('*beat*');
     });
   });
 });
@@ -237,7 +237,7 @@ describe('Timeline scope', () => {
       isDataViewSelection(dataViews[1]);
       dataViews[1]
         .split(',')
-        .filter((pattern) => pattern !== 'fakebeat-*')
+        .filter((pattern) => pattern !== 'fakebeat-*' && pattern !== 'siem-read*')
         .forEach((pattern) => isSourcererSelection(pattern));
 
       clickAlertCheckbox();

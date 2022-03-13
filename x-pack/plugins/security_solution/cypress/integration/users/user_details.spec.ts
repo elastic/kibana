@@ -24,7 +24,7 @@ describe('user details flyout', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    createCustomRuleEnabled(getNewRule());
+    createCustomRuleEnabled({ ...getNewRule(), customQuery: 'user.name:*' });
     refreshPage();
     waitForAlertsToPopulate();
   });

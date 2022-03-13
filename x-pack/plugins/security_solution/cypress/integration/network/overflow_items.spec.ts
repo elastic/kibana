@@ -37,7 +37,7 @@ describe('Overflow items', () => {
       esArchiverUnload('network');
     });
 
-    it('Shows more items in the popover', () => {
+    it.skip('Shows more items in the popover', () => {
       cy.get(DESTINATION_DOMAIN(testDomainOne)).should('not.exist');
       cy.get(DESTINATION_DOMAIN(testDomainTwo)).should('not.exist');
 

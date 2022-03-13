@@ -51,9 +51,13 @@ describe('Pagination', () => {
 
   it('should be able to change items count per page with the dropdown', () => {
     const itemsPerPage = 100;
-    const itemsExpected = 29;
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE_BTN).first().click({ force: true });
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION(itemsPerPage)).click();
-    cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', itemsExpected);
+    cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('not.have.text', '0');
+    cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE)
+      .invoke('text')
+      .then((events) => {
+        cy.wrap(parseInt(events, 10)).should('be.gt', defaultPageSize);
+      });
   });
 });

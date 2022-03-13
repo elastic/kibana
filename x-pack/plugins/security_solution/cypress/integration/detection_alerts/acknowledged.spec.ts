@@ -75,10 +75,14 @@ describe('Marking alerts as acknowledged', () => {
 describe('Marking alerts as acknowledged with read only role', () => {
   beforeEach(() => {
     cleanKibana();
+    esArchiverLoad('auditbeat_big');
     loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
     createCustomRuleEnabled(getNewRule());
     refreshPage();
     waitForAlertsToPopulate();
+  });
+  afterEach(() => {
+    esArchiverUnload('auditbeat_big');
   });
 
   it('Mark one alert as acknowledged when more than one open alerts are selected', () => {

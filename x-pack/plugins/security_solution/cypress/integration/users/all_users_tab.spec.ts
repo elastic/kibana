@@ -7,6 +7,7 @@
 
 import { HEADER_SUBTITLE, USER_NAME_CELL } from '../../screens/users/all_users';
 import { cleanKibana } from '../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 import { loginAndWaitForPage } from '../../tasks/login';
 
@@ -15,15 +16,18 @@ import { USERS_URL } from '../../urls/navigation';
 describe('Users stats and tables', () => {
   before(() => {
     cleanKibana();
-
+    esArchiverLoad('users');
     loginAndWaitForPage(USERS_URL);
+  });
+  after(() => {
+    esArchiverUnload('users');
   });
 
   it(`renders all users`, () => {
-    const totalUsers = 35;
-    const usersPerPage = 10;
+    const totalUsers = 1;
+    const usersPerPage = 1;
 
-    cy.get(HEADER_SUBTITLE).should('have.text', `Showing: ${totalUsers} users`);
+    cy.get(HEADER_SUBTITLE).should('have.text', `Showing: ${totalUsers} user`);
     cy.get(USER_NAME_CELL).should('have.length', usersPerPage);
   });
 });

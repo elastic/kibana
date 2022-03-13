@@ -182,7 +182,7 @@ describe('Exceptions Table - read only', () => {
     loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
     waitForExceptionsTableToBeLoaded();
 
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 2 lists`);
+    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
   });
 
   it('Delete icon is not shown', () => {
