@@ -121,7 +121,17 @@ ${
   mdx += scopApiToMdx(scopedDoc.server, 'Server', json, 'server');
   mdx += scopApiToMdx(scopedDoc.common, 'Common', json, 'common');
 
-  fs.writeFileSync(Path.resolve(folder, fileName + '.mdx'), mdx);
+  const mdxPath = Path.resolve(folder, fileName + '.mdx');
+  if (fs.existsSync(mdxPath)) {
+    const currentContents = fs.readFileSync(mdxPath);
+    const removeDate = /^date: [0-9]{4}-[0-9]{2}-[0-9]{2}$/m;
+    if (currentContents.toString().replace(removeDate, '') === mdxPath.replace(removeDate, '')) {
+      log.debug(`Plugin file content unchanged, skipping: ${doc.id}`);
+      return;
+    }
+  }
+
+  fs.writeFileSync(mdxPath, mdx);
 }
 
 function getJsonName(name: string): string {
