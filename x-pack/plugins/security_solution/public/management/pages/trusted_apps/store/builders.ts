@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  ConditionEntry,
-  ConditionEntryField,
-  NewTrustedApp,
-  OperatingSystem,
-} from '../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { ConditionEntry, NewTrustedApp } from '../../../../../common/endpoint/types';
 
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 

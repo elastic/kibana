@@ -10,4 +10,4 @@ export interface CspNavigationItem {
   readonly disabled?: boolean;
 }
 
-export type CspPage = 'dashboard' | 'findings' | 'benchmarks';
+export type CspPage = 'dashboard' | 'findings' | 'benchmarks' | 'rules';

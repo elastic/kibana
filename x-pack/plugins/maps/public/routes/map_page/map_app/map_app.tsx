@@ -16,6 +16,7 @@ import { type Filter, FilterStateStore } from '@kbn/es-query';
 import type { Query, TimeRange, DataView } from 'src/plugins/data/common';
 import {
   getData,
+  getExecutionContext,
   getCoreChrome,
   getMapsCapabilities,
   getNavigation,
@@ -114,6 +115,12 @@ export class MapApp extends React.Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
+
+    getExecutionContext().set({
+      type: 'application',
+      page: 'editor',
+      id: this.props.savedMap.getSavedObjectId() || 'new',
+    });
 
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()
