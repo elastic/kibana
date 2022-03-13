@@ -25,6 +25,7 @@ import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { SpacesList } from './spaces_list';
 import type { SpacesContextProps } from '../../../../../../x-pack/plugins/spaces/public';
+import { removeDataView, RemoveDataViewProps } from '../edit_index_pattern';
 
 const pagination = {
   initialPageSize: 10,
@@ -71,11 +72,13 @@ export const IndexPatternTable = ({
     dataViews,
     IndexPatternEditor,
     spaces,
+    overlays,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
+  const [selectedItems, setSelectedItems] = useState<IndexPatternTableItem[]>([]);
 
   const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
     if (!error) {
@@ -83,7 +86,28 @@ export const IndexPatternTable = ({
     }
   };
 
+  const renderDeleteButton = () => {
+    const clickHandler = removeDataView({
+      dataViews,
+      overlays,
+      uiSettings,
+      onDelete: () => alert('hi'),
+    });
+    if (selectedItems.length === 0) {
+      return;
+    }
+    // todo localize
+    return (
+      <EuiButton color="danger" iconType="trash" onClick={() => clickHandler(selectedItems)}>
+        Delete {selectedItems.length} Data Views
+      </EuiButton>
+    );
+  };
+
+  const deleteButton = renderDeleteButton();
+
   const search = {
+    toolsLeft: deleteButton && [deleteButton],
     query,
     onChange: handleOnChange,
     box: {
@@ -127,6 +151,13 @@ export const IndexPatternTable = ({
     [spaces]
   );
 
+  const removeHandler = removeDataView({
+    dataViews,
+    uiSettings,
+    overlays,
+    onDelete: () => loadDataViews(),
+  });
+
   const columns = [
     {
       field: 'title',
@@ -168,6 +199,23 @@ export const IndexPatternTable = ({
         );
       },
     },
+    {
+      name: 'Actions',
+      field: 'id',
+      actions: [
+        {
+          // todo translate
+          name: 'Delete',
+          description: 'Delete this data view',
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: (dataView: RemoveDataViewProps) => removeHandler([dataView]),
+          isPrimary: true,
+          'data-test-subj': 'action-delete',
+        },
+      ],
+    },
   ];
 
   const createButton = canSave ? (
@@ -202,6 +250,10 @@ export const IndexPatternTable = ({
     <></>
   );
 
+  const selection = {
+    onSelectionChange: setSelectedItems,
+  };
+
   return (
     <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
       <EuiPageHeader
@@ -221,12 +273,13 @@ export const IndexPatternTable = ({
         <EuiInMemoryTable
           allowNeutralSort={false}
           itemId="id"
-          isSelectable={false}
+          isSelectable={true}
           items={indexPatterns}
           columns={columns}
           pagination={pagination}
           sorting={sorting}
           search={search}
+          selection={selection}
         />
       </ContextWrapper>
       {displayIndexPatternEditor}
