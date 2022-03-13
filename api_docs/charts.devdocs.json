@@ -3478,6 +3478,65 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
+        "id": "def-common.validateOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "validateOptions",
+        "description": [],
+        "signature": [
+          "(value: string, availableOptions: (string | number)[] | Record<string, string | number>, getErrorMessage: () => string) => void"
+        ],
+        "path": "src/plugins/charts/common/utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.validateOptions.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/charts/common/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.validateOptions.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "availableOptions",
+            "description": [],
+            "signature": [
+              "(string | number)[] | Record<string, string | number>"
+            ],
+            "path": "src/plugins/charts/common/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.validateOptions.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "getErrorMessage",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/charts/common/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
