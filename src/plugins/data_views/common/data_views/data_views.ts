@@ -377,6 +377,7 @@ export class DataViewsService {
       id,
       version,
       namespaces,
+      updated_at: updatedAt,
       attributes: {
         title,
         timeFieldName,
@@ -414,6 +415,7 @@ export class DataViewsService {
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
+      updatedAt,
     };
   };
 

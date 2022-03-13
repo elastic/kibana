@@ -199,6 +199,12 @@ export const IndexPatternTable = ({
         );
       },
     },
+    // todo
+    {
+      field: 'type',
+      name: 'Date Modified',
+      render: () => '2022-2-20',
+    },
     {
       name: 'Actions',
       field: 'id',

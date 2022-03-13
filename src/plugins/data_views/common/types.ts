@@ -284,6 +284,7 @@ export interface DataViewSpec {
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
   namespaces?: string[];
+  updatedAt?: string;
 }
 
 export interface SourceFilter {
