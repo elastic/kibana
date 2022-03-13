@@ -279,7 +279,6 @@
             "label": "metric",
             "description": [],
             "signature": [
-              "string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -300,7 +299,6 @@
             "label": "buckets",
             "description": [],
             "signature": [
-              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -308,7 +306,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              ")[] | undefined"
+              "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false
@@ -321,7 +319,6 @@
             "label": "splitRow",
             "description": [],
             "signature": [
-              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -329,7 +326,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              ")[] | undefined"
+              "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false
@@ -342,7 +339,6 @@
             "label": "splitColumn",
             "description": [],
             "signature": [
-              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -350,7 +346,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              ")[] | undefined"
+              "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false
@@ -517,7 +513,6 @@
             "label": "buckets",
             "description": [],
             "signature": [
-              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -525,7 +520,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              ")[] | undefined"
+              "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false
@@ -750,7 +745,6 @@
             "label": "buckets",
             "description": [],
             "signature": [
-              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -758,7 +752,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              ")[] | undefined"
+              "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false
@@ -873,7 +867,6 @@
             "label": "buckets",
             "description": [],
             "signature": [
-              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -881,7 +874,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              ")[] | undefined"
+              "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false
@@ -927,7 +920,6 @@
             "label": "bucket",
             "description": [],
             "signature": [
-              "string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
