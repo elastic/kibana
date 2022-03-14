@@ -14,7 +14,7 @@ import { ControlEditor } from './control_editor';
 import { OverlayRef } from '../../../../../core/public';
 import { DEFAULT_CONTROL_WIDTH } from './editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlWidth, ControlInput } from '../../types';
+import { ControlWidth, ControlInput, IEditableControlFactory } from '../../types';
 import { toMountPoint } from '../../../../kibana_react/public';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
@@ -40,7 +40,7 @@ export const CreateControlButton = ({
 }: CreateControlButtonProps) => {
   // Controls Services Context
   const { overlays, controls } = pluginServices.getServices();
-  const { getControlTypes } = controls;
+  const { getControlTypes, getControlFactory } = controls;
   const { openFlyout, openConfirm } = overlays;
 
   const createNewControl = async () => {
@@ -76,7 +76,8 @@ export const CreateControlButton = ({
               width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
               updateWidth={updateDefaultWidth}
-              onSave={(type, factory) => {
+              onSave={(type) => {
+                const factory = getControlFactory(type) as IEditableControlFactory;
                 if (factory.presaveTransformFunction) {
                   inputToReturn = factory.presaveTransformFunction(inputToReturn);
                 }

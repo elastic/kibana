@@ -50,7 +50,7 @@ interface EditControlProps {
   isCreate: boolean;
   title?: string;
   width: ControlWidth;
-  onSave: (type: string, factory: IEditableControlFactory) => void;
+  onSave: (type: string) => void;
   onCancel: () => void;
   removeControl?: () => void;
   updateTitle: (title?: string) => void;
@@ -81,9 +81,8 @@ export const ControlEditor = ({
   const [currentWidth, setCurrentWidth] = useState(width);
   const [controlEditorValid, setControlEditorValid] = useState(false);
 
-  let factory: IEditableControlFactory | EmbeddableFactoryDefinition;
   const getControlTypeEditor = (type: string) => {
-    if (!factory) factory = getControlFactory(type);
+    const factory = getControlFactory(type);
     const ControlTypeEditor = (factory as IEditableControlFactory).controlEditorComponent;
     return ControlTypeEditor ? (
       <ControlTypeEditor
@@ -102,7 +101,7 @@ export const ControlEditor = ({
   };
 
   const typeButtons = getControlTypes().map((type) => {
-    if (!factory) factory = getControlFactory(type);
+    const factory = getControlFactory(type);
     const icon = (factory as EmbeddableFactoryDefinition).getIconType?.();
     return (
       <EuiKeyPadMenuItem
@@ -110,6 +109,7 @@ export const ControlEditor = ({
         data-test-subj={`create-${type}-control`}
         label={(factory as EmbeddableFactoryDefinition).getDisplayName()}
         isSelected={selectedType === type}
+        isDisabled={!isCreate}
         onClick={() => {
           setSelectedType(type);
         }}
@@ -199,7 +199,7 @@ export const ControlEditor = ({
               iconType="check"
               color="primary"
               disabled={!controlEditorValid}
-              onClick={() => onSave(selectedType, factory as IEditableControlFactory)}
+              onClick={() => onSave(selectedType)}
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}
             </EuiButton>

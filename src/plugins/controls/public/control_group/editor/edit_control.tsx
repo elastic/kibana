@@ -51,7 +51,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
   const editControl = async () => {
     const panel = panels[embeddableId];
-    const factory = getControlFactory(panel.type);
+    let factory = getControlFactory(panel.type);
     const embeddable = await untilEmbeddableLoaded(embeddableId);
 
     let inputToReturn: Partial<ControlInput> = {};
@@ -84,8 +84,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       });
     };
 
-    const editableFactory = factory as IEditableControlFactory;
-
     const flyoutInstance = openFlyout(
       forwardAllContext(
         <ControlEditor
@@ -99,7 +97,9 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
           onTypeEditorChange={(partialInput) =>
             (inputToReturn = { ...inputToReturn, ...partialInput })
           }
-          onSave={() => {
+          onSave={(type) => {
+            if (panel.type !== type) factory = getControlFactory(type);
+            const editableFactory = factory as IEditableControlFactory;
             if (editableFactory.presaveTransformFunction) {
               inputToReturn = editableFactory.presaveTransformFunction(inputToReturn, embeddable);
             }
