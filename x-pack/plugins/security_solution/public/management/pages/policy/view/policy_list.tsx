@@ -27,7 +27,7 @@ import {
   useGetAgentCountForPolicy,
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
-import { PackagePolicy } from '../../../../../../fleet/common';
+import { AgentPolicy } from '../../../../../../fleet/common';
 import { PolicyEndpointListLink } from '../../../components/policy_endpoint_list_link';
 
 export const PolicyList = memo(() => {
@@ -43,10 +43,11 @@ export const PolicyList = memo(() => {
   const policyIds = data?.items.map((policies) => policies.id) ?? [];
   const { data: endpointCount = { items: [] } } = useGetAgentCountForPolicy({
     policyIds,
+    customQueryOptions: { enabled: policyIds.length > 0 },
   });
 
   const policyIdToEndpointCount = useMemo(() => {
-    const map = new Map<string | PackagePolicy, number>();
+    const map = new Map<AgentPolicy['package_policies'][number], number>();
     for (const policy of endpointCount?.items) {
       map.set(policy.package_policies[0], policy.agents ?? 0);
     }

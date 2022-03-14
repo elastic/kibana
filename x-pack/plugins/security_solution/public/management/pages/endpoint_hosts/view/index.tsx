@@ -138,8 +138,6 @@ export const EndpointList = () => {
   const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
   const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
-  // what to do about this type?
-  // need to make the back button conditional
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
   const backLinkOptions = useMemo<BackToExternalAppButtonProps>(() => {
