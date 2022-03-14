@@ -15,7 +15,8 @@ export interface GetAggregateExecutionEventsArgs {
   ruleId: string;
   start: string;
   end: string;
-  filters: string;
+  queryText: string;
+  statusFilters: string[];
 }
 
 /**
@@ -30,13 +31,15 @@ export interface IRuleExecutionLogForRoutes {
    * @param ruleId Saved object id of the rule (`rule.id`).
    * @param start start of daterange to filter to
    * @param end end of daterange to filter to
-   * @param filters array of field-based filters, e.g.  kibana.alert.rule.execution.status:*
+   * @param queryText string of field-based filters, e.g.  kibana.alert.rule.execution.status:*
+   * @param statusFilters array of status filters, e.g.  ['succeeded', 'going to run']
    */
   getAggregateExecutionEvents({
     ruleId,
     start,
     end,
-    filters,
+    queryText,
+    statusFilters,
   }: GetAggregateExecutionEventsArgs): Promise<GetAggregateRuleExecutionEventsResponse>;
 
   /**

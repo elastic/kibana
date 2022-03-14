@@ -376,7 +376,8 @@ export const exportRules = async ({
  * @param ruleId string Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
  * @param start string Start daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now-30`)
  * @param end string End daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now/w`)
- * @param filters string Filters to apply to the search in querystring format (e.g. `event.duration > 1000 OR kibana.alert.rule.execution.metrics.execution_gap_duration_s > 100`)
+ * @param queryText search string in querystring format (e.g. `event.duration > 1000 OR kibana.alert.rule.execution.metrics.execution_gap_duration_s > 100`)
+ * @param statusFilters comma separated string of `statusFilters` (e.g. `succeeded,failed,partial failure`)
  * @param signal AbortSignal Optional signal for cancelling the request
  *
  * @throws An error if response is not OK
@@ -385,19 +386,26 @@ export const fetchRuleExecutionEvents = async ({
   ruleId,
   start,
   end,
-  filters,
+  queryText,
+  statusFilters,
   signal,
 }: {
   ruleId: string;
   start: string;
   end: string;
-  filters?: string;
+  queryText?: string;
+  statusFilters?: string;
   signal?: AbortSignal;
 }): Promise<GetAggregateRuleExecutionEventsResponse> => {
   const url = detectionEngineRuleExecutionEventsUrl(ruleId);
   return KibanaServices.get().http.fetch<GetAggregateRuleExecutionEventsResponse>(url, {
     method: 'GET',
-    query: { start, end, filters },
+    query: {
+      start,
+      end,
+      queryText: queryText?.trim(),
+      statusFilters: statusFilters?.trim(),
+    },
     signal,
   });
 };

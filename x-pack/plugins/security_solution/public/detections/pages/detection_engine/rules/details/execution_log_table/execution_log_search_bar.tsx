@@ -5,76 +5,140 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiHealth, EuiSearchBar, EuiSearchBarProps, SearchFilterConfig } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { capitalize, replace } from 'lodash';
+import {
+  EuiHealth,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiFilterGroup,
+  EuiFilterButton,
+  EuiFilterSelectItem,
+} from '@elastic/eui';
 import { RuleExecutionStatus } from '../../../../../../../common/detection_engine/schemas/common';
 import { getStatusColor } from '../../../../../components/rules/rule_execution_status/utils';
+import * as i18n from './translations';
 
-import * as i18n from '../translations';
-
-interface ExecutionLogTableSearchProps {
-  onSearch: (args: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => void;
-}
-
-export const EXECUTION_LOG_SEARCH_SCHEMA = {
-  strict: true,
-  fields: {
-    'kibana.alert.rule.execution.status': {
-      type: 'string',
-    },
-    '@timestamp': {
-      type: 'string',
-    },
-    'event.duration': {
-      type: 'number',
-    },
-    message: {
-      type: 'string',
-    },
-    'kibana.alert.rule.execution.metrics.execution_gap_duration_s': {
-      type: 'number',
-    },
-    'kibana.alert.rule.execution.metrics.total_indexing_duration_ms': {
-      type: 'number',
-    },
-    'kibana.alert.rule.execution.metrics.total_search_duration_ms': {
-      type: 'number',
-    },
-  },
+export const EXECUTION_LOG_SCHEMA_MAPPING = {
+  status: 'kibana.alert.rule.execution.status',
+  timestamp: '@timestamp',
+  duration: 'event.duration',
+  message: 'message',
+  gapDuration: 'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
+  indexingDuration: 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
+  searchDuration: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
+  totalActions: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+  schedulingDelay: 'kibana.task.schedule_delay',
 };
 
-const statuses = (Object.keys(RuleExecutionStatus) as Array<keyof typeof RuleExecutionStatus>).map(
-  (key) => key
-);
+export const replaceQueryTextAliases = (queryText: string): string => {
+  return Object.entries(EXECUTION_LOG_SCHEMA_MAPPING).reduce<string>(
+    (updatedQuery, [key, value]) => {
+      return replace(updatedQuery, key, value);
+    },
+    queryText
+  );
+};
 
-const filters: SearchFilterConfig[] = [
-  {
-    type: 'field_value_selection',
-    field: 'kibana.alert.rule.execution.status',
-    name: 'Status',
-    multiSelect: 'or',
-    options: statuses.map((status) => ({
-      value: status,
-      view: <EuiHealth color={getStatusColor(status as RuleExecutionStatus)}>{status}</EuiHealth>,
-    })),
-  },
+const statuses = [
+  RuleExecutionStatus.succeeded,
+  RuleExecutionStatus.failed,
+  RuleExecutionStatus['partial failure'],
 ];
 
-export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(({ onSearch }) => {
-  return (
-    <EuiSearchBar
-      data-test-subj="executionLogSearch"
-      aria-label={i18n.RULE_EXECUTION_LOG_SEARCH_PLACEHOLDER}
-      onChange={onSearch}
-      filters={filters}
-      box={{
-        [`data-test-subj`]: 'executionLogSearchInput',
-        placeholder: i18n.RULE_EXECUTION_LOG_SEARCH_PLACEHOLDER,
-        incremental: false,
-        schema: EXECUTION_LOG_SEARCH_SCHEMA,
-      }}
-    />
-  );
-});
+const statusFilters = statuses.map((status) => ({
+  label: <EuiHealth color={getStatusColor(status)}>{capitalize(status)}</EuiHealth>,
+  selected: false,
+}));
+
+interface ExecutionLogTableSearchProps {
+  onSearch: (queryText: string) => void;
+  onStatusFilterChange: (statusFilters: string[]) => void;
+}
+
+export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(
+  ({ onSearch, onStatusFilterChange }) => {
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [selectedFilters, setSelectedFilters] = useState<RuleExecutionStatus[]>([]);
+
+    const onSearchCallback = useCallback(
+      (queryText: string) => {
+        onSearch(replaceQueryTextAliases(queryText));
+      },
+      [onSearch]
+    );
+
+    const onStatusFilterChangeCallback = useCallback(
+      (filter: RuleExecutionStatus) => {
+        setSelectedFilters(
+          selectedFilters.includes(filter)
+            ? selectedFilters.filter((f) => f !== filter)
+            : [...selectedFilters, filter]
+        );
+      },
+      [selectedFilters]
+    );
+
+    const filtersComponent = useMemo(() => {
+      return statuses.map((filter, index) => (
+        <EuiFilterSelectItem
+          checked={selectedFilters.includes(filter) ? 'on' : undefined}
+          key={`${index}-${filter}`}
+          onClick={() => onStatusFilterChangeCallback(filter)}
+          title={filter}
+        >
+          <EuiHealth color={getStatusColor(filter)}>{capitalize(filter)}</EuiHealth>
+        </EuiFilterSelectItem>
+      ));
+    }, [onStatusFilterChangeCallback, selectedFilters]);
+
+    useEffect(() => {
+      onStatusFilterChange(selectedFilters);
+    }, [onStatusFilterChange, selectedFilters]);
+
+    return (
+      <EuiFlexGroup gutterSize={'s'}>
+        <EuiFlexItem grow={true}>
+          <EuiFieldSearch
+            data-test-subj="executionLogSearch"
+            aria-label={i18n.RULE_EXECUTION_LOG_SEARCH_PLACEHOLDER}
+            placeholder={i18n.RULE_EXECUTION_LOG_SEARCH_PLACEHOLDER}
+            onSearch={onSearchCallback}
+            isClearable={true}
+            fullWidth={true}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <EuiPopover
+              button={
+                <EuiFilterButton
+                  grow={false}
+                  data-test-subj={'status-filter-popover-button'}
+                  iconType="arrowDown"
+                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                  numFilters={statusFilters.length}
+                  isSelected={isPopoverOpen}
+                  hasActiveFilters={selectedFilters.length > 0}
+                  numActiveFilters={selectedFilters.length}
+                >
+                  {i18n.COLUMN_STATUS}
+                </EuiFilterButton>
+              }
+              isOpen={isPopoverOpen}
+              closePopover={() => setIsPopoverOpen(false)}
+              panelPaddingSize="none"
+              repositionOnScroll
+            >
+              {filtersComponent}
+            </EuiPopover>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 ExecutionLogSearchBar.displayName = 'ExecutionLogSearchBar';

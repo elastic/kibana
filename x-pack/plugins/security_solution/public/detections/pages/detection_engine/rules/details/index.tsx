@@ -316,7 +316,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setRuleDetailTab(RuleDetailTabs.exceptions);
     } else {
       setTabs(ruleDetailTabs);
-      setRuleDetailTab(RuleDetailTabs.alerts);
+      setRuleDetailTab(RuleDetailTabs.executionLogs);
     }
   }, [hasIndexRead]);
 
@@ -429,7 +429,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <EuiTab
             onClick={() => setRuleDetailTab(tab.id)}
             isSelected={tab.id === ruleDetailTab}
-            disabled={tab.disabled}
+            disabled={tab.disabled || (tab.id === RuleDetailTabs.executionLogs && !isExistingRule)}
             key={tab.id}
             data-test-subj={tab.dataTestSubj}
           >
@@ -438,7 +438,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         ))}
       </EuiTabs>
     ),
-    [ruleDetailTab, setRuleDetailTab, pageTabs]
+    [isExistingRule, ruleDetailTab, setRuleDetailTab, pageTabs]
   );
   const ruleIndices = useMemo(() => rule?.index ?? DEFAULT_INDEX_PATTERN, [rule?.index]);
 
@@ -602,6 +602,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+
+  const selectAlertsTabCallback = useCallback(() => {
+    setRuleDetailTab(RuleDetailTabs.alerts);
+  }, []);
 
   if (
     redirectToDetections(
@@ -804,7 +808,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               onRuleChange={refreshRule}
             />
           )}
-          {ruleDetailTab === RuleDetailTabs.executionLogs && <ExecutionLogTable ruleId={ruleId} />}
+          {ruleDetailTab === RuleDetailTabs.executionLogs && (
+            <ExecutionLogTable ruleId={ruleId} selectAlertsTab={selectAlertsTabCallback} />
+          )}
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
 

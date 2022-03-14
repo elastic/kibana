@@ -682,7 +682,8 @@ describe('Detections Rules API', () => {
         ruleId: '42',
         start: 'now-30',
         end: 'now',
-        filters: '',
+        queryText: '',
+        statusFilters: '',
         signal: abortCtrl.signal,
       });
 
@@ -692,7 +693,8 @@ describe('Detections Rules API', () => {
           method: 'GET',
           query: {
             end: 'now',
-            filters: '',
+            queryText: '',
+            statusFilters: '',
             start: 'now-30',
           },
           signal: abortCtrl.signal,
@@ -705,7 +707,8 @@ describe('Detections Rules API', () => {
         ruleId: '42',
         start: 'now-30',
         end: 'now',
-        filters: '',
+        queryText: '',
+        statusFilters: '',
         signal: abortCtrl.signal,
       });
       expect(response).toEqual(responseMock);

@@ -17,7 +17,8 @@ export const GetRuleExecutionEventsQueryParams = t.exact(
   t.type({
     start: t.string,
     end: t.string,
-    filters: t.union([t.string, t.undefined]),
+    queryText: t.union([t.string, t.undefined]),
+    statusFilters: t.union([t.string, t.undefined]),
   })
 );
 

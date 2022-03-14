@@ -35,21 +35,22 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
     },
     async (context, request, response) => {
       const { ruleId } = request.params;
-      const { start, end, filters = '' } = request.query;
+      const { start, end, queryText = '', statusFilters = '' } = request.query;
       const siemResponse = buildSiemResponse(response);
 
       try {
         const executionLog = context.securitySolution.getRuleExecutionLog();
-        const { events, maxEvents } = await executionLog.getAggregateExecutionEvents({
+        const { events, total } = await executionLog.getAggregateExecutionEvents({
           ruleId,
           start,
           end,
-          filters,
+          queryText,
+          statusFilters: statusFilters.length ? statusFilters.split(',') : [],
         });
 
         const responseBody: GetAggregateRuleExecutionEventsResponse = {
           events,
-          maxEvents,
+          total,
         };
 
         return response.ok({ body: responseBody });

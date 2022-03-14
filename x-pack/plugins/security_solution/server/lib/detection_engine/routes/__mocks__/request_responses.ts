@@ -561,53 +561,54 @@ export const getLastFailures = (): RuleExecutionEvent[] => [
 export const getAggregateExecutionEvents = (): GetAggregateRuleExecutionEventsResponse => ({
   events: [
     {
-      kibana: {
-        task: {
-          schedule_delay: 890000000,
-        },
-        alert: {
-          rule: {
-            execution: {
-              metrics: {
-                total_indexing_duration_ms: 0,
-                total_search_duration_ms: 5,
-              },
-              status: 'succeeded',
-            },
-          },
-        },
-      },
-      event: {
-        duration: 2035000000,
-      },
-      message: 'succeeded',
-      '@timestamp': '2022-02-01T05:56:27.813Z',
+      execution_uuid: '34bab6e0-89b6-4d10-9cbb-cda76d362db6',
+      timestamp: '2022-03-11T22:04:05.931Z',
+      duration_ms: 1975,
+      status: 'success',
+      message:
+        "rule executed: siem.queryRule:f78f3550-a186-11ec-89a1-0bce95157aba: 'This Rule Makes Alerts, Actions, AND Moar!'",
+      num_active_alerts: 0,
+      num_new_alerts: 0,
+      num_recovered_alerts: 0,
+      num_triggered_actions: 0,
+      num_succeeded_actions: 0,
+      num_errored_actions: 0,
+      total_search_duration_ms: 0,
+      es_search_duration_ms: 538,
+      schedule_delay_ms: 2091,
+      timed_out: false,
+      indexing_duration_ms: 7,
+      search_duration_ms: 551,
+      gap_duration_ms: 0,
+      security_status: 'succeeded',
+      security_message: 'succeeded',
     },
     {
-      kibana: {
-        task: {
-          schedule_delay: 13980000000,
-        },
-        alert: {
-          rule: {
-            execution: {
-              metrics: {
-                total_indexing_duration_ms: 0,
-                total_search_duration_ms: 9,
-              },
-              status: 'succeeded',
-            },
-          },
-        },
-      },
-      event: {
-        duration: 2065000000,
-      },
-      message: 'succeeded',
-      '@timestamp': '2022-02-01T05:51:27.143Z',
+      execution_uuid: '254d8400-9dc7-43c5-ad4b-227273d1a44b',
+      timestamp: '2022-03-11T22:02:41.923Z',
+      duration_ms: 11916,
+      status: 'success',
+      message:
+        "rule executed: siem.queryRule:f78f3550-a186-11ec-89a1-0bce95157aba: 'This Rule Makes Alerts, Actions, AND Moar!'",
+      num_active_alerts: 0,
+      num_new_alerts: 0,
+      num_recovered_alerts: 0,
+      num_triggered_actions: 1,
+      num_succeeded_actions: 1,
+      num_errored_actions: 0,
+      total_search_duration_ms: 0,
+      es_search_duration_ms: 1406,
+      schedule_delay_ms: 1583,
+      timed_out: false,
+      indexing_duration_ms: 0,
+      search_duration_ms: 0,
+      gap_duration_ms: 0,
+      security_status: 'partial failure',
+      security_message:
+        'Check privileges failed to execute ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [broken-index] name: "This Rule Makes Alerts, Actions, AND Moar!" id: "f78f3550-a186-11ec-89a1-0bce95157aba" rule id: "b64b4540-d035-4826-a1e7-f505bf4b9653" execution id: "254d8400-9dc7-43c5-ad4b-227273d1a44b" space ID: "default"',
     },
   ],
-  maxEvents: 2,
+  total: 2,
 });
 
 export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({

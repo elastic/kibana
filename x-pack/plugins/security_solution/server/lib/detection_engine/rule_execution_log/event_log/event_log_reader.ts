@@ -6,11 +6,10 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { get, set } from 'lodash';
+import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { IEventLogClient } from '../../../../../../event_log/server';
 
 import {
-  AggregateRuleExecutionEvent,
   RuleExecutionEvent,
   RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common';
@@ -22,6 +21,11 @@ import {
   RULE_EXECUTION_LOG_PROVIDER,
   RuleExecutionLogAction,
 } from './constants';
+import {
+  formatExecutionEventResponse,
+  getExecutionEventAggregation,
+} from './get_execution_event_aggregation';
+import { ExecutionUuidAggResult } from './get_execution_event_aggregation/types';
 
 export interface IEventLogReader {
   getAggregateExecutionEvents(
@@ -35,7 +39,8 @@ export interface GetAggregateExecutionEventsArgs {
   ruleId: string;
   start: string;
   end: string;
-  filters: string;
+  queryText: string;
+  statusFilters: string[];
 }
 
 export interface GetLastStatusChangesArgs {
@@ -44,15 +49,12 @@ export interface GetLastStatusChangesArgs {
   includeStatuses?: RuleExecutionStatus[];
 }
 
-// TODO: Hoist to package and share with UI in execution_log_table
-const MAX_EXECUTION_EVENTS_DISPLAYED = 500;
-
 export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader => {
   return {
     async getAggregateExecutionEvents(
       args: GetAggregateExecutionEventsArgs
     ): Promise<GetAggregateRuleExecutionEventsResponse> {
-      const { ruleId, start, end, filters } = args;
+      const { ruleId, start, end, queryText, statusFilters } = args;
       const soType = RULE_SAVED_OBJECT_TYPE;
       const soIds = [ruleId];
       const startDate = dateMath.parse(start);
@@ -61,86 +63,49 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       invariant(startDate?.isValid(), `Required "start" field is not valid: ${start}`);
       invariant(endDate?.isValid(), `Required "end" field is not valid: ${end}`);
 
-      // Fetch total unique executions per daterange to get max execution events
-      const { total: uniqueExecutionEventsResults = 0 } = await eventLog.findEventsBySavedObjectIds(
-        soType,
-        soIds,
-        {
+      const filterString = statusFilters.length
+        ? `kibana.alert.rule.execution.status:(${statusFilters.join(' OR ')})`
+        : '';
+      const filter = queryText.length ? `${queryText} AND ${filterString}` : filterString;
+
+      let idsFilter = '';
+      if (filter.length) {
+        // TODO: Current workaround to support root level filters without missing fields in the aggregate event
+        // TODO: See: https://github.com/elastic/kibana/pull/127339/files#r825240516
+        const filteredResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
           start: startDate?.utc().toISOString(),
           end: endDate?.utc().toISOString(),
-          page: 1,
-          per_page: 0,
-          sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
-          filter: `event.action:execute-start`,
-        }
-      );
-
-      // Fetch all events to aggregate into individual execution events for each unique executionId
-      const findResult = await eventLog.findEventsBySavedObjectIds(soType, soIds, {
-        start: startDate?.utc().toISOString(),
-        end: endDate?.utc().toISOString(),
-        page: 1,
-        per_page: 10000, // TODO: Possibly constrain to 5x MAX_EXECUTION_EVENTS_DISPLAYED (i.e. max events per execution)
-        sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
-        filter: filters,
-      });
-
-      const executeStartFields = ['@timestamp'];
-      const executeFields = ['kibana.task.schedule_delay', 'event.duration'];
-      const metricsFields = [
-        'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
-        'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
-        'kibana.alert.rule.execution.metrics.total_search_duration_ms',
-      ];
-
-      // TODO: Rework to ensure all fields are included from necessary event types
-      // Maybe use `objectArrayIntersection` from EQL sequence building?
-      const aggregatedResults: Record<string, object> = {};
-      findResult.data.forEach((event) => {
-        const uuid: string = get(event, 'kibana.alert.rule.execution.uuid');
-        const eventAction: string = get(event, 'event.action');
-        const status = get(event, 'kibana.alert.rule.execution.status');
-        if (aggregatedResults[uuid] == null) {
-          aggregatedResults[uuid] = {};
-        }
-
-        // Merge different event types into a single execution event.
-        // @timestamp comes from initial `execute-start` event from platform
-        // Remaining fields filled in from platform `execute` and security `metric`/`status-change` events
-        if (eventAction === 'execute-start') {
-          executeStartFields.forEach((field) => {
-            set(aggregatedResults[uuid], field, get(event, field));
-          });
-        } else if (eventAction === 'execute') {
-          executeFields.forEach((field) => {
-            set(aggregatedResults[uuid], field, get(event, field));
-          });
-        } else if (eventAction === 'execution-metrics') {
-          metricsFields.forEach((field) => {
-            set(aggregatedResults[uuid], field, get(event, field));
-          });
-        } else if (eventAction === 'status-change' && status !== 'running') {
-          if (status != null) {
-            set(aggregatedResults[uuid], 'kibana.alert.rule.execution.status', status);
-          }
-          const message = get(event, 'message');
-          if (message != null) {
-            // TODO: Append messages?
-            set(aggregatedResults[uuid], 'message', message);
-          }
-        }
-      });
-
-      const aggEvents = Object.values(aggregatedResults);
-      // Constrain length as not supporting pagination through in-memory aggregations in MVP
-      if (aggEvents.length > MAX_EXECUTION_EVENTS_DISPLAYED) {
-        aggEvents.length = MAX_EXECUTION_EVENTS_DISPLAYED;
+          filter,
+          aggs: {
+            filteredExecutionUUIDs: {
+              terms: {
+                field: 'kibana.alert.rule.execution.uuid',
+                size: MAX_EXECUTION_EVENTS_DISPLAYED,
+              },
+            },
+          },
+        });
+        const filteredExecutionUUIDs = filteredResults.aggregations
+          ?.filteredExecutionUUIDs as ExecutionUuidAggResult;
+        const filteredIds = filteredExecutionUUIDs?.buckets?.map((b) => b.key) ?? [];
+        idsFilter = filteredIds.length
+          ? `kibana.alert.rule.execution.uuid:(${filteredIds.join(' OR ')})`
+          : '';
       }
 
-      return {
-        events: aggEvents as AggregateRuleExecutionEvent[],
-        maxEvents: uniqueExecutionEventsResults,
-      };
+      const results = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
+        start: startDate?.utc().toISOString(), // TODO: Is there a way to get typescript to know startDate isn't null based on the above invariant?
+        end: endDate?.utc().toISOString(),
+        filter: idsFilter,
+        aggs: getExecutionEventAggregation({
+          maxExecutions: MAX_EXECUTION_EVENTS_DISPLAYED,
+          page: 1,
+          perPage: 10,
+          sort: [{ timestamp: { order: 'desc' } }],
+        }),
+      });
+
+      return formatExecutionEventResponse(results);
     },
     async getLastStatusChanges(args) {
       const soType = RULE_SAVED_OBJECT_TYPE;

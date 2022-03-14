@@ -19,7 +19,7 @@ export type GetRuleExecutionEventsResponse = t.TypeOf<typeof GetRuleExecutionEve
 export const GetAggregateRuleExecutionEventsResponse = t.exact(
   t.type({
     events: t.array(aggregateRuleExecutionEvent),
-    maxEvents: t.number,
+    total: t.number,
   })
 );
 

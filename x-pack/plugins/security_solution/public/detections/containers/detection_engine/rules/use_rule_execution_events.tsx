@@ -15,21 +15,23 @@ interface UseRuleExecutionEventsArgs {
   ruleId: string;
   start: string;
   end: string;
-  filters?: string;
+  queryText?: string;
+  statusFilters?: string;
 }
 
 export const useRuleExecutionEvents = ({
   ruleId,
   start,
   end,
-  filters,
+  queryText,
+  statusFilters,
 }: UseRuleExecutionEventsArgs) => {
   const { addError } = useAppToasts();
 
   return useQuery<GetAggregateRuleExecutionEventsResponse>(
-    ['ruleExecutionEvents', ruleId, start, end, filters],
+    ['ruleExecutionEvents', ruleId, start, end, queryText, statusFilters],
     async ({ signal }) => {
-      return fetchRuleExecutionEvents({ ruleId, start, end, filters, signal });
+      return fetchRuleExecutionEvents({ ruleId, start, end, queryText, statusFilters, signal });
     },
     {
       onError: (e) => {

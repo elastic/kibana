@@ -5,29 +5,32 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiHealth } from '@elastic/eui';
-
+import { EuiBasicTableColumn, EuiHealth, EuiLink, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { DocLinksStart } from 'kibana/public';
 import React from 'react';
 import {
   AggregateRuleExecutionEvent,
   RuleExecutionStatus,
 } from '../../../../../../../common/detection_engine/schemas/common';
-import {
-  getEmptyTagValue,
-  getEmptyValue,
-  getOrEmptyTagFromValue,
-} from '../../../../../../common/components/empty_value';
+import { getEmptyTagValue, getEmptyValue } from '../../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../../common/components/formatted_date';
 import { getStatusColor } from '../../../../../components/rules/rule_execution_status/utils';
+import { PopoverTooltip } from '../../all/popover_tooltip';
+import { TableHeaderTooltipCell } from '../../all/table_header_tooltip_cell';
 
-import * as i18n from '../translations';
-
-const ONE_SECOND_AS_NANOSECONDS = 1000000000;
+import * as i18n from './translations';
+import { RuleDurationFormat } from './rule_duration_format';
 
 export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecutionEvent>> = [
   {
-    name: i18n.COLUMN_STATUS,
-    field: 'kibana.alert.rule.execution.status',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_STATUS}
+        tooltipContent={i18n.COLUMN_STATUS_TOOLTIP}
+      />
+    ),
+    field: 'security_status',
     render: (value: RuleExecutionStatus, data) =>
       value ? <EuiHealth color={getStatusColor(value)}>{value}</EuiHealth> : getEmptyTagValue(),
     sortable: true,
@@ -35,59 +38,129 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecu
     width: '10%',
   },
   {
-    field: '@timestamp',
-    name: i18n.COLUMN_TIMESTAMP,
+    field: 'timestamp',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_TIMESTAMP}
+        tooltipContent={i18n.COLUMN_TIMESTAMP_TOOLTIP}
+      />
+    ),
     render: (value: string) => <FormattedDate value={value} fieldName="date" />,
     sortable: true,
     truncateText: false,
     width: '15%',
   },
   {
-    field: 'message',
-    name: i18n.COLUMN_MESSAGE,
+    field: 'duration_ms',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_DURATION}
+        tooltipContent={i18n.COLUMN_DURATION_TOOLTIP}
+      />
+    ),
+    render: (value: number) => (
+      <>{value ? <RuleDurationFormat duration={value} /> : getEmptyValue()}</>
+    ),
+    sortable: true,
+    truncateText: false,
+    width: '10%',
+  },
+  {
+    field: 'security_message',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_MESSAGE}
+        tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
+      />
+    ),
     render: (value: string) => <>{value}</>,
     sortable: true,
     truncateText: false,
     width: '35%',
   },
+];
+
+export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
+  docLinks: DocLinksStart
+): Array<EuiBasicTableColumn<AggregateRuleExecutionEvent>> => [
   {
-    field: 'event.duration',
-    name: i18n.COLUMN_DURATION,
-    render: (value: number) => <>{value ? value / ONE_SECOND_AS_NANOSECONDS : getEmptyValue()}</>,
+    field: 'gap_duration_ms',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_GAP_DURATION}
+        customTooltip={
+          <div style={{ maxWidth: '20px' }}>
+            <PopoverTooltip columnName={i18n.COLUMN_GAP_DURATION}>
+              <EuiText size={'s'} style={{ width: 300 }}>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="Duration of gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
+                    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.gapDurationColumnTooltip"
+                    values={{
+                      seeDocs: (
+                        <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
+                          {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </PopoverTooltip>
+          </div>
+        }
+      />
+    ),
+    render: (value: number) => (
+      <>{value ? <RuleDurationFormat duration={value} /> : getEmptyValue()}</>
+    ),
     sortable: true,
     truncateText: false,
-    width: '5%',
+    width: '10%',
   },
   {
-    field: 'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
-    name: i18n.COLUMN_GAP_DURATION,
-    render: (value: number) => getOrEmptyTagFromValue(value),
+    field: 'indexing_duration_ms',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_INDEX_DURATION}
+        tooltipContent={i18n.COLUMN_INDEX_DURATION_TOOLTIP}
+      />
+    ),
+    render: (value: number) => (
+      <>{value ? <RuleDurationFormat duration={value} /> : getEmptyValue()}</>
+    ),
     sortable: true,
     truncateText: false,
-    width: '6%',
+    width: '10%',
   },
   {
-    field: 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
-    name: i18n.COLUMN_INDEX_DURATION,
-    render: (value: number) => getOrEmptyTagFromValue(value),
+    field: 'search_duration_ms',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_SEARCH_DURATION}
+        tooltipContent={i18n.COLUMN_SEARCH_DURATION_TOOLTIP}
+      />
+    ),
+    render: (value: number) => (
+      <>{value ? <RuleDurationFormat duration={value} /> : getEmptyValue()}</>
+    ),
     sortable: true,
     truncateText: false,
-    width: '7%',
+    width: '10%',
   },
   {
-    field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
-    name: i18n.COLUMN_SEARCH_DURATION,
-    render: (value: number) => getOrEmptyTagFromValue(value),
+    field: 'schedule_delay_ms',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_SCHEDULING_DELAY}
+        tooltipContent={i18n.COLUMN_SCHEDULING_DELAY_TOOLTIP}
+      />
+    ),
+    render: (value: number) => (
+      <>{value ? <RuleDurationFormat duration={value} /> : getEmptyValue()}</>
+    ),
     sortable: true,
     truncateText: false,
-    width: '8%',
-  },
-  {
-    field: 'kibana.task.schedule_delay',
-    name: 'Scheduling Delay (s)',
-    render: (value: number) => <>{value ? value / ONE_SECOND_AS_NANOSECONDS : getEmptyValue()}</>,
-    sortable: true,
-    truncateText: false,
-    width: '8%',
+    width: '10%',
   },
 ];

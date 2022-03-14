@@ -50,7 +50,8 @@ describe('useRuleExecutionEvents', () => {
           ruleId: SOME_RULE_ID,
           start: 'now-30',
           end: 'now',
-          filters: '',
+          queryText: '',
+          statusFilters: '',
         }),
       {
         wrapper: createReactQueryWrapper(),

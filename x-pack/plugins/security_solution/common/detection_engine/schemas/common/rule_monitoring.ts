@@ -110,42 +110,27 @@ export type RuleExecutionEvent = t.TypeOf<typeof ruleExecutionEvent>;
 // -------------------------------------------------------------------------------------------------
 // Aggregate Rule execution events
 
-const metrics = t.type({
-  total_indexing_duration_ms: t.number,
-  total_search_duration_ms: t.number,
-});
-
-const execution = t.type({
-  metrics,
-  status: t.string,
-});
-
-const rule = t.type({
-  execution,
-});
-
-const alert = t.type({
-  rule,
-});
-
-const event = t.type({
-  duration: t.number,
-});
-
-const task = t.type({
-  schedule_delay: t.number,
-});
-
-const kibana = t.type({
-  task,
-  alert,
-});
-
 export const aggregateRuleExecutionEvent = t.type({
-  kibana,
-  event,
+  execution_uuid: t.string,
+  timestamp: IsoDateString,
+  duration_ms: t.number,
+  status: t.string,
   message: t.string,
-  '@timestamp': IsoDateString,
+  num_active_alerts: t.number,
+  num_new_alerts: t.number,
+  num_recovered_alerts: t.number,
+  num_triggered_actions: t.number,
+  num_succeeded_actions: t.number,
+  num_errored_actions: t.number,
+  total_search_duration_ms: t.number,
+  es_search_duration_ms: t.number,
+  schedule_delay_ms: t.number,
+  timed_out: t.boolean,
+  indexing_duration_ms: t.number,
+  search_duration_ms: t.number,
+  gap_duration_ms: t.number,
+  security_status: t.string,
+  security_message: t.string,
 });
 
 export type AggregateRuleExecutionEvent = t.TypeOf<typeof aggregateRuleExecutionEvent>;
