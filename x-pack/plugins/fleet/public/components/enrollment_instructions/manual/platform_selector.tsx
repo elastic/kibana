@@ -15,10 +15,11 @@ import type { PLATFORM_TYPE } from '../../../hooks';
 import { PLATFORM_OPTIONS, usePlatform } from '../../../hooks';
 
 interface Props {
-  linuxMacCommand: string;
+  macOsCommand: string;
+  linuxCommand: string;
+  debCommand: string;
+  rpmCommand: string;
   windowsCommand: string;
-  installAgentLink: string;
-  troubleshootLink: string;
   isK8s: boolean;
 }
 
@@ -28,10 +29,11 @@ const CommandCode = styled.pre({
 });
 
 export const PlatformSelector: React.FunctionComponent<Props> = ({
-  linuxMacCommand,
+  macOsCommand,
+  linuxCommand,
+  debCommand,
+  rpmCommand,
   windowsCommand,
-  installAgentLink,
-  troubleshootLink,
   isK8s,
 }) => {
   const { platform, setPlatform } = usePlatform();
@@ -54,7 +56,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
       <EuiSpacer size="l" />
       {isK8s ? (
         <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-          <CommandCode>{linuxMacCommand}</CommandCode>
+          <CommandCode>{linuxCommand}</CommandCode>
         </EuiCodeBlock>
       ) : (
         <>
@@ -67,9 +69,14 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             })}
           />
           <EuiSpacer size="s" />
-          {platform === 'linux-mac' && (
+          {platform === 'macos' && (
             <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{linuxMacCommand}</CommandCode>
+              <CommandCode>{macOsCommand}</CommandCode>
+            </EuiCodeBlock>
+          )}
+          {platform === 'linux' && (
+            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+              <CommandCode>{linuxCommand}</CommandCode>
             </EuiCodeBlock>
           )}
           {platform === 'windows' && (
@@ -77,43 +84,18 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               <CommandCode>{windowsCommand}</CommandCode>
             </EuiCodeBlock>
           )}
-          {platform === 'rpm-deb' && (
-            <EuiText>
-              <FormattedMessage
-                id="xpack.fleet.enrollmentInstructions.moreInstructionsText"
-                defaultMessage="See the {link} for RPM / DEB deploy instructions."
-                values={{
-                  link: (
-                    <EuiLink target="_blank" external href={installAgentLink}>
-                      <FormattedMessage
-                        id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
-                        defaultMessage="Elastic Agent docs"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiText>
+          {platform === 'deb' && (
+            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+              <CommandCode>{debCommand}</CommandCode>
+            </EuiCodeBlock>
+          )}
+          {platform === 'rpm' && (
+            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+              <CommandCode>{rpmCommand}</CommandCode>
+            </EuiCodeBlock>
           )}
         </>
       )}
-      <EuiSpacer size="l" />
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.enrollmentInstructions.troubleshootingText"
-          defaultMessage="If you are having trouble connecting, see our {link}."
-          values={{
-            link: (
-              <EuiLink target="_blank" external href={troubleshootLink}>
-                <FormattedMessage
-                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                  defaultMessage="troubleshooting guide"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
     </>
   );
 };

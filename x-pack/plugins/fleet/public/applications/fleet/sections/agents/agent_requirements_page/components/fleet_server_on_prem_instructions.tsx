@@ -46,7 +46,7 @@ import type { PLATFORM_TYPE } from '../../../../hooks';
 import type { AgentPolicy } from '../../../../types';
 import { FleetServerOnPremRequiredCallout } from '../../components';
 
-import { policyHasFleetServer } from '../../services/has_fleet_server';
+import { policyHasFleetServer } from '../../../../services';
 
 import { getInstallCommandForPlatform } from './install_command_utils';
 
@@ -379,7 +379,7 @@ export const addFleetServerHostStep = ({
 }): EuiStepProps => {
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostStepTitle', {
-      defaultMessage: 'Add your Fleet Server host',
+      defaultMessage: 'Get started with Fleet Server',
     }),
     status: undefined,
     children: <AddFleetServerHostStepContent addFleetServerHost={addFleetServerHost} />,
@@ -452,7 +452,7 @@ export const AddFleetServerHostStepContent = ({
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.fleetServerSetup.addFleetServerHostStepDescription"
-          defaultMessage="Specify the URL your agents will use to connect to Fleet Server. This should match the public IP address or domain of the host where Fleet Server will run. By default, Fleet Server uses port {port}."
+          defaultMessage="First, set the public IP or host name and port that agents will use to reach Fleet Server. It uses port {port} by default. We'll then generate a policy for you automatically. "
           values={{ port: <EuiCode>8220</EuiCode> }}
         />
       </EuiText>
@@ -461,7 +461,7 @@ export const AddFleetServerHostStepContent = ({
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
-            placeholder={'e.g. https://127.0.0.1:8220'}
+            placeholder={'https://fleet-server-host.com:8220'}
             value={fleetServerHost}
             isInvalid={!!error}
             onChange={onChange}
@@ -718,12 +718,6 @@ export const OnPremInstructions: React.FC = () => {
       <FleetServerOnPremRequiredCallout />
       <EuiSpacer size="xl" />
       <EuiText>
-        <h2>
-          <FormattedMessage
-            id="xpack.fleet.fleetServerSetup.setupTitle"
-            defaultMessage="Add a Fleet Server"
-          />
-        </h2>
         <EuiSpacer size="m" />
         <FormattedMessage
           id="xpack.fleet.fleetServerSetup.setupText"
@@ -748,10 +742,10 @@ export const OnPremInstructions: React.FC = () => {
       <EuiSteps
         className="eui-textLeft"
         steps={[
+          addFleetServerHostStep({ addFleetServerHost }),
           AgentPolicySelectionStep({ policyId, setPolicyId }),
           DownloadStep(true),
           deploymentModeStep({ deploymentMode, setDeploymentMode }),
-          addFleetServerHostStep({ addFleetServerHost }),
           ServiceTokenStep({
             disabled: deploymentMode === 'production' && !fleetServerHost,
             serviceToken,

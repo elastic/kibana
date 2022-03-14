@@ -79,8 +79,23 @@ export const getHttp = (basepath = BASE_PATH) => {
         return { success: true };
       }
 
+      if (path.match('/api/fleet/agent_policies')) {
+        return { items: [] };
+      }
+
+      if (path.match('/api/fleet/settings')) {
+        return { items: [] };
+      }
+
       action(path)('KP: UNSUPPORTED ROUTE');
       return {};
+    }) as HttpHandler,
+    post: (async (path: string, options: HttpFetchOptions) => {
+      if (path.match('/api/fleet/settings')) {
+        return { items: [] };
+      }
+
+      action(path)('KP: UNSUPPORTED ROUTE');
     }) as HttpHandler,
   } as unknown as HttpStart;
 

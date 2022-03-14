@@ -72,6 +72,9 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../applications/fleet/sections/agents/services/has_fleet_server', () => {
-  return { policyHasFleetServer: jest.fn().mockReturnValue(true) };
+jest.mock('../../services', () => {
+  return {
+    ...jest.requireActual('../../services'),
+    policyHasFleetServer: jest.fn().mockReturnValue(true),
+  };
 });

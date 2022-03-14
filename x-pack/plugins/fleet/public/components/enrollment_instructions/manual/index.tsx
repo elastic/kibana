@@ -34,8 +34,11 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
 
   return (
     <PlatformSelector
-      linuxMacCommand={linuxMacCommand}
+      macOsCommand={linuxMacCommand}
+      linuxCommand={linuxMacCommand}
       windowsCommand={windowsCommand}
+      debCommand={linuxMacCommand}
+      rpmCommand={linuxMacCommand}
       installAgentLink={docLinks.links.fleet.installElasticAgent}
       troubleshootLink={docLinks.links.fleet.troubleshooting}
       isK8s={false}

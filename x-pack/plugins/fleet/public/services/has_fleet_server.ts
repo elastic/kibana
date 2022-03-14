@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AgentPolicy, PackagePolicy } from '../../../types';
-import { FLEET_SERVER_PACKAGE } from '../../../constants';
+import { FLEET_SERVER_PACKAGE } from '../constants';
+import type { AgentPolicy, PackagePolicy } from '../types';
 
 export function policyHasFleetServer(agentPolicy: AgentPolicy) {
   return agentPolicy.package_policies?.some(

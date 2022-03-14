@@ -23,9 +23,9 @@ import {
 } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
-import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
-
 import { FLEET_SERVER_PACKAGE } from '../../constants';
+
+import { policyHasFleetServer } from '../../services';
 
 import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
 import type { InstructionProps } from './types';
@@ -104,8 +104,8 @@ export const ManagedInstructions = React.memo<InstructionProps>(
       } = fleetServerInstructions;
 
       return [
-        deploymentModeStep({ deploymentMode, setDeploymentMode }),
         addFleetServerHostStep({ addFleetServerHost }),
+        deploymentModeStep({ deploymentMode, setDeploymentMode }),
         ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
         FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
       ];

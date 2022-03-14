@@ -231,8 +231,11 @@ export const StandaloneInstructions = React.memo<InstructionProps>(
         }),
         children: (
           <PlatformSelector
-            linuxMacCommand={linuxMacCommand}
+            macOsCommand={linuxMacCommand}
+            linuxCommand={linuxMacCommand}
             windowsCommand={windowsCommand}
+            debCommand={linuxMacCommand}
+            rpmCommand={linuxMacCommand}
             installAgentLink={docLinks.links.fleet.installElasticAgentStandalone}
             troubleshootLink={docLinks.links.fleet.troubleshooting}
             isK8s={isK8s === 'IS_KUBERNETES'}
