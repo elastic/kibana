@@ -9,6 +9,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import { FC } from 'react';
+import { DataViewEditorStart } from 'src/plugins/data_view_editor/public';
 
 /** @internal */
 export interface SharedUXPluginSetup {}
@@ -28,4 +29,6 @@ export interface SharedUXPluginStart {
 export interface SharedUXPluginSetupDeps {}
 
 /** @internal */
-export interface SharedUXPluginStartDeps {}
+export interface SharedUXPluginStartDeps {
+  dataViewEditor: DataViewEditorStart;
+}

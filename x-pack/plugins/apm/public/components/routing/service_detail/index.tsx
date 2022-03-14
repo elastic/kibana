@@ -76,6 +76,7 @@ export const serviceDetail = {
             rangeFrom: t.string,
             rangeTo: t.string,
             kuery: t.string,
+            serviceGroup: t.string,
           }),
           t.partial({
             comparisonEnabled: toBooleanRt,
@@ -92,6 +93,7 @@ export const serviceDetail = {
       query: {
         kuery: '',
         environment: ENVIRONMENT_ALL.value,
+        serviceGroup: '',
       },
     },
     children: {

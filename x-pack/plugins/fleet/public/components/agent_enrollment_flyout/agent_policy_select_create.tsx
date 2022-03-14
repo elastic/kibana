@@ -73,6 +73,9 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
   const onClickCreatePolicy = () => {
     setCreateState({ status: CREATE_STATUS.INITIAL });
     setShowCreatePolicy(true);
+    if (withKeySelection && onKeyChange) {
+      onKeyChange(undefined);
+    }
   };
 
   return (

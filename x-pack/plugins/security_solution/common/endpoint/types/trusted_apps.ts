@@ -6,7 +6,11 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-
+import {
+  ConditionEntryField,
+  OperatingSystem,
+  TrustedAppEntryTypes,
+} from '@kbn/securitysolution-utils';
 import {
   DeleteTrustedAppsRequestSchema,
   GetOneTrustedAppRequestSchema,
@@ -15,7 +19,6 @@ import {
   PutTrustedAppUpdateRequestSchema,
   GetTrustedAppsSummaryRequestSchema,
 } from '../schema/trusted_apps';
-import { OperatingSystem } from './os';
 
 /** API request params for deleting Trusted App entry */
 export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;
@@ -67,18 +70,11 @@ export interface GetTrustedAppsSummaryResponse {
   linux: number;
 }
 
-export enum ConditionEntryField {
-  HASH = 'process.hash.*',
-  PATH = 'process.executable.caseless',
-  SIGNER = 'process.Ext.code_signature',
-}
-
 export enum OperatorFieldIds {
   is = 'is',
   matches = 'matches',
 }
 
-export type TrustedAppEntryTypes = 'match' | 'wildcard';
 export interface ConditionEntry<T extends ConditionEntryField = ConditionEntryField> {
   field: T;
   type: TrustedAppEntryTypes;
