@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
         USER.ML_POWERUSER_SPACE1
       );
 
-      expect(body).to.eql({ [adJobId]: { success: true } });
+      expect(body).to.eql({ [adJobId]: { type: 'ml-job', success: true } });
       await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [idSpace1]);
     });
 
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
         USER.ML_POWERUSER_SPACE1
       );
 
-      expect(body).to.eql({ [dfaJobId]: { success: true } });
+      expect(body).to.eql({ [dfaJobId]: { type: 'ml-job', success: true } });
       await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', [idSpace1]);
     });
 

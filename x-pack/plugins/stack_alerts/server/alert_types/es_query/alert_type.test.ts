@@ -156,7 +156,7 @@ describe('alertType', () => {
       const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
-      alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
       );
 
@@ -198,7 +198,7 @@ describe('alertType', () => {
           'time-field': newestDocumentTimestamp - 2000,
         },
       ]);
-      alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
       );
 
@@ -234,7 +234,7 @@ describe('alertType', () => {
       const previousTimestamp = Date.now();
       const newestDocumentTimestamp = previousTimestamp + 1000;
 
-      alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults([
             {
@@ -282,7 +282,7 @@ describe('alertType', () => {
 
       const oldestDocumentTimestamp = Date.now();
 
-      alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults([
             {
@@ -325,7 +325,7 @@ describe('alertType', () => {
 
       const oldestDocumentTimestamp = Date.now();
 
-      alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults([
             {
@@ -349,7 +349,7 @@ describe('alertType', () => {
       });
 
       const newestDocumentTimestamp = oldestDocumentTimestamp + 5000;
-      alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults([
             {
@@ -397,7 +397,7 @@ describe('alertType', () => {
 
       const oldestDocumentTimestamp = Date.now();
 
-      alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults(
             [
@@ -443,7 +443,7 @@ describe('alertType', () => {
 
       const oldestDocumentTimestamp = Date.now();
 
-      alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults(
             [

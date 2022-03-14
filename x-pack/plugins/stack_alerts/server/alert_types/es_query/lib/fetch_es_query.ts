@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from 'kibana/server';
+import { IScopedClusterClient, Logger } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { OnlyEsQueryAlertParams } from '../types';
-import { IAbortableClusterClient } from '../../../../../alerting/server';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { ES_QUERY_ID } from '../constants';
 import { getSearchParams } from './get_search_params';
@@ -21,12 +20,12 @@ export async function fetchEsQuery(
   params: OnlyEsQueryAlertParams,
   timestamp: string | undefined,
   services: {
-    search: IAbortableClusterClient;
+    scopedClusterClient: IScopedClusterClient;
     logger: Logger;
   }
 ) {
-  const { search, logger } = services;
-  const abortableEsClient = search.asCurrentUser;
+  const { scopedClusterClient, logger } = services;
+  const esClient = scopedClusterClient.asCurrentUser;
   const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
 
   const filter = timestamp
@@ -75,7 +74,7 @@ export async function fetchEsQuery(
     `es query alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`
   );
 
-  const { body: searchResult } = await abortableEsClient.search(query);
+  const { body: searchResult } = await esClient.search(query, { meta: true });
 
   logger.debug(
     ` es query alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`

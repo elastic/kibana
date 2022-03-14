@@ -24,7 +24,7 @@ export async function executor(
 ) {
   const esQueryAlert = isEsQueryAlert(options);
   const { alertId, name, services, params, state } = options;
-  const { alertFactory, search, searchSourceClient } = services;
+  const { alertFactory, scopedClusterClient, searchSourceClient } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
 
@@ -44,7 +44,7 @@ export async function executor(
 
   const { numMatches, searchResult, dateStart, dateEnd } = esQueryAlert
     ? await fetchEsQuery(alertId, name, params as OnlyEsQueryAlertParams, latestTimestamp, {
-        search,
+        scopedClusterClient,
         logger,
       })
     : await fetchSearchSourceQuery(

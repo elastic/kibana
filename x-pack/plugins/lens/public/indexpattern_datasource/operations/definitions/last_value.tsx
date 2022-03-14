@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
@@ -108,6 +109,13 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   };
 }
 
+function getExistsFilter(field: string) {
+  return {
+    query: `${field}: *`,
+    language: 'kuery',
+  };
+}
+
 export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn, 'field'> = {
   type: 'last_value',
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
@@ -129,6 +137,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       sourceField: field.name,
       params: newParams,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
+      filter:
+        oldColumn.filter && isEqual(oldColumn.filter, getExistsFilter(oldColumn.sourceField))
+          ? getExistsFilter(field.name)
+          : oldColumn.filter,
     };
   },
   getPossibleOperationForField: ({ aggregationRestrictions, type }) => {
@@ -186,7 +198,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       isBucketed: false,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
-      filter: getFilter(previousColumn, columnParams),
+      filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
         sortField: lastValueParams?.sortField || sortField,
