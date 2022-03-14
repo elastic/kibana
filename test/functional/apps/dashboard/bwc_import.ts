@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
 
   // https://github.com/elastic/kibana/issues/114053
-  describe.skip('bwc import', function describeIndexTests() {
+  describe('bwc import', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.settings.navigateTo();
