@@ -52,11 +52,9 @@ export type { QuickButtonProps } from './components/solution_toolbar';
 
 export {
   AddFromLibraryButton,
-  PrimaryActionButton,
   PrimaryActionPopover,
   QuickButtonGroup,
   SolutionToolbar,
-  SolutionToolbarButton,
   SolutionToolbarPopover,
 } from './components/solution_toolbar';
 

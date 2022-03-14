@@ -14,12 +14,7 @@ import {
   SolutionToolbarButton as PrimaryActionButton,
 } from '../../../../shared_ux/public';
 
-import {
-  AddFromLibraryButton,
-  QuickButtonGroup,
-  PrimaryActionPopover,
-  SolutionToolbarPopover,
-} from './items';
+import { QuickButtonGroup, PrimaryActionPopover, SolutionToolbarPopover } from './items';
 
 import './solution_toolbar.scss';
 
