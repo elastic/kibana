@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { search } from 'src/plugins/data/public';
+import { search } from '../../../../data/public';
 import { XYChartProps } from '../../common';
 import { getFilteredLayers } from './layers';
 import { isDataLayer } from './visualization';

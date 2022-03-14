@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { LEGACY_TIME_AXIS } from 'src/plugins/charts/common';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
 import moment from 'moment';
+import { LEGACY_TIME_AXIS } from '../../../charts/common';
+import { DataPublicPluginStart } from '../../../data/public';
+import { FieldFormatsStart } from '../../../field_formats/public';
+import { ChartsPluginStart } from '../../../charts/public';
 import { CoreSetup, CoreStart, IUiSettingsClient } from '../../../../core/public';
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {

@@ -8,13 +8,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ThemeServiceStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ChartsPluginStart, PaletteRegistry } from 'src/plugins/charts/public';
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { FormatFactory } from 'src/plugins/field_formats/common';
-import { KibanaThemeProvider } from 'src/plugins/kibana_react/public';
+import { ThemeServiceStart } from '../../../../kibana/public';
+import { ChartsPluginStart, PaletteRegistry } from '../../../../charts/public';
+import { ExpressionRenderDefinition } from '../../../../expressions';
+import { FormatFactory } from '../../../../field_formats/common';
+import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { XYChartProps } from '../../common';
 import { XYChartReportable } from '../components';
 import { calculateMinInterval } from '../helpers';

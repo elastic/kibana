@@ -7,6 +7,8 @@
  */
 
 import React, { useRef } from 'react';
+import { IconType } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   Chart,
   Settings,
@@ -35,11 +37,9 @@ import {
   BarSeriesProps,
   LineSeriesProps,
 } from '@elastic/charts';
-import type { Datatable, DatatableRow, DatatableColumn } from 'src/plugins/expressions/public';
-import { IconType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { RenderMode } from 'src/plugins/expressions';
-import { FieldFormat } from 'src/plugins/field_formats/common';
+import type { Datatable, DatatableRow, DatatableColumn } from '../../../../expressions/public';
+import { RenderMode } from '../../../../expressions/common';
+import { FieldFormat } from '../../../../field_formats/common';
 import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { DataLayerConfigResult, SeriesType, XYChartProps } from '../../common';

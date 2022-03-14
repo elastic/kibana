@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Query } from 'src/plugins/data/common';
 import { IconType } from '@elastic/eui';
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
-import { FieldFormatsSetup } from 'src/plugins/field_formats/public';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { Query } from '../../../data/common';
+import { DataPublicPluginSetup } from '../../../data/public';
+import { FieldFormatsSetup } from '../../../field_formats/public';
+import { ChartsPluginSetup } from '../../../charts/public';
 import { IFieldFormat, SerializedFieldFormat } from '../../../../plugins/field_formats/common';
 import type { RangeSelectContext, ValueClickContext } from '../../../../plugins/embeddable/public';
 import { Datatable, ExpressionsServiceStart, ExpressionsSetup } from '../../../expressions/public';
