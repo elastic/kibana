@@ -6,27 +6,51 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { SpaceListProps, SpacesApiUi } from '../../../../../../x-pack/plugins/spaces/public';
-import type { SavedObjectsManagementColumn } from '../types';
+import type {
+  ShareToSpaceFlyoutProps,
+  SpaceListProps,
+  SpacesApiUi,
+} from '../../../../../../x-pack/plugins/spaces/public';
+import type { SavedObjectsManagementRecord } from '../types';
+import { SavedObjectsManagementColumn } from '../types';
 
 interface WrapperProps {
   spacesApiUi: SpacesApiUi;
-  props: SpaceListProps;
+  spaceListProps: SpaceListProps;
+  flyoutProps: ShareToSpaceFlyoutProps;
 }
 
-const Wrapper = ({ spacesApiUi, props }: WrapperProps) => {
-  const LazyComponent = useMemo(() => spacesApiUi.components.getSpaceList, [spacesApiUi]);
+const Wrapper = ({ spacesApiUi, spaceListProps, flyoutProps }: WrapperProps) => {
+  const [showFlyout, setShowFlyout] = useState(false);
 
-  return <LazyComponent {...props} />;
+  function listOnClick() {
+    setShowFlyout(true);
+  }
+
+  function onClose() {
+    setShowFlyout(false);
+    flyoutProps.onClose?.();
+  }
+
+  const LazySpaceList = useMemo(() => spacesApiUi.components.getSpaceList, [spacesApiUi]);
+  const LazyShareToSpaceFlyout = useMemo(
+    () => spacesApiUi.components.getShareToSpaceFlyout,
+    [spacesApiUi]
+  );
+
+  return (
+    <>
+      <LazySpaceList {...spaceListProps} listOnClick={listOnClick} />
+      {showFlyout && <LazyShareToSpaceFlyout {...flyoutProps} onClose={onClose} />}
+    </>
+  );
 };
 
-export class ShareToSpaceSavedObjectsManagementColumn
-  implements SavedObjectsManagementColumn<void>
-{
+export class ShareToSpaceSavedObjectsManagementColumn extends SavedObjectsManagementColumn {
   public id: string = 'share_saved_objects_to_space';
 
   public euiColumn = {
@@ -37,18 +61,49 @@ export class ShareToSpaceSavedObjectsManagementColumn
     description: i18n.translate('savedObjectsManagement.shareToSpace.columnDescription', {
       defaultMessage: 'The other spaces that this object is currently shared to',
     }),
-    render: (namespaces: string[] | undefined) => {
+    render: (namespaces: string[] | undefined, record: SavedObjectsManagementRecord) => {
       if (!namespaces) {
         return null;
       }
 
-      const props: SpaceListProps = {
+      const spaceListProps: SpaceListProps = {
         namespaces,
+        behaviorContext: 'outside-space',
+      };
+      const flyoutProps: ShareToSpaceFlyoutProps = {
+        savedObjectTarget: {
+          type: record.type,
+          id: record.id,
+          namespaces: record.namespaces ?? [],
+          title: record.meta.title,
+          icon: record.meta.icon,
+        },
+        flyoutIcon: 'share',
+        onUpdate: (updatedObjects: Array<{ type: string; id: string }>) =>
+          (this.objectsToRefresh = [...updatedObjects]),
+        onClose: this.onClose,
+        enableCreateCopyCallout: true,
+        enableCreateNewSpaceLink: true,
       };
 
-      return <Wrapper spacesApiUi={this.spacesApiUi} props={props} />;
+      return (
+        <Wrapper
+          spacesApiUi={this.spacesApiUi}
+          spaceListProps={spaceListProps}
+          flyoutProps={flyoutProps}
+        />
+      );
     },
   };
+  public refreshOnFinish = () => this.objectsToRefresh;
 
-  constructor(private readonly spacesApiUi: SpacesApiUi) {}
+  private objectsToRefresh: Array<{ type: string; id: string }> = [];
+
+  constructor(private readonly spacesApiUi: SpacesApiUi) {
+    super();
+  }
+
+  private onClose = () => {
+    this.finish();
+  };
 }
