@@ -51,7 +51,8 @@ describe('ScreenshottingPlugin', () => {
       expect(startContract).toEqual(
         expect.objectContaining({
           diagnose: expect.any(Function),
-          getScreenshots: expect.any(Function),
+          getScreenshotsPdf: expect.any(Function),
+          getScreenshotsPng: expect.any(Function),
         })
       );
     });
@@ -68,7 +69,8 @@ describe('ScreenshottingPlugin', () => {
       expect(startContract).toEqual(
         expect.objectContaining({
           diagnose: expect.any(Function),
-          getScreenshots: expect.any(Function),
+          getScreenshotsPdf: expect.any(Function),
+          getScreenshotsPng: expect.any(Function),
         })
       );
     });
