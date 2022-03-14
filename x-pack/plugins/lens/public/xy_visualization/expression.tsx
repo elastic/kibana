@@ -613,6 +613,7 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend?.isInside ? legendInsideParams : legend.position}
+        legendSize={legend.legendSize}
         theme={{
           ...chartTheme,
           barSeriesStyle: {

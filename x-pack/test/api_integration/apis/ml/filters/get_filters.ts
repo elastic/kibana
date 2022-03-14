@@ -26,7 +26,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('get_filters', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/126870
+  describe.skip('get_filters', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
       for (const filter of validFilters) {
