@@ -22,5 +22,5 @@ export const servicesFactory: PluginServiceFactory<SharedUXServices, {}> = (para
   permissions: userPermissionsServiceFactory(),
   editors: editorsServiceFactory(),
   docLinks: docLinksServiceFactory(),
-  http: httpServiceFactory(),
+  http: httpServiceFactory(params),
 });
