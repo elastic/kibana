@@ -22,11 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateSolutionNavAvatar,
-  NO_DATA_PAGE_TEMPLATE_PROPS,
-} from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplateSolutionNavAvatar } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Chat } from '../../../../../../cloud/public';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
@@ -34,14 +30,16 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-import AppSearchImage from '../../assets/app_search.png';
-import WorkplaceSearchImage from '../../assets/workplace_search.png';
+import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
 import illustration from './lock_light.svg';
+
+// The EUI EmptyState component has a max-width of 850px, so we need to ensure that the layout looks as expected.
+const MAX_WIDTH = 850;
 
 interface ProductSelectorProps {
   access: {
@@ -146,7 +144,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     />
   );
   return (
-    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
+    <EnterpriseSearchOverviewPageTemplate
+      pageChrome={[]}
+      pageViewTelemetry="Overview"
+      isLoading={false}
+      restrictWidth={MAX_WIDTH}
+    >
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
       <TrialCallout />
@@ -177,6 +180,6 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       <EuiSpacer size="xxl" />
       {shouldShowEnterpriseSearchCards ? productCards : insufficientAccessMessage}
       <Chat />
-    </KibanaPageTemplate>
+    </EnterpriseSearchOverviewPageTemplate>
   );
 };
