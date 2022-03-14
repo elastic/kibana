@@ -35,8 +35,8 @@ import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
-import { HostRisk } from '../../../../common/containers/hosts_risk/types';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
+import { useHostRiskScore, HostRisk } from '../../../../risk_score/containers';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -100,7 +100,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     services: { cases },
   } = useKibana();
 
-  const CasesContext = cases.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const casesPermissions = useGetUserCasesPermissions();
 
   const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
@@ -136,7 +136,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   );
 
   const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    hostName,
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     pagination: {
       cursorStart: 0,
       querySize: 1,
