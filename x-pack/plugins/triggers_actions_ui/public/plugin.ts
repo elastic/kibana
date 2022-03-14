@@ -39,7 +39,9 @@ import type {
   RuleTypeModel,
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
+  AlertsTableProps,
 } from './types';
+import { getAlertsTableLazy } from './common/get_alerts_table';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -61,6 +63,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditAlertFlyout: (
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
+  getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
 }
 
 interface PluginsSetup {
@@ -201,6 +204,9 @@ export class Plugin
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,
         });
+      },
+      getAlertsTable: (props: AlertsTableProps) => {
+        return getAlertsTableLazy(props);
       },
     };
   }

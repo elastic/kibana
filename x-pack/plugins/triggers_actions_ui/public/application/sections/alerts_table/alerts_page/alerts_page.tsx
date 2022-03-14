@@ -9,7 +9,8 @@ import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@ela
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleRegistrySearchRequestPagination } from '../../../../../../rule_registry/common';
-import { AlertsTable, AlertsData } from '../alerts_table';
+import { AlertsTable } from '../alerts_table';
+import { AlertsData } from '../../../../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
@@ -66,6 +67,7 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
 
   return (
     <>
+      <h1>THIS IS AN INTERNAL TEST PAGE</h1>
       <AlertsTable {...tableProps} />
     </>
   );

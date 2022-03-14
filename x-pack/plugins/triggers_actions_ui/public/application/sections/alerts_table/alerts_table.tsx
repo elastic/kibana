@@ -5,58 +5,12 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import {
-  EuiDataGridColumn,
-  EuiDataGridControlColumn,
-  EuiDataGridCellValueElementProps,
-  EuiDataGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EuiDataGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
-import { RuleRegistrySearchRequestPagination } from '../../../../../rule_registry/common';
 import { QueryBar, useQueryBar, Provider, alertsPageStateContainer } from './query_bar';
 import { getVisibleAlertConsumers } from './lib/get_visible_alert_consumers';
 import { useFetchDataViews, useSorting, usePagination } from './hooks';
-
-interface BulkActionsObjectProp {
-  alertStatusActions?: boolean;
-  onAlertStatusActionSuccess?: void;
-  onAlertStatusActionFailure?: void;
-}
-
-export type AlertsData = Record<string, any[]>;
-
-export interface FetchAlertData {
-  activePage: number;
-  alerts: AlertsData;
-  isInitializing: boolean;
-  isLoading: boolean;
-  getInspectQuery: () => { request: {}; response: {} };
-  onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
-  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  onSortChange: (sort: estypes.SortCombinations[]) => void;
-  refresh: () => void;
-}
-
-interface AlertsTableProps {
-  consumers: AlertConsumers[];
-  bulkActions: BulkActionsObjectProp;
-  columns: EuiDataGridColumn[];
-  // defaultCellActions: TGridCellAction[];
-  deletedEventIds: string[];
-  disabledCellActions: string[];
-  pageSize: number;
-  pageSizeOptions: number[];
-  leadingControlColumns: EuiDataGridControlColumn[];
-  renderCellValue: (props: EuiDataGridCellValueElementProps) => React.ReactNode;
-  showCheckboxes: boolean;
-  trailingControlColumns: EuiDataGridControlColumn[];
-  useFetchAlertsData: () => FetchAlertData;
-}
+import { AlertsTableProps } from '../../../types';
 
 const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
   props: AlertsTableProps

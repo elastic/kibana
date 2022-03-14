@@ -8,9 +8,16 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { IconType } from '@elastic/eui';
+import {
+  IconType,
+  EuiDataGridColumn,
+  EuiDataGridControlColumn,
+  EuiDataGridCellValueElementProps,
+} from '@elastic/eui';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -38,6 +45,7 @@ import {
   ActionVariable,
   RuleType as CommonRuleType,
 } from '../../alerting/common';
+import { RuleRegistrySearchRequestPagination } from '../../rule_registry/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -349,4 +357,40 @@ export enum Percentiles {
 
 export interface TriggersActionsUiConfig {
   minimumScheduleInterval?: string;
+}
+
+export type AlertsData = Record<string, any[]>;
+
+export interface FetchAlertData {
+  activePage: number;
+  alerts: AlertsData;
+  isInitializing: boolean;
+  isLoading: boolean;
+  getInspectQuery: () => { request: {}; response: {} };
+  onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
+  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
+  onSortChange: (sort: estypes.SortCombinations[]) => void;
+  refresh: () => void;
+}
+
+export interface BulkActionsObjectProp {
+  alertStatusActions?: boolean;
+  onAlertStatusActionSuccess?: void;
+  onAlertStatusActionFailure?: void;
+}
+
+export interface AlertsTableProps {
+  consumers: AlertConsumers[];
+  bulkActions: BulkActionsObjectProp;
+  columns: EuiDataGridColumn[];
+  // defaultCellActions: TGridCellAction[];
+  deletedEventIds: string[];
+  disabledCellActions: string[];
+  pageSize: number;
+  pageSizeOptions: number[];
+  leadingControlColumns: EuiDataGridControlColumn[];
+  renderCellValue: (props: EuiDataGridCellValueElementProps) => React.ReactNode;
+  showCheckboxes: boolean;
+  trailingControlColumns: EuiDataGridControlColumn[];
+  useFetchAlertsData: () => FetchAlertData;
 }
