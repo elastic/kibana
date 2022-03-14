@@ -6,6 +6,10 @@
  */
 
 import React from 'react';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { act, waitFor, within } from '@testing-library/react';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import userEvent from '@testing-library/user-event';
 import { ArtifactFormComponentProps } from './types';
 import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -73,6 +77,7 @@ export interface ArtifactListPageRenderingSetup {
   mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   FormComponentMock: ReturnType<typeof getFormComponentMock>['FormComponentMock'];
   getLastFormComponentProps: ReturnType<typeof getFormComponentMock>['getLastFormComponentProps'];
+  getFirstCard(props?: Partial<{ showActions: boolean }>): Promise<HTMLElement>;
 }
 
 /**
@@ -89,8 +94,10 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
 
   const { FormComponentMock, getLastFormComponentProps } = getFormComponentMock();
 
+  let renderResult: ReturnType<AppContextTestRender['render']>;
+
   const renderArtifactListPage = (props: Partial<ArtifactListPageProps> = {}) => {
-    const renderResult = mockedContext.render(
+    renderResult = mockedContext.render(
       <ArtifactListPage
         apiClient={apiClient}
         ArtifactFormComponent={
@@ -105,6 +112,30 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
     return renderResult;
   };
 
+  const getFirstCard = async ({
+    showActions = false,
+  }: Partial<{ showActions: boolean }> = {}): Promise<HTMLElement> => {
+    const cards = await renderResult.findAllByTestId('testPage-card');
+
+    if (cards.length === 0) {
+      throw new Error('No cards found!');
+    }
+
+    const card = cards[0];
+
+    if (showActions) {
+      await act(async () => {
+        userEvent.click(within(card).getByTestId('testPage-card-header-actions-button'));
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-card-header-actions-contextMenuPanel'));
+        });
+      });
+    }
+
+    return card;
+  };
+
   return {
     renderArtifactListPage,
     history,
@@ -112,5 +143,6 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
     mockedApi,
     FormComponentMock,
     getLastFormComponentProps,
+    getFirstCard,
   };
 };
