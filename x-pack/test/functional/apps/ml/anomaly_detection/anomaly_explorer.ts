@@ -209,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('updates the URL state');
           await ml.navigation.assertCurrentURLContains(
-            'selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1454846400%2C1454860800)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t%2CviewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10'
+            'selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1454846400%2C1454860800)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t'
           );
 
           await ml.testExecution.logTestStep('clears the selection');
