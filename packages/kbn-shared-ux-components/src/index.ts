@@ -50,8 +50,8 @@ export const LazyNoDataViews = React.lazy(() =>
 );
 
 /**
- * A `NoDataViewsPage` component that is wrapped by the `withSuspense` HOC.  This component can
- * be used directly by consumers and will load the `LazyNoDataViewsPage` component lazily with
+ * A `NoDataViews` component that is wrapped by the `withSuspense` HOC.  This component can
+ * be used directly by consumers and will load the `LazyNoDataViews` component lazily with
  * a predefined fallback and error boundary.
  */
 export const NoDataViews = withSuspense(LazyNoDataViews);

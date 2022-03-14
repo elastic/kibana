@@ -8,7 +8,7 @@
 
 /**
  * TODO: `DataView` is a class exported by `src/plugins/data_views/public`.  Since this service
- * is contained in this package-- and packages should be stateless and shouldn't depend on
+ * is contained in this package-- and packages can only depend on other packages and never on
  * plugins-- we have to set this to `unknown`.  If and when `DataView` is exported from a
  * stateless package, we can remove this.
  */

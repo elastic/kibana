@@ -9,10 +9,9 @@
 import React, { FC, createContext, useContext } from 'react';
 
 import type { SharedUxServices } from './types';
-import { stubServicesFactory } from './services';
 
 // The React Context used to provide the services to the SharedUX components.
-const SharedUxServicesContext = createContext<SharedUxServices>(stubServicesFactory());
+const SharedUxServicesContext = createContext<SharedUxServices | null>(null);
 
 /**
  * The `React.Context` Provider component for the `SharedUxServices` context.  Any
@@ -30,7 +29,15 @@ export const SharedUxServicesProvider: FC<SharedUxServices> = ({ children, ...se
  * React hook for accessing pre-wired `SharedUxServices`.
  */
 export function useSharedUxServices() {
-  return useContext(SharedUxServicesContext);
+  const context = useContext(SharedUxServicesContext);
+
+  if (!context) {
+    throw new Error(
+      'SharedUxServicesContext missing.  Ensure your component or React root is wrapped with SharedUxServicesProvider.'
+    );
+  }
+
+  return context;
 }
 
 /**

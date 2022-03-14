@@ -8,10 +8,14 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
+import { servicesFactory } from '../../../services/storybook';
+
 import { NoDataViews as NoDataViewsComponent, Props } from './no_data_views.component';
 import { NoDataViews } from './no_data_views';
 
 import mdx from './no_data_views.mdx';
+
+const services = servicesFactory({});
 
 export default {
   title: 'No Data Views',
@@ -37,5 +41,9 @@ PureComponent.argTypes = {
   canCreateNewDataView: {
     control: 'boolean',
     defaultValue: true,
+  },
+  dataViewsDocLink: {
+    options: [services.docLinks.dataViewsDocLink, undefined],
+    control: { type: 'radio' },
   },
 };
