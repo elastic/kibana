@@ -2704,6 +2704,8 @@ components:
           type: string
         description:
           type: string
+        force:
+          type: boolean
       required:
         - name
         - namespace

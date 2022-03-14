@@ -4292,6 +4292,9 @@
           },
           "description": {
             "type": "string"
+          },
+          "force": {
+            "type": "boolean"
           }
         },
         "required": [

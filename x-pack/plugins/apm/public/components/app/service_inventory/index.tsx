@@ -34,7 +34,7 @@ function useServicesFetcher() {
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup },
   } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -55,11 +55,12 @@ function useServicesFetcher() {
             end,
             environment,
             kuery,
+            serviceGroup,
           },
         },
       });
     },
-    [start, end, environment, kuery]
+    [start, end, environment, kuery, serviceGroup]
   );
 
   const mainStatisticsFetch = useFetcher(
@@ -72,6 +73,7 @@ function useServicesFetcher() {
               kuery,
               start,
               end,
+              serviceGroup,
             },
           },
         }).then((mainStatisticsData) => {
@@ -82,7 +84,7 @@ function useServicesFetcher() {
         });
       }
     },
-    [environment, kuery, start, end]
+    [environment, kuery, start, end, serviceGroup]
   );
 
   const { data: mainStatisticsData = initialData } = mainStatisticsFetch;
