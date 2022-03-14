@@ -13,6 +13,7 @@ import type { DatatableVisualizationState } from '../visualization';
 export interface RowHeightSettingsProps {
   rowHeight?: 'auto' | 'single' | 'custom';
   rowHeightLines?: number;
+  maxRowHeight?: number;
   label: string;
   onChangeRowHeight: (newHeightMode: 'auto' | 'single' | 'custom' | undefined) => void;
   onChangeRowHeightLines: (newRowHeightLines: number) => void;
@@ -22,7 +23,14 @@ export interface RowHeightSettingsProps {
 const idPrefix = htmlIdGenerator()();
 
 export function RowHeightSettings(props: RowHeightSettingsProps) {
-  const { label, rowHeight, rowHeightLines, onChangeRowHeight, onChangeRowHeightLines } = props;
+  const {
+    label,
+    rowHeight,
+    rowHeightLines,
+    onChangeRowHeight,
+    onChangeRowHeightLines,
+    maxRowHeight,
+  } = props;
 
   const rowHeightModeOptions = [
     {
@@ -75,7 +83,7 @@ export function RowHeightSettings(props: RowHeightSettingsProps) {
                 fullWidth
                 showInput
                 min={1}
-                max={20}
+                max={maxRowHeight ?? 20}
                 step={1}
                 value={rowHeightLines ?? 2}
                 onChange={(e) => {

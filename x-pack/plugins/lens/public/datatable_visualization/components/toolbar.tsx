@@ -91,6 +91,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           onChangeRowHeight={onChangeHeaderHeight}
           onChangeRowHeightLines={onChangeHeaderHeightLines}
           data-test-subj="lnsHeaderHeightSettings"
+          maxRowHeight={5}
         />
         <RowHeightSettings
           rowHeight={state.rowHeight}

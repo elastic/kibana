@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiDataGridColumn,
   EuiDataGridColumnCellActionProps,
@@ -213,21 +214,23 @@ export const createGridColumns = (
     const currentAlignment = alignments && alignments[field];
     const alignmentClassName = `lnsTableCell--${currentAlignment}`;
 
-    const columnStyle =
-      headerRowHeight === 'auto' || headerRowHeight === 'custom'
-        ? {
-            whiteSpace: 'normal' as const,
-            display: '-webkit-box',
-            '-webkit-box-orient': 'vertical',
-            ...(headerRowHeight === 'custom' && { '-webkit-line-clamp': `${headerRowLines}` }),
-          }
-        : undefined;
+    const multiRowHeaderStyle = css({
+      whiteSpace: 'normal',
+      display: '-webkit-box',
+      WebkitBoxOrient: 'vertical',
+      ...(headerRowHeight === 'custom' && {
+        WebkitLineClamp: headerRowLines,
+      }),
+    });
+
+    const columnCSS =
+      headerRowHeight === 'auto' || headerRowHeight === 'custom' ? multiRowHeaderStyle : {};
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,
       cellActions,
       display: (
-        <div className={alignmentClassName} style={columnStyle}>
+        <div className={alignmentClassName} css={columnCSS}>
           {name}
         </div>
       ),
