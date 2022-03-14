@@ -330,6 +330,35 @@ export const waitForPage = (url: string) => {
   cy.get('[data-test-subj="headerGlobalNav"]');
 };
 
+export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void) => {
+  cy.visit(
+    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
+    {
+      onBeforeLoad(win) {
+        if (onBeforeLoadCallback) {
+          onBeforeLoadCallback(win);
+        }
+        disableRulesFeatureTour(win);
+      },
+    }
+  );
+  cy.get('[data-test-subj="headerGlobalNav"]');
+};
+
+export const visitWithoutDateRange = (url: string, role?: ROLES) => {
+  cy.visit(role ? getUrlWithRoute(role, url) : url, {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
+  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
+export const visitWithUser = (url: string, user: User) => {
+  cy.visit(constructUrlWithUser(user, url), {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
+  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
 export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   login(role);
   cy.visit(role ? getUrlWithRoute(role, url) : url, {
@@ -350,6 +379,15 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
 
   login(role);
+  cy.visit(role ? getUrlWithRoute(role, route) : route, {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
+  cy.get('[data-test-subj="headerGlobalNav"]');
+  cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
+};
+
+export const visitTimeline = (timelineId: string, role?: ROLES) => {
+  const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
     onBeforeLoad: disableRulesFeatureTour,
   });

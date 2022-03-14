@@ -19,8 +19,9 @@ import {
 } from '../../tasks/create_new_case';
 import {
   loginAndWaitForHostDetailsPage,
-  loginWithUserAndWaitForPageWithoutDateRange,
+  loginWithUser,
   logout,
+  visitWithUser,
 } from '../../tasks/login';
 import {
   createUsersAndRoles,
@@ -58,7 +59,6 @@ describe('Cases privileges', () => {
 
   after(() => {
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
-    cleanKibana();
   });
 
   beforeEach(() => {
@@ -67,7 +67,8 @@ describe('Cases privileges', () => {
 
   for (const user of [secAllUser, secReadCasesAllUser]) {
     it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, () => {
-      loginWithUserAndWaitForPageWithoutDateRange(CASES_URL, user);
+      loginWithUser(user);
+      visitWithUser(CASES_URL, user);
       goToCreateNewCase();
       fillCasesMandatoryfields(testCase);
       createCase();

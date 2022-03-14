@@ -20,96 +20,102 @@ import {
   goToAcknowledgedAlerts,
 } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPage } from '../../tasks/login';
-import { refreshPage } from '../../tasks/security_header';
+import { login, visit } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe('Marking alerts as acknowledged', () => {
+describe('Acknowledging alerts', () => {
   before(() => {
     esArchiverLoad('auditbeat_big');
-  });
-  beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPage(ALERTS_URL);
-    createCustomRuleEnabled(getNewRule());
-    refreshPage();
-    waitForAlertsToPopulate();
   });
   after(() => {
     esArchiverUnload('auditbeat_big');
   });
+  context('Marking alerts as acknowledged', () => {
+    before(() => {
+      login();
+    });
+    beforeEach(() => {
+      deleteAlertsAndRules();
+      createCustomRuleEnabled(getNewRule());
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
+    });
+    it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+      cy.get(ALERTS_COUNT)
+        .invoke('text')
+        .then((alertNumberString) => {
+          const numberOfAlerts = alertNumberString.split(' ')[0];
+          const numberOfAlertsToBeMarkedAcknowledged = 1;
+          const numberOfAlertsToBeSelected = 3;
 
-  it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
-    cy.get(ALERTS_COUNT)
-      .invoke('text')
-      .then((alertNumberString) => {
-        const numberOfAlerts = alertNumberString.split(' ')[0];
-        const numberOfAlertsToBeMarkedAcknowledged = 1;
-        const numberOfAlertsToBeSelected = 3;
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('not.exist');
+          selectNumberOfAlerts(numberOfAlertsToBeSelected);
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
-        cy.get(TAKE_ACTION_POPOVER_BTN).should('not.exist');
-        selectNumberOfAlerts(numberOfAlertsToBeSelected);
-        cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
+          markAcknowledgedFirstAlert();
+          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
+          cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+          cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+            'have.text',
+            `${expectedNumberOfAlerts}`
+          );
 
-        markAcknowledgedFirstAlert();
-        const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
-        cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
-        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should('have.text', `${expectedNumberOfAlerts}`);
+          goToAcknowledgedAlerts();
+          waitForAlerts();
 
-        goToAcknowledgedAlerts();
-        waitForAlerts();
-
-        cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
-        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
-          'have.text',
-          `${numberOfAlertsToBeMarkedAcknowledged}`
-        );
-      });
+          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
+          cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+            'have.text',
+            `${numberOfAlertsToBeMarkedAcknowledged}`
+          );
+        });
+    });
   });
-});
 
-describe('Marking alerts as acknowledged with read only role', () => {
-  beforeEach(() => {
-    cleanKibana();
-    esArchiverLoad('auditbeat_big');
-    loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
-    createCustomRuleEnabled(getNewRule());
-    refreshPage();
-    waitForAlertsToPopulate();
-  });
-  afterEach(() => {
-    esArchiverUnload('auditbeat_big');
-  });
+  context('Marking alerts as acknowledged with read only role', () => {
+    before(() => {
+      login(ROLES.t2_analyst);
+    });
+    beforeEach(() => {
+      deleteAlertsAndRules();
+      createCustomRuleEnabled(getNewRule());
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
+    });
+    it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+      cy.get(ALERTS_COUNT)
+        .invoke('text')
+        .then((alertNumberString) => {
+          const numberOfAlerts = alertNumberString.split(' ')[0];
+          const numberOfAlertsToBeMarkedAcknowledged = 1;
+          const numberOfAlertsToBeSelected = 3;
 
-  it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
-    cy.get(ALERTS_COUNT)
-      .invoke('text')
-      .then((alertNumberString) => {
-        const numberOfAlerts = alertNumberString.split(' ')[0];
-        const numberOfAlertsToBeMarkedAcknowledged = 1;
-        const numberOfAlertsToBeSelected = 3;
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('not.exist');
+          selectNumberOfAlerts(numberOfAlertsToBeSelected);
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
-        cy.get(TAKE_ACTION_POPOVER_BTN).should('not.exist');
-        selectNumberOfAlerts(numberOfAlertsToBeSelected);
-        cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
+          markAcknowledgedFirstAlert();
+          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
+          cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+          cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+            'have.text',
+            `${expectedNumberOfAlerts}`
+          );
 
-        markAcknowledgedFirstAlert();
-        const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
-        cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
-        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should('have.text', `${expectedNumberOfAlerts}`);
+          goToAcknowledgedAlerts();
+          waitForAlerts();
 
-        goToAcknowledgedAlerts();
-        waitForAlerts();
-
-        cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
-        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
-          'have.text',
-          `${numberOfAlertsToBeMarkedAcknowledged}`
-        );
-      });
+          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
+          cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+            'have.text',
+            `${numberOfAlertsToBeMarkedAcknowledged}`
+          );
+        });
+    });
   });
 });

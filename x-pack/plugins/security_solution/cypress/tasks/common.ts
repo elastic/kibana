@@ -66,6 +66,13 @@ export const reload = () => {
 };
 
 export const cleanKibana = () => {
+  deleteAlertsAndRules();
+  deleteCases();
+  deleteTimelines();
+  esArchiverResetKibana();
+};
+
+export const deleteAlertsAndRules = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
   cy.request('GET', '/api/detection_engine/rules/_find').then((response) => {
@@ -78,6 +85,7 @@ export const cleanKibana = () => {
           method: 'DELETE',
           url: `/api/detection_engine/rules?rule_id=${jsonRule.rule_id}`,
           headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+          failOnStatusCode: false,
         });
       });
     }
@@ -97,8 +105,21 @@ export const cleanKibana = () => {
     },
   });
 
-  deleteCases();
+  cy.request(
+    'POST',
+    `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
+    {
+      query: {
+        match_all: {},
+      },
+    }
+  );
+};
 
+export const deleteTimelines = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
     query: {
       bool: {
@@ -112,20 +133,6 @@ export const cleanKibana = () => {
       },
     },
   });
-
-  cy.request(
-    'POST',
-    `${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
-    {
-      query: {
-        match_all: {},
-      },
-    }
-  );
-
-  esArchiverResetKibana();
 };
 
 export const deleteCases = () => {

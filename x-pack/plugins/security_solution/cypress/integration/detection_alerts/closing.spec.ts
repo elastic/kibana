@@ -25,10 +25,9 @@ import {
   waitForAlerts,
 } from '../../tasks/alerts';
 import { createCustomRuleEnabled, deleteCustomRule } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { loginAndWaitForPage } from '../../tasks/login';
-import { refreshPage } from '../../tasks/security_header';
+import { login, visit } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -36,13 +35,13 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 describe('Closing alerts', () => {
   before(() => {
     esArchiverLoad('auditbeat_big');
+    cleanKibana();
+    login();
   });
   beforeEach(() => {
-    cleanKibana();
-
-    loginAndWaitForPage(ALERTS_URL);
+    deleteAlertsAndRules();
     createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
-    refreshPage();
+    visit(ALERTS_URL);
     waitForAlertsToPopulate();
     deleteCustomRule();
   });
@@ -187,12 +186,12 @@ describe('Closing alerts', () => {
 describe('Closing alerts with read only role', () => {
   before(() => {
     esArchiverLoad('auditbeat_big');
+    cleanKibana();
+    login(ROLES.t2_analyst);
   });
   beforeEach(() => {
-    cleanKibana();
-    loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
     createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
-    refreshPage();
+    visit(ALERTS_URL);
     waitForAlertsToPopulate();
     deleteCustomRule();
   });

@@ -25,20 +25,18 @@ import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPage } from '../../tasks/login';
-import { refreshPage } from '../../tasks/security_header';
+import { visit } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Opening alerts', () => {
   before(() => {
     esArchiverLoad('auditbeat_big');
+    cleanKibana();
+    createCustomRuleEnabled(getNewRule());
   });
   beforeEach(() => {
-    cleanKibana();
-    loginAndWaitForPage(ALERTS_URL);
-    createCustomRuleEnabled(getNewRule());
-    refreshPage();
+    visit(ALERTS_URL);
     waitForAlertsToPopulate();
     selectNumberOfAlerts(3);
 
@@ -46,7 +44,6 @@ describe('Opening alerts', () => {
 
     closeAlerts();
     waitForAlerts();
-    refreshPage();
   });
   after(() => {
     esArchiverUnload('auditbeat_big');

@@ -7,7 +7,7 @@
 
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
 
@@ -24,11 +24,12 @@ import { assertFieldDisplayed, createField } from '../../tasks/create_runtime_fi
 describe('Create DataView runtime field', () => {
   before(() => {
     cleanKibana();
+    login();
   });
 
   it('adds field to alert table', () => {
     const fieldName = 'field.name.alert.page';
-    loginAndWaitForPage(ALERTS_URL);
+    visit(ALERTS_URL);
     createCustomRuleEnabled(getNewRule());
     refreshPage();
     waitForAlertsToPopulate();
@@ -40,8 +41,7 @@ describe('Create DataView runtime field', () => {
 
   it('adds field to timeline', () => {
     const fieldName = 'field.name.timeline';
-
-    loginAndWaitForPage(HOSTS_URL);
+    visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
     openTimelineFieldsBrowser();

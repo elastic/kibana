@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  loginAndWaitForPage,
-  loginWithUserAndWaitForPageWithoutDateRange,
-} from '../../tasks/login';
+import { login, loginWithUser, visit, visitWithUser } from '../../tasks/login';
 
 import { HOSTS_URL, TIMELINES_URL } from '../../urls/navigation';
 import {
@@ -56,15 +53,19 @@ describe('Sourcerer', () => {
       createUsersAndRoles(usersToCreate, rolesToCreate);
     });
     it(`role(s) ${secReadCasesAllUser.roles.join()} shows error when user does not have permissions`, () => {
-      loginWithUserAndWaitForPageWithoutDateRange(HOSTS_URL, secReadCasesAllUser);
+      loginWithUser(secReadCasesAllUser);
+      visitWithUser(HOSTS_URL, secReadCasesAllUser);
       cy.get(TOASTER).should('have.text', 'Write role required to generate data');
     });
   });
 
   describe('Default scope', () => {
+    before(() => {
+      login();
+    });
     beforeEach(() => {
       cy.clearLocalStorage();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
     });
 
     it('correctly loads SIEM data view', () => {
@@ -134,9 +135,12 @@ describe('Sourcerer', () => {
   });
 });
 describe('Timeline scope', () => {
+  before(() => {
+    login();
+  });
   beforeEach(() => {
     cy.clearLocalStorage();
-    loginAndWaitForPage(TIMELINES_URL);
+    visit(TIMELINES_URL);
   });
 
   it('correctly loads SIEM data view before and after signals index exists', () => {
@@ -196,6 +200,7 @@ describe('Timeline scope', () => {
   });
   describe('Alerts checkbox', () => {
     before(() => {
+      login();
       createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
@@ -204,7 +209,7 @@ describe('Timeline scope', () => {
       );
     });
     beforeEach(() => {
-      loginAndWaitForPage(TIMELINES_URL);
+      visit(TIMELINES_URL);
       waitForAlertsIndexToExist();
     });
     it('Modifies timeline to alerts only, and switches to different saved timeline without issue', function () {
