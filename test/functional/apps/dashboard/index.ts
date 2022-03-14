@@ -40,28 +40,28 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       before(loadCurrentData);
       after(unloadCurrentData);
 
-      loadTestFile(require.resolve('./empty_dashboard'));
-      loadTestFile(require.resolve('./url_field_formatter'));
-      loadTestFile(require.resolve('./embeddable_rendering'));
-      loadTestFile(require.resolve('./embeddable_data_grid'));
-      loadTestFile(require.resolve('./create_and_add_embeddables'));
-      loadTestFile(require.resolve('./edit_embeddable_redirects'));
-      loadTestFile(require.resolve('./dashboard_unsaved_state'));
-      loadTestFile(require.resolve('./dashboard_unsaved_listing'));
-      loadTestFile(require.resolve('./edit_visualizations'));
-      loadTestFile(require.resolve('./dashboard_options'));
-      loadTestFile(require.resolve('./data_shared_attributes'));
-      loadTestFile(require.resolve('./share'));
-      loadTestFile(require.resolve('./embed_mode'));
-      loadTestFile(require.resolve('./dashboard_back_button'));
-      loadTestFile(require.resolve('./dashboard_error_handling'));
-      loadTestFile(require.resolve('./legacy_urls'));
-      loadTestFile(require.resolve('./saved_search_embeddable'));
+      // loadTestFile(require.resolve('./empty_dashboard'));
+      // loadTestFile(require.resolve('./url_field_formatter'));
+      // loadTestFile(require.resolve('./embeddable_rendering'));
+      // loadTestFile(require.resolve('./embeddable_data_grid'));
+      // loadTestFile(require.resolve('./create_and_add_embeddables'));
+      // loadTestFile(require.resolve('./edit_embeddable_redirects'));
+      // loadTestFile(require.resolve('./dashboard_unsaved_state'));
+      // loadTestFile(require.resolve('./dashboard_unsaved_listing'));
+      // loadTestFile(require.resolve('./edit_visualizations'));
+      // loadTestFile(require.resolve('./dashboard_options'));
+      // loadTestFile(require.resolve('./data_shared_attributes'));
+      // loadTestFile(require.resolve('./share'));
+      // loadTestFile(require.resolve('./embed_mode'));
+      // loadTestFile(require.resolve('./dashboard_back_button'));
+      // loadTestFile(require.resolve('./dashboard_error_handling'));
+      // loadTestFile(require.resolve('./legacy_urls'));
+      // loadTestFile(require.resolve('./saved_search_embeddable'));
 
       // Note: This one must be last because it unloads some data for one of its tests!
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
       // to improve efficiency...
-      loadTestFile(require.resolve('./dashboard_query_bar'));
+      // loadTestFile(require.resolve('./dashboard_query_bar'));
     });
 
     describe('using current data', function () {
@@ -69,20 +69,19 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       before(loadCurrentData);
       after(unloadCurrentData);
 
-      loadTestFile(require.resolve('./full_screen_mode'));
-      loadTestFile(require.resolve('./dashboard_filter_bar'));
-      loadTestFile(require.resolve('./dashboard_filtering'));
-      loadTestFile(require.resolve('./dashboard_controls_integration'));
-      loadTestFile(require.resolve('./panel_expand_toggle'));
-      loadTestFile(require.resolve('./dashboard_grid'));
-      loadTestFile(require.resolve('./view_edit'));
-      loadTestFile(require.resolve('./dashboard_saved_query'));
+      // loadTestFile(require.resolve('./full_screen_mode'));
+      // loadTestFile(require.resolve('./dashboard_filter_bar'));
+      // loadTestFile(require.resolve('./dashboard_filtering'));
+      // loadTestFile(require.resolve('./panel_expand_toggle'));
+      // loadTestFile(require.resolve('./dashboard_grid'));
+      // loadTestFile(require.resolve('./view_edit'));
+      // loadTestFile(require.resolve('./dashboard_saved_query'));
       // Order of test suites *shouldn't* be important but there's a bug for the view_edit test above
       // https://github.com/elastic/kibana/issues/46752
       // The dashboard_snapshot test below requires the timestamped URL which breaks the view_edit test.
       // If we don't use the timestamp in the URL, the colors in the charts will be different.
-      loadTestFile(require.resolve('./dashboard_snapshots'));
-      loadTestFile(require.resolve('./embeddable_library'));
+      // loadTestFile(require.resolve('./dashboard_snapshots'));
+      // loadTestFile(require.resolve('./embeddable_library'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
@@ -93,13 +92,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       before(loadLogstash);
       after(unloadLogstash);
 
-      loadTestFile(require.resolve('./dashboard_time_picker'));
-      loadTestFile(require.resolve('./bwc_shared_urls'));
-      loadTestFile(require.resolve('./panel_replacing'));
-      loadTestFile(require.resolve('./panel_cloning'));
-      loadTestFile(require.resolve('./copy_panel_to'));
-      loadTestFile(require.resolve('./panel_context_menu'));
-      loadTestFile(require.resolve('./dashboard_state'));
+      // loadTestFile(require.resolve('./dashboard_time_picker'));
+      // loadTestFile(require.resolve('./bwc_shared_urls'));
+      loadTestFile(require.resolve('./bwc_import'));
+      // loadTestFile(require.resolve('./panel_replacing'));
+      // loadTestFile(require.resolve('./panel_cloning'));
+      // loadTestFile(require.resolve('./copy_panel_to'));
+      // loadTestFile(require.resolve('./panel_context_menu'));
+      // loadTestFile(require.resolve('./dashboard_state'));
     });
 
     describe('using legacy data', function () {
@@ -107,10 +107,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       before(loadLogstash);
       after(unloadLogstash);
 
-      loadTestFile(require.resolve('./dashboard_save'));
-      loadTestFile(require.resolve('./dashboard_time'));
-      loadTestFile(require.resolve('./dashboard_listing'));
-      loadTestFile(require.resolve('./dashboard_clone'));
+      // loadTestFile(require.resolve('./dashboard_save'));
+      // loadTestFile(require.resolve('./dashboard_time'));
+      // loadTestFile(require.resolve('./dashboard_listing'));
+      // loadTestFile(require.resolve('./dashboard_clone'));
     });
 
     // TODO: Remove when vislib is removed
@@ -134,7 +134,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         await browser.refresh();
       });
 
-      loadTestFile(require.resolve('./dashboard_state'));
+      // loadTestFile(require.resolve('./dashboard_state'));
     });
   });
 }
