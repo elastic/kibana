@@ -14,6 +14,8 @@ import { StatItems } from '../../../../common/components/stat_items';
 import { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
+import { kpiTotalUsersMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_metric';
+import { kpiTotalUsersAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_area';
 import * as i18n from './translations';
 
 const euiVisColorPalette = euiPaletteColorBlind();
@@ -28,10 +30,12 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: euiColorVis1,
         icon: 'storage',
+        lensAttributes: kpiTotalUsersMetricLensAttributes,
       },
     ],
     enableAreaChart: true,
     description: i18n.USERS,
+    areaChartLensAttributes: kpiTotalUsersAreaLensAttributes,
   },
 ];
 
@@ -47,7 +51,7 @@ export interface UsersKpiProps {
 
 const QUERY_ID = 'TotalUsersKpiQuery';
 
-const UsersKpiHostsComponent: React.FC<UsersKpiProps> = ({
+const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
   filterQuery,
   from,
   indexNames,
@@ -93,4 +97,4 @@ const UsersKpiHostsComponent: React.FC<UsersKpiProps> = ({
   );
 };
 
-export const UsersKpiHosts = React.memo(UsersKpiHostsComponent);
+export const TotalUsersKpi = React.memo(TotalUsersKpiComponent);
