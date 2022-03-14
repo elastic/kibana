@@ -9,8 +9,6 @@ import React from 'react';
 
 import { LogStream, LogStreamProps } from '../../../../../infra/public';
 
-import { LOGS_SOURCE_ID } from '../../../../common/constants';
-
 /*
  * EnterpriseSearchLogStream is a light wrapper on top of infra's embeddable LogStream component.
  * It prepopulates our log source ID (set in server/plugin.ts) and sets a basic 24-hours-ago
@@ -22,12 +20,14 @@ import { LOGS_SOURCE_ID } from '../../../../common/constants';
  */
 
 interface Props extends Omit<LogStreamProps, 'startTimestamp' | 'endTimestamp'> {
+  sourceId?: string;
   startTimestamp?: LogStreamProps['startTimestamp'];
   endTimestamp?: LogStreamProps['endTimestamp'];
   hoursAgo?: number;
 }
 
 export const EntSearchLogStream: React.FC<Props> = ({
+  sourceId,
   startTimestamp,
   endTimestamp,
   hoursAgo = 24,
@@ -37,11 +37,13 @@ export const EntSearchLogStream: React.FC<Props> = ({
   if (!startTimestamp) startTimestamp = endTimestamp - hoursAgo * 60 * 60 * 1000;
 
   return (
-    <LogStream
-      sourceId={LOGS_SOURCE_ID}
-      startTimestamp={startTimestamp}
-      endTimestamp={endTimestamp}
-      {...props}
-    />
+    <EuiThemeProvider>
+      <LogStream
+        sourceId={sourceId}
+        startTimestamp={startTimestamp}
+        endTimestamp={endTimestamp}
+        {...props}
+      />
+    </EuiThemeProvider>
   );
 };

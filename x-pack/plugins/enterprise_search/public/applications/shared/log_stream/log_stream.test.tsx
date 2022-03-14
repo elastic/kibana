@@ -13,6 +13,8 @@ import { LogStream } from '../../../../../infra/public';
 
 import { EntSearchLogStream } from './';
 
+const fakeSourceId = 'fake-source-id';
+
 describe('EntSearchLogStream', () => {
   const mockDateNow = jest.spyOn(global.Date, 'now').mockReturnValue(160000000);
 
@@ -23,8 +25,8 @@ describe('EntSearchLogStream', () => {
       expect(wrapper.type()).toEqual(LogStream);
     });
 
-    it('renders with the enterprise search log source ID', () => {
-      expect(wrapper.prop('sourceId')).toEqual('ent-search-logs');
+    it('renders with the empty sourceId', () => {
+      expect(wrapper.prop('sourceId')).toBeUndefined();
     });
 
     it('renders with a default last-24-hours timestamp if no timestamp is passed', () => {
@@ -45,7 +47,9 @@ describe('EntSearchLogStream', () => {
     });
 
     it('allows passing a custom hoursAgo that modifies the default start timestamp', () => {
-      const wrapper = shallow(<EntSearchLogStream hoursAgo={1} />);
+      const wrapper = shallow(
+        shallow(<EntSearchLogStream sourceId={fakeSourceId} hoursAgo={1} />).prop('children')
+      );
 
       expect(wrapper.prop('startTimestamp')).toEqual(156400000);
       expect(wrapper.prop('endTimestamp')).toEqual(160000000);
@@ -53,15 +57,18 @@ describe('EntSearchLogStream', () => {
 
     it('allows passing any prop that the LogStream component takes', () => {
       const wrapper = shallow(
-        <EntSearchLogStream
-          height={500}
-          highlight="some-log-id"
-          columns={[
-            { type: 'timestamp', header: 'Timestamp' },
-            { type: 'field', field: 'log.level', header: 'Log level', width: 300 },
-          ]}
-          filters={[]}
-        />
+        shallow(
+          <EntSearchLogStream
+            sourceId={fakeSourceId}
+            height={500}
+            highlight="some-log-id"
+            columns={[
+              { type: 'timestamp', header: 'Timestamp' },
+              { type: 'field', field: 'log.level', header: 'Log level', width: 300 },
+            ]}
+            filters={[]}
+          />
+        ).prop('children')
       );
 
       expect(wrapper.prop('height')).toEqual(500);
