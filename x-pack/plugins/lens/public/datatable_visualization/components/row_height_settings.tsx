@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiRange, htmlIdGenerator } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiRange, htmlIdGenerator, EuiSpacer } from '@elastic/eui';
 import type { DatatableVisualizationState } from '../visualization';
 
 export interface RowHeightSettingsProps {
@@ -51,45 +51,43 @@ export function RowHeightSettings(props: RowHeightSettingsProps) {
   return (
     <>
       <EuiFormRow label={label} display="columnCompressed" data-test-subj={props['data-test-subj']}>
-        <EuiButtonGroup
-          isFullWidth
-          legend={label}
-          name="legendLocation"
-          buttonSize="compressed"
-          options={rowHeightModeOptions}
-          idSelected={`${idPrefix}${rowHeight ?? 'single'}`}
-          onChange={(optionId) => {
-            const newMode = optionId.replace(
-              idPrefix,
-              ''
-            ) as DatatableVisualizationState['rowHeight'];
-            onChangeRowHeight(newMode);
-          }}
-        />
-      </EuiFormRow>
-      {rowHeight === 'custom' ? (
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.table.visualOptionsCustomRowHeight', {
-            defaultMessage: 'Lines per row',
-          })}
-          display="columnCompressed"
-        >
-          <EuiRange
-            compressed
-            fullWidth
-            showInput
-            min={1}
-            max={20}
-            step={1}
-            value={rowHeightLines ?? 2}
-            onChange={(e) => {
-              const lineCount = Number(e.currentTarget.value);
-              onChangeRowHeightLines(lineCount);
+        <>
+          <EuiButtonGroup
+            isFullWidth
+            legend={label}
+            name="legendLocation"
+            buttonSize="compressed"
+            options={rowHeightModeOptions}
+            idSelected={`${idPrefix}${rowHeight ?? 'single'}`}
+            onChange={(optionId) => {
+              const newMode = optionId.replace(
+                idPrefix,
+                ''
+              ) as DatatableVisualizationState['rowHeight'];
+              onChangeRowHeight(newMode);
             }}
-            data-test-subj="lens-table-row-height-lineCountNumber"
           />
-        </EuiFormRow>
-      ) : null}
+          {rowHeight === 'custom' ? (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiRange
+                compressed
+                fullWidth
+                showInput
+                min={1}
+                max={20}
+                step={1}
+                value={rowHeightLines ?? 2}
+                onChange={(e) => {
+                  const lineCount = Number(e.currentTarget.value);
+                  onChangeRowHeightLines(lineCount);
+                }}
+                data-test-subj="lens-table-row-height-lineCountNumber"
+              />
+            </>
+          ) : null}
+        </>
+      </EuiFormRow>
     </>
   );
 }

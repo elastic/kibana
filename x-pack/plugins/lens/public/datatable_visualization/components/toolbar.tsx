@@ -83,24 +83,24 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         buttonDataTestSubj="lnsVisualOptionsButton"
       >
         <RowHeightSettings
-          rowHeight={state.rowHeight}
-          rowHeightLines={state.rowHeightLines}
-          label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
-            defaultMessage: 'Row height',
-          })}
-          onChangeRowHeight={onChangeRowHeight}
-          onChangeRowHeightLines={onChangeRowHeightLines}
-          data-test-subj="lnsRowHeightSettings"
-        />
-        <RowHeightSettings
           rowHeight={state.headerRowHeight}
           rowHeightLines={state.headerRowHeightLines}
           label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
-            defaultMessage: 'Header height',
+            defaultMessage: 'Header row height',
           })}
           onChangeRowHeight={onChangeHeaderHeight}
           onChangeRowHeightLines={onChangeHeaderHeightLines}
           data-test-subj="lnsHeaderHeightSettings"
+        />
+        <RowHeightSettings
+          rowHeight={state.rowHeight}
+          rowHeightLines={state.rowHeightLines}
+          label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
+            defaultMessage: 'Cell row height',
+          })}
+          onChangeRowHeight={onChangeRowHeight}
+          onChangeRowHeightLines={onChangeRowHeightLines}
+          data-test-subj="lnsRowHeightSettings"
         />
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {
