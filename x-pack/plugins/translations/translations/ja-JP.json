@@ -27528,12 +27528,7 @@
     "xpack.upgradeAssistant.overview.deprecationLogs.updateErrorMessage": "ログ状態を更新できませんでした。",
     "xpack.upgradeAssistant.overview.deprecationsCountCheckpointTitle": "廃止予定の問題を解決して変更を検証",
     "xpack.upgradeAssistant.overview.documentationLinkText": "ドキュメント",
-<<<<<<< HEAD
-    "xpack.upgradeAssistant.overview.esDeprecationLogsLink": "Elasticsearchの廃止予定ログ",
-    "xpack.upgradeAssistant.overview.fixIssuesStepDescription": "Elastic 8.xにアップグレードする前に、重大なElasticsearchおよびKibana構成の問題を解決する必要があります。警告を無視すると、アップグレード後に動作が変更される場合があります。{accessDeprecationLogsMessage}",
-=======
     "xpack.upgradeAssistant.overview.errorLoadingUpgradeStatus": "アップグレードステータスの取得中にエラーが発生しました",
->>>>>>> f4358d5fbd5... [Upgrade Assistant] Add deprecation logging as step on overview page (#126693)
     "xpack.upgradeAssistant.overview.fixIssuesStepTitle": "廃止予定設定を確認し、問題を解決",
     "xpack.upgradeAssistant.overview.loadingLogsLabel": "廃止予定ログ収集状態を読み込んでいます...",
     "xpack.upgradeAssistant.overview.observe.discoveryDescription": "廃止予定ログを検索およびフィルターし、必要な変更のタイプを把握します。",
