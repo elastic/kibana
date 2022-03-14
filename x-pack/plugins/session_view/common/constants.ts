@@ -25,3 +25,4 @@ export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id'
 //    search functionality will instead use a separate ES backend search to avoid this.
 // 3. Fewer round trips to the backend!
 export const PROCESS_EVENTS_PER_PAGE = 1000;
+export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
