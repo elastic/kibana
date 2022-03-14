@@ -10,13 +10,7 @@ import {
   RuleTypeParams,
   RuleTypeRegistryContract,
 } from '../../../triggers_actions_ui/public';
-import { ParsedTechnicalFields } from '../../../rule_registry/common/parse_technical_fields';
-import { AsDuration, AsPercent } from '../../common/utils/formatters';
-
-export type ObservabilityRuleTypeFormatter = (options: {
-  fields: ParsedTechnicalFields & Record<string, any>;
-  formatters: { asDuration: AsDuration; asPercent: AsPercent };
-}) => { reason: string; link: string };
+import { ObservabilityRuleTypeFormatter } from '../../../observability/common/rules/observability_rule_type_formatter';
 
 export interface ObservabilityRuleTypeModel<Params extends RuleTypeParams = RuleTypeParams>
   extends RuleTypeModel<Params> {

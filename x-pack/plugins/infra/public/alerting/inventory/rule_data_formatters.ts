@@ -8,7 +8,7 @@
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
-import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
+import { ObservabilityRuleTypeFormatter } from '../../../../observability/common/rules/observability_rule_type_formatter';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '-';
