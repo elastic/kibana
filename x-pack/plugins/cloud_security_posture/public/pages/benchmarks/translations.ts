@@ -23,12 +23,13 @@ export const ADD_A_CIS_INTEGRATION = i18n.translate('xpack.csp.benchmarks.add_a_
 });
 
 export const TABLE_COLUMN_HEADERS = {
-  BENCHMARK_RULES: i18n.translate('xpack.csp.benchmarks.table_column_headers.benchmark_rules', {
-    defaultMessage: 'Benchmark Rules',
+  INTEGRATION: i18n.translate('xpack.csp.benchmarks.table_column_headers.integrationNameLabel', {
+    defaultMessage: 'Integration',
   }),
-  BENCHMARK: i18n.translate('xpack.csp.benchmarks.table_column_headers.benchmark', {
-    defaultMessage: 'Benchmark',
-  }),
+  INTEGRATION_TYPE: i18n.translate(
+    'xpack.csp.benchmarks.table_column_headers.integrationTypeLabel',
+    { defaultMessage: 'Integration Type' }
+  ),
   ACTIVE_RULES: i18n.translate('xpack.csp.benchmarks.table_column_headers.active_rules', {
     defaultMessage: 'Active Rules',
   }),

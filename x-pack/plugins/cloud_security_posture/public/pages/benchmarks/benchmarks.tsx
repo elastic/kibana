@@ -6,6 +6,7 @@
  */
 import {
   EuiFieldSearch,
+  EuiFieldSearchProps,
   EuiPageHeaderProps,
   EuiButton,
   EuiSpacer,
@@ -16,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { CspPageTemplate } from '../../components/page_template';
@@ -28,6 +30,9 @@ import { extractErrorMessage } from '../../../common/utils/helpers';
 import { SEARCH_PLACEHOLDER } from './translations';
 
 const integrationPath = pagePathGetters.integrations_all({ searchTerm: 'CIS' }).join('');
+const BENCHMARKS_BREADCRUMBS = [allNavigationItems.benchmarks];
+const SEARCH_DEBOUNCE_MS = 300;
+export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'cspBenchmarksTable';
 
 const AddCisIntegrationButton = () => {
   const { http } = useKibana().services;
@@ -42,17 +47,23 @@ const AddCisIntegrationButton = () => {
 const BenchmarkEmptyState = ({ name }: { name: string }) => (
   <div>
     <EuiSpacer size="l" />
-    {name && (
+    {
       <EuiText>
         <strong>
           <FormattedMessage
             id="xpack.csp.benchmarks.integrationsNotFoundMessage"
-            defaultMessage='No benchmark integrations found for "{name}"'
-            values={{ name }}
+            defaultMessage="No benchmark integrations found"
           />
+          {name && (
+            <FormattedMessage
+              id="xpack.csp.benchmarks.integrationsNotFoundForNameMessage"
+              defaultMessage=' for "{name}"'
+              values={{ name }}
+            />
+          )}
         </strong>
       </EuiText>
-    )}
+    }
     <EuiSpacer size="s" />
     <EuiText>
       <EuiTextColor color="subdued">
@@ -74,21 +85,39 @@ const TotalIntegrationsCount = ({
     <EuiTextColor color="subdued">
       <FormattedMessage
         id="xpack.csp.benchmarks.totalIntegrationsCountMessage"
-        defaultMessage="Showing {pageCount} of {totalCount} integrations"
+        defaultMessage="Showing {pageCount} of {totalCount, plural, one {# integration} other {# integrations}}"
         values={{ pageCount, totalCount }}
       />
     </EuiTextColor>
   </EuiText>
 );
 
+const BenchmarkSearchField = ({
+  onSearch,
+  isLoading,
+}: Required<Pick<EuiFieldSearchProps, 'isLoading' | 'onSearch'>>) => {
+  const [localValue, setLocalValue] = useState('');
+
+  useDebounce(() => onSearch(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
+        <EuiFieldSearch
+          onSearch={setLocalValue}
+          isLoading={isLoading}
+          placeholder={SEARCH_PLACEHOLDER}
+          incremental
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const PAGE_HEADER: EuiPageHeaderProps = {
   pageTitle: BENCHMARK_INTEGRATIONS,
   rightSideItems: [<AddCisIntegrationButton />],
 };
-
-const BENCHMARKS_BREADCRUMBS = [allNavigationItems.benchmarks];
-
-export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'cspBenchmarksTable';
 
 export const Benchmarks = () => {
   const [query, setQuery] = useState({ name: '', page: 1, perPage: 5 });
@@ -101,15 +130,10 @@ export const Benchmarks = () => {
 
   return (
     <CspPageTemplate pageHeader={PAGE_HEADER}>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-          <EuiFieldSearch
-            onSearch={(name) => setQuery((current) => ({ ...current, name }))}
-            isLoading={queryResult.isLoading}
-            placeholder={SEARCH_PLACEHOLDER}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <BenchmarkSearchField
+        isLoading={queryResult.isLoading}
+        onSearch={(name) => setQuery((current) => ({ ...current, name }))}
+      />
       <EuiSpacer />
       <TotalIntegrationsCount
         pageCount={(queryResult.data?.items || []).length}

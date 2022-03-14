@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiLink,
   EuiBasicTable,
   type EuiBasicTableColumn,
   type EuiBasicTableProps,
@@ -15,11 +14,12 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import moment from 'moment';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, generatePath } from 'react-router-dom';
 import { TABLE_COLUMN_HEADERS } from './translations';
 import type { Benchmark } from '../../../common/types';
 import { pagePathGetters } from '../../../../fleet/public';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { allNavigationItems } from '../../common/navigation/constants';
 
 interface BenchmarksTableProps
   extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage'>,
@@ -30,46 +30,56 @@ interface BenchmarksTableProps
 }
 
 const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
-  const { http } = useKibana().services;
+  const { http, application } = useKibana().services;
   return (
-    <EuiLink
+    <a
       href={http.basePath.prepend(pagePathGetters.policy_details({ policyId }).join(''))}
       title={name}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        application.navigateToApp('fleet', {
+          path: pagePathGetters.policy_details({ policyId }).join(''),
+        });
+      }}
     >
       {name}
-    </EuiLink>
+    </a>
   );
 };
 
 const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   {
     field: 'package_policy.name',
-    name: TABLE_COLUMN_HEADERS.BENCHMARK_RULES,
-    render: (v, r) => (
-      <Link to={`/benchmark/${r.package_policy.id}/${r.package_policy.policy_id}/rules`} title={v}>
-        {v}
+    name: TABLE_COLUMN_HEADERS.INTEGRATION,
+    render: (packageName, benchmark) => (
+      <Link
+        to={generatePath(allNavigationItems.rules.path, {
+          packageId: benchmark.package_policy.id,
+          policyId: benchmark.package_policy.policy_id,
+        })}
+        title={packageName}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {packageName}
       </Link>
     ),
     truncateText: true,
   },
   {
-    field: 'package_policy.rules', // TODO: add fields
-    name: TABLE_COLUMN_HEADERS.ACTIVE_RULES,
-    truncateText: true,
-    // render: (benchmarkIntegration) =>
-    //   `${benchmarkIntegration.rules.active} of ${benchmarkIntegration.rules.total}`,
-  },
-  {
     field: 'package_policy.package.title',
-    name: TABLE_COLUMN_HEADERS.BENCHMARK,
+    name: TABLE_COLUMN_HEADERS.INTEGRATION_TYPE,
     dataType: 'string',
     truncateText: true,
   },
-
   {
     field: 'agent_policy.name',
     name: TABLE_COLUMN_HEADERS.AGENT_POLICY,
-    render: (v, r) => <AgentPolicyButtonLink name={v} id={r.agent_policy.id} />,
+    render: (name, benchmark) => (
+      <AgentPolicyButtonLink name={name} id={benchmark.agent_policy.id} />
+    ),
     truncateText: true,
   },
   {
@@ -83,13 +93,19 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     dataType: 'string',
     truncateText: true,
   },
-
   {
     field: 'package_policy.created_at',
     name: TABLE_COLUMN_HEADERS.CREATED_AT,
     dataType: 'date',
     truncateText: true,
     render: (date: Benchmark['package_policy']['created_at']) => moment(date).fromNow(),
+  },
+  {
+    field: 'package_policy.rules', // TODO: add fields
+    name: TABLE_COLUMN_HEADERS.ACTIVE_RULES,
+    truncateText: true,
+    // render: (benchmarkIntegration) =>
+    //   `${benchmarkIntegration.rules.active} of ${benchmarkIntegration.rules.total}`,
   },
 ];
 
@@ -106,11 +122,14 @@ export const BenchmarksTable = ({
 }: BenchmarksTableProps) => {
   const history = useHistory();
 
-  const getRowProps: EuiBasicTableProps<Benchmark>['rowProps'] = (item) => ({
-    onClick: (evt: MouseEvent) =>
-      // Navigate to rules page unless we already clicked a link
-      !(evt.target instanceof HTMLAnchorElement) &&
-      history.push(`/benchmark/${item.package_policy.id}/${item.package_policy.policy_id}/rules`),
+  const getRowProps: EuiBasicTableProps<Benchmark>['rowProps'] = (benchmark) => ({
+    onClick: () =>
+      history.push(
+        generatePath(allNavigationItems.rules.path, {
+          packageId: benchmark.package_policy.id,
+          policyId: benchmark.package_policy.policy_id,
+        })
+      ),
   });
 
   const pagination: Pagination = {

@@ -27,6 +27,8 @@ export const useCspBenchmarkIntegrations = ({ name, perPage, page }: Props) => {
         benchmark_name: name,
         per_page: perPage,
         page,
+        sort_field: 'name',
+        sort_order: 'asc',
       },
     })
   );

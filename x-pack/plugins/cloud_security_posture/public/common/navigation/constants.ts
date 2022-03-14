@@ -14,12 +14,12 @@ export const allNavigationItems: Record<CspPage, CspNavigationItem> = {
   findings: { name: TEXT.FINDINGS, path: '/findings' },
   rules: {
     name: 'Rules',
-    path: '/benchmark/:packageId/:policyId/rules',
+    path: '/benchmarks/:packageId/:policyId/rules',
     disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks,
   },
   benchmarks: {
     name: TEXT.MY_BENCHMARKS,
-    path: '/benchmark',
+    path: '/benchmarks',
     exact: true,
     disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks,
   },
