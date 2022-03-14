@@ -42,3 +42,5 @@ export const ALERT_COUNT_THRESHOLD = 999;
 // react-query caching keys
 export const QUERY_KEY_PROCESS_EVENTS = 'sessionViewProcessEvents';
 export const QUERY_KEY_ALERTS = 'sessionViewAlerts';
+
+export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
