@@ -7,7 +7,7 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce } from 'lodash';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 interface ServiceEnvironmentSuggestionsSelectProps {
@@ -87,7 +87,15 @@ export function ServiceEnvironmentSuggestionsSelect({
     [handleChange]
   );
 
-  const terms = data?.terms ?? [];
+  const terms: string[] = useMemo(() => data?.terms ?? [], [data]);
+
+  useEffect(() => {
+    if (terms.length === 1) {
+      const [term] = terms;
+      handleChange([{ label: term, value: term }]);
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [terms]);
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
     ...(customOptions ? customOptions : []),
