@@ -7,3 +7,4 @@
  */
 
 export { TimesliderEmbeddableFactory } from './time_slider_embeddable_factory';
+export { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';

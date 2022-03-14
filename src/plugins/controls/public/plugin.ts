@@ -30,9 +30,12 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '.';
-import { TimesliderEmbeddableFactory } from './control_types/time_slider';
+import {   TimesliderEmbeddableFactory,
+  TimeSliderControlEmbeddableInput,
+} from './control_types/time_slider';
 import { controlsService } from './services/kibana/controls';
 import { EmbeddableFactory } from '../../embeddable/public';
+import { TimeSliderControlEmbeddable } from './control_types/time_slider/time_slider_embeddable';
 
 export class ControlsPlugin
   implements
@@ -87,6 +90,7 @@ export class ControlsPlugin
       );
       registerControlType(optionsListFactory);
 
+<<<<<<< HEAD
       // Register range slider
       const rangeSliderFactoryDef = new RangeSliderEmbeddableFactory();
       const rangeSliderFactory = embeddable.registerEmbeddableFactory(
@@ -98,16 +102,29 @@ export class ControlsPlugin
         rangeSliderFactory
       );
       registerControlType(rangeSliderFactory);
+=======
+      // Time Slider Control Factory Setup
+      const timeSliderFactoryDef = new TimesliderEmbeddableFactory();
+      const timeSliderFactory = embeddable.registerEmbeddableFactory(
+        'TIME_SLIDER',
+        timeSliderFactoryDef
+      )();
+      this.transferEditorFunctions<TimeSliderControlEmbeddableInput>(
+        timeSliderFactoryDef,
+        timeSliderFactory
+      );
+
+      registerControlType(timeSliderFactory);
+>>>>>>> wip
     });
 
     // create time slider embeddable
-    const timeSliderFactory = new TimesliderEmbeddableFactory();
 
-    this.inlineEditors['TIME_SLIDER'] = {
-      controlEditorComponent: timeSliderFactory.controlEditorComponent,
-      presaveTransformFunction: timeSliderFactory.presaveTransformFunction,
-    };
-    embeddable.registerEmbeddableFactory('TIME_SLIDER', timeSliderFactory);
+    //    this.inlineEditors['TIME_SLIDER'] = {
+    //     controlEditorComponent: timeSliderFactory.controlEditorComponent,
+    //   presaveTransformFunction: timeSliderFactory.presaveTransformFunction,
+    //};
+    //embeddable.registerEmbeddableFactory('TIME_SLIDER', timeSliderFactory);
 
     return {
       registerControlType,

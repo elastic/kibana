@@ -17,23 +17,24 @@ import {
   createOptionsListInject,
 } from '../../../common/control_types/options_list/options_list_persistable_state';
 import { TimeSliderEditor } from './time_slider_editor';
+import { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';
 
 export class TimesliderEmbeddableFactory
-  implements EmbeddableFactoryDefinition, IEditableControlFactory<any>
+  implements EmbeddableFactoryDefinition, IEditableControlFactory<TimeSliderControlEmbeddableInput>
 {
   public type = 'TIME_SLIDER';
   public canCreateNew = () => false;
 
   constructor() {}
 
-  public async create(initialInput: any, parent?: IContainer) {
+  public async create(initialInput: TimeSliderControlEmbeddableInput, parent?: IContainer) {
     const { TimeSliderControlEmbeddable } = await import('./time_slider_embeddable');
     return Promise.resolve(new TimeSliderControlEmbeddable(initialInput, {}, parent));
   }
 
   public presaveTransformFunction = (
-    newInput: any, //Partial<OptionsListEmbeddableInput>,
-    embeddable?: any //ControlEmbeddable<OptionsListEmbeddableInput>
+    newInput: Partial<TimeSliderControlEmbeddableInput>,
+    embeddable?: ControlEmbeddable<TimeSliderControlEmbeddableInput>
   ) => {
     if (
       embeddable &&
@@ -41,7 +42,7 @@ export class TimesliderEmbeddableFactory
         !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId))
     ) {
       // if the field name or data view id has changed in this editing session, selected options are invalid, so reset them.
-      newInput.selectedOptions = [];
+      //newInput.selectedOptions = [];
     }
     return newInput;
   };
