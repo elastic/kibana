@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
