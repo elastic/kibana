@@ -22,6 +22,7 @@ import {
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
   EventsQueryTabBody,
+  SessionsTabBody,
 } from './navigation';
 import { HostAlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 
@@ -100,6 +101,9 @@ export const HostsTabs = memo<HostsTabsProps>(
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.alerts})`}>
           <HostAlertsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.sessions})`}>
+          <SessionsTabBody {...tabProps} />
         </Route>
       </Switch>
     );

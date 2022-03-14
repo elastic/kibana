@@ -4,13 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { CoreStart } from '../../../../src/core/public';
 import { TimelinesUIStart } from '../../timelines/public';
 
 export type SessionViewServices = CoreStart & {
   timelines: TimelinesUIStart;
 };
+
+export interface SessionViewUIStart {
+  getSessionViewTableProcessTree: (props: any) => ReactElement;
+  getSessionView: (sessionEntityId: string) => ReactElement;
+}
 
 export interface EuiTabProps {
   id: string;
