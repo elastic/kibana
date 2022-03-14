@@ -188,7 +188,10 @@ export const DocumentCreationButtons: React.FC<Props> = ({
             hasBorder
             layout="horizontal"
             betaBadgeProps={{
-              label: 'Beta',
+              label: i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.buttons.elasticsearchBetaBadge',
+                { defaultMessage: 'Beta' }
+              ),
               tooltipContent: i18n.translate(
                 'xpack.enterpriseSearch.appSearch.documentCreation.buttons.elasticsearchTooltip',
                 {
