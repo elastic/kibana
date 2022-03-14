@@ -568,13 +568,14 @@ export const getCollectionStatus = async (
     }
     // If there are multiple buckets, they are partially upgraded if a single mb index exists
     else {
-      // if there is more than one metricbeat index, remove them
-      const mbBuckets = indexBuckets.filter((item) => {
+      // if there is more than one metricbeat index, remove them, because we only need one to compare
+      // and more than one (edgecase) results in incorrect results with this strategy
+      const mbBuckets = indexBuckets.filter((item: Bucket) => {
         return item.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
       });
       let singleMbBuckets = [];
       if (mbBuckets.length > 1) {
-        singleMbBuckets = indexBuckets.filter((item) => {
+        singleMbBuckets = indexBuckets.filter((item: Bucket) => {
           return item.key !== mbBuckets[0].key;
         });
       } else {
