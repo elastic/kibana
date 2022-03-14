@@ -48,9 +48,9 @@ const TypeIcon = styled(EuiIcon)`
 `;
 TypeIcon.displayName = 'TypeIcon';
 
-export const Description = styled.span`
+export const Description = styled.span<{ width: string }>`
   user-select: text;
-  width: 380px;
+  width: ${({ width }) => width};
 `;
 Description.displayName = 'Description';
 
@@ -128,7 +128,7 @@ export const useFieldTableColumns: UseFieldTableColumns = ({
             );
           },
           sortable: true,
-          width: '200px',
+          width: '225px',
         },
         {
           field: 'description',
@@ -140,7 +140,10 @@ export const useFieldTableColumns: UseFieldTableColumns = ({
                   <p>{i18n.DESCRIPTION_FOR_FIELD(name)}</p>
                 </EuiScreenReaderOnly>
                 <EllipsisText>
-                  <Description data-test-subj={`field-${name}-description`}>
+                  <Description
+                    width={actions.length > 0 ? '335px' : '400px'}
+                    data-test-subj={`field-${name}-description`}
+                  >
                     {`${description ?? getEmptyValue()} ${getExampleText(example)}`}
                   </Description>
                 </EllipsisText>
@@ -148,7 +151,7 @@ export const useFieldTableColumns: UseFieldTableColumns = ({
             </EuiToolTip>
           ),
           sortable: true,
-          width: '380px',
+          width: actions.length > 0 ? '335px' : '400px',
         },
         {
           field: 'isRuntime',
@@ -165,14 +168,15 @@ export const useFieldTableColumns: UseFieldTableColumns = ({
             <EuiBadge data-test-subj={`field-${name}-category`}>{category}</EuiBadge>
           ),
           sortable: true,
-          width: actions.length > 0 ? '100px' : '160px',
+          width: '115px',
+          // width: actions.length > 0 ? '130px' : '160px',
         },
         ...(actions.length > 0
           ? [
               {
                 name: i18n.ACTIONS,
                 actions,
-                width: '60px',
+                width: '80px',
               },
             ]
           : []),

@@ -149,7 +149,7 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
       <EuiBadge data-test-subj={`field-${name}-category`}>{category}</EuiBadge>
     ),
     sortable: true,
-    width: '100px',
+    width: '130px',
   },
 ];
 
