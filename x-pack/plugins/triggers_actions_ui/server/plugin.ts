@@ -34,8 +34,6 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): void {
-    const experimentalFeatures = this.config.experimentalFeatures;
-
     const router = core.http.createRouter();
     registerDataService({
       logger: this.logger,
