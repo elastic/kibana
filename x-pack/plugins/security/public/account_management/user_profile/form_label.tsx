@@ -15,6 +15,16 @@ export interface FormLabelProps {
   isEqual: boolean;
 }
 
+/**
+ * Renders a form label which indicates if a field value has changed.
+ *
+ * @example
+ * ```typescript
+ * <FormLabel isEqual={formik.values.color === formik.initialValues.color}>
+ *   Color
+ * </FormLabel>
+ * ```
+ */
 export const FormLabel: FunctionComponent<FormLabelProps> = ({ isEqual, children }) => {
   const { register } = useFormChangesContext();
 
