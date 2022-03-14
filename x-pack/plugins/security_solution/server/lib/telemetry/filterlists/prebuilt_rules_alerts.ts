@@ -14,8 +14,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     id: true,
   },
   destination: {
-    address: true,
-    ip: true,
     port: true,
   },
   dll: {
@@ -102,7 +100,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     name: true,
   },
   source: {
-    ip: true,
     port: true,
   },
   tls: {
@@ -121,9 +118,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   },
   user: {
     domain: true,
-    email: true,
     id: true,
-    name: true,
   },
   // Base alert fields
   kibana: {
@@ -224,13 +219,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   // Google/GCP
-  gcp: {
-    audit: {
-      authentication_info: {
-        principal_email: true,
-      },
-    },
-  },
   google_workspace: {
     admin: {
       new_value: true,
@@ -298,12 +286,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
     logon: {
       type: true,
-    },
-  },
-  // zoom
-  zoom: {
-    meeting: {
-      password: true,
     },
   },
   // ml signal fields
