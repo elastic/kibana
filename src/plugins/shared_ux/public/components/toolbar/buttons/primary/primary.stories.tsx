@@ -8,7 +8,7 @@
 
 import { Story } from '@storybook/react';
 import React from 'react';
-import { SolutionToolbarButton } from './primary';
+import { ToolbarButton } from './primary';
 import mdx from './primary.mdx';
 
 export default {
@@ -33,7 +33,7 @@ export default {
 export const Component: Story<{
   iconType: any;
 }> = ({ iconType }) => {
-  return <SolutionToolbarButton label={'Primary Action'} iconType={iconType} />;
+  return <ToolbarButton label={'Primary Action'} iconType={iconType} />;
 };
 
 Component.args = {

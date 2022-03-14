@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<SolutionToolbarButton /> is rendered 1`] = `
+exports[`<ToolbarButton /> is rendered 1`] = `
 <ServicesProvider
   docLinks={
     Object {
@@ -23,7 +23,7 @@ exports[`<SolutionToolbarButton /> is rendered 1`] = `
     }
   }
 >
-  <SolutionToolbarButton
+  <ToolbarButton
     label="test"
   >
     <EuiButton
@@ -73,6 +73,6 @@ exports[`<SolutionToolbarButton /> is rendered 1`] = `
         </button>
       </EuiButtonDisplay>
     </EuiButton>
-  </SolutionToolbarButton>
+  </ToolbarButton>
 </ServicesProvider>
 `;
