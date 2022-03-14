@@ -986,6 +986,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.runDFAJob(dfaConfig.id);
       await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
       await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED, timeout);
+      await this.syncSavedObjects();
     },
 
     async updateJobSpaces(
@@ -1001,7 +1002,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove })
         .expect(200);
 
-      expect(body).to.eql({ [jobId]: { success: true } });
+      expect(body).to.eql({ [jobId]: { success: true, type: 'ml-job' } });
     },
 
     async assertJobSpaces(jobId: string, jobType: JobType, expectedSpaces: string[]) {
@@ -1024,10 +1025,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
-    async createTrainedModel(modelId: string, body: PutTrainedModelConfig) {
+    async syncSavedObjects(simulate: boolean = false, space?: string) {
+      const { body } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/sync?simulate=${simulate}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+      return body;
+    },
+
+    async createTrainedModel(modelId: string, body: PutTrainedModelConfig, space?: string) {
       log.debug(`Creating trained model with id "${modelId}"`);
-      const model = await esSupertest
-        .put(`/_ml/trained_models/${modelId}`)
+      const model = await kbnSupertest
+        .put(`${space ? `/s/${space}` : ''}/api/ml/trained_models/${modelId}`)
+        .set(COMMON_REQUEST_HEADERS)
         .send(body)
         .expect(200)
         .then((res: any) => res.body);
@@ -1089,7 +1099,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createModelAlias(modelId: string, modelAlias: string) {
       log.debug(`Creating alias for model "${modelId}"`);
       await esSupertest
-        .put(`/_ml/trained_models/${modelId}/model_aliases/${modelAlias}`)
+        .put(`/_ml/trained_models/${modelId}/model_aliases/${modelAlias}?reassign=true`)
         .expect(200);
       log.debug('> Model alias created');
     },

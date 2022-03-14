@@ -1563,40 +1563,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.convertToKibanaClient",
-        "type": "Function",
-        "tags": [],
-        "label": "convertToKibanaClient",
-        "description": [],
-        "signature": [
-          "(esClient: ",
-          "default",
-          ") => ",
-          "KibanaClient"
-        ],
-        "path": "packages/kbn-test/src/es/client_to_kibana_client.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.convertToKibanaClient.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "esClient",
-            "description": [],
-            "signature": [
-              "default"
-            ],
-            "path": "packages/kbn-test/src/es/client_to_kibana_client.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test",
         "id": "def-server.createEsClientForFtrConfig",
         "type": "Function",
         "tags": [],
@@ -3588,22 +3554,6 @@
             "signature": [
               "() => ",
               "default"
-            ],
-            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.ICluster.getKibanaEsClient",
-            "type": "Function",
-            "tags": [],
-            "label": "getKibanaEsClient",
-            "description": [],
-            "signature": [
-              "() => ",
-              "KibanaClient"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,

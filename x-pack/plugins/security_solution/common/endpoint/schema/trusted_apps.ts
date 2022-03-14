@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { ConditionEntry } from '../types';
 import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
 
 export const DeleteTrustedAppsRequestSchema = {
