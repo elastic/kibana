@@ -147,14 +147,14 @@ export const COLUMN_SEARCH_DURATION_TOOLTIP = i18n.translate(
 );
 
 export const COLUMN_SCHEDULING_DELAY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.searchDurationColumn',
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.schedulingDelayColumn',
   {
     defaultMessage: 'Scheduling Delay',
   }
 );
 
 export const COLUMN_SCHEDULING_DELAY_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.searchDurationColumnTooltip',
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.schedulingDelayColumnTooltip',
   {
     defaultMessage: 'The length of time from rule scheduled till rule executed (mm:ss:SSS)',
   }
