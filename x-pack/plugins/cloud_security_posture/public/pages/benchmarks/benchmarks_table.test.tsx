@@ -75,7 +75,7 @@ describe('<BenchmarksTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByText(item.package_policy.package?.title as string)).toBeInTheDocument();
+    expect(screen.getByText(item.package_policy.package!.title)).toBeInTheDocument();
   });
 
   it('renders agent policy name', () => {

@@ -31,16 +31,15 @@ interface BenchmarksTableProps
 
 const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
   const { http, application } = useKibana().services;
+  const [fleetBase, path] = pagePathGetters.policy_details({ policyId });
   return (
     <a
-      href={http.basePath.prepend(pagePathGetters.policy_details({ policyId }).join(''))}
+      href={http.basePath.prepend([fleetBase, path].join(''))}
       title={name}
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
-        application.navigateToApp('fleet', {
-          path: pagePathGetters.policy_details({ policyId }).join(''),
-        });
+        application.navigateToApp('fleet', { path });
       }}
     >
       {name}
