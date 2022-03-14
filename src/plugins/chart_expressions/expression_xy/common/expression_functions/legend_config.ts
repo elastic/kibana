@@ -84,6 +84,12 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies whether the legend items will be truncated or not',
       }),
     },
+    legendSize: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.legendSize.help', {
+        defaultMessage: 'Specifies the legend size in pixels.',
+      }),
+    },
   },
   fn(input, args) {
     return {

@@ -168,6 +168,7 @@ export const buildExpression = (
                       : [],
                     position: [state.legend.position],
                     isInside: state.legend.isInside ? [state.legend.isInside] : [],
+                    legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
                     horizontalAlignment: state.legend.horizontalAlignment
                       ? [state.legend.horizontalAlignment]
                       : [],

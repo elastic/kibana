@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.tryForTime(120000, async () => {
         const { body } = await supertest.get(downloadPath).expect(500);
         expect(body.message).to.match(
-          /Reporting generation failed: ReportingError\(code: unknown_error\) "/
+          /Reporting generation failed: ReportingError\(code: browser_unexpectedly_closed_error\) "/
         );
       });
     });

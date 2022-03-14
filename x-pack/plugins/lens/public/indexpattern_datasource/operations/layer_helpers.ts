@@ -228,15 +228,12 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
+    const buildColumnFn = columnParams
+      ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
+      : operationDefinition.buildColumn({ ...baseOptions, layer });
 
     return updateDefaultLabels(
-      addOperationFn(
-        layer,
-        operationDefinition.buildColumn({ ...baseOptions, layer }),
-        columnId,
-        visualizationGroups,
-        targetGroup
-      ),
+      addOperationFn(layer, buildColumnFn, columnId, visualizationGroups, targetGroup),
       indexPattern
     );
   }
@@ -1706,7 +1703,7 @@ export function getSplitByTermsLayer(
   dateField: IndexPatternField | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
-  const { termsParams, metrics, timeInterval, splitWithDateHistogram } = layer;
+  const { termsParams, metrics, timeInterval, splitWithDateHistogram, dropPartialBuckets } = layer;
   const copyMetricsArray = [...metrics];
 
   const computedLayer = computeLayerFromContext(
@@ -1731,6 +1728,7 @@ export function getSplitByTermsLayer(
       visualizationGroups: [],
       columnParams: {
         interval: timeInterval,
+        dropPartials: dropPartialBuckets,
       },
     }),
     columnId,
@@ -1784,7 +1782,7 @@ export function getSplitByFiltersLayer(
   dateField: IndexPatternField | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
-  const { splitFilters, metrics, timeInterval } = layer;
+  const { splitFilters, metrics, timeInterval, dropPartialBuckets } = layer;
   const filterParams = splitFilters?.map((param) => {
     const query = param.filter ? param.filter.query : '';
     const language = param.filter ? param.filter.language : 'kuery';
@@ -1816,6 +1814,7 @@ export function getSplitByFiltersLayer(
       visualizationGroups: [],
       columnParams: {
         interval: timeInterval,
+        dropPartials: dropPartialBuckets,
       },
     }),
     columnId,

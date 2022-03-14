@@ -22,9 +22,10 @@ import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
 import { State, visualizationTypes, XYSuggestion, XYLayerConfig } from './types';
 import {
+  FillStyle,
   SeriesType,
   YAxisMode,
-  YConfigResult,
+  YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
@@ -303,13 +304,14 @@ export const getXyVisualization = ({
     if (!foundLayer) {
       return prevState;
     }
+    const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
     const axisMode = axisPosition as YAxisMode;
-    const yConfig = metrics.map<YConfigResult>((metric, idx) => {
+    const yConfig = metrics.map<YConfig>((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],
         ...(axisMode && { axisMode }),
-        type: 'lens_xy_yConfig',
+        ...(isReferenceLine && { fill: chartType === 'area' ? 'below' : ('none' as FillStyle) }),
       };
     });
     const newLayer = {
@@ -317,7 +319,8 @@ export const getXyVisualization = ({
       ...(chartType && { seriesType: chartType as SeriesType }),
       ...(palette && { palette }),
       yConfig,
-    };
+      layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
+    } as XYLayerConfig;
 
     const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
 

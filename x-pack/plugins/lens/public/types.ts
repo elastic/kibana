@@ -634,6 +634,7 @@ export interface SuggestionRequest<T = unknown> {
    */
   state?: T;
   mainPalette?: PaletteOutput;
+  isFromContext?: boolean;
   /**
    * The visualization needs to know which table is being suggested
    */
