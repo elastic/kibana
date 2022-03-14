@@ -29,6 +29,7 @@ interface State {
   isLoadingPreview: boolean;
   importer: GeoFileImporter | null;
   previewSummary: string | null;
+  isNoLimit: boolean;
 }
 
 export class GeoFilePicker extends Component<Props, State> {
@@ -40,6 +41,7 @@ export class GeoFilePicker extends Component<Props, State> {
     isLoadingPreview: false,
     importer: null,
     previewSummary: null,
+    isNoLimit: true,
   };
 
   async componentDidMount() {
@@ -64,7 +66,7 @@ export class GeoFilePicker extends Component<Props, State> {
     if (files && files.length) {
       const file = files[0];
       try {
-        const importer = geoImporterFactory(file);
+        const importer = geoImporterFactory(file, this.state.isNoLimit);
         this.setState(
           {
             defaultIndexName: file.name.split('.')[0].toLowerCase(),
@@ -136,10 +138,12 @@ export class GeoFilePicker extends Component<Props, State> {
           values: { fileTypes: GEO_FILE_TYPES.join(', ') },
         })}
         <br />
-        {i18n.translate('xpack.fileUpload.geoFilePicker.maxSize', {
-          defaultMessage: 'Max size: {maxFileSize}',
-          values: { maxFileSize: getMaxBytesFormatted() },
-        })}
+
+        {!this.state.isNoLimit &&
+          i18n.translate('xpack.fileUpload.geoFilePicker.maxSize', {
+            defaultMessage: 'Max size: {maxFileSize}',
+            values: { maxFileSize: getMaxBytesFormatted() },
+          })}
       </span>
     );
   }

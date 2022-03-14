@@ -16,8 +16,8 @@ export function getFileExtension(file: File) {
   return '.' + extension;
 }
 
-export function validateFile(file: File, types: string[]) {
-  if (file.size > getMaxBytes()) {
+export function validateFile(file: File, types: string[], isNoLimit?: boolean) {
+  if (file.size > getMaxBytes() && !isNoLimit) {
     throw new Error(
       i18n.translate('xpack.fileUpload.fileSizeError', {
         defaultMessage: 'File size {fileSize} exceeds maximum file size of {maxFileSize}',
