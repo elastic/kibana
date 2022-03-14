@@ -19,11 +19,10 @@ import {
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
-import {
-  ALERT_LIST_ITEM_TEST_ID,
-  ALERT_LIST_ITEM_TIMESTAMP,
-  ALERT_LIST_ITEM_ARGS,
-} from '../detail_panel_alert_tab/index.test';
+
+export const ALERT_LIST_ITEM_TEST_ID = 'sessionView:detailPanelAlertListItem';
+export const ALERT_LIST_ITEM_ARGS_TEST_ID = 'sessionView:detailPanelAlertListItemArgs';
+export const ALERT_LIST_ITEM_TIMESTAMP_TEST_ID = 'sessionView:detailPanelAlertListItemTimestamp';
 
 interface DetailPanelAlertsListItemDeps {
   event: ProcessEvent;
@@ -109,7 +108,7 @@ export const DetailPanelAlertListItem = ({
       }
     >
       <EuiSpacer size="xs" />
-      <EuiText data-test-subj={ALERT_LIST_ITEM_TIMESTAMP} color="subdued" size="s">
+      <EuiText data-test-subj={ALERT_LIST_ITEM_TIMESTAMP_TEST_ID} color="subdued" size="s">
         {timestamp}
       </EuiText>
       <EuiPanel
@@ -119,7 +118,7 @@ export const DetailPanelAlertListItem = ({
         hasShadow={false}
         borderRadius="m"
       >
-        <EuiText data-test-subj={ALERT_LIST_ITEM_ARGS} size="xs">
+        <EuiText data-test-subj={ALERT_LIST_ITEM_ARGS_TEST_ID} size="xs">
           {args.join(' ')}
         </EuiText>
       </EuiPanel>

@@ -11,15 +11,17 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { DetailPanelAlertTab } from './index';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { fireEvent } from '@testing-library/dom';
-
-export const ALERT_LIST_ITEM_TEST_ID = 'sessionView:detailPanelAlertListItem';
-export const ALERT_GROUP_ITEM_TEST_ID = 'sessionView:detailPanelAlertGroupItem';
-export const INVESTIGATED_ALERT_TEST_ID = 'sessionView:detailPanelInvestigatedAlert';
-export const VIEW_MODE_TOGGLE = 'sessionView:detailPanelAlertsViewMode';
-export const ALERT_LIST_ITEM_TIMESTAMP = 'sessionView:detailPanelAlertListItemTimestamp';
-export const ALERT_LIST_ITEM_ARGS = 'sessionView:detailPanelAlertListItemArgs';
-export const ALERT_GROUP_ITEM_COUNT = 'sessionView:detailPanelAlertGroupCount';
-export const ALERT_GROUP_ITEM_TITLE = 'sessionView:detailPanelAlertGroupTitle';
+import { INVESTIGATED_ALERT_TEST_ID, VIEW_MODE_TOGGLE } from './index';
+import {
+  ALERT_LIST_ITEM_TEST_ID,
+  ALERT_LIST_ITEM_ARGS_TEST_ID,
+  ALERT_LIST_ITEM_TIMESTAMP_TEST_ID,
+} from '../detail_panel_alert_list_item/index';
+import {
+  ALERT_GROUP_ITEM_TEST_ID,
+  ALERT_GROUP_ITEM_COUNT_TEST_ID,
+  ALERT_GROUP_ITEM_TITLE_TEST_ID,
+} from '../detail_panel_alert_group_item/index';
 
 const ACCORDION_BUTTON_CLASS = '.euiAccordion__button';
 const VIEW_MODE_GROUP = 'groupView';
@@ -204,11 +206,11 @@ describe('DetailPanelAlertTab component', () => {
         />
       );
 
-      expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_TIMESTAMP)[0]).toHaveTextContent(
+      expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_TIMESTAMP_TEST_ID)[0]).toHaveTextContent(
         mockAlerts[0]['@timestamp']
       );
 
-      expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_ARGS)[0]).toHaveTextContent(
+      expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_ARGS_TEST_ID)[0]).toHaveTextContent(
         mockAlerts[0].process.args.join(' ')
       );
     });
@@ -224,8 +226,8 @@ describe('DetailPanelAlertTab component', () => {
 
       fireEvent.click(renderResult.getByTestId(VIEW_MODE_GROUP));
 
-      expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_COUNT)).toHaveTextContent('2');
-      expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_TITLE)).toHaveTextContent(
+      expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_COUNT_TEST_ID)).toHaveTextContent('2');
+      expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_TITLE_TEST_ID)).toHaveTextContent(
         mockAlerts[0].kibana?.alert.rule.name || ''
       );
     });

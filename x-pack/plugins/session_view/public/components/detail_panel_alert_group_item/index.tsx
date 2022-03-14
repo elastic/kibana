@@ -10,11 +10,10 @@ import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { useStyles } from '../detail_panel_alert_list_item/styles';
 import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
-import {
-  ALERT_GROUP_ITEM_TEST_ID,
-  ALERT_GROUP_ITEM_TITLE,
-  ALERT_GROUP_ITEM_COUNT,
-} from '../detail_panel_alert_tab/index.test';
+
+export const ALERT_GROUP_ITEM_TEST_ID = 'sessionView:detailPanelAlertGroupItem';
+export const ALERT_GROUP_ITEM_COUNT_TEST_ID = 'sessionView:detailPanelAlertGroupCount';
+export const ALERT_GROUP_ITEM_TITLE_TEST_ID = 'sessionView:detailPanelAlertGroupTitle';
 
 interface DetailPanelAlertsGroupItemDeps {
   alerts: ProcessEvent[];
@@ -49,7 +48,7 @@ export const DetailPanelAlertGroupItem = ({
       arrowDisplay="right"
       initialIsOpen={false}
       buttonContent={
-        <EuiText data-test-subj={ALERT_GROUP_ITEM_TITLE} css={styles.alertTitle} size="s">
+        <EuiText data-test-subj={ALERT_GROUP_ITEM_TITLE_TEST_ID} css={styles.alertTitle} size="s">
           <p>
             <EuiIcon color="danger" type="alert" css={styles.alertIcon} />
             {rule.name}
@@ -59,7 +58,7 @@ export const DetailPanelAlertGroupItem = ({
       css={styles.alertItem}
       extraAction={
         <EuiNotificationBadge
-          data-test-subj={ALERT_GROUP_ITEM_COUNT}
+          data-test-subj={ALERT_GROUP_ITEM_COUNT_TEST_ID}
           className="eui-alignCenter"
           size="m"
         >

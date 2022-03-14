@@ -10,7 +10,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiContextMenuPanel, EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { ProcessImpl } from '../process_tree/hooks';
-import { BUTTON_TEST_ID, SHOW_DETAILS_TEST_ID, JUMP_TO_PROCESS_TEST_ID } from './index.test';
+
+export const BUTTON_TEST_ID = 'sessionView:detailPanelAlertActionsBtn';
+export const SHOW_DETAILS_TEST_ID = 'sessionView:detailPanelAlertActionShowDetails';
+export const JUMP_TO_PROCESS_TEST_ID = 'sessionView:detailPanelAlertActionJumpToProcess';
 
 interface DetailPanelAlertActionsDeps {
   event: ProcessEvent;

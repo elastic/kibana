@@ -7,14 +7,15 @@
 
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { DetailPanelAlertActions } from './index';
+import {
+  DetailPanelAlertActions,
+  BUTTON_TEST_ID,
+  SHOW_DETAILS_TEST_ID,
+  JUMP_TO_PROCESS_TEST_ID,
+} from './index';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import userEvent from '@testing-library/user-event';
 import { ProcessImpl } from '../process_tree/hooks';
-
-export const BUTTON_TEST_ID = 'sessionView:detailPanelAlertActionsBtn';
-export const SHOW_DETAILS_TEST_ID = 'sessionView:detailPanelAlertActionShowDetails';
-export const JUMP_TO_PROCESS_TEST_ID = 'sessionView:detailPanelAlertActionJumpToProcess';
 
 describe('DetailPanelAlertActions component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

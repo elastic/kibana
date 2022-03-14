@@ -12,7 +12,9 @@ import { ProcessEvent, Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
 import { DetailPanelAlertGroupItem } from '../detail_panel_alert_group_item';
-import { INVESTIGATED_ALERT_TEST_ID, VIEW_MODE_TOGGLE } from './index.test';
+
+export const INVESTIGATED_ALERT_TEST_ID = 'sessionView:detailPanelInvestigatedAlert';
+export const VIEW_MODE_TOGGLE = 'sessionView:detailPanelAlertsViewMode';
 
 interface DetailPanelAlertTabDeps {
   alerts: ProcessEvent[];
