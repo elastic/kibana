@@ -37,13 +37,11 @@ export const EntSearchLogStream: React.FC<Props> = ({
   if (!startTimestamp) startTimestamp = endTimestamp - hoursAgo * 60 * 60 * 1000;
 
   return (
-    <EuiThemeProvider>
-      <LogStream
-        sourceId={sourceId}
-        startTimestamp={startTimestamp}
-        endTimestamp={endTimestamp}
-        {...props}
-      />
-    </EuiThemeProvider>
+    <LogStream
+      sourceId={sourceId}
+      startTimestamp={startTimestamp}
+      endTimestamp={endTimestamp}
+      {...props}
+    />
   );
 };
