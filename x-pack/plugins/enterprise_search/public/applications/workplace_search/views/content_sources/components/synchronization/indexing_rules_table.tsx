@@ -229,26 +229,6 @@ export const IndexingRulesTable: React.FC = () => {
         clearFlashMessages();
       }}
       title=""
-      // uneditableItems={[
-      //   {
-      //     id: 0,
-      //     filterType: 'object_type',
-      //     valueType: 'include',
-      //     value: '*',
-      //   },
-      //   {
-      //     id: 0,
-      //     filterType: 'path_template',
-      //     valueType: 'include',
-      //     value: '*',
-      //   },
-      //   {
-      //     id: 0,
-      //     filterType: 'file_extension',
-      //     valueType: 'include',
-      //     value: '*',
-      //   },
-      // ]}
       bottomRows={[<EuiText size="s">Include everything else from this source</EuiText>]}
       canRemoveLastItem
       showRowIndex
