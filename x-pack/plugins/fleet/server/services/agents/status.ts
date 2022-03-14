@@ -119,10 +119,11 @@ export async function getIncomingDataByAgentsId(
       allow_partial_search_results: true,
       _source: false,
       timeout: '5s',
+      size: 0,
       body: {
         query: {
           bool: {
-            must: [
+            filter: [
               {
                 terms: {
                   'agent.id': agentsIds,

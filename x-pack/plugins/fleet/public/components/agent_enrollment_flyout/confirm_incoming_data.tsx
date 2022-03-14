@@ -13,7 +13,7 @@ import type { InstalledIntegrationPolicy } from '../../hooks';
 import { useGetAgentIncomingData } from '../../hooks';
 interface Props {
   agentsIds: string[];
-  installedPolicy: InstalledIntegrationPolicy;
+  installedPolicy?: InstalledIntegrationPolicy;
 }
 
 export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
@@ -59,15 +59,17 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
       )}
 
       <EuiSpacer size="m" />
-      <EuiButton
-        href={linkButton.href}
-        isDisabled={isLoading}
-        color="primary"
-        fill
-        data-test-subj="IncomingDataConfirmedButton"
-      >
-        {linkButton.text}
-      </EuiButton>
+      {installedPolicy && (
+        <EuiButton
+          href={linkButton.href}
+          isDisabled={isLoading}
+          color="primary"
+          fill
+          data-test-subj="IncomingDataConfirmedButton"
+        >
+          {linkButton.text}
+        </EuiButton>
+      )}
     </>
   );
 };

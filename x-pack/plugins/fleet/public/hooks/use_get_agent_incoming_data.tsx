@@ -18,7 +18,7 @@ export interface InstalledIntegrationPolicy {
 
 export const useGetAgentIncomingData = (
   agentsIds: string[],
-  installedPolicy: InstalledIntegrationPolicy
+  installedPolicy?: InstalledIntegrationPolicy
 ) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [incomingData, setIncomingData] = useState<IncomingDataList[]>([]);
@@ -45,20 +45,25 @@ export const useGetAgentIncomingData = (
       }, 0),
     [incomingData]
   );
+  const { getAbsolutePath, getHref } = useLink();
 
   let href;
   let text;
-  const { getAbsolutePath, getHref } = useLink();
-  if (installedPolicy.name === 'apm') {
+  if (!installedPolicy) {
+    href = '';
+    text = '';
+  }
+
+  if (installedPolicy?.name === 'apm') {
     href = getAbsolutePath('/app/home#/tutorial/apm');
-    text = i18n.translate('xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText', {
+    text = i18n.translate('xpack.fleet.confirmIncomingData.installApmAgentButtonText', {
       defaultMessage: 'Install APM Agent',
     });
   } else {
     href = getHref('integration_details_assets', {
-      pkgkey: `${installedPolicy.name}-${installedPolicy.version}`,
+      pkgkey: `${installedPolicy?.name}-${installedPolicy?.version}`,
     });
-    text = i18n.translate('xpack.fleet.epm.agentEnrollment.viewDataAssetsLabel', {
+    text = i18n.translate('xpack.fleet.confirmIncomingData.viewDataAssetsButtonText', {
       defaultMessage: 'View assets',
     });
   }
