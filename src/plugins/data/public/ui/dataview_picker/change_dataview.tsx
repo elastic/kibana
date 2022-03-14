@@ -7,7 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -70,7 +69,7 @@ export function ChangeDataView({
         css={css`
           max-width: ${POPOVER_CONTENT_WIDTH}px;
         `}
-        data-test-subj={classNames('changeDataView-button', dataTestSubj)}
+        data-test-subj={dataTestSubj}
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         color={isMissingCurrent ? 'danger' : 'primary'}
         iconSide="right"
