@@ -309,6 +309,7 @@ export class Printer {
         this.printTypeParameters(node),
         `(${node.parameters.map((p) => p.getFullText()).join(', ')})`,
         node.type ? [': ', this.printNode(node.type), ';'] : ';',
+        '\n',
       ].flat();
     }
 
