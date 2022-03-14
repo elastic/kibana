@@ -34,8 +34,8 @@ describe('ConfigurationChoice', () => {
   it('renders internal connector if available', () => {
     const wrapper = shallow(<ConfigurationChoice {...{ ...props }} />);
 
-    expect(wrapper.find('EuiPanel')).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(3);
+    expect(wrapper.find('EuiCard')).toHaveLength(1);
+    expect(wrapper.find(EuiText)).toHaveLength(1);
     expect(wrapper.find(EuiButton)).toHaveLength(1);
   });
   it('should navigate to internal connector on internal connector click', () => {
@@ -69,8 +69,8 @@ describe('ConfigurationChoice', () => {
       />
     );
 
-    expect(wrapper.find('EuiPanel')).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(3);
+    expect(wrapper.find('EuiCard')).toHaveLength(1);
+    expect(wrapper.find(EuiText)).toHaveLength(1);
     expect(wrapper.find(EuiButton)).toHaveLength(1);
   });
   it('should navigate to external connector on external connector click', () => {
@@ -106,8 +106,8 @@ describe('ConfigurationChoice', () => {
       />
     );
 
-    expect(wrapper.find('EuiPanel')).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(3);
+    expect(wrapper.find('EuiCard')).toHaveLength(1);
+    expect(wrapper.find(EuiText)).toHaveLength(1);
     expect(wrapper.find(EuiButton)).toHaveLength(1);
   });
   it('should navigate to custom connector on internal connector click', () => {
