@@ -257,7 +257,6 @@ export const SecretKeys = [
   ConfigKey.TLS_CERTIFICATE,
   ConfigKey.TLS_KEY,
   ConfigKey.TLS_KEY_PASSPHRASE,
-  ConfigKey.URLS,
   ConfigKey.USERNAME,
   ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES,
   ConfigKey.ZIP_URL_TLS_CERTIFICATE,

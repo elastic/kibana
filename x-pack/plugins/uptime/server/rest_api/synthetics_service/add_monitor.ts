@@ -43,16 +43,6 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         })
       );
 
-    for (let i = 0; i < 200; i++) {
-      await savedObjectsClient.create<SyntheticsMonitorWithSecrets>(
-        syntheticsMonitorType,
-        formatSecrets({
-          ...monitor,
-          revision: 1,
-        })
-      );
-    }
-
     const { syntheticsService } = server;
 
     const errors = await syntheticsService.pushConfigs(request, [
