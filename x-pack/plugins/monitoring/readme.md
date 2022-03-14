@@ -19,4 +19,4 @@ This plugin provides the Stack Monitoring kibana application.
 
 ## Troubleshooting
 - [Diagnostic queries](dev_docs/runbook/diagnostic_queries.md)
-- [CPU metrics](dev_docs/runbook/cpu_metrics.md) (WIP)
+- [CPU metrics](dev_docs/runbook/cpu_metrics.md)
