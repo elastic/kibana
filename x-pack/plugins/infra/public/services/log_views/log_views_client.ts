@@ -74,7 +74,8 @@ export class LogViewsClient implements ILogViewsClient {
             return 'missing' as const;
           }
 
-          if (decodeTotalHits(rawResponse.hits.total).value > 0) {
+          const totalHits = decodeTotalHits(rawResponse.hits.total);
+          if (typeof totalHits === 'number' ? totalHits > 0 : totalHits.value > 0) {
             return 'available' as const;
           }
 
@@ -122,7 +123,10 @@ export class LogViewsClient implements ILogViewsClient {
 }
 
 const decodeTotalHits = decodeOrThrow(
-  rt.type({
-    value: rt.number,
-  })
+  rt.union([
+    rt.number,
+    rt.type({
+      value: rt.number,
+    }),
+  ])
 );
