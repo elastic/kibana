@@ -10,7 +10,6 @@ import {
   OVERVIEW_CTI_LINKS,
   OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL,
   OVERVIEW_CTI_TOTAL_EVENT_COUNT,
-  OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON,
 } from '../../screens/overview';
 
 import { loginAndWaitForPage } from '../../tasks/login';
