@@ -861,12 +861,22 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should hide the alerts column if the alert feature is disabled', async () => {
-    const { queryByText } = render(
-      <TestProviders features={{ alerts: false }}>
+    const { queryByTestId } = render(
+      <TestProviders features={{ alerts: { enabled: false } }}>
         <AllCasesList />
       </TestProviders>
     );
 
-    expect(queryByText('Alerts')).toBe(null);
+    expect(queryByTestId('case-table-column-alertsCount')).toBe(null);
+  });
+
+  it('should show the alerts column if the alert feature is enabled', async () => {
+    const { getByTestId } = render(
+      <TestProviders features={{ alerts: { enabled: true } }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    expect(getByTestId('case-table-column-alertsCount')).toBeInTheDocument();
   });
 });

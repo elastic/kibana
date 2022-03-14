@@ -15,16 +15,20 @@ export interface UseCasesFeatures {
   metricsFeatures: CaseMetricsFeature[];
 }
 
-const isObject = (obj: unknown): obj is object => {
-  return typeof obj === 'object' && obj != null;
-};
-
 export const useCasesFeatures = (): UseCasesFeatures => {
   const { features } = useCasesContext();
   const casesFeatures = useMemo(
     () => ({
-      isAlertsEnabled: !!features.alerts,
-      isSyncAlertsEnabled: isObject(features.alerts) ? features.alerts.sync : features.alerts,
+      isAlertsEnabled: features.alerts.enabled,
+      /**
+       * If the alerts feature is disabled we will disable everything.
+       * If not, them we honor the sync option.
+       * The sync and enabled option in DEFAULT_FEATURES in x-pack/plugins/cases/common/constants.ts
+       * is defaulted to true. This will help consumers to set the enabled
+       * option to true and get the whole alerts experience without the need
+       * to explicitly set the sync to true
+       */
+      isSyncAlertsEnabled: !features.alerts.enabled ? false : !!features.alerts.sync,
       metricsFeatures: features.metrics,
     }),
     [features]
