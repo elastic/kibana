@@ -15,8 +15,8 @@ interface SuggestionsSelectProps {
   customOptionText?: string;
   defaultValue?: string;
   fieldName: string;
-  start?: number;
-  end?: number;
+  start?: string;
+  end?: string;
   onChange: (value?: string) => void;
   isClearable?: boolean;
   isInvalid?: boolean;

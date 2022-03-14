@@ -20,8 +20,8 @@ export async function getHasNotDefinedEnvironment({
 }: {
   setup: Setup;
   serviceName?: string;
-  start: number;
-  end: number;
+  start?: number;
+  end?: number;
 }) {
   const { apmEventClient } = setup;
 

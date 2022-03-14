@@ -23,10 +23,10 @@ export function EnvironmentSelect({
 }: {
   environment: Environment;
   prepend?: string;
-  onChange: (value: string) => void;
+  onChange: (value?: string) => void;
   hasNotDefinedEnvironment?: boolean;
-  start?: number;
-  end?: number;
+  start?: string;
+  end?: string;
 }) {
   const customOptions = useEnvironmentCustomOptions({ start, end });
 

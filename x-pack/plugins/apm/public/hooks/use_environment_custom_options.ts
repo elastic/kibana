@@ -16,8 +16,8 @@ export function useEnvironmentCustomOptions({
   end,
 }: {
   serviceName?: string;
-  start?: number;
-  end?: number;
+  start?: string;
+  end?: string;
 }) {
   const { data } = useFetcher(
     (callApmApi) => {

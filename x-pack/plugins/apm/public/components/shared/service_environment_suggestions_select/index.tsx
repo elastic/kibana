@@ -16,8 +16,8 @@ interface ServiceEnvironmentSuggestionsSelectProps {
   defaultValue?: string;
   fieldName: string;
   serviceName: string;
-  start?: number;
-  end?: number;
+  start?: string;
+  end?: string;
   onChange: (value?: string) => void;
   isClearable?: boolean;
   placeholder: string;
