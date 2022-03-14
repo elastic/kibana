@@ -83,6 +83,7 @@ export function BackendDetailDependenciesTable() {
               rangeTo,
               latencyAggregationType: undefined,
               transactionType: undefined,
+              serviceGroup: '',
             }}
           />
         ),
