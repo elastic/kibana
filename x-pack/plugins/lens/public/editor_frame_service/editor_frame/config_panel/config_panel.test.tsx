@@ -288,8 +288,6 @@ describe('ConfigPanel', () => {
             {
               groupId: 'testGroup',
               columnId: 'myColumn',
-              dataType: 'number',
-              label: 'Initial value',
               staticValue: 100,
             },
           ],
@@ -319,8 +317,6 @@ describe('ConfigPanel', () => {
             {
               groupId: 'testGroup',
               columnId: 'myColumn',
-              dataType: 'number',
-              label: 'Initial value',
               staticValue: 100,
             },
           ],
@@ -335,9 +331,7 @@ describe('ConfigPanel', () => {
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
       expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith({}, 'newId', {
         columnId: 'myColumn',
-        dataType: 'number',
         groupId: 'testGroup',
-        label: 'Initial value',
         staticValue: 100,
       });
     });
@@ -354,8 +348,6 @@ describe('ConfigPanel', () => {
             {
               groupId: 'a',
               columnId: 'newId',
-              dataType: 'number',
-              label: 'Initial value',
               staticValue: 100,
             },
           ],
@@ -374,8 +366,6 @@ describe('ConfigPanel', () => {
         {
           groupId: 'a',
           columnId: 'newId',
-          dataType: 'number',
-          label: 'Initial value',
           staticValue: 100,
         }
       );
