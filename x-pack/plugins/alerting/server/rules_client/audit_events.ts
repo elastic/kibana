@@ -45,7 +45,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_aggregate: ['access', 'accessing', 'accessed'],
   rule_get_execution_log: [
     'access execution log for',
-    'accessing executiog log for',
+    'accessing execution log for',
     'accessed execution log for',
   ],
 };
