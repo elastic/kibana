@@ -435,6 +435,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     let filterBar;
     if (this.shouldRenderFilterBar()) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
 

@@ -92,7 +92,7 @@ export function QueryBarMenu({
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
 
   useEffect(() => {
-    const fetchSavedSearched = async () => {
+    const fetchSavedQueries = async () => {
       cancelPendingListingRequest.current();
       let requestGotCancelled = false;
       cancelPendingListingRequest.current = () => {
@@ -105,8 +105,8 @@ export function QueryBarMenu({
 
       setSavedQueries(savedQueryItems.reverse().slice(0, 5));
     };
-    fetchSavedSearched();
-  }, [savedQueryService]);
+    fetchSavedQueries();
+  }, [savedQueryService, savedQuery]);
 
   useEffect(() => {
     if (savedQuery) {
@@ -500,7 +500,6 @@ export function QueryBarMenu({
         anchorPosition="rightUp"
         repositionOnScroll
       >
-        {/* <EuiContextMenu initialPanelId={0} panels={panels} /> */}
         {renderComponent()}
       </EuiPopover>
     </>
