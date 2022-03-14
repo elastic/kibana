@@ -71,8 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-  describe.skip('Generating signals from source indexes', () => {
+  describe('Generating signals from source indexes', () => {
     beforeEach(async () => {
       await deleteSignalsIndex(supertest, log);
       await createSignalsIndex(supertest, log);
