@@ -8,7 +8,6 @@ export { parseTechnicalFields, type ParsedTechnicalFields } from './parse_techni
 export type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
-  RuleRegistrySearchRequestSort,
   RuleRegistrySearchRequestPagination,
 } from './search_strategy';
 export { BASE_RAC_ALERTS_API_PATH } from './constants';
