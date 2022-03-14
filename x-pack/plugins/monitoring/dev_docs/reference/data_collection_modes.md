@@ -40,12 +40,12 @@ The elastic agents connected to fleet then using the integration data to collect
 
 ## Logs collection
 
-Regardless of the metrics collection mode, logs should always be collected using filebeat. Filebeat ships with a module for each stack component that can be used to collect the logs for that component.
+Regardless of the metrics collection mode, logs should always be collected using filebeat. Filebeat ships with a module for some stack components that can be used to collect the logs for that component.
 
 - [Elasticsearch](https://github.com/elastic/beats/tree/main/filebeat/module/elasticsearch)
 - [Kibana](https://github.com/elastic/beats/tree/main/filebeat/module/kibana)
 - [Logstash](https://github.com/elastic/beats/tree/main/filebeat/module/logstash)
-- Beats (TBD)
-- Enterprise Search (TBD)
-
+ 
 Stack Monitoring will read those same logs, as configured by the `monitoring.ui.logs.index` setting.
+
+Beats and Enterprise Search don't have filebeat modules, but the logs can be ingested using basic JSON filebeat configurations.
