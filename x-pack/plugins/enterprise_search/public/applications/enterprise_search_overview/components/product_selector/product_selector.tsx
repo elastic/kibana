@@ -36,7 +36,8 @@ import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
-import illustration from './document_set.svg';
+import lockLightIllustration from './lock_light.svg';
+import searchIndicesIllustration from './search_indices.svg';
 
 // The EUI EmptyState component has a max-width of 850px, so we need to ensure that the layout looks as expected.
 const MAX_WIDTH = 850;
@@ -91,7 +92,18 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
 
   const insufficientAccessMessage = (
     <EuiEmptyPrompt
-      icon={<EuiImage size="fullWidth" src={illustration} alt="" />}
+      icon={
+        <EuiImage
+          size="fullWidth"
+          src={lockLightIllustration}
+          alt={i18n.translate(
+            'xpack.enterpriseSearch.overview.insufficientPermissions.image.altText',
+            {
+              defaultMessage: 'Insufficient permissions illustration',
+            }
+          )}
+        />
+      }
       title={
         <h2>
           {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsTitle', {
@@ -182,7 +194,15 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
         }
         layout="horizontal"
         color="plain"
-        icon={<EuiImage size="fullWidth" src={illustration} alt="" />}
+        icon={
+          <EuiImage
+            size="fullWidth"
+            src={searchIndicesIllustration}
+            alt={i18n.translate('xpack.enterpriseSearch.overview.searchIndices.image.altText', {
+              defaultMessage: 'Search indices illustration',
+            })}
+          />
+        }
         body={
           <p>
             {i18n.translate('xpack.enterpriseSearch.emptyState.description', {
