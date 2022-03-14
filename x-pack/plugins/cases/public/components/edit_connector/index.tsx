@@ -19,7 +19,6 @@ import {
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 
-import { shallowEqual } from 'react-redux';
 import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
 import { Case } from '../../../common/ui/types';
 import { ActionConnector, ConnectorTypeFields } from '../../../common/api';
@@ -148,7 +147,7 @@ export const EditConnector = React.memo(
     useEffect(() => {
       const enable =
         (currentConnector !== undefined && currentConnector?.id !== selectedConnector) ||
-        !shallowEqual(fields, caseFields);
+        !deepEqual(fields, caseFields);
       setEnableSave(enable);
     }, [caseFields, currentConnector, fields, selectedConnector]);
 
