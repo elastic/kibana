@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import React from 'react';
+import { AppContextTestRender } from '../../../common/mock/endpoint';
 import { trustedAppsAllHttpMocks, TrustedAppsGetListHttpMocksInterface } from '../../pages/mocks';
-import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
-import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/trusted_apps_api_client';
-import { artifactListPageLabels } from './translations';
+import { ArtifactListPageProps } from './artifact_list_page';
 import { act, fireEvent, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ArtifactFormComponentProps } from './types';
 import type { HttpFetchOptionsWithPath } from 'kibana/public';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../common/endpoint/service/artifacts';
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../common/components/user_privileges/endpoint/mocks';
+import { getArtifactListPageRenderingSetup, getFormComponentMock, getDeferred } from './mocks';
 
 jest.mock('../../../common/components/user_privileges');
 const useUserPrivileges = _useUserPrivileges as jest.Mock;
@@ -31,72 +28,20 @@ describe('When using the ArtifactListPage component', () => {
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
-  let FormComponentMock: jest.Mock<React.FunctionComponent<ArtifactFormComponentProps>>;
-
-  interface DeferredInterface<T = void> {
-    promise: Promise<T>;
-    resolve: (data: T) => void;
-    reject: (e: Error) => void;
-  }
-
-  const getDeferred = function <T = void>(): DeferredInterface<T> {
-    let resolve: DeferredInterface<T>['resolve'];
-    let reject: DeferredInterface<T>['reject'];
-
-    const promise = new Promise<T>((_resolve, _reject) => {
-      resolve = _resolve;
-      reject = _reject;
-    });
-
-    // @ts-ignore
-    return { promise, resolve, reject };
-  };
-
-  /**
-   * Returns the props object that the Form component was last called with
-   */
-  const getLastFormComponentProps = (): ArtifactFormComponentProps => {
-    return FormComponentMock.mock.calls[FormComponentMock.mock.calls.length - 1][0];
-  };
+  let FormComponentMock: ReturnType<typeof getFormComponentMock>['FormComponentMock'];
+  let getLastFormComponentProps: ReturnType<
+    typeof getFormComponentMock
+  >['getLastFormComponentProps'];
 
   beforeEach(() => {
-    const mockedContext = createAppRootMockRenderer();
+    const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, coreStart } = mockedContext);
-    mockedApi = trustedAppsAllHttpMocks(coreStart.http);
+    ({ history, coreStart, mockedApi, FormComponentMock, getLastFormComponentProps } = renderSetup);
 
-    const apiClient = new TrustedAppsApiClient(coreStart.http);
-    const labels = { ...artifactListPageLabels };
+    render = (props) => (renderResult = renderSetup.renderArtifactListPage(props));
+  });
 
-    FormComponentMock = jest.fn((({ mode, error, disabled }: ArtifactFormComponentProps) => {
-      return (
-        <div data-test-subj="formMock">
-          <div>{`${mode} form`}</div>
-          <div>{`Is Disabled: ${disabled}`}</div>
-          {error && (
-            <>
-              <div data-test-subj="formError">{error.message}</div>
-              <div>{JSON.stringify(error.body)}</div>
-            </>
-          )}
-        </div>
-      );
-    }) as unknown as jest.Mock<React.FunctionComponent<ArtifactFormComponentProps>>);
-
-    render = (props: Partial<ArtifactListPageProps> = {}) => {
-      return (renderResult = mockedContext.render(
-        <ArtifactListPage
-          apiClient={apiClient}
-          ArtifactFormComponent={
-            FormComponentMock as unknown as ArtifactListPageProps['ArtifactFormComponent']
-          }
-          labels={labels}
-          data-test-subj="testPage"
-          {...props}
-        />
-      ));
-    };
-
+  afterEach(() => {
     // Ensure user privileges are reset
     useUserPrivileges.mockReturnValue({
       ...useUserPrivileges(),
@@ -878,7 +823,7 @@ describe('When using the ArtifactListPage component', () => {
         });
       });
 
-      it('should show a no results found message if filter did not return any results', async () => {
+      it('should show a no results found message if filter did not return` any results', async () => {
         let apiNoResultsDone = false;
         mockedApi.responseProvider.trustedAppsList.mockImplementationOnce(() => {
           apiNoResultsDone = true;
