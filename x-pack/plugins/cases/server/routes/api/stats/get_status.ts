@@ -6,7 +6,6 @@
  */
 
 import { CaseRoute } from '../types';
-import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
 
 import { CasesStatusRequest } from '../../../../common/api';
 import { CASE_STATUS_URL } from '../../../../common/constants';
@@ -19,19 +18,11 @@ import { createCasesRoute } from '../create_cases_route';
 export const getStatusRoute: CaseRoute = createCasesRoute({
   method: 'get',
   path: CASE_STATUS_URL,
+  options: { deprecated: true },
   handler: async ({ context, request, response, logger, kibanaVersion }) => {
     try {
-      logDeprecatedEndpoint(
-        logger,
-        request.headers,
-        `The get cases status API '${CASE_STATUS_URL}' is deprecated.`
-      );
-
       const client = await context.cases.getCasesClient();
       return response.ok({
-        headers: {
-          ...getWarningHeader(kibanaVersion),
-        },
         body: await client.metrics.getStatusTotalsByType(request.query as CasesStatusRequest),
       });
     } catch (error) {

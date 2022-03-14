@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
-import { HostIsolationExceptionsApiClient } from '../../host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { BlocklistsApiClient } from '../services';
 
 // FIXME:PT delete this when real component is implemented
 const TempDevFormComponent: ArtifactListPageProps['ArtifactFormComponent'] = (props) => {
@@ -39,7 +39,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
     defaultMessage: 'Blocklist',
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.blocklist.pageAboutInfo', {
-    defaultMessage: '(DEV: temporarily using isolation exception api)', // FIXME: need wording from PM
+    defaultMessage: 'Add a blocklist to block applications or files from running on the endpoint.',
   }),
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageAddButtonTitle', {
     defaultMessage: 'Add blocklist entry',
@@ -118,13 +118,11 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
 
 export const Blocklist = memo(() => {
   const http = useHttp();
-  // FIXME: Implement Blocklist API client and define list
-  // for now, just using Event Filters
-  const eventFiltersApiClient = HostIsolationExceptionsApiClient.getInstance(http);
+  const blocklistsApiClient = BlocklistsApiClient.getInstance(http);
 
   return (
     <ArtifactListPage
-      apiClient={eventFiltersApiClient}
+      apiClient={blocklistsApiClient}
       ArtifactFormComponent={TempDevFormComponent} // FIXME: Implement create/edit form
       labels={BLOCKLIST_PAGE_LABELS}
       data-test-subj="blocklistPage"

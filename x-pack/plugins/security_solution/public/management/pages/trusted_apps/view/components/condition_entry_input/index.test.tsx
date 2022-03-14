@@ -8,11 +8,8 @@
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 import { keys } from 'lodash';
-import {
-  ConditionEntry,
-  ConditionEntryField,
-  OperatingSystem,
-} from '../../../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { ConditionEntry } from '../../../../../../../common/endpoint/types';
 
 import { ConditionEntryInput } from '.';
 import { EuiSuperSelectProps } from '@elastic/eui';
@@ -53,6 +50,7 @@ describe('Condition entry input', () => {
     />
   );
 
+  // @ts-ignore
   it.each(keys(ConditionEntryField).map((k) => [k]))(
     'should call on change for field input with value %s',
     (field) => {

@@ -41,9 +41,6 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      // Work around ESTF failure outlined in https://github.com/elastic/kibana/issues/124594
-      indexDetailFixture.logs = body.logs;
-
       expect(body).to.eql(indexDetailFixture);
     });
 

@@ -36,6 +36,7 @@ import {
   setDocLinks,
   setSpaces,
   setTheme,
+  setExecutionContext,
 } from './services';
 import {
   createVisEmbeddableFromObject,
@@ -86,6 +87,7 @@ import type { SharePluginSetup, SharePluginStart } from '../../share/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import type { PresentationUtilPluginStart } from '../../presentation_util/public';
 import type { UsageCollectionStart } from '../../usage_collection/public';
+import type { ScreenshotModePluginStart } from '../../screenshot_mode/public';
 import type { HomePublicPluginSetup } from '../../home/public';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
@@ -130,6 +132,7 @@ export interface VisualizationsStartDeps {
   share?: SharePluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
+  screenshotMode: ScreenshotModePluginStart;
 }
 
 /**
@@ -289,6 +292,11 @@ export class VisualizationsPlugin
 
         params.element.classList.add('visAppWrapper');
         const { renderApp } = await import('./visualize_app');
+        if (pluginsStart.screenshotMode.isScreenshotMode()) {
+          params.element.classList.add('visEditorScreenshotModeActive');
+          // @ts-expect-error TS error, cannot find type declaration for scss
+          await import('./visualize_screenshot_mode.scss');
+        }
         const unmount = renderApp(params, services);
         return () => {
           data.search.session.clear();
@@ -365,6 +373,7 @@ export class VisualizationsPlugin
     setTimeFilter(data.query.timefilter.timefilter);
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
+    setExecutionContext(core.executionContext);
     setChrome(core.chrome);
 
     if (spaces) {
