@@ -6,6 +6,8 @@ jobs:
   sync_issues_with_table:
     runs-on: ubuntu-latest
     name: Add issues to project
+    if: |
+      github.event.label.name == 'Team: Actionable Observability'
     steps:
       - name: Add
         uses: richkuz/projectnext-label-assigner@1.0.2
