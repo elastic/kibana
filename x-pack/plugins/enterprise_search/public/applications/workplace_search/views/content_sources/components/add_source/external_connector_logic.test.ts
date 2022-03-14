@@ -32,6 +32,7 @@ describe('ExternalConnectorLogic', () => {
   const DEFAULT_VALUES: ExternalConnectorValues = {
     dataLoading: true,
     buttonLoading: false,
+    formDisabled: true,
     externalConnectorUrl: '',
     externalConnectorApiKey: '',
     sourceConfigData: {
@@ -61,7 +62,7 @@ describe('ExternalConnectorLogic', () => {
 
       it('saves the external url', () => {
         expect(ExternalConnectorLogic.values.externalConnectorUrl).toEqual(
-          sourceConfigData.configuredFields.url
+          sourceConfigData.configuredFields.externalConnectorUrl
         );
       });
 
@@ -72,14 +73,20 @@ describe('ExternalConnectorLogic', () => {
       it('sets undefined url to empty string', () => {
         ExternalConnectorLogic.actions.fetchExternalSourceSuccess({
           ...sourceConfigData,
-          configuredFields: { ...sourceConfigData.configuredFields, url: undefined },
+          configuredFields: {
+            ...sourceConfigData.configuredFields,
+            externalConnectorUrl: undefined,
+          },
         });
         expect(ExternalConnectorLogic.values.externalConnectorUrl).toEqual('');
       });
       it('sets undefined api key to empty string', () => {
         ExternalConnectorLogic.actions.fetchExternalSourceSuccess({
           ...sourceConfigData,
-          configuredFields: { ...sourceConfigData.configuredFields, apiKey: undefined },
+          configuredFields: {
+            ...sourceConfigData.configuredFields,
+            externalConnectorApiKey: undefined,
+          },
         });
         expect(ExternalConnectorLogic.values.externalConnectorApiKey).toEqual('');
       });

@@ -38,6 +38,7 @@ export interface ExternalConnectorConfig {
 }
 
 export interface ExternalConnectorValues {
+  formDisabled: boolean;
   buttonLoading: boolean;
   dataLoading: boolean;
   externalConnectorApiKey: string;
@@ -74,14 +75,16 @@ export const ExternalConnectorLogic = kea<
     externalConnectorUrl: [
       '',
       {
-        fetchExternalSourceSuccess: (_, { configuredFields: { url } }) => url || '',
+        fetchExternalSourceSuccess: (_, { configuredFields: { externalConnectorUrl } }) =>
+          externalConnectorUrl || '',
         setExternalConnectorUrl: (_, url) => url,
       },
     ],
     externalConnectorApiKey: [
       '',
       {
-        fetchExternalSourceSuccess: (_, { configuredFields: { apiKey } }) => apiKey || '',
+        fetchExternalSourceSuccess: (_, { configuredFields: { externalConnectorApiKey } }) =>
+          externalConnectorApiKey || '',
         setExternalConnectorApiKey: (_, apiKey) => apiKey,
       },
     ],
@@ -136,5 +139,11 @@ export const ExternalConnectorLogic = kea<
         flashAPIErrors(e);
       }
     },
+  }),
+  selectors: ({ selectors }) => ({
+    formDisabled: [
+      () => [selectors.buttonLoading, selectors.dataLoading],
+      (buttonLoading: boolean, dataLoading: boolean) => buttonLoading || dataLoading,
+    ],
   }),
 });

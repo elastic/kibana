@@ -112,8 +112,8 @@ export interface SourceConfigData {
     baseUrl?: string;
     clientId?: string;
     clientSecret?: string;
-    url?: string;
-    apiKey?: string;
+    externalConnectorUrl?: string;
+    externalConnectorApiKey?: string;
   };
   accountContextOnly?: boolean;
 }
