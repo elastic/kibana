@@ -15,6 +15,7 @@ export {
   enableComparisonByDefault,
   enableInfrastructureView,
   defaultApmServiceEnvironment,
+  enableRandomSampling,
 } from './ui_settings_keys';
 
 export const casesFeatureId = 'observabilityCases';

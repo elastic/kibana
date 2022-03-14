@@ -35,6 +35,7 @@ import {
   environmentRt,
   kueryRt,
   offsetRt,
+  probabilityRt,
   rangeRt,
 } from '../default_api_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
@@ -56,7 +57,7 @@ import { ConnectionStatsItemWithImpact } from './../../../common/connections';
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
   }),
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<{
@@ -99,7 +100,7 @@ const servicesRoute = createApmServerRoute({
   }> {
     const setup = await setupRequest(resources);
     const { params, logger } = resources;
-    const { environment, kuery, start, end } = params.query;
+    const { environment, kuery, start, end, probability } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
@@ -110,6 +111,7 @@ const servicesRoute = createApmServerRoute({
     return getServices({
       environment,
       kuery,
+      probability,
       setup,
       searchAggregatedTransactions,
       logger,

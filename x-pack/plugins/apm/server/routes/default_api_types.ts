@@ -6,13 +6,17 @@
  */
 
 import * as t from 'io-ts';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
 
 export { environmentRt } from '../../common/environment_rt';
 
 export const rangeRt = t.type({
   start: isoToEpochRt,
   end: isoToEpochRt,
+});
+
+export const probabilityRt = t.type({
+  probability: t.union([t.literal('none'), toNumberRt]),
 });
 
 export const offsetRt = t.partial({ offset: t.string });

@@ -15,6 +15,7 @@ import {
   maxSuggestions,
   enableInfrastructureView,
   defaultApmServiceEnvironment,
+  enableRandomSampling,
 } from '../common/ui_settings_keys';
 
 /**
@@ -76,5 +77,15 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     value: '',
     schema: schema.string(),
+  },
+  [enableRandomSampling]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableRandomSampling', {
+      defaultMessage: 'Enable progressive loading of selected APM views',
+    }),
+    description:
+      'Whether to load data progressively for APM views. Data may be requested with a high sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
+    value: false,
+    schema: schema.boolean(),
   },
 };

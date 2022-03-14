@@ -94,6 +94,7 @@ export async function getServiceTransactionDetailedStatistics({
           services: {
             terms: {
               field: SERVICE_NAME,
+              size: serviceNames.length,
             },
             aggs: {
               transactionType: {

@@ -12,13 +12,14 @@ import uuid from 'uuid';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { SearchBar } from '../../shared/search_bar';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ServiceList } from './service_list';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
+import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 
 const initialData = {
   requestId: '',
@@ -36,7 +37,7 @@ function useServicesFetcher() {
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
-  } = useAnyOfApmParams('/services/{serviceName}', '/services');
+  } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -47,34 +48,40 @@ function useServicesFetcher() {
     comparisonType,
   });
 
-  const { data = initialData, status: mainStatisticsStatus } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/services', {
-          params: {
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
+  const { data = initialData, status: mainStatisticsStatus } =
+    useProgressiveFetcher(
+      (callApmApi) => {
+        if (start && end) {
+          return callApmApi('GET /internal/apm/services', {
+            params: {
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
             },
-          },
-        }).then((mainStatisticsData) => {
-          return {
-            requestId: uuid(),
-            mainStatisticsData,
-          };
-        });
-      }
-    },
-    [environment, kuery, start, end]
-  );
+          }).then((mainStatisticsData) => {
+            return {
+              requestId: uuid(),
+              mainStatisticsData,
+            };
+          });
+        }
+      },
+      [environment, kuery, start, end]
+    );
 
   const { mainStatisticsData, requestId } = data;
 
   const { data: comparisonData } = useFetcher(
     (callApmApi) => {
-      if (start && end && mainStatisticsData.items.length) {
+      if (
+        start &&
+        end &&
+        mainStatisticsData.items.length &&
+        mainStatisticsStatus === FETCH_STATUS.SUCCESS
+      ) {
         return callApmApi('GET /internal/apm/services/detailed_statistics', {
           params: {
             query: {

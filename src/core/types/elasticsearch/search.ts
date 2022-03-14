@@ -455,6 +455,11 @@ export type AggregateOf<
       reverse_nested: {
         doc_count: number;
       } & SubAggregateOf<TAggregationContainer, TDocument>;
+      random_sampler: {
+        seed: number;
+        probability: number;
+        doc_count: number;
+      } & SubAggregateOf<TAggregationContainer, TDocument>;
       sampler: {
         doc_count: number;
       } & SubAggregateOf<TAggregationContainer, TDocument>;
