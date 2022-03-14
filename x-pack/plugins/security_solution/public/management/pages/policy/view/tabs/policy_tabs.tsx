@@ -7,16 +7,21 @@
 
 import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { PolicyData } from '../../../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getPolicyDetailPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
+  getEventFiltersListPath,
+  getHostIsolationExceptionsListPath,
+  getTrustedAppsListPath,
+  getPolicyDetailsArtifactsListPath,
 } from '../../../../common/routing';
+import { useHttp } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
 import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
 import {
@@ -27,11 +32,18 @@ import {
   policyDetails,
   policyIdFromParams,
 } from '../../store/policy_details/selectors';
-import { PolicyEventFiltersLayout } from '../event_filters/layout';
-import { PolicyHostIsolationExceptionsTab } from '../host_isolation_exceptions/host_isolation_exceptions_tab';
+import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
 import { PolicyFormLayout } from '../policy_forms/components';
 import { usePolicyDetailsSelector } from '../policy_hooks';
-import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
+import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from './event_filters_translations';
+import { POLICY_ARTIFACT_TRUSTED_APPS_LABELS } from './trusted_apps_translations';
+import { POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS } from './host_isolation_exceptions_translations';
+import { TrustedAppsApiClient } from '../../../trusted_apps/service/trusted_apps_api_client';
+import { EventFiltersApiClient } from '../../../event_filters/service/event_filters_api_client';
+import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
+import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
+import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 
 const enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -48,6 +60,7 @@ interface PolicyTab {
 
 export const PolicyTabs = React.memo(() => {
   const history = useHistory();
+  const http = useHttp();
   const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
   const isInEventFilters = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
@@ -76,7 +89,55 @@ export const PolicyTabs = React.memo(() => {
     }
   }, [canSeeHostIsolationExceptions, history, isInHostIsolationExceptionsTab, policyId]);
 
+  const getTrustedAppsApiClientInstance = useCallback(
+    () => TrustedAppsApiClient.getInstance(http),
+    [http]
+  );
+
+  const getEventFiltersApiClientInstance = useCallback(
+    () => EventFiltersApiClient.getInstance(http),
+    [http]
+  );
+
+  const getHostIsolationExceptionsApiClientInstance = useCallback(
+    () => HostIsolationExceptionsApiClient.getInstance(http),
+    [http]
+  );
+
   const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
+    const trustedAppsLabels = {
+      ...POLICY_ARTIFACT_TRUSTED_APPS_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.trustedApps.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {app} other {apps}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
+    const eventFiltersLabels = {
+      ...POLICY_ARTIFACT_EVENT_FILTERS_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.eventFilters.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} event {count, plural, =1 {filter} other {filters}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
+    const hostIsolationExceptionsLabels = {
+      ...POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} host isolation {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
     return {
       [PolicyTabKeys.SETTINGS]: {
         id: PolicyTabKeys.SETTINGS,
@@ -98,7 +159,14 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyTrustedAppsLayout />
+            <PolicyArtifactsLayout
+              policyItem={policyItem}
+              labels={trustedAppsLabels}
+              getExceptionsListApiClient={getTrustedAppsApiClientInstance}
+              searchableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
+              getArtifactPath={getTrustedAppsListPath}
+              getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
+            />
           </>
         ),
       },
@@ -110,7 +178,14 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyEventFiltersLayout policyItem={policyItem} />
+            <PolicyArtifactsLayout
+              policyItem={policyItem}
+              labels={eventFiltersLabels}
+              getExceptionsListApiClient={getEventFiltersApiClientInstance}
+              searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
+              getArtifactPath={getEventFiltersListPath}
+              getPolicyArtifactsPath={getPolicyEventFiltersPath}
+            />
           </>
         ),
       },
@@ -126,13 +201,28 @@ export const PolicyTabs = React.memo(() => {
             content: (
               <>
                 <EuiSpacer />
-                <PolicyHostIsolationExceptionsTab policy={policyItem as PolicyData} />
+                <PolicyArtifactsLayout
+                  policyItem={policyItem}
+                  labels={hostIsolationExceptionsLabels}
+                  getExceptionsListApiClient={getHostIsolationExceptionsApiClientInstance}
+                  searchableFields={HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS}
+                  getArtifactPath={getHostIsolationExceptionsListPath}
+                  getPolicyArtifactsPath={getPolicyHostIsolationExceptionsPath}
+                  externalPrivileges={privileges.canIsolateHost}
+                />
               </>
             ),
           }
         : undefined,
     };
-  }, [canSeeHostIsolationExceptions, policyItem]);
+  }, [
+    canSeeHostIsolationExceptions,
+    getEventFiltersApiClientInstance,
+    getHostIsolationExceptionsApiClientInstance,
+    getTrustedAppsApiClientInstance,
+    policyItem,
+    privileges.canIsolateHost,
+  ]);
 
   // convert tabs object into an array EuiTabbedContent can understand
   const tabsList: PolicyTab[] = useMemo(
