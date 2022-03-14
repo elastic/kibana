@@ -16,7 +16,7 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
