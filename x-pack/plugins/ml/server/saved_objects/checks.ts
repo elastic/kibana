@@ -279,11 +279,7 @@ export function checksFactory(
     spacesEnabled: boolean,
     resolveMlCapabilities: ResolveMlCapabilities
   ): Promise<DeleteMLSpaceAwareItemCheckResponse> {
-    if (
-      jobType !== 'anomaly-detector' &&
-      jobType !== 'data-frame-analytics' &&
-      jobType !== 'trained-model'
-    ) {
+    if (['anomaly-detector', 'data-frame-analytics', 'trained-model'].includes(jobType) === false) {
       throw Boom.badRequest(
         'Saved object type must be "anomaly-detector", "data-frame-analytics" or "trained-model'
       );
