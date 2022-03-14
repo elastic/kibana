@@ -68,7 +68,7 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../urls/navigation';
@@ -79,8 +79,11 @@ describe('Detection rules, override', () => {
   const expectedTags = getNewOverrideRule().tags.join('');
   const expectedMitre = formatMitreAttackDescription(getNewOverrideRule().mitre);
 
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+    login();
+  });
+  beforeEach(() => {
     createTimeline(getNewOverrideRule().timeline).then((response) => {
       cy.wrap({
         ...getNewOverrideRule(),
@@ -93,7 +96,7 @@ describe('Detection rules, override', () => {
   });
 
   it('Creates and enables a new custom rule with override option', function () {
-    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
+    visitWithoutDateRange(RULE_CREATION);
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleWithOverrideAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);

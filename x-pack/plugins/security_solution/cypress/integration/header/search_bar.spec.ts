@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openAddFilterPopover, fillAddFilterForm } from '../../tasks/search_bar';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../screens/search_bar';
 import { getHostIpFilter } from '../../objects/filter';
@@ -17,7 +17,8 @@ import { cleanKibana } from '../../tasks/common';
 describe('SearchBar', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPage(HOSTS_URL);
+    login();
+    visit(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });
 

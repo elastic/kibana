@@ -11,7 +11,7 @@ import { EXCEPTIONS_TABLE_SHOWING_LISTS } from '../../screens/exceptions';
 import { createExceptionList } from '../../tasks/api_calls/exceptions';
 import { cleanKibana } from '../../tasks/common';
 import { dismissCallOut, getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { EXCEPTIONS_URL } from '../../urls/navigation';
 
 const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
@@ -23,7 +23,8 @@ describe('All exception lists - read only', () => {
     // Create exception list not used by any rules
     createExceptionList(getExceptionList(), getExceptionList().list_id);
 
-    loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
+    login(ROLES.reader);
+    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
 
     cy.reload();
 

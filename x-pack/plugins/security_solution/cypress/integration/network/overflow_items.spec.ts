@@ -16,7 +16,7 @@ import {
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openHoverActions } from '../../tasks/network/flows';
 
 import { NETWORK_URL } from '../../urls/navigation';
@@ -29,9 +29,10 @@ describe('Overflow items', () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('network');
+      login();
     });
     beforeEach(() => {
-      loginAndWaitForPage(NETWORK_URL);
+      visit(NETWORK_URL);
     });
     after(() => {
       esArchiverUnload('network');

@@ -22,7 +22,7 @@ import {
   filterFieldsBrowser,
   toggleCategory,
 } from '../../tasks/fields_browser';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openEvents } from '../../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
@@ -52,6 +52,7 @@ describe('Events Viewer', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('auditbeat_big');
+    login();
   });
 
   after(() => {
@@ -60,7 +61,7 @@ describe('Events Viewer', () => {
 
   context('Fields rendering', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
     });
 
@@ -88,7 +89,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer query modal', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
     });
 
@@ -101,7 +102,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer fields behaviour', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
     });
 
@@ -131,7 +132,7 @@ describe('Events Viewer', () => {
 
   context('Events behavior', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
     });

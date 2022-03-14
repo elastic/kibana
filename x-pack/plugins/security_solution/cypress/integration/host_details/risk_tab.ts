@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loginAndWaitForHostDetailsPage } from '../../tasks/login';
+import { login, visitHostDetailsPage } from '../../tasks/login';
 
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -15,6 +15,7 @@ describe('risk tab', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risky_hosts');
+    login();
   });
 
   after(() => {
@@ -22,7 +23,7 @@ describe('risk tab', () => {
   });
 
   it('renders risk tab', () => {
-    loginAndWaitForHostDetailsPage('siem-kibana');
+    visitHostDetailsPage('siem-kibana');
     cy.get('[data-test-subj="navigation-hostRisk"]').click();
     waitForTableToLoad();
 
@@ -34,7 +35,7 @@ describe('risk tab', () => {
   });
 
   it('shows risk information overlay when button is clicked', () => {
-    loginAndWaitForHostDetailsPage('siem-kibana');
+    visitHostDetailsPage('siem-kibana');
     cy.get('[data-test-subj="navigation-hostRisk"]').click();
     waitForTableToLoad();
 

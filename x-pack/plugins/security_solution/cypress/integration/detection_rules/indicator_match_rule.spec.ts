@@ -73,7 +73,7 @@ import {
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
-import { cleanKibana, reload } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules, reload } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -108,10 +108,10 @@ import {
 } from '../../screens/create_new_rule';
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { goBackToAllRulesTable, getDetails } from '../../tasks/rule_details';
 
-import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
+import { ALERTS_URL, DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../urls/navigation';
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
 describe('indicator match', () => {
@@ -127,6 +127,7 @@ describe('indicator match', () => {
       cleanKibana();
       esArchiverLoad('threat_indicator');
       esArchiverLoad('suspicious_source_event');
+      login();
     });
     after(() => {
       esArchiverUnload('threat_indicator');
@@ -135,7 +136,7 @@ describe('indicator match', () => {
 
     describe('Creating new indicator match rules', () => {
       beforeEach(() => {
-        loginAndWaitForPageWithoutDateRange(RULE_CREATION);
+        visitWithoutDateRange(RULE_CREATION);
         selectIndicatorMatchType();
       });
 
@@ -404,8 +405,8 @@ describe('indicator match', () => {
 
     describe('Generating signals', () => {
       beforeEach(() => {
-        cleanKibana();
-        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+        deleteAlertsAndRules();
+        visitWithoutDateRange(ALERTS_URL);
       });
 
       it('Creates and enables a new Indicator Match rule', () => {
@@ -543,11 +544,9 @@ describe('indicator match', () => {
 
     describe('Duplicates the indicator rule', () => {
       beforeEach(() => {
-        cleanKibana();
-        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-        goToManageAlertsDetectionRules();
+        deleteAlertsAndRules();
         createCustomIndicatorRule(getNewThreatIndicatorRule());
-        reload();
+        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
       it('Allows the rule to be duplicated from the table', () => {

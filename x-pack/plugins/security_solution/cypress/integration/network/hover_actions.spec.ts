@@ -9,7 +9,7 @@ import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../screens/search_bar';
 import { DATA_PROVIDERS } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { NETWORK_URL } from '../../urls/navigation';
 import {
   clickOnAddToTimeline,
@@ -33,6 +33,7 @@ describe('Hover actions', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('network');
+    login();
   });
 
   after(() => {
@@ -40,7 +41,7 @@ describe('Hover actions', () => {
   });
 
   beforeEach(() => {
-    loginAndWaitForPage(NETWORK_URL, undefined, onBeforeLoadCallback);
+    visit(NETWORK_URL, onBeforeLoadCallback);
     openHoverActions();
   });
 

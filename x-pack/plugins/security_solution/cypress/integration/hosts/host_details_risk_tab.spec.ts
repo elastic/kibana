@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loginAndWaitForHostDetailsPage } from '../../tasks/login';
+import { login, visitHostDetailsPage } from '../../tasks/login';
 
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -20,7 +20,8 @@ describe('risk tab', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risky_hosts');
-    loginAndWaitForHostDetailsPage('siem-kibana');
+    login();
+    visitHostDetailsPage('siem-kibana');
     navigateToHostRiskDetailTab();
     waitForTableToLoad();
   });

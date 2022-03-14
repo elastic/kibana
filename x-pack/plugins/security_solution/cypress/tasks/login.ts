@@ -395,6 +395,11 @@ export const visitTimeline = (timelineId: string, role?: ROLES) => {
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
 
+export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
+  visit(hostDetailsUrl(hostName));
+  cy.get('[data-test-subj="host-overview"] [data-test-subj="loading-spinner"]').should('exist');
+  cy.get('[data-test-subj="host-overview"] [data-test-subj="loading-spinner"]').should('not.exist');
+};
 export const loginAndWaitForHostDetailsPage = (hostName = 'suricata-iowa') => {
   loginAndWaitForPage(hostDetailsUrl(hostName));
   cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');

@@ -26,11 +26,11 @@ import {
   waitForRulesTableToBeLoaded,
   waitForRuleToChangeStatus,
 } from '../../tasks/alerts_detection_rules';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 import { createCustomRule } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   getExistingRule,
   getNewOverrideRule,
@@ -41,9 +41,13 @@ import {
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
 describe('Alerts detection rules', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    login();
+  });
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    visitWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     createCustomRule(getNewRule(), '1');
     createCustomRule(getExistingRule(), '2');

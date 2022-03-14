@@ -22,8 +22,8 @@ import {
 } from '../../screens/timeline';
 import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
-import { cleanKibana } from '../../tasks/common';
-import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { cleanKibana, deleteTimelines } from '../../tasks/common';
+import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { selectCustomTemplates } from '../../tasks/templates';
 import {
@@ -46,7 +46,8 @@ import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 describe('Timelines', (): void => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPage(OVERVIEW_URL);
+    login();
+    visit(OVERVIEW_URL);
   });
 
   describe('Toggle create timeline from plus icon', () => {
@@ -116,9 +117,10 @@ describe('Timelines', (): void => {
 describe('Create a timeline from a template', () => {
   before(() => {
     cy.intercept('/api/timeline*').as('timeline');
-    cleanKibana();
+    deleteTimelines();
     createTimelineTemplate(getTimeline());
-    loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    login();
+    visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
     waitForTimelinesPanelToBeLoaded();
   });
   it('Should have the same query and open the timeline modal', () => {

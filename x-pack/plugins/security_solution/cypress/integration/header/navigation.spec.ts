@@ -19,7 +19,7 @@ import {
   EXCEPTIONS,
 } from '../../screens/security_header';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, loginAndWaitForPage, visit } from '../../tasks/login';
 import { navigateFromHeaderTo } from '../../tasks/security_header';
 
 import {
@@ -54,7 +54,8 @@ import { cleanKibana } from '../../tasks/common';
 describe('top-level navigation common to all pages in the Security app', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPage(TIMELINES_URL);
+    login();
+    visit(TIMELINES_URL);
   });
 
   it('navigates to the Overview page', () => {

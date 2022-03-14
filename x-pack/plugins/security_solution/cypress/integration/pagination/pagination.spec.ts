@@ -15,7 +15,7 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 import { openAllHosts, openUncommonProcesses } from '../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../tasks/hosts/uncommon_processes';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { goToFirstPage, goToSecondPage } from '../../tasks/pagination';
 import { refreshPage } from '../../tasks/security_header';
 
@@ -25,7 +25,8 @@ describe('Pagination', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('host_uncommon_processes');
-    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+    login();
+    visit(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     waitForUncommonProcessesToBeLoaded();
   });
   after(() => {

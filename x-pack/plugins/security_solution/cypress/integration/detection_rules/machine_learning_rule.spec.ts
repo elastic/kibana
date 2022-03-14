@@ -40,11 +40,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import {
-  changeRowsPerPageTo100,
-  filterByCustomRules,
-  goToRuleDetails,
-} from '../../tasks/alerts_detection_rules';
+import { filterByCustomRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
   createAndEnableRule,
@@ -64,7 +60,7 @@ describe('Detection rules, machine learning', () => {
   const expectedMitre = formatMitreAttackDescription(getMachineLearningRule().mitre);
   const expectedNumberOfRules = 1;
 
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
   });
 
@@ -77,8 +73,6 @@ describe('Detection rules, machine learning', () => {
     createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-    changeRowsPerPageTo100();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);

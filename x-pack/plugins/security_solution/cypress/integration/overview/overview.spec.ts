@@ -8,7 +8,7 @@
 import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../../screens/overview';
 
 import { expandHostStats, expandNetworkStats } from '../../tasks/overview';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, loginAndWaitForPage, visit } from '../../tasks/login';
 
 import { OVERVIEW_URL } from '../../urls/navigation';
 
@@ -21,7 +21,8 @@ describe('Overview Page', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('overview');
-    loginAndWaitForPage(OVERVIEW_URL);
+    login();
+    visit(OVERVIEW_URL);
   });
 
   after(() => {
@@ -63,6 +64,7 @@ describe('Overview Page', () => {
 
 describe('Overview page with no data', () => {
   before(() => {
+    login();
     esArchiverUnload('auditbeat');
   });
   after(() => {
@@ -70,7 +72,7 @@ describe('Overview page with no data', () => {
   });
 
   it('Splash screen should be here', () => {
-    loginAndWaitForPage(OVERVIEW_URL);
+    visit(OVERVIEW_URL);
     cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
   });
 });

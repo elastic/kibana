@@ -11,11 +11,13 @@ import { getNewRule } from '../../objects/rule';
 
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import {
+  login,
   loginAndWaitForPageWithoutDateRange,
+  visitWithoutDateRange,
   waitForPageWithoutDateRange,
 } from '../../tasks/login';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL, EXCEPTIONS_URL } from '../../urls/navigation';
+import { EXCEPTIONS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 import {
   deleteExceptionListWithRuleReference,
@@ -46,7 +48,7 @@ const getExceptionList2 = () => ({
 describe('Exceptions Table', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    login();
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
@@ -68,7 +70,7 @@ describe('Exceptions Table', () => {
       'exceptionListResponse'
     );
 
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    visitWithoutDateRange(EXCEPTIONS_URL);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
@@ -78,7 +80,7 @@ describe('Exceptions Table', () => {
   it('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
     exportExceptionList();
 
@@ -90,7 +92,7 @@ describe('Exceptions Table', () => {
   });
 
   it('Filters exception lists on search', () => {
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     // Using cy.contains because we do not care about the exact text,
@@ -141,7 +143,7 @@ describe('Exceptions Table', () => {
   });
 
   it('Deletes exception list without rule reference', () => {
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     // Using cy.contains because we do not care about the exact text,
@@ -175,7 +177,8 @@ describe('Exceptions Table - read only', () => {
   before(() => {
     // First we login as a privileged user to create exception list
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL, ROLES.platform_engineer);
+    login(ROLES.platform_engineer);
+    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.platform_engineer);
     createExceptionList(getExceptionList(), getExceptionList().list_id);
 
     // Then we login as read-only user to test.
