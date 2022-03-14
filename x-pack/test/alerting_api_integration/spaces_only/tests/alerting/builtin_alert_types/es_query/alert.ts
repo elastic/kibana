@@ -292,7 +292,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
-          const { previousTimestamp } = doc._source;
+          const { previousTimestamp, hits } = doc._source;
           const { name, title, message } = doc._source.params;
 
           expect(name).to.be('always fire');
@@ -300,7 +300,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           const messagePattern =
             /alert 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
-          // expect(hits).not.to.be.empty();
+          expect(hits).not.to.be.empty();
 
           // during the first execution, the latestTimestamp value should be empty
           // since this alert always fires, the latestTimestamp value should be updated each execution
