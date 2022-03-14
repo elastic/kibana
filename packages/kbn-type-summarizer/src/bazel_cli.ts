@@ -19,7 +19,7 @@ const HELP = `
 Script called from bazel to create the summarized version of a package. When called by Bazel
 config is passed as a JSON encoded object.
 
-When called via "node scripts/build_type_summarizer_output" pass a path to a package and that
+When called via "node scripts/type_summarizer" pass a path to a package and that
 package's types will be read from node_modules and written to data/type-summarizer-output.
 
 `;
