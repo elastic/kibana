@@ -42,10 +42,7 @@ export const removeDataView =
   (dataViewArray: RemoveDataViewProps[]) => {
     const dataView = dataViewArray[0];
     async function doRemove() {
-      await asyncForEach(dataViewArray, async ({ id }) => {
-        return dataViews.delete(id);
-      });
-      await dataViews.getDefaultDataView();
+      await asyncForEach(dataViewArray, async ({ id }) => dataViews.delete(id));
       onDelete();
     }
 
