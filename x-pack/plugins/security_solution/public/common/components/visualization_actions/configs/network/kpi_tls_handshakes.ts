@@ -7,7 +7,7 @@
 import { LensAttributes } from '../../types';
 
 export const kpiTlsHandshakes: LensAttributes = {
-  title: '[Network] KPI TLS handshakes',
+  title: '[Network] TLS handshakes',
   description: '',
   visualizationType: 'lnsMetric',
   state: {

@@ -39,7 +39,7 @@ export const kpiHostMetric: LensAttributes = {
       layerType: 'data',
     },
   },
-  title: '[Host] KPI Hosts - metric',
+  title: '[Host] Hosts - metric',
   visualizationType: 'lnsMetric',
   references: [
     {

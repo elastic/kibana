@@ -39,7 +39,7 @@ export const kpiUniqueIpsDestinationMetric: LensAttributes = {
       layerType: 'data',
     },
   },
-  title: '[Host]  KPI Unique IPs - destination metric',
+  title: '[Host] Unique IPs - destination metric',
   visualizationType: 'lnsMetric',
   references: [
     {

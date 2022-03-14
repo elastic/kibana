@@ -8,7 +8,7 @@
 import { LensAttributes } from '../../types';
 
 export const kpiUserAuthenticationsMetricSuccess: LensAttributes = {
-  title: '[Host] KPI User authentications - metric success ',
+  title: '[Host] User authentications - metric success ',
   description: '',
   visualizationType: 'lnsMetric',
   state: {

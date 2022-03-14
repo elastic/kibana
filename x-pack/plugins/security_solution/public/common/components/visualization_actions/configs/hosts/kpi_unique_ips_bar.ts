@@ -105,7 +105,7 @@ export const kpiUniqueIpsBar: LensAttributes = {
       yRightExtent: { mode: 'full' },
     },
   },
-  title: '[Host]  KPI Unique IPs - bar',
+  title: '[Host] Unique IPs - bar',
   visualizationType: 'lnsXY',
   references: [
     {

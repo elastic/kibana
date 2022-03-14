@@ -8,7 +8,7 @@
 import { LensAttributes } from '../../types';
 
 export const kpiUserAuthenticationsArea: LensAttributes = {
-  title: '[Host] KPI User authentications - area ',
+  title: '[Host] User authentications - area ',
   description: '',
   visualizationType: 'lnsXY',
   state: {

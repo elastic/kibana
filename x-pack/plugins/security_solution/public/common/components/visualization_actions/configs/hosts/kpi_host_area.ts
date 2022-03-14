@@ -67,7 +67,7 @@ export const kpiHostArea: LensAttributes = {
       yRightExtent: { mode: 'full' },
     },
   },
-  title: '[Host] KPI Hosts - area',
+  title: '[Host] Hosts - area',
   visualizationType: 'lnsXY',
   references: [
     {

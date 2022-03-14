@@ -7,7 +7,11 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/utils';
+import {
+  prepareLogTable,
+  Dimension,
+  validateAccessor,
+} from '../../../../visualizations/common/utils';
 import { validateOptions } from '../../../../charts/common';
 import { TagCloudRendererParams } from '../types';
 import { ExpressionTagcloudFunction } from '../types';
@@ -129,12 +133,12 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         default: '{palette}',
       },
       metric: {
-        types: ['vis_dimension'],
+        types: ['vis_dimension', 'string'],
         help: argHelp.metric,
         required: true,
       },
       bucket: {
-        types: ['vis_dimension'],
+        types: ['vis_dimension', 'string'],
         help: argHelp.bucket,
       },
       ariaLabel: {
@@ -144,6 +148,9 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
       },
     },
     fn(input, args, handlers) {
+      validateAccessor(args.metric, input.columns);
+      validateAccessor(args.bucket, input.columns);
+
       validateOptions(args.scale, ScaleOptions, errors.invalidScaleOptionError);
       validateOptions(args.orientation, Orientation, errors.invalidOrientationError);
 

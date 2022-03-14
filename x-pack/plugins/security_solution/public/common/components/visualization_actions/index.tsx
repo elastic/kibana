@@ -23,7 +23,6 @@ import {
   INSPECT,
   MORE_ACTIONS,
   OPEN_IN_LENS,
-  SAVE_VISUALIZATION,
 } from './translations';
 
 const Wrapper = styled.div`
@@ -57,13 +56,8 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   const userPermissions = useGetUserCasesPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
 
-  const {
-    canUseEditor,
-    navigateToPrefilledEditor,
-    SaveModalComponent: LensSaveModalComponent,
-  } = lens;
+  const { canUseEditor, navigateToPrefilledEditor } = lens;
   const [isPopoverOpen, setPopover] = useState(false);
-  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {
@@ -114,15 +108,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     );
   }, [attributes, navigateToPrefilledEditor, timerange]);
 
-  const closeSaveModalVisible = useCallback(() => {
-    setIsSaveModalVisible(false);
-  }, []);
-
-  const onSaveVisualization = useCallback(() => {
-    setIsSaveModalVisible(true);
-    closePopover();
-  }, []);
-
   const onOpenInspectModal = useCallback(() => {
     closePopover();
     setIsInspectModalOpen(true);
@@ -161,24 +146,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   const items = useMemo(
     () => [
       <EuiContextMenuItem
-        icon="visArea"
-        key="visualizationActionsOpenInLens"
-        data-test-subj="viz-actions-open-in-lens"
-        disabled={disabledOpenInLens}
-        onClick={onOpenInLens}
-      >
-        {OPEN_IN_LENS}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        icon="save"
-        key="visualizationActionsSaveVisualization"
-        data-test-subj="viz-actions-save"
-        disabled={!userCanCrud}
-        onClick={onSaveVisualization}
-      >
-        {SAVE_VISUALIZATION}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
         icon="inspect"
         key="visualizationActionsInspect"
         onClick={handleInspectButtonClick}
@@ -186,6 +153,15 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         data-test-subj="viz-actions-inspect"
       >
         {INSPECT}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        icon="visArea"
+        key="visualizationActionsOpenInLens"
+        data-test-subj="viz-actions-open-in-lens"
+        disabled={disabledOpenInLens}
+        onClick={onOpenInLens}
+      >
+        {OPEN_IN_LENS}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         disabled={isAddToNewCaseDisabled}
@@ -215,8 +191,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
       onAddToExistingCaseClicked,
       onAddToNewCaseClicked,
       onOpenInLens,
-      onSaveVisualization,
-      userCanCrud,
     ]
   );
 
@@ -233,22 +207,8 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     [dataTestSubj, onButtonClick]
   );
 
-  const initialInput = useMemo(
-    () =>
-      attributes != null
-        ? {
-            id: 'saveVisualizationModal',
-            attributes,
-          }
-        : null,
-    [attributes]
-  );
-
   return (
     <Wrapper className={className}>
-      {isSaveModalVisible && initialInput != null && (
-        <LensSaveModalComponent initialInput={initialInput} onClose={closeSaveModalVisible} />
-      )}
       {request !== null && response !== null && (
         <EuiPopover
           button={button}

@@ -63,9 +63,6 @@ describe('VisualizationActions', () => {
     title: 'mock networkDnsHistogram',
   };
   const mockNavigateToPrefilledEditor = jest.fn();
-  const MockLensSaveModalComponent = jest.fn(() => (
-    <div data-test-subj="LensSaveModal">{'mockLensSaveModal'}</div>
-  ));
   const mockGetCreateCaseFlyoutOpen = jest.fn();
   const mockGetAllCasesSelectorModalOpen = jest.fn();
 
@@ -76,7 +73,6 @@ describe('VisualizationActions', () => {
         lens: {
           canUseEditor: jest.fn(() => true),
           navigateToPrefilledEditor: mockNavigateToPrefilledEditor,
-          SaveModalComponent: MockLensSaveModalComponent,
         },
         cases: {
           ...mockCasesContract(),
@@ -168,7 +164,7 @@ describe('VisualizationActions', () => {
     expect(mockNavigateToPrefilledEditor.mock.calls[0][1].openInNewTab).toEqual(true);
   });
 
-  test('Should render Save button', () => {
+  test('Should render Inspect button', () => {
     const { container } = render(
       <TestProviders store={store}>
         <VisualizationActions {...props} />
@@ -176,34 +172,11 @@ describe('VisualizationActions', () => {
     );
     fireEvent.click(container.querySelector(`[data-test-subj="stat-networkDnsHistogramQuery"]`)!);
 
-    expect(screen.getByText('Save visualization')).toBeInTheDocument();
+    expect(screen.getByText('Inspect')).toBeInTheDocument();
+    expect(screen.getByText('Inspect')).not.toBeDisabled();
   });
 
-  test('Should open LensSaveModal', () => {
-    const { container } = render(
-      <TestProviders store={store}>
-        <VisualizationActions {...props} />
-      </TestProviders>
-    );
-    fireEvent.click(container.querySelector(`[data-test-subj="stat-networkDnsHistogramQuery"]`)!);
-    fireEvent.click(screen.getByText('Save visualization'));
-
-    expect(screen.getByText('mockLensSaveModal')).toBeInTheDocument();
-  });
-
-  test('Should render Inspect visualization button', () => {
-    const { container } = render(
-      <TestProviders store={store}>
-        <VisualizationActions {...props} />
-      </TestProviders>
-    );
-    fireEvent.click(container.querySelector(`[data-test-subj="stat-networkDnsHistogramQuery"]`)!);
-
-    expect(screen.getByText('Inspect visualization')).toBeInTheDocument();
-    expect(screen.getByText('Inspect visualization')).not.toBeDisabled();
-  });
-
-  test('Should render Inspect visualization Modal after clicking the inspect button', () => {
+  test('Should render Inspect Modal after clicking the inspect button', () => {
     const { baseElement, container } = render(
       <TestProviders store={store}>
         <VisualizationActions {...props} />
@@ -211,8 +184,8 @@ describe('VisualizationActions', () => {
     );
     fireEvent.click(container.querySelector(`[data-test-subj="stat-networkDnsHistogramQuery"]`)!);
 
-    expect(screen.getByText('Inspect visualization')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Inspect visualization'));
+    expect(screen.getByText('Inspect')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Inspect'));
     expect(
       baseElement.querySelector('[data-test-subj="modal-inspect-euiModal"]')
     ).toBeInTheDocument();

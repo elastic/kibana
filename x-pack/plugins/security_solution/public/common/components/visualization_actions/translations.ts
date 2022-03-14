@@ -15,15 +15,8 @@ export const MORE_ACTIONS = i18n.translate(
 );
 
 export const INSPECT = i18n.translate('xpack.securitySolution.visualizationActions.inspect', {
-  defaultMessage: 'Inspect visualization',
+  defaultMessage: 'Inspect',
 });
-
-export const SAVE_VISUALIZATION = i18n.translate(
-  'xpack.securitySolution.visualizationActions.saveVisualization',
-  {
-    defaultMessage: 'Save visualization',
-  }
-);
 
 export const OPEN_IN_LENS = i18n.translate(
   'xpack.securitySolution.visualizationActions.openInLens',

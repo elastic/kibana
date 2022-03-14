@@ -32,7 +32,8 @@ import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { HISTOGRAM_ACTIONS_BUTTON_CLASS, VisualizationActions } from '../visualization_actions';
 import { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, SecurityPageName } from '../../../../common/constants';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -59,10 +60,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
-
-const HeaderChildrenFlexItem = styled(EuiFlexItem)`
-  margin-left: 24px;
-`;
 
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
@@ -107,7 +104,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 }) => {
   const dispatch = useDispatch();
   const { cases } = useKibana().services;
-  const CasesContext = cases.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
 
@@ -169,6 +166,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
   const [loading, { data, inspect, totalCount, refetch }] =
     useMatrixHistogramCombined(matrixHistogramRequest);
+  const [{ pageName }] = useRouteSpy();
+
+  const onHostOrNetworkPage =
+    pageName === SecurityPageName.hosts || pageName === SecurityPageName.network;
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -242,11 +243,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             titleSize={titleSize}
             subtitle={subtitleWithCounts}
             inspectMultiple
-            showInspectButton={showInspectButton}
+            showInspectButton={showInspectButton || !onHostOrNetworkPage}
             isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              {(getLensAttributes || lensAttributes) && timerange && (
+              {onHostOrNetworkPage && (getLensAttributes || lensAttributes) && timerange && (
                 <EuiFlexItem grow={false}>
                   <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
                     <VisualizationActions
@@ -272,7 +273,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                   />
                 )}
               </EuiFlexItem>
-              <HeaderChildrenFlexItem grow={false}>{headerChildren}</HeaderChildrenFlexItem>
+              <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
             </EuiFlexGroup>
           </HeaderSection>
 

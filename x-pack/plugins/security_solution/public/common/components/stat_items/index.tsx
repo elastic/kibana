@@ -7,20 +7,21 @@
 
 import { ScaleType, Rotation, BrushEndListener, ElementClickListener } from '@elastic/charts';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiIcon,
+  EuiButtonIcon,
+  EuiLoadingSpinner,
   EuiTitle,
   IconType,
 } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
+import { useQueryToggle } from '../query_toggle';
 
 import {
   HostsKpiStrategyResponse,
@@ -36,7 +37,6 @@ import { InspectButton } from '../inspect';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { LensAttributes } from '../visualization_actions/types';
-import { useQueryToggle } from '../query_toggle';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -81,7 +81,6 @@ export interface StatItems {
 export interface StatItemsProps extends StatItems {
   areaChart?: ChartSeriesData[];
   barChart?: ChartSeriesData[];
-  loading: boolean;
   from: string;
   id: string;
   narrowDateRange: UpdateDateRange;
@@ -173,10 +172,7 @@ export const addValueToBarChart = (
     ];
   }, []);
 };
-const StyledTitle = styled.h6`
-  color: #993366;
-  line-height: 200%;
-`;
+
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
   data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse,
@@ -201,7 +197,10 @@ export const useKpiMatrixStatus = (
     setQuerySkip,
     loading,
   }));
-
+const StyledTitle = styled.h6`
+  color: #993366;
+  line-height: 200%;
+`;
 export const StatItemsComponent = React.memo<StatItemsProps>(
   ({
     areaChart,
@@ -277,7 +276,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
             </EuiFlexItem>
             {showInspectButton && toggleStatus && !loading && (
               <EuiFlexItem grow={false}>
-                <InspectButton queryId={id} title={`KPI ${description}`} inspectIndex={index} />
+                <InspectButton queryId={id} title={description} inspectIndex={index} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -323,7 +322,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                               queryId={id}
                               inspectIndex={index}
                               timerange={timerange}
-                              title={`KPI ${description}`}
+                              title={description}
                               className="viz-actions"
                             />
                           )}
@@ -346,7 +345,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                         queryId: id,
                         inspectIndex: index,
                         timerange,
-                        title: `KPI ${description}`,
+                        title: description,
                       }}
                     />
                   </FlexItem>
@@ -366,7 +365,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                           queryId: id,
                           inspectIndex: index,
                           timerange,
-                          title: `KPI ${description}`,
+                          title: description,
                         }}
                       />
                     </FlexItem>
@@ -389,7 +388,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     prevProps.index === nextProps.index &&
     prevProps.narrowDateRange === nextProps.narrowDateRange &&
     prevProps.statKey === nextProps.statKey &&
-    prevProps.loading === nextProps.loading &&
     prevProps.to === nextProps.to &&
     deepEqual(prevProps.areaChart, nextProps.areaChart) &&
     deepEqual(prevProps.barChart, nextProps.barChart) &&
