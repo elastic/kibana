@@ -7,6 +7,7 @@
 import { ReactElement, ReactNode } from 'react';
 import { CoreStart } from '../../../../src/core/public';
 import { TimelinesUIStart } from '../../timelines/public';
+import { ProcessEvent } from '../common/types/process_tree';
 
 export type SessionViewServices = CoreStart & {
   timelines: TimelinesUIStart;
@@ -15,6 +16,15 @@ export type SessionViewServices = CoreStart & {
 export interface SessionViewUIStart {
   getSessionViewTableProcessTree: (props: any) => ReactElement;
   getSessionView: (sessionEntityId: string) => ReactElement;
+}
+
+export interface SessionViewDeps {
+  // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
+  sessionEntityId: string;
+  height?: number;
+  // if provided, the session view will jump to and select the provided event if it belongs to the session leader
+  // session view will fetch a page worth of events starting from jumpToEvent as well as a page backwards.
+  jumpToEvent?: ProcessEvent;
 }
 
 export interface EuiTabProps {

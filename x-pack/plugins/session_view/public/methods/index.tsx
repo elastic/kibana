@@ -9,6 +9,7 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { SessionViewTableProcessTreeProps } from '../types';
+import { SessionViewDeps } from '../types';
 
 // Initializing react-query
 const queryClient = new QueryClient();
@@ -24,11 +25,16 @@ export const getSessionViewTableProcessTreeLazy = (props: SessionViewTableProces
     </Suspense>
   );
 };
-export const getSessionViewLazy = (sessionEntityId: string) => {
+
+export const getSessionViewLazy = ({ sessionEntityId, height, jumpToEvent }: SessionViewDeps) => {
   return (
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <SessionViewLazy sessionEntityId={sessionEntityId} />
+        <SessionViewLazy
+          sessionEntityId={sessionEntityId}
+          height={height}
+          jumpToEvent={jumpToEvent}
+        />
       </Suspense>
     </QueryClientProvider>
   );
