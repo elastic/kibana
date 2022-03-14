@@ -7,13 +7,12 @@
 
 import { getColorAssignments } from './color_assignment';
 import type { FormatFactory, LensMultiTable } from '../../common';
-import type { DataLayerConfigResult } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
+import { XYDataLayerConfig } from './types';
 
 describe('color_assignment', () => {
-  const layers: DataLayerConfigResult[] = [
+  const layers: XYDataLayerConfig[] = [
     {
-      type: 'lens_xy_data_layer',
       yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
@@ -25,7 +24,6 @@ describe('color_assignment', () => {
       accessors: ['y1', 'y2'],
     },
     {
-      type: 'lens_xy_data_layer',
       yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,

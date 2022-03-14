@@ -13,7 +13,6 @@ import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory } from '../../common';
 import { isDataLayer, isReferenceLayer } from './visualization_helpers';
-import { DataLayerConfigResult } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { XYDataLayerConfig, XYLayerConfig, XYReferenceLineLayerConfig } from './types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
@@ -24,7 +23,7 @@ export type ColorAssignments = Record<
   string,
   {
     totalSeriesCount: number;
-    getRank(sortedLayer: DataLayerConfigResult, seriesKey: string, yAccessor: string): number;
+    getRank(sortedLayer: XYDataLayerConfig, seriesKey: string, yAccessor: string): number;
   }
 >;
 
@@ -33,10 +32,10 @@ export function getColorAssignments(
   data: { tables: Record<string, Datatable> },
   formatFactory: FormatFactory
 ): ColorAssignments {
-  const layersPerPalette: Record<string, DataLayerConfigResult[]> = {};
+  const layersPerPalette: Record<string, XYDataLayerConfig[]> = {};
 
   layers
-    .filter((layer): layer is DataLayerConfigResult => isDataLayer(layer))
+    .filter((layer): layer is XYDataLayerConfig => isDataLayer(layer))
     .forEach((layer) => {
       const palette = layer.palette?.name || 'default';
       if (!layersPerPalette[palette]) {
@@ -75,7 +74,7 @@ export function getColorAssignments(
     );
     return {
       totalSeriesCount,
-      getRank(sortedLayer: DataLayerConfigResult, seriesKey: string, yAccessor: string) {
+      getRank(sortedLayer: XYDataLayerConfig, seriesKey: string, yAccessor: string) {
         const layerIndex = paletteLayers.findIndex((l) => sortedLayer.layerId === l.layerId);
         const currentSeriesPerLayer = seriesPerLayer[layerIndex];
         const splitRank = currentSeriesPerLayer.splits.indexOf(seriesKey);
