@@ -11,11 +11,11 @@ import React from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useComparison } from '../../../../hooks/use_comparison';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
 export function BackendInventoryDependenciesTable() {
   const {
@@ -33,7 +33,12 @@ export function BackendInventoryDependenciesTable() {
 
   const trackEvent = useUiTracker();
 
-  const { offset } = useComparison();
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {

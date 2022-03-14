@@ -11,11 +11,11 @@ import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useComparison } from '../../../hooks/use_comparison';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
+import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import {
   ServiceOverviewInstancesTable,
   TableOptions,
@@ -86,7 +86,12 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { comparisonStart, comparisonEnd } = useComparison();
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+    comparisonEnabled,
+  });
 
   const {
     data: mainStatsData = INITIAL_STATE_MAIN_STATS,

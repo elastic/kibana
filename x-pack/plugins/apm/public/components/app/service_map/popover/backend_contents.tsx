@@ -14,10 +14,10 @@ import { useUiTracker } from '../../../../../../observability/public';
 import { ContentsProps } from '.';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useComparison } from '../../../../hooks/use_comparison';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 type BackendReturn = APIReturnType<'GET /internal/apm/service-map/backend'>;
@@ -38,7 +38,14 @@ export function BackendContents({
     '/services/{serviceName}/service-map'
   );
 
-  const { offset } = useComparison();
+  const { comparisonEnabled, comparisonType } = query;
+
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
 
   const apmRouter = useApmRouter();
 

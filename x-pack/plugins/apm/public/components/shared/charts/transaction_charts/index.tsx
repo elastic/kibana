@@ -14,6 +14,7 @@ import { LatencyChart } from '../latency_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TransactionColdstartRateChart } from '../transaction_coldstart_rate_chart';
 import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
+import { TimeRangeComparisonType } from '../../../../../common/runtime_types/comparison_type_rt';
 
 export function TransactionCharts({
   kuery,
@@ -23,6 +24,7 @@ export function TransactionCharts({
   transactionName,
   isServerlessContext,
   comparisonEnabled,
+  comparisonType,
 }: {
   kuery: string;
   environment: string;
@@ -31,6 +33,7 @@ export function TransactionCharts({
   transactionName?: string;
   isServerlessContext?: boolean;
   comparisonEnabled?: boolean;
+  comparisonType?: TimeRangeComparisonType;
 }) {
   return (
     <>
@@ -68,6 +71,7 @@ export function TransactionCharts({
                   transactionName={transactionName}
                   environment={environment}
                   comparisonEnabled={comparisonEnabled}
+                  comparisonType={comparisonType}
                 />
               </EuiFlexItem>
             ) : (

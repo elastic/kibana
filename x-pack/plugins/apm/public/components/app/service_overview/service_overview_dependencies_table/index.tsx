@@ -17,7 +17,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/service_link';
-import { useComparison } from '../../../../hooks/use_comparison';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
@@ -46,7 +46,12 @@ export function ServiceOverviewDependenciesTable({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { offset } = useComparison();
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
 
   const { serviceName, transactionType } = useApmServiceContext();
 

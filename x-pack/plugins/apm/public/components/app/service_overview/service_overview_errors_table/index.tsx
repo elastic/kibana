@@ -16,9 +16,9 @@ import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useComparison } from '../../../../hooks/use_comparison';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -81,7 +81,12 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { comparisonStart, comparisonEnd } = useComparison();
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+    comparisonEnabled,
+  });
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;

@@ -22,7 +22,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { AnomalyDetection } from './anomaly_detection';
 import { StatsList } from './stats_list';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { useComparison } from '../../../../hooks/use_comparison';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 type ServiceNodeReturn =
@@ -51,11 +51,16 @@ export function ServiceContents({
     throw new Error('Expected rangeFrom and rangeTo to be set');
   }
 
-  const { rangeFrom, rangeTo, comparisonEnabled } = query;
+  const { rangeFrom, rangeTo, comparisonEnabled, comparisonType } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { offset } = useComparison();
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
 
   const serviceName = nodeData.id!;
   const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';

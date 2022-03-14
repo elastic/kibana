@@ -20,10 +20,13 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { useComparison } from '../../../hooks/use_comparison';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
+import {
+  getComparisonChartTheme,
+  getTimeRangeComparison,
+} from '../../shared/time_comparison/get_time_range_comparison';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -44,7 +47,7 @@ export function ServiceOverviewThroughputChart({
   transactionName?: string;
 }) {
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled },
+    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
   } = useApmParams('/services/{serviceName}');
 
   const { environment } = useEnvironmentsContext();
@@ -57,8 +60,13 @@ export function ServiceOverviewThroughputChart({
 
   const { transactionType, serviceName } = useApmServiceContext();
 
-  const { comparisonStart, comparisonEnd, comparisonChartTheme } =
-    useComparison();
+  const comparisonChartTheme = getComparisonChartTheme();
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+    comparisonEnabled,
+  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {

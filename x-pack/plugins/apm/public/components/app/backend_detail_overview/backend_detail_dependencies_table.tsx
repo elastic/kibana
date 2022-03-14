@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getNodeName, NodeType } from '../../../../common/connections';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useComparison } from '../../../hooks/use_comparison';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { DependenciesTable } from '../../shared/dependencies_table';
 import { ServiceLink } from '../../shared/service_link';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -30,7 +30,12 @@ export function BackendDetailDependenciesTable() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { offset } = useComparison();
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
