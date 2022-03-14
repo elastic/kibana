@@ -20,13 +20,13 @@ export const storedPackagePoliciesToAgentInputs = async (
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
-  for(const packagePolicy of packagePolicies) {
+  for (const packagePolicy of packagePolicies) {
     if (!packagePolicy.enabled || !packagePolicy.inputs || !packagePolicy.inputs.length) {
       continue;
     }
 
     let appendInputId = true;
-  
+
     // Looks up package info and marks to skip appending input information to package policy ID
     // to make it unique if package is "limited": this means that only one policy for the package can
     // exist on the agent policy, so its ID is already unique
@@ -36,7 +36,7 @@ export const storedPackagePoliciesToAgentInputs = async (
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
-      if(isPackageLimited(packageInfo)) {
+      if (isPackageLimited(packageInfo)) {
         appendInputId = false;
       }
     }
@@ -46,9 +46,11 @@ export const storedPackagePoliciesToAgentInputs = async (
         return;
       }
 
-      const inputId = appendInputId ? `${input.type}${input.policy_template ? `-${input.policy_template}-` : '-'}${
-          packagePolicy.id
-        }` : packagePolicy.id;
+      const inputId = appendInputId
+        ? `${input.type}${input.policy_template ? `-${input.policy_template}-` : '-'}${
+            packagePolicy.id
+          }`
+        : packagePolicy.id;
 
       const fullInput: FullAgentPolicyInput = {
         id: inputId,
@@ -100,7 +102,7 @@ export const storedPackagePoliciesToAgentInputs = async (
 
       fullInputs.push(fullInput);
     });
-  };
+  }
 
   return fullInputs;
 };

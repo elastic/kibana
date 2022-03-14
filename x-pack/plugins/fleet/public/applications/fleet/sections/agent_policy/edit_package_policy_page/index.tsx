@@ -784,11 +784,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
             </EuiFlyoutHeader>
             <FlyoutBody>
               <EuiCodeBlock isCopyable fontSize="m" whiteSpace="pre">
-                {JSON.stringify(
-                  dryRunData[0].agent_diff?.[0] || [],
-                  null,
-                  2
-                )}
+                {JSON.stringify(dryRunData[0].agent_diff?.[0] || [], null, 2)}
               </EuiCodeBlock>
             </FlyoutBody>
           </EuiFlyout>
