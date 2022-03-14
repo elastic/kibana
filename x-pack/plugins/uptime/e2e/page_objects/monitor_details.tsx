@@ -6,7 +6,8 @@
  */
 
 import { Page } from '@elastic/synthetics';
-import { byTestId, delay } from '../journeys/utils';
+import { byTestId, delay, getQuerystring } from '../journeys/utils';
+import { utilsPageProvider } from './utils';
 
 interface AlertType {
   id: string;
@@ -14,7 +15,34 @@ interface AlertType {
 }
 
 export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
+  const overview = `${kibanaUrl}/app/uptime`;
+
   return {
+    ...utilsPageProvider({ page }),
+    async waitForLoadingToFinish() {
+      while (true) {
+        if ((await page.$(byTestId('kbnLoadingMessage'))) === null) break;
+        await page.waitForTimeout(5 * 1000);
+      }
+    },
+
+    async loginToKibana(usernameT?: string, passwordT?: string) {
+      await page.fill('[data-test-subj=loginUsername]', 'elastic', {
+        timeout: 60 * 1000,
+      });
+      await page.fill('[data-test-subj=loginPassword]', 'changeme');
+
+      await page.click('[data-test-subj=loginSubmit]');
+
+      await this.waitForLoadingToFinish();
+    },
+
+    async navigateToOverviewPage(options?: object) {
+      await page.goto(`${overview}${options ? `?${getQuerystring(options)}` : ''}`, {
+        waitUntil: 'networkidle',
+      });
+    },
+
     async navigateToMonitorDetails(monitorId: string) {
       await page.click(byTestId(`monitor-page-link-${monitorId}`));
     },
