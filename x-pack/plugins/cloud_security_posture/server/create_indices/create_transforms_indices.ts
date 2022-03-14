@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
 import { latestFindingsMapping } from './latest_findings_mapping';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
@@ -12,7 +13,6 @@ import {
   LATEST_FINDINGS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_PATTERN,
 } from '../../common/constants';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 // TODO: Add integration tests
 export const initializeCspTransformsIndices = async (
@@ -31,12 +31,12 @@ export const createIndexIfNotExists = async (
 ) => {
   try {
     const isLatestIndexExists = await esClient.indices.exists({
-      index: index,
+      index,
     });
 
     if (!isLatestIndexExists) {
       await esClient.indices.create({
-        index: index,
+        index,
         mappings: mapping,
       });
     }
