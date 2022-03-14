@@ -158,6 +158,9 @@ export const applicationUsageSchema = {
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
   securitySolutionUI: commonSchema,
+  /**
+   * @deprecated legacy key for users that still have bookmarks to the old siem name. "securitySolutionUI" key is the replacement
+   */
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,

@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable } from '../../../../visualizations/common/utils';
+import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
 import { ChartTypes, TreemapVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -56,7 +57,13 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
     },
     legendPosition: {
       types: ['string'],
+      default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+    },
+    legendSize: {
+      types: ['number'],
+      help: strings.getLegendSizeArgHelp(),
     },
     nestedLegend: {
       types: ['boolean'],
@@ -96,6 +103,17 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
 
     if (args.splitColumn && args.splitRow) {
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
+    }
+
+    validateAccessor(args.metric, context.columns);
+    if (args.buckets) {
+      args.buckets.forEach((bucket) => validateAccessor(bucket, context.columns));
+    }
+    if (args.splitColumn) {
+      args.splitColumn.forEach((splitColumn) => validateAccessor(splitColumn, context.columns));
+    }
+    if (args.splitRow) {
+      args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
 
     const visConfig: PartitionVisParams = {

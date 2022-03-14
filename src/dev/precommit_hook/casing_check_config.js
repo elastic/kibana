@@ -61,9 +61,6 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
-  // Bundled package names typically use a format like ${pkgName}-${pkgVersion}, so don't lint them
-  'x-pack/plugins/fleet/server/bundled_packages/**/*',
-
   // Bazel default files
   '**/WORKSPACE.bazel',
   '**/BUILD.bazel',
@@ -110,7 +107,10 @@ export const IGNORE_DIRECTORY_GLOBS = [
  *
  * @type {Array}
  */
-export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
+export const REMOVE_EXTENSION = [
+  'packages/kbn-plugin-generator/template/**/*.ejs',
+  'packages/kbn-generate/templates/**/*.ejs',
+];
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!
