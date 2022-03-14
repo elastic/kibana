@@ -9,99 +9,40 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useCasesFeatures, UseCasesFeatures } from './use_cases_features';
 import { TestProviders } from '../../common/mock';
+import { CasesContextFeatures } from '../../containers/types';
 
 describe('useCasesFeatures', () => {
-  it('returns isAlertsEnabled=true and isSyncAlertsEnabled=true if the feature.alerts={sync: true, enabled: true}', async () => {
-    const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-      wrapper: ({ children }) => (
-        <TestProviders features={{ alerts: { sync: true, enabled: true } }}>
-          {children}
-        </TestProviders>
-      ),
-    });
+  // isAlertsEnabled, isSyncAlertsEnabled, alerts
+  const tests: Array<[boolean, boolean, CasesContextFeatures['alerts']]> = [
+    [true, true, { enabled: true, sync: true }],
+    [true, false, { enabled: true, sync: false }],
+    [false, false, { enabled: false, sync: true }],
+    [false, false, { enabled: false, sync: false }],
+    [false, false, { enabled: false }],
+    // the default for sync is true
+    [true, true, { enabled: true }],
+    // the default for enabled is true
+    [true, true, { sync: true }],
+    // the default for enabled is true
+    [true, false, { sync: false }],
+    // the default for enabled and sync is true
+    [true, true, {}],
+  ];
 
-    expect(result.current).toEqual({
-      isAlertsEnabled: true,
-      isSyncAlertsEnabled: true,
-      metricsFeatures: [],
-    });
-  });
+  it.each(tests)(
+    'returns isAlertsEnabled=%s and isSyncAlertsEnabled=%s if feature.alerts=%s',
+    async (isAlertsEnabled, isSyncAlertsEnabled, alerts) => {
+      const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
+        wrapper: ({ children }) => <TestProviders features={{ alerts }}>{children}</TestProviders>,
+      });
 
-  it('returns isAlertsEnabled=true and isSyncAlertsEnabled=false if the feature.alerts={sync: false, enabled: true}', async () => {
-    const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-      wrapper: ({ children }) => (
-        <TestProviders features={{ alerts: { sync: false, enabled: true } }}>
-          {children}
-        </TestProviders>
-      ),
-    });
-
-    expect(result.current).toEqual({
-      isAlertsEnabled: true,
-      isSyncAlertsEnabled: false,
-      metricsFeatures: [],
-    });
-  });
-
-  it('returns isAlertsEnabled=false and isSyncAlertsEnabled=false if the feature.alerts={ enabled: false }', async () => {
-    const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-      wrapper: ({ children }) => (
-        <TestProviders features={{ alerts: { enabled: false } }}>{children}</TestProviders>
-      ),
-    });
-
-    expect(result.current).toEqual({
-      isAlertsEnabled: false,
-      isSyncAlertsEnabled: false,
-      metricsFeatures: [],
-    });
-  });
-
-  it('returns isAlertsEnabled=true and isSyncAlertsEnabled=true if the feature.alerts={ enabled: true }', async () => {
-    const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-      wrapper: ({ children }) => (
-        <TestProviders features={{ alerts: { enabled: true } }}>{children}</TestProviders>
-      ),
-    });
-
-    expect(result.current).toEqual({
-      isAlertsEnabled: true,
-      isSyncAlertsEnabled: true,
-      metricsFeatures: [],
-    });
-  });
-
-  it('returns isAlertsEnabled=false and isSyncAlertsEnabled=false if the feature.alerts={ sync: true enabled: false }', async () => {
-    const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-      wrapper: ({ children }) => (
-        <TestProviders features={{ alerts: { sync: true, enabled: false } }}>
-          {children}
-        </TestProviders>
-      ),
-    });
-
-    expect(result.current).toEqual({
-      isAlertsEnabled: false,
-      isSyncAlertsEnabled: false,
-      metricsFeatures: [],
-    });
-  });
-
-  it('returns isAlertsEnabled=false and isSyncAlertsEnabled=false if the feature.alerts={ sync: false enabled: false }', async () => {
-    const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-      wrapper: ({ children }) => (
-        <TestProviders features={{ alerts: { sync: false, enabled: false } }}>
-          {children}
-        </TestProviders>
-      ),
-    });
-
-    expect(result.current).toEqual({
-      isAlertsEnabled: false,
-      isSyncAlertsEnabled: false,
-      metricsFeatures: [],
-    });
-  });
+      expect(result.current).toEqual({
+        isAlertsEnabled,
+        isSyncAlertsEnabled,
+        metricsFeatures: [],
+      });
+    }
+  );
 
   it('returns the metrics correctly', async () => {
     const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {

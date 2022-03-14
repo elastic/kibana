@@ -28,10 +28,10 @@ export const useCasesFeatures = (): UseCasesFeatures => {
        * option to true and get the whole alerts experience without the need
        * to explicitly set the sync to true
        */
-      isSyncAlertsEnabled: !features.alerts.enabled ? false : !!features.alerts.sync,
+      isSyncAlertsEnabled: !features.alerts.enabled ? false : features.alerts.sync,
       metricsFeatures: features.metrics,
     }),
-    [features]
+    [features.alerts.enabled, features.alerts.sync, features.metrics]
   );
   return casesFeatures;
 };
