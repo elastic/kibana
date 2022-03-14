@@ -18,21 +18,24 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
   let testBed: OverviewTestBed;
   const { mockedKibanaDeprecations, mockedCriticalKibanaDeprecations } =
     kibanaDeprecationsServiceHelpers.defaultMockedResponses;
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('When load succeeds', () => {
     const setup = async (response: DomainDeprecationDetails[]) => {
       // Set up with no ES deprecations.
-      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esNoDeprecations);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esNoDeprecations);
 
       await act(async () => {
         const deprecationService = deprecationsServiceMock.createStartContract();
         kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response });
 
-        testBed = await setupOverviewPage(mockEnvironment.httpSetup, {
+        testBed = await setupOverviewPage(httpSetup, {
           services: {
             core: {
               deprecations: deprecationService,
@@ -113,7 +116,7 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
           mockRequestErrorMessage: 'Internal Server Error',
         });
 
-        testBed = await setupOverviewPage(mockEnvironment.httpSetup, {
+        testBed = await setupOverviewPage(httpSetup, {
           services: {
             core: {
               deprecations: deprecationService,

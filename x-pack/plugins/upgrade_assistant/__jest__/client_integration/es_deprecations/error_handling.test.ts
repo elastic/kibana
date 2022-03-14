@@ -12,9 +12,12 @@ import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.
 
 describe('Error handling', () => {
   let testBed: ElasticsearchTestBed;
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   it('handles 403', async () => {
@@ -24,10 +27,10 @@ describe('Error handling', () => {
       message: 'Forbidden',
     };
 
-    mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
     const { component, find } = testBed;
@@ -49,10 +52,10 @@ describe('Error handling', () => {
       },
     };
 
-    mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
     const { component, find } = testBed;
@@ -72,10 +75,10 @@ describe('Error handling', () => {
       },
     };
 
-    mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
     const { component, find } = testBed;
@@ -92,10 +95,10 @@ describe('Error handling', () => {
       message: 'Internal server error',
     };
 
-    mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
     const { component, find } = testBed;
