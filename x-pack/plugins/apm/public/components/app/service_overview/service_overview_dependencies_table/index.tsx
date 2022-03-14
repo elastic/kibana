@@ -38,6 +38,7 @@ export function ServiceOverviewDependenciesTable({
       kuery,
       rangeFrom,
       rangeTo,
+      serviceGroup,
       comparisonEnabled,
       comparisonType,
       latencyAggregationType,
