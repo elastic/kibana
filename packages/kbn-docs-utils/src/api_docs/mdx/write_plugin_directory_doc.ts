@@ -111,7 +111,21 @@ ${getDirectoryTable(pluginApiMap, pluginStatsMap, false)}
 
 `) + '\n\n';
 
-  fs.writeFileSync(Path.resolve(folder, 'plugin_directory.mdx'), mdx);
+  const mdxPath = Path.resolve(folder, 'plugin_directory.mdx');
+  if (fs.existsSync(mdxPath)) {
+    const currentContents = fs.readFileSync(mdxPath);
+    const removeDate = /^date: [0-9]{4}-[0-9]{2}-[0-9]{2}$/m;
+
+    fs.writeFileSync(mdxPath + '_orig', currentContents.toString().replace(removeDate, ''));
+    fs.writeFileSync(mdxPath + '_new', mdx.replace(removeDate, ''));
+
+    if (currentContents.toString().replace(removeDate, '') === mdx.replace(removeDate, '')) {
+      log.debug(`Plugin file content unchanged, skip writing plugin directory`);
+      return;
+    }
+  }
+
+  fs.writeFileSync(mdxPath, mdx);
 }
 
 function getDirectoryTable(
