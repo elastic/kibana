@@ -20,6 +20,10 @@ import {
   EuiPanel,
   useEuiTheme,
   useGeneratedHtmlId,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  EuiTourStep,
 } from '@elastic/eui';
 import type { DataViewListItem } from 'src/plugins/data_views/public';
 import { IDataPluginServices } from '../../';
@@ -27,6 +31,7 @@ import { useKibana } from '../../../../kibana_react/public';
 import type { ChangeDataViewTriggerProps } from './index';
 
 const POPOVER_CONTENT_WIDTH = 280;
+const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
 
 export function ChangeDataView({
   isMissingCurrent,
@@ -49,7 +54,24 @@ export function ChangeDataView({
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const kibana = useKibana<IDataPluginServices>();
-  const { application, data } = kibana.services;
+  const { application, data, storage } = kibana.services;
+
+  const [isTourDismissed, setIsTourDismissed] = useState(() =>
+    Boolean(storage.get(NEW_DATA_VIEW_MENU_STORAGE_KEY))
+  );
+  const [isTourOpen, setIsTourOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isTourDismissed) {
+      setIsTourOpen(true);
+    }
+  }, [isTourDismissed, setIsTourOpen]);
+
+  const onTourDismiss = () => {
+    storage.set(NEW_DATA_VIEW_MENU_STORAGE_KEY, true);
+    setIsTourDismissed(true);
+    setIsTourOpen(false);
+  };
 
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
   const searchListInputId = useGeneratedHtmlId({ prefix: 'dataviewPickerListSearchInput' });
@@ -70,7 +92,11 @@ export function ChangeDataView({
           max-width: ${POPOVER_CONTENT_WIDTH}px;
         `}
         data-test-subj={dataTestSubj}
-        onClick={() => setPopoverIsOpen(!isPopoverOpen)}
+        onClick={() => {
+          setPopoverIsOpen(!isPopoverOpen);
+          setIsTourOpen(false);
+          // onTourDismiss(); TODO: Decide if opening the menu should also dismiss the tour
+        }}
         color={isMissingCurrent ? 'danger' : 'primary'}
         iconSide="right"
         iconType="arrowDown"
@@ -83,7 +109,27 @@ export function ChangeDataView({
   };
 
   return (
-    <>
+    <EuiTourStep
+      content={
+        <EuiText style={{ maxWidth: 320 }}>
+          <p>
+            The data view selector has moved! You&apos;ll find all related data view options in this
+            new menu.
+          </p>
+        </EuiText>
+      }
+      isStepOpen={isTourOpen}
+      onFinish={onTourDismiss}
+      step={1}
+      stepsTotal={1}
+      title={
+        <>
+          <EuiIcon type="bell" size="s" /> &nbsp; Hey there!
+        </>
+      }
+      footerAction={<EuiLink onClick={onTourDismiss}>Got it!</EuiLink>}
+      repositionOnScroll
+    >
       <EuiPopover
         panelClassName="changeDataViewPopover"
         button={createTrigger()}
@@ -202,6 +248,6 @@ export function ChangeDataView({
           )}
         </div>
       </EuiPopover>
-    </>
+    </EuiTourStep>
   );
 }
