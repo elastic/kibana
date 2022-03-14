@@ -131,7 +131,7 @@ export default function (providerContext: FtrProviderContext) {
     type: `synthetics/${monitorType}`,
     use_output: 'default',
   });
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125881
+
   describe('When on the Synthetics Integration Policy Create Page', function () {
     skipIfNoDockerRegistry(providerContext);
     const basicConfig = {
