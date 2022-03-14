@@ -700,7 +700,6 @@ describe('EPM template', () => {
         example: {
           properties: {
             id: {
-              ignore_above: 1024,
               time_series_dimension: true,
               type: 'keyword',
             },
