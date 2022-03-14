@@ -305,7 +305,7 @@ export class Printer {
       return [
         this.getLeadingComments(node),
         this.printModifiers(exportInfo, node),
-        this.getMappedSourceNode(node.name),
+        this.getMappedSourceNode(node.name, exportInfo?.name),
         this.printTypeParameters(node),
         `(${node.parameters.map((p) => p.getFullText()).join(', ')})`,
         node.type ? [': ', this.printNode(node.type), ';'] : ';',
