@@ -659,13 +659,31 @@ export class RulesClient {
     this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
-    // Make sure user has access to this rule
-    await this.authorization.ensureAuthorized({
-      ruleTypeId: rule.alertTypeId,
-      consumer: rule.consumer,
-      operation: ReadOperations.GetExecutionLog,
-      entity: AlertingAuthorizationEntity.Rule,
-    });
+    try {
+      // Make sure user has access to this rule
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetExecutionLog,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET,
+        savedObject: { type: 'alert', id },
+      })
+    );
 
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();

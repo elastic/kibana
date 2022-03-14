@@ -18,6 +18,7 @@ import { ActionsAuthorization } from '../../../../actions/server';
 import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { SavedObject } from 'kibana/server';
 import { RawRule } from '../../types';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { getExecutionLogAggregation } from '../../lib/get_execution_log_aggregation';
 
@@ -29,6 +30,7 @@ const eventLogClient = eventLogClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -47,10 +49,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  auditLogger,
 };
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
+  (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
@@ -523,5 +527,84 @@ describe('getExecutionLogForRule()', () => {
     expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams())
     ).rejects.toMatchInlineSnapshot(`[Error: OMG 2!]`);
+  });
+
+  describe('authorization', () => {
+    beforeEach(() => {
+      const ruleSO = getRuleSavedObject({});
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ruleSO);
+    });
+
+    test('ensures user is authorised to get this type of alert under the consumer', async () => {
+      await rulesClient.get({ id: '1' });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'rule-consumer',
+        operation: 'get',
+        ruleTypeId: '123',
+      });
+    });
+
+    test('throws when user is not authorised to get this type of alert', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to get a "myType" alert for "myApp"`)
+      );
+
+      await expect(rulesClient.get({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to get a "myType" alert for "myApp"]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'rule-consumer',
+        operation: 'get',
+        ruleTypeId: '123',
+      });
+    });
+  });
+
+  describe('auditLogger', () => {
+    beforeEach(() => {
+      const ruleSO = getRuleSavedObject({});
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ruleSO);
+    });
+
+    test('logs audit event when getting a rule execution log', async () => {
+      await rulesClient.get({ id: '1' });
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_get',
+            outcome: 'success',
+          }),
+          kibana: { saved_object: { id: '1', type: 'alert' } },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to get a rule', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(rulesClient.get({ id: '1' })).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_get',
+            outcome: 'failure',
+          }),
+          kibana: {
+            saved_object: {
+              id: '1',
+              type: 'alert',
+            },
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
+    });
   });
 });
