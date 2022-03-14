@@ -46,7 +46,7 @@ export const useAlertPrevalence = ({
 
   let count: undefined | number;
   if (data) {
-    count = data.aggregations?.[ALERT_PREVALENCE_AGG].buckets[0].doc_count;
+    count = data.aggregations?.[ALERT_PREVALENCE_AGG].buckets[0]?.doc_count;
   }
 
   const error = !loading && count === undefined;
