@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
-
-/**
- * Creates the Shared UX plugin.
- */
-export function plugin() {
-  return new SharedUXPlugin();
-}
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
+export { NoDataCard } from './no_data_card';

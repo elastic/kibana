@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
+export { servicesDecorator } from './decorators';
 
-/**
- * Creates the Shared UX plugin.
- */
-export function plugin() {
-  return new SharedUXPlugin();
-}
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
+export {
+  servicesFactory,
+  docLinksServiceFactory,
+  editorsServiceFactory,
+  platformServiceFactory,
+  userPermissionsServiceFactory,
+} from './services';
