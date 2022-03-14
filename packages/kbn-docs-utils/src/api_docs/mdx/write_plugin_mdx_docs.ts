@@ -125,7 +125,7 @@ ${
   if (fs.existsSync(mdxPath)) {
     const currentContents = fs.readFileSync(mdxPath);
     const removeDate = /^date: [0-9]{4}-[0-9]{2}-[0-9]{2}$/m;
-    if (currentContents.toString().replace(removeDate, '') === mdxPath.replace(removeDate, '')) {
+    if (currentContents.toString().replace(removeDate, '') === mdx.replace(removeDate, '')) {
       log.debug(`Plugin file content unchanged, skipping: ${doc.id}`);
       return;
     }
