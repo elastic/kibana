@@ -10,7 +10,7 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react';
 import React from 'react';
 import { IconButtonGroup } from './icon_button_group';
-import mdx from './quick_group.mdx';
+import mdx from './icon_button_group.mdx';
 
 export default {
   title: 'Toolbar/Toolbar Icon Button Group',
