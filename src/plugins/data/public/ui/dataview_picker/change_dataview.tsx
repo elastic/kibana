@@ -12,12 +12,10 @@ import { css } from '@emotion/react';
 import {
   EuiPopover,
   EuiHorizontalRule,
-  EuiSelectable,
   EuiSelectableProps,
   EuiButton,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiPanel,
   useEuiTheme,
   useGeneratedHtmlId,
   EuiIcon,
@@ -29,6 +27,7 @@ import type { DataViewListItem } from 'src/plugins/data_views/public';
 import { IDataPluginServices } from '../../';
 import { useKibana } from '../../../../kibana_react/public';
 import type { ChangeDataViewTriggerProps } from './index';
+import { DataViewsList } from './dataview_list';
 
 const POPOVER_CONTENT_WIDTH = 280;
 const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
@@ -181,51 +180,16 @@ export function ChangeDataView({
               <EuiHorizontalRule margin="none" />
             </>
           )}
-          <EuiSelectable<{
-            key?: string;
-            label: string;
-            value?: string;
-            checked?: 'on' | 'off' | undefined;
-          }>
-            {...selectableProps}
-            data-test-subj="indexPattern-switcher"
-            searchable
-            singleSelection="always"
-            options={dataViewsList?.map(({ title, id }) => ({
-              key: id,
-              label: title,
-              value: id,
-              checked: id === currentDataViewId ? 'on' : undefined,
-            }))}
-            onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked) as unknown as {
-                value: string;
-              };
-              onChangeDataView(choice.value);
+          <DataViewsList
+            dataViewsList={dataViewsList}
+            onChangeDataView={(newId) => {
+              onChangeDataView(newId);
               setPopoverIsOpen(false);
             }}
-            searchProps={{
-              id: searchListInputId,
-              compressed: true,
-              placeholder: i18n.translate('data.query.queryBar.indexPattern.findDataView', {
-                defaultMessage: 'Find a data view',
-              }),
-              ...(selectableProps ? selectableProps.searchProps : undefined),
-            }}
-          >
-            {(list, search) => (
-              <EuiPanel
-                css={css`
-                  padding-bottom: 0;
-                `}
-                color="transparent"
-                paddingSize="s"
-              >
-                {search}
-                {list}
-              </EuiPanel>
-            )}
-          </EuiSelectable>
+            currentDataViewId={currentDataViewId}
+            selectableProps={selectableProps}
+            searchListInputId={searchListInputId}
+          />
           {onDataViewCreated && (
             <>
               <EuiHorizontalRule margin="none" />
