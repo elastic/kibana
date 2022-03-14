@@ -76,11 +76,6 @@ export interface UserProfileFormValues {
   customAvatarColor: boolean;
 }
 
-export interface UserProfileFormStatus {
-  changes: any;
-  numChanges: number;
-}
-
 export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
   const { services } = useKibana<CoreStart>();
   const [initialValues, resetInitialValues] = useState<UserProfileFormValues>({
@@ -133,10 +128,6 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
       }
     },
     initialValues,
-    initialStatus: {
-      changes: {},
-      numChanges: 0,
-    },
     enableReinitialize: true,
   });
 
@@ -293,7 +284,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   isDisabled={isReservedUser}
                   fullWidth
                 >
-                  <FormField as={EuiFieldText} name="user.full_name" fullWidth />
+                  <FormField name="user.full_name" fullWidth />
                 </FormRow>
 
                 <FormRow
@@ -306,7 +297,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   isDisabled={isReservedUser}
                   fullWidth
                 >
-                  <FormField as={EuiFieldText} type="email" name="user.email" fullWidth />
+                  <FormField type="email" name="user.email" fullWidth />
                 </FormRow>
               </EuiDescribedFormGroup>
               <EuiDescribedFormGroup
@@ -450,7 +441,6 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                           fullWidth
                         >
                           <FormField
-                            as={EuiFieldText}
                             name="data.avatar.initials"
                             validate={{
                               required: i18n.translate(

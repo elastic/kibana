@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiFieldText } from '@elastic/eui';
 import { useField } from 'formik';
 import type { FieldValidator } from 'formik';
 import React from 'react';
@@ -13,6 +14,50 @@ export interface FormFieldProps<T extends React.ElementType> {
   as?: T;
   name: string;
   validate?: FieldValidator | ValidateOptions;
+}
+
+/**
+ * Renders a field inside with correct inline validation states.
+ *
+ * @example Text field with validation rule:
+ * ```typescript
+ * <FormField name="initials" validate={{ required: 'Enter initials.' }} />
+ * ```
+ *
+ * @example Color picker which uses non-standard value prop and change handler:
+ * ```typescript
+ * <FormField
+ *   as={EuiColorPicker}
+ *   name="color"
+ *   color={formik.values.color}
+ *   onChange={(value) => formik.setFieldValue('color', value)}
+ * />
+ * ```
+ */
+export function FormField<T extends React.ElementType = typeof EuiFieldText>({
+  as,
+  validate,
+  onBlur,
+  ...rest
+}: FormFieldProps<T> & Omit<React.ComponentPropsWithoutRef<T>, keyof FormFieldProps<T>>) {
+  const Component = as || EuiFieldText;
+
+  const [field, meta, helpers] = useField({
+    name: rest.name,
+    validate: typeof validate === 'object' ? createFieldValidator(validate) : validate,
+  });
+
+  return (
+    <Component
+      isInvalid={meta.touched && !!meta.error}
+      {...field}
+      {...rest}
+      onBlur={(event) => {
+        onBlur?.(event);
+        helpers.setTouched(true); // Marking as touched manually here since some EUI fields don't pass on the correct `event` argument causing errors when `field.onBlur(event)` is called as a result of spreading `field` props.
+      }}
+    />
+  );
 }
 
 export interface ValidateOptions {
@@ -37,32 +82,6 @@ export interface ValidateOptions {
     value: RegExp;
     message: string;
   };
-}
-
-export function FormField<T extends React.ElementType = 'input'>({
-  as,
-  validate,
-  onBlur,
-  ...rest
-}: FormFieldProps<T> & Omit<React.ComponentPropsWithoutRef<T>, keyof FormFieldProps<T>>) {
-  const Component = as || 'input';
-
-  const [field, meta, helpers] = useField({
-    name: rest.name,
-    validate: typeof validate === 'object' ? createFieldValidator(validate) : validate,
-  });
-
-  return (
-    <Component
-      isInvalid={meta.touched && !!meta.error}
-      {...field}
-      {...rest}
-      onBlur={(event) => {
-        onBlur?.(event);
-        helpers.setTouched(true); // Marking as touched manually here since some EUI fields don't pass on the correct `event` argument causing errors when `field.onBlur(event)` is called as a result of spreading `field` props.
-      }}
-    />
-  );
 }
 
 export function createFieldValidator(options: ValidateOptions): FieldValidator {

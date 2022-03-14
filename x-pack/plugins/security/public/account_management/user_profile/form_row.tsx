@@ -16,12 +16,27 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FormLabel } from './form_label';
 
 /**
- * Same as @see EuiFormRow but automatically renders `error` and `isInvalid` states based on @see FormikContext.
+ * Renders a form row with correct error states, change indicator and optional indicator.
+ *
+ * @example Renders as optional since form field has no validation rule.
+ * ```typescript
+ * <FormRow label="Email">
+ *   <FormField name="email" />
+ * </FormRow>
+ * ```
  */
 export const FormRow: FunctionComponent<EuiFormRowProps & { name?: string }> = (props) => {
   const formik = useFormikContext();
   const child = Children.only(props.children);
-  const meta = formik.getFieldMeta(props.name ?? child.props.name);
+  const name = props.name ?? child.props.name;
+
+  if (!name) {
+    throw new Error(
+      'name prop is undefined, please verify you are rendering either <FormRow> itself or its direct child with a name prop to correctly identify the field.'
+    );
+  }
+
+  const meta = formik.getFieldMeta(name);
 
   const isOptional = !child.props.validate || !child.props.validate.required;
   const isDisabled = props.isDisabled || child.props.disabled;
