@@ -34,7 +34,7 @@ export const ALL_CASES_OPENED_ON = '[data-test-subj="case-table-column-createdAt
 
 export const ALL_CASES_PAGE_TITLE = '[data-test-subj="header-page-title"]';
 
-export const ALL_CASES_CREATED_BY = '[data-test-subj="case-table-column-createdBy"]';
+export const ALL_CASES_REPORTER = '[data-test-subj="case-table-column-createdBy"]';
 
 export const ALL_CASES_REPORTERS_COUNT =
   '[data-test-subj="options-filter-popover-button-Reporter"]';
