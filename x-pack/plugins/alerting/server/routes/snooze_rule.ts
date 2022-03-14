@@ -7,7 +7,7 @@
 
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState, AlertTypeDisabledError } from '../lib';
+import { ILicenseState, RuleMutedError } from '../lib';
 import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
@@ -56,7 +56,7 @@ export const snoozeRuleRoute = (
           await rulesClient.snooze({ ...params, ...body });
           return res.noContent();
         } catch (e) {
-          if (e instanceof AlertTypeDisabledError) {
+          if (e instanceof RuleMutedError) {
             return e.sendResponse(res);
           }
           throw e;

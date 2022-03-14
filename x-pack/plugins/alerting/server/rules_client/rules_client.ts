@@ -40,7 +40,12 @@ import {
   PartialAlertWithLegacyId as PartialRuleWithLegacyId,
   RawAlertInstance as RawAlert,
 } from '../types';
-import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
+import {
+  validateRuleTypeParams,
+  ruleExecutionStatusFromRaw,
+  getAlertNotifyWhenType,
+  RuleMutedError,
+} from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -374,6 +379,7 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
+      snoozeEndTime: data.snoozeEndTime ? new Date(data.snoozeEndTime).toISOString() : undefined,
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -1508,6 +1514,11 @@ export class RulesClient {
 
       if (attributes.actions.length) {
         await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+
+      const currentRule = await this.get({ id });
+      if (currentRule.muteAll) {
+        throw new RuleMutedError('Cannot snooze a rule that is already muted');
       }
     } catch (error) {
       this.auditLogger?.log(
