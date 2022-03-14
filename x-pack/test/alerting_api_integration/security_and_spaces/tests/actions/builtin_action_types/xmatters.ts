@@ -50,6 +50,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           name: 'An xmatters action',
           connector_type_id: '.xmatters',
           config: {
+            configUrl: null,
             usesBasic: false,
           },
           secrets: {
@@ -65,6 +66,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         connector_type_id: '.xmatters',
         is_missing_secrets: false,
         config: {
+          configUrl: null,
           usesBasic: false,
         },
       });
