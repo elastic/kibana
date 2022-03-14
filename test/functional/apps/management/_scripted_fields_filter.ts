@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/126027
-  describe.skip('filter scripted fields', function describeIndexTests() {
+  describe('filter scripted fields', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await browser.setWindowSize(1200, 800);
