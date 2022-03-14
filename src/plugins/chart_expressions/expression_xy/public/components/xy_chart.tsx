@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './expression.scss';
-
 import React, { useRef } from 'react';
 import {
   Chart,
@@ -74,6 +72,8 @@ import {
 } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { XYLayerConfigResult } from '../../common/types';
+
+import './xy_chart.scss';
 
 declare global {
   interface Window {
