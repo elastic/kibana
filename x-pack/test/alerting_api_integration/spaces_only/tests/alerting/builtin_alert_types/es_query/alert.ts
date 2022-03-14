@@ -292,7 +292,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
-          const { previousTimestamp, hits } = doc._source;
+          const { previousTimestamp } = doc._source;
           const { name, title, message } = doc._source.params;
 
           expect(name).to.be('always fire');
