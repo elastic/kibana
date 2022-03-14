@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { accountManagementApp } from './account_management_app';
+export { UserProfile } from './user_profile';
+export { UserAvatar } from './user_avatar';
+
+export type { UserProfileProps, UserProfileFormValues } from './user_profile';
+export type { UserAvatarProps } from './user_avatar';

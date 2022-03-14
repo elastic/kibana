@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { userProfileMock } from '../../common/model/user_profile.mock';
 import type { UserProfileServiceStart } from '../user_profile';
-import { userProfileMock } from './user_profile.mock';
 
 export const userProfileServiceMock = {
   createStart: (): jest.Mocked<UserProfileServiceStart> => ({

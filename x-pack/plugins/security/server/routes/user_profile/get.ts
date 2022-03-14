@@ -13,21 +13,30 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineGetUserProfileRoute({
   router,
+  getSession,
   getUserProfileService,
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/user_profile/{uid}',
+      path: '/internal/security/user_profile',
       options: { tags: ['access:accessUserProfile'] },
       validate: {
-        params: schema.object({ uid: schema.string() }),
+        query: schema.object({ data: schema.maybe(schema.string()) }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
+      const session = await getSession().get(request);
+      if (!session) {
+        return response.unauthorized();
+      }
+      if (!session.userProfileId) {
+        return response.notFound();
+      }
+
       const userProfileService = getUserProfileService();
       try {
-        const profile = await userProfileService.get(request.params.uid, '*');
-        return response.ok({ body: profile });
+        const profile = await userProfileService.get(session.userProfileId, request.query.data);
+        return response.ok({ body: { ...profile, provider: session.provider } });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }

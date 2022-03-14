@@ -13,21 +13,29 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineUpdateUserProfileDataRoute({
   router,
+  getSession,
   getUserProfileService,
 }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/security/user_profile/_data/{uid}',
+      path: '/internal/security/user_profile/_data',
       options: { tags: ['access:updateUserProfile'] },
       validate: {
-        params: schema.object({ uid: schema.string() }),
         body: schema.recordOf(schema.string(), schema.any()),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
+      const session = await getSession().get(request);
+      if (!session) {
+        return response.unauthorized();
+      }
+      if (!session.userProfileId) {
+        return response.notFound();
+      }
+
       const userProfileService = getUserProfileService();
       try {
-        await userProfileService.update(request.params.uid, request.body);
+        await userProfileService.update(request, session.userProfileId, request.body);
         return response.ok();
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

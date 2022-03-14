@@ -12,9 +12,13 @@ import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
+import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from 'src/core/public';
 
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../src/plugins/kibana_react/public';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceSetup } from '../authentication';
 import type { UserMenuLink } from './nav_control_component';
@@ -44,7 +48,6 @@ export interface SecurityNavControlServiceStart {
 
 export class SecurityNavControlService {
   private securityLicense!: SecurityLicense;
-  private authc!: AuthenticationServiceSetup;
   private logoutUrl!: string;
 
   private navControlRegistered!: boolean;
@@ -54,9 +57,8 @@ export class SecurityNavControlService {
   private readonly stop$ = new ReplaySubject(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
 
-  public setup({ securityLicense, authc, logoutUrl }: SetupDeps) {
+  public setup({ securityLicense, logoutUrl }: SetupDeps) {
     this.securityLicense = securityLicense;
-    this.authc = authc;
     this.logoutUrl = logoutUrl;
   }
 
@@ -114,28 +116,25 @@ export class SecurityNavControlService {
     core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'injectedMetadata' | 'application' | 'theme'>
   ) {
     const { theme$ } = core.theme;
-    const currentUserPromise = this.authc.getCurrentUser();
     core.chrome.navControls.registerRight({
       order: 2000,
-      mount: (el: HTMLElement) => {
-        const I18nContext = core.i18n.Context;
-
-        const props = {
-          user: currentUserPromise,
-          editProfileUrl: core.http.basePath.prepend('/security/account'),
-          logoutUrl: this.logoutUrl,
-          userMenuLinks$: this.userMenuLinks$,
-        };
+      mount: (element: HTMLElement) => {
         ReactDOM.render(
-          <I18nContext>
-            <KibanaThemeProvider theme$={theme$}>
-              <SecurityNavControl {...props} />
-            </KibanaThemeProvider>
-          </I18nContext>,
-          el
+          <KibanaContextProvider services={core}>
+            <I18nProvider>
+              <KibanaThemeProvider theme$={theme$}>
+                <SecurityNavControl
+                  editProfileUrl={core.http.basePath.prepend('/security/account')}
+                  logoutUrl={this.logoutUrl}
+                  userMenuLinks$={this.userMenuLinks$}
+                />
+              </KibanaThemeProvider>
+            </I18nProvider>
+          </KibanaContextProvider>,
+          element
         );
 
-        return () => ReactDOM.unmountComponentAtNode(el);
+        return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
 

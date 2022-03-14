@@ -9,8 +9,8 @@ import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
+import { userProfileMock } from '../../common/model/user_profile.mock';
 import { securityMock } from '../mocks';
-import { userProfileMock } from './user_profile.mock';
 import { UserProfileService } from './user_profile_service';
 
 const logger = loggingSystemMock.createLogger();

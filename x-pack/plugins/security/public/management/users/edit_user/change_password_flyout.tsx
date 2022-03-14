@@ -208,46 +208,48 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
             </>
           ) : undefined}
 
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.security.management.users.changePasswordFlyout.userLabel',
-              {
-                defaultMessage: 'User',
-              }
-            )}
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="user" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSpacer size="xs" />
-                <EuiText>{username}</EuiText>
-                <EuiSpacer size="xs" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-
           {isCurrentUser ? (
+            <>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.security.management.users.changePasswordFlyout.currentPasswordLabel',
+                  { defaultMessage: 'Current password' }
+                )}
+                error={form.errors.current_password}
+                isInvalid={form.touched.current_password && !!form.errors.current_password}
+              >
+                <EuiFieldPassword
+                  name="current_password"
+                  type="dual"
+                  defaultValue={form.values.current_password}
+                  isInvalid={form.touched.current_password && !!form.errors.current_password}
+                  autoComplete="current-password"
+                  inputRef={firstFieldRef}
+                  data-test-subj="editUserChangePasswordCurrentPasswordInput"
+                />
+              </EuiFormRow>
+            </>
+          ) : (
             <EuiFormRow
               label={i18n.translate(
-                'xpack.security.management.users.changePasswordFlyout.currentPasswordLabel',
-                { defaultMessage: 'Current password' }
+                'xpack.security.management.users.changePasswordFlyout.userLabel',
+                {
+                  defaultMessage: 'User',
+                }
               )}
-              error={form.errors.current_password}
-              isInvalid={form.touched.current_password && !!form.errors.current_password}
             >
-              <EuiFieldPassword
-                name="current_password"
-                type="dual"
-                defaultValue={form.values.current_password}
-                isInvalid={form.touched.current_password && !!form.errors.current_password}
-                autoComplete="current-password"
-                inputRef={firstFieldRef}
-                data-test-subj="editUserChangePasswordCurrentPasswordInput"
-              />
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="user" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiSpacer size="xs" />
+                  <EuiText>{username}</EuiText>
+                  <EuiSpacer size="xs" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFormRow>
-          ) : null}
+          )}
 
           <EuiFormRow
             label={i18n.translate(

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { IClusterClient, Logger } from 'src/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
 
+import type { UserData, UserInfo, UserProfile } from '../../common';
 import { getDetailedErrorMessage } from '../errors';
-import type { UserData, UserInfo, UserProfile } from './user_profile';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
@@ -29,10 +29,11 @@ export interface UserProfileServiceStart {
 
   /**
    * Updates user preferences by identifier.
+   * @param request Kibana request object
    * @param uid User ID
    * @param data Application data to be written (merged with existing data).
    */
-  update<T extends UserData>(uid: string, data: T): Promise<void>;
+  update<T extends UserData>(request: KibanaRequest, uid: string, data: T): Promise<void>;
 }
 
 type GetProfileResponse<T extends UserData> = Record<
@@ -90,16 +91,16 @@ export class UserProfileService {
           }`,
         });
         const { user, enabled, data } = body[uid];
-        return { uid, enabled, user, data: data[KIBANA_DATA_ROOT] };
+        return { uid, enabled, user, data: data[KIBANA_DATA_ROOT] ?? {} };
       } catch (error) {
         logger.error(`Failed to retrieve user profile [uid=${uid}]: ${error.message}`);
         throw error;
       }
     }
 
-    async function update<T extends UserData>(uid: string, data: T) {
+    async function update<T extends UserData>(request: KibanaRequest, uid: string, data: T) {
       try {
-        await clusterClient.asInternalUser.transport.request({
+        await clusterClient.asScoped(request).asCurrentUser.transport.request({
           method: 'POST',
           path: `_security/profile/_data/${uid}`,
           body: {

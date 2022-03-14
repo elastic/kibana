@@ -5,80 +5,28 @@
  * 2.0.
  */
 
-import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { AppMountParameters, CoreStart, NotificationsStart } from 'src/core/public';
-
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import type { AuthenticatedUser } from '../../common/model';
 import { getUserDisplayName } from '../../common/model';
-import type { AuthenticationServiceSetup } from '../authentication';
-import type { UserAPIClient } from '../management';
-import { ChangePassword } from './change_password';
-import { PersonalInfo } from './personal_info';
+import { Breadcrumb } from '../components/breadcrumb';
+import { useCurrentUser, useUserProfile } from '../components/use_current_user';
+import type { UserProfileProps } from './user_profile';
+import { UserProfile } from './user_profile';
 
-interface Props {
-  authc: AuthenticationServiceSetup;
-  userAPIClient: PublicMethodsOf<UserAPIClient>;
-  notifications: NotificationsStart;
-}
+export const AccountManagementPage: FunctionComponent = () => {
+  const currentUser = useCurrentUser();
+  const userProfile = useUserProfile<Pick<UserProfileProps['data'], 'avatar'>>('avatar');
 
-export const AccountManagementPage = ({ userAPIClient, authc, notifications }: Props) => {
-  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
-  useEffect(() => {
-    authc.getCurrentUser().then(setCurrentUser);
-  }, [authc]);
-
-  if (!currentUser) {
+  if (!currentUser.value || !userProfile.value) {
     return null;
   }
 
+  const displayName = getUserDisplayName(userProfile.value.user);
+
   return (
-    <EuiPage>
-      <EuiPageBody restrictWidth>
-        <EuiPanel>
-          <EuiText data-test-subj={'userDisplayName'}>
-            <h1>
-              <FormattedMessage
-                id="xpack.security.account.pageTitle"
-                defaultMessage="Settings for {strongUsername}"
-                values={{ strongUsername: <strong>{getUserDisplayName(currentUser)}</strong> }}
-              />
-            </h1>
-          </EuiText>
-
-          <EuiSpacer size="xl" />
-
-          <PersonalInfo user={currentUser} />
-
-          <ChangePassword
-            user={currentUser}
-            userAPIClient={userAPIClient}
-            notifications={notifications}
-          />
-        </EuiPanel>
-      </EuiPageBody>
-    </EuiPage>
+    <Breadcrumb text={displayName} href="/security/account">
+      <UserProfile user={currentUser.value} data={userProfile.value.data} />
+    </Breadcrumb>
   );
 };
-
-export function renderAccountManagementPage(
-  i18nStart: CoreStart['i18n'],
-  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
-  props: Props
-) {
-  ReactDOM.render(
-    <i18nStart.Context>
-      <KibanaThemeProvider theme$={theme$}>
-        <AccountManagementPage {...props} />
-      </KibanaThemeProvider>
-    </i18nStart.Context>,
-    element
-  );
-
-  return () => ReactDOM.unmountComponentAtNode(element);
-}

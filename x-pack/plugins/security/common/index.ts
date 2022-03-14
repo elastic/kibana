@@ -17,6 +17,10 @@ export type {
   RoleKibanaPrivilege,
   FeaturesPrivileges,
   User,
+  UserProfile,
+  UserData,
+  UserAvatar,
+  UserInfo,
   ApiKey,
   UserRealm,
 } from './model';
