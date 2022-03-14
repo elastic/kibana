@@ -27,7 +27,7 @@ interface Props extends Context {
 }
 
 /**
- * This provider is automatically wrapping the form inside the <Form /> component
+ * This provider wraps the whole form and is consumed by the <Form /> component
  */
 export const FormDataContextProvider = ({ children, getFormData$, getFormData }: Props) => {
   const value = useMemo<Context>(

@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-// We don't export the "useField()" hook as it created internally.
-// Consumers must use the <UseField /> component to create a field hook.
+// We don't export the "useField()" hook as it is created internally.
+// Consumers must use the <UseField />, <UseArray /> or <UseMultiFields />
+// components to create fields.
 export { useForm, useFormData, useFormIsModified, useBehaviorSubject } from './hooks';
 
 export { getFieldValidityAndErrorMessage } from './helpers';

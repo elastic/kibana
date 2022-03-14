@@ -30,7 +30,7 @@ interface Props<T> {
         {minValueField => {
           return (
             // The EuiDualRange handles 2 values (min and max) and thus
-            // returns 2 fields in our form
+            // updates 2 fields in our form
             <EuiDualRange
               min={0}
               max={100}
