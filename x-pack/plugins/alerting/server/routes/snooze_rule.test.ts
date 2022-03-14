@@ -24,6 +24,14 @@ beforeEach(() => {
 const SNOOZE_END_TIME = '2025-03-07T00:00:00.000Z';
 
 describe('snoozeAlertRoute', () => {
+  beforeAll(() => {
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(new Date(2020, 3, 1));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   it('snoozes an alert', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
