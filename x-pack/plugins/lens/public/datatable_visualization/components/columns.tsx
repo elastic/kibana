@@ -212,28 +212,24 @@ export const createGridColumns = (
       }
     }
     const currentAlignment = alignments && alignments[field];
-    const alignmentClassName = `lnsTableCell--${currentAlignment}`;
+    const hasMultipleRows = headerRowHeight === 'auto' || headerRowHeight === 'custom';
 
-    const multiRowHeaderStyle = css({
-      whiteSpace: 'normal',
-      display: '-webkit-box',
-      WebkitBoxOrient: 'vertical',
+    const columnStyle = css({
       ...(headerRowHeight === 'custom' && {
         WebkitLineClamp: headerRowLines,
       }),
+      ...(hasMultipleRows && {
+        whiteSpace: 'normal',
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+      }),
+      textAlign: currentAlignment,
     });
-
-    const columnCSS =
-      headerRowHeight === 'auto' || headerRowHeight === 'custom' ? multiRowHeaderStyle : {};
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,
       cellActions,
-      display: (
-        <div className={alignmentClassName} css={columnCSS}>
-          {name}
-        </div>
-      ),
+      display: <div css={columnStyle}>{name}</div>,
       displayAsText: name,
       actions: {
         showHide: false,
