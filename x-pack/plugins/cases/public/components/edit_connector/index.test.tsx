@@ -16,7 +16,6 @@ import { basicCase, basicPush, caseUserActions } from '../../containers/mock';
 import { useKibana } from '../../common/lib/kibana';
 import { CaseConnector } from '../../containers/configure/types';
 import userEvent from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
