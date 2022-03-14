@@ -42,7 +42,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
               ...job.layout,
               // TODO: We do not do a runtime check for supported layout id types for now. But technically
               // we should.
-              id: job.layout.id as PngScreenshotOptions['layout']['id'],
+              id: job.layout?.id as PngScreenshotOptions['layout']['id'],
             },
             urls: [[url, locatorParams]],
           });
