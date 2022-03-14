@@ -12,12 +12,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'header']);
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
   describe('encoded URL params in context page', () => {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'context_encoded_param']);
       await PageObjects.common.navigateToApp('settings');
       await es.transport.request({
         path: '/context-encoded-param/_doc/1+1=2',
