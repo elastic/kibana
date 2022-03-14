@@ -24,10 +24,14 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
   title,
   button,
   description,
+  renderFooter,
   ...cardRest
 }) => {
   const footer = () => {
-    if (button && typeof button !== 'string') {
+    if (typeof button !== 'string') {
+      return button;
+    }
+    if (!button && !renderFooter) {
       return button;
     }
     return <EuiButton fill>{button || title}</EuiButton>;

@@ -66,6 +66,7 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
       image={ElasticAgentLogo}
       title={title || elasticAgentCardTitle}
       description={elasticAgentCardDescription}
+      renderFooter={true}
       {...cardRest}
     />
   );

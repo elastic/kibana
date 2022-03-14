@@ -26,6 +26,10 @@ export type NoDataCardProps = Partial<Omit<EuiCardProps, 'layout'>> & {
    * Description for the card. If not provided, the default will be used.
    */
   description?: string | ReactNode;
+  /**
+   * If true, default footer should be rendered if no override is provided
+   */
+  renderFooter?: boolean;
 };
 
 export type ElasticAgentCardProps = NoDataCardProps & {
