@@ -803,7 +803,8 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const allCheckbox = await screen.findByTestId('checkboxSelectAll');
+    userEvent.click(allCheckbox);
     const checkboxes = await screen.findAllByRole('checkbox');
 
     for (const checkbox of checkboxes) {
@@ -815,7 +816,7 @@ describe('AllCasesListGeneric', () => {
       expect(checkbox).not.toBeChecked();
     }
 
-    waitForComponentToUpdate();
+    await waitForComponentToUpdate();
   });
 
   it('should deselect cases when changing filters', async () => {
@@ -824,26 +825,15 @@ describe('AllCasesListGeneric', () => {
       selectedCases: [],
     });
 
-    const { rerender } = render(
+    render(
       <TestProviders>
         <AllCasesList />
       </TestProviders>
     );
 
-    /** Something really weird is going on and we have to rerender
-     * to get the correct html output. Not sure why.
-     *
-     * If you run the test alone the rerender is not needed.
-     * If you run the test along with the above test
-     * then you need the rerender
-     */
-    rerender(
-      <TestProviders>
-        <AllCasesList />
-      </TestProviders>
-    );
+    const allCheckbox = await screen.findByTestId('checkboxSelectAll');
 
-    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    userEvent.click(allCheckbox);
     const checkboxes = await screen.findAllByRole('checkbox');
 
     for (const checkbox of checkboxes) {
@@ -857,26 +847,30 @@ describe('AllCasesListGeneric', () => {
       expect(checkbox).not.toBeChecked();
     }
 
-    waitForComponentToUpdate();
+    await waitForComponentToUpdate();
   });
 
   it('should hide the alerts column if the alert feature is disabled', async () => {
-    const { queryByTestId } = render(
+    expect.assertions(1);
+
+    const { findAllByTestId } = render(
       <TestProviders features={{ alerts: { enabled: false } }}>
         <AllCasesList />
       </TestProviders>
     );
 
-    expect(queryByTestId('case-table-column-alertsCount')).toBe(null);
+    await expect(findAllByTestId('case-table-column-alertsCount')).rejects.toThrow();
   });
 
   it('should show the alerts column if the alert feature is enabled', async () => {
-    const { getByTestId } = render(
+    const { findAllByTestId } = render(
       <TestProviders features={{ alerts: { enabled: true } }}>
         <AllCasesList />
       </TestProviders>
     );
 
-    expect(getByTestId('case-table-column-alertsCount')).toBeInTheDocument();
+    const alertCounts = await findAllByTestId('case-table-column-alertsCount');
+
+    expect(alertCounts.length).toBeGreaterThan(0);
   });
 });
