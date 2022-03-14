@@ -61,7 +61,7 @@ export function ChangeDataView({
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data]);
+  }, [data, currentDataViewId]);
 
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, ...rest } = trigger;
