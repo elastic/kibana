@@ -500,65 +500,6 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.Execution.validate",
-            "type": "Function",
-            "tags": [],
-            "label": "validate",
-            "description": [],
-            "signature": [
-              "<Type = unknown>(value: Type, argDef: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunctionParameter",
-                "text": "ExpressionFunctionParameter"
-              },
-              "<Type>) => void"
-            ],
-            "path": "src/plugins/expressions/common/execution/execution.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.Execution.validate.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "Type"
-                ],
-                "path": "src/plugins/expressions/common/execution/execution.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.Execution.validate.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "argDef",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ExpressionFunctionParameter",
-                    "text": "ExpressionFunctionParameter"
-                  },
-                  "<Type>"
-                ],
-                "path": "src/plugins/expressions/common/execution/execution.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
             "id": "def-public.Execution.resolveArgs",
             "type": "Function",
             "tags": [],
@@ -12013,65 +11954,6 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-server.Execution.validate",
-            "type": "Function",
-            "tags": [],
-            "label": "validate",
-            "description": [],
-            "signature": [
-              "<Type = unknown>(value: Type, argDef: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunctionParameter",
-                "text": "ExpressionFunctionParameter"
-              },
-              "<Type>) => void"
-            ],
-            "path": "src/plugins/expressions/common/execution/execution.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-server.Execution.validate.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "Type"
-                ],
-                "path": "src/plugins/expressions/common/execution/execution.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "expressions",
-                "id": "def-server.Execution.validate.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "argDef",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ExpressionFunctionParameter",
-                    "text": "ExpressionFunctionParameter"
-                  },
-                  "<Type>"
-                ],
-                "path": "src/plugins/expressions/common/execution/execution.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
             "id": "def-server.Execution.resolveArgs",
             "type": "Function",
             "tags": [],
@@ -20400,65 +20282,6 @@
                 "path": "src/plugins/expressions/common/execution/execution.ts",
                 "deprecated": false,
                 "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.Execution.validate",
-            "type": "Function",
-            "tags": [],
-            "label": "validate",
-            "description": [],
-            "signature": [
-              "<Type = unknown>(value: Type, argDef: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunctionParameter",
-                "text": "ExpressionFunctionParameter"
-              },
-              "<Type>) => void"
-            ],
-            "path": "src/plugins/expressions/common/execution/execution.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-common.Execution.validate.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "Type"
-                ],
-                "path": "src/plugins/expressions/common/execution/execution.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "expressions",
-                "id": "def-common.Execution.validate.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "argDef",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ExpressionFunctionParameter",
-                    "text": "ExpressionFunctionParameter"
-                  },
-                  "<Type>"
-                ],
-                "path": "src/plugins/expressions/common/execution/execution.ts",
-                "deprecated": false,
-                "isRequired": true
               }
             ],
             "returnComment": []
