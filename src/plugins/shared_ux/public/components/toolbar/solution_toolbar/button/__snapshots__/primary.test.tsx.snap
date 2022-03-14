@@ -12,8 +12,14 @@ exports[`<SolutionToolbarButton /> is rendered 1`] = `
       "openDataViewEditor": [MockFunction],
     }
   }
+  http={
+    Object {
+      "addBasePath": [MockFunction],
+    }
+  }
   permissions={
     Object {
+      "canAccessFleet": true,
       "canCreateNewDataView": true,
     }
   }
