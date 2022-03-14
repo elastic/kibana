@@ -31,7 +31,6 @@ import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
@@ -59,7 +58,6 @@ interface Props {
   yDomain?: YDomainRange;
   anomalyTimeseries?: ServiceAnomalyTimeseries;
   customTheme?: Record<string, unknown>;
-  alerts?: APMServiceAlert[];
 }
 export function TimeseriesChart({
   id,
@@ -73,7 +71,6 @@ export function TimeseriesChart({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
-  alerts,
 }: Props) {
   const history = useHistory();
   const { core } = useApmPluginContext();
