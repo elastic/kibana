@@ -12,9 +12,9 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./kibana_exclusive'));
     loadTestFile(require.resolve('./kibana_exclusive_mb'));
     loadTestFile(require.resolve('./es_and_kibana'));
-    // loadTestFile(require.resolve('./es_and_kibana_mb'));
+    loadTestFile(require.resolve('./es_and_kibana_mb'));
     loadTestFile(require.resolve('./es_and_kibana_exclusive'));
-    // loadTestFile(require.resolve('./es_and_kibana_exclusive_mb'));
+    //loadTestFile(require.resolve('./es_and_kibana_exclusive_mb'));
     loadTestFile(require.resolve('./detect_beats'));
     loadTestFile(require.resolve('./detect_beats_management'));
     loadTestFile(require.resolve('./detect_logstash'));
