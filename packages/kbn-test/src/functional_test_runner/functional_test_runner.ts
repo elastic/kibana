@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
+import { writeFileSync, mkdirSync } from 'fs';
+import Path, { dirname } from 'path';
 import { ToolingLog } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/utils';
 
@@ -97,6 +98,15 @@ export class FunctionalTestRunner {
         reporter,
         reporterOptions
       );
+
+      // there's a bug in mocha's dry run, see https://github.com/mochajs/mocha/issues/4838
+      // until we can update to a mocha version where this is fixed, we won't actually
+      // execute the mocha dry run but simulate it by reading the suites and tests of
+      // the mocha object and writing a report file with similar structure to the json report
+      // (just leave out some execution details like timing, retry and erros)
+      if (config.get('mochaOpts.dryRun')) {
+        return this.simulateMochaDryRun(mocha);
+      }
 
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
@@ -243,5 +253,63 @@ export class FunctionalTestRunner {
 
     this.closed = true;
     await this.lifecycle.cleanup.trigger();
+  }
+
+  simulateMochaDryRun(mocha: any) {
+    interface TestEntry {
+      file: string;
+      title: string;
+      fullTitle: string;
+    }
+
+    const getFullTitle = (node: Test | Suite): string => {
+      const parentTitle = node.parent && getFullTitle(node.parent);
+      return parentTitle ? `${parentTitle} ${node.title}` : node.title;
+    };
+
+    let suiteCount = 0;
+    const passes: TestEntry[] = [];
+    const pending: TestEntry[] = [];
+
+    const collectTests = (suite: Suite) => {
+      for (const subSuite of suite.suites) {
+        suiteCount++;
+        for (const test of subSuite.tests) {
+          const testEntry = {
+            title: test.title,
+            fullTitle: getFullTitle(test),
+            file: test.file || '',
+          };
+          if (test.pending) {
+            pending.push(testEntry);
+          } else {
+            passes.push(testEntry);
+          }
+        }
+        collectTests(subSuite);
+      }
+    };
+
+    collectTests(mocha.suite);
+
+    const reportData = {
+      stats: {
+        suites: suiteCount,
+        tests: passes.length + pending.length,
+        passes: passes.length,
+        pending: pending.length,
+        failures: 0,
+      },
+      tests: [...passes, ...pending],
+      passes,
+      pending,
+      failures: [],
+    };
+
+    const reportPath = mocha.options.reporterOptions.output;
+    mkdirSync(dirname(reportPath), { recursive: true });
+    writeFileSync(reportPath, JSON.stringify(reportData, null, 2), 'utf8');
+
+    return 0;
   }
 }

@@ -23,9 +23,18 @@ Review important information about the {kib} 8.0.0 releases.
 [[release-notes-8.0.1]]
 == {kib} 8.0.1
 
-coming::[8.0.1]
-
 The 8.0.1 release includes the following enhancement and bug fixes.
+
+[float]
+[[breaking-changes-8.0.1]]
+=== Breaking changes
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in the 8.0.1 release. 
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+<<breaking-changes-8.0.0,8.0.0>> | <<breaking-changes-8.0.0-rc2,8.0.0-rc2>> | <<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
 [[enhancement-v8.0.1]]

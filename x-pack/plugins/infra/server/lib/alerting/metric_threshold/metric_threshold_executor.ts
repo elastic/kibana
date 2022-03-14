@@ -118,6 +118,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       sourceId || 'default'
     );
     const config = source.configuration;
+    const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
 
     const previousGroupBy = state.groupBy;
     const previousFilterQuery = state.filterQuery;
@@ -135,7 +136,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
       config,
-      prevGroups
+      prevGroups,
+      compositeSize
     );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
@@ -248,7 +250,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
       }
     }
-
     return { groups, groupBy: params.groupBy, filterQuery: params.filterQuery };
   });
 

@@ -6,7 +6,7 @@
  */
 
 import { Server } from '@hapi/hapi';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import {
@@ -35,15 +35,20 @@ import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { LogEntriesService } from './services/log_entries';
-import { InfraPluginRequestHandlerContext } from './types';
+import { InfraPluginRequestHandlerContext, InfraConfig } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
 import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 import { RulesService } from './services/rules';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 
-export const config: PluginConfigDescriptor = {
+export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
+    alerting: schema.object({
+      metric_threshold: schema.object({
+        group_by_page_size: schema.number({ defaultValue: 10000 }),
+      }),
+    }),
     inventory: schema.object({
       compositeSize: schema.number({ defaultValue: 2000 }),
     }),
@@ -64,7 +69,7 @@ export const config: PluginConfigDescriptor = {
   deprecations: configDeprecations,
 };
 
-export type InfraConfig = TypeOf<typeof config.schema>;
+export type { InfraConfig };
 
 export interface KbnServer extends Server {
   usage: any;

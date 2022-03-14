@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-export default function () {
-  return {
-    screenshots: {
-      directory: 'bar',
-    },
-  };
+export interface EsClusterExecOptions {
+  skipNativeRealmSetup?: boolean;
+  reportTime?: (...args: any[]) => void;
+  startTime?: number;
+  esArgs?: string[];
+  esJavaOpts?: string;
+  password?: string;
+  skipReadyCheck?: boolean;
+  readyTimeout?: number;
 }
