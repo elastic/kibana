@@ -11,7 +11,7 @@ import React from 'react';
 import { ServicesProvider, SharedUXServices } from '../../../../services';
 import { servicesFactory } from '../../../../services/mocks';
 
-import { SolutionToolbarButton } from './primary';
+import { SolutionToolbarButton } from '../primary';
 
 describe('<SolutionToolbarButton />', () => {
   let services: SharedUXServices;

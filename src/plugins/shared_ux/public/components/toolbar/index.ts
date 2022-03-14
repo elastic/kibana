@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { SolutionToolbarButton } from './solution_toolbar/button/primary';
+export { SolutionToolbarButton } from './button/primary/primary';
+export { AddFromLibraryButton } from './button/add_from_library/add_from_library';
