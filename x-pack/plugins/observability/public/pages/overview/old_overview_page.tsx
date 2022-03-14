@@ -83,7 +83,7 @@ export function OverviewPage({ routeParams }: Props) {
   }, []);
 
   const kibana = useKibana<ObservabilityAppServices>();
-  const CasesContext = kibana.services.cases.getCasesContext();
+  const CasesContext = kibana.services.cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
 
   if (hasAnyData === undefined) {
