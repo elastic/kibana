@@ -28802,7 +28802,6 @@
     "xpack.upgradeAssistant.overview.whatsNewLink": "8.xの新機能",
     "xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch": "「{indexName}」に再インデックスするための権限が不十分です。",
     "xpack.upgradeAssistant.status.allDeprecationsResolvedMessage": "すべての廃止予定の警告が解決されました。",
-    "xpack.upgradeAssistant.status.deprecationsUnresolvedMessage": "アップグレード前に移行が必要な{notMigratedSystemIndices}システム{notMigratedSystemIndices, plural, other  {インデックス}}と、解決が必要な{esTotalCriticalDeps} Elasticsearch廃止予定{esTotalCriticalDeps, plural, other  {問題}}および{kibanaTotalCriticalDeps} Kibana廃止予定{kibanaTotalCriticalDeps, plural, other  {問題}}があります。",
     "xpack.upgradeAssistant.upgradedDescription": "すべての Elasticsearch ノードがアップグレードされました。Kibana をアップデートする準備ができました。",
     "xpack.upgradeAssistant.upgradedTitle": "クラスターがアップグレードされました",
     "xpack.upgradeAssistant.upgradingDescription": "1 つまたは複数の Elasticsearch ノードに、 Kibana よりも新しいバージョンの Elasticsearch があります。すべてのノードがアップグレードされた後で Kibana をアップグレードしてください。",
