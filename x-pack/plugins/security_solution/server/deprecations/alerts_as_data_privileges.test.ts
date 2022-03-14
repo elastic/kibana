@@ -7,23 +7,16 @@
 
 import { deprecationsServiceMock } from 'src/core/server/mocks';
 import { RegisterDeprecationsConfig } from 'src/core/server';
-import { registerRulePreviewPrivilegeDeprecations } from './rule_preview_privileges';
+import { registerAlertsIndexPrivilegeDeprecations } from './alerts_as_data_privileges';
 import { getRoleMock, getContextMock } from './utils.mock';
 
 const getDependenciesMock = () => ({
   deprecationsService: deprecationsServiceMock.createSetupContract(),
   getKibanaRoles: jest.fn(),
-  packageInfo: {
-    branch: 'some-branch',
-    buildSha: 'deadbeef',
-    dist: true,
-    version: '7.16.0',
-    buildNum: 1,
-  },
   applicationName: 'kibana-.kibana',
 });
 
-describe('rule preview privileges deprecation', () => {
+describe('alerts as data privileges deprecation', () => {
   describe('deprecation handler', () => {
     let mockDependencies: ReturnType<typeof getDependenciesMock>;
     let mockContext: ReturnType<typeof getContextMock>;
@@ -32,7 +25,7 @@ describe('rule preview privileges deprecation', () => {
     beforeEach(() => {
       mockContext = getContextMock();
       mockDependencies = getDependenciesMock();
-      registerRulePreviewPrivilegeDeprecations(mockDependencies);
+      registerAlertsIndexPrivilegeDeprecations(mockDependencies);
 
       expect(mockDependencies.deprecationsService.registerDeprecations).toHaveBeenCalledTimes(1);
       deprecationHandler =
@@ -78,13 +71,18 @@ describe('rule preview privileges deprecation', () => {
       expect(result).toEqual([]);
     });
 
-    it('returns no deprecation when a role also has read access to the previews index', async () => {
+    it('returns no deprecation when a role also has read access to the alerts-as-data index alias and backing index pattern', async () => {
       mockDependencies.getKibanaRoles.mockResolvedValue({
         roles: [
           getRoleMock(
             [
               {
-                names: ['other-index', '.siem-signals-*', '.preview.alerts-security.alerts-*'],
+                names: [
+                  'other-index',
+                  '.siem-signals-*',
+                  '.alerts-security.alerts-*',
+                  '.internal.alerts-security.alerts-*',
+                ],
                 privileges: ['all'],
               },
             ],
@@ -133,7 +131,12 @@ describe('rule preview privileges deprecation', () => {
           getRoleMock(
             [
               {
-                names: ['other-index', '.siem-signals-*', '.preview.alerts-security.alerts-*'],
+                names: [
+                  'other-index',
+                  '.siem-signals-*',
+                  '.alerts-security.alerts-*',
+                  '.internal.alerts-security.alerts-*',
+                ],
                 privileges: ['all'],
               },
             ],
@@ -142,11 +145,29 @@ describe('rule preview privileges deprecation', () => {
           getRoleMock(
             [
               {
+                names: ['other-index', '.siem-signals-*', '.alerts-security.alerts-*'],
+                privileges: ['all'],
+              },
+            ],
+            'relevantRole1'
+          ),
+          getRoleMock(
+            [
+              {
+                names: ['other-index', '.siem-signals-*', '.internal.alerts-security.alerts-*'],
+                privileges: ['all'],
+              },
+            ],
+            'relevantRole2'
+          ),
+          getRoleMock(
+            [
+              {
                 names: ['other-index', '.siem-signals-*'],
                 privileges: ['all'],
               },
             ],
-            'relevantRole'
+            'relevantRole3'
           ),
         ],
       });
@@ -155,18 +176,22 @@ describe('rule preview privileges deprecation', () => {
         {
           correctiveActions: {
             manualSteps: [
-              'Update your roles to include read privileges for the detection alerts preview indices appropriate for that role and space(s).',
-              'In 8.0, users will be unable to view preview results until those permissions are added.',
-              'The roles that currently have read access to detection alerts indices are: relevantRole',
+              'Update your roles to include read privileges for the detection alerts indices appropriate for that role and space(s).',
+              'In 8.0, users will be unable to view alerts until those permissions are added.',
+              'The roles that currently have read access to detection alerts indices are: relevantRole1, relevantRole2, relevantRole3',
             ],
           },
           deprecationType: 'feature',
           documentationUrl:
-            'https://www.elastic.co/guide/en/security/some-branch/rules-ui-create.html#preview-rules',
+            'https://www.elastic.co/guide/en/security/8.0/whats-new.html#index-updates-8.0',
           level: 'warning',
-          message:
-            'In order to enable a more robust preview in 8.0+, users will need read privileges to new detection alerts preview indices (.preview.alerts-security.alerts-<KIBANA_SPACE>), analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>).',
-          title: 'The Detections Rule Preview feature is changing',
+          message: `In order to view detection alerts in 8.0+, users will need read privileges to new detection alerts index aliases \
+(.alerts-security.alerts-<KIBANA_SPACE>) and backing indices (.internal.alerts-security.alerts-<KIBANA_SPACE>-*), \
+analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>). \
+In addition, any enabled Detection rules will be automatically disabled during the upgrade and must be manually re-enabled after \
+upgrading. Rules that are automatically disabled will also automatically be tagged to assist in manually re-enabling them post-upgrade. \
+Alerts created after upgrading will use a different schema.`,
+          title: 'The Detection Alerts index names are changing',
         },
       ]);
     });
