@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import type { PropsOf } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { CoreStart } from '../../../../../src/core/public';
 import {
   createKibanaReactContext,
@@ -43,18 +44,22 @@ export const useKibanaContextForPluginProvider = (
   return Provider;
 };
 
-export const createAsyncKibanaContextForPluginProvider =
-  (coreSetup: InfraClientCoreSetup) =>
-  ({ children }: React.PropsWithChildren<{}>) => {
-    const [Provider, setProvider] = useState<React.ComponentType | undefined>(undefined);
+export const createLazyComponentWithKibanaContext = <T extends React.ComponentType<any>>(
+  coreSetup: InfraClientCoreSetup,
+  lazyComponentFactory: () => Promise<{ default: T }>
+) =>
+  React.lazy(() =>
+    Promise.all([lazyComponentFactory(), coreSetup.getStartServices()]).then(
+      ([{ default: LazilyLoadedComponent }, [core, plugins, pluginStart]]) => {
+        const { Provider } = createKibanaContextForPlugin(core, plugins, pluginStart);
 
-    useEffect(() => {
-      coreSetup
-        .getStartServices()
-        .then(([core, plugins, pluginStart]) =>
-          setProvider(createKibanaContextForPlugin(core, plugins, pluginStart).Provider)
-        );
-    }, []);
-
-    return Provider != null ? <Provider>{children}</Provider> : null;
-  };
+        return {
+          default: (props: PropsOf<T>) => (
+            <Provider>
+              <LazilyLoadedComponent {...props} />
+            </Provider>
+          ),
+        };
+      }
+    )
+  );
