@@ -41,6 +41,7 @@ import {
   formatDuration,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
+  parseDuration,
 } from '../../../../../alerting/common/parse_duration';
 import { loadRuleTypes } from '../../lib/rule_api';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
@@ -590,11 +591,49 @@ export const RuleForm = ({
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip', {
           defaultMessage:
-            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows. The xpack.alerting.rules.minimumScheduleInterval setting defines the minimum value.',
+            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows. The xpack.alerting.rules.minimumScheduleInterval.value setting defines the minimum value. The xpack.alerting.rules.minimumScheduleInterval.enforce setting defines whether this minimum is required or suggested.',
         })}
       />
     </>
   );
+
+  const getHelpTextForInterval = () => {
+    if (!config || !config.minimumScheduleInterval) {
+      return '';
+    }
+
+    // No help text if there is an error
+    if (errors['schedule.interval'].length > 0) {
+      return '';
+    }
+
+    if (config.minimumScheduleInterval.enforce) {
+      // Always show help text if minimum is enforced
+      return i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
+        defaultMessage: 'Interval must be at least {minimum}.',
+        values: {
+          minimum: formatDuration(config.minimumScheduleInterval.value, true),
+        },
+      });
+    } else if (
+      rule.schedule.interval &&
+      parseDuration(rule.schedule.interval) < parseDuration(config.minimumScheduleInterval.value)
+    ) {
+      // Only show help text if current interval is less than suggested
+      return i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpSuggestionText',
+        {
+          defaultMessage:
+            'Intervals less than {minimum} are not recommended due to performance considerations.',
+          values: {
+            minimum: formatDuration(config.minimumScheduleInterval.value, true),
+          },
+        }
+      );
+    } else {
+      return '';
+    }
+  };
 
   return (
     <EuiForm>
@@ -671,29 +710,7 @@ export const RuleForm = ({
             fullWidth
             data-test-subj="intervalFormRow"
             display="rowCompressed"
-            helpText={
-              errors['schedule.interval'].length > 0
-                ? ''
-                : config.minimumScheduleInterval?.enforce
-                ? i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
-                    defaultMessage: 'Interval must be at least {minimum}.',
-                    values: {
-                      minimum: formatDuration(config.minimumScheduleInterval?.value ?? '1m', true),
-                    },
-                  })
-                : i18n.translate(
-                    'xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpTextWarn',
-                    {
-                      defaultMessage: 'Recommended interval should be at least {minimum}.',
-                      values: {
-                        minimum: formatDuration(
-                          config.minimumScheduleInterval?.value ?? '1m',
-                          true
-                        ),
-                      },
-                    }
-                  )
-            }
+            helpText={getHelpTextForInterval()}
             label={labelForRuleChecked}
             isInvalid={errors['schedule.interval'].length > 0}
             error={errors['schedule.interval']}

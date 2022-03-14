@@ -93,7 +93,7 @@ describe('rule_form', () => {
   describe('rule_form create rule', () => {
     let wrapper: ReactWrapper<any>;
 
-    async function setup(enforceMinimum = false) {
+    async function setup(enforceMinimum = false, schedule = '1m') {
       const mocks = coreMock.createSetup();
       const { loadRuleTypes } = jest.requireMock('../../lib/rule_api');
       const ruleTypes: RuleType[] = [
@@ -173,7 +173,7 @@ describe('rule_form', () => {
         params: {},
         consumer: ALERTS_FEATURE_ID,
         schedule: {
-          interval: '1m',
+          interval: schedule,
         },
         actions: [],
         tags: [],
@@ -213,17 +213,24 @@ describe('rule_form', () => {
       expect(ruleTypeSelectOptions.exists()).toBeTruthy();
     });
 
-    it('renders minimum schedule interval when enforce = true', async () => {
+    it('renders minimum schedule interval helper text when enforce = true', async () => {
       await setup(true);
       expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
         `Interval must be at least 1 minute.`
       );
     });
 
-    it('renders minimum schedule interval suggestion when enforce = false', async () => {
+    it('renders minimum schedule interval helper suggestion when enforce = false and schedule is less than configuration', async () => {
+      await setup(false, '10s');
+      expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
+        `Intervals less than 1 minute are not recommended due to performance considerations.`
+      );
+    });
+
+    it('does not render minimum schedule interval helper when enforce = false and schedule is greater than configuration', async () => {
       await setup();
       expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
-        `Recommended interval should be at least 1 minute.`
+        ``
       );
     });
 
