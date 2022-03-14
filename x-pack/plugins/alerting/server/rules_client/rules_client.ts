@@ -150,6 +150,10 @@ export interface MuteOptions extends IndexType {
   alertInstanceId: string;
 }
 
+export interface SnoozeOptions extends IndexType {
+  snoozeEndTime: string | -1;
+}
+
 export interface FindOptions extends IndexType {
   perPage?: number;
   page?: number;
@@ -1489,7 +1493,7 @@ export class RulesClient {
     snoozeEndTime,
   }: {
     id: string;
-    snoozeEndTime?: string;
+    snoozeEndTime: string | -1;
   }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
@@ -1498,7 +1502,7 @@ export class RulesClient {
     );
   }
 
-  private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime?: string }) {
+  private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime: string | -1 }) {
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
@@ -1541,10 +1545,11 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-    // If no snoozeEndTime is set, instead mute all
-    const newAttrs = snoozeEndTime
-      ? { snoozeEndTime: new Date(snoozeEndTime).toISOString(), muteAll: false }
-      : { muteAll: true, snoozeEndTime: null };
+    // If snoozeEndTime is -1, instead mute all
+    const newAttrs =
+      snoozeEndTime === -1
+        ? { snoozeEndTime: new Date(snoozeEndTime).toISOString(), muteAll: false }
+        : { muteAll: true, snoozeEndTime: null };
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,

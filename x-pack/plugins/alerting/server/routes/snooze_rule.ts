@@ -8,7 +8,8 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState, RuleMutedError } from '../lib';
-import { verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext, RewriteRequestCase } from './lib';
+import { SnoozeOptions } from '../rules_client';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
@@ -29,10 +30,8 @@ const bodySchema = schema.object({
   ]),
 });
 
-const rewriteBodyReq: (body: { snooze_end_time: string | -1 }) => { snoozeEndTime?: string } = ({
-  snooze_end_time: snoozeEndTime,
-}) => ({
-  snoozeEndTime: typeof snoozeEndTime === 'string' ? snoozeEndTime : undefined,
+const rewriteBodyReq: RewriteRequestCase<SnoozeOptions> = ({ snooze_end_time: snoozeEndTime }) => ({
+  snoozeEndTime,
 });
 
 export const snoozeRuleRoute = (
