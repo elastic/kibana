@@ -57,6 +57,16 @@ const agent = {
   packages: [],
 };
 
+// getAgents can be called many times on load, wait() was grabbing the wrong call
+// .all returns all requests performed so far, allowing us to reliably grab the most recent call
+const getLatestRequestUrl = (selector: string) =>
+  cy.get(selector + '.all').then((requests) => {
+    if (!requests.length) return undefined;
+    const latestRequest = requests[requests.length - 1];
+    // @ts-ignore no property url, typing is wrong for return type of .all
+    return new URL(latestRequest?.request?.url);
+  });
+
 describe('View agents', () => {
   beforeEach(() => {
     cy.intercept('/api/fleet/agents/setup', { isReady: true });
@@ -121,7 +131,7 @@ describe('View agents', () => {
       ]).as('getSuggestions');
 
       cy.visit('/app/fleet/agents');
-      cy.get('[data-test-subj="queryInput"]').clear().type('agent.id: ');
+      cy.getBySel('queryInput').clear().type('agent.id: ');
 
       cy.wait('@getSuggestions').then(({ request }) => {
         expect(request.body.field).to.equal('agent.id');
@@ -139,14 +149,11 @@ describe('View agents', () => {
       cy.visit('/app/fleet/agents');
       cy.contains('agent-1');
 
-      cy.get('[data-test-subj="agentList.showUpgradeable"]').click();
-      // getAgents can be called many times on load, wait() was grabbing the wrong call
-      // .all returns all requests performed so far, allowing us to reliably grab the most recent call
-      cy.get('@getAgents.all').then((requests) => {
-        // @ts-ignore no property request, typings are incorrect for .all
-        const latestRequest = requests[requests.length - 1].request;
-        const latestRequestUrl = new URL(latestRequest.url);
-        expect(latestRequestUrl.searchParams.get('showUpgradeable')).equals('true');
+      cy.getBySel('agentList.showUpgradeable').click();
+      getLatestRequestUrl('@getAgents').then((url) => {
+        expect(url).instanceOf(URL);
+        // @ts-ignore
+        expect(url.searchParams.get('showUpgradeable')).equals('true');
       });
     });
   });
@@ -156,7 +163,7 @@ describe('View agents', () => {
       cy.visit('/app/fleet/agents');
       cy.contains('agent-1');
 
-      cy.get('[data-test-subj="agentList.policyFilter"]').click();
+      cy.getBySel('agentList.policyFilter').click();
 
       cy.get('button').contains('Agent policy 1');
       cy.get('button').contains('Agent policy 2');
@@ -165,16 +172,13 @@ describe('View agents', () => {
       cy.visit('/app/fleet/agents');
       cy.contains('agent-1');
 
-      cy.get('[data-test-subj="agentList.policyFilter"]').click();
+      cy.getBySel('agentList.policyFilter').click();
 
       cy.get('button').contains('Agent policy 2').click();
-      cy.get('@getAgents.all').then((requests) => {
-        // @ts-ignore no property request, typings are incorrect for .all
-        const latestRequest = requests[requests.length - 1].request;
-        const latestRequestUrl = new URL(latestRequest.url);
-        expect(latestRequestUrl.searchParams.get('kuery')).contains(
-          'fleet-agents.policy_id : ("policy-2")'
-        );
+      getLatestRequestUrl('@getAgents').then((url) => {
+        expect(url).instanceOf(URL);
+        // @ts-ignore
+        expect(url.searchParams.get('kuery')).contains('fleet-agents.policy_id : ("policy-2")');
       });
     });
   });
