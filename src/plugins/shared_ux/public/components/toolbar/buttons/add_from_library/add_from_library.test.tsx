@@ -5,6 +5,3 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export { SolutionToolbarButton } from './buttons/primary/primary';
-export { AddFromLibraryButton } from './buttons/add_from_library/add_from_library';
