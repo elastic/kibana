@@ -28,14 +28,19 @@ import { CasesClient } from './client';
 import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import {
+  PluginStartContract as FeaturesPluginStart,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '../../features/server';
 import { LensServerPluginSetup } from '../../lens/server';
+import { getCasesKibanaFeature } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
+  features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
 }
@@ -76,6 +81,8 @@ export class CasePlugin {
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
+
+    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     core.savedObjects.registerType(
       createCaseCommentSavedObjectType({

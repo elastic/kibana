@@ -239,6 +239,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
 
   componentWillUnmount() {
     this.updateVisState.cancel();
+    this.abortControllerFetchFields?.abort();
     this.props.eventEmitter.off('updateEditor', this.updateModel);
   }
 
