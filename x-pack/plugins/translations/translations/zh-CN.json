@@ -28486,7 +28486,6 @@
     "xpack.upgradeAssistant.overview.whatsNewLink": "8.x 版新增功能",
     "xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch": "您没有足够的权限重新索引“{indexName}”。",
     "xpack.upgradeAssistant.status.allDeprecationsResolvedMessage": "所有弃用警告均已解决。",
-    "xpack.upgradeAssistant.status.deprecationsUnresolvedMessage": "您具有 {notMigratedSystemIndices} 个必须迁移的系统{notMigratedSystemIndices, plural, other {索引}}以及 {esTotalCriticalDeps} 个 Elasticsearch 弃用{esTotalCriticalDeps, plural, other {问题}}和 {kibanaTotalCriticalDeps} 个 Kibana 弃用{kibanaTotalCriticalDeps, plural, other {问题}}，必须解决它们才能进行升级。",
     "xpack.upgradeAssistant.upgradedDescription": "所有 Elasticsearch 节点已升级。可以现在升级 Kibana。",
     "xpack.upgradeAssistant.upgradedTitle": "您的集群已升级",
     "xpack.upgradeAssistant.upgradingDescription": "一个或多个 Elasticsearch 节点的 Elasticsearch 版本比 Kibana 版本新。所有节点升级后，请升级 Kibana。",
