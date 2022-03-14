@@ -367,7 +367,7 @@ export default ({ getService }: FtrProviderContext): void => {
         return signals;
       };
 
-      it('should change the status of all alerts attached to a case to close when closure_type: close-by-pushing and syncAlerts: true', async () => {
+      it('should change the status of all alerts attached to a case to closed when closure_type: close-by-pushing and syncAlerts: true', async () => {
         const signals = await attachAlertsAndPush();
         /**
          * The status of the alerts should be changed to closed when pushing a case and the
@@ -382,7 +382,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('should NOT change the status of all alerts attached to a case to close when closure_type: close-by-pushing and syncAlerts: false', async () => {
+      it('should NOT change the status of all alerts attached to a case to closed when closure_type: close-by-pushing and syncAlerts: false', async () => {
         const signals = await attachAlertsAndPush({ syncAlerts: false });
         /**
          * The status of the alerts should NOT be changed to closed when pushing a case and the
