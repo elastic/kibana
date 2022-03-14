@@ -26,8 +26,8 @@ import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { isEqual, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverField } from './discover_field';
+import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../common';
 import { groupFields } from './lib/group_fields';
@@ -106,8 +106,8 @@ export function DiscoverSidebarComponent({
   setFieldEditorRef,
   closeFlyout,
   editField,
-  createNewDataView,
   viewMode,
+  createNewDataView,
   showDataViewPicker,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
