@@ -22,11 +22,8 @@ import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
-import {
-  cleanPreconfiguredOutputs,
-  ensurePreconfiguredOutputs,
-  ensurePreconfiguredPackagesAndPolicies,
-} from './preconfiguration';
+import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
+import { ensurePreconfiguredOutputs } from './preconfiguration/index';
 import { outputService } from './output';
 
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
@@ -119,9 +116,6 @@ async function createSetupSideEffects(
   ).filter((result) => (result.errors ?? []).length > 0);
 
   const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
-
-  logger.debug('Cleaning up Fleet outputs');
-  await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
 
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
