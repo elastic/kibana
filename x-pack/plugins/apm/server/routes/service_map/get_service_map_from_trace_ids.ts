@@ -8,7 +8,7 @@
 import { find, uniqBy } from 'lodash';
 import { Connection, ConnectionNode } from '../../../common/service_map';
 import { Setup } from '../../lib/helpers/setup_request';
-import { fetchServicePathsFromTraceIdsScriptedMetric } from './fetch_service_paths_from_trace_ids_scripted_metric';
+import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
 export function getConnections({
   paths,
@@ -51,12 +51,7 @@ export async function getServiceMapFromTraceIds({
   end: number;
 }) {
   const serviceMapFromTraceIdsScriptResponse =
-    await fetchServicePathsFromTraceIdsScriptedMetric(
-      setup,
-      traceIds,
-      start,
-      end
-    );
+    await fetchServicePathsFromTraceIds(setup, traceIds, start, end);
 
   const serviceMapScriptedAggValue =
     serviceMapFromTraceIdsScriptResponse.aggregations?.service_map.value;
