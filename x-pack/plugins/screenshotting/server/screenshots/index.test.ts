@@ -400,6 +400,7 @@ describe('Screenshot Observable Pipeline', () => {
               },
             ],
             "error": undefined,
+            "renderErrors": undefined,
             "screenshots": Array [
               Object {
                 "data": Object {
