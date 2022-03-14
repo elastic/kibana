@@ -33,7 +33,8 @@ import { FiltersIndexPatternColumn, isQueryValid } from './operations/definition
 import { checkColumnForPrecisionError, Query } from '../../../../../src/plugins/data/common';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
-import { DEFAULT_MAX_DOC_COUNT, supportsRarityRanking } from './operations/definitions/terms';
+import { supportsRarityRanking } from './operations/definitions/terms';
+import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../common/expressions';
 
 export function isColumnInvalid(
