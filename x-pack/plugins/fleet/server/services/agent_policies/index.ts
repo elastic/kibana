@@ -6,3 +6,4 @@
  */
 
 export { getFullAgentPolicy } from './full_agent_policy';
+export { validateOutputForPolicy } from './validate_outputs_for_policy';

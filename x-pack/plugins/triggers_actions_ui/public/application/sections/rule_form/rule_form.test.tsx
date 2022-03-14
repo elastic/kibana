@@ -185,8 +185,9 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
+          config={{ minimumScheduleInterval: '1m' }}
           dispatch={() => {}}
-          errors={{ name: [], interval: [], ruleTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
@@ -210,6 +211,13 @@ describe('rule_form', () => {
       await setup();
       const ruleTypeSelectOptions = wrapper.find('[data-test-subj="my-rule-type-SelectOption"]');
       expect(ruleTypeSelectOptions.exists()).toBeTruthy();
+    });
+
+    it('renders minimum schedule interval', async () => {
+      await setup();
+      expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
+        `Interval must be at least 1 minute.`
+      );
     });
 
     it('does not render registered rule type which non editable', async () => {
@@ -357,8 +365,9 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
+          config={{ minimumScheduleInterval: '1m' }}
           dispatch={() => {}}
-          errors={{ name: [], interval: [], ruleTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
@@ -419,8 +428,9 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
+          config={{ minimumScheduleInterval: '1m' }}
           dispatch={() => {}}
-          errors={{ name: [], interval: [], ruleTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
