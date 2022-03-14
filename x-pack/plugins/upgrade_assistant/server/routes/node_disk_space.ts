@@ -78,7 +78,8 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
 
             nodeIds.forEach((nodeId) => {
               const node = nodeStats.nodes[nodeId];
-              const byteStats = node.fs.total;
+              const byteStats = node?.fs?.total;
+              // @ts-expect-error @elastic/elasticsearch not supported
               const { total_in_bytes: totalInBytes, available_in_bytes: availableInBytes } =
                 byteStats;
 
@@ -98,7 +99,7 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
                 if (percentageAvailable < rawLowDiskWatermarkPercentageValue) {
                   nodesWithLowDiskSpace.push({
                     nodeId,
-                    nodeName: node.name,
+                    nodeName: node.name || nodeId,
                     available: `${Math.round(percentageAvailable)}%`,
                     lowDiskWatermarkSetting: lowDiskWatermarkSetting!,
                   });
@@ -115,7 +116,7 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
                 if (availableInBytes < rawLowDiskWatermarkBytesValue) {
                   nodesWithLowDiskSpace.push({
                     nodeId,
-                    nodeName: node.name,
+                    nodeName: node.name || nodeId,
                     available: `${Math.round(percentageAvailable)}%`,
                     lowDiskWatermarkSetting: lowDiskWatermarkSetting!,
                   });
