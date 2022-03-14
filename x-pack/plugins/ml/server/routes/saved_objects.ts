@@ -28,11 +28,11 @@ export function savedObjectsRoutes(
   { getSpaces, resolveMlCapabilities }: SavedObjectsRouteDeps
 ) {
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/status Get job saved object status
+   * @api {get} /api/ml/saved_objects/status Get job and trained model saved object status
    * @apiName SavedObjectsStatus
-   * @apiDescription Lists all jobs and saved objects to view the relationship status between them
+   * @apiDescription Lists all jobs, trained models and saved objects to view the relationship status between them
    *
    */
   router.get(
@@ -58,12 +58,12 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/sync Sync job saved objects
-   * @apiName SyncJobSavedObjects
-   * @apiDescription Synchronizes saved objects for jobs. Saved objects will be created for jobs which are missing them,
-   *                 and saved objects will be deleted for jobs which no longer exist.
+   * @api {get} /api/ml/saved_objects/sync Sync job and trained models saved objects
+   * @apiName SyncMLSavedObjects
+   * @apiDescription Synchronizes saved objects for jobs and trained models. Saved objects will be created for items which are missing them,
+   *                 and saved objects will be deleted for items which no longer exist.
    *                 Updates missing datafeed IDs in saved objects for datafeeds which exist, and
    *                 removes datafeed IDs for datafeeds which no longer exist.
    *
@@ -98,11 +98,11 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/initialize Create job saved objects for all jobs
-   * @apiName InitializeJobSavedObjects
-   * @apiDescription Create saved objects for jobs which are missing them.
+   * @api {get} /api/ml/saved_objects/initialize Create saved objects for all job and trained models
+   * @apiName InitializeMLSavedObjects
+   * @apiDescription Create saved objects for jobs and trained models which are missing them.
    *
    */
   router.get(
@@ -135,11 +135,11 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/sync_needed Check whether job saved objects need synchronizing
+   * @api {get} /api/ml/saved_objects/sync_needed Check whether job and trained model saved objects need synchronizing
    * @apiName SyncCheck
-   * @apiDescription Check whether job saved objects need synchronizing.
+   * @apiDescription Check whether job and trained model saved objects need synchronizing.
    *
    */
   router.post(
@@ -172,7 +172,7 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
    * @api {post} /api/ml/saved_objects/update_jobs_spaces Update what spaces jobs are assigned to
    * @apiName UpdateJobsSpaces
@@ -211,7 +211,7 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
    * @api {post} /api/ml/saved_objects/update_trained_models_spaces Update what spaces trained models are assigned to
    * @apiName UpdateTrainedModelsSpaces
@@ -249,11 +249,11 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {post} /api/ml/saved_objects/remove_item_from_current_space Remove jobs from the current space
-   * @apiName RemoveJobsFromCurrentSpace
-   * @apiDescription Remove a list of jobs from the current space.
+   * @api {post} /api/ml/saved_objects/remove_item_from_current_space Remove jobs or trained models from the current space
+   * @apiName RemoveMLSpaceAwareItemsFromCurrentSpace
+   * @apiDescription Remove a list of jobs or trained models from the current space.
    *
    * @apiSchema (body) itemsAndCurrentSpace
    */
@@ -313,7 +313,7 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
    * @api {get} /api/ml/saved_objects/jobs_spaces Get all jobs and their spaces
    * @apiName JobsSpaces
@@ -358,7 +358,7 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
    * @api {get} /api/ml/saved_objects/trained_models_spaces Get all trained models and their spaces
    * @apiName TrainedModelsSpaces
@@ -397,10 +397,10 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
    * @api {post} /api/ml/saved_objects/can_delete_ml_space_aware_item Check whether user can delete a job or trained model
-   * @apiName CanDeleteJob
+   * @apiName CanDeleteMLSpaceAwareItems
    * @apiDescription Check the user's ability to delete jobs or trained models. Returns whether they are able
    *                 to fully delete the job or trained model and whether they are able to remove it from
    *                 the current space.
