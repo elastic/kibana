@@ -25,6 +25,8 @@ export const LazySolutionToolbarButton = React.lazy(() =>
   }))
 );
 
+export const RedirectAppLinks = React.lazy(() => import('./redirect_app_links'));
+
 /**
  * A `ExitFullScreenButton` component that is wrapped by the `withSuspense` HOC.  This component can
  * be used directly by consumers and will load the `LazyExitFullScreenButton` component lazily with
