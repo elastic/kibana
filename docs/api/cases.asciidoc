@@ -27,5 +27,12 @@ these APIs:
 * <<cases-api-update>>
 * {security-guide}/cases-api-update-comment.html[Update comment]
 
+//CREATE
 include::cases/cases-api-create.asciidoc[leveloffset=+1]
+////
+//FIND
+include::cases-api-find-cases.asciidoc[leveloffset=+1]
+include::cases-api-find-connectors.asciidoc[leveloffset=+1]
+////
+//UPDATE
 include::cases/cases-api-update.asciidoc[leveloffset=+1]
