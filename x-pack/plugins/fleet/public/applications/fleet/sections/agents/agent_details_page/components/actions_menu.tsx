@@ -129,7 +129,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               )}
             </EuiContextMenuItem>,
           ],
-          ...(!cloud?.isCloudEnabled
+          ...(cloud?.isCloudEnabled
             ? [
                 <EuiContextMenuItem
                   icon="logoUptime"
