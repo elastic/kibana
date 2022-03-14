@@ -27,6 +27,7 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
+import { ConsolesPopoverHeaderSectionItem } from '../../../common/components/consoles_popover_header_section_item';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -77,6 +78,10 @@ export const GlobalHeader = React.memo(
               <MlPopover />
             </EuiHeaderSectionItem>
           )}
+
+          {/* The consoles Popover may or may not be shown, depending on the user's authz */}
+          <ConsolesPopoverHeaderSectionItem />
+
           <EuiHeaderSectionItem>
             <EuiHeaderLinks>
               <EuiHeaderLink
