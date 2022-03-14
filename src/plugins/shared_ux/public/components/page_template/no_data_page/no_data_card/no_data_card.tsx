@@ -16,7 +16,7 @@ const recommendedLabel = i18n.translate('sharedUX.pageTemplate.noDataPage.recomm
 });
 
 const defaultDescription = i18n.translate('sharedUX.pageTemplate.noDataCard.description', {
-  defaultMessage: `Proceed without collecting data`,
+  defaultMessage: 'Proceed without collecting data',
 });
 
 export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
@@ -28,7 +28,7 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
   ...cardRest
 }) => {
   const footer = () => {
-    if (typeof button !== 'string') {
+    if (button && typeof button !== 'string') {
       return button;
     }
     if (!button && !renderFooter) {

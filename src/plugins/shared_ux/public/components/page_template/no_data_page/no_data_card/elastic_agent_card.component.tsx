@@ -9,12 +9,16 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTextColor } from '@elastic/eui';
+import { Observable } from 'rxjs';
 import { ElasticAgentCardProps } from './types';
 import { NoDataCard } from './no_data_card';
 import ElasticAgentLogo from './assets/elastic_agent_card.svg';
+import { RedirectAppLinks } from '../../../redirect_app_links';
 
 export type ElasticAgentCardComponentProps = ElasticAgentCardProps & {
   canAccessFleet: boolean;
+  navigateToUrl: (url: string) => Promise<void>;
+  currentAppId$: Observable<string | undefined>;
 };
 
 const noPermissionTitle = i18n.translate(
@@ -48,20 +52,19 @@ const elasticAgentCardDescription = i18n.translate(
 export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardComponentProps> = ({
   canAccessFleet,
   title,
+  navigateToUrl,
+  currentAppId$,
   ...cardRest
 }) => {
-  if (!canAccessFleet) {
-    return (
-      <NoDataCard
-        image={ElasticAgentLogo}
-        title={<EuiTextColor color="default">{noPermissionTitle}</EuiTextColor>}
-        description={<EuiTextColor color="default">{noPermissionDescription}</EuiTextColor>}
-        isDisabled
-      />
-    );
-  }
-
-  return (
+  const noAccessCard = (
+    <NoDataCard
+      image={ElasticAgentLogo}
+      title={<EuiTextColor color="default">{noPermissionTitle}</EuiTextColor>}
+      description={<EuiTextColor color="default">{noPermissionDescription}</EuiTextColor>}
+      isDisabled
+    />
+  );
+  const card = (
     <NoDataCard
       image={ElasticAgentLogo}
       title={title || elasticAgentCardTitle}
@@ -69,5 +72,11 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
       renderFooter={true}
       {...cardRest}
     />
+  );
+
+  return (
+    <RedirectAppLinks navigateToUrl={navigateToUrl} currentAppId$={currentAppId$}>
+      {canAccessFleet ? card : noAccessCard}
+    </RedirectAppLinks>
   );
 };

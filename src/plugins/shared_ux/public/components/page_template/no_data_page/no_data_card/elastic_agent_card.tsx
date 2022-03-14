@@ -8,12 +8,13 @@
 
 import React from 'react';
 import { ElasticAgentCardProps } from './types';
-import { useHttp, usePermissions } from '../../../../services';
+import { useApplication, useHttp, usePermissions } from '../../../../services';
 import { ElasticAgentCardComponent } from './elastic_agent_card.component';
 
 export const ElasticAgentCard = (props: ElasticAgentCardProps) => {
   const { canAccessFleet } = usePermissions();
   const { addBasePath } = useHttp();
+  const { navigateToUrl, currentAppId$ } = useApplication();
 
   const createHref = () => {
     const { href, category } = props;
@@ -28,6 +29,12 @@ export const ElasticAgentCard = (props: ElasticAgentCardProps) => {
   };
 
   return (
-    <ElasticAgentCardComponent {...props} href={createHref()} canAccessFleet={canAccessFleet} />
+    <ElasticAgentCardComponent
+      {...props}
+      href={createHref()}
+      canAccessFleet={canAccessFleet}
+      navigateToUrl={navigateToUrl}
+      currentAppId$={currentAppId$}
+    />
   );
 };

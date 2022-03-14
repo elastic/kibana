@@ -13,6 +13,7 @@ import { SharedUXUserPermissionsService } from './permissions';
 import { SharedUXEditorsService } from './editors';
 import { SharedUXDocLinksService } from './doc_links';
 import { SharedUXHttpService } from './http';
+import { SharedUXApplicationService } from './application';
 
 /**
  * A collection of services utilized by SharedUX.  This serves as a thin
@@ -28,6 +29,7 @@ export interface SharedUXServices {
   editors: SharedUXEditorsService;
   docLinks: SharedUXDocLinksService;
   http: SharedUXHttpService;
+  application: SharedUXApplicationService;
 }
 
 // The React Context used to provide the services to the SharedUX components.
@@ -64,3 +66,5 @@ export const useEditors = () => useServices().editors;
 export const useDocLinks = () => useServices().docLinks;
 
 export const useHttp = () => useServices().http;
+
+export const useApplication = () => useServices().application;

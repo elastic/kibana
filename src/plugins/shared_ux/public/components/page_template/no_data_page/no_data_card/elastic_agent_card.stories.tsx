@@ -11,6 +11,7 @@ import {
   ElasticAgentCardComponent,
   ElasticAgentCardComponentProps,
 } from './elastic_agent_card.component';
+import { applicationServiceFactory } from '../../../../services/storybook/application';
 
 export default {
   title: 'Elastic Agent Data Card',
@@ -20,9 +21,14 @@ export default {
 type Params = Pick<ElasticAgentCardComponentProps, 'canAccessFleet'>;
 
 export const PureComponent = (params: Params) => {
+  const { currentAppId$, navigateToUrl } = applicationServiceFactory();
   return (
     <div style={{ width: '50%' }}>
-      <ElasticAgentCardComponent {...params} />
+      <ElasticAgentCardComponent
+        {...params}
+        currentAppId$={currentAppId$}
+        navigateToUrl={navigateToUrl}
+      />
     </div>
   );
 };
