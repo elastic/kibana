@@ -6,10 +6,7 @@
  */
 
 import { ROLES } from '../../../common/test';
-import {
-  getExceptionList,
-  expectedExportedExceptionList,
-} from '../../objects/exception';
+import { getExceptionList, expectedExportedExceptionList } from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
 
 import { createCustomRule } from '../../tasks/api_calls/rules';
