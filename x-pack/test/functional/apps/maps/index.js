@@ -95,7 +95,11 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./layer_errors'));
       loadTestFile(require.resolve('./visualize_create_menu'));
       loadTestFile(require.resolve('./discover'));
+<<<<<<< HEAD
       loadTestFile(require.resolve('./lens'));
+=======
+      loadTestFile(require.resolve('./geofile_wizard_auto_open'));
+>>>>>>> f071726b9e7bd20ccb9fc0e1d36de59d8d92b4fd
     });
   });
 }

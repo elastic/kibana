@@ -130,21 +130,18 @@ export const ProcessTree = ({
   useEffect(() => {
     // after 2 pages are loaded (due to bi-directional jump to), auto select the process
     // for the jumpToEvent
-    if (jumpToEvent && data.length === 2) {
+    if (!selectedProcess && jumpToEvent) {
       const process = processMap[jumpToEvent.process.entity_id];
 
       if (process) {
         onProcessSelected(process);
+        selectProcess(process);
       }
-    }
-  }, [jumpToEvent, processMap, onProcessSelected, data]);
-
-  // auto selects the session leader process if no selection is made yet
-  useEffect(() => {
-    if (!selectedProcess) {
+    } else if (!selectedProcess) {
+      // auto selects the session leader process if no selection is made yet
       onProcessSelected(sessionLeader);
     }
-  }, [sessionLeader, onProcessSelected, selectedProcess]);
+  }, [jumpToEvent, processMap, onProcessSelected, selectProcess, selectedProcess, sessionLeader]);
 
   return (
     <div
@@ -162,6 +159,8 @@ export const ProcessTree = ({
           isSessionLeader
           process={sessionLeader}
           onProcessSelected={onProcessSelected}
+          jumpToAlertID={jumpToEvent?.kibana?.alert.uuid}
+          selectedProcessId={selectedProcess?.id}
         />
       )}
       <div
