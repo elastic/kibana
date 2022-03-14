@@ -140,7 +140,6 @@ export function TimeseriesChart({
             tooltip: { visible: true },
           }}
           showLegend
-          showLegendExtra
           legendPosition={Position.Bottom}
           xDomain={xDomain}
           onLegendItemClick={(legend) => {
