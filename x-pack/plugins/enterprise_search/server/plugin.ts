@@ -26,7 +26,7 @@ import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
-  LOGS_SOURCE_ID,
+  ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
 } from '../common/constants';
 
@@ -179,11 +179,11 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register logs source configuration, used by LogStream components
      * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
-    infra.defineInternalSourceConfiguration(LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Logs',
+    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
+      name: 'Enterprise Search Search Relevance Logs',
       logIndices: {
         type: 'index_name',
-        indexName: '.ent-search-*',
+        indexName: 'logs-app_search.search_relevance_suggestions-*',
       },
     });
 
