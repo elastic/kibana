@@ -24,7 +24,9 @@ jest.mock('../../../lib/kibana', () => {
       services: {
         ...original.useKibana().services,
         cases: {
-          getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+          ui: {
+            getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+          },
         },
       },
     }),
