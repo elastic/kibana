@@ -21,7 +21,7 @@ import { isEmpty, noop } from 'lodash/fp';
 
 import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
 import { Case } from '../../../common/ui/types';
-import { ActionConnector, ConnectorTypeFields } from '../../../common/api';
+import { ActionConnector, ConnectorTypeFields, NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { CaseUserActions } from '../../containers/types';
@@ -148,10 +148,12 @@ export const EditConnector = React.memo(
       // null and none are equivalent to `no connector`.
       // This makes sure we don't enable the button when the "no connector" option is selected
       // by default. e.g. when a case is created without a selector
-      const isNoConnectorDeafultValue = currentConnector === null && selectedConnector === 'none';
+      const isNoConnectorDeafultValue =
+        currentConnector === null && selectedConnector === NONE_CONNECTOR_ID;
       const enable =
         (!isNoConnectorDeafultValue && currentConnector?.id !== selectedConnector) ||
         !deepEqual(fields, caseFields);
+
       setEnableSave(enable);
     }, [caseFields, currentConnector, fields, selectedConnector]);
 

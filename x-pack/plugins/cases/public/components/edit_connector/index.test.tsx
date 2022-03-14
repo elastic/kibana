@@ -16,6 +16,7 @@ import { basicCase, basicPush, caseUserActions } from '../../containers/mock';
 import { useKibana } from '../../common/lib/kibana';
 import { CaseConnector } from '../../containers/configure/types';
 import userEvent from '@testing-library/user-event';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -297,5 +298,43 @@ describe('EditConnector ', () => {
     userEvent.click(result.getByTestId('dropdown-connectors'));
     userEvent.click(result.getAllByTestId('dropdown-connector-no-connector')[0]);
     expect(result.getByTestId('edit-connectors-submit')).toBeEnabled();
+
+    // this strange assertion is required because of existing race conditions inside the EditConnector component
+    await waitFor(() => {
+      expect(true).toBeTruthy();
+    });
+  });
+
+  it('disables the save button when no connector is the default', async () => {
+    const defaultProps = getDefaultProps();
+    const noneConnector = {
+      ...defaultProps,
+      caseData: {
+        ...defaultProps.caseData,
+        connector: {
+          id: 'none',
+          fields: null,
+        } as CaseConnector,
+      },
+    };
+    const result = render(
+      <TestProviders>
+        <EditConnector {...noneConnector} />
+      </TestProviders>
+    );
+
+    // the save button should be disabled
+    userEvent.click(result.getByTestId('connector-edit-button'));
+    expect(result.getByTestId('edit-connectors-submit')).toBeDisabled();
+
+    // simulate changing the connector
+    userEvent.click(result.getByTestId('dropdown-connectors'));
+    userEvent.click(result.getAllByTestId('dropdown-connector-resilient-2')[0]);
+    expect(result.getByTestId('edit-connectors-submit')).toBeEnabled();
+
+    // this strange assertion is required because of existing race conditions inside the EditConnector component
+    await waitFor(() => {
+      expect(true).toBeTruthy();
+    });
   });
 });
