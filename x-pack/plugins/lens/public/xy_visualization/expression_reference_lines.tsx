@@ -12,10 +12,15 @@ import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { FieldFormat } from 'src/plugins/field_formats/common';
-import { euiLightVars } from '@kbn/ui-theme';
-import type { IconPosition, ReferenceLineLayerArgs, YAxisMode } from '../../common/expressions';
+import type {
+  IconPosition,
+  ReferenceLineLayerArgs,
+  YAxisMode,
+  YConfig,
+} from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
+import { defaultReferenceLineColor } from './color_assignment';
 
 export const REFERENCE_LINE_MARKER_SIZE = 20;
 
@@ -54,25 +59,31 @@ export const computeChartMargins = (
 };
 
 // Note: it does not take into consideration whether the reference line is in view or not
-export const getReferenceLineRequiredPaddings = (
-  referenceLineLayers: ReferenceLineLayerArgs[],
+
+export const getLinesCausedPaddings = (
+  visualConfigs: Array<
+    Pick<YConfig, 'axisMode' | 'icon' | 'iconPosition' | 'textVisibility'> | undefined
+  >,
   axesMap: Record<'left' | 'right', unknown>
 ) => {
   // collect all paddings for the 4 axis: if any text is detected double it.
   const paddings: Partial<Record<Position, number>> = {};
   const icons: Partial<Record<Position, number>> = {};
-  referenceLineLayers.forEach((layer) => {
-    layer.yConfig?.forEach(({ axisMode, icon, iconPosition, textVisibility }) => {
-      if (axisMode && (hasIcon(icon) || textVisibility)) {
-        const placement = getBaseIconPlacement(iconPosition, axisMode, axesMap);
-        paddings[placement] = Math.max(
-          paddings[placement] || 0,
-          REFERENCE_LINE_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
-        );
-        icons[placement] = (icons[placement] || 0) + (hasIcon(icon) ? 1 : 0);
-      }
-    });
+  visualConfigs?.forEach((config) => {
+    if (!config) {
+      return;
+    }
+    const { axisMode, icon, iconPosition, textVisibility } = config;
+    if (axisMode && (hasIcon(icon) || textVisibility)) {
+      const placement = getBaseIconPlacement(iconPosition, axisMode, axesMap);
+      paddings[placement] = Math.max(
+        paddings[placement] || 0,
+        REFERENCE_LINE_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
+      );
+      icons[placement] = (icons[placement] || 0) + (hasIcon(icon) ? 1 : 0);
+    }
   });
+
   // post-process the padding based on the icon presence:
   // if no icon is present for the placement, just reduce the padding
   (Object.keys(paddings) as Position[]).forEach((placement) => {
@@ -80,7 +91,6 @@ export const getReferenceLineRequiredPaddings = (
       paddings[placement] = REFERENCE_LINE_MARKER_SIZE;
     }
   });
-
   return paddings;
 };
 
@@ -163,7 +173,7 @@ interface MarkerConfig {
   textVisibility?: boolean;
 }
 
-function getMarkerToShow(
+export function getMarkerToShow(
   markerConfig: MarkerConfig,
   label: string | undefined,
   isHorizontal: boolean,
@@ -241,8 +251,6 @@ export const ReferenceLineAnnotations = ({
 
           const formatter = formatters[groupId || 'bottom'];
 
-          const defaultColor = euiLightVars.euiColorDarkShade;
-
           // get the position for vertical chart
           const markerPositionVertical = getBaseIconPlacement(
             yConfig.iconPosition,
@@ -284,7 +292,7 @@ export const ReferenceLineAnnotations = ({
 
           const sharedStyle = {
             strokeWidth: yConfig.lineWidth || 1,
-            stroke: yConfig.color || defaultColor,
+            stroke: yConfig.color || defaultReferenceLineColor,
             dash: dashStyle,
           };
 
@@ -355,7 +363,7 @@ export const ReferenceLineAnnotations = ({
                 })}
                 style={{
                   ...sharedStyle,
-                  fill: yConfig.color || defaultColor,
+                  fill: yConfig.color || defaultReferenceLineColor,
                   opacity: 0.1,
                 }}
               />

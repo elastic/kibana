@@ -151,7 +151,7 @@ describe('xy_visualization', () => {
 
       expect(initialState.layers).toHaveLength(1);
       expect((initialState.layers[0] as XYDataLayerConfig).xAccessor).not.toBeDefined();
-      expect(initialState.layers[0].accessors).toHaveLength(0);
+      expect((initialState.layers[0] as XYDataLayerConfig).accessors).toHaveLength(0);
 
       expect(initialState).toMatchInlineSnapshot(`
         Object {
@@ -229,7 +229,7 @@ describe('xy_visualization', () => {
 
   describe('#getSupportedLayers', () => {
     it('should return a double layer types', () => {
-      expect(xyVisualization.getSupportedLayers()).toHaveLength(2);
+      expect(xyVisualization.getSupportedLayers()).toHaveLength(3);
     });
 
     it('should return the icon for the visualization type', () => {
@@ -474,9 +474,10 @@ describe('xy_visualization', () => {
         layerId: 'first',
         context: newContext,
       });
-      expect(state?.layers[0]).toHaveProperty('seriesType', 'area');
-      expect(state?.layers[0]).toHaveProperty('layerType', 'referenceLine');
-      expect(state?.layers[0].yConfig).toStrictEqual([
+      const firstLayer = state?.layers[0] as XYDataLayerConfig;
+      expect(firstLayer).toHaveProperty('seriesType', 'area');
+      expect(firstLayer).toHaveProperty('layerType', 'referenceLine');
+      expect(firstLayer.yConfig).toStrictEqual([
         {
           axisMode: 'right',
           color: '#68BC00',
@@ -1071,7 +1072,7 @@ describe('xy_visualization', () => {
 
       it('should support static value', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].accessors = [];
+        (state.layers[1] as XYReferenceLineLayerConfig).accessors = [];
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig = undefined;
         expect(
           xyVisualization.getConfiguration({
@@ -1084,7 +1085,7 @@ describe('xy_visualization', () => {
 
       it('should return no referenceLine groups for a empty data layer', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].accessors = [];
+        (state.layers[0] as XYDataLayerConfig).accessors = [];
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig = undefined;
 
         const options = xyVisualization.getConfiguration({

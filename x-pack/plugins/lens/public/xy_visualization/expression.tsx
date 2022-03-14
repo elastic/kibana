@@ -74,11 +74,13 @@ import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
 import {
   computeChartMargins,
-  getReferenceLineRequiredPaddings,
+  getLinesCausedPaddings,
   ReferenceLineAnnotations,
 } from './expression_reference_lines';
+
+import { Annotations, getCollectiveConfigsByInterval } from './annotations/expression';
 import { computeOverallDataDomain } from './reference_line_helpers';
-import { getReferenceLayers, isDataLayer } from './visualization_helpers';
+import { getReferenceLayers, isDataLayer, getAnnotationsLayer } from './visualization_helpers';
 
 declare global {
   interface Window {
@@ -354,7 +356,25 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const referenceLinePaddings = getReferenceLineRequiredPaddings(referenceLineLayers, yAxesMap);
+  const annotationsLayers = getAnnotationsLayer(layers);
+
+  const firstTable = data.tables[filteredLayers[0].layerId];
+
+  const xColumnId = firstTable.columns.find((col) => col.id === filteredLayers[0].xAccessor)?.id;
+
+  const collectiveAnnotationConfigs = getCollectiveConfigsByInterval(
+    annotationsLayers,
+    minInterval,
+    xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
+    filteredBarLayers.length > 0,
+    xAxisFormatter
+  );
+  const visualConfigs = [
+    ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
+    ...collectiveAnnotationConfigs,
+  ].filter(Boolean);
+
+  const linesPaddings = getLinesCausedPaddings(visualConfigs, yAxesMap);
 
   const getYAxesStyle = (groupId: 'left' | 'right') => {
     const tickVisible =
@@ -370,9 +390,9 @@ export function XYChart({
             ? args.labelsOrientation?.yRight || 0
             : args.labelsOrientation?.yLeft || 0,
         padding:
-          referenceLinePaddings[groupId] != null
+          linesPaddings[groupId] != null
             ? {
-                inner: referenceLinePaddings[groupId],
+                inner: linesPaddings[groupId],
               }
             : undefined,
       },
@@ -383,9 +403,9 @@ export function XYChart({
             : axisTitlesVisibilitySettings?.yLeft,
         // if labels are not visible add the padding to the title
         padding:
-          !tickVisible && referenceLinePaddings[groupId] != null
+          !tickVisible && linesPaddings[groupId] != null
             ? {
-                inner: referenceLinePaddings[groupId],
+                inner: linesPaddings[groupId],
               }
             : undefined,
       },
@@ -592,16 +612,13 @@ export function XYChart({
         tickLabel: {
           visible: tickLabelsVisibilitySettings?.x,
           rotation: labelsOrientation?.x,
-          padding:
-            referenceLinePaddings.bottom != null
-              ? { inner: referenceLinePaddings.bottom }
-              : undefined,
+          padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
         },
         axisTitle: {
           visible: axisTitlesVisibilitySettings.x,
           padding:
-            !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
-              ? { inner: referenceLinePaddings.bottom }
+            !tickLabelsVisibilitySettings?.x && linesPaddings.bottom != null
+              ? { inner: linesPaddings.bottom }
               : undefined,
         },
       };
@@ -634,7 +651,7 @@ export function XYChart({
           chartMargins: {
             ...chartTheme.chartPaddings,
             ...computeChartMargins(
-              referenceLinePaddings,
+              linesPaddings,
               tickLabelsVisibilitySettings,
               axisTitlesVisibilitySettings,
               yAxesMap,
@@ -983,7 +1000,15 @@ export function XYChart({
             right: Boolean(yAxesMap.right),
           }}
           isHorizontal={shouldRotate}
-          paddingMap={referenceLinePaddings}
+          paddingMap={linesPaddings}
+        />
+      ) : null}
+      {collectiveAnnotationConfigs.length ? (
+        <Annotations
+          collectiveAnnotationConfigs={collectiveAnnotationConfigs}
+          formatter={xAxisFormatter}
+          isHorizontal={shouldRotate}
+          paddingMap={linesPaddings}
         />
       ) : null}
     </Chart>

@@ -854,7 +854,17 @@ export interface Visualization<T = unknown> {
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
-
+  /**
+   * TODO: used only for vis-only annotations
+   */
+  renderDimensionTrigger?: (props: {
+    layerId: string;
+    columnId: string;
+    state: T;
+    hideTooltip?: boolean;
+    invalid?: boolean;
+    invalidMessage?: string;
+  }) => JSX.Element | null;
   /**
    * The frame will call this function on all visualizations at different times. The
    * main use cases where visualization suggestions are requested are:
