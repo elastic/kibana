@@ -20,11 +20,9 @@ import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
-import { State, visualizationTypes, XYSuggestion } from './types';
+import { State, visualizationTypes, XYSuggestion, XYLayerConfig } from './types';
 import {
   SeriesType,
-  XYDataLayerConfig,
-  XYLayerConfig,
   YAxisMode,
   YConfigResult,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
@@ -57,7 +55,7 @@ import {
   validateLayersForDimension,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
-import { XYState } from '..';
+import { XYState, XYDataLayerConfig } from './types';
 
 export const getXyVisualization = ({
   paletteService,
@@ -183,13 +181,16 @@ export const getXyVisualization = ({
     if (isReferenceLayer(layer)) {
       return getReferenceConfiguration({ state, frame, layer, sortedAccessors, mappedAccessors });
     }
+
+    const dataLayer: XYDataLayerConfig = layer;
+
     const dataLayers = getDataLayers(state.layers);
 
     const isHorizontal = isHorizontalChart(state.layers);
     const { left, right } = groupAxesByType([layer], frame.activeData);
     // Check locally if it has one accessor OR one accessor per axis
     const layerHasOnlyOneAccessor = Boolean(
-      layer.accessors.length < 2 ||
+      dataLayer.accessors.length < 2 ||
         (left.length && left.length < 2) ||
         (right.length && right.length < 2)
     );
@@ -201,9 +202,10 @@ export const getXyVisualization = ({
         // check that the other layers are compatible with this one
         (l) => {
           if (
-            l.seriesType === layer.seriesType &&
-            Boolean(l.xAccessor) === Boolean(layer.xAccessor) &&
-            Boolean(l.splitAccessor) === Boolean(layer.splitAccessor)
+            isDataLayer(l) &&
+            l.seriesType === dataLayer.seriesType &&
+            Boolean(l.xAccessor) === Boolean(dataLayer.xAccessor) &&
+            Boolean(l.splitAccessor) === Boolean(dataLayer.splitAccessor)
           ) {
             const { left: localLeft, right: localRight } = groupAxesByType([l], frame.activeData);
             // return true only if matching axis are found
@@ -222,9 +224,9 @@ export const getXyVisualization = ({
         {
           groupId: 'x',
           groupLabel: getAxisName('x', { isHorizontal }),
-          accessors: layer.xAccessor ? [{ columnId: layer.xAccessor }] : [],
+          accessors: dataLayer.xAccessor ? [{ columnId: dataLayer.xAccessor }] : [],
           filterOperations: isBucketed,
-          supportsMoreColumns: !layer.xAccessor,
+          supportsMoreColumns: !dataLayer.xAccessor,
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
@@ -242,21 +244,21 @@ export const getXyVisualization = ({
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Break down by',
           }),
-          accessors: layer.splitAccessor
+          accessors: dataLayer.splitAccessor
             ? [
                 {
-                  columnId: layer.splitAccessor,
+                  columnId: dataLayer.splitAccessor,
                   triggerIcon: 'colorBy' as const,
                   palette: paletteService
-                    .get(layer.palette?.name || 'default')
-                    .getCategoricalColors(10, layer.palette?.params),
+                    .get(dataLayer.palette?.name || 'default')
+                    .getCategoricalColors(10, dataLayer.palette?.params),
                 },
               ]
             : [],
           filterOperations: isBucketed,
-          supportsMoreColumns: !layer.splitAccessor,
+          supportsMoreColumns: !dataLayer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: layer.seriesType.includes('percentage') && hasOnlyOneAccessor,
+          required: dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor,
           enableDimensionEditor: true,
         },
       ],
@@ -279,7 +281,7 @@ export const getXyVisualization = ({
       return setReferenceDimension(props);
     }
 
-    const newLayer = { ...foundLayer };
+    const newLayer: XYDataLayerConfig = Object.assign(foundLayer);
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
     }
@@ -386,7 +388,7 @@ export const getXyVisualization = ({
       } else if (newLayer.splitAccessor === columnId) {
         delete newLayer.splitAccessor;
         // as the palette is associated with the break down by dimension, remove it together with the dimension
-        delete newLayer.palette;
+        newLayer.palette = { type: 'palette', name: '' };
       }
     }
     if (newLayer.accessors.includes(columnId)) {

@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../../core/server';
 import { ExpressionXyPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ExpressionXyPlugin(initializerContext);
+export function plugin() {
+  return new ExpressionXyPlugin();
 }
 
 export type { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';

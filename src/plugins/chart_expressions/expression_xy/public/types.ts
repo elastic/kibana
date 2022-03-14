@@ -14,17 +14,6 @@ import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { IFieldFormat, SerializedFieldFormat } from '../../../../plugins/field_formats/common';
 import type { RangeSelectContext, ValueClickContext } from '../../../../plugins/embeddable/public';
 import { Datatable, ExpressionsServiceStart, ExpressionsSetup } from '../../../expressions/public';
-import {
-  AxesSettingsConfig,
-  AxisExtentConfig,
-  FittingFunction,
-  LabelsOrientationConfig,
-  LegendConfigResult,
-  SeriesType,
-  ValueLabelMode,
-  XYCurveType,
-  XYLayerConfig,
-} from '../common';
 
 export interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -154,29 +143,6 @@ export interface VisualizationType {
    */
   showExperimentalBadge?: boolean;
 }
-
-export interface XYState {
-  preferredSeriesType: SeriesType;
-  legend: LegendConfigResult;
-  valueLabels?: ValueLabelMode;
-  fittingFunction?: FittingFunction;
-  yLeftExtent?: AxisExtentConfig;
-  yRightExtent?: AxisExtentConfig;
-  layers: XYLayerConfig[];
-  xTitle?: string;
-  yTitle?: string;
-  yRightTitle?: string;
-  axisTitlesVisibilitySettings?: AxesSettingsConfig;
-  tickLabelsVisibilitySettings?: AxesSettingsConfig;
-  gridlinesVisibilitySettings?: AxesSettingsConfig;
-  labelsOrientation?: LabelsOrientationConfig;
-  curveType?: XYCurveType;
-  fillOpacity?: number;
-  hideEndzones?: boolean;
-  valuesInLegend?: boolean;
-}
-
-export type State = XYState;
 
 export interface AccessorConfig {
   columnId: string;

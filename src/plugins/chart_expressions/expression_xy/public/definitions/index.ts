@@ -7,4 +7,3 @@
  */
 
 export { visualizationDefinitions } from './visualizations';
-export { fittingFunctionDefinitions } from './fitting_functions';

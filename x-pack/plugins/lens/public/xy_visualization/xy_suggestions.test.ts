@@ -15,7 +15,7 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
-import { XYDataLayerConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { XYDataLayerConfig } from './types';
 
 jest.mock('../id_generator');
 
@@ -203,7 +203,6 @@ describe('xy_suggestions', () => {
             xScaleType: 'linear',
             isHistogram: false,
             palette: { type: 'palette', name: 'default' },
-            type: 'lens_xy_data_layer',
           },
           {
             layerId: 'second',
@@ -215,7 +214,6 @@ describe('xy_suggestions', () => {
             xScaleType: 'linear',
             isHistogram: false,
             palette: { type: 'palette', name: 'default' },
-            type: 'lens_xy_data_layer',
           },
         ],
       },
@@ -320,7 +318,6 @@ describe('xy_suggestions', () => {
             xScaleType: 'linear',
             isHistogram: false,
             palette: { type: 'palette', name: 'default' },
-            type: 'lens_xy_data_layer',
           },
         ],
       },
@@ -367,7 +364,6 @@ describe('xy_suggestions', () => {
             xScaleType: 'linear',
             isHistogram: false,
             palette: { type: 'palette', name: 'default' },
-            type: 'lens_xy_data_layer',
           },
           {
             layerId: 'second',
@@ -380,7 +376,6 @@ describe('xy_suggestions', () => {
             xScaleType: 'linear',
             isHistogram: false,
             palette: { type: 'palette', name: 'default' },
-            type: 'lens_xy_data_layer',
           },
         ],
       },
@@ -614,7 +609,6 @@ describe('xy_suggestions', () => {
             xScaleType: 'linear',
             isHistogram: false,
             palette: { type: 'palette', name: 'default' },
-            type: 'lens_xy_data_layer',
           },
         ],
       },
@@ -674,7 +668,6 @@ describe('xy_suggestions', () => {
           xScaleType: 'linear',
           isHistogram: false,
           palette: { type: 'palette', name: 'default' },
-          type: 'lens_xy_data_layer',
         },
       ],
     };
@@ -718,7 +711,6 @@ describe('xy_suggestions', () => {
           xScaleType: 'linear',
           isHistogram: false,
           palette: { type: 'palette', name: 'default' },
-          type: 'lens_xy_data_layer',
         },
       ],
     };
@@ -766,7 +758,6 @@ describe('xy_suggestions', () => {
           xScaleType: 'linear',
           isHistogram: false,
           palette: { type: 'palette', name: 'default' },
-          type: 'lens_xy_data_layer',
         },
       ],
     };
@@ -815,7 +806,6 @@ describe('xy_suggestions', () => {
           xScaleType: 'linear',
           isHistogram: false,
           palette: { type: 'palette', name: 'default' },
-          type: 'lens_xy_data_layer',
         },
       ],
     };
@@ -858,7 +848,6 @@ describe('xy_suggestions', () => {
           xScaleType: 'linear',
           isHistogram: false,
           palette: { type: 'palette', name: 'default' },
-          type: 'lens_xy_data_layer',
         },
       ],
     };
@@ -904,7 +893,6 @@ describe('xy_suggestions', () => {
           xScaleType: 'linear',
           isHistogram: false,
           palette: { type: 'palette', name: 'default' },
-          type: 'lens_xy_data_layer',
         },
       ],
     };
@@ -954,7 +942,6 @@ describe('xy_suggestions', () => {
           xScaleType: 'linear',
           isHistogram: false,
           palette: { type: 'palette', name: 'default' },
-          type: 'lens_xy_data_layer',
         },
       ],
     };
@@ -1005,7 +992,6 @@ describe('xy_suggestions', () => {
           xScaleType: 'linear',
           isHistogram: false,
           palette: { type: 'palette', name: 'default' },
-          type: 'lens_xy_data_layer',
         },
       ],
     };

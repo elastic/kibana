@@ -8,15 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { DatasourcePublicAPI, OperationMetadata, VisualizationType } from '../types';
-import { State, visualizationTypes, XYState } from './types';
-import { isHorizontalChart } from './state_helpers';
 import {
-  DataLayerConfigResult,
-  ReferenceLineLayerConfigResult,
-  SeriesType,
-  XYDataLayerConfig,
+  State,
+  visualizationTypes,
+  XYState,
   XYLayerConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+} from './types';
+import { isHorizontalChart } from './state_helpers';
+import { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '..';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
@@ -128,22 +129,20 @@ export function checkScaleOperation(
   };
 }
 
-export const isDataLayer = (layer: XYLayerConfig): layer is DataLayerConfigResult =>
+export const isDataLayer = (layer: XYLayerConfig): layer is XYDataLayerConfig =>
   layer.layerType === layerTypes.DATA || !layer.layerType;
 
 export const getDataLayers = (layers: XYLayerConfig[]) =>
-  (layers || []).filter((layer): layer is DataLayerConfigResult => isDataLayer(layer));
+  (layers || []).filter((layer): layer is XYDataLayerConfig => isDataLayer(layer));
 
 export const getFirstDataLayer = (layers: XYLayerConfig[]) =>
-  (layers || []).find((layer): layer is DataLayerConfigResult => isDataLayer(layer));
+  (layers || []).find((layer): layer is XYDataLayerConfig => isDataLayer(layer));
 
-export const isReferenceLayer = (layer: XYLayerConfig): layer is ReferenceLineLayerConfigResult =>
+export const isReferenceLayer = (layer: XYLayerConfig): layer is XYReferenceLineLayerConfig =>
   layer.layerType === layerTypes.REFERENCELINE;
 
 export const getReferenceLayers = (layers: XYLayerConfig[]) =>
-  (layers || []).filter((layer): layer is ReferenceLineLayerConfigResult =>
-    isReferenceLayer(layer)
-  );
+  (layers || []).filter((layer): layer is XYReferenceLineLayerConfig => isReferenceLayer(layer));
 
 export function getVisualizationType(state: State): VisualizationType | 'mixed' {
   if (!state.layers.length) {
@@ -246,7 +245,6 @@ export function newLayerState(
 ): XYLayerConfig {
   if (layerType === 'data') {
     return {
-      type: 'lens_xy_data_layer',
       layerId,
       seriesType,
       accessors: [],
@@ -259,7 +257,6 @@ export function newLayerState(
   }
 
   return {
-    type: 'lens_xy_referenceLine_layer',
     layerId,
     accessors: [],
     layerType,
@@ -274,7 +271,7 @@ export function getLayersByType(state: State, byType?: string) {
 
 export function validateLayersForDimension(
   dimension: string,
-  layers: DataLayerConfigResult[],
+  layers: XYDataLayerConfig[],
   missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
   | { valid: true }

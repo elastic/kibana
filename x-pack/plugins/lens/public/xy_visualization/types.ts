@@ -22,13 +22,28 @@ import type {
   SeriesType,
   LegendConfig,
   AxisExtentConfig,
-  XYLayerConfig,
   XYCurveType,
   AxesSettingsConfig,
   FittingFunction,
   LabelsOrientationConfig,
+  DataLayerArgs,
+  LayerType,
+  ReferenceLineLayerArgs,
+  YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import type { ValueLabelConfig } from '../../common/types';
+
+export interface XYDataLayerConfig extends Omit<DataLayerArgs, 'yConfig'> {
+  layerType: LayerType;
+  yConfig?: YConfig[];
+}
+
+export interface XYReferenceLineLayerConfig extends Omit<ReferenceLineLayerArgs, 'yConfig'> {
+  layerType: LayerType;
+  yConfig?: YConfig[];
+}
+
+export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;
 
 // Persisted parts of the state
 export interface XYState {

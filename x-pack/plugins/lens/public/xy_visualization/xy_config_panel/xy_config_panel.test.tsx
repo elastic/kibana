@@ -39,7 +39,6 @@ describe('XY Config panels', () => {
           xScaleType: 'linear',
           yScaleType: 'linear',
           isHistogram: false,
-          type: 'lens_xy_data_layer',
           palette: { type: 'palette', name: 'default' },
         },
       ],
@@ -72,7 +71,7 @@ describe('XY Config panels', () => {
             layers: [
               {
                 ...state.layers[0],
-                yConfig: [{ axisMode: 'right', forAccessor: 'bar', type: 'lens_xy_yConfig' }],
+                yConfig: [{ axisMode: 'right', forAccessor: 'bar' }],
               },
             ],
           }}
@@ -93,7 +92,7 @@ describe('XY Config panels', () => {
             layers: [
               {
                 ...state.layers[0],
-                yConfig: [{ axisMode: 'right', forAccessor: 'foo', type: 'lens_xy_yConfig' }],
+                yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
               },
             ],
           }}
@@ -118,7 +117,7 @@ describe('XY Config panels', () => {
             layers: [
               {
                 ...state.layers[0],
-                yConfig: [{ axisMode: 'right', forAccessor: 'foo', type: 'lens_xy_yConfig' }],
+                yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
               },
             ],
           }}
@@ -299,7 +298,6 @@ describe('XY Config panels', () => {
                 xScaleType: 'linear',
                 yScaleType: 'linear',
                 isHistogram: false,
-                type: 'lens_xy_data_layer',
                 palette: { type: 'palette', name: 'default' },
               },
             ],
@@ -341,11 +339,10 @@ describe('XY Config panels', () => {
                 splitAccessor: undefined,
                 xAccessor: 'foo',
                 accessors: ['bar'],
-                yConfig: [{ forAccessor: 'bar', color: 'red', type: 'lens_xy_yConfig' }],
+                yConfig: [{ forAccessor: 'bar', color: 'red' }],
                 xScaleType: 'linear',
                 yScaleType: 'linear',
                 isHistogram: false,
-                type: 'lens_xy_data_layer',
                 palette: { type: 'palette', name: 'default' },
               },
             ],

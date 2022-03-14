@@ -156,7 +156,7 @@ export interface XYArgs {
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
   valueLabels: ValueLabelMode;
-  layers: Array<DataLayerConfigResult | ReferenceLineLayerConfigResult>;
+  layers: XYLayerConfigResult[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -174,11 +174,12 @@ export interface XYReferenceLineLayerConfig {
   accessors: string[];
   yConfig?: YConfigResult[];
 }
+
 export type ReferenceLineLayerArgs = XYReferenceLineLayerConfig & {
   columnToLabel?: string;
 };
 
-export type XYLayerConfig = DataLayerConfigResult | ReferenceLineLayerConfigResult;
+export type XYLayerConfigResult = DataLayerConfigResult | ReferenceLineLayerConfigResult;
 
 export interface LensMultiTable {
   type: typeof MULTITABLE;

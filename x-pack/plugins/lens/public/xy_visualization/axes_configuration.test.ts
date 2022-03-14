@@ -275,7 +275,7 @@ describe('axes_configuration', () => {
       [
         {
           ...sampleLayer,
-          yConfig: [{ type: 'lens_xy_yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
+          yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
       false,
@@ -295,7 +295,7 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yConfig: [{ type: 'lens_xy_yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
+          yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
       false,
@@ -319,7 +319,7 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yConfig: [{ type: 'lens_xy_yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
+          yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
       false,

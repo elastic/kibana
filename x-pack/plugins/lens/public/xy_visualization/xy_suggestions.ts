@@ -16,11 +16,10 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, XYState, visualizationTypes } from './types';
+import { State, XYState, visualizationTypes, XYLayerConfig, XYDataLayerConfig } from './types';
 import type {
   DataLayerConfigResult,
   SeriesType,
-  XYLayerConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
@@ -504,12 +503,12 @@ function buildSuggestion({
   }
   const existingLayer = getExistingLayer(currentState, layerId) || null;
   const accessors = yValues.map((col) => col.columnId);
-  const newLayer: DataLayerConfigResult = {
+  const newLayer: XYDataLayerConfig = {
     ...(existingLayer || {}),
     palette:
       mainPalette ||
       (existingLayer && 'palette' in existingLayer
-        ? (existingLayer as DataLayerConfigResult).palette
+        ? (existingLayer as XYDataLayerConfig).palette
         : { type: 'palette', name: '' }),
     layerId,
     seriesType,
@@ -524,7 +523,6 @@ function buildSuggestion({
     xScaleType: (existingLayer as DataLayerConfigResult).xScaleType ?? 'linear',
     yScaleType: (existingLayer as DataLayerConfigResult).yScaleType ?? 'linear',
     isHistogram: (existingLayer as DataLayerConfigResult).isHistogram ?? false,
-    type: 'lens_xy_data_layer',
   };
 
   // Maintain consistent order for any layers that were saved

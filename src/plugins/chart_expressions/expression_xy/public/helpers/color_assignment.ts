@@ -14,7 +14,11 @@ import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state';
 import { FormatFactory } from '../types';
 import { isDataLayer, isReferenceLayer } from './visualization';
-import { DataLayerConfigResult, ReferenceLineLayerConfigResult, XYLayerConfig } from '../../common';
+import {
+  DataLayerConfigResult,
+  ReferenceLineLayerConfigResult,
+  XYLayerConfigResult,
+} from '../../common';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -29,7 +33,7 @@ export type ColorAssignments = Record<
 >;
 
 export function getColorAssignments(
-  layers: XYLayerConfig[],
+  layers: XYLayerConfigResult[],
   data: { tables: Record<string, Datatable> },
   formatFactory: FormatFactory
 ): ColorAssignments {
@@ -109,7 +113,7 @@ const getReferenceLineAccessorColorConfig = (layer: ReferenceLineLayerConfigResu
 export function getAccessorColorConfig(
   colorAssignments: ColorAssignments,
   frame: Pick<FramePublicAPI, 'datasourceLayers'>,
-  layer: XYLayerConfig,
+  layer: XYLayerConfigResult,
   paletteService: PaletteRegistry
 ): AccessorConfig[] {
   if (isReferenceLayer(layer)) {

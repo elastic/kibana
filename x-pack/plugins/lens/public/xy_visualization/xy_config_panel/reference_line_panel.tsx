@@ -57,7 +57,6 @@ export const ReferenceLinePanel = (
         newYConfigs.push({
           forAccessor: accessor,
           ...yConfig,
-          type: 'lens_xy_yConfig',
         });
       }
       setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));

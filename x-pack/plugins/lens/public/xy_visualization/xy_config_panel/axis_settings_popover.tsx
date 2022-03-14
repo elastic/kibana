@@ -20,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import {
-  XYLayerConfig,
   AxesSettingsConfig,
   AxisExtentConfig,
 } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
@@ -37,6 +36,7 @@ import { EuiIconAxisRight } from '../../assets/axis_right';
 import { EuiIconAxisTop } from '../../assets/axis_top';
 import { ToolbarButtonProps } from '../../../../../../src/plugins/kibana_react/public';
 import { validateExtent } from '../axes_configuration';
+import { XYLayerConfig } from '../types';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 

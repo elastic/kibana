@@ -44,7 +44,7 @@ import { RenderMode } from 'src/plugins/expressions';
 import { FieldFormat } from 'src/plugins/field_formats/common';
 import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
-import type { DataLayerConfigResult, SeriesType, XYChartProps, XYLayerConfig } from '../../common';
+import type { DataLayerConfigResult, SeriesType, XYChartProps } from '../../common';
 import { isHorizontalChart, getSeriesColor } from '../helpers';
 import {
   ChartsPluginSetup,
@@ -73,6 +73,7 @@ import {
   ReferenceLineAnnotations,
 } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
+import { XYLayerConfigResult } from '../../common/types';
 
 declare global {
   interface Window {
@@ -164,7 +165,7 @@ export function XYChart({
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
-  const layersById = filteredLayers.reduce<Record<string, XYLayerConfig>>((memo, layer) => {
+  const layersById = filteredLayers.reduce<Record<string, XYLayerConfigResult>>((memo, layer) => {
     memo[layer.layerId] = layer;
     return memo;
   }, {});

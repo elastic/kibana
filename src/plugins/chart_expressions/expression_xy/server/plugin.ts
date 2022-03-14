@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/server';
+import { CoreSetup, CoreStart, Plugin } from '../../../../core/server';
 
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
 import {

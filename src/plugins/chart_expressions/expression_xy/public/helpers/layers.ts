@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataLayerConfigResult, LensMultiTable, XYLayerConfig } from '../../common';
+import { DataLayerConfigResult, LensMultiTable, XYLayerConfigResult } from '../../common';
 import { isDataLayer } from './visualization';
 
-export function getFilteredLayers(layers: XYLayerConfig[], data: LensMultiTable) {
+export function getFilteredLayers(layers: XYLayerConfigResult[], data: LensMultiTable) {
   return layers.filter<DataLayerConfigResult>((layer): layer is DataLayerConfigResult => {
     if (!isDataLayer(layer)) {
       return false;

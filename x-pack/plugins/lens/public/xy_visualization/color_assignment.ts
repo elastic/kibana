@@ -13,11 +13,8 @@ import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory } from '../../common';
 import { isDataLayer, isReferenceLayer } from './visualization_helpers';
-import {
-  DataLayerConfigResult,
-  ReferenceLineLayerConfigResult,
-  XYLayerConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { DataLayerConfigResult } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { XYDataLayerConfig, XYLayerConfig, XYReferenceLineLayerConfig } from './types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -98,7 +95,7 @@ export function getColorAssignments(
   });
 }
 
-const getReferenceLineAccessorColorConfig = (layer: ReferenceLineLayerConfigResult) => {
+const getReferenceLineAccessorColorConfig = (layer: XYReferenceLineLayerConfig) => {
   return layer.accessors.map((accessor) => {
     const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     return {
@@ -118,19 +115,20 @@ export function getAccessorColorConfig(
   if (isReferenceLayer(layer)) {
     return getReferenceLineAccessorColorConfig(layer);
   }
+  const dataLayer: XYDataLayerConfig = layer;
 
-  const layerContainsSplits = Boolean(layer.splitAccessor);
-  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
+  const layerContainsSplits = Boolean(dataLayer.splitAccessor);
+  const currentPalette: PaletteOutput = dataLayer.palette || { type: 'palette', name: 'default' };
   const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
-  return layer.accessors.map((accessor) => {
-    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+  return dataLayer.accessors.map((accessor) => {
+    const currentYConfig = dataLayer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     if (layerContainsSplits) {
       return {
         columnId: accessor as string,
         triggerIcon: 'disabled',
       };
     }
-    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
+    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[dataLayer.layerId]);
     const rank = colorAssignments[currentPalette.name].getRank(
       layer,
       columnToLabel[accessor] || accessor,

@@ -11,7 +11,7 @@ import { debounce } from 'lodash';
 import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State } from '../types';
+import { State, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
 import { getSeriesColor } from '../state_helpers';
 import {
@@ -63,7 +63,8 @@ export const ColorPicker = ({
       return defaultReferenceLineColor;
     }
 
-    const datasource = frame.datasourceLayers[layer.layerId];
+    const dataLayer: XYDataLayerConfig = layer;
+    const datasource = frame.datasourceLayers[dataLayer.layerId];
     const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
 
     const colorAssignments = getColorAssignments(
@@ -75,8 +76,8 @@ export const ColorPicker = ({
       colorAssignments,
       frame,
       {
-        ...layer,
-        accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+        ...dataLayer,
+        accessors: sortedAccessors.filter((sorted) => dataLayer.accessors.includes(sorted)),
       },
       paletteService
     );
@@ -109,7 +110,6 @@ export const ColorPicker = ({
           newYConfigs.push({
             forAccessor: accessor,
             color: output.hex,
-            type: 'lens_xy_yConfig',
           });
         }
         setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));

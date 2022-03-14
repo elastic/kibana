@@ -9,9 +9,6 @@ import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { layerTypes } from '../../common';
 import type {
-  DataLayerConfigResult,
-  XYDataLayerConfig,
-  XYLayerConfig,
   YAxisMode,
   YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
@@ -19,7 +16,7 @@ import { Datatable } from '../../../../../src/plugins/expressions/public';
 import type { AccessorConfig, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
-import type { XYState } from './types';
+import type { XYState, XYLayerConfig, XYDataLayerConfig } from './types';
 import {
   checkScaleOperation,
   getAxisName,
@@ -74,7 +71,7 @@ export function getGroupsRelatedToData<T extends ReferenceLineBase>(
  * Returns a dictionary with the groups filled in all the data layers
  */
 export function getGroupsAvailableInData(
-  dataLayers: DataLayerConfigResult[],
+  dataLayers: XYDataLayerConfig[],
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   tables: Record<string, Datatable> | undefined
 ) {
@@ -90,7 +87,7 @@ export function getGroupsAvailableInData(
 }
 
 export function getStaticValue(
-  dataLayers: DataLayerConfigResult[],
+  dataLayers: XYDataLayerConfig[],
   groupId: 'x' | 'yLeft' | 'yRight',
   { activeData }: Pick<FramePublicAPI, 'activeData'>,
   layerHasNumberHistogram: (layer: XYDataLayerConfig) => boolean
@@ -126,7 +123,7 @@ export function getStaticValue(
 
 function getAccessorCriteriaForGroup(
   groupId: 'x' | 'yLeft' | 'yRight',
-  dataLayers: DataLayerConfigResult[],
+  dataLayers: XYDataLayerConfig[],
   activeData: FramePublicAPI['activeData']
 ) {
   switch (groupId) {

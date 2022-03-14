@@ -8,7 +8,7 @@
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import type { SeriesType, XYLayerConfig, YConfig, ValidLayer } from '../../common';
+import type { SeriesType, XYLayerConfigResult, YConfig, ValidLayer } from '../../common';
 import { visualizationDefinitions } from '../definitions';
 import { getDataLayers, isDataLayer } from './visualization';
 
@@ -32,7 +32,7 @@ export function isStackedChart(seriesType: SeriesType) {
   return seriesType.includes('stacked');
 }
 
-export function isHorizontalChart(layers: XYLayerConfig[]) {
+export function isHorizontalChart(layers: XYLayerConfigResult[]) {
   return getDataLayers(layers).every((l) => isHorizontalSeries(l.seriesType));
 }
 
@@ -46,7 +46,7 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
   return (definition.icon as EuiIconType) || 'empty';
 }
 
-export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
+export const getSeriesColor = (layer: XYLayerConfigResult, accessor: string) => {
   if (isDataLayer(layer) && layer.splitAccessor) {
     return null;
   }
@@ -55,7 +55,10 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   );
 };
 
-export const getColumnToLabelMap = (layer: XYLayerConfig, datasource: DatasourcePublicAPI) => {
+export const getColumnToLabelMap = (
+  layer: XYLayerConfigResult,
+  datasource: DatasourcePublicAPI
+) => {
   const columnToLabel: Record<string, string> = {};
   layer.accessors
     .concat(isDataLayer(layer) && layer.splitAccessor ? [layer.splitAccessor] : [])

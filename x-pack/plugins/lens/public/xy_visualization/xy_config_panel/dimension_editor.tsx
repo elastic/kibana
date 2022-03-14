@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State } from '../types';
+import { State, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
 import { YAxisMode } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart } from '../state_helpers';
@@ -50,10 +50,11 @@ export function DimensionEditor(
   if (isReferenceLayer(layer)) {
     return <ReferenceLinePanel {...props} />;
   }
+  const dataLayer: XYDataLayerConfig = layer;
 
   const axisMode =
-    (layer.yConfig &&
-      layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
+    (dataLayer.yConfig &&
+      dataLayer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
     'auto';
 
   if (props.groupId === 'breakdown') {
@@ -61,9 +62,9 @@ export function DimensionEditor(
       <>
         <PalettePicker
           palettes={props.paletteService}
-          activePalette={layer.palette}
+          activePalette={dataLayer.palette}
           setPalette={(newPalette) => {
-            setState(updateLayer(state, { ...layer, palette: newPalette }, index));
+            setState(updateLayer(state, { ...dataLayer, palette: newPalette }, index));
           }}
         />
       </>
@@ -125,7 +126,7 @@ export function DimensionEditor(
           idSelected={`${idPrefix}${axisMode}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as YAxisMode;
-            const newYAxisConfigs = [...(layer.yConfig || [])];
+            const newYAxisConfigs = [...(dataLayer.yConfig || [])];
             const existingIndex = newYAxisConfigs.findIndex(
               (yAxisConfig) => yAxisConfig.forAccessor === accessor
             );
@@ -138,10 +139,9 @@ export function DimensionEditor(
               newYAxisConfigs.push({
                 forAccessor: accessor,
                 axisMode: newMode,
-                type: 'lens_xy_yConfig',
               });
             }
-            setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
+            setState(updateLayer(state, { ...dataLayer, yConfig: newYAxisConfigs }, index));
           }}
         />
       </EuiFormRow>
