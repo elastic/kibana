@@ -38,10 +38,10 @@ export function registerIntegrations(
   customIntegrations.registerCustomIntegration({
     id: 'ingest_geojson',
     title: i18n.translate('xpack.maps.registerIntegrations.geojson.integrationTitle', {
-      defaultMessage: 'GeoJson',
+      defaultMessage: 'GeoJSON',
     }),
     description: i18n.translate('xpack.maps.registerIntegrations.geojson.integrationDescription', {
-      defaultMessage: 'Upload GeoJson with Maps.',
+      defaultMessage: 'Upload GeoJSON files with Elastic Maps.',
     }),
     uiInternalPath: `${getFullPath('')}#?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`,
     icons: [
@@ -62,7 +62,7 @@ export function registerIntegrations(
     description: i18n.translate(
       'xpack.maps.registerIntegrations.shapefile.integrationDescription',
       {
-        defaultMessage: 'Upload Shapefile with Maps.',
+        defaultMessage: 'Upload Shapefiles with Elastic Maps.',
       }
     ),
     uiInternalPath: `${getFullPath('')}#?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`,
