@@ -10,7 +10,7 @@ filegroup(
   name = "build_pkg_code",
   srcs = [
 <% for (const p of packages.filter(p => p.hasBuildRule())) { _%>
-    "//<%- p.repoRelativeDir %>:build",
+    "//<%- p.normalizedRepoRelativeDir %>:build",
 <% } _%>
   ],
 )
@@ -20,7 +20,7 @@ filegroup(
   name = "build_pkg_types",
   srcs = [
 <% for (const p of packages.filter(p => p.hasBuildTypesRule())) { _%>
-    "//<%- p.repoRelativeDir %>:build_types",
+    "//<%- p.normalizedRepoRelativeDir %>:build_types",
 <% } _%>
   ],
 )

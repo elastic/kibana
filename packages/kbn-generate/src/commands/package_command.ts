@@ -49,7 +49,7 @@ export const PackageCommand: GenerateCommand = {
 
     const containingDir = flags.dir ? Path.resolve(`${flags.dir}`) : ROOT_PKG_DIR;
     const packageDir = Path.resolve(containingDir, name.slice(1).replace('/', '-'));
-    const repoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
+    const normalizedRepoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
 
     try {
       await Fsp.readdir(packageDir);
@@ -107,8 +107,8 @@ export const PackageCommand: GenerateCommand = {
           name,
           web,
           dev,
-          directoryName: Path.basename(repoRelativeDir),
-          repoRelativeDir,
+          directoryName: Path.basename(normalizedRepoRelativeDir),
+          normalizedRepoRelativeDir,
         },
       });
     }
@@ -122,8 +122,8 @@ export const PackageCommand: GenerateCommand = {
       ? [packageJson.devDependencies, packageJson.dependencies]
       : [packageJson.dependencies, packageJson.devDependencies];
 
-    addDeps[name] = `link:bazel-bin/${repoRelativeDir}`;
-    addDeps[typePkgName] = `link:bazel-bin/${repoRelativeDir}/npm_module_types`;
+    addDeps[name] = `link:bazel-bin/${normalizedRepoRelativeDir}`;
+    addDeps[typePkgName] = `link:bazel-bin/${normalizedRepoRelativeDir}/npm_module_types`;
     delete removeDeps[name];
     delete removeDeps[typePkgName];
 

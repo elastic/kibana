@@ -10,6 +10,7 @@ import { inspect } from 'util';
 import Path from 'path';
 import Fsp from 'fs/promises';
 
+import normalizePath from 'normalize-path';
 import { REPO_ROOT } from '@kbn/utils';
 
 const BUILD_RULE_NAME = /(^|\s)name\s*=\s*"build"/;
@@ -67,14 +68,14 @@ export class BazelPackage {
       }
     }
 
-    return new BazelPackage(Path.relative(REPO_ROOT, dir), pkg, buildBazelContent);
+    return new BazelPackage(normalizePath(Path.relative(REPO_ROOT, dir)), pkg, buildBazelContent);
   }
 
   constructor(
     /**
      * Relative path from the root of the repository to the package directory
      */
-    public readonly repoRelativeDir: string,
+    public readonly normalizedRepoRelativeDir: string,
     /**
      * Parsed package.json file from the package
      */
@@ -104,6 +105,6 @@ export class BazelPackage {
    * print all the BUILD.bazel files
    */
   [inspect.custom]() {
-    return `BazelPackage<${this.repoRelativeDir}>`;
+    return `BazelPackage<${this.normalizedRepoRelativeDir}>`;
   }
 }
