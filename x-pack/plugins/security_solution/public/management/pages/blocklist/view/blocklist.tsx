@@ -39,7 +39,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
     defaultMessage: 'Blocklist',
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.blocklist.pageAboutInfo', {
-    defaultMessage: 'Add a blocklist to block applications or files from running.',
+    defaultMessage: 'Add a blocklist to block applications or files from running on the endpoint.',
   }),
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageAddButtonTitle', {
     defaultMessage: 'Add blocklist entry',
