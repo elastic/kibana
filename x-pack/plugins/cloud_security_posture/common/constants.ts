@@ -24,7 +24,6 @@ export const RULE_FAILED = `failed`;
 export const INTERNAL_FEATURE_FLAGS = {
   showBenchmarks: false,
   showTrendLineMock: false,
-  showClusterMetaMock: false,
   showManageRulesMock: false,
   showRisksMock: false,
 } as const;

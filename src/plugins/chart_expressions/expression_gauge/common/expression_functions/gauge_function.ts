@@ -7,10 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { findAccessorOrFail } from '../../../../visualizations/common/utils';
-import type { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { prepareLogTable } from '../../../../visualizations/common/utils';
-import type { DatatableColumn } from '../../../../expressions';
+import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
 import { validateOptions } from '../../../../charts/common';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
@@ -69,15 +66,6 @@ const strings = {
     i18n.translate('expressionGauge.logDatatable.goal', {
       defaultMessage: 'Goal',
     }),
-};
-
-const validateAccessor = (
-  accessor: string | undefined | ExpressionValueVisDimension,
-  columns: DatatableColumn[]
-) => {
-  if (accessor && typeof accessor === 'string') {
-    findAccessorOrFail(accessor, columns);
-  }
 };
 
 export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
