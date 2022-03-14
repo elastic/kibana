@@ -169,7 +169,6 @@ export const useFieldTableColumns: UseFieldTableColumns = ({
           ),
           sortable: true,
           width: '115px',
-          // width: actions.length > 0 ? '130px' : '160px',
         },
         ...(actions.length > 0
           ? [
