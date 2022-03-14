@@ -10,7 +10,7 @@ import { fireEvent, act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { HostsInput } from '.';
+import { MultiRowInput } from '.';
 
 function renderInput(
   value = ['http://host1.com'],
@@ -20,7 +20,7 @@ function renderInput(
   const renderer = createFleetTestRendererMock();
 
   const utils = renderer.render(
-    <HostsInput
+    <MultiRowInput
       value={value}
       errors={errors}
       label="HOST LABEL"
@@ -45,9 +45,9 @@ test('it should allow to remove an host', async () => {
   const { utils, mockOnChange } = renderInput(['http://host1.com', 'http://host2.com']);
 
   await act(async () => {
-    const deleteRowEl = await utils.container.querySelector('[aria-label="Delete host"]');
+    const deleteRowEl = await utils.container.querySelector('[aria-label="Delete row"]');
     if (!deleteRowEl) {
-      throw new Error('Delete host button not found');
+      throw new Error('Delete row button not found');
     }
     fireEvent.click(deleteRowEl);
   });
@@ -115,7 +115,7 @@ test('Should remove error when item deleted', async () => {
 
   mockOnChange.mockImplementation((newValue) => {
     utils.rerender(
-      <HostsInput
+      <MultiRowInput
         value={newValue}
         errors={errors}
         label="HOST LABEL"
@@ -127,9 +127,9 @@ test('Should remove error when item deleted', async () => {
   });
 
   await act(async () => {
-    const deleteRowButtons = await utils.container.querySelectorAll('[aria-label="Delete host"]');
+    const deleteRowButtons = await utils.container.querySelectorAll('[aria-label="Delete row"]');
     if (deleteRowButtons.length !== 3) {
-      throw new Error('Delete host buttons not found');
+      throw new Error('Delete row buttons not found');
     }
 
     fireEvent.click(deleteRowButtons[1]);

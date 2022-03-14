@@ -15,18 +15,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
-import { Process, ProcessEvent } from '../../../common/types/process_tree';
+import { Process } from '../../../common/types/process_tree';
+import { SessionViewDeps } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { useStyles } from './styles';
 import { useFetchSessionViewProcessEvents } from './hooks';
-
-interface SessionViewDeps {
-  // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
-  sessionEntityId: string;
-  height?: number;
-  jumpToEvent?: ProcessEvent;
-}
 
 /**
  * The main wrapper component for the session view.
