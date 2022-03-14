@@ -60,16 +60,16 @@ const changeAlertsStatusToClose = async (
     },
   })) as SavedObjectsFindResponse<CommentRequestAlertType>;
 
-  await alertsService.updateAlertsStatus(
-    alertAttachments.saved_objects
-      .map((attachment) =>
-        createAlertUpdateRequest({
-          comment: attachment.attributes,
-          status: CaseStatuses.closed,
-        })
-      )
-      .flat()
-  );
+  const alerts = alertAttachments.saved_objects
+    .map((attachment) =>
+      createAlertUpdateRequest({
+        comment: attachment.attributes,
+        status: CaseStatuses.closed,
+      })
+    )
+    .flat();
+
+  await alertsService.updateAlertsStatus(alerts);
 };
 
 /**
