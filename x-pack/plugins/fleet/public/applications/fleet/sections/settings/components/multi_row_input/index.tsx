@@ -23,13 +23,14 @@ import {
   EuiFormHelpText,
   euiDragDropReorder,
   EuiFormErrorText,
+  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
-export interface HostInputProps {
+export interface MultiRowInputProps {
   id: string;
   value: string[];
   onChange: (newValue: string[]) => void;
@@ -38,17 +39,35 @@ export interface HostInputProps {
   errors?: Array<{ message: string; index?: number }>;
   isInvalid?: boolean;
   disabled?: boolean;
+  placeholder?: string;
+  multiline?: boolean;
+  sortable?: boolean;
 }
 
 interface SortableTextFieldProps {
   id: string;
   index: number;
   value: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onDelete: (index: number) => void;
   errors?: string[];
   autoFocus?: boolean;
   disabled?: boolean;
+  placeholder?: string;
+  multiline?: boolean;
+}
+
+interface NonSortableTextFieldProps {
+  index: number;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onDelete: (index: number) => void;
+  errors?: string[];
+  autoFocus?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  multiline?: boolean;
+  deletable?: boolean;
 }
 
 const DraggableDiv = sytled.div`
@@ -64,7 +83,18 @@ function displayErrors(errors?: string[]) {
 }
 
 const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
-  ({ id, index, value, onChange, onDelete, autoFocus, errors, disabled }) => {
+  ({
+    id,
+    index,
+    multiline,
+    value,
+    onChange,
+    onDelete,
+    placeholder,
+    autoFocus,
+    errors,
+    disabled,
+  }) => {
     const onDeleteHandler = useCallback(() => {
       onDelete(index);
     }, [onDelete, index]);
@@ -106,17 +136,27 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
               </DraggableDiv>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFieldText
-                fullWidth
-                value={value}
-                onChange={onChange}
-                autoFocus={autoFocus}
-                isInvalid={isInvalid}
-                disabled={disabled}
-                placeholder={i18n.translate('xpack.fleet.hostsInput.placeholder', {
-                  defaultMessage: 'Specify host URL',
-                })}
-              />
+              {multiline ? (
+                <EuiTextArea
+                  fullWidth
+                  value={value}
+                  onChange={onChange}
+                  autoFocus={autoFocus}
+                  isInvalid={isInvalid}
+                  disabled={disabled}
+                  placeholder={placeholder}
+                />
+              ) : (
+                <EuiFieldText
+                  fullWidth
+                  value={value}
+                  onChange={onChange}
+                  autoFocus={autoFocus}
+                  isInvalid={isInvalid}
+                  disabled={disabled}
+                  placeholder={placeholder}
+                />
+              )}
               {displayErrors(errors)}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -125,8 +165,8 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
                 onClick={onDeleteHandler}
                 iconType="cross"
                 disabled={disabled}
-                aria-label={i18n.translate('xpack.fleet.settings.deleteHostButton', {
-                  defaultMessage: 'Delete host',
+                aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
+                  defaultMessage: 'Delete row',
                 })}
               />
             </EuiFlexItem>
@@ -137,7 +177,74 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
   }
 );
 
-export const HostsInput: FunctionComponent<HostInputProps> = ({
+const NonSortableTextField: FunctionComponent<NonSortableTextFieldProps> = React.memo(
+  ({
+    index,
+    deletable,
+    multiline,
+    value,
+    onChange,
+    onDelete,
+    placeholder,
+    autoFocus,
+    errors,
+    disabled,
+  }) => {
+    const onDeleteHandler = useCallback(() => {
+      onDelete(index);
+    }, [onDelete, index]);
+
+    const isInvalid = (errors?.length ?? 0) > 0;
+
+    return (
+      <>
+        {index > 0 && <EuiSpacer size="s" />}
+
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem>
+            {multiline ? (
+              <EuiTextArea
+                fullWidth
+                value={value}
+                onChange={onChange}
+                autoFocus={autoFocus}
+                isInvalid={isInvalid}
+                disabled={disabled}
+                placeholder={placeholder}
+              />
+            ) : (
+              <EuiFieldText
+                fullWidth
+                value={value}
+                onChange={onChange}
+                autoFocus={autoFocus}
+                isInvalid={isInvalid}
+                disabled={disabled}
+                placeholder={placeholder}
+              />
+            )}
+            {displayErrors(errors)}
+          </EuiFlexItem>
+          {deletable && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                color="text"
+                onClick={onDeleteHandler}
+                iconType="cross"
+                disabled={disabled}
+                aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
+                  defaultMessage: 'Delete row',
+                })}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </>
+    );
+  }
+);
+
+export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
   id,
   value: valueFromProps,
   onChange,
@@ -146,6 +253,9 @@ export const HostsInput: FunctionComponent<HostInputProps> = ({
   isInvalid,
   errors,
   disabled,
+  placeholder,
+  multiline = false,
+  sortable = true,
 }) => {
   const [autoFocus, setAutoFocus] = useState(false);
   const value = useMemo(() => {
@@ -156,7 +266,7 @@ export const HostsInput: FunctionComponent<HostInputProps> = ({
     () =>
       value.map((host, idx) => ({
         value: host,
-        onChange: (e: ChangeEvent<HTMLInputElement>) => {
+        onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
           const newValue = [...value];
           newValue[idx] = e.target.value;
 
@@ -215,17 +325,19 @@ export const HostsInput: FunctionComponent<HostInputProps> = ({
     return errors && errors.filter((err) => err.index === undefined).map(({ message }) => message);
   }, [errors]);
 
-  const isSortable = rows.length > 1;
+  const isSortable = sortable && rows.length > 1;
+
   return (
     <EuiFormRow fullWidth label={label} isInvalid={isInvalid}>
       <>
         <EuiFormHelpText>{helpText}</EuiFormHelpText>
         {helpText && <EuiSpacer size="m" />}
-        <EuiDragDropContext onDragEnd={onDragEndHandler}>
-          <EuiDroppable droppableId={`${id}Droppable`} spacing="none">
-            {rows.map((row, idx) => (
-              <React.Fragment key={idx}>
-                {isSortable ? (
+
+        {isSortable ? (
+          <EuiDragDropContext onDragEnd={onDragEndHandler}>
+            <EuiDroppable droppableId={`${id}Droppable`} spacing="none">
+              {rows.map((row, idx) => (
+                <React.Fragment key={idx}>
                   <SortableTextField
                     id={`${id}${idx}Draggable`}
                     index={idx}
@@ -235,26 +347,29 @@ export const HostsInput: FunctionComponent<HostInputProps> = ({
                     autoFocus={autoFocus}
                     errors={indexedErrors[idx]}
                     disabled={disabled}
+                    placeholder={placeholder}
                   />
-                ) : (
-                  <>
-                    <EuiFieldText
-                      fullWidth
-                      value={row.value}
-                      onChange={row.onChange}
-                      isInvalid={!!indexedErrors[idx]}
-                      placeholder={i18n.translate('xpack.fleet.hostsInput.placeholder', {
-                        defaultMessage: 'Specify host URL',
-                      })}
-                      disabled={disabled}
-                    />
-                    {displayErrors(indexedErrors[idx])}
-                  </>
-                )}
-              </React.Fragment>
-            ))}
-          </EuiDroppable>
-        </EuiDragDropContext>
+                </React.Fragment>
+              ))}
+            </EuiDroppable>
+          </EuiDragDropContext>
+        ) : (
+          rows.map((row, idx) => (
+            <NonSortableTextField
+              key={idx}
+              multiline={multiline}
+              index={idx}
+              onChange={row.onChange}
+              onDelete={onDelete}
+              value={row.value}
+              autoFocus={autoFocus}
+              errors={indexedErrors[idx]}
+              disabled={disabled}
+              placeholder={placeholder}
+              deletable={rows.length > 1}
+            />
+          ))
+        )}
         {displayErrors(globalErrors)}
         <EuiSpacer size="m" />
         <EuiButtonEmpty
@@ -264,7 +379,7 @@ export const HostsInput: FunctionComponent<HostInputProps> = ({
           iconType="plusInCircle"
           onClick={addRowHandler}
         >
-          <FormattedMessage id="xpack.fleet.hostsInput.addRow" defaultMessage="Add row" />
+          <FormattedMessage id="xpack.fleet.multiRowInput.addRow" defaultMessage="Add row" />
         </EuiButtonEmpty>
       </>
     </EuiFormRow>
