@@ -8,9 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
+import { ThemeServiceStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ThemeServiceStart } from '../../../../kibana/public';
 import { ChartsPluginStart, PaletteRegistry } from '../../../../charts/public';
 import { ExpressionRenderDefinition } from '../../../../expressions';
 import { FormatFactory } from '../../../../field_formats/common';
