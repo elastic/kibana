@@ -109,7 +109,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
   return (
     <Chart size={['100%', 50]}>
       <Settings
-        // TODO use the EUI charts theme
+        // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
         rotation={90}
         tooltip={{
           headerFormatter: ({ value }) =>

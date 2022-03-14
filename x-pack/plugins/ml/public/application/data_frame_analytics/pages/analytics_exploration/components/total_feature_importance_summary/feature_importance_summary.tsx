@@ -289,7 +289,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
               >
                 <Settings
                   rotation={90}
-                  // TODO use the EUI charts theme
+                  // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                   theme={theme}
                   showLegend={showLegend}
                 />
