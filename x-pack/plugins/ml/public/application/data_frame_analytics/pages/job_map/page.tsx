@@ -28,7 +28,7 @@ export const Page: FC = () => {
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   const mapJobId = globalState?.ml?.jobId;
   const mapModelId = globalState?.ml?.modelId;
-  const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds | undefined>();
+  const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds>();
   const {
     services: { docLinks },
   } = useMlKibana();
