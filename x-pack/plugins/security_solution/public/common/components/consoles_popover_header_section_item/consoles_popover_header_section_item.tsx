@@ -8,6 +8,8 @@
 import React, { memo, useState, useCallback, useMemo } from 'react';
 import { EuiHeaderSectionItem, EuiHeaderSectionItemButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../user_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const LABELS = Object.freeze({
   buttonLabel: i18n.translate('xpack.securitySolution.consolesPopoverHeaderItem.buttonLabel', {
@@ -62,6 +64,12 @@ const ConsolesPopover = memo(() => {
 ConsolesPopover.displayName = 'ConsolesPopover';
 
 export const ConsolesPopoverHeaderSectionItem = memo((props) => {
-  return <ConsolesPopover />;
+  const canAccessEndpointManagement =
+    useUserPrivileges().endpointPrivileges.canAccessEndpointManagement;
+  const isExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsConsoleEnabled'
+  );
+
+  return canAccessEndpointManagement && isExperimentalFeatureEnabled ? <ConsolesPopover /> : null;
 });
 ConsolesPopoverHeaderSectionItem.displayName = 'ConsolesPopoverHeaderSectionItem';
