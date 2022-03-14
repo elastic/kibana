@@ -145,8 +145,12 @@ export const EditConnector = React.memo(
     // only enable the save button if changes were made to the previous selected
     // connector or its fields
     useEffect(() => {
+      // null and none are equivalent to `no connector`.
+      // This makes sure we don't enable the button when the "no connector" option is selected
+      // by default. e.g. when a case is created without a selector
+      const isNoConnectorDeafultValue = currentConnector === null && selectedConnector === 'none';
       const enable =
-        (currentConnector !== undefined && currentConnector?.id !== selectedConnector) ||
+        (!isNoConnectorDeafultValue && currentConnector?.id !== selectedConnector) ||
         !deepEqual(fields, caseFields);
       setEnableSave(enable);
     }, [caseFields, currentConnector, fields, selectedConnector]);
