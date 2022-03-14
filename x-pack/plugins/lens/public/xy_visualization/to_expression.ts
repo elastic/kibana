@@ -17,7 +17,6 @@ import type {
   XYReferenceLineLayerConfig,
   YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { layerTypes } from '../../common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
@@ -147,7 +146,7 @@ export const buildExpression = (
     chain: [
       {
         type: 'function',
-        function: 'lens_xy_chart',
+        function: 'xyVis',
         arguments: {
           title: [attributes?.title || ''],
           description: [attributes?.description || ''],
@@ -160,7 +159,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_legendConfig',
+                  function: 'legendConfig',
                   arguments: {
                     isVisible: [state.legend.isVisible],
                     showSingleSeries: state.legend.showSingleSeries
@@ -199,7 +198,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_axisExtentConfig',
+                  function: 'axisExtentConfig',
                   arguments: {
                     mode: [state?.yLeftExtent?.mode || 'full'],
                     lowerBound:
@@ -221,7 +220,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_axisExtentConfig',
+                  function: 'axisExtentConfig',
                   arguments: {
                     mode: [state?.yRightExtent?.mode || 'full'],
                     lowerBound:
@@ -243,7 +242,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_axisTitlesVisibilityConfig',
+                  function: 'axisTitlesVisibilityConfig',
                   arguments: {
                     x: [state?.axisTitlesVisibilitySettings?.x ?? true],
                     yLeft: [state?.axisTitlesVisibilitySettings?.yLeft ?? true],
@@ -259,7 +258,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_tickLabelsConfig',
+                  function: 'tickLabelsConfig',
                   arguments: {
                     x: [state?.tickLabelsVisibilitySettings?.x ?? true],
                     yLeft: [state?.tickLabelsVisibilitySettings?.yLeft ?? true],
@@ -275,7 +274,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_gridlinesConfig',
+                  function: 'gridlinesConfig',
                   arguments: {
                     x: [state?.gridlinesVisibilitySettings?.x ?? true],
                     yLeft: [state?.gridlinesVisibilitySettings?.yLeft ?? true],
@@ -291,7 +290,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_labelsOrientationConfig',
+                  function: 'labelsOrientationConfig',
                   arguments: {
                     x: [state?.labelsOrientation?.x ?? 0],
                     yLeft: [state?.labelsOrientation?.yLeft ?? 0],
@@ -333,7 +332,7 @@ const referenceLineLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'lens_xy_referenceLine_layer',
+        function: 'referenceLineLayer',
         arguments: {
           layerId: [layer.layerId],
           yConfig: layer.yConfig
@@ -341,7 +340,6 @@ const referenceLineLayerToExpression = (
                 yConfigToExpression(yConfig, defaultReferenceLineColor)
               )
             : [],
-          layerType: [layerTypes.REFERENCELINE],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
         },
@@ -372,7 +370,7 @@ const dataLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'lens_xy_data_layer',
+        function: 'dataLayer',
         arguments: {
           layerId: [layer.layerId],
           hide: [Boolean(layer.hide)],
@@ -387,7 +385,6 @@ const dataLayerToExpression = (
             ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig))
             : [],
           seriesType: [layer.seriesType],
-          layerType: [layerTypes.DATA],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
           ...(layer.palette
@@ -425,7 +422,7 @@ const yConfigToExpression = (yConfig: YConfig, defaultColor?: string): Ast => {
     chain: [
       {
         type: 'function',
-        function: 'lens_xy_yConfig',
+        function: 'yConfig',
         arguments: {
           forAccessor: [yConfig.forAccessor],
           axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],

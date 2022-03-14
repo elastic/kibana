@@ -127,6 +127,7 @@ export function getAccessorColorConfig(
         triggerIcon: 'disabled',
       };
     }
+
     const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[dataLayer.layerId]);
     const rank = colorAssignments[currentPalette.name].getRank(
       layer,

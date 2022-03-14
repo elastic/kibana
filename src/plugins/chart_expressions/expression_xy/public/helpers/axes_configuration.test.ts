@@ -221,7 +221,7 @@ describe('axes_configuration', () => {
   };
 
   const sampleLayer: DataLayerConfigResult = {
-    type: 'lens_xy_data_layer',
+    type: 'dataLayer',
     layerId: 'first',
     layerType: LayerTypes.DATA,
     seriesType: 'line',
@@ -276,7 +276,7 @@ describe('axes_configuration', () => {
       [
         {
           ...sampleLayer,
-          yConfig: [{ type: 'lens_xy_yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
+          yConfig: [{ type: 'yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
       false,
@@ -296,7 +296,7 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yConfig: [{ type: 'lens_xy_yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
+          yConfig: [{ type: 'yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
       false,
@@ -320,7 +320,7 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yConfig: [{ type: 'lens_xy_yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
+          yConfig: [{ type: 'yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
       false,

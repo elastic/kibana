@@ -47,7 +47,7 @@ export const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable =
 });
 
 export const sampleLayer: DataLayerConfigResult = {
-  type: 'lens_xy_data_layer',
+  type: 'dataLayer',
   layerId: 'first',
   layerType: LayerTypes.DATA,
   seriesType: 'line',
@@ -66,43 +66,43 @@ export const createArgsWithLayers = (layers: DataLayerConfigResult[] = [sampleLa
   yTitle: '',
   yRightTitle: '',
   legend: {
-    type: 'lens_xy_legendConfig',
+    type: 'legendConfig',
     isVisible: false,
     position: Position.Top,
   },
   valueLabels: 'hide',
   valuesInLegend: false,
   axisTitlesVisibilitySettings: {
-    type: 'lens_xy_axisTitlesVisibilityConfig',
+    type: 'axisTitlesVisibilityConfig',
     x: true,
     yLeft: true,
     yRight: true,
   },
   tickLabelsVisibilitySettings: {
-    type: 'lens_xy_tickLabelsConfig',
+    type: 'tickLabelsConfig',
     x: true,
     yLeft: false,
     yRight: false,
   },
   labelsOrientation: {
-    type: 'lens_xy_labelsOrientationConfig',
+    type: 'labelsOrientationConfig',
     x: 0,
     yLeft: -90,
     yRight: -45,
   },
   gridlinesVisibilitySettings: {
-    type: 'lens_xy_gridlinesConfig',
+    type: 'gridlinesConfig',
     x: true,
     yLeft: false,
     yRight: false,
   },
   yLeftExtent: {
     mode: 'full',
-    type: 'lens_xy_axisExtentConfig',
+    type: 'axisExtentConfig',
   },
   yRightExtent: {
     mode: 'full',
-    type: 'lens_xy_axisExtentConfig',
+    type: 'axisExtentConfig',
   },
   layers,
 });

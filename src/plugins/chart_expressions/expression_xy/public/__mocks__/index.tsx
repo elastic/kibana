@@ -167,7 +167,7 @@ export const dateHistogramData: LensMultiTable = {
 };
 
 export const dateHistogramLayer: DataLayerConfigResult = {
-  type: 'lens_xy_data_layer',
+  type: 'dataLayer',
   layerId: 'timeLayer',
   layerType: LayerTypes.DATA,
   hide: false,
@@ -216,7 +216,7 @@ export function sampleArgsWithReferenceLine(value: number = 150) {
           palette: mockPaletteOutput,
           isHistogram: false,
           hide: true,
-          yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'lens_xy_yConfig' }],
+          yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'yConfig' }],
         },
       ],
     } as XYArgs,

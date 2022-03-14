@@ -18,6 +18,7 @@ import {
 } from '../expression_functions';
 import { createMockExecutionContext } from '../../../../../plugins/expressions/common/mocks';
 import { mockPaletteOutput, sampleArgs } from '../__mocks__';
+import { LayerTypes } from '../constants';
 
 describe('xy_expression', () => {
   describe('configs', () => {
@@ -30,12 +31,12 @@ describe('xy_expression', () => {
       const result = legendConfigFunction.fn(null, args, createMockExecutionContext());
 
       expect(result).toEqual({
-        type: 'lens_xy_legendConfigFunction',
+        type: 'legendConfig',
         ...args,
       });
     });
 
-    test('dataLayerConfigFunction produces the correct arguments', () => {
+    test('dataLayerConfig produces the correct arguments', () => {
       const args: DataLayerArgs = {
         layerId: 'first',
         seriesType: 'line',
@@ -51,7 +52,8 @@ describe('xy_expression', () => {
       const result = dataLayerConfigFunction.fn(null, args, createMockExecutionContext());
 
       expect(result).toEqual({
-        type: 'lens_xy_data_layer',
+        type: 'dataLayer',
+        layerType: LayerTypes.DATA,
         ...args,
       });
     });
@@ -67,7 +69,7 @@ describe('xy_expression', () => {
     const result = tickLabelsConfigFunction.fn(null, args, createMockExecutionContext());
 
     expect(result).toEqual({
-      type: 'lens_xy_tickLabelsConfigFunction',
+      type: 'tickLabelsConfig',
       ...args,
     });
   });
@@ -82,7 +84,7 @@ describe('xy_expression', () => {
     const result = gridlinesConfigFunction.fn(null, args, createMockExecutionContext());
 
     expect(result).toEqual({
-      type: 'lens_xy_gridlinesConfigFunction',
+      type: 'gridlinesConfig',
       ...args,
     });
   });
@@ -97,7 +99,7 @@ describe('xy_expression', () => {
     const result = labelsOrientationConfigFunction.fn(null, args, createMockExecutionContext());
 
     expect(result).toEqual({
-      type: 'lens_xy_labelsOrientationConfigFunction',
+      type: 'labelsOrientationConfig',
       ...args,
     });
   });
@@ -109,7 +111,7 @@ describe('xy_expression', () => {
 
       expect(result).toEqual({
         type: 'render',
-        as: 'lens_xy_chart_renderer',
+        as: 'xyVis',
         value: { data, args },
       });
     });

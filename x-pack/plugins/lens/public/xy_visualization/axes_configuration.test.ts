@@ -220,7 +220,7 @@ describe('axes_configuration', () => {
   };
 
   const sampleLayer: DataLayerConfigResult = {
-    type: 'lens_xy_data_layer',
+    type: 'dataLayer',
     layerId: 'first',
     layerType: layerTypes.DATA,
     seriesType: 'line',

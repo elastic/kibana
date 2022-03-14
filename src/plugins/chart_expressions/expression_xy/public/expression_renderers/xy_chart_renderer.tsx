@@ -37,7 +37,7 @@ interface XyChartRendererDeps {
 export const getXyChartRenderer = ({
   getStartDeps,
 }: XyChartRendererDeps): ExpressionRenderDefinition<XYChartProps> => ({
-  name: 'lens_xy_chart_renderer',
+  name: 'xyVis',
   displayName: 'XY chart',
   help: i18n.translate('xpack.lens.xyChart.renderer.help', {
     defaultMessage: 'X/Y chart renderer',

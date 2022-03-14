@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-export const XY_CHART = 'lens_xy_chart';
-export const Y_CONFIG = 'lens_xy_yConfig';
+export const XY_CHART = 'xyVis';
+export const Y_CONFIG = 'yConfig';
 export const MULTITABLE = 'lens_multitable';
-export const DATA_LAYER = 'lens_xy_data_layer';
-export const LEGEND_CONFIG = 'lens_xy_legendConfig';
-export const XY_CHART_RENDERER = 'lens_xy_chart_renderer';
-export const GRID_LINES_CONFIG = 'lens_xy_gridlinesConfig';
-export const TICK_LABELS_CONFIG = 'lens_xy_tickLabelsConfig';
-export const AXIS_EXTENT_CONFIG = 'lens_xy_axisExtentConfig';
-export const REFERENCE_LINE_LAYER = 'lens_xy_referenceLine_layer';
-export const LABELS_ORIENTATION_CONFIG = 'lens_xy_labelsOrientationConfig';
-export const AXIS_TITLES_VISIBILITY_CONFIG = 'lens_xy_axisTitlesVisibilityConfig';
+export const DATA_LAYER = 'dataLayer';
+export const LEGEND_CONFIG = 'legendConfig';
+export const XY_CHART_RENDERER = 'xyVis';
+export const GRID_LINES_CONFIG = 'gridlinesConfig';
+export const TICK_LABELS_CONFIG = 'tickLabelsConfig';
+export const AXIS_EXTENT_CONFIG = 'axisExtentConfig';
+export const REFERENCE_LINE_LAYER = 'referenceLineLayer';
+export const LABELS_ORIENTATION_CONFIG = 'labelsOrientationConfig';
+export const AXIS_TITLES_VISIBILITY_CONFIG = 'axisTitlesVisibilityConfig';
 
 export const LayerTypes = {
   DATA: 'data',

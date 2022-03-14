@@ -137,6 +137,7 @@ export function LayerPanel(
       activeVisualization,
     ]
   );
+
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
 
@@ -207,6 +208,7 @@ export function LayerPanel(
             previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
           }
         }
+
         const newVisState = setDimension({
           columnId,
           groupId,
@@ -445,7 +447,6 @@ export function LayerPanel(
                     <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
-
                         return (
                           <DraggableDimensionButton
                             registerNewButtonRef={registerNewButtonRef}

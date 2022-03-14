@@ -128,7 +128,7 @@ describe('XYChart component', () => {
             {
               ...args.layers[0],
               seriesType: 'line',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
             } as DataLayerConfigResult,
           ],
         }}
@@ -142,7 +142,7 @@ describe('XYChart component', () => {
 
   describe('date range', () => {
     const timeSampleLayer: DataLayerConfigResult = {
-      type: 'lens_xy_data_layer',
+      type: 'dataLayer',
       layerId: 'first',
       layerType: LayerTypes.DATA,
       seriesType: 'line',
@@ -204,7 +204,7 @@ describe('XYChart component', () => {
                 ...args.layers[0],
                 seriesType: 'line',
                 xScaleType: 'time',
-                type: 'lens_xy_data_layer',
+                type: 'dataLayer',
               } as DataLayerConfigResult,
             ],
           }}
@@ -243,7 +243,7 @@ describe('XYChart component', () => {
 
     describe('axis time', () => {
       const defaultTimeLayer: DataLayerConfigResult = {
-        type: 'lens_xy_data_layer',
+        type: 'dataLayer',
         layerId: 'first',
         layerType: LayerTypes.DATA,
         seriesType: 'line',
@@ -397,7 +397,7 @@ describe('XYChart component', () => {
         layers: [
           {
             ...args.layers[0],
-            type: 'lens_xy_data_layer',
+            type: 'dataLayer',
             seriesType: 'line',
             xScaleType: 'time',
             isHistogram: true,
@@ -474,7 +474,7 @@ describe('XYChart component', () => {
               layers: [
                 {
                   ...args.layers[0],
-                  type: 'lens_xy_data_layer',
+                  type: 'dataLayer',
                   layerType: 'data',
                   seriesType: 'bar',
                   xScaleType: 'time',
@@ -521,7 +521,7 @@ describe('XYChart component', () => {
           args={{
             ...args,
             yLeftExtent: {
-              type: 'lens_xy_axisExtentConfig',
+              type: 'axisExtentConfig',
               mode: 'custom',
               lowerBound: 123,
               upperBound: 456,
@@ -546,7 +546,7 @@ describe('XYChart component', () => {
           args={{
             ...args,
             yLeftExtent: {
-              type: 'lens_xy_axisExtentConfig',
+              type: 'axisExtentConfig',
               mode: 'dataBounds',
             },
           }}
@@ -569,7 +569,7 @@ describe('XYChart component', () => {
           args={{
             ...args,
             yLeftExtent: {
-              type: 'lens_xy_axisExtentConfig',
+              type: 'axisExtentConfig',
               mode: 'dataBounds',
             },
             layers: [
@@ -577,7 +577,7 @@ describe('XYChart component', () => {
                 ...args.layers[0],
                 layerType: 'data',
                 seriesType: 'area',
-                type: 'lens_xy_data_layer',
+                type: 'dataLayer',
                 xScaleType: 'linear',
                 yScaleType: 'linear',
                 isHistogram: false,
@@ -604,7 +604,7 @@ describe('XYChart component', () => {
           args={{
             ...args,
             yLeftExtent: {
-              type: 'lens_xy_axisExtentConfig',
+              type: 'axisExtentConfig',
               mode: 'custom',
               lowerBound: 123,
               upperBound: 456,
@@ -613,7 +613,7 @@ describe('XYChart component', () => {
               {
                 ...args.layers[0],
                 seriesType: 'bar',
-                type: 'lens_xy_data_layer',
+                type: 'dataLayer',
                 layerType: 'data',
                 xScaleType: 'linear',
                 yScaleType: 'linear',
@@ -652,7 +652,7 @@ describe('XYChart component', () => {
           args={{
             ...args,
             yLeftExtent: {
-              type: 'lens_xy_axisExtentConfig',
+              type: 'axisExtentConfig',
               mode: 'custom',
               lowerBound: 123,
               upperBound: 456,
@@ -699,7 +699,7 @@ describe('XYChart component', () => {
               ...args.layers[0],
               seriesType: 'line',
               xScaleType: 'linear',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: 'data',
               yScaleType: 'linear',
               isHistogram: false,
@@ -729,7 +729,7 @@ describe('XYChart component', () => {
               seriesType: 'line',
               xScaleType: 'linear',
               isHistogram: true,
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: 'data',
               yScaleType: 'linear',
               palette: { type: 'palette', name: 'default' },
@@ -787,7 +787,7 @@ describe('XYChart component', () => {
             {
               ...args.layers[0],
               seriesType: 'bar',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: 'data',
               xScaleType: 'linear',
               yScaleType: 'linear',
@@ -816,7 +816,7 @@ describe('XYChart component', () => {
             {
               ...args.layers[0],
               seriesType: 'area',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: 'data',
               xScaleType: 'linear',
               yScaleType: 'linear',
@@ -845,7 +845,7 @@ describe('XYChart component', () => {
             {
               ...args.layers[0],
               seriesType: 'bar_horizontal',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: 'data',
               xScaleType: 'linear',
               yScaleType: 'linear',
@@ -902,7 +902,7 @@ describe('XYChart component', () => {
 
     const numberLayer: DataLayerConfigResult = {
       layerId: 'numberLayer',
-      type: 'lens_xy_data_layer',
+      type: 'dataLayer',
       layerType: LayerTypes.DATA,
       hide: false,
       xAccessor: 'xAccessorId',
@@ -1024,7 +1024,7 @@ describe('XYChart component', () => {
           layers: [
             {
               layerId: 'first',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               isHistogram: true,
               seriesType: 'bar_stacked',
@@ -1112,7 +1112,7 @@ describe('XYChart component', () => {
     const { args } = sampleArgs();
 
     const numberLayer: DataLayerConfigResult = {
-      type: 'lens_xy_data_layer',
+      type: 'dataLayer',
       layerId: 'numberLayer',
       layerType: LayerTypes.DATA,
       hide: false,
@@ -1233,7 +1233,7 @@ describe('XYChart component', () => {
           layers: [
             {
               layerId: 'first',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
               xAccessor: 'd',
@@ -1281,7 +1281,7 @@ describe('XYChart component', () => {
           layers: [
             {
               layerId: 'first',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
               xAccessor: 'd',
@@ -1312,7 +1312,7 @@ describe('XYChart component', () => {
           layers: [
             {
               layerId: 'first',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
               xAccessor: 'd',
@@ -1363,7 +1363,7 @@ describe('XYChart component', () => {
             {
               ...args.layers[0],
               seriesType: 'bar_stacked',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               xScaleType: 'ordinal',
               yScaleType: 'linear',
@@ -1392,7 +1392,7 @@ describe('XYChart component', () => {
             {
               ...args.layers[0],
               seriesType: 'area_stacked',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               xScaleType: 'ordinal',
               yScaleType: 'linear',
@@ -1421,7 +1421,7 @@ describe('XYChart component', () => {
             {
               ...args.layers[0],
               seriesType: 'bar_horizontal_stacked',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               xScaleType: 'ordinal',
               yScaleType: 'linear',
@@ -1451,7 +1451,7 @@ describe('XYChart component', () => {
           layers: [
             {
               ...args.layers[0],
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               xAccessor: undefined,
               splitAccessor: 'e',
               seriesType: 'bar_stacked',
@@ -1486,7 +1486,7 @@ describe('XYChart component', () => {
       accessors: ['b'],
       seriesType: 'bar',
       isHistogram: true,
-      type: 'lens_xy_data_layer',
+      type: 'dataLayer',
       layerType: LayerTypes.DATA,
       xScaleType: 'ordinal',
       yScaleType: 'linear',
@@ -1505,7 +1505,7 @@ describe('XYChart component', () => {
       ...args.layers[0],
       seriesType: 'bar',
       isHistogram: true,
-      type: 'lens_xy_data_layer',
+      type: 'dataLayer',
       layerType: LayerTypes.DATA,
       xScaleType: 'ordinal',
       yScaleType: 'linear',
@@ -1525,7 +1525,7 @@ describe('XYChart component', () => {
       ...args.layers[0],
       seriesType: 'line',
       isHistogram: true,
-      type: 'lens_xy_data_layer',
+      type: 'dataLayer',
       layerType: LayerTypes.DATA,
       xScaleType: 'ordinal',
       yScaleType: 'linear',
@@ -1536,7 +1536,7 @@ describe('XYChart component', () => {
       ...args.layers[0],
       seriesType: 'line',
       isHistogram: true,
-      type: 'lens_xy_data_layer',
+      type: 'dataLayer',
       layerType: LayerTypes.DATA,
       xScaleType: 'ordinal',
       yScaleType: 'linear',
@@ -1567,7 +1567,7 @@ describe('XYChart component', () => {
               ...args.layers[0],
               seriesType: 'bar_stacked',
               isHistogram: true,
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               xScaleType: 'ordinal',
               yScaleType: 'linear',
@@ -1594,7 +1594,7 @@ describe('XYChart component', () => {
               ...args.layers[0],
               seriesType: 'bar',
               isHistogram: true,
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               xScaleType: 'ordinal',
               yScaleType: 'linear',
@@ -1995,7 +1995,7 @@ describe('XYChart component', () => {
               ...args.layers[0],
               xScaleType: 'ordinal',
               seriesType: 'bar_stacked',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               yScaleType: 'linear',
               isHistogram: false,
@@ -2023,7 +2023,7 @@ describe('XYChart component', () => {
               ...args.layers[0],
               yScaleType: 'sqrt',
               seriesType: 'bar_stacked',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               xScaleType: 'ordinal',
               isHistogram: false,
@@ -2033,6 +2033,7 @@ describe('XYChart component', () => {
         }}
       />
     );
+
     expect(component.find(LineSeries).at(0).prop('yScaleType')).toEqual(ScaleType.Sqrt);
     expect(component.find(LineSeries).at(1).prop('yScaleType')).toEqual(ScaleType.Sqrt);
   });
@@ -2084,7 +2085,7 @@ describe('XYChart component', () => {
       x: false,
       yLeft: true,
       yRight: true,
-      type: 'lens_xy_tickLabelsConfig',
+      type: 'tickLabelsConfig',
     };
 
     const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
@@ -2105,7 +2106,7 @@ describe('XYChart component', () => {
       x: true,
       yLeft: false,
       yRight: false,
-      type: 'lens_xy_tickLabelsConfig',
+      type: 'tickLabelsConfig',
     };
 
     const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
@@ -2126,7 +2127,7 @@ describe('XYChart component', () => {
       x: true,
       yLeft: true,
       yRight: true,
-      type: 'lens_xy_tickLabelsConfig',
+      type: 'tickLabelsConfig',
     };
 
     const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
@@ -2147,7 +2148,7 @@ describe('XYChart component', () => {
       x: -45,
       yLeft: 0,
       yRight: -90,
-      type: 'lens_xy_labelsOrientationConfig',
+      type: 'labelsOrientationConfig',
     };
 
     const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
@@ -2168,7 +2169,7 @@ describe('XYChart component', () => {
       x: false,
       yLeft: true,
       yRight: true,
-      type: 'lens_xy_tickLabelsConfig',
+      type: 'tickLabelsConfig',
     };
 
     const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
@@ -2189,7 +2190,7 @@ describe('XYChart component', () => {
       x: -45,
       yLeft: -90,
       yRight: -90,
-      type: 'lens_xy_labelsOrientationConfig',
+      type: 'labelsOrientationConfig',
     };
 
     const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
@@ -2238,38 +2239,38 @@ describe('XYChart component', () => {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
-      legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+      legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
-        type: 'lens_xy_tickLabelsConfig',
+        type: 'tickLabelsConfig',
         x: true,
         yLeft: true,
         yRight: true,
       },
       gridlinesVisibilitySettings: {
-        type: 'lens_xy_gridlinesConfig',
+        type: 'gridlinesConfig',
         x: true,
         yLeft: false,
         yRight: false,
       },
       labelsOrientation: {
-        type: 'lens_xy_labelsOrientationConfig',
+        type: 'labelsOrientationConfig',
         x: 0,
         yLeft: 0,
         yRight: 0,
       },
       yLeftExtent: {
         mode: 'full',
-        type: 'lens_xy_axisExtentConfig',
+        type: 'axisExtentConfig',
       },
       yRightExtent: {
         mode: 'full',
-        type: 'lens_xy_axisExtentConfig',
+        type: 'axisExtentConfig',
       },
       layers: [
         {
           layerId: 'first',
-          type: 'lens_xy_data_layer',
+          type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
           xAccessor: 'a',
@@ -2283,7 +2284,7 @@ describe('XYChart component', () => {
         },
         {
           layerId: 'second',
-          type: 'lens_xy_data_layer',
+          type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
           xAccessor: 'a',
@@ -2330,38 +2331,38 @@ describe('XYChart component', () => {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
-      legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+      legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
-        type: 'lens_xy_tickLabelsConfig',
+        type: 'tickLabelsConfig',
         x: true,
         yLeft: false,
         yRight: false,
       },
       gridlinesVisibilitySettings: {
-        type: 'lens_xy_gridlinesConfig',
+        type: 'gridlinesConfig',
         x: true,
         yLeft: false,
         yRight: false,
       },
       labelsOrientation: {
-        type: 'lens_xy_labelsOrientationConfig',
+        type: 'labelsOrientationConfig',
         x: 0,
         yLeft: 0,
         yRight: 0,
       },
       yLeftExtent: {
         mode: 'full',
-        type: 'lens_xy_axisExtentConfig',
+        type: 'axisExtentConfig',
       },
       yRightExtent: {
         mode: 'full',
-        type: 'lens_xy_axisExtentConfig',
+        type: 'axisExtentConfig',
       },
       layers: [
         {
           layerId: 'first',
-          type: 'lens_xy_data_layer',
+          type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
           xAccessor: 'a',
@@ -2406,38 +2407,38 @@ describe('XYChart component', () => {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
-      legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+      legend: { type: 'legendConfig', isVisible: true, position: Position.Top },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
-        type: 'lens_xy_tickLabelsConfig',
+        type: 'tickLabelsConfig',
         x: true,
         yLeft: false,
         yRight: false,
       },
       gridlinesVisibilitySettings: {
-        type: 'lens_xy_gridlinesConfig',
+        type: 'gridlinesConfig',
         x: true,
         yLeft: false,
         yRight: false,
       },
       labelsOrientation: {
-        type: 'lens_xy_labelsOrientationConfig',
+        type: 'labelsOrientationConfig',
         x: 0,
         yLeft: 0,
         yRight: 0,
       },
       yLeftExtent: {
         mode: 'full',
-        type: 'lens_xy_axisExtentConfig',
+        type: 'axisExtentConfig',
       },
       yRightExtent: {
         mode: 'full',
-        type: 'lens_xy_axisExtentConfig',
+        type: 'axisExtentConfig',
       },
       layers: [
         {
           layerId: 'first',
-          type: 'lens_xy_data_layer',
+          type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
           xAccessor: 'a',
@@ -2472,7 +2473,7 @@ describe('XYChart component', () => {
               accessors: ['a'],
               splitAccessor: undefined,
               seriesType: 'bar_stacked',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               xScaleType: 'ordinal',
               yScaleType: 'linear',
@@ -2503,7 +2504,7 @@ describe('XYChart component', () => {
               accessors: ['a'],
               splitAccessor: undefined,
               seriesType: 'bar_stacked',
-              type: 'lens_xy_data_layer',
+              type: 'dataLayer',
               layerType: LayerTypes.DATA,
               xScaleType: 'ordinal',
               yScaleType: 'linear',
@@ -2616,7 +2617,7 @@ describe('XYChart component', () => {
       x: false,
       yLeft: true,
       yRight: true,
-      type: 'lens_xy_axisTitlesVisibilityConfig',
+      type: 'axisTitlesVisibilityConfig',
     };
 
     const component = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
@@ -2637,7 +2638,7 @@ describe('XYChart component', () => {
       x: true,
       yLeft: false,
       yRight: false,
-      type: 'lens_xy_gridlinesConfig',
+      type: 'gridlinesConfig',
     };
 
     const component = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
@@ -2686,7 +2687,7 @@ describe('XYChart component', () => {
     };
     const timeSampleLayer: DataLayerConfigResult = {
       layerId: 'first',
-      type: 'lens_xy_data_layer',
+      type: 'dataLayer',
       layerType: LayerTypes.DATA,
       seriesType: 'line',
       xAccessor: 'c',

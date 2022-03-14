@@ -14,7 +14,7 @@ import { LayerTypes } from '../../common/constants';
 describe('color_assignment', () => {
   const layers: DataLayerConfigResult[] = [
     {
-      type: 'lens_xy_data_layer',
+      type: 'dataLayer',
       yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
@@ -26,7 +26,7 @@ describe('color_assignment', () => {
       accessors: ['y1', 'y2'],
     },
     {
-      type: 'lens_xy_data_layer',
+      type: 'dataLayer',
       yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
