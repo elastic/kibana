@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import fs from 'fs';
 import Path from 'path';
 import dedent from 'dedent';
 import { ToolingLog } from '@kbn/dev-utils';
 import { PluginApi, PluginMetaInfo } from '../types';
-import { getPluginApiDocId } from '../utils';
+import { getPluginApiDocId, writeFileIfChanged } from '../utils';
 
 function hasPublicApi(doc: PluginApi): boolean {
   return doc.client.length > 0 || doc.server.length > 0 || doc.common.length > 0;
@@ -112,20 +111,7 @@ ${getDirectoryTable(pluginApiMap, pluginStatsMap, false)}
 `) + '\n\n';
 
   const mdxPath = Path.resolve(folder, 'plugin_directory.mdx');
-  if (fs.existsSync(mdxPath)) {
-    const currentContents = fs.readFileSync(mdxPath);
-    const removeDate = /^date: [0-9]{4}-[0-9]{2}-[0-9]{2}$/m;
-
-    fs.writeFileSync(mdxPath + '_orig', currentContents.toString().replace(removeDate, ''));
-    fs.writeFileSync(mdxPath + '_new', mdx.replace(removeDate, ''));
-
-    if (currentContents.toString().replace(removeDate, '') === mdx.replace(removeDate, '')) {
-      log.debug(`Plugin file content unchanged, skip writing plugin directory`);
-      return;
-    }
-  }
-
-  fs.writeFileSync(mdxPath, mdx);
+  writeFileIfChanged(mdxPath, mdx, log);
 }
 
 function getDirectoryTable(

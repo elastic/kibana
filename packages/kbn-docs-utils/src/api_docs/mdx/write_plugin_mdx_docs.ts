@@ -17,6 +17,7 @@ import {
   groupPluginApi,
   getFileName,
   getSlug,
+  writeFileIfChanged,
 } from '../utils';
 import { writePluginDocSplitByFolder } from './write_plugin_split_by_folder';
 import { WritePluginDocsOpts } from './types';
@@ -122,16 +123,7 @@ ${
   mdx += scopApiToMdx(scopedDoc.common, 'Common', json, 'common');
 
   const mdxPath = Path.resolve(folder, fileName + '.mdx');
-  if (fs.existsSync(mdxPath)) {
-    const currentContents = fs.readFileSync(mdxPath);
-    const removeDate = /^date: [0-9]{4}-[0-9]{2}-[0-9]{2}$/m;
-    if (currentContents.toString().replace(removeDate, '') === mdx.replace(removeDate, '')) {
-      log.debug(`Plugin file content unchanged, skipping: ${doc.id}`);
-      return;
-    }
-  }
-
-  fs.writeFileSync(mdxPath, mdx);
+  writeFileIfChanged(mdxPath, mdx, log);
 }
 
 function getJsonName(name: string): string {
