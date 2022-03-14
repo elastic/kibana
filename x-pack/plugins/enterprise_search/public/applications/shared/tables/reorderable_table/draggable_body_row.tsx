@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiDraggable, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToken } from '@elastic/eui';
+import { EuiDraggable, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
 import { BodyRow } from './body_row';
 import { Column } from './types';
@@ -47,16 +47,12 @@ export const DraggableBodyRow = <Item extends object>({
         additionalProps={additionalProps}
         leftAction={
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>{disableDragging ? <></> : <EuiIcon type="grab" />}</EuiFlexItem>
             <EuiFlexItem>
-              {rowIdentifier ? (
-                <EuiToken size="m" iconType={() => <EuiText size="s">{rowIdentifier}</EuiText>} />
-              ) : (
-                <></>
-              )}
+              {disableDragging ? <div style={{ width: '16px' }} /> : <EuiIcon type="grab" />}
             </EuiFlexItem>
           </EuiFlexGroup>
         }
+        rowIdentifier={rowIdentifier}
         errors={errors}
       />
     </EuiDraggable>

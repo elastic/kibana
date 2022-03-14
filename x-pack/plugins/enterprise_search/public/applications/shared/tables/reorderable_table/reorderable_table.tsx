@@ -11,7 +11,7 @@ import classNames from 'classnames';
 
 import './reorderable_table.scss';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { BodyRow } from './body_row';
 import { BodyRows } from './body_rows';
@@ -49,28 +49,15 @@ export const ReorderableTable = <Item extends object>({
   rowErrors = () => undefined,
   showRowIndex = false,
 }: ReorderableTableProps<Item>) => {
-  const headerRowActions = [];
-
-  if (!disableReordering) {
-    headerRowActions.push(<></>);
-  }
-  if (showRowIndex) {
-    headerRowActions.push(<></>);
-  }
-
-  const unorderableActions = [<></>];
-
-  if (showRowIndex) {
-    unorderableActions.push(
-      <EuiToken size="m" fill="dark" iconType={() => <EuiText size="s">∞</EuiText>} />
-    );
-  }
-
   return (
     <div className={classNames(className, 'reorderableTable')}>
-      <HeaderRow columns={columns} leftAction={headerRowActions} />
+      <HeaderRow
+        columns={columns}
+        leftAction={disableReordering ? undefined : <></>}
+        spacingForRowIdentifier={showRowIndex}
+      />
 
-      {items.length === 0 && unreorderableItems.length === 0 && (
+      {items.length === 0 && unreorderableItems.length === 0 && bottomRows.length === 0 && (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem data-test-subj="NoItems" className="reorderableTableNoItems">
             {noItemsMessage}
@@ -88,13 +75,7 @@ export const ReorderableTable = <Item extends object>({
               item={item}
               additionalProps={rowProps(item)}
               errors={rowErrors(item)}
-              leftAction={
-                showRowIndex ? (
-                  <EuiToken size="m" iconType={() => <EuiText size="s">{itemIndex}</EuiText>} />
-                ) : (
-                  <></>
-                )
-              }
+              rowIdentifier={showRowIndex ? `${itemIndex + 1}` : undefined}
             />
           )}
         />
@@ -113,7 +94,7 @@ export const ReorderableTable = <Item extends object>({
                 disableDragging={disableDragging}
                 rowIndex={itemIndex}
                 errors={rowErrors(item)}
-                rowIdentifier={`${itemIndex + 1}`}
+                rowIdentifier={showRowIndex ? `${itemIndex + 1}` : undefined}
               />
             )}
             onReorder={onReorder}
@@ -131,7 +112,8 @@ export const ReorderableTable = <Item extends object>({
                 item={item}
                 additionalProps={rowProps(item)}
                 errors={rowErrors(item)}
-                leftAction={unorderableActions}
+                leftAction={disableReordering ? undefined : <> </>}
+                rowIdentifier={showRowIndex ? '∞' : undefined}
               />
             )}
           />
@@ -140,9 +122,10 @@ export const ReorderableTable = <Item extends object>({
         {bottomRows.map((row, rowIndex) => (
           <BodyRow
             key={rowIndex}
-            leftAction={unorderableActions}
+            rowIdentifier={showRowIndex ? '∞' : undefined}
             columns={[{ render: () => row }]}
             item={{}}
+            leftAction={disableReordering ? undefined : <> </>}
           />
         ))}
       </div>

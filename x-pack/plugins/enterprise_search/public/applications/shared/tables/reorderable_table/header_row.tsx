@@ -16,22 +16,22 @@ import { Column } from './types';
 interface HeaderRowProps<Item> {
   columns: Array<Column<Item>>;
   // Cell to put in first column before other columns
-  leftAction?: React.ReactNode | React.ReactNode[];
+  leftAction?: React.ReactNode;
+  spacingForRowIdentifier?: boolean;
 }
 
-export const HeaderRow = <Item extends object>({ columns, leftAction }: HeaderRowProps<Item>) => {
-  const leftActions: React.ReactNode[] = Array.isArray(leftAction) ? leftAction : [leftAction];
-
+export const HeaderRow = <Item extends object>({
+  columns,
+  leftAction,
+  spacingForRowIdentifier = false,
+}: HeaderRowProps<Item>) => {
   return (
     <div className="reorderableTableHeader">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFlexGroup>
-            {leftActions.map((action, actionIndex) => (
-              <Cell key={actionIndex} {...DRAGGABLE_UX_STYLE}>
-                {action}
-              </Cell>
-            ))}
+            {leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
+            {spacingForRowIdentifier && <Cell {...DRAGGABLE_UX_STYLE} flexBasis="24px" />}
             {columns.map((column, columnIndex) => (
               <Cell key={`table_header_cell_${columnIndex}`} {...column}>
                 <EuiText size="s">
