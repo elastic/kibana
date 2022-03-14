@@ -50,7 +50,7 @@ export const DraggableBodyRow = <Item extends object>({
             <EuiFlexItem>{disableDragging ? <></> : <EuiIcon type="grab" />}</EuiFlexItem>
             <EuiFlexItem>
               {rowIdentifier ? (
-                <EuiToken iconType={() => <EuiText>{rowIdentifier}</EuiText>} />
+                <EuiToken size="m" iconType={() => <EuiText size="s">{rowIdentifier}</EuiText>} />
               ) : (
                 <></>
               )}
