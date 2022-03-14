@@ -1855,10 +1855,6 @@
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/saved_objects/sync_task.ts"
-            },
-            {
-              "plugin": "ml",
               "path": "x-pack/plugins/ml/server/plugin.ts"
             },
             {

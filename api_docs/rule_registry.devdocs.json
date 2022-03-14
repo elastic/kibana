@@ -371,13 +371,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "ruleRegistry",
-                    "scope": "server",
-                    "docId": "kibRuleRegistryPluginApi",
-                    "section": "def-server.RuleDataClientConstructorOptions",
-                    "text": "RuleDataClientConstructorOptions"
-                  }
+                  "ConstructorOptions"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
                 "deprecated": false,
@@ -1376,7 +1370,7 @@
           },
           "<TActionGroupIds, never>>) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
           "AlertTypeParamsValidator",
-          "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; actionGroups: ",
+          "<TParams> | undefined; } | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -1426,7 +1420,7 @@
           },
           "<TParams>; injectReferences: (params: TParams, references: ",
           "SavedObjectReference",
-          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; }"
+          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; minimumScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; doesSetRecoveryContext?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
         "deprecated": false,
@@ -2635,124 +2629,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ruleRegistry",
-        "id": "def-server.RuleDataClientConstructorOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "RuleDataClientConstructorOptions",
-        "description": [],
-        "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleDataClientConstructorOptions.indexInfo",
-            "type": "Object",
-            "tags": [],
-            "label": "indexInfo",
-            "description": [],
-            "signature": [
-              "IndexInfo"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleDataClientConstructorOptions.resourceInstaller",
-            "type": "Object",
-            "tags": [],
-            "label": "resourceInstaller",
-            "description": [],
-            "signature": [
-              "{ installCommonResources: () => Promise<void>; installIndexLevelResources: (indexInfo: ",
-              "IndexInfo",
-              ") => Promise<void>; installAndUpdateNamespaceLevelResources: (indexInfo: ",
-              "IndexInfo",
-              ", namespace: string) => Promise<void>; }"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleDataClientConstructorOptions.isWriteEnabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "isWriteEnabled",
-            "description": [],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleDataClientConstructorOptions.isWriterCacheEnabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "isWriterCacheEnabled",
-            "description": [],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleDataClientConstructorOptions.waitUntilReadyForReading",
-            "type": "Object",
-            "tags": [],
-            "label": "waitUntilReadyForReading",
-            "description": [],
-            "signature": [
-              "Promise<",
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.WaitResult",
-                "text": "WaitResult"
-              },
-              ">"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleDataClientConstructorOptions.waitUntilReadyForWriting",
-            "type": "Object",
-            "tags": [],
-            "label": "waitUntilReadyForWriting",
-            "description": [],
-            "signature": [
-              "Promise<",
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.WaitResult",
-                "text": "WaitResult"
-              },
-              ">"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleDataClientConstructorOptions.logger",
-            "type": "Object",
-            "tags": [],
-            "label": "logger",
-            "description": [],
-            "signature": [
-              "Logger"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -3526,11 +3402,7 @@
           "AlertConsumers",
           "[]; query?: { bool: ",
           "QueryDslBoolQuery",
-          "; } | undefined; sort?: ",
-          "SortCombinations",
-          "[] | undefined; pagination?: ",
-          "RuleRegistrySearchRequestPagination",
-          " | undefined; }"
+          "; } | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
         "deprecated": false,
