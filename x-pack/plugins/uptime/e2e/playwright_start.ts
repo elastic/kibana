@@ -13,9 +13,9 @@ import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
 
-export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {
+export function playwrightRunTests() {
   return async ({ getService }: any) => {
-    const results = await playwrightStart(getService, headless, match);
+    const results = await playwrightStart(getService);
 
     Object.entries(results).forEach(([_journey, result]) => {
       if (result.status !== 'succeeded') {
@@ -43,8 +43,7 @@ async function playwrightStart(getService: any) {
 
   const res = await playwrightRun({
     params: { kibanaUrl, getService },
-    playwrightOptions: { headless, chromiumSandbox: false, timeout: 60 * 1000 },
-    match: match === 'undefined' ? '' : match,
+    playwrightOptions: { headless: true, chromiumSandbox: false, timeout: 60 * 1000 },
   });
 
   console.log('Removing esArchiver...');
