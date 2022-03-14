@@ -27,6 +27,7 @@ export interface Cluster {
   meta: {
     clusterId: string;
     benchmarkName: string;
+    lastUpdate: number; // unix epoch time
   };
   stats: Stats;
   resourcesTypes: ResourceType[];
