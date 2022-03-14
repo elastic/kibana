@@ -59,6 +59,12 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies whether or not the legend items should be truncated.',
       }),
     },
+    legendSize: {
+      types: ['number'],
+      help: i18n.translate('expressionHeatmap.function.args.legendSize.help', {
+        defaultMessage: 'Specifies the legend size in pixels.',
+      }),
+    },
   },
   fn(input, args) {
     validateOptions(args.position, Position, errors.invalidPositionError);
