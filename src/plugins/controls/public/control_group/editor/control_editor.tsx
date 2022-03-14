@@ -107,6 +107,7 @@ export const ControlEditor = ({
     return (
       <EuiKeyPadMenuItem
         id={`createControlButton_${type}`}
+        data-test-subj={`create-${type}-control`}
         label={(factory as EmbeddableFactoryDefinition).getDisplayName()}
         isSelected={selectedType === type}
         onClick={() => {
