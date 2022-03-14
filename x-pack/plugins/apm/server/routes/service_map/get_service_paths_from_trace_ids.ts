@@ -54,6 +54,18 @@ export interface Context {
   locationsToRemove: Record<string, unknown>;
 }
 
+export async function getServicePathsFromTraceIds({
+  servicePathsFromTraceIds,
+}: {
+  servicePathsFromTraceIds: ServicePathsFromTraceIds;
+}) {
+  return withApmSpan('get_service_paths_from_trace_ids', async () => {
+    return await asyncGetServicePathsFromTraceIds({
+      servicePathsFromTraceIds,
+    });
+  });
+}
+
 export function getEventsByIdMap(
   servicePathsFromTraceIds: ServicePathsFromTraceIds
 ) {
@@ -84,12 +96,12 @@ export function getEventsByIdMap(
   }, {} as EventsById);
 }
 
-export function getServicePathsFromTraceIds({
+function asyncGetServicePathsFromTraceIds({
   servicePathsFromTraceIds,
 }: {
   servicePathsFromTraceIds: ServicePathsFromTraceIds;
 }) {
-  return withApmSpan('get_service_paths_fromt_trace_ids', async () => {
+  return new Promise((resolve) => {
     const eventsByIdMap = getEventsByIdMap(servicePathsFromTraceIds);
 
     const context: Context = {
@@ -111,10 +123,10 @@ export function getServicePathsFromTraceIds({
       }
     });
 
-    return {
+    resolve({
       paths,
       discoveredServices: Object.values(context.externalToServiceMap),
-    };
+    });
   });
 }
 

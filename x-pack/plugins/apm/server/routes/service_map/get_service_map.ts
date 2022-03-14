@@ -7,16 +7,18 @@
 
 import { Logger } from 'kibana/server';
 import { chunk } from 'lodash';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery, termQuery } from '../../../../observability/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
+import { withApmSpan } from '../../utils/with_apm_span';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,
@@ -24,8 +26,6 @@ import {
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { transformServiceMapResponses } from './transform_service_map_responses';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 
 export interface IEnvOptions {
   setup: Setup;
@@ -64,42 +64,29 @@ async function getConnectionData({
       return init;
     }
 
-    // const chunkedResponses = await withApmSpan(
-    //   'get_service_paths_from_all_trace_ids',
-    //   () =>
-    //     Promise.all(
-    //       chunks.map((traceIdsChunk) =>
-    //         getServiceMapFromTraceIds({
-    //           setup,
-    //           traceIds: traceIdsChunk,
-    //           start,
-    //           end,
-    //         })
-    //       )
-    //     )
-    // );
-
-    // return chunkedResponses.reduce((prev, current) => {
-    //   return {
-    //     connections: prev.connections.concat(current.connections),
-    //     discoveredServices: prev.discoveredServices.concat(
-    //       current.discoveredServices
-    //     ),
-    //   };
-    // });
-
     const chunkedResponses = await withApmSpan(
-      'get_service_paths_from_all_trace_ids',
+      'get_service_map_from_trace_ids',
       () =>
-        getServiceMapFromTraceIds({
-          setup,
-          traceIds,
-          start,
-          end,
-        })
+        Promise.all(
+          chunks.map((traceIdsChunk, index) =>
+            getServiceMapFromTraceIds({
+              setup,
+              traceIds: traceIdsChunk,
+              start,
+              end,
+            })
+          )
+        )
     );
 
-    return chunkedResponses;
+    return chunkedResponses.reduce((prev, current) => {
+      return {
+        connections: prev.connections.concat(current.connections),
+        discoveredServices: prev.discoveredServices.concat(
+          current.discoveredServices
+        ),
+      };
+    });
   });
 }
 
