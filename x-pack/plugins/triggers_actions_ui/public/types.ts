@@ -363,7 +363,7 @@ export type AlertsData = Record<string, any[]>;
 
 export interface FetchAlertData {
   activePage: number;
-  alerts: AlertsData;
+  alerts: AlertsData[];
   isInitializing: boolean;
   isLoading: boolean;
   getInspectQuery: () => { request: {}; response: {} };

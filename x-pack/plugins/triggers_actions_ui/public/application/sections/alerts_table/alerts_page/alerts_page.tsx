@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React, { useState } from 'react';
+import { get } from 'lodash';
 import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleRegistrySearchRequestPagination } from '../../../../../../rule_registry/common';
 import { AlertsTable } from '../alerts_table';
-import { AlertsData } from '../../../../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
@@ -25,10 +25,33 @@ const consumers = [
 const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
   const [showCheckboxes] = useState(false);
 
+  const mockAlertData = [
+    {
+      'kibana.alert.rule.name': ['Test1'],
+      'kibana.alert.rule.category': ['Internal'],
+    },
+    {
+      'kibana.alert.rule.name': ['Test2'],
+      'kibana.alert.rule.category': ['Internal'],
+    },
+    {
+      'kibana.alert.rule.name': ['Test3'],
+      'kibana.alert.rule.category': ['Internal'],
+    },
+    {
+      'kibana.alert.rule.name': ['Test4'],
+      'kibana.alert.rule.category': ['Internal'],
+    },
+    {
+      'kibana.alert.rule.name': ['Test5'],
+      'kibana.alert.rule.category': ['Internal'],
+    },
+  ];
+
   const useFetchAlertsData = () => {
     return {
-      activePage: 1,
-      alerts: {} as AlertsData,
+      activePage: 0,
+      alerts: mockAlertData,
       isInitializing: false,
       isLoading: false,
       getInspectQuery: () => ({ request: {}, response: {} }),
@@ -54,11 +77,11 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
     ],
     deletedEventIds: [],
     disabledCellActions: [],
-    pageSize: 20,
+    pageSize: 2,
     pageSizeOptions: [2, 5, 10, 20, 50, 100],
     leadingControlColumns: [],
-    renderCellValue: (cellProps: EuiDataGridCellValueElementProps) => {
-      return 'N/A';
+    renderCellValue: ({ columnId, rowIndex }: EuiDataGridCellValueElementProps) => {
+      return get(mockAlertData[rowIndex], columnId, 'N/A');
     },
     showCheckboxes,
     trailingControlColumns: [],

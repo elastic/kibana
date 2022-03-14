@@ -56,11 +56,6 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
   }, [props.consumers, capabilities, kibanaFeatures]);
   const { dataViews } = useFetchDataViews(visibleConsumers, http, data);
   const [visibleColumns, setVisibleColumns] = useState(props.columns.map(({ id }) => id));
-  const alertsCount = useMemo(() => {
-    const keys = Object.keys(alerts);
-    if (keys.length === 0) return 0;
-    return alerts[keys[0]].length;
-  }, [alerts]);
 
   return (
     <>
@@ -81,7 +76,7 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
         columns={props.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
-        rowCount={alertsCount}
+        rowCount={alerts.length}
         renderCellValue={props.renderCellValue}
         sorting={{ columns: sortingColumns, onSort }}
         pagination={{
