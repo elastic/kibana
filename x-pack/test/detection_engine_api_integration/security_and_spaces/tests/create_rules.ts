@@ -327,8 +327,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-      it.skip('should create a single rule which has a timestamp override and generates two signals with a "partial failure" status', async () => {
+      it('should create a single rule which has a timestamp override and generates two signals with a "partial failure" status', async () => {
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
         // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz

@@ -145,8 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest, log);
       });
 
-      // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-      it.skip('should be able to execute and get 10 signals when doing a specific query', async () => {
+      it('should be able to execute and get 10 signals when doing a specific query', async () => {
         const rule: CreateRulesSchema = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
@@ -503,8 +502,7 @@ export default ({ getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/threat_intel');
         });
 
-        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-        it.skip('enriches signals with the single indicator that matched', async () => {
+        it('enriches signals with the single indicator that matched', async () => {
           const rule: CreateRulesSchema = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
@@ -595,8 +593,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-        it.skip('enriches signals with multiple indicators if several matched', async () => {
+        it('enriches signals with multiple indicators if several matched', async () => {
           const rule: CreateRulesSchema = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
@@ -676,8 +673,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-        it.skip('adds a single indicator that matched multiple fields', async () => {
+        it('adds a single indicator that matched multiple fields', async () => {
           const rule: CreateRulesSchema = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
@@ -789,8 +785,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-        it.skip('generates multiple signals with multiple matches', async () => {
+        it('generates multiple signals with multiple matches', async () => {
           const rule: CreateRulesSchema = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',

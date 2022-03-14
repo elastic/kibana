@@ -42,8 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
    * the "signal.original_time" field, ensuring that timestamp overrides operate, and ensuring that
    * partial errors happen correctly
    */
-  // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-  describe.skip('timestamp tests', () => {
+  describe('timestamp tests', () => {
     describe('Signals generated from events with a timestamp in seconds is converted correctly into the forced ISO8601 format when copying', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);

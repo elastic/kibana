@@ -604,8 +604,7 @@ export default ({ getService }: FtrProviderContext) => {
           await deleteAllExceptions(supertest, log);
         });
 
-        // Flake until this fixed: https://github.com/elastic/elasticsearch/issues/84256
-        it.skip('should be able to execute against an exception list that does not include valid entries and get back 10 signals', async () => {
+        it('should be able to execute against an exception list that does not include valid entries and get back 10 signals', async () => {
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
             log,
