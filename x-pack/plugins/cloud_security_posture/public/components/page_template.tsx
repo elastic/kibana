@@ -65,7 +65,10 @@ const NO_DATA_CONFIG: KibanaPageTemplateProps['noDataConfig'] = {
   },
 };
 
-export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({ children, ...props }) => {
+export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({
+  children,
+  ...kibanaPageTemplateProps
+}) => {
   // TODO: Consider using more sophisticated logic to find out if our integration is installed
   const kubeBeatQuery = useKubebeatDataView();
 
@@ -82,7 +85,7 @@ export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({ children, .
   return (
     <KibanaPageTemplate
       {...DEFAULT_PROPS}
-      {...props}
+      {...kibanaPageTemplateProps}
       template={template}
       noDataConfig={noDataConfig}
     >
