@@ -24,7 +24,8 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { DataViewField, DataView } from '../../../../../../data/common';
+import { DataViewField, DataView, DataViewAttributes } from '../../../../../../data/common';
+import { SavedObject } from '../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { AppState } from '../../services/discover_state';
@@ -47,6 +48,10 @@ export interface DiscoverSidebarResponsiveProps {
    */
   documents$: DataDocuments$;
   /**
+   * List of available index patterns
+   */
+  indexPatternList: Array<SavedObject<DataViewAttributes>>;
+  /**
    * Has been toggled closed
    */
   isClosed?: boolean;
@@ -58,6 +63,10 @@ export interface DiscoverSidebarResponsiveProps {
    * Callback function when adding a filter from sidebar
    */
   onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Callback function when changing an index pattern
+   */
+  onChangeIndexPattern: (id: string) => void;
   /**
    * Callback function when removing a field
    * @param fieldName
@@ -78,6 +87,10 @@ export interface DiscoverSidebarResponsiveProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   /**
+   * Shows index pattern and a button that displays the sidebar in a flyout
+   */
+  useFlyout?: boolean;
+  /**
    * Read from the Fields API
    */
   useNewFieldsApi?: boolean;
@@ -85,6 +98,10 @@ export interface DiscoverSidebarResponsiveProps {
    * callback to execute on edit runtime field
    */
   onEditRuntimeField: () => void;
+  /**
+   * callback to execute on create dataview
+   */
+  onDataViewCreated: (dataView: DataView) => void;
   /**
    * Discover view mode
    */
@@ -102,7 +119,7 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi } = props;
+  const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
@@ -133,11 +150,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [selectedIndexPattern]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
 
   useEffect(() => {
     const cleanup = () => {
       if (closeFieldEditor?.current) {
         closeFieldEditor?.current();
+      }
+      if (closeDataViewEditor?.current) {
+        closeDataViewEditor?.current();
       }
     };
     return () => {
@@ -150,11 +171,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     closeFieldEditor.current = ref;
   }, []);
 
+  const setDataViewEditorRef = useCallback((ref: () => void | undefined) => {
+    closeDataViewEditor.current = ref;
+  }, []);
+
   const closeFlyout = useCallback(() => {
     setIsFlyoutVisible(false);
   }, []);
 
-  const { dataViewFieldEditor } = services;
+  const { dataViewFieldEditor, dataViewEditor } = services;
   const { availableFields$ } = props;
 
   useEffect(
@@ -216,6 +241,24 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     ]
   );
 
+  const createNewDataView = useCallback(() => {
+    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
+    if (!indexPatternFieldEditPermission) {
+      return;
+    }
+    const ref = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        onDataViewCreated(dataView);
+      },
+    });
+    if (setDataViewEditorRef) {
+      setDataViewEditorRef(ref);
+    }
+    if (closeFlyout) {
+      closeFlyout();
+    }
+  }, [dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]);
+
   if (!selectedIndexPattern) {
     return null;
   }
@@ -231,6 +274,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
             editField={editField}
+            createNewDataView={createNewDataView}
           />
         </EuiHideFor>
       )}
@@ -294,6 +338,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   setFieldEditorRef={setFieldEditorRef}
                   closeFlyout={closeFlyout}
                   editField={editField}
+                  createNewDataView={createNewDataView}
+                  showDataViewPicker={true}
                 />
               </div>
             </EuiFlyout>

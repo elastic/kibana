@@ -15,7 +15,8 @@ import realHits from '../../../../__fixtures__/real_hits.js';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { flattenHit } from '../../../../../../data/common';
+import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
+import { SavedObject } from '../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
@@ -35,6 +36,12 @@ function getCompProps(): DiscoverSidebarProps {
     Record<string, unknown>
   > as ElasticSearchHit[];
 
+  const indexPatternList = [
+    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
+    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
+    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
+  ];
+
   const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
@@ -51,6 +58,8 @@ function getCompProps(): DiscoverSidebarProps {
     columns: ['extension'],
     fieldCounts,
     documents: hits,
+    indexPatternList,
+    onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
@@ -62,6 +71,8 @@ function getCompProps(): DiscoverSidebarProps {
     onEditRuntimeField: jest.fn(),
     editField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    createNewDataView: jest.fn(),
+    onDataViewCreated: jest.fn(),
     availableFields$,
   };
 }

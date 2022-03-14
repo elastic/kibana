@@ -101,6 +101,9 @@ export function ChangeIndexPattern({
             }}
             searchProps={{
               compressed: true,
+              placeholder: i18n.translate('xpack.lens.indexPattern.findDataViewPlaceholder', {
+                defaultMessage: 'Find a data view',
+              }),
               ...(selectableProps ? selectableProps.searchProps : undefined),
             }}
           >

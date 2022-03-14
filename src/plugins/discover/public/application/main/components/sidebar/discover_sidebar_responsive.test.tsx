@@ -15,7 +15,8 @@ import realHits from '../../../../__fixtures__/real_hits.js';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { flattenHit } from '../../../../../../data/common';
+import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
+import { SavedObject } from '../../../../../../../core/types';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
@@ -76,6 +77,12 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     Record<string, unknown>
   > as ElasticSearchHit[];
 
+  const indexPatternList = [
+    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
+    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
+    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
+  ];
+
   for (const hit of hits) {
     for (const key of Object.keys(flattenHit(hit, indexPattern))) {
       mockfieldCounts[key] = (mockfieldCounts[key] || 0) + 1;
@@ -92,6 +99,8 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
     }) as AvailableFields$,
+    indexPatternList,
+    onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
@@ -100,6 +109,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    onDataViewCreated: jest.fn(),
   };
 }
 
