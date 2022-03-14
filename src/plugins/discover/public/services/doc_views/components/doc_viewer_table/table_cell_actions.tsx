@@ -160,7 +160,7 @@ export const TableActions = ({
           name: pinnedLabel,
           'aria-label': pinnedAriaLabel,
           icon: pinnedIconType,
-          onClick: () => onClickAction(togglePinned),
+          onClick: onClickAction(togglePinned),
         },
       ],
     },
