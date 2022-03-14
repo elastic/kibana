@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-export interface OptionsField {
-  label: string;
-  value: string;
-  checked: 'on' | 'off' | undefined;
-}
-
 export interface StateField {
   timestamp: boolean;
   verboseMode: boolean;

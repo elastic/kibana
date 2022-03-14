@@ -101,6 +101,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       float: 'right',
       position: 'relative',
       paddingRight: size.base,
+      paddingLeft: `min(${size.xxl})`,
     };
 
     const alertDetails: CSSObject = {

@@ -15,14 +15,15 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { OptionsField, StateField } from '../../../common/types/session_view';
+import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { StateField } from '../../../common/types/session_view';
 import { useStyles } from './styles';
 
 export const SessionViewDisplayOptions = ({
   onChange,
   optionsStates,
 }: {
-  onChange: (vars:StateField) => void;
+  onChange: (vars: StateField) => void;
   optionsStates: StateField;
 }) => {
   const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
@@ -32,20 +33,20 @@ export const SessionViewDisplayOptions = ({
   const timestampString = 'Timestamp';
   const verboseModeString = 'Verbose mode';
 
-  const optionsList: OptionsField[] = useMemo(
+  const optionsList: EuiSelectableOption[] = useMemo(
     () => [
       {
         label: i18n.translate('xpack.sessionView.sessionViewToggle.sessionViewToggleOptions', {
           defaultMessage: timestampString,
         }),
-        value: timestampString,
+        key: timestampString,
         checked: optionsStates?.timestamp ? 'on' : undefined,
       },
       {
         label: i18n.translate('xpack.sessionView.sessionViewToggle.sessionViewToggleOptions', {
           defaultMessage: verboseModeString,
         }),
-        value: verboseModeString,
+        key: verboseModeString,
         checked: optionsStates?.verboseMode ? 'on' : undefined,
       },
     ],
@@ -64,7 +65,7 @@ export const SessionViewDisplayOptions = ({
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
         iconType="eye"
-        display={isOptionDropdownOpen ? 'base' : 'empty'}
+        display={optionsStates.verboseMode ? 'fill' : 'empty'}
         onClick={toggleOptionButton}
         size="m"
         aria-label="Option"
@@ -73,12 +74,12 @@ export const SessionViewDisplayOptions = ({
     </EuiFlexItem>
   );
 
-  const handleSelect = (options: [OptionsField]) => {
+  const handleSelect = (options: EuiSelectableOption[]) => {
     const updateOptionState = options.reduce(
-      (chosenOptionStates: StateField, listedOptionStates: OptionsField) => {
-        if (listedOptionStates.value === timestampString) {
+      (chosenOptionStates: StateField, listedOptionStates: EuiSelectableOption) => {
+        if (listedOptionStates.key === timestampString) {
           chosenOptionStates.timestamp = listedOptionStates.checked === 'on';
-        } else if (listedOptionStates.value === verboseModeString) {
+        } else if (listedOptionStates.key === verboseModeString) {
           chosenOptionStates.verboseMode = listedOptionStates.checked === 'on';
         }
         return chosenOptionStates;
