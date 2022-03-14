@@ -35,7 +35,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('elastic admin preview', () => {
-        it('should create a single preview rule', async () => {
+        // Flakey preview, please investigate and fix
+        it.skip('should create a single preview rule', async () => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_PREVIEW)
             .set('kbn-xsrf', 'true')
@@ -58,7 +59,8 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
         });
 
-        it('should throw an error if an invalid invocation count is used', async () => {
+        // Flakey preview, please investigate and fix
+        it.skip('should throw an error if an invalid invocation count is used', async () => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_PREVIEW)
             .set('kbn-xsrf', 'true')
