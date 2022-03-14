@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { NoDataCard } from './no_data_page/no_data_card';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-shared-ux-utility'],
+};
