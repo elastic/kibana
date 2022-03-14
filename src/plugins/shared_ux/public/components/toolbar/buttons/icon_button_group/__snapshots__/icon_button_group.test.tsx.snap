@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<QuickButtonGroup /> is rendered 1`] = `
+exports[`<IconButtonGroup /> is rendered 1`] = `
 .emotion-0.euiButtonGroupButton {
   background-color: #FFF;
   border: 1px solid #D3DAE6!important;
@@ -38,7 +38,7 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
     }
   }
 >
-  <QuickButtonGroup
+  <IconButtonGroup
     buttons={
       Array [
         Object {
@@ -197,6 +197,6 @@ exports[`<QuickButtonGroup /> is rendered 1`] = `
         </div>
       </fieldset>
     </EuiButtonGroup>
-  </QuickButtonGroup>
+  </IconButtonGroup>
 </ServicesProvider>
 `;
