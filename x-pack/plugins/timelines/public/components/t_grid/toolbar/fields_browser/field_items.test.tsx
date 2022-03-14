@@ -153,7 +153,7 @@ describe('field_items', () => {
           field: 'category',
           name: 'Category',
           sortable: true,
-          width: '100px',
+          width: '130px',
         },
       ]);
     });
