@@ -269,44 +269,46 @@ describe('rule_form', () => {
     async function setup() {
       const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
 
-      useLoadRuleTypes.mockReturnValue([
-        {
-          id: 'other-consumer-producer-rule-type',
-          name: 'Test',
-          actionGroups: [
-            {
-              id: 'testActionGroup',
-              name: 'Test Action Group',
+      useLoadRuleTypes.mockReturnValue({
+        ruleTypes: [
+          {
+            id: 'other-consumer-producer-rule-type',
+            name: 'Test',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            defaultActionGroupId: 'testActionGroup',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: RecoveredActionGroup,
+            producer: ALERTS_FEATURE_ID,
+            authorizedConsumers: {
+              [ALERTS_FEATURE_ID]: { read: true, all: true },
+              test: { read: true, all: true },
             },
-          ],
-          defaultActionGroupId: 'testActionGroup',
-          minimumLicenseRequired: 'basic',
-          recoveryActionGroup: RecoveredActionGroup,
-          producer: ALERTS_FEATURE_ID,
-          authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: true },
-            test: { read: true, all: true },
           },
-        },
-        {
-          id: 'same-consumer-producer-rule-type',
-          name: 'Test',
-          actionGroups: [
-            {
-              id: 'testActionGroup',
-              name: 'Test Action Group',
+          {
+            id: 'same-consumer-producer-rule-type',
+            name: 'Test',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            defaultActionGroupId: 'testActionGroup',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: RecoveredActionGroup,
+            producer: 'test',
+            authorizedConsumers: {
+              [ALERTS_FEATURE_ID]: { read: true, all: true },
+              test: { read: true, all: true },
             },
-          ],
-          defaultActionGroupId: 'testActionGroup',
-          minimumLicenseRequired: 'basic',
-          recoveryActionGroup: RecoveredActionGroup,
-          producer: 'test',
-          authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: true },
-            test: { read: true, all: true },
           },
-        },
-      ]);
+        ],
+      });
       const mocks = coreMock.createSetup();
       const [
         {
