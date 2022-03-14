@@ -39,8 +39,8 @@ import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import { PostComment } from '../../containers/use_post_comment';
-import type { CasesOwners } from '../../methods/can_use_cases';
 import { CaseAttachments } from '../../types';
+import type { CasesOwners } from '../../client/helpers/can_use_cases';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
