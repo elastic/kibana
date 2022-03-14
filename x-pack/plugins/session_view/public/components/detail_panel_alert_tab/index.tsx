@@ -5,14 +5,16 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { EuiButtonGroup, EuiHorizontalRule } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButtonGroup, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { groupBy } from 'lodash';
 import { ProcessEvent, Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
 import { DetailPanelAlertGroupItem } from '../detail_panel_alert_group_item';
 
+export const ALERTS_TAB_EMPTY_STATE_TEST_ID = 'sessionView:detailPanelAlertsEmptyState';
 export const INVESTIGATED_ALERT_TEST_ID = 'sessionView:detailPanelInvestigatedAlert';
 export const VIEW_MODE_TOGGLE = 'sessionView:detailPanelAlertsViewMode';
 
@@ -63,6 +65,30 @@ export const DetailPanelAlertTab = ({
   const groupedAlerts = useMemo(() => {
     return groupBy(filteredAlerts, (event) => event.kibana?.alert.rule.uuid);
   }, [filteredAlerts]);
+
+  if (alerts.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj={ALERTS_TAB_EMPTY_STATE_TEST_ID}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.sessionView.detailPanelAlertsEmptyTitle"
+              defaultMessage="No alerts"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.sessionView.detailPanelAlertsEmptyMsg"
+              defaultMessage="No alerts were created for this session."
+            />
+          </p>
+        }
+      />
+    );
+  }
 
   return (
     <div css={styles.container}>

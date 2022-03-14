@@ -67,13 +67,12 @@ export const SessionViewDetailPanel = ({
         name: i18n.translate('xpack.sessionView.detailsPanel.alerts', {
           defaultMessage: 'Alerts',
         }),
-        append: (
+        append: hasAlerts && (
           <EuiNotificationBadge className="eui-alignCenter" size="m">
             {alertsCount}
           </EuiNotificationBadge>
         ),
-        disabled: !hasAlerts,
-        content: hasAlerts && (
+        content: alerts && (
           <DetailPanelAlertTab
             alerts={alerts}
             onProcessSelected={onProcessSelected}

@@ -11,7 +11,11 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { DetailPanelAlertTab } from './index';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { fireEvent } from '@testing-library/dom';
-import { INVESTIGATED_ALERT_TEST_ID, VIEW_MODE_TOGGLE } from './index';
+import {
+  INVESTIGATED_ALERT_TEST_ID,
+  VIEW_MODE_TOGGLE,
+  ALERTS_TAB_EMPTY_STATE_TEST_ID,
+} from './index';
 import {
   ALERT_LIST_ITEM_TEST_ID,
   ALERT_LIST_ITEM_ARGS_TEST_ID,
@@ -230,6 +234,18 @@ describe('DetailPanelAlertTab component', () => {
       expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_TITLE_TEST_ID)).toHaveTextContent(
         mockAlerts[0].kibana?.alert.rule.name || ''
       );
+    });
+
+    it('renders an empty state when there are no alerts', async () => {
+      renderResult = mockedContext.render(
+        <DetailPanelAlertTab
+          alerts={[]}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
+      );
+
+      expect(renderResult.queryByTestId(ALERTS_TAB_EMPTY_STATE_TEST_ID)).toBeTruthy();
     });
   });
 });
