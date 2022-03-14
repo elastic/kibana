@@ -25,7 +25,7 @@ const CasesAppComponent: React.FC = () => {
         useFetchAlertData: () => [false, {}],
         userCanCrud: userCapabilities.crud,
         basePath: '/',
-        features: { alerts: { sync: false } },
+        features: { alerts: false },
         releasePhase: 'experimental',
       })}
     </Wrapper>

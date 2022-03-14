@@ -20,7 +20,7 @@ import {
 import { SnakeToCamelCase } from '../types';
 
 export interface CasesContextFeatures {
-  alerts: { sync: boolean };
+  alerts: { sync: boolean } | boolean;
   metrics: CaseMetricsFeature[];
 }
 

@@ -9,16 +9,22 @@ import { useMemo } from 'react';
 import { CaseMetricsFeature } from '../../containers/types';
 import { useCasesContext } from './use_cases_context';
 
-interface UseCasesFeatures {
+export interface UseCasesFeatures {
+  isAlertsEnabled: boolean;
   isSyncAlertsEnabled: boolean;
   metricsFeatures: CaseMetricsFeature[];
 }
+
+const isObject = (obj: unknown): obj is object => {
+  return typeof obj === 'object' && obj != null;
+};
 
 export const useCasesFeatures = (): UseCasesFeatures => {
   const { features } = useCasesContext();
   const casesFeatures = useMemo(
     () => ({
-      isSyncAlertsEnabled: features.alerts.sync,
+      isAlertsEnabled: !!features.alerts,
+      isSyncAlertsEnabled: isObject(features.alerts) ? features.alerts.sync : features.alerts,
       metricsFeatures: features.metrics,
     }),
     [features]

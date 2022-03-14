@@ -34,6 +34,8 @@ import { registerConnectorsToMockActionRegistry } from '../../common/mock/regist
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { usePostComment } from '../../containers/use_post_comment';
+import { useGetTags } from '../../containers/use_get_tags';
+import { useGetReporters } from '../../containers/use_get_reporters';
 
 jest.mock('../../containers/use_post_comment');
 jest.mock('../../containers/use_bulk_update_case');
@@ -41,6 +43,8 @@ jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -53,6 +57,8 @@ const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
+const useGetTagsMock = useGetTags as jest.Mock;
+const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostCommentMock = usePostComment as jest.Mock;
@@ -149,6 +155,14 @@ describe('AllCasesListGeneric', () => {
     useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
+    useGetTagsMock.mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
+    useGetReportersMock.mockReturnValue({
+      reporters: ['casetester'],
+      respReporters: [{ username: 'casetester' }],
+      isLoading: true,
+      isError: false,
+      fetchReporters: jest.fn(),
+    });
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     mockKibana();
@@ -214,19 +228,24 @@ describe('AllCasesListGeneric', () => {
         ],
       },
     });
+
     const wrapper = mount(
       <TestProviders>
         <AllCasesList />
       </TestProviders>
     );
+
     const checkIt = (columnName: string, key: number) => {
       const column = wrapper.find('[data-test-subj="cases-table"] tbody .euiTableRowCell').at(key);
       expect(column.find('.euiTableRowCell--hideForDesktop').text()).toEqual(columnName);
       expect(column.find('span').text()).toEqual(emptyTag);
     };
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
-      useCasesColumns(defaultColumnArgs)
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+      () => useCasesColumns(defaultColumnArgs),
+      {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
     );
 
     await waitFor(() => {
@@ -696,11 +715,15 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
-      useCasesColumns({
-        ...defaultColumnArgs,
-        isSelectorView: true,
-      })
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+      () =>
+        useCasesColumns({
+          ...defaultColumnArgs,
+          isSelectorView: true,
+        }),
+      {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
     );
 
     expect(result.current.find((i) => i.name === 'Status')).toBeFalsy();
@@ -835,5 +858,15 @@ describe('AllCasesListGeneric', () => {
     }
 
     waitForComponentToUpdate();
+  });
+
+  it('should hide the alerts column if the alert feature is disabled', async () => {
+    const { queryByText } = render(
+      <TestProviders features={{ alerts: false }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    expect(queryByText('Alerts')).toBe(null);
   });
 });
