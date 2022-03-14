@@ -536,7 +536,8 @@ describe('getExecutionLogForRule()', () => {
     });
 
     test('ensures user is authorised to get this type of alert under the consumer', async () => {
-      await rulesClient.get({ id: '1' });
+      eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
+      await rulesClient.getExecutionLogForRule(getExecutionLogByIdParams());
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
@@ -547,13 +548,13 @@ describe('getExecutionLogForRule()', () => {
     });
 
     test('throws when user is not authorised to get this type of alert', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(
+      authorization.ensureAuthorized.mockRejectedValueOnce(
         new Error(`Unauthorized to get a "myType" alert for "myApp"`)
       );
 
-      await expect(rulesClient.get({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "myType" alert for "myApp"]`
-      );
+      await expect(
+        rulesClient.getExecutionLogForRule(getExecutionLogByIdParams())
+      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to get a "myType" alert for "myApp"]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
@@ -571,11 +572,12 @@ describe('getExecutionLogForRule()', () => {
     });
 
     test('logs audit event when getting a rule execution log', async () => {
-      await rulesClient.get({ id: '1' });
+      eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
+      await rulesClient.getExecutionLogForRule(getExecutionLogByIdParams());
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'rule_get',
+            action: 'rule_get_execution_log',
             outcome: 'success',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -584,13 +586,17 @@ describe('getExecutionLogForRule()', () => {
     });
 
     test('logs audit event when not authorised to get a rule', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+      // first call occurs during rule SO get
+      authorization.ensureAuthorized.mockResolvedValueOnce();
+      authorization.ensureAuthorized.mockRejectedValueOnce(new Error('Unauthorized'));
 
-      await expect(rulesClient.get({ id: '1' })).rejects.toThrow();
+      await expect(
+        rulesClient.getExecutionLogForRule(getExecutionLogByIdParams())
+      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized]`);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'rule_get',
+            action: 'rule_get_execution_log',
             outcome: 'failure',
           }),
           kibana: {

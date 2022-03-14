@@ -670,7 +670,7 @@ export class RulesClient {
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.GET,
+          action: RuleAuditAction.GET_EXECUTION_LOG,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -680,7 +680,7 @@ export class RulesClient {
 
     this.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.GET,
+        action: RuleAuditAction.GET_EXECUTION_LOG,
         savedObject: { type: 'alert', id },
       })
     );
