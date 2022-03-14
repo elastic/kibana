@@ -95,6 +95,7 @@ export type { AllSeries } from './components/shared/exploratory_view/hooks/use_s
 export type { SeriesUrl } from './components/shared/exploratory_view/types';
 
 export type {
+  ObservabilityRuleTypeFormatter,
   ObservabilityRuleTypeModel,
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
