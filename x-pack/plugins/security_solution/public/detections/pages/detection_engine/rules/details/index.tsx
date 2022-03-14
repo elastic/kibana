@@ -316,7 +316,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setRuleDetailTab(RuleDetailTabs.exceptions);
     } else {
       setTabs(ruleDetailTabs);
-      setRuleDetailTab(RuleDetailTabs.executionLogs);
+      setRuleDetailTab(RuleDetailTabs.alerts);
     }
   }, [hasIndexRead]);
 

@@ -246,7 +246,8 @@ export const getRuleExecutionEventsRequest = () =>
     query: {
       start: 'now-30',
       end: 'now',
-      filters: '',
+      queryText: '',
+      statusFilters: '',
     },
   });
 
