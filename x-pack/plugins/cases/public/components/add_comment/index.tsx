@@ -27,6 +27,7 @@ import * as i18n from './translations';
 import { schema, AddCommentFormSchema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useKibanaCapabilities } from '../../common/lib/kibana';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -78,6 +79,9 @@ export const AddComment = React.memo(
         options: { stripEmptyFields: false },
         schema,
       });
+
+      const appCapabilities = useKibanaCapabilities();
+      const disabledUiPlugins: string[] = [...(!appCapabilities.visualize ? ['lens'] : [])];
 
       const fieldName = 'comment';
       const { setFieldValue, reset, submit } = form;
@@ -164,6 +168,7 @@ export const AddComment = React.memo(
                 componentProps={{
                   ref: editorRef,
                   id,
+                  disabledUiPlugins,
                   idAria: 'caseComment',
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',
