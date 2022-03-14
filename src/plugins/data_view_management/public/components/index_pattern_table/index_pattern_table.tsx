@@ -97,10 +97,16 @@ export const IndexPatternTable = ({
     if (selectedItems.length === 0) {
       return;
     }
-    // todo localize
     return (
       <EuiButton color="danger" iconType="trash" onClick={() => clickHandler(selectedItems)}>
-        Delete {selectedItems.length} Data Views
+        <FormattedMessage
+          id="indexPatternManagement.dataViewTable.deleteButtonLabel"
+          defaultMessage="Delete {selectedItems, number} {selectedItems, plural,
+            one {Data View}
+            other {Data Views}
+}"
+          values={{ selectedItems: selectedItems.length }}
+        />
       </EuiButton>
     );
   };
@@ -164,9 +170,15 @@ export const IndexPatternTable = ({
     field: 'id',
     actions: [
       {
-        // todo translate
-        name: 'Delete',
-        description: 'Delete this data view',
+        name: i18n.translate('indexPatternManagement.dataViewTable.columnDelete', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n.translate(
+          'indexPatternManagement.dataViewTable.columnDeleteDescription',
+          {
+            defaultMessage: 'Delete this data view',
+          }
+        ),
         icon: 'trash',
         color: 'danger',
         type: 'icon',
