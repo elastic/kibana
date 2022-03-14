@@ -140,6 +140,7 @@ exports[`ElasticAgentCard renders 1`] = `
         description="Use Elastic Agent for a simple, unified way to collect data from your machines."
         href="/app/integrations/browse"
         image="test-file-stub"
+        renderFooter={true}
         title="Add Elastic Agent"
       >
         <EuiCard
@@ -149,13 +150,6 @@ exports[`ElasticAgentCard renders 1`] = `
             }
           }
           description="Use Elastic Agent for a simple, unified way to collect data from your machines."
-          footer={
-            <EuiButton
-              fill={true}
-            >
-              Add Elastic Agent
-            </EuiButton>
-          }
           href="/app/integrations/browse"
           image="test-file-stub"
           paddingSize="l"
@@ -220,53 +214,6 @@ exports[`ElasticAgentCard renders 1`] = `
                     </p>
                   </div>
                 </EuiText>
-              </div>
-              <div
-                className="euiCard__footer"
-              >
-                <EuiButton
-                  fill={true}
-                >
-                  <EuiButtonDisplay
-                    baseClassName="euiButton"
-                    disabled={false}
-                    element="button"
-                    fill={true}
-                    isDisabled={false}
-                    type="button"
-                  >
-                    <button
-                      className="euiButton euiButton--primary euiButton--fill"
-                      disabled={false}
-                      style={
-                        Object {
-                          "minWidth": undefined,
-                        }
-                      }
-                      type="button"
-                    >
-                      <EuiButtonContent
-                        className="euiButton__content"
-                        iconSide="left"
-                        textProps={
-                          Object {
-                            "className": "euiButton__text",
-                          }
-                        }
-                      >
-                        <span
-                          className="euiButtonContent euiButton__content"
-                        >
-                          <span
-                            className="euiButton__text"
-                          >
-                            Add Elastic Agent
-                          </span>
-                        </span>
-                      </EuiButtonContent>
-                    </button>
-                  </EuiButtonDisplay>
-                </EuiButton>
               </div>
             </div>
           </EuiPanel>
