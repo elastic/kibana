@@ -61,6 +61,10 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       help: strings.getLegendPositionArgHelp(),
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
     },
+    legendSize: {
+      types: ['number'],
+      help: strings.getLegendSizeArgHelp(),
+    },
     nestedLegend: {
       types: ['boolean'],
       help: strings.getNestedLegendArgHelp(),
