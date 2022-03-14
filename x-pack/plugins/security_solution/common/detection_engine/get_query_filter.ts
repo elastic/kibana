@@ -12,6 +12,10 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import { Filter, EsQueryConfig, DataViewBase, buildEsQuery } from '@kbn/es-query';
+import {
+  EqlSearchRequest,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ESBoolQuery } from '../typed_json';
 import { Query, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
@@ -58,12 +62,6 @@ export const getAllFilters = (filters: Filter[], exceptionFilter: Filter | undef
   }
 };
 
-interface EqlSearchRequest {
-  method: string;
-  path: string;
-  body: object;
-}
-
 export const buildEqlSearchRequest = (
   query: string,
   index: string[],
@@ -94,7 +92,7 @@ export const buildEqlSearchRequest = (
     chunkSize: 1024,
   });
   const indexString = index.join();
-  const requestFilter: unknown[] = [
+  const requestFilter: QueryDslQueryContainer[] = [
     {
       range: {
         [timestamp]: {
@@ -114,9 +112,16 @@ export const buildEqlSearchRequest = (
       },
     });
   }
+  const fields = [
+    {
+      field: '*',
+      include_unmapped: true,
+    },
+    ...docFields,
+  ];
   return {
-    method: 'POST',
-    path: `/${indexString}/_eql/search?allow_no_indices=true`,
+    index: indexString,
+    allow_no_indices: true,
     body: {
       size,
       query,
@@ -126,13 +131,7 @@ export const buildEqlSearchRequest = (
         },
       },
       event_category_field: eventCategoryOverride,
-      fields: [
-        {
-          field: '*',
-          include_unmapped: true,
-        },
-        ...docFields,
-      ],
+      fields,
     },
   };
 };
