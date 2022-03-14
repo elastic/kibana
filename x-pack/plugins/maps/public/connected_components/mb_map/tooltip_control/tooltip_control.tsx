@@ -13,10 +13,11 @@ import {
   Map as MbMap,
   GeoJSONFeature,
   MapMouseEvent,
-  Point as MbPoint,
+  Point2D,
+  PointLike,
 } from '@kbn/mapbox-gl';
 import uuid from 'uuid/v4';
-import { Geometry } from 'geojson';
+import { Feature, Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { GEO_JSON_TYPE, LON_INDEX, RawValue } from '../../../../common/constants';
@@ -204,7 +205,7 @@ export class TooltipControl extends Component<Props, {}> {
         break;
       }
 
-      const featureId = layer.getFeatureId(mbFeature);
+      const featureId = layer.getFeatureId(mbFeature as Feature);
       const layerId = layer.getId();
       let match = false;
       for (let j = 0; j < uniqueFeatures.length; j++) {
@@ -330,7 +331,7 @@ export class TooltipControl extends Component<Props, {}> {
     });
   }
 
-  _getMbFeaturesUnderPointer(mbLngLatPoint: MbPoint) {
+  _getMbFeaturesUnderPointer(mbLngLatPoint: Point2D) {
     if (!this.props.mbMap) {
       return [];
     }
@@ -346,7 +347,7 @@ export class TooltipControl extends Component<Props, {}> {
         x: mbLngLatPoint.x + PADDING,
         y: mbLngLatPoint.y + PADDING,
       },
-    ] as [MbPoint, MbPoint];
+    ] as [PointLike, PointLike];
     return this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbLayerIds,
     });

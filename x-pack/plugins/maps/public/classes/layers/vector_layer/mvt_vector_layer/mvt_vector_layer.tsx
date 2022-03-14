@@ -7,9 +7,9 @@
 
 import type {
   Map as MbMap,
-  AnyLayer as MbLayer,
-  GeoJSONSource as MbGeoJSONSource,
-  VectorSource as MbVectorSource,
+  LayerSpecification,
+  Source as MbSource,
+  VectorSourceSpecification,
 } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
@@ -280,7 +280,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
 
     if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
-      const mbTooManyFeaturesLayer: MbLayer = {
+      const mbTooManyFeaturesLayer: LayerSpecification = {
         id: tooManyFeaturesLayerId,
         type: 'line',
         source: this.getId(),
@@ -308,7 +308,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
-    const mbSource = mbMap.getSource(this.getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
+    const mbSource = mbMap.getSource(this.getMbSourceId());
     if (!mbSource) {
       return false;
     }
@@ -316,7 +316,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       // Expected source is not compatible, so remove.
       return true;
     }
-    const mbTileSource = mbSource as MbVectorSource;
+    const mbTileSource = mbSource as MbSource & VectorSourceSpecification;
 
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest) {
@@ -343,9 +343,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       // but the programmable JS-object uses camelcase `sourceLayer`
       if (
         mbLayer &&
-        // @ts-expect-error
         mbLayer.sourceLayer !== sourceData.tileSourceLayer &&
-        // @ts-expect-error
         mbLayer.sourceLayer !== ES_MVT_META_LAYER_NAME
       ) {
         // If the source-pointer of one of the layers is stale, they will all be stale.

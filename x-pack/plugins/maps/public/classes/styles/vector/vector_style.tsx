@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { CSSProperties, ReactElement } from 'react';
-import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
+import { Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
 import {
@@ -794,15 +794,17 @@ export class VectorStyle implements IVectorStyle {
   }
 
   clearFeatureState(featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) {
-    const tmpFeatureIdentifier: FeatureIdentifier = {
+    const tmpFeatureIdentifier: { source: string; id: string | number; } = {
       source: '',
-      id: undefined,
+      id: '',
     };
     for (let i = 0; i < featureCollection.features.length; i++) {
-      const feature = featureCollection.features[i];
-      tmpFeatureIdentifier.source = sourceId;
-      tmpFeatureIdentifier.id = feature.id;
-      mbMap.removeFeatureState(tmpFeatureIdentifier);
+      const featureId = featureCollection.features[i].id;
+      if (featureId) {
+        tmpFeatureIdentifier.source = sourceId;
+        tmpFeatureIdentifier.id = featureId;
+        mbMap.removeFeatureState(tmpFeatureIdentifier);
+      }
     }
   }
 

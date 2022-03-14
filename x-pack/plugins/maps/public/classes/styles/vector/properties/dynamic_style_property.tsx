@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { Feature, FeatureCollection } from 'geojson';
-import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
@@ -524,9 +524,9 @@ export class DynamicStyleProperty<T>
     mbSourceId: string
   ): boolean {
     const supportsFeatureState = this.supportsMbFeatureState();
-    const featureIdentifier: FeatureIdentifier = {
-      source: mbSourceId,
-      id: undefined,
+    const featureIdentifier: { source: string; id: string | number; } = {
+      source: '',
+      id: '',
     };
     const featureState: Record<string, RawValue> = {};
     const targetMbName = this.getMbPropertyName();
@@ -536,8 +536,10 @@ export class DynamicStyleProperty<T>
       const targetMbValue = this.getMbPropertyValue(rawValue);
       if (supportsFeatureState) {
         featureState[targetMbName] = targetMbValue; // the same value will be potentially overridden multiple times, if the name remains identical
-        featureIdentifier.id = feature.id;
-        mbMap.setFeatureState(featureIdentifier, featureState);
+        if (feature.id) {
+          featureIdentifier.id = feature.id;
+          mbMap.setFeatureState(featureIdentifier, featureState);
+        }
       } else {
         if (feature.properties) {
           feature.properties[targetMbName] = targetMbValue;

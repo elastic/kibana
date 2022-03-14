@@ -13,7 +13,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 // @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
-import type { Map as MbMap } from '@kbn/mapbox-gl';
+import type { Map as MbMap, MapEvent } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { MapMouseEvent } from '@kbn/mapbox-gl';
 import { DRAW_SHAPE } from '../../../../common/constants';
@@ -89,7 +89,7 @@ export class DrawControl extends Component<Props> {
     }
 
     this.props.mbMap.getCanvas().style.cursor = '';
-    this.props.mbMap.off('draw.create', this._onDraw);
+    this.props.mbMap.off('draw.create' as MapEvent, this._onDraw);
     if (this.props.onClick) {
       this.props.mbMap.off('click', this._onClick);
     }
@@ -101,7 +101,7 @@ export class DrawControl extends Component<Props> {
     if (!this._mbDrawControlAdded) {
       this.props.mbMap.addControl(this._mbDrawControl);
       this._mbDrawControlAdded = true;
-      this.props.mbMap.on('draw.create', this._onDraw);
+      this.props.mbMap.on('draw.create' as MapEvent, this._onDraw);
 
       if (this.props.onClick) {
         this.props.mbMap.on('click', this._onClick);

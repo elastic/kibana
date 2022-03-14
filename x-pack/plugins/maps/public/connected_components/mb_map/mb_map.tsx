@@ -11,8 +11,8 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from '@kbn/es-query';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
 
-import { mapboxgl } from '@kbn/mapbox-gl';
-import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+import { maplibregl } from '@kbn/mapbox-gl';
+import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
@@ -81,7 +81,7 @@ export class MbMap extends Component<Props, State> {
   private _prevDisableInteractive?: boolean;
   private _prevLayerList?: ILayer[];
   private _prevTimeslice?: Timeslice;
-  private _navigationControl = new mapboxgl.NavigationControl({ showCompass: false });
+  private _navigationControl = new maplibregl.NavigationControl({ showCompass: false });
   private _tileStatusTracker?: TileStatusTracker;
 
   state: State = {
@@ -165,13 +165,13 @@ export class MbMap extends Component<Props, State> {
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
     return new Promise((resolve) => {
       const mbStyle = {
-        version: 8,
+        version: maplibregl.v8,
         sources: {},
         layers: [],
         glyphs: getGlyphUrl(),
       };
 
-      const options: MapboxOptions = {
+      const options: MapOptions = {
         attributionControl: false,
         container: this._containerRef!,
         style: mbStyle,
@@ -189,7 +189,7 @@ export class MbMap extends Component<Props, State> {
       } else {
         options.bounds = [-170, -60, 170, 75];
       }
-      const mbMap = new mapboxgl.Map(options);
+      const mbMap = new maplibregl.Map(options);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
 
@@ -309,12 +309,12 @@ export class MbMap extends Component<Props, State> {
 
     if (goto.bounds) {
       // clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
-      const lnLatBounds = new mapboxgl.LngLatBounds(
-        new mapboxgl.LngLat(
+      const lnLatBounds = new maplibregl.LngLatBounds(
+        new maplibregl.LngLat(
           clampToLonBounds(goto.bounds.minLon),
           clampToLatBounds(goto.bounds.minLat)
         ),
-        new mapboxgl.LngLat(
+        new maplibregl.LngLat(
           clampToLonBounds(goto.bounds.maxLon),
           clampToLatBounds(goto.bounds.maxLat)
         )
