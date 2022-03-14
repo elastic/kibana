@@ -28,17 +28,30 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 [[Preconfigured-xmatters-configuration]]
 ==== Preconfigured connector type
 
+Connector using Basic Authentication
 [source,text]
 --
  my-xmatters:
    name: preconfigured-xmatters-connector-type
    actionTypeId: .xmatters
    config:
-     url: https://test.host
+     configUrl: https://test.host
+     usesBasic: true
    secrets:
      user: testuser
      password: passwordkeystorevalue
-     url: https://test.host?apiKey=1234-abcd
+--
+
+Connector using URL Authentication
+[source,text]
+--
+ my-xmatters:
+   name: preconfigured-xmatters-connector-type
+   actionTypeId: .xmatters
+   config:
+     usesBasic: false
+   secrets:
+     secretsUrl: https://test.host?apiKey=1234-abcd
 --
 
 Config defines information for the connector type:
@@ -104,7 +117,3 @@ To use the Elastic xMatters connector either install the Elastic workflow templa
 
 Note: If you use basic authentication, specify the Web / App Login ID in the user credentials for the connector. This value can be found in the Edit Profile modal in xMatters for each user.
 For detailed configuration instructions, see https://help.xmatters.com/ondemand/#cshid=ElasticTrigger[xMatters online help]
-
-Mustache template variables (the text enclosed in double braces, for example, `context.rule.name`) have
-their values escaped, so that the final JSON will be valid (escaping double quote characters).
-For more information on Mustache template variables, refer to <<defining-rules-actions-details>>.

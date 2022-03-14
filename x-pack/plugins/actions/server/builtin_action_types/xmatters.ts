@@ -26,7 +26,7 @@ export type XmattersActionTypeExecutorOptions = ActionTypeExecutorOptions<
 >;
 
 const configSchemaProps = {
-  configUrl: schema.maybe(schema.string()),
+  configUrl: schema.nullable(schema.string()),
   usesBasic: schema.boolean({ defaultValue: true }),
 };
 const ConfigSchema = schema.object(configSchemaProps);
@@ -141,7 +141,7 @@ function validateConnector(
     }
     if (configUrl == null) {
       return i18n.translate('xpack.actions.builtin.xmatters.missingConfigUrl', {
-        defaultMessage: 'Provide valid URL',
+        defaultMessage: 'Provide valid configUrl',
       });
     }
   } else {
@@ -157,7 +157,7 @@ function validateConnector(
     }
     if (secretsUrl == null) {
       return i18n.translate('xpack.actions.builtin.xmatters.missingSecretsUrl', {
-        defaultMessage: 'Provide valid URL with API Key',
+        defaultMessage: 'Provide valid secretsUrl with API Key',
       });
     }
   }
@@ -170,7 +170,7 @@ function validateActionTypeSecrets(
 ): string | undefined {
   if (!secretsObject.secretsUrl && !secretsObject.user && !secretsObject.password) {
     return i18n.translate('xpack.actions.builtin.xmatters.noSecretsProvided', {
-      defaultMessage: 'Provide either URL link or username/password to authenticate',
+      defaultMessage: 'Provide either secretsUrl link or user/password to authenticate',
     });
   }
 
@@ -180,7 +180,7 @@ function validateActionTypeSecrets(
     if (secretsObject.user || secretsObject.password) {
       return i18n.translate('xpack.actions.builtin.xmatters.noUserPassWhenSecretsUrl', {
         defaultMessage:
-          'Cannot use username/password for URL authentication. Provide valid URL or use Basic Authentication.',
+          'Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication.',
       });
     }
 
@@ -191,7 +191,7 @@ function validateActionTypeSecrets(
       }
     } catch (err) {
       return i18n.translate('xpack.actions.builtin.xmatters.xmattersInvalidUrlError', {
-        defaultMessage: 'Invalid URL: {err}',
+        defaultMessage: 'Invalid secretsUrl: {err}',
         values: {
           err,
         },

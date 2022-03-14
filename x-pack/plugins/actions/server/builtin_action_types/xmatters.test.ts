@@ -88,7 +88,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, secrets);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Cannot use username/password for URL authentication. Provide valid URL or use Basic Authentication."`
+      `"error validating action type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
     );
   });
 
@@ -100,7 +100,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, secrets);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Cannot use username/password for URL authentication. Provide valid URL or use Basic Authentication."`
+      `"error validating action type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
     );
   });
 
@@ -113,7 +113,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, secrets);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Cannot use username/password for URL authentication. Provide valid URL or use Basic Authentication."`
+      `"error validating action type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
     );
   });
 
@@ -137,7 +137,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Provide either URL link or username/password to authenticate"`
+      `"error validating action type secrets: Provide either secretsUrl link or user/password to authenticate"`
     );
   });
 
@@ -148,7 +148,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, secrets);
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type secrets: Invalid URL: TypeError: Invalid URL: example.com/do-something?apiKey=someKey"'
+      '"error validating action type secrets: Invalid secretsUrl: TypeError: Invalid URL: example.com/do-something?apiKey=someKey"'
     );
   });
 
@@ -219,7 +219,8 @@ describe('config validation', () => {
   });
 
   test('config validations returns successful useBasic is false and no url is provided', () => {
-    const config: Record<string, boolean> = {
+    const config: Record<string, null | boolean> = {
+      configUrl: null,
       usesBasic: false,
     };
 
@@ -293,7 +294,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(actionType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: Provide valid URL"`
+      `"error validating action type connector: Provide valid configUrl"`
     );
   });
 
@@ -481,6 +482,7 @@ describe('execute()', () => {
 
   test('execute with useBasic=false uses empty authentication object', async () => {
     const config: ActionTypeConfigType = {
+      configUrl: null,
       usesBasic: false,
     };
     const secrets: ActionTypeSecretsType = {
