@@ -73,14 +73,14 @@ export const GlobalHeader = React.memo(
     return (
       <InPortal node={portalNode}>
         <EuiHeaderSection side="right">
+          {/* The consoles Popover may or may not be shown, depending on the user's authz */}
+          <ConsolesPopoverHeaderSectionItem />
+
           {isDetectionsPath(pathname) && (
             <EuiHeaderSectionItem>
               <MlPopover />
             </EuiHeaderSectionItem>
           )}
-
-          {/* The consoles Popover may or may not be shown, depending on the user's authz */}
-          <ConsolesPopoverHeaderSectionItem />
 
           <EuiHeaderSectionItem>
             <EuiHeaderLinks>

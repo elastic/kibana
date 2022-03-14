@@ -56,7 +56,7 @@ const ConsolesPopover = memo(() => {
         closePopover={handlePopoverClose}
         repositionOnScroll
       >
-        {'content of popover here'}
+        {'Currently open consoles and the ability to start a new console will be shown here soon'}
       </EuiPopover>
     </EuiHeaderSectionItem>
   );
