@@ -15,8 +15,9 @@ import type { FramePublicAPI, Visualization } from '../../../types';
 interface AddLayerButtonProps {
   visualization: Visualization;
   visualizationState: unknown;
-  onAddLayerClick: (layerType: LayerType) => void;
+  onAddLayerClick: (layerType: LayerType, noDatasource?: boolean) => void;
   layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  noDatasource?: boolean;
 }
 
 export function getLayerType(visualization: Visualization, state: unknown, layerId: string) {
@@ -28,6 +29,7 @@ export function AddLayerButton({
   visualizationState,
   onAddLayerClick,
   layersMeta,
+  noDatasource,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
@@ -63,7 +65,7 @@ export function AddLayerButton({
           })}
           fill
           color="text"
-          onClick={() => onAddLayerClick(supportedLayers[0].type)}
+          onClick={() => onAddLayerClick(supportedLayers[0].type, noDatasource)}
           iconType="layers"
         >
           {i18n.translate('xpack.lens.configPanel.addLayerButton', {
@@ -115,7 +117,7 @@ export function AddLayerButton({
                 icon: icon && <EuiIcon size="m" type={icon} />,
                 ['data-test-subj']: `lnsLayerAddButton-${type}`,
                 onClick: () => {
-                  onAddLayerClick(type);
+                  onAddLayerClick(type, noDatasource);
                   toggleLayersChoice(false);
                 },
               };

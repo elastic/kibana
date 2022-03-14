@@ -154,6 +154,7 @@ export const removeOrClearLayer = createAction<{
 export const addLayer = createAction<{
   layerId: string;
   layerType: LayerType;
+  noDatasource?: boolean;
 }>('lens/addLayer');
 
 export const setLayerDefaultDimension = createAction<{
@@ -607,11 +608,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     [addLayer.type]: (
       state,
       {
-        payload: { layerId, layerType },
+        payload: { layerId, layerType, noDatasource },
       }: {
         payload: {
           layerId: string;
           layerType: LayerType;
+          noDatasource?: boolean;
         };
       }
     ) => {
@@ -619,22 +621,22 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         return state;
       }
 
-      const activeDatasource = datasourceMap[state.activeDatasourceId];
       const activeVisualization = visualizationMap[state.visualization.activeId];
-
-      const datasourceState = activeDatasource.insertLayer(
-        state.datasourceStates[state.activeDatasourceId].state,
-        layerId
-      );
-
       const visualizationState = activeVisualization.appendLayer!(
         state.visualization.state,
         layerId,
         layerType
       );
 
+      const activeDatasource = noDatasource ? undefined : datasourceMap[state.activeDatasourceId];
+
       const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
-        datasourceState,
+        datasourceState: activeDatasource
+          ? activeDatasource.insertLayer(
+              state.datasourceStates[state.activeDatasourceId].state,
+              layerId
+            )
+          : state.datasourceStates[state.activeDatasourceId].state,
         visualizationState,
         framePublicAPI: {
           // any better idea to avoid `as`?
@@ -710,7 +712,7 @@ function addInitialValueIfAvailable({
   framePublicAPI: FramePublicAPI;
   visualizationState: unknown;
   datasourceState: unknown;
-  activeDatasource: Datasource;
+  activeDatasource?: Datasource;
   activeVisualization: Visualization;
   layerId: string;
   layerType: string;
@@ -721,7 +723,11 @@ function addInitialValueIfAvailable({
     .getSupportedLayers(visualizationState, framePublicAPI)
     .find(({ type }) => type === layerType);
 
-  if (layerInfo?.initialDimensions && activeDatasource?.initializeDimension) {
+  if (
+    layerType !== 'annotations' &&
+    layerInfo?.initialDimensions &&
+    activeDatasource?.initializeDimension
+  ) {
     const info = groupId
       ? layerInfo.initialDimensions.find(({ groupId: id }) => id === groupId)
       : // pick the first available one if not passed
@@ -733,6 +739,25 @@ function addInitialValueIfAvailable({
           ...info,
           columnId: columnId || info.columnId,
         }),
+        activeVisualizationState: activeVisualization.setDimension({
+          groupId: info.groupId,
+          layerId,
+          columnId: columnId || info.columnId,
+          prevState: visualizationState,
+          frame: framePublicAPI,
+        }),
+      };
+    }
+  }
+  if (layerType === 'annotations' && layerInfo?.initialDimensions) {
+    const info = groupId
+      ? layerInfo.initialDimensions.find(({ groupId: id }) => id === groupId)
+      : // pick the first available one if not passed
+        layerInfo.initialDimensions[0];
+
+    if (info) {
+      return {
+        activeDatasourceState: datasourceState,
         activeVisualizationState: activeVisualization.setDimension({
           groupId: info.groupId,
           layerId,
