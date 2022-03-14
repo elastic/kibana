@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { IEmbeddable } from 'src/plugins/embeddable/public';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
-import { Embeddable } from '../embeddable';
+import type { Embeddable } from '../embeddable';
 import type { DiscoverStart } from '../../../../../src/plugins/discover/public';
+import { DOC_TYPE } from '../../common';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 
@@ -25,8 +26,8 @@ export const createOpenInDiscoverAction = (discover: DiscoverStart) =>
       }),
     isCompatible: async (context: { embeddable: IEmbeddable }) => {
       let isCompatible = false;
-      if (context.embeddable instanceof Embeddable) {
-        isCompatible = await context.embeddable.getCanViewUnderlyingData();
+      if (context.embeddable.type === DOC_TYPE) {
+        isCompatible = await (context.embeddable as Embeddable).getCanViewUnderlyingData();
       }
       return isCompatible;
     },
