@@ -30,17 +30,27 @@ import type {
   LayerType,
   ReferenceLineLayerArgs,
   YConfig,
+  XScaleType,
+  YScaleType,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type { ValueLabelConfig } from '../../common/types';
 
-export interface XYDataLayerConfig extends Omit<DataLayerArgs, 'yConfig'> {
+export interface XYDataLayerConfig
+  extends Omit<DataLayerArgs, 'yConfig' | 'palette' | 'isHistogram' | 'xScaleType' | 'yScaleType'> {
   layerType: LayerType;
   yConfig?: YConfig[];
+  palette?: PaletteOutput;
+  yScaleType?: YScaleType;
+  xScaleType?: XScaleType;
+  isHistogram?: boolean;
 }
 
-export interface XYReferenceLineLayerConfig extends Omit<ReferenceLineLayerArgs, 'yConfig'> {
+export interface XYReferenceLineLayerConfig
+  extends Omit<ReferenceLineLayerArgs, 'yConfig' | 'palette'> {
   layerType: LayerType;
   yConfig?: YConfig[];
+  palette?: PaletteOutput;
 }
 
 export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;

@@ -46,6 +46,7 @@ export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig
   }
   const dataLayers = getDataLayers(state.layers);
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
+
   return referenceLayers
     .filter(({ label, config }: T) => groupsAvailable[label] || config?.length)
     .map((layer) => ({ ...layer, valid: groupsAvailable[layer.label] }));
@@ -345,19 +346,16 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
 
     newLayer.yConfig = [
       ...(newLayer.yConfig || []),
-      ...(previousYConfig
-        ? [
-            {
-              // override with previous styling,
-              ...previousYConfig,
-              // but keep the new group & id config
-              forAccessor: columnId,
-              axisMode,
-            },
-          ]
-        : []),
+      {
+        // override with previous styling,
+        ...previousYConfig,
+        // but keep the new group & id config
+        forAccessor: columnId,
+        axisMode,
+      },
     ];
   }
+
   return {
     ...prevState,
     layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),

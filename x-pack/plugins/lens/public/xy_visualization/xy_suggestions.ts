@@ -17,10 +17,7 @@ import {
   TableChangeType,
 } from '../types';
 import { State, XYState, visualizationTypes, XYLayerConfig, XYDataLayerConfig } from './types';
-import type {
-  DataLayerConfigResult,
-  SeriesType,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
@@ -510,7 +507,7 @@ function buildSuggestion({
       mainPalette ||
       (existingLayer && 'palette' in existingLayer
         ? (existingLayer as XYDataLayerConfig).palette
-        : { type: 'palette', name: '' }),
+        : undefined),
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
@@ -521,9 +518,6 @@ function buildSuggestion({
         ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
     layerType: layerTypes.DATA,
-    xScaleType: (existingLayer as DataLayerConfigResult).xScaleType ?? 'linear',
-    yScaleType: (existingLayer as DataLayerConfigResult).yScaleType ?? 'linear',
-    isHistogram: (existingLayer as DataLayerConfigResult).isHistogram ?? false,
   };
 
   // Maintain consistent order for any layers that were saved

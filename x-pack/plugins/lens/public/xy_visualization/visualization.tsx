@@ -141,11 +141,6 @@ export const getXyVisualization = ({
             seriesType: defaultSeriesType,
             showGridlines: false,
             layerType: layerTypes.DATA,
-            type: 'lens_xy_data_layer',
-            xScaleType: 'linear',
-            yScaleType: 'linear',
-            isHistogram: false,
-            palette: { name: 'default', type: 'palette' },
           },
         ],
       }
@@ -273,7 +268,9 @@ export const getXyVisualization = ({
 
   setDimension(props) {
     const { prevState, layerId, columnId, groupId } = props;
-    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+    const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
+      (l) => l.layerId === layerId
+    );
     if (!foundLayer) {
       return prevState;
     }
@@ -282,7 +279,7 @@ export const getXyVisualization = ({
       return setReferenceDimension(props);
     }
 
-    const newLayer: XYDataLayerConfig = Object.assign(foundLayer);
+    const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
     }
@@ -391,7 +388,7 @@ export const getXyVisualization = ({
       } else if (newLayer.splitAccessor === columnId) {
         delete newLayer.splitAccessor;
         // as the palette is associated with the break down by dimension, remove it together with the dimension
-        newLayer.palette = { type: 'palette', name: '' };
+        delete newLayer.palette;
       }
     }
     if (newLayer.accessors.includes(columnId)) {
