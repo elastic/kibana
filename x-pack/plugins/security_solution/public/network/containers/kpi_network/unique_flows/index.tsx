@@ -84,7 +84,6 @@ export const useNetworkKpiUniqueFlows = ({
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-
         searchSubscription$.current = data.search
           .search<NetworkKpiUniqueFlowsRequestOptions, NetworkKpiUniqueFlowsStrategyResponse>(
             request,

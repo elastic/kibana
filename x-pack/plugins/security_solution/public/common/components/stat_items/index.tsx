@@ -86,6 +86,7 @@ export interface StatItemsProps extends StatItems {
   narrowDateRange: UpdateDateRange;
   to: string;
   showInspectButton?: boolean;
+  loading: boolean;
   setQuerySkip: (skip: boolean) => void;
 }
 
@@ -384,6 +385,8 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     prevProps.enableBarChart === nextProps.enableBarChart &&
     prevProps.from === nextProps.from &&
     prevProps.grow === nextProps.grow &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.setQuerySkip === nextProps.setQuerySkip &&
     prevProps.id === nextProps.id &&
     prevProps.index === nextProps.index &&
     prevProps.narrowDateRange === nextProps.narrowDateRange &&
