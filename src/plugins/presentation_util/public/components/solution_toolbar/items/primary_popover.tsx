@@ -13,5 +13,5 @@ import { SolutionToolbarPopover, Props as SolutionToolbarPopoverProps } from './
 export type Props = Omit<SolutionToolbarPopoverProps, 'primary'>;
 
 export const PrimaryActionPopover = (props: Omit<SolutionToolbarPopoverProps, 'primary'>) => (
-  <SolutionToolbarPopover primary={true} {...props} />
+  <SolutionToolbarPopover {...props} />
 );

@@ -49,12 +49,7 @@ const primaryButtonConfigs = {
     <PrimaryActionButton label="Primary Action" iconType="apps" onClick={action('generic')} />
   ),
   Canvas: (
-    <SolutionToolbarPopover
-      label="Add element"
-      iconType="plusInCircle"
-      panelPaddingSize="none"
-      primary={true}
-    >
+    <SolutionToolbarPopover label="Add element" iconType="plusInCircle" panelPaddingSize="none">
       {() => (
         <EuiContextMenu
           initialPanelId={0}

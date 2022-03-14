@@ -14,7 +14,7 @@ import {
   SolutionToolbarButtonProps as ButtonProps,
 } from '../../../../../shared_ux/public';
 
-type AllowedButtonProps = Omit<typeof ButtonProps, 'onClick' | 'fill'>;
+type AllowedButtonProps = Omit<ButtonProps, 'onClick' | 'fill'>;
 type AllowedPopoverProps = Omit<
   EuiPopoverProps,
   'button' | 'isOpen' | 'closePopover' | 'anchorPosition'
@@ -22,11 +22,12 @@ type AllowedPopoverProps = Omit<
 
 export type Props = AllowedButtonProps &
   AllowedPopoverProps & {
+    label: string;
     children: (arg: { closePopover: () => void }) => React.ReactNode;
     iconType: IconType;
   };
 
-export const SolutionToolbarPopover = ({ iconType, children, ...popover }: Props) => {
+export const SolutionToolbarPopover = ({ label, iconType, children, ...popover }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onButtonClick = () => setIsOpen((status) => !status);
