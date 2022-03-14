@@ -125,7 +125,7 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiDataGrid
-        aria-label="Data grid demo"
+        aria-label="Alerts table"
         columns={props.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
