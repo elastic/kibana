@@ -41,7 +41,7 @@ export const NetworkKpiBaseComponent = React.memo<{
 }>(
   ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange }) => {
     const { cases } = useKibana().services;
-    const CasesContext = cases.getCasesContext();
+    const CasesContext = cases.ui.getCasesContext();
     const userPermissions = useGetUserCasesPermissions();
     const userCanCrud = userPermissions?.crud ?? false;
 

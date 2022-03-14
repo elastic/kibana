@@ -104,7 +104,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 }) => {
   const dispatch = useDispatch();
   const { cases } = useKibana().services;
-  const CasesContext = cases.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
 
