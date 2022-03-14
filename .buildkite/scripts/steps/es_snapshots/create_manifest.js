@@ -16,6 +16,8 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
   const destination = process.argv[2] || __dirname + '/test';
 
   const ES_BRANCH = process.env.ELASTICSEARCH_BRANCH;
+  const ES_CLOUD_IMAGE = process.env.ELASTICSEARCH_CLOUD_IMAGE;
+  const ES_CLOUD_IMAGE_CHECKSUM = process.env.ELASTICSEARCH_CLOUD_IMAGE_CHECKSUM;
   const GIT_COMMIT = process.env.ELASTICSEARCH_GIT_COMMIT;
   const GIT_COMMIT_SHORT = process.env.ELASTICSEARCH_GIT_COMMIT_SHORT;
 
@@ -42,10 +44,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
       .filter((filename) => !filename.match(/.sha512$/))
       .filter((filename) => !filename.match(/.json$/))
       .map((filename) => {
-        const parts = filename
-          .replace('elasticsearch-cloud', 'cloud')
-          .replace('elasticsearch-oss', 'oss')
-          .split('-');
+        const parts = filename.replace('elasticsearch-oss', 'oss').split('-');
 
         VERSION = VERSION || parts[1];
         SNAPSHOT_ID = SNAPSHOT_ID || `${date}_${GIT_COMMIT_SHORT}`;
@@ -61,6 +60,17 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
           license: parts[0] === 'oss' ? 'oss' : 'default',
         };
       });
+
+    if (ES_CLOUD_IMAGE && ES_CLOUD_IMAGE_CHECKSUM) {
+      manifestEntries.push({
+        checksum: ES_CLOUD_IMAGE_CHECKSUM,
+        url: ES_CLOUD_IMAGE,
+        version: VERSION,
+        platform: 'docker',
+        architecture: 'image',
+        license: 'default',
+      });
+    }
 
     const manifest = {
       id: SNAPSHOT_ID,
