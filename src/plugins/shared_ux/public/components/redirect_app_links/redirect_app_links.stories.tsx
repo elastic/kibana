@@ -36,7 +36,7 @@ export const Component = () => {
         iconType="plusInCircle"
         onClick={action('button pressed')}
       >
-        Test link{' '}
+        Test link
       </EuiButton>
     </RedirectAppLinks>
   );
