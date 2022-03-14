@@ -9,6 +9,7 @@ import { Logger } from '@kbn/logging';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getServicesItems } from './get_services_items';
+import { ServiceGroup } from '../../../../common/service_groups';
 
 export async function getServices({
   environment,
@@ -19,6 +20,7 @@ export async function getServices({
   logger,
   start,
   end,
+  serviceGroup,
 }: {
   environment: string;
   kuery: string;
@@ -28,6 +30,7 @@ export async function getServices({
   logger: Logger;
   start: number;
   end: number;
+  serviceGroup: ServiceGroup | null;
 }) {
   return withApmSpan('get_services', async () => {
     const items = await getServicesItems({
@@ -39,6 +42,7 @@ export async function getServices({
       logger,
       start,
       end,
+      serviceGroup,
     });
 
     return {

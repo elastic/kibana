@@ -29,6 +29,8 @@ import {
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
+import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
+import { ServiceGroup } from '../../../../common/service_groups';
 
 interface AggregationParams {
   environment: string;
@@ -39,6 +41,7 @@ interface AggregationParams {
   maxNumServices: number;
   start: number;
   end: number;
+  serviceGroup: ServiceGroup | null;
 }
 
 export async function getServiceTransactionStats({
@@ -50,6 +53,7 @@ export async function getServiceTransactionStats({
   maxNumServices,
   start,
   end,
+  serviceGroup,
 }: AggregationParams) {
   const { apmEventClient } = setup;
 
@@ -83,6 +87,7 @@ export async function getServiceTransactionStats({
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
+              ...serviceGroupQuery(serviceGroup),
             ],
           },
         },

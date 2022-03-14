@@ -53,11 +53,20 @@ import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ScopedAnnotationsClient } from '../../../../observability/server';
 import { Annotation } from './../../../../observability/common/annotations';
 import { ConnectionStatsItemWithImpact } from './../../../common/connections';
+import { getSortedAndFilteredServices } from './get_services/get_sorted_and_filtered_services';
+import { ServiceHealthStatus } from './../../../common/service_health_status';
+import { getServiceGroup } from '../service_groups/get_service_group';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
-    query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.partial({ serviceGroup: t.string }),
+      probabilityRt,
+    ]),
   }),
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<{
@@ -98,16 +107,29 @@ const servicesRoute = createApmServerRoute({
       }
     >;
   }> {
-    const setup = await setupRequest(resources);
-    const { params, logger } = resources;
-    const { environment, kuery, start, end, probability } = params.query;
+    const { context, params, logger } = resources;
+    const {
+      environment,
+      kuery,
+      start,
+      end,
+      serviceGroup: serviceGroupId,
+      probability,
+    } = params.query;
+    const savedObjectsClient = context.core.savedObjects.client;
+
+    const [setup, serviceGroup] = await Promise.all([
+      setupRequest(resources),
+      serviceGroupId
+        ? getServiceGroup({ savedObjectsClient, serviceGroupId })
+        : Promise.resolve(null),
+    ]);
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
       start,
       end,
     });
-
     return getServices({
       environment,
       kuery,
@@ -117,6 +139,7 @@ const servicesRoute = createApmServerRoute({
       logger,
       start,
       end,
+      serviceGroup,
     });
   },
 });
@@ -1226,6 +1249,58 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
   },
 });
 
+const sortedAndFilteredServicesRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/sorted_and_filtered_services',
+  options: {
+    tags: ['access:apm'],
+  },
+  params: t.type({
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      kueryRt,
+      t.partial({ serviceGroup: t.string }),
+    ]),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    services: Array<{
+      serviceName: string;
+      healthStatus?: ServiceHealthStatus;
+    }>;
+  }> => {
+    const {
+      query: { start, end, environment, kuery, serviceGroup: serviceGroupId },
+    } = resources.params;
+
+    if (kuery) {
+      return {
+        services: [],
+      };
+    }
+
+    const savedObjectsClient = resources.context.core.savedObjects.client;
+
+    const [setup, serviceGroup] = await Promise.all([
+      setupRequest(resources),
+      serviceGroupId
+        ? getServiceGroup({ savedObjectsClient, serviceGroupId })
+        : Promise.resolve(null),
+    ]);
+    return {
+      services: await getSortedAndFilteredServices({
+        setup,
+        start,
+        end,
+        environment,
+        logger: resources.logger,
+        serviceGroup,
+      }),
+    };
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -1247,4 +1322,5 @@ export const serviceRouteRepository = {
   ...serviceAlertsRoute,
   ...serviceInfrastructureRoute,
   ...serviceAnomalyChartsRoute,
+  ...sortedAndFilteredServicesRoute,
 };

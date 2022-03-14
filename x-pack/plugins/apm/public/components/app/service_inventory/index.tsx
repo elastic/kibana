@@ -20,14 +20,13 @@ import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_ra
 import { ServiceList } from './service_list';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
+import { joinByKey } from '../../../../common/utils/join_by_key';
 
 const initialData = {
   requestId: '',
-  mainStatisticsData: {
-    items: [],
-    hasHistoricalData: true,
-    hasLegacyData: false,
-  },
+  items: [],
+  hasHistoricalData: true,
+  hasLegacyData: false,
 };
 
 function useServicesFetcher() {
@@ -36,7 +35,7 @@ function useServicesFetcher() {
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup },
   } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -48,39 +47,56 @@ function useServicesFetcher() {
     comparisonType,
   });
 
-  const { data = initialData, status: mainStatisticsStatus } =
-    useProgressiveFetcher(
-      (callApmApi) => {
-        if (start && end) {
-          return callApmApi('GET /internal/apm/services', {
-            params: {
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-              },
+  const sortedAndFilteredServicesFetch = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/sorted_and_filtered_services', {
+        params: {
+          query: {
+            start,
+            end,
+            environment,
+            kuery,
+            serviceGroup,
+          },
+        },
+      });
+    },
+    [start, end, environment, kuery, serviceGroup]
+  );
+
+  const mainStatisticsFetch = useProgressiveFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi('GET /internal/apm/services', {
+          params: {
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              serviceGroup,
             },
-          }).then((mainStatisticsData) => {
-            return {
-              requestId: uuid(),
-              mainStatisticsData,
-            };
-          });
-        }
-      },
-      [environment, kuery, start, end]
-    );
+          },
+        }).then((mainStatisticsData) => {
+          return {
+            requestId: uuid(),
+            ...mainStatisticsData,
+          };
+        });
+      }
+    },
+    [environment, kuery, start, end, serviceGroup]
+  );
 
-  const { mainStatisticsData, requestId } = data;
+  const { data: mainStatisticsData = initialData } = mainStatisticsFetch;
 
-  const { data: comparisonData } = useFetcher(
+  const comparisonFetch = useFetcher(
     (callApmApi) => {
       if (
         start &&
         end &&
         mainStatisticsData.items.length &&
-        mainStatisticsStatus === FETCH_STATUS.SUCCESS
+        mainStatisticsFetch.status === FETCH_STATUS.SUCCESS
       ) {
         return callApmApi('GET /internal/apm/services/detailed_statistics', {
           params: {
@@ -103,20 +119,23 @@ function useServicesFetcher() {
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, offset],
+    [mainStatisticsData.requestId, offset],
     { preservePreviousData: false }
   );
 
   return {
-    mainStatisticsData,
-    mainStatisticsStatus,
-    comparisonData,
+    sortedAndFilteredServicesFetch,
+    mainStatisticsFetch,
+    comparisonFetch,
   };
 }
 
 export function ServiceInventory() {
-  const { mainStatisticsData, mainStatisticsStatus, comparisonData } =
-    useServicesFetcher();
+  const {
+    sortedAndFilteredServicesFetch,
+    mainStatisticsFetch,
+    comparisonFetch,
+  } = useServicesFetcher();
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
@@ -129,8 +148,13 @@ export function ServiceInventory() {
     !userHasDismissedCallout &&
     shouldDisplayMlCallout(anomalyDetectionSetupState);
 
-  const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
-  const isFailure = mainStatisticsStatus === FETCH_STATUS.FAILURE;
+  const isLoading =
+    sortedAndFilteredServicesFetch.status === FETCH_STATUS.LOADING ||
+    (sortedAndFilteredServicesFetch.status === FETCH_STATUS.SUCCESS &&
+      sortedAndFilteredServicesFetch.data?.services.length === 0 &&
+      mainStatisticsFetch.status === FETCH_STATUS.LOADING);
+
+  const isFailure = mainStatisticsFetch.status === FETCH_STATUS.FAILURE;
   const noItemsMessage = (
     <EuiEmptyPrompt
       title={
@@ -142,6 +166,14 @@ export function ServiceInventory() {
       }
       titleSize="s"
     />
+  );
+
+  const items = joinByKey(
+    [
+      ...(sortedAndFilteredServicesFetch.data?.services ?? []),
+      ...(mainStatisticsFetch.data?.items ?? []),
+    ],
+    'serviceName'
   );
 
   return (
@@ -161,8 +193,8 @@ export function ServiceInventory() {
           <ServiceList
             isLoading={isLoading}
             isFailure={isFailure}
-            items={mainStatisticsData.items}
-            comparisonData={comparisonData}
+            items={items}
+            comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
           />
         </EuiFlexItem>

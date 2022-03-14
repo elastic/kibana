@@ -16,7 +16,15 @@ import {
   enableInfrastructureView,
   defaultApmServiceEnvironment,
   enableRandomSampling,
+  enableServiceGroups,
 } from '../common/ui_settings_keys';
+
+const technicalPreviewLabel = i18n.translate(
+  'xpack.observability.uiSettings.technicalPreviewLabel',
+  {
+    defaultMessage: 'technical preview',
+  }
+);
 
 /**
  * uiSettings definitions for Observability.
@@ -87,5 +95,18 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       'Whether to load data progressively for APM views. Data may be requested with a high sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
     value: false,
     schema: schema.boolean(),
+  },
+  [enableServiceGroups]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableServiceGroups', {
+      defaultMessage: 'Service groups feature',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableServiceGroupsDescription', {
+      defaultMessage: '{technicalPreviewLabel} Enable the Service groups feature on APM UI',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
   },
 };

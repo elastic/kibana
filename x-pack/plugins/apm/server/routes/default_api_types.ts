@@ -16,7 +16,7 @@ export const rangeRt = t.type({
 });
 
 export const probabilityRt = t.type({
-  probability: t.union([t.literal('none'), toNumberRt]),
+  probability: toNumberRt,
 });
 
 export const offsetRt = t.partial({ offset: t.string });
