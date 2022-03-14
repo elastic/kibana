@@ -117,7 +117,7 @@ export const xyChart: ExpressionFunctionDefinition<
     },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      types: ['lens_xy_layer'] as any,
+      types: ['lens_xy_data_layer', 'lens_xy_referenceLine_layer'] as any,
       help: 'Layers of visual series',
       multi: true,
     },
