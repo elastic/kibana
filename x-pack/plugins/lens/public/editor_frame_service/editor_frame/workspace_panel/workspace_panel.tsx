@@ -504,8 +504,8 @@ export const VisualizationWrapper = ({
         dispatchLens(
           onActiveDataChange(
             Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-              (acc, [key, value]) => ({
-                [key === 'default' ? defaultLayerId : key]: value,
+              (acc, [key, value], index, tables) => ({
+                [tables.length === 1 ? defaultLayerId : key]: value,
               }),
               {}
             )
