@@ -9,7 +9,7 @@ import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL } from '../../translations'
 import { LensAttributes } from '../../types';
 
 export const kpiUniquePrivateIpsBar: LensAttributes = {
-  title: '[Network] KPI Unique private IPs - bar chart',
+  title: '[Network] Unique private IPs - bar chart',
   description: '',
   visualizationType: 'lnsXY',
   state: {

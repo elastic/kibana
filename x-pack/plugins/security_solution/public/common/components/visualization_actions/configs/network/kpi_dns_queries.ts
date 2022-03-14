@@ -8,7 +8,7 @@
 import { LensAttributes } from '../../types';
 
 export const kpiDnsQueries: LensAttributes = {
-  title: '[Network] KPI DNS metric',
+  title: '[Network] DNS metric',
   description: '',
   visualizationType: 'lnsMetric',
   state: {

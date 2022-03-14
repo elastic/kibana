@@ -7,7 +7,7 @@
 import { LensAttributes } from '../../types';
 
 export const kpiUniquePrivateIpsArea: LensAttributes = {
-  title: '[Network] KPI Unique private IPs - area chart',
+  title: '[Network] Unique private IPs - area chart',
   description: '',
   visualizationType: 'lnsXY',
   state: {

@@ -8,7 +8,7 @@
 import { LensAttributes } from '../../types';
 
 export const kpiNetworkEvents: LensAttributes = {
-  title: '[Network] KPI Network events',
+  title: '[Network] Network events',
   description: '',
   visualizationType: 'lnsMetric',
   state: {

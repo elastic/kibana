@@ -249,7 +249,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
             </EuiFlexItem>
             {showInspectButton && (
               <EuiFlexItem grow={false}>
-                <InspectButton queryId={id} title={`KPI ${description}`} inspectIndex={index} />
+                <InspectButton queryId={id} title={description} inspectIndex={index} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -283,7 +283,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                           queryId={id}
                           inspectIndex={index}
                           timerange={timerange}
-                          title={`KPI ${description}`}
+                          title={description}
                           className="viz-actions"
                         />
                       )}
@@ -306,7 +306,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                     queryId: id,
                     inspectIndex: index,
                     timerange,
-                    title: `KPI ${description}`,
+                    title: description,
                   }}
                 />
               </FlexItem>
@@ -326,7 +326,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                       queryId: id,
                       inspectIndex: index,
                       timerange,
-                      title: `KPI ${description}`,
+                      title: description,
                     }}
                   />
                 </FlexItem>

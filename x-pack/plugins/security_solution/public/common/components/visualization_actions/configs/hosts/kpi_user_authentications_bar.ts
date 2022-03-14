@@ -9,7 +9,7 @@ import { LensAttributes } from '../../types';
 import { FAIL_CHART_LABEL, SUCCESS_CHART_LABEL } from '../../translations';
 
 export const kpiUserAuthenticationsBar: LensAttributes = {
-  title: '[Host] KPI User authentications - bar ',
+  title: '[Host] User authentications - bar ',
   description: '',
   visualizationType: 'lnsXY',
   state: {

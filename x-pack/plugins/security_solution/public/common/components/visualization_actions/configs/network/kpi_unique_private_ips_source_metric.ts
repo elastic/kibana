@@ -47,7 +47,7 @@ export const kpiUniquePrivateIpsSourceMetric: LensAttributes = {
       layerType: 'data',
     },
   },
-  title: '[Network] KPI Unique private IPs - source metric',
+  title: '[Network] Unique private IPs - source metric',
   visualizationType: 'lnsMetric',
   references: [
     {

@@ -8,7 +8,7 @@
 import { LensAttributes } from '../../types';
 
 export const kpiUniqueFlowIds: LensAttributes = {
-  title: '[Network] KPI Unique flow IDs',
+  title: '[Network] Unique flow IDs',
   description: '',
   visualizationType: 'lnsMetric',
   state: {
