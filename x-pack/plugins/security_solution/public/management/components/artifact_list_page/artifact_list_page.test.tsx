@@ -6,13 +6,12 @@
  */
 
 import { AppContextTestRender } from '../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks, TrustedAppsGetListHttpMocksInterface } from '../../pages/mocks';
+import { trustedAppsAllHttpMocks } from '../../pages/mocks';
 import { ArtifactListPageProps } from './artifact_list_page';
 import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   getArtifactListPageRenderingSetup,
-  getFormComponentMock,
   getDeferred,
   ArtifactListPageRenderingSetup,
 } from './mocks';
@@ -26,15 +25,12 @@ describe('When using the ArtifactListPage component', () => {
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
-  let getLastFormComponentProps: ReturnType<
-    typeof getFormComponentMock
-  >['getLastFormComponentProps'];
   let getFirstCard: ArtifactListPageRenderingSetup['getFirstCard'];
 
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, mockedApi, getLastFormComponentProps, getFirstCard } = renderSetup);
+    ({ history, mockedApi, getFirstCard } = renderSetup);
 
     render = (props = {}) => (renderResult = renderSetup.renderArtifactListPage(props));
   });
@@ -55,92 +51,6 @@ describe('When using the ArtifactListPage component', () => {
     });
 
     await waitForElementToBeRemoved(loader);
-  });
-
-  describe('and NO data exists', () => {
-    let renderWithNoData: () => ReturnType<typeof render>;
-    let originalListApiResponseProvider: TrustedAppsGetListHttpMocksInterface['trustedAppsList'];
-
-    beforeEach(() => {
-      originalListApiResponseProvider =
-        mockedApi.responseProvider.trustedAppsList.getMockImplementation()!;
-
-      renderWithNoData = () => {
-        mockedApi.responseProvider.trustedAppsList.mockReturnValue({
-          data: [],
-          page: 1,
-          per_page: 10,
-          total: 0,
-        });
-
-        render();
-
-        return renderResult;
-      };
-    });
-
-    it('should display empty state', async () => {
-      renderWithNoData();
-
-      await waitFor(async () => {
-        expect(renderResult.getByTestId('testPage-emptyState'));
-      });
-    });
-
-    it('should hide page headers', async () => {
-      renderWithNoData();
-
-      expect(renderResult.queryByTestId('header-page-title')).toBe(null);
-    });
-
-    it('should open create flyout when primary button is clicked', async () => {
-      renderWithNoData();
-      const addButton = await renderResult.findByTestId('testPage-emptyState-addButton');
-
-      act(() => {
-        userEvent.click(addButton);
-      });
-
-      expect(renderResult.getByTestId('testPage-flyout')).toBeTruthy();
-      expect(history.location.search).toMatch(/show=create/);
-    });
-
-    describe('and the first item is created', () => {
-      it('should show the list after creating first item and remove empty state', async () => {
-        renderWithNoData();
-        const addButton = await renderResult.findByTestId('testPage-emptyState-addButton');
-
-        act(() => {
-          userEvent.click(addButton);
-        });
-
-        await waitFor(async () => {
-          expect(renderResult.getByTestId('testPage-flyout'));
-        });
-
-        // indicate form is valid
-        act(() => {
-          const lastProps = getLastFormComponentProps();
-          lastProps.onChange({ item: { ...lastProps.item, name: 'some name' }, isValid: true });
-        });
-
-        mockedApi.responseProvider.trustedAppsList.mockImplementation(
-          originalListApiResponseProvider
-        );
-
-        // Submit form
-        act(() => {
-          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-        });
-
-        // wait for the list to show up
-        await act(async () => {
-          await waitFor(() => {
-            expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
-          });
-        });
-      });
-    });
   });
 
   describe('and data exists', () => {
