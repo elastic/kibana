@@ -12,7 +12,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common',
   'settings',
-  'header',]);
+  'header',
+    'tagManagement']);
   const a11y = getService('a11y');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
@@ -37,6 +38,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('createTagButton');
         await a11y.testAppSnapshot();
       });
+
+
+      it('tag listing page meets a11y validations', async () => {
+        await PageObjects.tagManagement.tagModal.fillForm(
+          {
+            name: 'a11yTag',
+            color: '#fc03db',
+            description: 'a11y test tag',
+          },
+          {
+            submit: true,
+          }
+        );
+        //await PageObjects.tagManagement.tagModal.clickConfirm();
+        //await PageObjects.tagManagement.tagModal.clickCancel();
+        await a11y.testAppSnapshot();
+      });
+
+
+
+
+
 
 
   });
