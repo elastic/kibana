@@ -72,6 +72,12 @@ export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; ki
       await page.click(byTestId(`monitor-page-link-${monitorId}`));
     },
 
+    async navigateToOverviewPage(options?: object) {
+      await page.goto(`${overview}${options ? `?${getQuerystring(options)}` : ''}`, {
+        waitUntil: 'networkidle',
+      });
+    },
+
     async selectFilterItem(filterType: string, itemArg: string | string[]) {
       const itemList = Array.isArray(itemArg) ? itemArg : [itemArg];
       await page.click(`[aria-label="expands filter group for ${filterType} filter"]`);
