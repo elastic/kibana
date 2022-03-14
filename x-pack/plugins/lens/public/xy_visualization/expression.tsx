@@ -49,6 +49,7 @@ import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
 import { ThemeServiceStart } from 'kibana/public';
 import { FieldFormat } from 'src/plugins/field_formats/common';
+import { EventAnnotationServiceType } from '../../../../../src/plugins/event_annotation/public';
 import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
@@ -103,6 +104,7 @@ export type XYChartRenderProps = XYChartProps & {
   onSelectRange: (data: LensBrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
+  eventAnnotationService: EventAnnotationServiceType;
 };
 
 export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
@@ -139,6 +141,7 @@ export const getXyChartRenderer = (dependencies: {
   timeZone: string;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
+  eventAnnotationService: EventAnnotationServiceType;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -169,6 +172,7 @@ export const getXyChartRenderer = (dependencies: {
             chartsActiveCursorService={dependencies.chartsActiveCursorService}
             chartsThemeService={dependencies.chartsThemeService}
             paletteService={dependencies.paletteService}
+            eventAnnotationService={dependencies.eventAnnotationService}
             timeZone={dependencies.timeZone}
             useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
             minInterval={calculateMinInterval(config)}

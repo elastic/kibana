@@ -60,8 +60,10 @@ export const getXyVisualization = ({
   fieldFormats,
   useLegacyTimeAxis,
   kibanaTheme,
+  eventAnnotationService,
 }: {
   paletteService: PaletteRegistry;
+  eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;

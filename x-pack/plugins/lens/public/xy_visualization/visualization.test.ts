@@ -23,6 +23,7 @@ import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks'
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { Datatable } from 'src/plugins/expressions';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { eventAnnotationServiceMock } from 'src/plugins/event_annotation/public/mocks';
 
 function exampleState(): State {
   return {
@@ -49,6 +50,7 @@ const xyVisualization = getXyVisualization({
   fieldFormats: fieldFormatsMock,
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
+  eventAnnotationService: eventAnnotationServiceMock,
 });
 
 describe('xy_visualization', () => {

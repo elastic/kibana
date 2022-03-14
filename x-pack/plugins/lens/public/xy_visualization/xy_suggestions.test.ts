@@ -11,6 +11,7 @@ import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { eventAnnotationServiceMock } from '../../../../../src/plugins/event_annotation/public/mocks';
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
@@ -24,6 +25,7 @@ const xyVisualization = getXyVisualization({
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
+  eventAnnotationService: eventAnnotationServiceMock,
 });
 
 describe('xy_suggestions', () => {

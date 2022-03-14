@@ -47,6 +47,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { XyEndzones } from './x_domain';
+import { eventAnnotationServiceMock } from 'src/plugins/event_annotation/public/mocks';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -536,6 +537,7 @@ describe('xy_expression', () => {
         onSelectRange,
         syncColors: false,
         useLegacyTimeAxis: false,
+        eventAnnotationService: eventAnnotationServiceMock,
       };
     });
 
