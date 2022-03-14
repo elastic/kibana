@@ -5,10 +5,18 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFieldSearch,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import useDebounce from 'react-use/lib/useDebounce';
+import moment from 'moment';
 import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
 import { RulesBulkActionsMenu } from './rules_bulk_actions_menu';
@@ -24,6 +32,7 @@ interface RulesTableToolbarProps {
   selectedRulesCount: number;
   searchValue: string;
   isSearching: boolean;
+  lastModified?: string;
 }
 
 interface CounterProps {
@@ -33,6 +42,16 @@ interface CounterProps {
 interface ButtonProps {
   onClick(): void;
 }
+
+const LastModificationLabel = ({ lastModified }: { lastModified: string }) => (
+  <EuiText size="s">
+    <FormattedMessage
+      id="xpack.csp.rules.lastModificationLabel"
+      defaultMessage="Last modification to integration {timeAgo} "
+      values={{ timeAgo: moment.duration(moment().diff(+new Date(lastModified))).humanize() }}
+    />
+  </EuiText>
+);
 
 export const RulesTableHeader = ({
   search,
@@ -45,22 +64,27 @@ export const RulesTableHeader = ({
   selectedRulesCount,
   searchValue,
   isSearching,
+  lastModified,
 }: RulesTableToolbarProps) => (
-  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
-    <Counters total={totalRulesCount} selected={selectedRulesCount} />
-    <SelectAllToggle
-      isSelectAll={selectedRulesCount === totalRulesCount}
-      clear={clearSelection}
-      select={selectAll}
-    />
-    <BulkMenu
-      bulkEnable={bulkEnable}
-      bulkDisable={bulkDisable}
-      selectedRulesCount={selectedRulesCount}
-    />
-    <RefreshButton onClick={refresh} />
-    <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
-  </EuiFlexGroup>
+  <div>
+    {lastModified && <LastModificationLabel lastModified={lastModified} />}
+    <EuiSpacer />
+    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
+      <Counters total={totalRulesCount} selected={selectedRulesCount} />
+      <SelectAllToggle
+        isSelectAll={selectedRulesCount === totalRulesCount}
+        clear={clearSelection}
+        select={selectAll}
+      />
+      <BulkMenu
+        bulkEnable={bulkEnable}
+        bulkDisable={bulkDisable}
+        selectedRulesCount={selectedRulesCount}
+      />
+      <RefreshButton onClick={refresh} />
+      <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
+    </EuiFlexGroup>
+  </div>
 );
 
 const Counters = ({ total, selected }: { total: number; selected: number }) => (

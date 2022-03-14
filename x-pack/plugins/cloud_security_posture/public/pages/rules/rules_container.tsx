@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { extractErrorMessage } from '../../../common/utils/helpers';
+import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesBottomBar } from './rules_bottom_bar';
 import { RulesTableHeader } from './rules_table_header';
@@ -109,6 +109,15 @@ export const RulesContainer = () => {
 
   const { mutate: bulkUpdate, isLoading: isUpdating } = useBulkUpdateCspRules();
 
+  const lastModified = useMemo(
+    () =>
+      data?.savedObjects
+        .map((v) => v.updatedAt)
+        .filter(isNonNullable)
+        .sort((a, b) => +new Date(b) - +new Date(a))[0] || '',
+    [data]
+  );
+
   const rulesPageData = useMemo(
     () => getRulesPageData({ data, error, status }, changedRules, rulesQuery),
     [data, error, status, changedRules, rulesQuery]
@@ -178,6 +187,7 @@ export const RulesContainer = () => {
           searchValue={rulesQuery.search}
           totalRulesCount={rulesPageData.all_rules.length}
           isSearching={status === 'loading'}
+          lastModified={lastModified}
         />
         <EuiSpacer />
         <RulesTable

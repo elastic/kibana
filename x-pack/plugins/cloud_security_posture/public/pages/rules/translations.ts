@@ -39,8 +39,8 @@ export const SECTION = i18n.translate('xpack.csp.rules.sectionColumnHeaderLabel'
   defaultMessage: 'Section',
 });
 
-export const UPDATED_AT = i18n.translate('xpack.csp.rules.updatedAtColumnHeaderLabel', {
-  defaultMessage: 'Updated at',
+export const LAST_MODIFIED = i18n.translate('xpack.csp.rules.lastModifiedColumnHeaderLabel', {
+  defaultMessage: 'Last modified',
 });
 
 export const ENABLED = i18n.translate('xpack.csp.rules.enabledColumnHeaderLabel', {
