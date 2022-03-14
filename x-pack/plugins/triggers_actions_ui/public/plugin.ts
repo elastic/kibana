@@ -31,6 +31,7 @@ import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+import { getAlertsTableLazy } from './common/get_alerts_table';
 
 import type {
   ActionTypeModel,
@@ -41,7 +42,6 @@ import type {
   ConnectorEditFlyoutProps,
   AlertsTableProps,
 } from './types';
-import { getAlertsTableLazy } from './common/get_alerts_table';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;

@@ -97,3 +97,6 @@ export function AlertsTable(props: AlertsTableProps) {
     </Provider>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export { AlertsTable as default };

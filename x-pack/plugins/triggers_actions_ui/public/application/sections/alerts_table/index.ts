@@ -4,4 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { AlertsTable } from './alerts_table';
+import { lazy } from 'react';
+import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
+
+export const AlertsTable = suspendedComponentWithProps(lazy(() => import('./alerts_table')));
