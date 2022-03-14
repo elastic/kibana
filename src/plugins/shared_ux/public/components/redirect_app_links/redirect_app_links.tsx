@@ -26,7 +26,7 @@ export interface RedirectAppLinksProps extends Props {
  *
  * @example
  * ```tsx
- * <RedirectAppLinks application={application}>
+ * <RedirectAppLinks navigateToUrl={() => url} currentAppId$={observableAppId}>
  *   <a href="/base-path/app/another-app/some-path">Go to another-app</a>
  * </RedirectAppLinks>
  * ```
