@@ -8,7 +8,8 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { AlertsData, AlertsTable } from './alerts_table';
+import { AlertsTable } from './alerts_table';
+import { AlertsData } from '../../../types';
 jest.mock('../../../../../../../src/plugins/data/public/');
 jest.mock('../../../common/lib/kibana');
 
@@ -31,9 +32,16 @@ describe('AlertsTable', () => {
     },
   ];
 
-  const alerts: AlertsData = {
-    field: ['one', 'two'],
-  };
+  const alerts: AlertsData[] = [
+    {
+      field1: ['one'],
+      field2: ['two'],
+    },
+    {
+      field1: ['three'],
+      field2: ['four'],
+    },
+  ];
   const fetchAlertsData = {
     activePage: 0,
     alerts,
