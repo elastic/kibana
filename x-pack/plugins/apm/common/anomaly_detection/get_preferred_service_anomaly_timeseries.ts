@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENVIRONMENT_ALL } from '../environment_filter_values';
+import { getEnvironmentLabel } from '../environment_filter_values';
 import { Environment } from '../environment_rt';
 import { ApmMlDetectorType } from './apm_ml_detectors';
 import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
@@ -25,12 +25,9 @@ export function getPreferredServiceAnomalyTimeseries({
     (serie) => serie.type === detectorType
   );
 
-  const preferredEnvironment =
-    environment === ENVIRONMENT_ALL.value ? ENVIRONMENT_ALL.label : environment;
-
   return seriesForType.find(
     (serie) =>
-      serie.environment === preferredEnvironment &&
+      serie.environment === getEnvironmentLabel(environment) &&
       (fallbackToTransactions ? serie.version <= 2 : serie.version >= 3)
   );
 }
