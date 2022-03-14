@@ -5976,7 +5976,6 @@
     "xpack.apm.filter.environment.allLabel": "Tous",
     "xpack.apm.filter.environment.label": "Environnement",
     "xpack.apm.filter.environment.notDefinedLabel": "Non défini",
-    "xpack.apm.filter.environment.selectEnvironmentLabel": "Sélectionner l'environnement",
     "xpack.apm.fleet_integration.settings.advancedOptionsLavel": "Options avancées",
     "xpack.apm.fleet_integration.settings.apm.capturePersonalDataDescription": "Capturer des données personnelles, telles que l'IP ou l'agent utilisateur",
     "xpack.apm.fleet_integration.settings.apm.capturePersonalDataTitle": "Capture des données personnelles",

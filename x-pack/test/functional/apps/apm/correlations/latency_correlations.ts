@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
+  const PageObjects = getPageObjects(['common', 'header', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
@@ -66,11 +66,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const fromTime = 'Jul 29, 2019 @ 00:00:00.000';
         const toTime = 'Jul 30, 2019 @ 00:00:00.000';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await testSubjects.click('comboBoxInput');
+        await find.clickByButtonText('All');
 
         await retry.try(async () => {
           const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
           const apmMainContainerTextItems = apmMainContainerText[0].split('\n');
-
           expect(apmMainContainerTextItems).to.not.contain('No services found');
 
           expect(apmMainContainerTextItems).to.contain('opbeans-go');

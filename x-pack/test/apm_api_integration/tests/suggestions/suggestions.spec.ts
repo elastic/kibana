@@ -25,7 +25,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns all environments', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { field: SERVICE_ENVIRONMENT, string: '' } },
+              params: { query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: '' } },
             });
 
             expectSnapshot(body).toMatchInline(`
@@ -43,7 +43,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns items matching the string parameter', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { field: SERVICE_ENVIRONMENT, string: 'pr' } },
+              params: { query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: 'pr' } },
             });
 
             expectSnapshot(body).toMatchInline(`
@@ -62,7 +62,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns all services', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { field: SERVICE_NAME, string: '' } },
+              params: { query: { fieldName: SERVICE_NAME, fieldValue: '' } },
             });
 
             expectSnapshot(body).toMatchInline(`
@@ -86,7 +86,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns items matching the string parameter', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { field: SERVICE_NAME, string: 'aud' } },
+              params: { query: { fieldName: SERVICE_NAME, fieldValue: 'aud' } },
             });
 
             expectSnapshot(body).toMatchInline(`
@@ -105,7 +105,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns all transaction types', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { field: TRANSACTION_TYPE, string: '' } },
+              params: { query: { fieldName: TRANSACTION_TYPE, fieldValue: '' } },
             });
 
             expectSnapshot(body).toMatchInline(`
@@ -125,7 +125,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns items matching the string parameter', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { field: TRANSACTION_TYPE, string: 'w' } },
+              params: { query: { fieldName: TRANSACTION_TYPE, fieldValue: 'w' } },
             });
 
             expectSnapshot(body).toMatchInline(`
