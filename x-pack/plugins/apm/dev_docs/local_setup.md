@@ -17,6 +17,27 @@ To access an Elasticsearch instance that has live data you have three options:
 ```
 yarn es snapshot
 ```
+*Note: Elasticsearch will be available on http://localhost:9200*
+
+
+**Customizing `config/kibana.dev.yml`**
+
+Create or update `kibana.dev.yml` file with the following content:
+
+```
+elasticsearch.hosts: http://localhost:9200
+elasticsearch.username: kibana_system
+elasticsearch.password: changeme
+```
+
+then, start kibana
+```
+yarn start
+```
+*Note: Kibana will be available on http://localhost:5601*
+
+
+
 
 **Create APM mappings**
 
@@ -24,7 +45,7 @@ yarn es snapshot
 node ./scripts/es_archiver load "x-pack/plugins/apm/ftr_e2e/cypress/fixtures/es_archiver/apm_mappings_only_8.0.0" --es-url=http://system_indices_superuser:changeme@localhost:9200 --kibana-url=http://elastic:changeme@localhost:5601 --config=./test/functional/config.js
 ```
 
-*Note: Elasticsearch must be available before running the above command*
+*Note: Elasticsearch and Kibana must be available before running the above command*
 
 
 **Run Synthtrace**
@@ -57,9 +78,9 @@ cd apm-integration-testing/
 ./scripts/compose.py start master --all --no-kibana
 ```
 
-### Connect Kibana to Elasticsearch
+**Customizing `config/kibana.dev.yml`**
 
-Update `config/kibana.dev.yml` with:
+Create or update `kibana.dev.yml` file with the following content: 
 
 ```yml
 elasticsearch.hosts: http://localhost:9200
