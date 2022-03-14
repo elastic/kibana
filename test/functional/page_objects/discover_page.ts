@@ -486,7 +486,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectIndexPattern(indexPattern: string) {
-    await this.testSubjects.click('indexPattern-switch-link');
+    await this.testSubjects.click('discover-dataView-switch-link');
     await this.find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
     await this.find.clickByCssSelector(
       `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
@@ -622,7 +622,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async getCurrentlySelectedDataView() {
     await this.testSubjects.existOrFail('discover-sidebar');
-    const button = await this.testSubjects.find('indexPattern-switch-link');
+    const button = await this.testSubjects.find('discover-dataView-switch-link');
     return button.getAttribute('title');
   }
 }

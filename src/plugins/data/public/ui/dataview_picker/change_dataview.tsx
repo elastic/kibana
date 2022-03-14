@@ -143,6 +143,7 @@ export function ChangeDataView({
             checked?: 'on' | 'off' | undefined;
           }>
             {...selectableProps}
+            data-test-subj="indexPattern-switcher"
             searchable
             singleSelection="always"
             options={dataViewsList?.map(({ title, id }) => ({
