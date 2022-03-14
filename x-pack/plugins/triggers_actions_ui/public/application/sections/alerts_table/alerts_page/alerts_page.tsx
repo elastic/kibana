@@ -6,11 +6,9 @@
  */
 import React, { useState } from 'react';
 import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import {
-  RuleRegistrySearchRequestPagination,
-  RuleRegistrySearchRequestSort,
-} from '../../../../../../rule_registry/common';
+import { RuleRegistrySearchRequestPagination } from '../../../../../../rule_registry/common';
 import { AlertsTable, AlertsData } from '../alerts_table';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -35,7 +33,7 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
       getInspectQuery: () => ({ request: {}, response: {} }),
       onColumnsChange: (columns: EuiDataGridControlColumn[]) => {},
       onPageChange: (pagination: RuleRegistrySearchRequestPagination) => {},
-      onSortChange: (sort: RuleRegistrySearchRequestSort[]) => {},
+      onSortChange: (sort: estypes.SortCombinations[]) => {},
       refresh: () => {},
     };
   };

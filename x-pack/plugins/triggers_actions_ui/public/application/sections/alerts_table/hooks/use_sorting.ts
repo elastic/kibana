@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { useCallback, useState } from 'react';
-import { RuleRegistrySearchRequestSort } from '../../../../../../rule_registry/common';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export function useSorting(onSortChange: (sort: RuleRegistrySearchRequestSort[]) => void) {
+export function useSorting(onSortChange: (sort: estypes.SortCombinations[]) => void) {
   const [sortingColumns, setSortingColumns] = useState([]);
   const onSort = useCallback(
     (_state) => {

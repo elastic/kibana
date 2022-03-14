@@ -15,11 +15,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  RuleRegistrySearchRequestPagination,
-  RuleRegistrySearchRequestSort,
-} from '../../../../../rule_registry/common';
+import { RuleRegistrySearchRequestPagination } from '../../../../../rule_registry/common';
 import { QueryBar, useQueryBar, Provider, alertsPageStateContainer } from './query_bar';
 import { getVisibleAlertConsumers } from './lib/get_visible_alert_consumers';
 import { useFetchDataViews, useSorting, usePagination } from './hooks';
@@ -40,7 +38,7 @@ export interface FetchAlertData {
   getInspectQuery: () => { request: {}; response: {} };
   onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  onSortChange: (sort: RuleRegistrySearchRequestSort[]) => void;
+  onSortChange: (sort: estypes.SortCombinations[]) => void;
   refresh: () => void;
 }
 
