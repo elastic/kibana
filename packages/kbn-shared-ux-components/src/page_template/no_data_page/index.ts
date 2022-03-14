@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { NoDataCard } from './no_data_page/no_data_card';
+export { NoDataCard } from './no_data_card';

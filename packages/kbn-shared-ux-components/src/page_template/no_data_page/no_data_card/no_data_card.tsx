@@ -11,13 +11,19 @@ import React, { FunctionComponent } from 'react';
 import { EuiButton, EuiCard } from '@elastic/eui';
 import type { NoDataCardProps } from './types';
 
-const recommendedLabel = i18n.translate('sharedUX.pageTemplate.noDataPage.recommendedLabel', {
-  defaultMessage: 'Recommended',
-});
+const recommendedLabel = i18n.translate(
+  'sharedUXComponents.pageTemplate.noDataPage.recommendedLabel',
+  {
+    defaultMessage: 'Recommended',
+  }
+);
 
-const defaultDescription = i18n.translate('sharedUX.pageTemplate.noDataCard.description', {
-  defaultMessage: `Proceed without collecting data`,
-});
+const defaultDescription = i18n.translate(
+  'sharedUXComponents.pageTemplate.noDataCard.description',
+  {
+    defaultMessage: `Proceed without collecting data`,
+  }
+);
 
 export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
   recommended,

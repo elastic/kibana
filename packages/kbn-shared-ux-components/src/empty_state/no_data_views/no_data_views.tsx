@@ -11,12 +11,10 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { useEditors, usePermissions, useDocLinks } from '@kbn/shared-ux-services';
 import type { SharedUxEditorsService } from '@kbn/shared-ux-services';
 
-import { DataView } from '../../../../../data_views/public';
-
 import { NoDataViews as NoDataViewsComponent } from './no_data_views.component';
 
 export interface Props {
-  onDataViewCreated: (dataView: DataView) => void;
+  onDataViewCreated: (dataView: unknown) => void;
 }
 
 type CloseDataViewEditorFn = ReturnType<SharedUxEditorsService['openDataViewEditor']>;
@@ -60,7 +58,7 @@ export const NoDataViews = ({ onDataViewCreated }: Props) => {
 
     const ref = openDataViewEditor({
       onSave: (dataView) => {
-        onDataViewCreated(dataView as DataView);
+        onDataViewCreated(dataView);
       },
     });
 
