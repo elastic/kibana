@@ -25,6 +25,7 @@ interface ReorderableTableProps<Item> {
   items: Item[];
   noItemsMessage: React.ReactNode;
   unreorderableItems?: Item[];
+  bottomRows?: React.ReactNode[];
   className?: string;
   disableDragging?: boolean;
   disableReordering?: boolean;
@@ -39,6 +40,7 @@ export const ReorderableTable = <Item extends object>({
   items,
   noItemsMessage,
   unreorderableItems = [],
+  bottomRows = [],
   className = '',
   disableDragging = false,
   disableReordering = false,
@@ -59,7 +61,9 @@ export const ReorderableTable = <Item extends object>({
   const unorderableActions = [<></>];
 
   if (showRowIndex) {
-    unorderableActions.push(<EuiToken iconType={() => <EuiText>∞</EuiText>} />);
+    unorderableActions.push(
+      <EuiToken size="m" fill="dark" iconType={() => <EuiText size="s">∞</EuiText>} />
+    );
   }
 
   return (
@@ -85,7 +89,11 @@ export const ReorderableTable = <Item extends object>({
               additionalProps={rowProps(item)}
               errors={rowErrors(item)}
               leftAction={
-                showRowIndex ? <EuiToken iconType={() => <EuiText>{itemIndex}</EuiText>} /> : <></>
+                showRowIndex ? (
+                  <EuiToken size="m" iconType={() => <EuiText size="s">{itemIndex}</EuiText>} />
+                ) : (
+                  <></>
+                )
               }
             />
           )}
@@ -112,22 +120,32 @@ export const ReorderableTable = <Item extends object>({
           />
         </>
       )}
+      <div className="unorderableRows">
+        {unreorderableItems.length > 0 && (
+          <BodyRows
+            items={unreorderableItems}
+            renderItem={(item, itemIndex) => (
+              <BodyRow
+                key={`table_draggable_row_${itemIndex}`}
+                columns={columns}
+                item={item}
+                additionalProps={rowProps(item)}
+                errors={rowErrors(item)}
+                leftAction={unorderableActions}
+              />
+            )}
+          />
+        )}
 
-      {unreorderableItems.length > 0 && (
-        <BodyRows
-          items={unreorderableItems}
-          renderItem={(item, itemIndex) => (
-            <BodyRow
-              key={`table_draggable_row_${itemIndex}`}
-              columns={columns}
-              item={item}
-              additionalProps={rowProps(item)}
-              errors={rowErrors(item)}
-              leftAction={unorderableActions}
-            />
-          )}
-        />
-      )}
+        {bottomRows.map((row, rowIndex) => (
+          <BodyRow
+            key={rowIndex}
+            leftAction={unorderableActions}
+            columns={[{ render: () => row }]}
+            item={{}}
+          />
+        ))}
+      </div>
     </div>
   );
 };
