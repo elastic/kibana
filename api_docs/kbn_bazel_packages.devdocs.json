@@ -1,0 +1,240 @@
+{
+  "id": "@kbn/bazel-packages",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/bazel-packages",
+        "id": "def-server.BazelPackage",
+        "type": "Class",
+        "tags": [],
+        "label": "BazelPackage",
+        "description": [],
+        "path": "packages/kbn-bazel-packages/src/bazel_package.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/bazel-packages",
+            "id": "def-server.BazelPackage.fromDir",
+            "type": "Function",
+            "tags": [],
+            "label": "fromDir",
+            "description": [],
+            "signature": [
+              "(dir: string) => Promise<",
+              {
+                "pluginId": "@kbn/bazel-packages",
+                "scope": "server",
+                "docId": "kibKbnBazelPackagesPluginApi",
+                "section": "def-server.BazelPackage",
+                "text": "BazelPackage"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-bazel-packages/src/bazel_package.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/bazel-packages",
+                "id": "def-server.BazelPackage.fromDir.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dir",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-bazel-packages/src/bazel_package.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/bazel-packages",
+            "id": "def-server.BazelPackage.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-bazel-packages/src/bazel_package.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/bazel-packages",
+                "id": "def-server.BazelPackage.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "repoRelativeDir",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-bazel-packages/src/bazel_package.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/bazel-packages",
+                "id": "def-server.BazelPackage.Unnamed.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "pkg",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/kbn-bazel-packages/src/bazel_package.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/bazel-packages",
+                "id": "def-server.BazelPackage.Unnamed.$3",
+                "type": "string",
+                "tags": [],
+                "label": "buildBazelContent",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-bazel-packages/src/bazel_package.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/bazel-packages",
+            "id": "def-server.BazelPackage.hasBuildRule",
+            "type": "Function",
+            "tags": [],
+            "label": "hasBuildRule",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-bazel-packages/src/bazel_package.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/bazel-packages",
+            "id": "def-server.BazelPackage.hasBuildTypesRule",
+            "type": "Function",
+            "tags": [],
+            "label": "hasBuildTypesRule",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-bazel-packages/src/bazel_package.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/bazel-packages",
+        "id": "def-server.discoverBazelPackages",
+        "type": "Function",
+        "tags": [],
+        "label": "discoverBazelPackages",
+        "description": [
+          "\nSearch the local Kibana repo for bazel packages and return an array of BazelPackage objects\nrepresenting each package found."
+        ],
+        "signature": [
+          "() => Promise<",
+          {
+            "pluginId": "@kbn/bazel-packages",
+            "scope": "server",
+            "docId": "kibKbnBazelPackagesPluginApi",
+            "section": "def-server.BazelPackage",
+            "text": "BazelPackage"
+          },
+          "[]>"
+        ],
+        "path": "packages/kbn-bazel-packages/src/discover_packages.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/bazel-packages",
+        "id": "def-server.generatePackagesBuildBazelFile",
+        "type": "Function",
+        "tags": [],
+        "label": "generatePackagesBuildBazelFile",
+        "description": [],
+        "signature": [
+          "(packages: ",
+          {
+            "pluginId": "@kbn/bazel-packages",
+            "scope": "server",
+            "docId": "kibKbnBazelPackagesPluginApi",
+            "section": "def-server.BazelPackage",
+            "text": "BazelPackage"
+          },
+          "[]) => string"
+        ],
+        "path": "packages/kbn-bazel-packages/src/generate_packages_build_bazel_file.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/bazel-packages",
+            "id": "def-server.generatePackagesBuildBazelFile.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "packages",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/bazel-packages",
+                "scope": "server",
+                "docId": "kibKbnBazelPackagesPluginApi",
+                "section": "def-server.BazelPackage",
+                "text": "BazelPackage"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-bazel-packages/src/generate_packages_build_bazel_file.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
