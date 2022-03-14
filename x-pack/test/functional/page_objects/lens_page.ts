@@ -811,7 +811,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Changes the index pattern in the data panel
      */
     async switchDataPanelIndexPattern(name: string) {
-      await testSubjects.click('indexPattern-switch-link');
+      await testSubjects.click('lns-dataView-switch-link');
       await find.clickByCssSelector(`[title="${name}"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -829,7 +829,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Returns the current index pattern of the data panel
      */
     async getDataPanelIndexPattern() {
-      return await (await testSubjects.find('indexPattern-switch-link')).getAttribute('title');
+      return await (await testSubjects.find('lns-dataView-switch-link')).getAttribute('title');
     },
 
     /**
