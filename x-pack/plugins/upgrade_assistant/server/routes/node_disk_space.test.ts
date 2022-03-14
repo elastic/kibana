@@ -38,16 +38,14 @@ describe('Disk space API', () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.nodes.stats as jest.Mock
       ).mockResolvedValue({
-        body: {
-          nodes: {
-            '1YOaoS9lTNOiTxR1uzSgRA': {
-              name: 'node_name',
-              fs: {
-                total: {
-                  // Keeping these numbers (inaccurately) small so it's easier to reason the math when scanning through :)
-                  total_in_bytes: 100,
-                  available_in_bytes: 20,
-                },
+        nodes: {
+          '1YOaoS9lTNOiTxR1uzSgRA': {
+            name: 'node_name',
+            fs: {
+              total: {
+                // Keeping these numbers (inaccurately) small so it's easier to reason the math when scanning through :)
+                total_in_bytes: 100,
+                available_in_bytes: 20,
               },
             },
           },
@@ -60,13 +58,11 @@ describe('Disk space API', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
           .getSettings as jest.Mock
       ).mockResolvedValue({
-        body: {
-          defaults: {
-            'cluster.routing.allocation.disk.watermark.low': '75%',
-          },
-          transient: {},
-          persistent: {},
+        defaults: {
+          'cluster.routing.allocation.disk.watermark.low': '75%',
         },
+        transient: {},
+        persistent: {},
       });
 
       const resp = await routeDependencies.router.getHandler({
@@ -90,11 +86,9 @@ describe('Disk space API', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
           .getSettings as jest.Mock
       ).mockResolvedValue({
-        body: {
-          defaults: {},
-          transient: {},
-          persistent: { 'cluster.routing.allocation.disk.watermark.low': '75%' },
-        },
+        defaults: {},
+        transient: {},
+        persistent: { 'cluster.routing.allocation.disk.watermark.low': '75%' },
       });
 
       const resp = await routeDependencies.router.getHandler({
@@ -118,11 +112,9 @@ describe('Disk space API', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
           .getSettings as jest.Mock
       ).mockResolvedValue({
-        body: {
-          defaults: {},
-          transient: { 'cluster.routing.allocation.disk.watermark.low': '80%' },
-          persistent: { 'cluster.routing.allocation.disk.watermark.low': '85%' },
-        },
+        defaults: {},
+        transient: { 'cluster.routing.allocation.disk.watermark.low': '80%' },
+        persistent: { 'cluster.routing.allocation.disk.watermark.low': '85%' },
       });
 
       const resp = await routeDependencies.router.getHandler({
@@ -146,13 +138,11 @@ describe('Disk space API', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
           .getSettings as jest.Mock
       ).mockResolvedValue({
-        body: {
-          defaults: {
-            'cluster.routing.allocation.disk.watermark.low': '80b',
-          },
-          transient: {},
-          persistent: {},
+        defaults: {
+          'cluster.routing.allocation.disk.watermark.low': '80b',
         },
+        transient: {},
+        persistent: {},
       });
 
       const resp = await routeDependencies.router.getHandler({
@@ -176,11 +166,9 @@ describe('Disk space API', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
           .getSettings as jest.Mock
       ).mockResolvedValue({
-        body: {
-          defaults: {},
-          transient: {},
-          persistent: {},
-        },
+        defaults: {},
+        transient: {},
+        persistent: {},
       });
 
       const resp = await routeDependencies.router.getHandler({
@@ -197,13 +185,11 @@ describe('Disk space API', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
           .getSettings as jest.Mock
       ).mockResolvedValue({
-        body: {
-          defaults: {
-            'cluster.routing.allocation.disk.watermark.low': '10%',
-          },
-          transient: {},
-          persistent: {},
+        defaults: {
+          'cluster.routing.allocation.disk.watermark.low': '10%',
         },
+        transient: {},
+        persistent: {},
       });
 
       const resp = await routeDependencies.router.getHandler({
@@ -234,13 +220,11 @@ describe('Disk space API', () => {
           routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
             .getSettings as jest.Mock
         ).mockResolvedValue({
-          body: {
-            defaults: {
-              'cluster.routing.allocation.disk.watermark.low': '85%',
-            },
-            transient: {},
-            persistent: {},
+          defaults: {
+            'cluster.routing.allocation.disk.watermark.low': '85%',
           },
+          transient: {},
+          persistent: {},
         });
 
         (
