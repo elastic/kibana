@@ -176,6 +176,6 @@ export const useKibanaCapabilities = (): { visualize: boolean } => {
   const capabilities = useKibana().services.application.capabilities;
 
   return {
-    visualize: !!capabilities?.visualize?.show,
+    visualize: !!capabilities?.visualize?.save,
   };
 };
