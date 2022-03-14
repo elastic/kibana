@@ -1536,19 +1536,6 @@
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
-                    "id": "def-common.heatmapLegendConfig.args.position.default",
-                    "type": "string",
-                    "tags": [],
-                    "label": "default",
-                    "description": [],
-                    "signature": [
-                      "\"right\""
-                    ],
-                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
-                  },
-                  {
-                    "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapLegendConfig.args.position.options",
                     "type": "Array",
                     "tags": [],

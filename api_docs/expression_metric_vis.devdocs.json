@@ -62,7 +62,6 @@
             "label": "metrics",
             "description": [],
             "signature": [
-              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -70,7 +69,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              ")[]"
+              "[]"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false
@@ -83,7 +82,6 @@
             "label": "bucket",
             "description": [],
             "signature": [
-              "string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -229,7 +227,6 @@
             "label": "metric",
             "description": [],
             "signature": [
-              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -237,7 +234,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              ")[]"
+              "[]"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false
@@ -250,7 +247,6 @@
             "label": "bucket",
             "description": [],
             "signature": [
-              "string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
