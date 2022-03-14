@@ -44,7 +44,7 @@ export const SolutionToolbarButton = withSuspense(LazySolutionToolbarButton);
 /**
  * An example of the solution toolbar button
  */
-export { AddFromLibraryButton } from './toolbar/button/add_from_library/add_from_library';
+export { AddFromLibraryButton } from './toolbar/buttons/add_from_library/add_from_library';
 
 /**
  * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the

@@ -14,7 +14,7 @@ export type Props = Omit<SolutionToolbarButtonProps, 'iconType' | 'label'>;
 
 const label = {
   getLibraryButtonLabel: () =>
-    i18n.translate('sharedUX.solutionToolbar.libraryButtonLabel', {
+    i18n.translate('sharedUX.toolbar.buttons.addFromLibrary.libraryButtonLabel', {
       defaultMessage: 'Add from library',
     }),
 };
