@@ -1,6 +1,6 @@
 If the stack monitoring UI isn't showing data for any cluster, it may first be useful to survey the available data using a query like this:
 
-```HTTP
+```Kibana Dev Tools
 POST .monitoring-*/_search
 {
   "size": 0,
@@ -43,7 +43,7 @@ This will show what document types are available in each index for each cluster 
 
 The main cluster list requires ES cluster stats to be available. You can use this query to check for the presence of cluster stats for a given `CLUSTER_UUID` (note the replacement required in the query).
 
-```HTTP
+```Kibana Dev Tools
 POST .monitoring-*,*:.monitoring-*,metrics-*,*:metrics-*/_search
 {
   "size": 10,
