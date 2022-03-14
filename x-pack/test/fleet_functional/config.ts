@@ -29,7 +29,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        // Enable debug fleet logs by default
+        `--logging.loggers=[{"name": "plugins.fleet", "level": "debug"}]`,
+      ],
     },
     layout: {
       fixedHeaderHeight: 200,

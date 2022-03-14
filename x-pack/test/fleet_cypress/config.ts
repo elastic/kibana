@@ -38,6 +38,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        // Enable debug fleet logs by default
+        `--logging.loggers=[{"name": "plugins.fleet", "level": "debug"}]`,
       ],
     },
   };
