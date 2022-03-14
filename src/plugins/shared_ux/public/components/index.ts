@@ -59,16 +59,16 @@ export const LazyNoDataViewsPage = React.lazy(() =>
 export const NoDataViewsPage = withSuspense(LazyNoDataViewsPage);
 
 /**
- * The Lazily-loaded `QuickButtonGroup` component.  Consumers should use `React.Suspennse` or the
+ * The Lazily-loaded `IconButtonGroup` component.  Consumers should use `React.Suspennse` or the
  * `withSuspense` HOC to load this component.
  */
-export const LazyQuickButtonGroup = React.lazy(() =>
-  import('./toolbar/index').then(({ QuickButtonGroup }) => ({
-    default: QuickButtonGroup,
+export const LazyIconButtonGroup = React.lazy(() =>
+  import('./toolbar/index').then(({ IconButtonGroup }) => ({
+    default: IconButtonGroup,
   }))
 );
 
 /**
- * The QuickButtonGroup component that is wrapped by the `withSuspence` HOC.
+ * The IconButtonGroup component that is wrapped by the `withSuspence` HOC.
  */
-export const QuickButtonGroup = withSuspense(LazyQuickButtonGroup);
+export const IconButtonGroup = withSuspense(LazyIconButtonGroup);

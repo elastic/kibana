@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { mount as enzymeMount, ReactWrapper } from 'enzyme';
+import React from 'react';
+import { ServicesProvider, SharedUXServices } from '../../../../services';
+import { servicesFactory } from '../../../../services/mocks';
 
-import { ServicesProvider, SharedUXServices } from '../../../services';
-import { servicesFactory } from '../../../services/mocks';
-import { QuickButtonGroup } from './quick_group';
+import { SolutionToolbarButton } from './primary';
 
-describe('<QuickButtonGroup />', () => {
+describe('<SolutionToolbarButton />', () => {
   let services: SharedUXServices;
   let mount: (element: JSX.Element) => ReactWrapper;
 
@@ -28,19 +28,14 @@ describe('<QuickButtonGroup />', () => {
   });
 
   test('is rendered', () => {
-    const component = mount(
-      <QuickButtonGroup
-        legend="Legend"
-        buttons={[
-          {
-            label: 'Text',
-            onClick: jest.fn(),
-            iconType: 'visText',
-          },
-        ]}
-      />
-    );
+    const component = mount(<SolutionToolbarButton label="test" />);
 
     expect(component).toMatchSnapshot();
+  });
+  test('it can be passed a functional onClick handler', () => {
+    const mockHandler = jest.fn();
+    const component = mount(<SolutionToolbarButton label="withOnClick" onClick={mockHandler} />);
+    component.simulate('click');
+    expect(mockHandler).toHaveBeenCalled();
   });
 });

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ServicesProvider, SharedUXServices } from '../../../services';
-import { servicesFactory } from '../../../services/mocks';
+import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 
-import { SolutionToolbarButton } from './primary';
+import { ServicesProvider, SharedUXServices } from '../../../../services';
+import { servicesFactory } from '../../../../services/mocks';
+import { IconButtonGroup } from './icon_button_group';
 
-describe('<SolutionToolbarButton />', () => {
+describe('<IconButtonGroup />', () => {
   let services: SharedUXServices;
   let mount: (element: JSX.Element) => ReactWrapper;
 
@@ -28,14 +28,19 @@ describe('<SolutionToolbarButton />', () => {
   });
 
   test('is rendered', () => {
-    const component = mount(<SolutionToolbarButton label="test" />);
+    const component = mount(
+      <IconButtonGroup
+        legend="Legend"
+        buttons={[
+          {
+            label: 'Text',
+            onClick: jest.fn(),
+            iconType: 'visText',
+          },
+        ]}
+      />
+    );
 
     expect(component).toMatchSnapshot();
-  });
-  test('it can be passed a functional onClick handler', () => {
-    const mockHandler = jest.fn();
-    const component = mount(<SolutionToolbarButton label="withOnClick" onClick={mockHandler} />);
-    component.simulate('click');
-    expect(mockHandler).toHaveBeenCalled();
   });
 });

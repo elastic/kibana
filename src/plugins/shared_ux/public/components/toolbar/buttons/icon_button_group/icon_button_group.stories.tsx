@@ -9,11 +9,11 @@
 import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react';
 import React from 'react';
-import { QuickButtonGroup } from './quick_group';
+import { IconButtonGroup } from './icon_button_group';
 import mdx from './quick_group.mdx';
 
 export default {
-  title: 'Toolbar/Solution Toolbar Quick Button Group',
+  title: 'Toolbar/Toolbar Icon Button Group',
   description: 'A collection of buttons that is a part of the solution toolbar.',
   parameters: {
     docs: {
@@ -54,7 +54,7 @@ const quickButtons = [
 
 export const ConnectedComponent: Story<{ quickButtonCount: number }> = ({ quickButtonCount }) => {
   return (
-    <QuickButtonGroup
+    <IconButtonGroup
       legend="Example icon group"
       buttons={quickButtons.slice(0, quickButtonCount)}
     />

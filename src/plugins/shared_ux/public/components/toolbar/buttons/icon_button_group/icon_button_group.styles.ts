@@ -8,7 +8,7 @@
 
 import { UseEuiTheme } from '@elastic/eui';
 
-export const QuickGroupButtonStyles = ({ euiTheme }: UseEuiTheme) => {
+export const IconButtonGroupStyles = ({ euiTheme }: UseEuiTheme) => {
   return {
     button: {
       '&.euiButtonGroupButton': {
