@@ -77,6 +77,36 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ],
   };
 
+  const mockInput2: PackagePolicyInput = {
+    type: 'test-metrics',
+    policy_template: 'some-template',
+    enabled: true,
+    vars: {
+      inputVar: { value: 'input-value' },
+      inputVar2: { value: undefined },
+      inputVar3: {
+        type: 'yaml',
+        value: 'testField: test',
+      },
+      inputVar4: { value: '' },
+    },
+    streams: [
+      {
+        id: 'test-metrics-foo',
+        enabled: true,
+        data_stream: { dataset: 'foo', type: 'metrics' },
+        vars: {
+          fooVar: { value: 'foo-value' },
+          fooVar2: { value: [1, 2] },
+        },
+        compiled_stream: {
+          fooKey: 'fooValue1',
+          fooKey2: ['fooValue2'],
+        },
+      },
+    ],
+  };
+
   it('returns no inputs for package policy with no inputs, or only disabled inputs', () => {
     expect(storedPackagePoliciesToAgentInputs([mockPackagePolicy])).toEqual([]);
 
@@ -118,7 +148,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       ])
     ).toEqual([
       {
-        id: 'some-uuid',
+        id: 'test-logs-some-uuid',
         name: 'mock-package-policy',
         revision: 1,
         type: 'test-logs',
@@ -140,6 +170,71 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           {
             id: 'test-logs-bar',
             data_stream: { dataset: 'bar', type: 'logs' },
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('returns unique agent inputs IDs, with policy template name if one exists', () => {
+    expect(
+      storedPackagePoliciesToAgentInputs([
+        {
+          ...mockPackagePolicy,
+          package: {
+            name: 'mock-package',
+            title: 'Mock package',
+            version: '0.0.0',
+          },
+          inputs: [mockInput, mockInput2],
+        },
+      ])
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock-package-policy',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock-package',
+            version: '0.0.0',
+          },
+        },
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+          {
+            id: 'test-logs-bar',
+            data_stream: { dataset: 'bar', type: 'logs' },
+          },
+        ],
+      },
+      {
+        id: 'test-metrics-some-template-some-uuid',
+        name: 'mock-package-policy',
+        revision: 1,
+        type: 'test-metrics',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock-package',
+            version: '0.0.0',
+          },
+        },
+        streams: [
+          {
+            id: 'test-metrics-foo',
+            data_stream: { dataset: 'foo', type: 'metrics' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
           },
         ],
       },
@@ -169,7 +264,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       ])
     ).toEqual([
       {
-        id: 'some-uuid',
+        id: 'test-logs-some-uuid',
         name: 'mock-package-policy',
         revision: 1,
         type: 'test-logs',
@@ -201,7 +296,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       ])
     ).toEqual([
       {
-        id: 'some-uuid',
+        id: 'test-logs-some-uuid',
         name: 'mock-package-policy',
         revision: 1,
         type: 'test-logs',
@@ -263,7 +358,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       ])
     ).toEqual([
       {
-        id: 'some-uuid',
+        id: 'test-logs-some-uuid',
         revision: 1,
         name: 'mock-package-policy',
         type: 'test-logs',
