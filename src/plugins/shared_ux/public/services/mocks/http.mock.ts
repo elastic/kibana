@@ -7,15 +7,13 @@
  */
 
 import { PluginServiceFactory } from '../types';
-import { SharedUXUserPermissionsService } from '../permissions';
+import { SharedUXHttpService } from '../http';
 
-export type MockUserPermissionsServiceFactory =
-  PluginServiceFactory<SharedUXUserPermissionsService>;
+export type MockHttpServiceFactory = PluginServiceFactory<SharedUXHttpService>;
 
 /**
- * A factory function for creating a Jest-based implementation of `SharedUXUserPermissionsService`.
+ * A factory function for creating a Jest-based implementation of `SharedUXHttpService`.
  */
-export const userPermissionsServiceFactory: MockUserPermissionsServiceFactory = () => ({
-  canCreateNewDataView: true,
-  canAccessFleet: true,
+export const httpServiceFactory: MockHttpServiceFactory = () => ({
+  addBasePath: jest.fn((path: string) => (path ? path : 'path')),
 });

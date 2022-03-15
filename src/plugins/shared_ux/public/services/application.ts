@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { NoDataCard, ElasticAgentCard } from './no_data_page/no_data_card';
+import { Observable } from 'rxjs';
+
+export interface SharedUXApplicationService {
+  navigateToUrl: (url: string) => Promise<void>;
+  currentAppId$: Observable<string | undefined>;
+}
