@@ -51,12 +51,9 @@ const quickButtons = [
   },
 ];
 
-export const ConnectedComponent: Story<{ quickButtonCount: number }> = ({ quickButtonCount }) => {
+export const ConnectedComponent: Story<{ buttonCount: number }> = ({ buttonCount }) => {
   return (
-    <IconButtonGroup
-      legend="Example icon group"
-      buttons={quickButtons.slice(0, quickButtonCount)}
-    />
+    <IconButtonGroup legend="Example icon group" buttons={quickButtons.slice(0, buttonCount)} />
   );
 };
 
