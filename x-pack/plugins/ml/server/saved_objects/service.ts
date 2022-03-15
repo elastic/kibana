@@ -14,7 +14,11 @@ import {
   IScopedClusterClient,
 } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../../security/server';
-import type { JobType, TrainedModelType } from '../../common/types/saved_objects';
+import type {
+  JobType,
+  TrainedModelType,
+  SavedObjectResult,
+} from '../../common/types/saved_objects';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
@@ -43,11 +47,6 @@ export interface TrainedModelJob {
 type TrainedModelObjectFilter = { [k in keyof TrainedModelObject]?: string };
 
 export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFactory>;
-
-type UpdateJobsSpacesResult = Record<
-  string,
-  { success: boolean; type: JobType | TrainedModelType; error?: any }
->;
 
 export function jobSavedObjectServiceFactory(
   savedObjectsClient: SavedObjectsClientContract,
@@ -335,13 +334,13 @@ export function jobSavedObjectServiceFactory(
     jobIds: string[],
     spacesToAdd: string[],
     spacesToRemove: string[]
-  ): Promise<UpdateJobsSpacesResult> {
+  ): Promise<SavedObjectResult> {
     const type = jobType;
     if (jobIds.length === 0 || (spacesToAdd.length === 0 && spacesToRemove.length === 0)) {
       return {};
     }
 
-    const results: UpdateJobsSpacesResult = {};
+    const results: SavedObjectResult = {};
     const jobs = await _getJobObjects(jobType);
     const jobObjectIdMap = new Map<string, string>();
     const jobObjectsToUpdate: Array<{ type: string; id: string }> = [];
@@ -681,12 +680,12 @@ export function jobSavedObjectServiceFactory(
     modelIds: string[],
     spacesToAdd: string[],
     spacesToRemove: string[]
-  ): Promise<UpdateJobsSpacesResult> {
+  ): Promise<SavedObjectResult> {
     const type: TrainedModelType = 'trained-model';
     if (modelIds.length === 0 || (spacesToAdd.length === 0 && spacesToRemove.length === 0)) {
       return {};
     }
-    const results: UpdateJobsSpacesResult = {};
+    const results: SavedObjectResult = {};
     const models = await _getTrainedModelObjects();
     const trainedModelObjectIdMap = new Map<string, string>();
     const objectsToUpdate: Array<{ type: string; id: string }> = [];
@@ -782,21 +781,11 @@ export function createJobError(id: string, key: keyof JobObject) {
     reason = `No known datafeed with id '${id}'`;
   }
 
-  return {
-    error: {
-      reason,
-    },
-    status: 404,
-  };
+  return reason;
 }
 
 export function createTrainedModelError(id: string) {
-  return {
-    error: {
-      reason: `No known trained model with id '${id}'`,
-    },
-    status: 404,
-  };
+  return `No known trained model with id '${id}'`;
 }
 
 function createSavedObjectFilter(
