@@ -17,6 +17,13 @@ export type {
   KqlWildcardNode,
   KqlFunctionNode,
   KqlSuggestionNode,
+  KqlAndFunctionNode,
+  KqlExistsFunctionNode,
+  KqlIsFunctionNode,
+  KqlNestedFunctionNode,
+  KqlNotFunctionNode,
+  KqlOrFunctionNode,
+  KqlRangeFunctionNode,
 } from './types';
 export { fromKueryExpression } from './ast';
 export { KQLSyntaxError } from './kuery_syntax_error';

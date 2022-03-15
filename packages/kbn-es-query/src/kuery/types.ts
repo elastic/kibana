@@ -18,6 +18,16 @@ export type {
   KqlSuggestionNode,
 } from './node_types/types';
 
+export type {
+  KqlAndFunctionNode,
+  KqlExistsFunctionNode,
+  KqlIsFunctionNode,
+  KqlNestedFunctionNode,
+  KqlNotFunctionNode,
+  KqlOrFunctionNode,
+  KqlRangeFunctionNode,
+} from './functions/types';
+
 /** @internal */
 export interface KueryParseOptions {
   startRule: string;

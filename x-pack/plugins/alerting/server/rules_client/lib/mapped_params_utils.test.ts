@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, KqlAndFunctionNode } from '@kbn/es-query';
 import {
   getMappedParams,
   getModifiedFilter,
@@ -102,7 +102,7 @@ describe('getModifiedValue', () => {
 
 describe('modifyFilterKueryNode', () => {
   it('modifies the resulting kuery node AST filter for alert params', () => {
-    const astFilter = fromKueryExpression(
+    const astFilter = fromKueryExpression<KqlAndFunctionNode>(
       'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.params.severity > medium'
     );
 
