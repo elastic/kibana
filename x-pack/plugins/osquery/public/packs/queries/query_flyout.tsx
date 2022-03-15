@@ -58,7 +58,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         Object.values(ecsFieldValue).every((field) => !isEmpty(Object.values(field)[0]));
 
       return new Promise((resolve) => {
-        if (isValid && isEcsFieldValueValid) {
+        if (isValid && ecsFieldValue && isEcsFieldValueValid) {
           onSave({
             ...payload,
             ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
