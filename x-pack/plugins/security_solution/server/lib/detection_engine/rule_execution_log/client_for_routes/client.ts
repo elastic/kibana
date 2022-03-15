@@ -35,6 +35,10 @@ export const createClientForRoutes = (
       end,
       queryText,
       statusFilters,
+      page,
+      perPage,
+      sortField,
+      sortOrder,
     }: GetAggregateExecutionEventsArgs): Promise<GetAggregateRuleExecutionEventsResponse> {
       return withSecuritySpan(
         'IRuleExecutionLogForRoutes.getAggregateExecutionEvents',
@@ -46,6 +50,10 @@ export const createClientForRoutes = (
               end,
               queryText,
               statusFilters,
+              page,
+              perPage,
+              sortField,
+              sortOrder,
             });
           } catch (e) {
             const logMessage =

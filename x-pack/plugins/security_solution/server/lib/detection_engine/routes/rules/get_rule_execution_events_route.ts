@@ -15,7 +15,7 @@ import { DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL } from '../../../../../commo
 import {
   GetRuleExecutionEventsQueryParams,
   GetRuleExecutionEventsRequestParams,
-} from '../../../../../common/detection_engine/schemas/request/get_rule_execution_events_request';
+} from '../../../../../common/detection_engine/schemas/request/get_rule_execution_events_schema';
 
 /**
  * Returns execution events of a given rule (aggregated by executionId) from Event Log.
@@ -35,7 +35,16 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
     },
     async (context, request, response) => {
       const { ruleId } = request.params;
-      const { start, end, queryText = '', statusFilters = '' } = request.query;
+      const {
+        start,
+        end,
+        query_text: queryText = '',
+        status_filters: statusFilters = '',
+        page,
+        per_page: perPage,
+        sort_field: sortField = '@timestamp',
+        sort_order: sortOrder = 'desc',
+      } = request.query;
       const siemResponse = buildSiemResponse(response);
 
       try {
@@ -46,6 +55,10 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
           end,
           queryText,
           statusFilters: statusFilters.length ? statusFilters.split(',') : [],
+          page: page != null ? parseInt(page, 10) : 0,
+          perPage: perPage != null ? parseInt(perPage, 10) : 10,
+          sortField,
+          sortOrder,
         });
 
         const responseBody: GetAggregateRuleExecutionEventsResponse = {

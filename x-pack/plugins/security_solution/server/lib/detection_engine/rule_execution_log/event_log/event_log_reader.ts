@@ -6,6 +6,7 @@
  */
 
 import dateMath from '@elastic/datemath';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { IEventLogClient } from '../../../../../../event_log/server';
 
@@ -41,6 +42,10 @@ export interface GetAggregateExecutionEventsArgs {
   end: string;
   queryText: string;
   statusFilters: string[];
+  page: number;
+  perPage: number;
+  sortField: string;
+  sortOrder: string;
 }
 
 export interface GetLastStatusChangesArgs {
@@ -54,7 +59,8 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
     async getAggregateExecutionEvents(
       args: GetAggregateExecutionEventsArgs
     ): Promise<GetAggregateRuleExecutionEventsResponse> {
-      const { ruleId, start, end, queryText, statusFilters } = args;
+      const { ruleId, start, end, queryText, statusFilters, page, perPage, sortField, sortOrder } =
+        args;
       const soType = RULE_SAVED_OBJECT_TYPE;
       const soIds = [ruleId];
       const startDate = dateMath.parse(start);
@@ -62,20 +68,49 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
 
       invariant(startDate?.isValid(), `Required "start" field is not valid: ${start}`);
       invariant(endDate?.isValid(), `Required "end" field is not valid: ${end}`);
+      // TODO: validate remaining params
 
-      const filterString = statusFilters.length
-        ? `kibana.alert.rule.execution.status:(${statusFilters.join(' OR ')})`
-        : '';
-      const filter = queryText.length ? `${queryText} AND ${filterString}` : filterString;
+      // Current workaround to support root level filters without missing fields in the aggregate event
+      // or including events from statuses that aren't selected
+      // TODO: See: https://github.com/elastic/kibana/pull/127339/files#r825240516
+      // First fetch execution uuid's by status filter if provided
+      let statusIds: string[] = [];
+      if (statusFilters.length) {
+        const statusResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
+          start: startDate?.utc().toISOString(),
+          end: endDate?.utc().toISOString(),
+          filter: `kibana.alert.rule.execution.status:(${statusFilters.join(' OR ')})`,
+          aggs: {
+            filteredExecutionUUIDs: {
+              terms: {
+                field: 'kibana.alert.rule.execution.uuid',
+                size: MAX_EXECUTION_EVENTS_DISPLAYED,
+              },
+            },
+          },
+        });
+        const filteredExecutionUUIDs = statusResults.aggregations
+          ?.filteredExecutionUUIDs as ExecutionUuidAggResult;
+        statusIds = filteredExecutionUUIDs?.buckets?.map((b) => b.key) ?? [];
+        // Early return if no results based on status filter
+        if (statusIds.length === 0) {
+          return {
+            total: 0,
+            events: [],
+          };
+        }
+      }
 
-      let idsFilter = '';
-      if (filter.length) {
-        // TODO: Current workaround to support root level filters without missing fields in the aggregate event
-        // TODO: See: https://github.com/elastic/kibana/pull/127339/files#r825240516
+      // Now fetch execution uuid's with user provided filter and constraining to statusId's
+      let filterIds: string[] = [];
+      if (queryText.length) {
+        const queryTextFilter = statusFilters.length
+          ? `${queryText} AND kibana.alert.rule.execution.uuid:(${statusIds.join(' OR ')})`
+          : queryText;
         const filteredResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
           start: startDate?.utc().toISOString(),
           end: endDate?.utc().toISOString(),
-          filter,
+          filter: queryTextFilter,
           aggs: {
             filteredExecutionUUIDs: {
               terms: {
@@ -87,11 +122,30 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
         });
         const filteredExecutionUUIDs = filteredResults.aggregations
           ?.filteredExecutionUUIDs as ExecutionUuidAggResult;
-        const filteredIds = filteredExecutionUUIDs?.buckets?.map((b) => b.key) ?? [];
-        idsFilter = filteredIds.length
-          ? `kibana.alert.rule.execution.uuid:(${filteredIds.join(' OR ')})`
-          : '';
+        filterIds = filteredExecutionUUIDs?.buckets?.map((b) => b.key) ?? [];
+        // Early return if no results based on queryText filter
+        if (filterIds.length === 0) {
+          return {
+            total: 0,
+            events: [],
+          };
+        }
       }
+
+      //
+      const statusAndFilterIds = Array.from(new Set([...statusIds, ...filterIds]));
+      // Early return if no results based on both status and queryText filter
+      if ((statusFilters.length || queryText.length) && statusAndFilterIds.length === 0) {
+        return {
+          total: 0,
+          events: [],
+        };
+      }
+
+      // Finally, query for aggregate events, and pass any ID's as filters as determined from the above status/queryText results
+      const idsFilter = statusAndFilterIds.length
+        ? `kibana.alert.rule.execution.uuid:(${statusAndFilterIds.join(' OR ')})`
+        : '';
 
       const results = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
         start: startDate?.utc().toISOString(), // TODO: Is there a way to get typescript to know startDate isn't null based on the above invariant?
@@ -99,9 +153,9 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
         filter: idsFilter,
         aggs: getExecutionEventAggregation({
           maxExecutions: MAX_EXECUTION_EVENTS_DISPLAYED,
-          page: 1,
-          perPage: 10,
-          sort: [{ timestamp: { order: 'desc' } }],
+          page,
+          perPage,
+          sort: [{ [sortField]: { order: sortOrder } }] as estypes.Sort,
         }),
       });
 

@@ -17,6 +17,10 @@ interface UseRuleExecutionEventsArgs {
   end: string;
   queryText?: string;
   statusFilters?: string;
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: string;
 }
 
 export const useRuleExecutionEvents = ({
@@ -25,13 +29,39 @@ export const useRuleExecutionEvents = ({
   end,
   queryText,
   statusFilters,
+  page,
+  perPage,
+  sortField,
+  sortOrder,
 }: UseRuleExecutionEventsArgs) => {
   const { addError } = useAppToasts();
 
   return useQuery<GetAggregateRuleExecutionEventsResponse>(
-    ['ruleExecutionEvents', ruleId, start, end, queryText, statusFilters],
+    [
+      'ruleExecutionEvents',
+      ruleId,
+      start,
+      end,
+      queryText,
+      statusFilters,
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+    ],
     async ({ signal }) => {
-      return fetchRuleExecutionEvents({ ruleId, start, end, queryText, statusFilters, signal });
+      return fetchRuleExecutionEvents({
+        ruleId,
+        start,
+        end,
+        queryText,
+        statusFilters,
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+        signal,
+      });
     },
     {
       onError: (e) => {

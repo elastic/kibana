@@ -33,7 +33,7 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecu
     field: 'security_status',
     render: (value: RuleExecutionStatus, data) =>
       value ? <EuiHealth color={getStatusColor(value)}>{value}</EuiHealth> : getEmptyTagValue(),
-    sortable: true,
+    sortable: false,
     truncateText: false,
     width: '10%',
   },
@@ -74,7 +74,7 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecu
       />
     ),
     render: (value: string) => <>{value}</>,
-    sortable: true,
+    sortable: false,
     truncateText: false,
     width: '35%',
   },

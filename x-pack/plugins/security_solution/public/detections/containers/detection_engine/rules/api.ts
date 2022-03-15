@@ -373,11 +373,15 @@ export const exportRules = async ({
 /**
  * Fetch rule execution events (e.g. status changes) from Event Log.
  *
- * @param ruleId string Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
- * @param start string Start daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now-30`)
- * @param end string End daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now/w`)
+ * @param ruleId Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
+ * @param start Start daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now-30`)
+ * @param end End daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now/w`)
  * @param queryText search string in querystring format (e.g. `event.duration > 1000 OR kibana.alert.rule.execution.metrics.execution_gap_duration_s > 100`)
  * @param statusFilters comma separated string of `statusFilters` (e.g. `succeeded,failed,partial failure`)
+ * @param page current page to fetch
+ * @param perPage number of results to fetch per page
+ * @param sortField field to sort by
+ * @param sortOrder what order to sort by (e.g. `asc` or `desc`)
  * @param signal AbortSignal Optional signal for cancelling the request
  *
  * @throws An error if response is not OK
@@ -388,6 +392,10 @@ export const fetchRuleExecutionEvents = async ({
   end,
   queryText,
   statusFilters,
+  page,
+  perPage,
+  sortField,
+  sortOrder,
   signal,
 }: {
   ruleId: string;
@@ -395,6 +403,10 @@ export const fetchRuleExecutionEvents = async ({
   end: string;
   queryText?: string;
   statusFilters?: string;
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: string;
   signal?: AbortSignal;
 }): Promise<GetAggregateRuleExecutionEventsResponse> => {
   const url = detectionEngineRuleExecutionEventsUrl(ruleId);
@@ -403,8 +415,12 @@ export const fetchRuleExecutionEvents = async ({
     query: {
       start,
       end,
-      queryText: queryText?.trim(),
-      statusFilters: statusFilters?.trim(),
+      query_text: queryText?.trim(),
+      status_filters: statusFilters?.trim(),
+      page,
+      per_page: perPage,
+      sort_field: sortField,
+      sort_order: sortOrder,
     },
     signal,
   });

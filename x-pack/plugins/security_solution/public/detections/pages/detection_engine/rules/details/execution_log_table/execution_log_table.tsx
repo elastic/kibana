@@ -17,10 +17,10 @@ import {
   OnTimeChangeProps,
   OnRefreshProps,
   OnRefreshChangeProps,
-  EuiInMemoryTable,
   EuiSpacer,
   EuiSwitch,
   EuiToolTip,
+  EuiBasicTable,
 } from '@elastic/eui';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
@@ -64,28 +64,60 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     storage,
     timelines,
   } = useKibana().services;
+  // Datepicker state
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [start, setStart] = useState('now-24h');
   const [end, setEnd] = useState('now');
+
+  // Searchbar/Filter/Settings state
   const [queryText, setQueryText] = useState('');
   const [statusFilters, setStatusFilters] = useState('');
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-  const { addError } = useAppToasts();
   const [showMetricColumns, setShowMetricColumns] = useState<boolean>(
     storage.get(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY) ?? false
   );
 
+  // Pagination state
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
+  const [sortField, setSortField] = useState('timestamp');
+  const [sortDirection, setSortDirection] = useState('desc');
+  // Index for `add filter` action and toasts for errors
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+  const { addError } = useAppToasts();
+
+  // Table data state
   const {
     data: events,
     dataUpdatedAt,
     isFetching,
     isLoading,
     refetch,
-  } = useRuleExecutionEvents({ ruleId, start, end, queryText, statusFilters });
+  } = useRuleExecutionEvents({
+    ruleId,
+    start,
+    end,
+    queryText,
+    statusFilters,
+    page: pageIndex,
+    perPage: pageSize,
+    sortField,
+    sortOrder: sortDirection,
+  });
   const items = events?.events ?? [];
   const maxEvents = events?.total ?? 0;
+
+  // Callbacks
+  const onTableChangeCallback = useCallback(({ page = {}, sort = {} }) => {
+    const { index, size } = page;
+    const { field, direction } = sort;
+
+    setPageIndex(index);
+    setPageSize(size);
+    setSortField(field);
+    setSortDirection(direction);
+  }, []);
 
   const onTimeChangeCallback = useCallback(
     (props: OnTimeChangeProps) => {
@@ -147,6 +179,33 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     [addError, filterManager, indexPattern, selectAlertsTab]
   );
 
+  const onShowMetricColumnsCallback = useCallback(
+    (showMetrics: boolean) => {
+      storage.set(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY, showMetrics);
+      setShowMetricColumns(showMetrics);
+    },
+    [storage]
+  );
+
+  // Memoized state
+  const pagination = useMemo(() => {
+    return {
+      pageIndex,
+      pageSize,
+      totalItemCount: maxEvents,
+      pageSizeOptions: [5, 10, 25, 50],
+    };
+  }, [maxEvents, pageIndex, pageSize]);
+
+  const sorting = useMemo(() => {
+    return {
+      sort: {
+        field: sortField,
+        direction: sortDirection,
+      },
+    };
+  }, [sortDirection, sortField]);
+
   const actions = useMemo(
     () => [
       {
@@ -181,14 +240,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         ? [...EXECUTION_LOG_COLUMNS, ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks), ...actions]
         : [...EXECUTION_LOG_COLUMNS, ...actions],
     [actions, docLinks, showMetricColumns]
-  );
-
-  const onShowMetricColumnsCallback = useCallback(
-    (showMetrics: boolean) => {
-      storage.set(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY, showMetrics);
-      setShowMetricColumns(showMetrics);
-    },
-    [storage]
   );
 
   return (
@@ -254,12 +305,14 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
           </EuiToolTip>
         </UtilityBarSection>
       </UtilityBar>
-      <EuiInMemoryTable
+      <EuiBasicTable
         columns={executionLogColumns}
         items={items}
         loading={isFetching}
-        pagination={{ pageSizeOptions: [5, 10, 25, 50, 100], pageSize: 10 }}
-        sorting={{ sort: { field: '@timestamp', direction: 'desc' } }}
+        pagination={pagination}
+        // @ts-ignore-next-line //TODO: Resole sorting type
+        sorting={sorting}
+        onChange={onTableChangeCallback}
       />
     </>
   );

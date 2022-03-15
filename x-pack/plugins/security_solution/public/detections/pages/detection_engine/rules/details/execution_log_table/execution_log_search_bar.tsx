@@ -27,7 +27,7 @@ export const EXECUTION_LOG_SCHEMA_MAPPING = {
   duration: 'event.duration',
   message: 'message',
   gapDuration: 'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
-  indexingDuration: 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
+  indexDuration: 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
   searchDuration: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
   totalActions: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
   schedulingDelay: 'kibana.task.schedule_delay',

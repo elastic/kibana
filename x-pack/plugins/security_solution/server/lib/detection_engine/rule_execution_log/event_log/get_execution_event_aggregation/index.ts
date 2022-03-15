@@ -44,15 +44,16 @@ const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
 const SORT_FIELD_TO_AGG_MAPPING: Record<string, string> = {
   status: 'ruleExecution>status',
   timestamp: 'ruleExecution>executeStartTime',
-  execution_duration: 'ruleExecution>executionDuration',
-  total_indexing_duration: 'securityMetrics>indexingDuration',
-  total_search_duration: 'securityMetrics>totalSearchDuration',
-  gap_duration: 'securityMetrics>gapDuration',
-  schedule_delay: 'ruleExecution>scheduleDelay',
+  duration_ms: 'ruleExecution>executionDuration',
+  indexing_duration_ms: 'securityMetrics>indexDuration',
+  search_duration_ms: 'securityMetrics>searchDuration',
+  gap_duration_ms: 'securityMetrics>gapDuration',
+  schedule_delay_ms: 'ruleExecution>scheduleDelay',
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
+  security_status: 'securityStatus>status',
   // TODO: To be added in https://github.com/elastic/kibana/pull/126210
-  // total_alerts_created: 'ruleExecution>totalAlertsDetected',
-  // total_alerts_detected: 'ruleExecution>totalAlertsCreated',
+  // total_alerts_created: 'securityMetrics>totalAlertsDetected',
+  // total_alerts_detected: 'securityMetrics>totalAlertsCreated',
 };
 
 /**
@@ -87,7 +88,7 @@ export const getExecutionEventAggregation = ({
         executionUuidSorted: {
           bucket_sort: {
             sort: formatSortForBucketSort(sort),
-            from: (page - 1) * perPage,
+            from: page * perPage,
             size: perPage,
           },
         },

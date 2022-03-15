@@ -17,6 +17,10 @@ export interface GetAggregateExecutionEventsArgs {
   end: string;
   queryText: string;
   statusFilters: string[];
+  page: number;
+  perPage: number;
+  sortField: string;
+  sortOrder: string;
 }
 
 /**
@@ -33,6 +37,10 @@ export interface IRuleExecutionLogForRoutes {
    * @param end end of daterange to filter to
    * @param queryText string of field-based filters, e.g.  kibana.alert.rule.execution.status:*
    * @param statusFilters array of status filters, e.g.  ['succeeded', 'going to run']
+   * @param page current page to fetch
+   * @param perPage number of results to fetch per page
+   * @param sortField field to sort by
+   * @param sortOrder what order to sort by (e.g. `asc` or `desc`)
    */
   getAggregateExecutionEvents({
     ruleId,
@@ -40,6 +48,10 @@ export interface IRuleExecutionLogForRoutes {
     end,
     queryText,
     statusFilters,
+    page,
+    perPage,
+    sortField,
+    sortOrder,
   }: GetAggregateExecutionEventsArgs): Promise<GetAggregateRuleExecutionEventsResponse>;
 
   /**
