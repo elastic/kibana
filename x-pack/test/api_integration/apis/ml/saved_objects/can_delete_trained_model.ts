@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.cleanMLSavedObjects();
     });
 
-    it('job in individual spaces, single space user can only untag', async () => {
+    it('model in individual spaces, single space user can only untag', async () => {
       const body = await runRequest(
         'trained-model',
         [modelIdSpace1],
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.eql({ [modelIdSpace1]: { canDelete: false, canRemoveFromSpace: true } });
     });
 
-    it('job in individual spaces, all spaces user can delete and untag', async () => {
+    it('model in individual spaces, all spaces user can delete and untag', async () => {
       const body = await runRequest(
         'trained-model',
         [modelIdSpace1],
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.eql({ [modelIdSpace1]: { canDelete: true, canRemoveFromSpace: true } });
     });
 
-    it('job in * space, single space user can not untag or delete', async () => {
+    it('model in * space, single space user can not untag or delete', async () => {
       const body = await runRequest(
         'trained-model',
         [modelIdStarSpace],
@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.eql({ [modelIdStarSpace]: { canDelete: false, canRemoveFromSpace: false } });
     });
 
-    it('job in * space, all spaces user can delete but not untag', async () => {
+    it('model in * space, all spaces user can delete but not untag', async () => {
       const body = await runRequest(
         'trained-model',
         [modelIdStarSpace],
