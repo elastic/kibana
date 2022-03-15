@@ -16,6 +16,8 @@ import { scoreIntervalToDateTime } from '../../../common/components/ml/score/sco
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { Anomaly } from '../../../common/components/ml/types';
 import { usersDetailsPagePath } from '../constants';
+import { TimelineId } from '../../../../common/types';
+import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({
@@ -29,6 +31,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     type,
     setAbsoluteRangeDatePicker,
     detailName,
+    pageFilters,
   }) => {
     const narrowDateRange = useCallback(
       (score: Anomaly, interval: string) => {
@@ -75,6 +78,13 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       <Switch>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
+        </Route>
+        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.events})`}>
+          <EventsQueryTabBody
+            {...tabProps}
+            pageFilters={pageFilters}
+            timelineId={TimelineId.usersPageEvents}
+          />
         </Route>
       </Switch>
     );

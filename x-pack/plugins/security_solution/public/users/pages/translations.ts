@@ -31,3 +31,10 @@ export const NAVIGATION_RISK_TITLE = i18n.translate(
     defaultMessage: 'Users by risk',
   }
 );
+
+export const NAVIGATION_EVENTS_TITLE = i18n.translate(
+  'xpack.securitySolution.users.navigation.eventsTitle',
+  {
+    defaultMessage: 'Events',
+  }
+);

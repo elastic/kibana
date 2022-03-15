@@ -36,7 +36,7 @@ export const AllUsersQueryTabBody = ({
     indexNames,
     skip,
     startDate,
-    // TODO Fix me
+    // TODO Fix me!!
     // @ts-ignore
     type,
     deleteQuery,
@@ -58,7 +58,7 @@ export const AllUsersQueryTabBody = ({
       totalCount={totalCount}
       docValueFields={docValueFields}
       indexNames={indexNames}
-      // TODO Fix me
+      // TODO Fix me!!
       // @ts-ignore
       type={type}
     />

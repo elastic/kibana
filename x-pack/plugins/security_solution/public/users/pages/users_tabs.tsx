@@ -19,6 +19,8 @@ import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_
 import { UpdateDateRange } from '../../common/components/charts/common';
 
 import { UserRiskScoreQueryTabBody } from './navigation/user_risk_score_tab_body';
+import { EventsQueryTabBody } from '../../common/components/events_tab/events_query_tab_body';
+import { TimelineId } from '../../../common/types';
 
 export const UsersTabs = memo<UsersTabsProps>(
   ({
@@ -82,6 +84,9 @@ export const UsersTabs = memo<UsersTabsProps>(
         </Route>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.risk})`}>
           <UserRiskScoreQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.events})`}>
+          <EventsQueryTabBody {...tabProps} timelineId={TimelineId.usersPageEvents} />
         </Route>
       </Switch>
     );

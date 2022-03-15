@@ -118,6 +118,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
           dispatch(
             usersActions.updateTableSorting({
               sort: newSort as RiskScoreSortField,
+              tableType,
             })
           );
         }

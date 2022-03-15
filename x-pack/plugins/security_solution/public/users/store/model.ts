@@ -16,6 +16,8 @@ export enum UsersTableType {
   allUsers = 'allUsers',
   anomalies = 'anomalies',
   risk = 'userRisk',
+  events = 'events',
+  // alerts = 'externalAlerts',
 }
 
 export type AllUsersTables = UsersTableType;
@@ -36,10 +38,12 @@ export interface UsersQueries {
   [UsersTableType.allUsers]: AllUsersQuery;
   [UsersTableType.anomalies]: null | undefined;
   [UsersTableType.risk]: UsersRiskScoreQuery;
+  [UsersTableType.events]: BasicQueryPaginated;
 }
 
 export interface UserDetailsQueries {
   [UsersTableType.anomalies]: null | undefined;
+  [UsersTableType.events]: BasicQueryPaginated;
 }
 
 export interface UsersPageModel {

@@ -8,27 +8,28 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { Filter } from '@kbn/es-query';
 import { TimelineId } from '../../../../common/types/timeline';
-import { StatefulEventsViewer } from '../../../common/components/events_viewer';
+import { StatefulEventsViewer } from '../events_viewer';
 import { timelineActions } from '../../../timelines/store/timeline';
-import { HostsComponentsQueryProps } from './types';
-import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
-import {
-  MatrixHistogramOption,
-  MatrixHistogramConfigs,
-} from '../../../common/components/matrix_histogram/types';
-import { MatrixHistogram } from '../../../common/components/matrix_histogram';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
-import * as i18n from '../translations';
+import { eventsDefaultModel } from '../events_viewer/default_model';
+
+import { MatrixHistogram } from '../matrix_histogram';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
+import * as i18n from '../../../hosts/pages/translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 import { getEventsHistogramLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/hosts/events';
+import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
+import { GlobalTimeArgs } from '../../containers/use_global_time';
+import { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
+import { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
+import { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -61,7 +62,17 @@ export const histogramConfigs: MatrixHistogramConfigs = {
   getLensAttributes: getEventsHistogramLensAttributes,
 };
 
-const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
+type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps;
+
+export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
+  deleteQuery?: GlobalTimeArgs['deleteQuery'];
+  indexNames: string[];
+  pageFilters?: Filter[];
+  setQuery: GlobalTimeArgs['setQuery'];
+  timelineId: TimelineId;
+};
+
+const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
@@ -69,6 +80,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   pageFilters,
   setQuery,
   startDate,
+  timelineId,
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -78,7 +90,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   useEffect(() => {
     dispatch(
       timelineActions.initializeTGridSettings({
-        id: TimelineId.hostsPageEvents,
+        id: timelineId,
         defaultColumns: eventsDefaultModel.columns.map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {
@@ -89,7 +101,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         ),
       })
     );
-  }, [dispatch, tGridEnabled]);
+  }, [dispatch, tGridEnabled, timelineId]);
 
   useEffect(() => {
     return () => {
@@ -119,7 +131,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         defaultModel={eventsDefaultModel}
         end={endDate}
         entityType="events"
-        id={TimelineId.hostsPageEvents}
+        id={timelineId}
         leadingControlColumns={leadingControlColumns}
         pageFilters={pageFilters}
         renderCellValue={DefaultCellRenderer}

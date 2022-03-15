@@ -44,7 +44,14 @@ export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &
   UsersDetailsComponentDispatchProps &
   UsersQueryProps;
 
-type KeyUsersDetailsNavTab = UsersTableType.anomalies;
+export type KeyUsersDetailsNavTabWithoutMlPermission = UsersTableType.events;
+
+type KeyUsersDetailsNavTabWithMlPermission = KeyUsersDetailsNavTabWithoutMlPermission &
+  UsersTableType.anomalies;
+
+type KeyUsersDetailsNavTab =
+  | KeyUsersDetailsNavTabWithoutMlPermission
+  | KeyUsersDetailsNavTabWithMlPermission;
 
 export type UsersDetailsNavTab = Record<KeyUsersDetailsNavTab, NavTab>;
 
