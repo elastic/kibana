@@ -201,9 +201,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     updatePageState
   );
 
-  const navigateToSourceSelection = async () => {
+  const navigateToSourceSelection = useCallback(async () => {
     await navigateToPath(ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION);
-  };
+  }, []);
 
   const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
     if (search.error !== null) {
@@ -275,7 +275,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   return (
     <div data-test-subj="mlAnalyticsJobList">
       {modals}
-      {!isManagementTable && <EuiSpacer size="m" />}
       <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
       <EuiFlexGroup justifyContent="spaceBetween">
         {!isManagementTable && stats}

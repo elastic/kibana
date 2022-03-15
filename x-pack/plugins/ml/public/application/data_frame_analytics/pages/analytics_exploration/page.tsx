@@ -34,7 +34,7 @@ export const Page: FC<{
     dataFrameAnalytics: { getDataFrameAnalytics },
   } = useMlApiContext();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
-  const jobIdToUse = jobId || analyticsId?.job_id;
+  const jobIdToUse = jobId ?? analyticsId?.job_id;
   const analysisTypeToUse = analysisType || analyticsId?.analysis_type;
 
   const checkJobsExist = async () => {
@@ -89,7 +89,7 @@ export const Page: FC<{
         <MlPageHeader>
           <FormattedMessage
             id="xpack.ml.dataframe.analyticsExploration.title"
-            defaultMessage="Explore results for job ID"
+            defaultMessage="Explore results"
           />
         </MlPageHeader>
       )}

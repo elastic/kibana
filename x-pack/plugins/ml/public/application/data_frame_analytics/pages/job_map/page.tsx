@@ -74,8 +74,8 @@ export const Page: FC = () => {
     );
   };
 
-  const jobId = mapJobId || analyticsId?.job_id;
-  const modelId = mapModelId || analyticsId?.model_id;
+  const jobId = mapJobId ?? analyticsId?.job_id;
+  const modelId = mapModelId ?? analyticsId?.model_id;
 
   return (
     <>

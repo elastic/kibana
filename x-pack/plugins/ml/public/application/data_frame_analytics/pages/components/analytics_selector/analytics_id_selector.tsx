@@ -150,9 +150,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   async function fetchAnalyticsModels() {
     setIsLoading(true);
     try {
-      const response = await trainedModelsApiService.getTrainedModels(undefined, {
-        size: 1000,
-      });
+      const response = await trainedModelsApiService.getTrainedModels();
       setTrainedModels(response);
     } catch (e) {
       console.error('Error fetching trained models', e); // eslint-disable-line
@@ -192,15 +190,10 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
 
   const selectionValue = {
     selectable: (item: TableItem) => {
-      const selectedId = selected?.job_id || selected?.model_id;
-      let itemId;
-      let isBuiltInModel = false;
-      if (isDataFrameAnalyticsConfigs(item)) {
-        itemId = item?.id;
-      } else {
-        itemId = item?.model_id;
-        isBuiltInModel = item.tags.includes(BUILT_IN_MODEL_TAG);
-      }
+      const selectedId = selected?.job_id ?? selected?.model_id;
+      const isDFA = isDataFrameAnalyticsConfigs(item);
+      const itemId = isDFA ? item.id : item.model_id;
+      const isBuiltInModel = isDFA ? false : item.tags.includes(BUILT_IN_MODEL_TAG);
       return (selected === undefined || selectedId === itemId) && !isBuiltInModel;
     },
     onSelectionChange: (selectedItem: TableItem[]) => {
@@ -209,23 +202,13 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
         setSelected(undefined);
         return;
       }
-      let config:
-        | DataFrameAnalyticsConfig['analysis']
-        | TrainedModelConfigResponse['inference_config'];
-      let modelId;
-      let jobId;
-      if (isDataFrameAnalyticsConfigs(item)) {
-        config = item?.analysis;
-        jobId = item?.id;
-      } else {
-        config = item?.inference_config;
-        modelId = item?.model_id;
-      }
-      const analysisType = item ? Object.keys(config!)[0] : undefined;
+      const isDFA = isDataFrameAnalyticsConfigs(item);
+      const config = isDFA ? item.analysis : item.inference_config;
+      const analysisType = config ? Object.keys(config)[0] : undefined;
 
       setSelected({
-        model_id: modelId,
-        job_id: jobId,
+        model_id: isDFA ? undefined : item.model_id,
+        job_id: isDFA ? item.id : undefined,
         analysis_type: analysisType,
       });
     },

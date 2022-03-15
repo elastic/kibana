@@ -21,7 +21,7 @@ import { getNestedProperty } from '../../../../../util/object_utils';
 
 import { getDataViewAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
 
-const fixedPageSize: number = 8;
+const fixedPageSize: number = 20;
 
 export const SourceSelection: FC = () => {
   const {
