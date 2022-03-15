@@ -30,4 +30,4 @@ NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $KBN_NODE_OPTS $NODE_OP
 
 NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" ${@} --xpack.task_manager.unsafe.exclude_task_types='["*"]' &
 
-wait
+wait -n
