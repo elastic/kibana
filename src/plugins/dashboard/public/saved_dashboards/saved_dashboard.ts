@@ -17,8 +17,7 @@ import { extractReferences, injectReferences } from '../../common/saved_dashboar
 
 import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 import { DashboardOptions } from '../types';
-
-import { ControlStyle } from '../../../controls/public';
+import { RawControlGroupAttributes } from '../application';
 
 export interface DashboardSavedObject extends SavedObject {
   id?: string;
@@ -40,7 +39,7 @@ export interface DashboardSavedObject extends SavedObject {
   aliasId?: string;
   suppressRedirectToast?: boolean;
 
-  controlGroupInput?: { controlStyle?: ControlStyle; panelsJSON?: string };
+  controlGroupInput?: Omit<RawControlGroupAttributes, 'id'>;
 }
 
 const defaults = {

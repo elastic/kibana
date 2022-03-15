@@ -7,18 +7,31 @@
 
 import type { ErrorType } from '../util/errors';
 export type JobType = 'anomaly-detector' | 'data-frame-analytics';
-export const ML_SAVED_OBJECT_TYPE = 'ml-job';
+export type TrainedModelType = 'trained-model';
+
+export const ML_JOB_SAVED_OBJECT_TYPE = 'ml-job';
+export const ML_TRAINED_MODEL_SAVED_OBJECT_TYPE = 'ml-trained-model';
 export const ML_MODULE_SAVED_OBJECT_TYPE = 'ml-module';
+export type MlSavedObjectType =
+  | typeof ML_JOB_SAVED_OBJECT_TYPE
+  | typeof ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
+  | typeof ML_MODULE_SAVED_OBJECT_TYPE;
 
 export interface SavedObjectResult {
-  [jobId: string]: { success: boolean; type: JobType; error?: ErrorType };
+  [id: string]: { success: boolean; type: JobType | TrainedModelType; error?: ErrorType };
 }
 
+export type SyncResult = {
+  [jobType in JobType | TrainedModelType]?: {
+    [id: string]: { success: boolean; error?: ErrorType };
+  };
+};
+
 export interface SyncSavedObjectResponse {
-  savedObjectsCreated: SavedObjectResult;
-  savedObjectsDeleted: SavedObjectResult;
-  datafeedsAdded: SavedObjectResult;
-  datafeedsRemoved: SavedObjectResult;
+  savedObjectsCreated: SyncResult;
+  savedObjectsDeleted: SyncResult;
+  datafeedsAdded: SyncResult;
+  datafeedsRemoved: SyncResult;
 }
 
 export interface CanDeleteJobResponse {
@@ -32,9 +45,14 @@ export type JobsSpacesResponse = {
   [jobType in JobType]: { [jobId: string]: string[] };
 };
 
+export interface TrainedModelsSpacesResponse {
+  trainedModels: { [id: string]: string[] };
+}
+
 export interface InitializeSavedObjectResponse {
   jobs: Array<{ id: string; type: JobType }>;
   datafeeds: Array<{ id: string; type: JobType }>;
+  trainedModels: Array<{ id: string }>;
   success: boolean;
   error?: ErrorType;
 }
