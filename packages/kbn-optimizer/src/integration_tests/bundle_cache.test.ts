@@ -54,8 +54,8 @@ it('emits "bundle cached" event when everything is updated', async () => {
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
   ];
-  const checksums = await Hashes.ofFiles(referencedPaths);
-  const cacheKey = bundle.createCacheKey(referencedPaths, checksums);
+  const hashes = await Hashes.ofFiles(referencedPaths);
+  const cacheKey = bundle.createCacheKey(referencedPaths, hashes);
 
   bundle.cache.set({
     cacheKey,
@@ -93,8 +93,8 @@ it('emits "bundle not cached" event when cacheKey is up to date but caching is d
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
   ];
-  const mtimes = await Hashes.ofFiles(referencedPaths);
-  const cacheKey = bundle.createCacheKey(referencedPaths, mtimes);
+  const hashes = await Hashes.ofFiles(referencedPaths);
+  const cacheKey = bundle.createCacheKey(referencedPaths, hashes);
 
   bundle.cache.set({
     cacheKey,
@@ -132,8 +132,8 @@ it('emits "bundle not cached" event when optimizerCacheKey is missing', async ()
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
   ];
-  const mtimes = await Hashes.ofFiles(referencedPaths);
-  const cacheKey = bundle.createCacheKey(referencedPaths, mtimes);
+  const hashes = await Hashes.ofFiles(referencedPaths);
+  const cacheKey = bundle.createCacheKey(referencedPaths, hashes);
 
   bundle.cache.set({
     cacheKey,
@@ -171,8 +171,8 @@ it('emits "bundle not cached" event when optimizerCacheKey is outdated, includes
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
   ];
-  const mtimes = await Hashes.ofFiles(referencedPaths);
-  const cacheKey = bundle.createCacheKey(referencedPaths, mtimes);
+  const hashes = await Hashes.ofFiles(referencedPaths);
+  const cacheKey = bundle.createCacheKey(referencedPaths, hashes);
 
   bundle.cache.set({
     cacheKey,
@@ -215,8 +215,8 @@ it('emits "bundle not cached" event when bundleRefExportIds is outdated, include
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
   ];
-  const mtimes = await Hashes.ofFiles(referencedPaths);
-  const cacheKey = bundle.createCacheKey(referencedPaths, mtimes);
+  const hashes = await Hashes.ofFiles(referencedPaths);
+  const cacheKey = bundle.createCacheKey(referencedPaths, hashes);
 
   bundle.cache.set({
     cacheKey,
