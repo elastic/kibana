@@ -4195,7 +4195,6 @@
     "home.tutorials.zscalerLogs.shortDescription": "Filebeatを使用してZscaler NSSからログを収集して解析します。",
     "home.welcomeTitle": "Elasticへようこそ",
     "indexPatternEditor.aliasLabel": "エイリアス",
-    "indexPatternEditor.createDataView.emptyState.createAnywayLink": "非表示のインデックスまたはシステムインデックスに対してデータビューを作成します。",
     "indexPatternEditor.createIndex.noMatch": "名前は1つ以上のデータストリーム、インデックス、またはインデックスエイリアスと一致する必要があります。",
     "indexPatternEditor.createIndexPattern.emptyState.checkDataButton": "新規データを確認",
     "indexPatternEditor.createIndexPattern.emptyState.createAnywayTxt": "{link}もできます。",

@@ -4204,7 +4204,6 @@
     "home.tutorials.zscalerLogs.shortDescription": "使用 Filebeat 从 Zscaler NSS 收集并解析日志。",
     "home.welcomeTitle": "欢迎使用 Elastic",
     "indexPatternEditor.aliasLabel": "别名",
-    "indexPatternEditor.createDataView.emptyState.createAnywayLink": "根据隐藏或系统索引创建数据视图。",
     "indexPatternEditor.createIndex.noMatch": "名称必须匹配一个或多个数据流、索引或索引别名。",
     "indexPatternEditor.createIndexPattern.emptyState.checkDataButton": "检查新数据",
     "indexPatternEditor.createIndexPattern.emptyState.createAnywayTxt": "您还可以{link}",
