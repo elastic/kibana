@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timeToVisualize',
     'common',
     'header',
+    'unifiedSearch',
   ]);
   const find = getService('find');
   const listingTable = getService('listingTable');
@@ -26,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createNewLens = async () => {
     await PageObjects.visualize.navigateToNewVisualization();
     await PageObjects.visualize.clickVisType('lens');
+    await PageObjects.unifiedSearch.closeTour();
     await PageObjects.lens.goToTimeRange();
 
     await PageObjects.lens.configureDimension({

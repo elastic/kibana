@@ -28,6 +28,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     'visualize',
     'dashboard',
     'timeToVisualize',
+    'unifiedSearch',
   ]);
 
   return logWrapper('lensPage', log, {
@@ -1101,6 +1102,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
+      await PageObjects.unifiedSearch.closeTour();
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
