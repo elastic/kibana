@@ -63,6 +63,8 @@ export type {
   RegistrySearchResult,
   IndexTemplateEntry,
   IndexTemplateMappings,
+  TemplateMap,
+  TemplateMapEntry,
   Settings,
   SettingsSOAttributes,
   InstallType,
