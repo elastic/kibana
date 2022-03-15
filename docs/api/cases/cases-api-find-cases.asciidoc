@@ -45,7 +45,6 @@ cases that the user has access to read.
 `tags`::
 (Optional, string) Filters the returned cases by tags.
 
-
 NOTE: Even though the JSON case object uses `created_at` and `updated_at`
 fields, you must use `createdAt` and `updatedAt` fields in the URL
 query.
@@ -80,24 +79,28 @@ The API returns a JSON object listing the retrieved cases. For example:
       "version": "WzExMCwxXQ==",
       "comments": [],
       "totalComment": 0,
-      "closed_at": null,
-      "closed_by": null,
-      "created_at": "2020-03-29T13:03:23.533Z",
-      "created_by": {
-        "email": "rhustler@aol.com",
-        "full_name": "Rat Hustler",
-        "username": "rhustler"
-      },
-      "external_service": null,
-      "updated_at": null,
-      "updated_by": null,
+      "totalAlerts": 0,
       "title": "The Long Game",
       "tags": [
         "windows",
         "phishing"
       ],
       "description": "Windows 95",
+      "settings": {
+        "syncAlerts": true
+      },
+      "owner": "securitySolution",
+      "closed_at": null,
+      "closed_by": null,
+      "created_at": "2022-03-29T13:03:23.533Z",
+      "created_by": {
+        "email": "rhustler@email.com",
+        "full_name": "Rat Hustler",
+        "username": "rhustler"
+      },
       "status": "open",
+      "updated_at": null,
+      "updated_by": null,
       "connector": {
         "id": "131d4448-abe0-4789-939d-8ef60680b498",
         "name": "My connector",
@@ -106,35 +109,41 @@ The API returns a JSON object listing the retrieved cases. For example:
           "issueType": "10006",
           "priority": null,
         }
-      },
-      "settings": {
-        "syncAlerts": true
-      },
-      "owner": "securitySolution",
+      }
+      "external_service": null,
     },
     {
       "id": "a18b38a0-71b0-11ea-a0b2-c51ea50a58e2",
       "version": "Wzk4LDFd",
       "comments": [],
       "totalComment": 0,
+      "totalAlerts": 0,
+      "title": "This case will self-destruct in 5 seconds",
+      "tags": [
+        "phishing",
+        "social engineering",
+        "bubblegum"
+      ],
+      "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active!",
+      "settings": {
+        "syncAlerts": false
+      },
+      "owner": "cases",
       "closed_at": null,
       "closed_by": null,
-      "created_at": "2020-03-29T11:30:02.658Z",
+      "created_at": "2022-03-29T11:30:02.658Z",
       "created_by": {
         "email": "ahunley@imf.usa.gov",
         "full_name": "Alan Hunley",
         "username": "ahunley"
       },
-      "external_service": null,
-      "updated_at": "2020-03-29T12:01:50.244Z",
+      "status": "open",
+      "updated_at": "2022-03-29T12:01:50.244Z",
       "updated_by": {
         "full_name": "Classified",
         "email": "classified@hms.oo.gov.uk",
         "username": "M"
       },
-      "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active!",
-      "title": "This case will self-destruct in 5 seconds",
-      "status": "open",
       "connector": {
         "id": "131d4448-abe0-4789-939d-8ef60680b498",
         "name": "My connector",
@@ -144,18 +153,11 @@ The API returns a JSON object listing the retrieved cases. For example:
           "severityCode": 6,
         }
       },
-      "settings": {
-        "syncAlerts": false
-      },
-      "owner": "securitySolution",
-      "tags": [
-        "phishing",
-        "social engineering",
-        "bubblegum"
-      ]
+      "external_service": null,
     }
   ],
   "count_open_cases": 2,
+  "count_in_progress_cases":0,
   "count_closed_cases": 0
 }
 --------------------------------------------------
