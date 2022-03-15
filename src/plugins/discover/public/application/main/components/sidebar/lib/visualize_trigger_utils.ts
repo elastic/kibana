@@ -14,7 +14,7 @@ import {
 } from '../../../../../../../ui_actions/public';
 import { getUiActions } from '../../../../../kibana_services';
 import type { DataViewField } from '../../../../../../../data_views/public';
-import { KBN_FIELD_TYPES } from '../../../../../../../data/common';
+import { KBN_FIELD_TYPES } from '../../../../../../../data/public';
 import { APP_ID } from '../../../../../../common';
 
 function getTriggerConstant(type: string) {

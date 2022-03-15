@@ -11,7 +11,7 @@ import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
 import { savedSearchMock } from '../../__mocks__/saved_search';
 import { SavedObject } from '../../../../../core/types';
-import type { DataViewAttributes } from '../../../../data_views/common';
+import type { DataViewAttributes } from '../../../../data_views/public';
 import { setHeaderActionMenuMounter } from '../../kibana_services';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '../../../../kibana_react/public';

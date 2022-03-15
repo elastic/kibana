@@ -11,7 +11,7 @@
 import { keys, each, cloneDeep, clone, uniq, filter, map } from 'lodash';
 // @ts-expect-error
 import realHits from '../../../../../__fixtures__/real_hits.js';
-import { flattenHit } from '../../../../../../../data/common';
+import { flattenHit } from '../../../../../../../data/public';
 import type { DataView } from '../../../../../../../data_views/public';
 
 // @ts-expect-error

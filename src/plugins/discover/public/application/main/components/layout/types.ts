@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '../../../../../../data/common';
-import type { Query, TimeRange } from '../../../../../../data/public';
-import type { DataViewAttributes } from '../../../../../../data_views/common';
-import type { DataView } from '../../../../../../data_views/public';
+import type { Query, TimeRange, SavedObject } from '../../../../../../data/public';
+import type { DataView, DataViewAttributes } from '../../../../../../data_views/public';
 import { ISearchSource } from '../../../../../../data/public';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DataRefetch$, SavedSearchData } from '../../utils/use_saved_search';

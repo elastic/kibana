@@ -9,7 +9,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FieldFormatsStart } from '../../../field_formats/public';
-import { flattenHit } from '../../../data/common';
+import { flattenHit } from '../../../data/public';
 import { DataView } from '../../../data_views/public';
 import { formatFieldValue } from './format_value';
 

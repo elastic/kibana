@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { formatFieldValue } from '../../../utils/format_value';
-import { flattenHit } from '../../../../../data/common';
+import { flattenHit } from '../../../../../data/public';
 import { DataView } from '../../../../../data_views/public';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { TableCell } from './table_row/table_cell';

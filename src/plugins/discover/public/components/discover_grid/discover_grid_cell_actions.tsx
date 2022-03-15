@@ -10,7 +10,7 @@ import React, { useContext } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '../../../../data_views/public';
-import { flattenHit } from '../../../../data/common';
+import { flattenHit } from '../../../../data/public';
 import { DiscoverGridContext } from './discover_grid_context';
 
 export const FilterInBtn = ({

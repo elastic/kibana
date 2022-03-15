@@ -7,7 +7,7 @@
  */
 
 import type { DataView } from 'src/plugins/data_views/public';
-import type { EsQuerySortValue } from 'src/plugins/data/common';
+import type { EsQuerySortValue } from 'src/plugins/data/public';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
 

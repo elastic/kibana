@@ -14,8 +14,7 @@ import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern, DiscoverIndexPatternProps } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
-import type { DataViewAttributes } from 'src/plugins/data_views/common';
-import type { DataView } from 'src/plugins/data_views/public';
+import type { DataView, DataViewAttributes } from 'src/plugins/data_views/public';
 import { indexPatternsMock } from '../../../../__mocks__/index_patterns';
 
 const indexPattern = {

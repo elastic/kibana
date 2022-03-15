@@ -8,7 +8,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormatsStart } from '../../../field_formats/public';
-import { KBN_FIELD_TYPES } from '../../../data/common';
+import { KBN_FIELD_TYPES } from '../../../data/public';
 import { DataView, DataViewField } from '../../../data_views/public';
 
 /**

@@ -21,7 +21,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import type { DataView } from '../../../../data_views/public';
-import { flattenHit } from '../../../../data/common';
+import { flattenHit } from '../../../../data/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';

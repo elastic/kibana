@@ -7,7 +7,7 @@
  */
 
 import { escapeRegExp } from 'lodash/fp';
-import { getFieldSubtypeNested } from '../../../../../data_views/common';
+import { getFieldSubtypeNested } from '../../../../../data_views/public';
 import type { DataView } from '../../../../../data_views/public';
 
 /**

@@ -18,7 +18,7 @@ import type { SavedSearch, SortOrder } from '../../../services/saved_searches';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
-import { ISearchSource } from '../../../../../data/common';
+import { ISearchSource } from '../../../../../data/public';
 import { Adapters } from '../../../../../inspector';
 import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';

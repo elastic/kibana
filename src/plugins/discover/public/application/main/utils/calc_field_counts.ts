@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { DataView } from '../../../../../data_views/public';
-import { flattenHit } from '../../../../../data/common';
+import { flattenHit } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../../types';
 
 /**

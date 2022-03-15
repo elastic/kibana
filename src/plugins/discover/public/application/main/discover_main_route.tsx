@@ -7,12 +7,12 @@
  */
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { SavedObject } from 'src/plugins/data/common';
+import { SavedObject } from 'src/plugins/data/public';
 import { ISearchSource } from 'src/plugins/data/public';
 import {
   DataViewAttributes,
   DataViewSavedObjectConflictError,
-} from '../../../../data_views/common';
+} from '../../../../data_views/public';
 import {
   SavedSearch,
   getSavedSearch,

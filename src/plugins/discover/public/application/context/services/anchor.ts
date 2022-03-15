@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ISearchSource, EsQuerySortValue } from '../../../../../data/common';
+import { ISearchSource, EsQuerySortValue } from '../../../../../data/public';
 import { DataView } from '../../../../../data_views/public';
 import { EsHitRecord } from '../../types';
 
