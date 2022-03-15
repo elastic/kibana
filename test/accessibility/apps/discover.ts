@@ -9,7 +9,14 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'share',
+    'timePicker',
+    'unifiedSearch',
+  ]);
   const a11y = getService('a11y');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
@@ -18,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
     });
 

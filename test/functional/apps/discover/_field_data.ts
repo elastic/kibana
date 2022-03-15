@@ -17,7 +17,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'discover',
+    'visualize',
+    'timePicker',
+    'unifiedSearch',
+  ]);
   const find = getService('find');
   const testSubjects = getService('testSubjects');
 
@@ -33,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.unifiedSearch.closeTour();
     });
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {

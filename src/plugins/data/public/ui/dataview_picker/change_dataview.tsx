@@ -126,7 +126,11 @@ export function ChangeDataView({
           <EuiIcon type="bell" size="s" /> &nbsp; Hey there!
         </>
       }
-      footerAction={<EuiLink onClick={onTourDismiss}>Got it!</EuiLink>}
+      footerAction={
+        <EuiLink data-test-subj="dataViewPickerTourLink" onClick={onTourDismiss}>
+          Got it!
+        </EuiLink>
+      }
       repositionOnScroll
     >
       <EuiPopover

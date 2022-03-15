@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
     'share',
     'timePicker',
+    'unifiedSearch',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -98,6 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.header.clickDiscover();
+      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.timePicker.setHistoricalDataRange();
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');

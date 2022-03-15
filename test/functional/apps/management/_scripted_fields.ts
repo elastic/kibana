@@ -39,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visualize',
     'discover',
     'timePicker',
+    'unifiedSearch',
   ]);
 
   describe('scripted fields', function () {
@@ -137,6 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);

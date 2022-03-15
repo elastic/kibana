@@ -21,13 +21,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const docTable = getService('docTable');
-  const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'context',
+    'discover',
+    'timePicker',
+    'unifiedSearch',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const find = getService('find');
 
   describe('discover - context - back navigation', function contextSize() {
     before(async function () {
+      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
       await PageObjects.common.navigateToApp('discover');
