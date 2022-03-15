@@ -20,7 +20,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
     type: 'security:telemetry-prebuilt-rule-alerts',
     title: 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry',
     interval: '1h',
-    timeout: '10m',
+    timeout: '5m',
     version: '1.0.0',
     runTask: async (
       taskId: string,
@@ -72,7 +72,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
         return enrichedAlerts.length;
       } catch (err) {
-        logger.warn('could not complete prebuilt alerts telemetry task');
+        logger.debug('could not complete prebuilt alerts telemetry task');
         return 0;
       }
     },
