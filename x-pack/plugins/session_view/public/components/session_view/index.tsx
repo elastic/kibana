@@ -17,11 +17,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
 import { Process } from '../../../common/types/process_tree';
-import { StateField } from '../../../common/types/session_view';
+import { DisplayOptionsState } from '../../../common/types/session_view';
 import { SessionViewDeps } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
-import { SessionViewDisplayOptions } from '../session_view_toggle_options';
+import { SessionViewDisplayOptions } from '../session_view_display_options';
 import { useStyles } from './styles';
 import { useFetchSessionViewProcessEvents } from './hooks';
 
@@ -40,7 +40,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
-  const [optionsStates, setOptionsStates] = useState<StateField>({
+  const [displayOptions, setDisplayOptions] = useState<DisplayOptionsState>({
     timestamp: true,
     verboseMode: true,
   });
@@ -62,8 +62,8 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   const toggleDetailPanel = useCallback(() => {
     setIsDetailOpen(!isDetailOpen);
   }, [isDetailOpen]);
-  const handleOptionChange = useCallback((checkedOptions: StateField) => {
-    setOptionsStates(checkedOptions);
+  const handleOptionChange = useCallback((checkedOptions: DisplayOptionsState) => {
+    setDisplayOptions(checkedOptions);
   }, []);
 
   if (!isFetching && !hasData) {
@@ -108,7 +108,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
           <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
             <SessionViewDisplayOptions
-              optionsStates={optionsStates}
+              optionsStates={displayOptions}
               onChange={handleOptionChange}
             />
           </EuiFlexItem>
@@ -182,8 +182,8 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                     fetchNextPage={fetchNextPage}
                     fetchPreviousPage={fetchPreviousPage}
                     setSearchResults={setSearchResults}
-                    timeStampOn={optionsStates.timestamp}
-                    verboseModeOn={optionsStates.verboseMode}
+                    timeStampOn={displayOptions.timestamp}
+                    verboseModeOn={displayOptions.verboseMode}
                   />
                 </div>
               )}

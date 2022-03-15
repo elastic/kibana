@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface StateField {
+export interface DisplayOptionsState {
   timestamp: boolean;
   verboseMode: boolean;
 }

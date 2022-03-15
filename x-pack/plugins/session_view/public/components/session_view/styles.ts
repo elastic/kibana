@@ -19,7 +19,6 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
   const cached = useMemo(() => {
     const processTree: CSSObject = {
       height: `${height}px`,
-      paddingTop: euiTheme.size.s,
     };
 
     const detailPanel: CSSObject = {
@@ -30,11 +29,15 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       position: 'relative',
       marginLeft: `${euiTheme.size.xs} !important`,
       marginRight: `${euiTheme.size.xs} !important`,
+      marginTop: `${euiTheme.size.m} !important`,
+      marginBottom: `${euiTheme.size.m} !important`,
     };
 
     const buttonsEyeDetail: CSSObject = {
       marginLeft: `${euiTheme.size.xs} !important`,
       marginRight: `${euiTheme.size.xs} !important`,
+      marginTop: `${euiTheme.size.m} !important`,
+      marginBottom: `${euiTheme.size.m} !important`,
     };
 
     return {

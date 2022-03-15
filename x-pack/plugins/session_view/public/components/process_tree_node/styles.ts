@@ -19,7 +19,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { colors, border, size } = euiTheme;
+    const { colors, border, size, font } = euiTheme;
 
     const TREE_INDENT = `calc(${size.l} + ${size.xxs})`;
 
@@ -102,9 +102,15 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
 
     const timeStamp: CSSObject = {
       float: 'right',
-      position: 'relative',
+      fontFamily: 'Roboto Mono',
+      fontSize: '11px',
+      fontStyle: 'normal',
+      fontWeight: font.weight.regular,
+      lineHeight: '18px',
+      letterSpacing: '0em',
       paddingRight: size.base,
       paddingLeft: `min(${size.xxl})`,
+      position: 'relative',
     };
 
     const alertDetails: CSSObject = {

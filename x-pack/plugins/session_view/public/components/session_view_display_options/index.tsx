@@ -16,22 +16,22 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { StateField } from '../../../common/types/session_view';
+import { DisplayOptionsState } from '../../../common/types/session_view';
 import { useStyles } from './styles';
+
+const TIMESTAMP_OPTION_KEY = 'Timestamp';
+const VERBOSE_MODE_OPTION_KEY = 'Verbose mode';
 
 export const SessionViewDisplayOptions = ({
   onChange,
   optionsStates,
 }: {
-  onChange: (vars: StateField) => void;
-  optionsStates: StateField;
+  onChange: (vars: DisplayOptionsState) => void;
+  optionsStates: DisplayOptionsState;
 }) => {
   const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
 
   const styles = useStyles();
-
-  const timestampString = 'Timestamp';
-  const verboseModeString = 'Verbose mode';
 
   const optionsList: EuiSelectableOption[] = useMemo(
     () => [
@@ -42,7 +42,7 @@ export const SessionViewDisplayOptions = ({
             defaultMessage: 'Timestamp',
           }
         ),
-        key: timestampString,
+        key: TIMESTAMP_OPTION_KEY,
         checked: optionsStates?.timestamp ? 'on' : undefined,
       },
       {
@@ -52,7 +52,7 @@ export const SessionViewDisplayOptions = ({
             defaultMessage: 'Verbose mode',
           }
         ),
-        key: verboseModeString,
+        key: VERBOSE_MODE_OPTION_KEY,
         checked: optionsStates?.verboseMode ? 'on' : undefined,
       },
     ],
@@ -82,10 +82,10 @@ export const SessionViewDisplayOptions = ({
 
   const handleSelect = (options: EuiSelectableOption[]) => {
     const updateOptionState = options.reduce(
-      (chosenOptionStates: StateField, listedOptionStates: EuiSelectableOption) => {
-        if (listedOptionStates.key === timestampString) {
+      (chosenOptionStates: DisplayOptionsState, listedOptionStates: EuiSelectableOption) => {
+        if (listedOptionStates.key === TIMESTAMP_OPTION_KEY) {
           chosenOptionStates.timestamp = listedOptionStates.checked === 'on';
-        } else if (listedOptionStates.key === verboseModeString) {
+        } else if (listedOptionStates.key === VERBOSE_MODE_OPTION_KEY) {
           chosenOptionStates.verboseMode = listedOptionStates.checked === 'on';
         }
         return chosenOptionStates;
