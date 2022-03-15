@@ -92,13 +92,13 @@ describe('TelemetrySender', () => {
       expect(refreshConfigMock).toBeCalledTimes(0);
     });
 
-    it('returns false whenever optIn is false', async () => {
+    it('returns false whenever optIn is false (no need to refresh the config)', async () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
 
-      expect(refreshConfigMock).toBeCalledTimes(1);
+      expect(refreshConfigMock).toBeCalledTimes(0);
       expect(telemetryService.getIsOptedIn).toBeCalledTimes(1);
       expect(shouldSendReport).toBe(false);
     });
@@ -113,6 +113,7 @@ describe('TelemetrySender', () => {
       expect(telemetrySender['lastReported']).toBeUndefined();
       expect(shouldSendReport).toBe(true);
       expect(telemetryService.fetchLastReported).toHaveBeenCalledTimes(1);
+      expect(refreshConfigMock).toBeCalledTimes(1);
     });
 
     it('returns true if lastReported passed REPORT_INTERVAL_MS', async () => {
@@ -124,6 +125,7 @@ describe('TelemetrySender', () => {
       telemetrySender['lastReported'] = lastReported;
       const shouldSendReport = await telemetrySender['shouldSendReport']();
       expect(shouldSendReport).toBe(true);
+      expect(refreshConfigMock).toBeCalledTimes(1);
     });
 
     it('returns false if local lastReported is within REPORT_INTERVAL_MS', async () => {
@@ -135,6 +137,7 @@ describe('TelemetrySender', () => {
       telemetrySender['lastReported'] = lastReported;
       const shouldSendReport = await telemetrySender['shouldSendReport']();
       expect(shouldSendReport).toBe(false);
+      expect(refreshConfigMock).toBeCalledTimes(0);
     });
 
     it('returns false if local lastReported is expired but the remote is within REPORT_INTERVAL_MS', async () => {
@@ -145,6 +148,7 @@ describe('TelemetrySender', () => {
       telemetrySender['lastReported'] = Date.now() - (REPORT_INTERVAL_MS + 1000);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
       expect(shouldSendReport).toBe(false);
+      expect(refreshConfigMock).toBeCalledTimes(0);
     });
 
     it('returns true if lastReported is malformed', async () => {
@@ -154,6 +158,7 @@ describe('TelemetrySender', () => {
       telemetrySender['lastReported'] = `random_malformed_string` as unknown as number;
       const shouldSendReport = await telemetrySender['shouldSendReport']();
       expect(shouldSendReport).toBe(true);
+      expect(refreshConfigMock).toBeCalledTimes(1);
     });
 
     it('returns false if we are in screenshot mode', async () => {
@@ -164,6 +169,7 @@ describe('TelemetrySender', () => {
 
       expect(telemetryService.getIsOptedIn).toBeCalledTimes(0);
       expect(shouldSendReport).toBe(false);
+      expect(refreshConfigMock).toBeCalledTimes(0);
     });
   });
   describe('sendIfDue', () => {

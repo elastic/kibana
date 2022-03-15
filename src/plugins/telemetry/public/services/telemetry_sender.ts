@@ -80,10 +80,23 @@ export class TelemetrySender {
    * @returns `true` if a new report should be sent. `false` otherwise.
    */
   private shouldSendReport = async (): Promise<boolean> => {
-    if (this.isActiveWindow()) {
-      await this.refreshConfig();
-      if (this.telemetryService.canSendTelemetry()) {
-        return await this.isReportDue();
+    if (this.isActiveWindow() && this.telemetryService.canSendTelemetry()) {
+      if (await this.isReportDue()) {
+        /*
+         * If we think it should send telemetry (local optIn config is `true` and the last report is expired),
+         * let's refresh the config and make sure optIn is still true.
+         *
+         * This change is to ensure that if the user opts-out of telemetry, background tabs realize about it without needing to refresh the page or navigate to another app.
+         *
+         * We are checking twice to avoid making too many requests to fetch the SO:
+         * `sendIfDue` is triggered every minute or when the page regains focus.
+         * If the previously fetched config already dismisses the telemetry, there's no need to fetch the telemetry config.
+         *
+         * The edge case is: if previously opted-out and the user opts-in, background tabs won't realize about that until they navigate to another app.
+         * We are fine with that compromise for now.
+         */
+        await this.refreshConfig();
+        return this.telemetryService.canSendTelemetry();
       }
     }
 
