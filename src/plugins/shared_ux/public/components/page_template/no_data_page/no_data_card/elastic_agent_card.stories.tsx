@@ -23,13 +23,11 @@ type Params = Pick<ElasticAgentCardComponentProps, 'canAccessFleet'>;
 export const PureComponent = (params: Params) => {
   const { currentAppId$, navigateToUrl } = applicationServiceFactory();
   return (
-    <div style={{ width: '50%' }}>
-      <ElasticAgentCardComponent
-        {...params}
-        currentAppId$={currentAppId$}
-        navigateToUrl={navigateToUrl}
-      />
-    </div>
+    <ElasticAgentCardComponent
+      {...params}
+      currentAppId$={currentAppId$}
+      navigateToUrl={navigateToUrl}
+    />
   );
 };
 

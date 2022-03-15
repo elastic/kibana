@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiButton, EuiCard } from '@elastic/eui';
 import type { NoDataCardProps } from './types';
+import { NoDataCardStyles } from './no_data_card.styles';
 
 const recommendedLabel = i18n.translate('sharedUX.pageTemplate.noDataPage.recommendedLabel', {
   defaultMessage: 'Recommended',
@@ -27,6 +28,8 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
   isDisabled,
   ...cardRest
 }) => {
+  const styles = NoDataCardStyles();
+
   const footer = () => {
     // Don't render the footer action if disabled
     if (isDisabled) {
@@ -44,6 +47,7 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
 
   return (
     <EuiCard
+      css={styles}
       paddingSize="l"
       title={title!}
       description={cardDescription}
