@@ -63,15 +63,14 @@ export async function getSharingData(
   const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);
   return {
     getSearchSource: (absoluteTime?: boolean): SerializedSearchSourceFields => {
-      const absoluteFilter = data.query.timefilter.timefilter.createFilter(index);
       const timeFilter = absoluteTime ? absoluteTimeFilter : relativeTimeFilter;
 
       // remove timeFilter from existing filter
       if (Array.isArray(existingFilter)) {
         existingFilter = existingFilter.filter(
-          (current) => !isEqualFilters(current, absoluteFilter)
+          (current) => !isEqualFilters(current, absoluteTimeFilter)
         );
-      } else if (isEqualFilters(existingFilter, absoluteFilter)) {
+      } else if (isEqualFilters(existingFilter, absoluteTimeFilter)) {
         existingFilter = undefined;
       }
 
