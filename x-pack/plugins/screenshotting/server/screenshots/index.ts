@@ -80,7 +80,9 @@ export class Screenshots {
     this.semaphore = new Semaphore(poolSize);
   }
 
-  getScreenshots<F extends string>(options: ScreenshotOptions<F>): Observable<ScreenshotResult> {
+  getScreenshots<F extends 'pdf' | 'png'>(
+    options: ScreenshotOptions<F>
+  ): Observable<ScreenshotResult> {
     const apmTrans = apm.startTransaction('screenshot-pipeline', 'screenshotting');
     const apmCreateLayout = apmTrans?.startSpan('create-layout', 'setup');
     const layout = createLayout(options.layout);
