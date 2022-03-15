@@ -14,7 +14,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const docTable = getService('docTable');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'settings', 'context']);
+  const PageObjects = getPageObjects([
+    'common',
+    'timePicker',
+    'settings',
+    'context',
+    'unifiedSearch',
+  ]);
 
   async function setAutocompleteUseTimeRange(value: boolean) {
     await PageObjects.settings.navigateTo();
@@ -46,6 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.unifiedSearch.closeTour();
       });
 
       describe('discover', () => {
