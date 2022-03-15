@@ -33,13 +33,19 @@ import { Services } from './services';
 
 type Props = Services;
 
-function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) {
+function App({
+  fetchTopN,
+  fetchElasticFlamechart,
+  fetchElasticFlamechart2,
+  fetchPixiFlamechart,
+}: Props) {
   const [topn, setTopN] = useState({
     samples: [],
     series: new Map(),
   });
 
   const [elasticFlamegraph, setElasticFlamegraph] = useState({ leaves: [] });
+  const [elasticFlamegraph2, setElasticFlamegraph2] = useState({ leaves: [] });
   const [pixiFlamegraph, setPixiFlamegraph] = useState({});
 
   const tabs = [
@@ -65,6 +71,19 @@ function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) 
           <EuiSpacer />
           <FlameGraphContext.Provider value={elasticFlamegraph}>
             <FlameGraphNavigation getter={fetchElasticFlamechart} setter={setElasticFlamegraph} />
+            <FlameGraph id="flamechart" height={600} />
+          </FlameGraphContext.Provider>
+        </>
+      ),
+    },
+    {
+      id: 'flamegraph-elastic2',
+      name: 'FlameGraph (Elastic2)',
+      content: (
+        <>
+          <EuiSpacer />
+          <FlameGraphContext.Provider value={elasticFlamegraph2}>
+            <FlameGraphNavigation getter={fetchElasticFlamechart2} setter={setElasticFlamegraph2} />
             <FlameGraph id="flamechart" height={600} />
           </FlameGraphContext.Provider>
         </>

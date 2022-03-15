@@ -57,21 +57,21 @@ function extractFileIDArrayFromFrameIDArray(frameIDs: string[]): string[] {
   return fileIDs;
 }
 
-const downsampledIndex = 'profiling-events-5pow';
-
 // Return the index that has between targetSampleSize..targetSampleSize*samplingFactor entries.
 // The starting point is the number of entries from the profiling-events-5pow<initialExp> index.
 //
 // More details on how the down-sampling works can be found at the write path
 //   https://github.com/elastic/prodfiler/blob/bdcc2711c6cd7e89d63b58a17329fb9fdbabe008/pf-elastic-collector/elastic.go
 export function getSampledTraceEventsIndex(
+  index: string,
   targetSampleSize: number,
   sampleCountFromInitialExp: number,
   initialExp: number
 ): DownsampledEventsIndex {
   const maxExp = 11;
   const samplingFactor = 5;
-  const fullEventsIndex: DownsampledEventsIndex = { name: 'profiling-events', sampleRate: 1 };
+  const fullEventsIndex: DownsampledEventsIndex = { name: index, sampleRate: 1 };
+  const downsampledIndex = index + '-5pow';
 
   if (sampleCountFromInitialExp === 0) {
     // Take the shortcut to the full events index.
@@ -154,12 +154,14 @@ function getNumberOfUniqueStacktracesWithoutLeafNode(
 async function queryFlameGraph(
   logger: Logger,
   client: ElasticsearchClient,
+  index: string,
   filter: ProjectTimeQuery,
   sampleSize: number
 ): Promise<FlameGraph> {
   // Start with counting the results in the index down-sampled by 5^6.
   // That is in the middle of our down-sampled indexes.
   const initialExp = 6;
+  const downsampledIndex = index + '-5pow';
 
   const eventsIndex = await logExecutionLatency(
     logger,
@@ -177,7 +179,7 @@ async function queryFlameGraph(
 
       logger.info('sampleCountFromPow6 ' + sampleCountFromInitialExp);
 
-      return getSampledTraceEventsIndex(sampleSize, sampleCountFromInitialExp, initialExp);
+      return getSampledTraceEventsIndex(index, sampleSize, sampleCountFromInitialExp, initialExp);
     }
   );
 
@@ -227,16 +229,13 @@ async function queryFlameGraph(
   );
 
   let totalCount: number = resEvents.body.aggregations?.total_count.value;
-  let docCount = 0;
 
   const stackTraceEvents = new Map<StackTraceID, number>();
   resEvents.body.aggregations?.group_by.buckets.forEach((item: any) => {
     const traceid: StackTraceID = item.key.traceid;
     stackTraceEvents.set(traceid, item.sum_count.value);
-    docCount++;
   });
-  logger.info('events fetched: ' + docCount);
-  logger.info('total count: ' + totalCount);
+  logger.info('events total count: ' + totalCount);
   logger.info('unique stacktraces: ' + stackTraceEvents.size);
 
   // Manual downsampling if totalCount exceeds sampleSize by 10%.
@@ -316,9 +315,11 @@ async function queryFlameGraph(
 
   // Create a lookup map StackFrameID -> StackFrame.
   const stackFrames = new Map<StackFrameID, StackFrame>();
+  let framesFound = 0;
   for (const frame of resStackFrames.body.docs) {
     if (frame.found) {
       stackFrames.set(frame._id, frame._source);
+      framesFound++;
     } else {
       stackFrames.set(frame._id, {
         FileName: '',
@@ -329,6 +330,7 @@ async function queryFlameGraph(
       });
     }
   }
+  logger.info('found ' + framesFound + ' / ' + stackFrameDocIDs.size + ' frames');
 
   // Create the set of unique executable FileIDs.
   const executableDocIDs = new Set<string>();
@@ -396,14 +398,20 @@ export function registerFlameChartElasticSearchRoute(
       },
     },
     async (context, request, response) => {
-      const { projectID, timeFrom, timeTo } = request.query;
+      const { index, projectID, timeFrom, timeTo } = request.query;
       const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const filter = newProjectTimeQuery(projectID!, timeFrom!, timeTo!);
 
-        const flamegraph = await queryFlameGraph(logger, esClient, filter, targetSampleSize);
+        const flamegraph = await queryFlameGraph(
+          logger,
+          esClient,
+          index!,
+          filter,
+          targetSampleSize
+        );
         logger.info('returning payload response to client');
 
         return response.ok({
@@ -441,14 +449,20 @@ export function registerFlameChartPixiSearchRoute(
       },
     },
     async (context, request, response) => {
-      const { projectID, timeFrom, timeTo } = request.query;
+      const { index, projectID, timeFrom, timeTo } = request.query;
       const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const filter = newProjectTimeQuery(projectID!, timeFrom!, timeTo!);
 
-        const flamegraph = await queryFlameGraph(logger, esClient, filter, targetSampleSize);
+        const flamegraph = await queryFlameGraph(
+          logger,
+          esClient,
+          index!,
+          filter,
+          targetSampleSize
+        );
 
         return response.ok({
           body: flamegraph.toPixi(),
