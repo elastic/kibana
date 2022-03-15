@@ -21,7 +21,12 @@ verify_no_git_changes() {
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
 
-  GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc'; git status --porcelain api_docs)"
+  if [[ "${GITHUB_PR_TARGET_BRANCH:-}" == "main" ]]; then
+    GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc'; git status --porcelain api_docs)"
+  else
+    GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
+  fi
+
   if [ "$GIT_CHANGES" ]; then
     if [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
       NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
@@ -48,8 +53,10 @@ verify_no_git_changes() {
       # Mostly, we're concerned about files that already exist that could be updated
       # However, api_docs can create new files or delete old ones
       # If there are more specialized cases like this in the future, we should figure out a better solution for this
-      git add 'api_docs/*.json' || true
-      git add 'api_docs/*.mdx' || true
+      if [[ "${GITHUB_PR_TARGET_BRANCH:-}" == "main" ]]; then
+        git add 'api_docs/*.json' || true
+        git add 'api_docs/*.mdx' || true
+      fi
 
       git commit -m "$NEW_COMMIT_MESSAGE"
       git push
