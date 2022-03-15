@@ -31,6 +31,8 @@ import { FleetTrustedAppsCard } from './endpoint_package_custom_extension/compon
 import { LinkWithIcon } from './endpoint_package_custom_extension/components/link_with_icon';
 import { FleetIntegrationHostIsolationExceptionsCard } from './endpoint_package_custom_extension/components/fleet_integration_host_isolation_exceptions_card';
 import { FleetIntegrationEventFiltersCard } from './endpoint_package_custom_extension/components/fleet_integration_event_filters_card';
+import { FleetIntegrationBlocklistsCard } from './endpoint_package_custom_extension/components/fleet_integration_blocklists_card';
+import { ReactQueryClientProvider } from '../../../../../common/containers/query_client/query_client_provider';
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -38,10 +40,10 @@ import { FleetIntegrationEventFiltersCard } from './endpoint_package_custom_exte
 export const EndpointPolicyEditExtension = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy, onChange }) => {
     return (
-      <>
+      <ReactQueryClientProvider>
         <EuiSpacer size="m" />
         <WrappedPolicyDetailsForm policyId={policy.id} onChange={onChange} />
-      </>
+      </ReactQueryClientProvider>
     );
   }
 );
@@ -179,6 +181,8 @@ const WrappedPolicyDetailsForm = memo<{
           <FleetIntegrationEventFiltersCard policyId={policyId} />
           <EuiSpacer size="s" />
           <FleetIntegrationHostIsolationExceptionsCard policyId={policyId} />
+          <EuiSpacer size="s" />
+          <FleetIntegrationBlocklistsCard policyId={policyId} />
         </div>
         <EuiSpacer size="l" />
         <div>

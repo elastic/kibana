@@ -11,16 +11,22 @@ import { PackageCustomExtensionComponentProps } from '../../../../../../../../fl
 import { FleetEventFiltersCard } from './components/fleet_event_filters_card';
 import { FleetHostIsolationExceptionsCard } from './components/fleet_host_isolation_exceptions_card';
 import { FleetTrustedAppsCardWrapper } from './components/fleet_trusted_apps_card_wrapper';
+import { FleetBlocklistsCard } from './components/fleet_blocklists_card';
+import { ReactQueryClientProvider } from '../../../../../../common/containers/query_client/query_client_provider';
 
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
     return (
       <div data-test-subj="fleetEndpointPackageCustomContent">
-        <FleetTrustedAppsCardWrapper {...props} />
-        <EuiSpacer />
-        <FleetEventFiltersCard {...props} />
-        <EuiSpacer />
-        <FleetHostIsolationExceptionsCard {...props} />
+        <ReactQueryClientProvider>
+          <FleetTrustedAppsCardWrapper {...props} />
+          <EuiSpacer />
+          <FleetEventFiltersCard {...props} />
+          <EuiSpacer />
+          <FleetHostIsolationExceptionsCard {...props} />
+          <EuiSpacer />
+          <FleetBlocklistsCard {...props} />
+        </ReactQueryClientProvider>
       </div>
     );
   }
