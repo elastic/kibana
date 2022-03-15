@@ -1,8 +1,8 @@
 Stack monitoring has three metrics collection modes:
 
 - Previous standard, still supported: [Internal collection](#internal-collection)
-- Current standard: [Standalone Metricbeat collection](#metricbeat-collection)
-- Planned future standard: [Package-driven collection](#package-collection)
+- Current standard: [Standalone Metricbeat collection](#standalone-metricbeat-collection)
+- Planned future standard: [Package-driven collection](#package-driven-collection)
 
 And two log collection modes:
 
@@ -21,7 +21,7 @@ The production cluster receives these metrics on the `/_monitoring/bulk` endpoin
 
 Alternatively some stack components (logstash & beats) can be configured to send data directly to the [monitoring deployment](../reference/terminology.md#monitoring-deployment) either using a user-provided cluster UUID, or sending the data with no UUID to be associated with the [standalone cluster](../reference/terminology.md#standalone-cluster).
 
-### Metricbeat collection
+### Standalone Metricbeat collection
 
 When using metricbeat collection, each component in your Elastic stack exposes an endpoint for metricbeat to collect metric data.
 
