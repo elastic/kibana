@@ -563,7 +563,7 @@ describe('artifacts lists', () => {
         });
       });
 
-      test('it should add process.name entry when wildcard file.path.text entry has filename', async () => {
+      test('it should add file.name entry when wildcard file.path.text entry has filename', async () => {
         const os = 'linux';
         const testEntries: EntriesArray = [
           {
@@ -584,7 +584,7 @@ describe('artifacts lists', () => {
               value: '/usr/bi*/doc.md',
             },
             {
-              field: 'process.name',
+              field: 'file.name',
               operator: 'included',
               type: 'exact_cased',
               value: 'doc.md',
@@ -647,7 +647,7 @@ describe('artifacts lists', () => {
         });
       });
 
-      test('it should not add process.name entry when wildcard file.path.text entry has wildcard filename', async () => {
+      test('it should not add file.name entry when wildcard file.path.text entry has wildcard filename', async () => {
         const os = 'linux';
         const testEntries: EntriesArray = [
           {
@@ -735,7 +735,7 @@ describe('artifacts lists', () => {
         });
       });
 
-      test('it should add process.name entry when wildcard file.path.text entry has filename', async () => {
+      test('it should add file.name entry when wildcard file.path.text entry has filename', async () => {
         const os = Math.floor(Math.random() * 2) === 0 ? 'windows' : 'macos';
         const value = os === 'windows' ? 'C:\\My Doc*\\doc.md' : '/usr/bi*/doc.md';
 
@@ -758,7 +758,7 @@ describe('artifacts lists', () => {
               value,
             },
             {
-              field: 'process.name',
+              field: 'file.name',
               operator: 'included',
               type: 'exact_caseless',
               value: 'doc.md',
@@ -823,7 +823,7 @@ describe('artifacts lists', () => {
         });
       });
 
-      test('it should not add process.name entry when wildcard file.path.text entry has wildcard filename', async () => {
+      test('it should not add file.name entry when wildcard file.path.text entry has wildcard filename', async () => {
         const os = Math.floor(Math.random() * 2) === 0 ? 'windows' : 'macos';
         const value = os === 'windows' ? 'C:\\My Doc*\\*.md' : '/usr/bin/*.md';
         const testEntries: EntriesArray = [

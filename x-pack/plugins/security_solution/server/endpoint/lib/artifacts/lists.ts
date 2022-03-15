@@ -256,7 +256,7 @@ function translateItem(
   };
 }
 
-function appendProcessNameEntry({
+function appendOptimizedEntryForEndpoint({
   wildcardProcessEntry,
   entry,
   os,
@@ -273,7 +273,10 @@ function appendProcessNameEntry({
   const entries: TranslatedPerformantEntries = [
     wildcardProcessEntry,
     {
-      field: normalizeFieldName('process.name'),
+      field:
+        entry.field === 'file.path.text'
+          ? normalizeFieldName('file.name')
+          : normalizeFieldName('process.name'),
       operator: entry.operator,
       type: (os === 'linux' ? 'exact_cased' : 'exact_caseless') as Extract<
         TranslatedEntryMatcher,
@@ -358,7 +361,7 @@ function translateEntry(
             // when path has a full executable name
             // append a process.name entry based on os
             // `exact_cased` for linux and `exact_caseless` for others
-            return appendProcessNameEntry({ entry, os, wildcardProcessEntry });
+            return appendOptimizedEntryForEndpoint({ entry, os, wildcardProcessEntry });
           } else {
             return wildcardProcessEntry;
           }
