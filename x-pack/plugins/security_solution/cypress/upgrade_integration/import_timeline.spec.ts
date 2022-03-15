@@ -38,7 +38,13 @@ import {
 } from '../screens/timelines';
 
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { closeTimeline, deleteTimeline, goToCorrelationTab, goToNotesTab } from '../tasks/timeline';
+import {
+  closeTimeline,
+  deleteTimeline,
+  goToCorrelationTab,
+  goToNotesTab,
+  setKibanaTimezoneToUTC,
+} from '../tasks/timeline';
 import { expandNotes, importTimeline, openTimeline } from '../tasks/timelines';
 
 import { TIMELINES_URL } from '../urls/navigation';
@@ -47,9 +53,9 @@ const timeline = '7_15_timeline.ndjson';
 const username = 'elastic';
 
 const timelineDetails = {
-  dateStart: 'Oct 11, 2020 @ 00:00:00.000',
-  dateEnd: 'Oct 11, 2030 @ 17:13:15.851',
-  queryTab: 'Query2',
+  dateStart: 'Oct 10, 2020 @ 22:00:00.000',
+  dateEnd: 'Oct 11, 2030 @ 15:13:15.851',
+  queryTab: 'Query4',
   correlationTab: 'Correlation',
   analyzerTab: 'Analyzer',
   notesTab: 'Notes2',
@@ -57,7 +63,6 @@ const timelineDetails = {
 };
 
 const detectionAlert = {
-  timestamp: 'Nov 17, 2021 @ 09:36:25.499',
   message: '—',
   eventCategory: 'file',
   eventAction: 'initial_scan',
@@ -68,7 +73,7 @@ const detectionAlert = {
 };
 
 const event = {
-  timestamp: 'Nov 4, 2021 @ 11:09:29.438',
+  timestamp: 'Nov 4, 2021 @ 10:09:29.438',
   message: '—',
   eventCategory: 'file',
   eventAction: 'initial_scan',
@@ -82,6 +87,7 @@ describe('Import timeline after upgrade', () => {
   before(() => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     importTimeline(timeline);
+    setKibanaTimezoneToUTC();
   });
 
   after(() => {
@@ -142,7 +148,6 @@ describe('Import timeline after upgrade', () => {
       cy.get(NOTES_TAB_BUTTON).should('have.text', timelineDetails.notesTab);
       cy.get(PINNED_TAB_BUTTON).should('have.text', timelineDetails.pinnedTab);
 
-      cy.get(QUERY_EVENT_TABLE_CELL).eq(0).should('contain', detectionAlert.timestamp);
       cy.get(QUERY_EVENT_TABLE_CELL).eq(1).should('contain', detectionAlert.message);
       cy.get(QUERY_EVENT_TABLE_CELL).eq(2).should('contain', detectionAlert.eventCategory);
       cy.get(QUERY_EVENT_TABLE_CELL).eq(3).should('contain', detectionAlert.eventAction);

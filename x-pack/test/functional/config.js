@@ -541,6 +541,25 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
+        // https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshots-register-repository.html#snapshot-repo-prereqs
+        snapshot_restore_user: {
+          elasticsearch: {
+            cluster: [
+              'monitor',
+              'manage_slm',
+              'cluster:admin/snapshot',
+              'cluster:admin/repository',
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
 
         ingest_pipelines_user: {
           elasticsearch: {
@@ -571,6 +590,27 @@ export default async function ({ readConfigFile }) {
         remote_clusters_user: {
           elasticsearch: {
             cluster: ['manage'],
+          },
+        },
+
+        global_alerts_logs_all_else_read: {
+          kibana: [
+            {
+              feature: {
+                apm: ['read'],
+                logs: ['all'],
+                infrastructure: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
           },
         },
       },

@@ -72,6 +72,31 @@ export interface DeleteParams {
 }
 
 export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
+  // Find the index the annotation is stored in.
+  async function fetchAnnotationIndex(id: string) {
+    const searchParams: estypes.SearchRequest = {
+      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+      size: 1,
+      body: {
+        query: {
+          ids: {
+            values: [id],
+          },
+        },
+      },
+    };
+
+    const { body } = await asInternalUser.search(searchParams);
+    const totalCount =
+      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
+
+    if (totalCount === 0) {
+      throw Boom.notFound(`Cannot find annotation with ID ${id}`);
+    }
+
+    return body.hits.hits[0]._index;
+  }
+
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.
@@ -95,6 +120,8 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
 
     if (typeof annotation._id !== 'undefined') {
       params.id = annotation._id;
+      params.index = await fetchAnnotationIndex(annotation._id);
+      params.require_alias = false;
       delete params.body._id;
       delete params.body.key;
     }
@@ -385,28 +412,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   }
 
   async function deleteAnnotation(id: string) {
-    // Find the index the annotation is stored in.
-    const searchParams: estypes.SearchRequest = {
-      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      size: 1,
-      body: {
-        query: {
-          ids: {
-            values: [id],
-          },
-        },
-      },
-    };
-
-    const { body } = await asInternalUser.search(searchParams);
-    const totalCount =
-      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total.value;
-
-    if (totalCount === 0) {
-      throw Boom.notFound(`Cannot find annotation with ID ${id}`);
-    }
-
-    const index = body.hits.hits[0]._index;
+    const index = await fetchAnnotationIndex(id);
 
     const deleteParams: DeleteParams = {
       index,
