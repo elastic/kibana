@@ -32,6 +32,7 @@ import {
 import { loginAndWaitForPage } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
+import { ecsFieldMap } from '../../../../rule_registry/common/assets/field_maps/ecs_field_map';
 
 import { HOSTS_URL } from '../../urls/navigation';
 
@@ -109,7 +110,27 @@ describe('Fields Browser', () => {
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should('have.text', '5');
+      const fieldsThatMatchFilterInput = Object.keys(ecsFieldMap).filter((fieldName) => {
+        const dotDelimitedFieldParts = fieldName.split('.');
+        const fieldPartMatch = dotDelimitedFieldParts.filter((fieldPart) => {
+          const camelCasedStringsMatching = fieldPart
+            .split('_')
+            .some((part) => part.startsWith(filterInput));
+          if (fieldPart.startsWith(filterInput)) {
+            return true;
+          } else if (camelCasedStringsMatching) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+        return fieldName.startsWith(filterInput) || fieldPartMatch.length > 0;
+      }).length;
+
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should(
+        'have.text',
+        fieldsThatMatchFilterInput
+      );
     });
   });
 

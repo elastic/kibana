@@ -108,7 +108,6 @@ describe('Events Viewer', () => {
 
     it('resets all fields in the events viewer when `Reset Fields` is clicked', () => {
       const filterInput = 'host.geo.c';
-
       filterFieldsBrowser(filterInput);
       cy.get(HOST_GEO_COUNTRY_NAME_HEADER).should('not.exist');
       addsHostGeoCountryNameToHeader();

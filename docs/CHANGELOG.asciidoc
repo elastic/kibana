@@ -100,7 +100,7 @@ Machine Learning::
 
 Management::
 * Support suggesting index templates v2 {kibana-pull}124655[#124655]
-* *Console* now supports autocompletion for [index templates](https://www.elastic.co/guide/en/elasticsearch/reference/master/index-templates.html) and [component templates](https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-component-template.html) introduced in {es} 7.8.0.
+* *Console* now supports autocompletion for index templates and component templates introduced in {es} 7.8.0.
 * Transforms: Support to set destination ingest pipeline {kibana-pull}123911[#123911]
 * Transforms: Adds reset action to transforms management {kibana-pull}123735[#123735]
 * Transforms: Support for terms agg in pivot configurations {kibana-pull}123634[#123634]
