@@ -52,7 +52,7 @@ export const DownloadStep = (hasFleetServer: boolean, isK8s: string, enrollmentA
         }
         const fleetServerHosts = settings.data?.item.fleet_server_hosts;
         let host = '';
-        if (fleetServerHosts !== undefined) {
+        if (fleetServerHosts !== undefined && fleetServerHosts.length !== 0) {
           setFleetServer(fleetServerHosts[0]);
           host = fleetServerHosts[0];
         }
@@ -92,7 +92,7 @@ export const DownloadStep = (hasFleetServer: boolean, isK8s: string, enrollmentA
     isK8s === 'IS_KUBERNETES' ? (
       <FormattedMessage
         id="xpack.fleet.agentEnrollment.downloadDescriptionForK8s"
-        defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Modify {FleetUrlVariable} and {FleetTokenVariable} in the Daemonset environment variables and apply the manifest."
+        defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Check {FleetUrlVariable} and {FleetTokenVariable} in the Daemonset environment variables and apply the manifest."
         values={{
           FleetUrlVariable: <EuiCode>FLEET_URL</EuiCode>,
           FleetTokenVariable: <EuiCode>FLEET_ENROLLMENT_TOKEN</EuiCode>,
@@ -176,8 +176,7 @@ export const DownloadStep = (hasFleetServer: boolean, isK8s: string, enrollmentA
         <EuiText size="s">
           <>{linuxUsers}</>
         </EuiText>
-        <>{k8sYaml}</>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiButton href={downloadLink} target="_blank" iconSide="right" iconType="popout">
@@ -188,6 +187,8 @@ export const DownloadStep = (hasFleetServer: boolean, isK8s: string, enrollmentA
             <>{k8sCopyYaml}</>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <>{k8sYaml}</>
       </>
     ),
   };

@@ -356,9 +356,11 @@ export const getK8sManifest: FleetRequestHandler<
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
   try {
+    const fleetServer = request.query?.fleetServer ?? '';
+    const token = request.query?.enrolToken ?? '';
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
-      request.query.fleetServer,
-      request.query.enrolToken
+      fleetServer,
+      token
     );
     if (fullAgentManifest) {
       const body: GetFullAgentManifestResponse = {
@@ -382,9 +384,11 @@ export const downloadK8sManifest: FleetRequestHandler<
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
   try {
+    const fleetServer = request.query.fleetServer ?? '';
+    const token = request.query.enrolToken ?? '';
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
-      request.query.fleetServer,
-      request.query.enrolToken
+      fleetServer,
+      token
     );
     if (fullAgentManifest) {
       const body = fullAgentManifest;

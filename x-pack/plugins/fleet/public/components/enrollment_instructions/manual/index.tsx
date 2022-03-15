@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useStartServices, useKibanaVersion } from '../../../hooks';
+import { useStartServices } from '../../../hooks';
 import type { EnrollmentAPIKey } from '../../../types';
 
 import { PlatformSelector } from './platform_selector';
