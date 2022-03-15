@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'maps']);
   const testSubjects = getService('testSubjects');
+  const filterBar = getService('filterBar');
 
   describe('choropleth chart', () => {
     it('should allow creation of choropleth chart', async () => {
@@ -47,6 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.dragFieldToWorkspace('geo.dest');
+
+      // add filter to force data fetch to set activeData
+      await filterBar.addFilter('bytes', 'is between', '200', '10000');
 
       await testSubjects.click('lnsSuggestion-worldCountriesByCountOfRecords > lnsSuggestion');
 
