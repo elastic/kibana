@@ -53,7 +53,7 @@ import {
   SolutionToolbar,
   withSuspense,
 } from '../../../../presentation_util/public';
-import { SolutionToolbarButton as PrimaryActionButton } from '../../../../shared_ux/public';
+import { SolutionToolbarButton } from '../../../../shared_ux/public';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -589,7 +589,7 @@ export function DashboardTopNav({
           <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
             {{
               primaryActionButton: (
-                <PrimaryActionButton
+                <SolutionToolbarButton
                   label={getCreateVisualizationButtonTitle()}
                   onClick={createNewVisType(lensAlias)}
                   iconType="lensApp"

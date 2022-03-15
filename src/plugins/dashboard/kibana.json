@@ -30,5 +30,11 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["home", "kibanaReact", "kibanaUtils", "presentationUtil"]
+  "requiredBundles": [
+    "home",
+    "kibanaReact",
+    "kibanaUtils",
+    "presentationUtil",
+    "sharedUX"
+  ]
 }
