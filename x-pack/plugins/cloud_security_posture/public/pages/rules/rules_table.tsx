@@ -147,12 +147,12 @@ const getColumns = ({
           enabled ? (
             <FormattedMessage
               id="xpack.csp.rules.deactivateRuleLabel"
-              defaultMessage={'Deactivate Rule'}
+              defaultMessage="Deactivate Rule"
             />
           ) : (
             <FormattedMessage
               id="xpack.csp.rules.activateRuleLabel"
-              defaultMessage={'Activate Rule'}
+              defaultMessage="Activate Rule"
             />
           )
         }
