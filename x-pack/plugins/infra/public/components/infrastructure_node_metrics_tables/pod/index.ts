@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { PodMetricsTable } from './pod_metrics_table';
 export { usePodMetricsTable } from './use_pod_metrics_table';

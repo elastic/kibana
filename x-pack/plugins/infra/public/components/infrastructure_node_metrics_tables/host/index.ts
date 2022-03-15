@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { HostMetricsTable } from './host_metrics_table';
 export { useHostMetricsTable } from './use_host_metrics_table';

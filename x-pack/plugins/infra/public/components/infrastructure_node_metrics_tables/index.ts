@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { useContainerMetricsTable } from './container';
-export { useHostMetricsTable } from './host';
-export { usePodMetricsTable } from './pod';
+export { ContainerMetricsTable, useContainerMetricsTable } from './container';
+export { HostMetricsTable, useHostMetricsTable } from './host';
+export { PodMetricsTable, usePodMetricsTable } from './pod';
