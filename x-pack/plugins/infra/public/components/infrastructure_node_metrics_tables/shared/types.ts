@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CoreProvidersProps } from '../../../apps/common_providers';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { CoreProvidersProps } from '../../../apps/common_providers';
 import type { MetricsExplorerTimeOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 export interface UseNodeMetricsTableOptions {

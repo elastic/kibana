@@ -6,8 +6,8 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { CoreProvidersProps } from '../../../apps/common_providers';
-import { SourceProviderProps, UseNodeMetricsTableOptions } from '../shared';
+import type { CoreProvidersProps } from '../../../apps/common_providers';
+import type { SourceProviderProps, UseNodeMetricsTableOptions } from '../shared';
 
 const LazyIntegratedHostMetricsTable = lazy(() => import('./integrated_host_metrics_table'));
 

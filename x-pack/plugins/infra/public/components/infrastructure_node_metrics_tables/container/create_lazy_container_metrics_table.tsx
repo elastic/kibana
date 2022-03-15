@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { CoreProvidersProps } from '../../../apps/common_providers';
+import type { CoreProvidersProps } from '../../../apps/common_providers';
 import type { SourceProviderProps, UseNodeMetricsTableOptions } from '../shared';
 
 const LazyIntegratedContainerMetricsTable = lazy(
