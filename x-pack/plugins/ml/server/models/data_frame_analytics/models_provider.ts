@@ -60,7 +60,7 @@ export interface MemoryStatsResponse {
       transport_address: string;
       roles: string[];
       name: string;
-      attributes: { 'ml.machine_memory': string; 'ml.max_jvm_size': string };
+      attributes: Record<`${'ml.'}${string}`, string>;
       ephemeral_id: string;
     }
   >;
