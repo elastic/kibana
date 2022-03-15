@@ -226,6 +226,6 @@ export interface NodeDeploymentStatsResponse {
 }
 
 export interface NodesOverviewResponse {
-  count: number;
+  _nodes: { total: number; failed: number; successful: number };
   nodes: NodeDeploymentStatsResponse[];
 }
