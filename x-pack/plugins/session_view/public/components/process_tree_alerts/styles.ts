@@ -19,21 +19,15 @@ export const useStyles = () => {
       marginTop: size.s,
       marginRight: size.s,
       color: colors.text,
-      padding: size.m,
+      padding: `${size.s} 0`,
       borderStyle: 'solid',
       borderColor: colors.lightShade,
       borderWidth: border.width.thin,
       borderRadius: border.radius.medium,
       maxWidth: 800,
+      maxHeight: 378,
+      overflowY: 'auto',
       backgroundColor: 'white',
-      '&>div': {
-        borderTop: border.thin,
-        marginTop: size.m,
-        paddingTop: size.m,
-        '&:first-child': {
-          borderTop: 'none',
-        },
-      },
     };
 
     return {
