@@ -42,9 +42,15 @@ export interface AuthenticatedUser extends User {
   authentication_type: string;
 }
 
-export function canUserChangePassword(user: AuthenticatedUser) {
+export function isUserAnonymous(user: Pick<AuthenticatedUser, 'authentication_provider'>) {
+  return user.authentication_provider.type === 'anonymous';
+}
+
+export function canUserChangePassword(
+  user: Pick<AuthenticatedUser, 'authentication_realm' | 'authentication_provider'>
+) {
   return (
     REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(user.authentication_realm.type) &&
-    user.authentication_provider.type !== 'anonymous'
+    !isUserAnonymous(user)
   );
 }

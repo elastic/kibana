@@ -47,7 +47,7 @@ import { isUserReserved } from '../../management/users/user_utils';
 import { FormChangesProvider, useFormChanges, useFormChangesContext } from './form_changes';
 import { FormField } from './form_field';
 import { FormLabel } from './form_label';
-import { FormRow } from './form_row';
+import { FormRow, OptionalText } from './form_row';
 import { UserAvatar } from './user_avatar';
 import { UserProfileAPIClient } from './user_profile_api_client';
 import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
@@ -281,6 +281,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       defaultMessage="Full name"
                     />
                   }
+                  labelAppend={<OptionalText />}
                   isDisabled={isReservedUser}
                   fullWidth
                 >
@@ -294,6 +295,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       defaultMessage="Email address"
                     />
                   }
+                  labelAppend={<OptionalText />}
                   isDisabled={isReservedUser}
                   fullWidth
                 >

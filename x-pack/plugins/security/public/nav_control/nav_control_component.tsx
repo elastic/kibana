@@ -23,7 +23,7 @@ import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getUserDisplayName } from '../../common/model';
+import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { UserAvatar } from '../account_management/user_profile';
 import { useUserProfile } from '../components/use_current_user';
 
@@ -77,9 +77,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     </EuiHeaderSectionItemButton>
   );
 
-  const isAnonymousUser = userProfile.value
-    ? userProfile.value.authentication_provider.type === 'anonymous'
-    : false;
+  const isAnonymous = userProfile.value ? isUserAnonymous(userProfile.value) : false;
   const items: EuiContextMenuPanelItemDescriptor[] = [];
 
   if (userMenuLinks.length) {
@@ -94,7 +92,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     items.push(...userMenuLinkMenuItems);
   }
 
-  if (!isAnonymousUser) {
+  if (!isAnonymous) {
     const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
     const profileMenuItem = {
       name: (
@@ -117,8 +115,8 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     }
   }
 
-  const logoutMenuItem = {
-    name: isAnonymousUser ? (
+  items.push({
+    name: isAnonymous ? (
       <FormattedMessage
         id="xpack.security.navControlComponent.loginLinkText"
         defaultMessage="Log in"
@@ -132,8 +130,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     icon: <EuiIcon type="exit" size="m" />,
     href: logoutUrl,
     'data-test-subj': 'logoutLink',
-  };
-  items.push(logoutMenuItem);
+  });
 
   const panels = [
     {

@@ -15,17 +15,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FormLabel } from './form_label';
 
+export interface FormRowProps {
+  name?: string;
+}
+
 /**
- * Renders a form row with correct error states, change indicator and optional indicator.
+ * Renders a form row with correct error states.
  *
- * @example Renders as optional since form field has no validation rule.
+ * @example
  * ```typescript
  * <FormRow label="Email">
  *   <FormField name="email" />
  * </FormRow>
  * ```
  */
-export const FormRow: FunctionComponent<EuiFormRowProps & { name?: string }> = (props) => {
+export const FormRow: FunctionComponent<EuiFormRowProps & FormRowProps> = (props) => {
   const formik = useFormikContext();
   const child = Children.only(props.children);
   const name = props.name ?? child.props.name;
@@ -38,9 +42,6 @@ export const FormRow: FunctionComponent<EuiFormRowProps & { name?: string }> = (
 
   const meta = formik.getFieldMeta(name);
 
-  const isOptional = !child.props.validate || !child.props.validate.required;
-  const isDisabled = props.isDisabled || child.props.disabled;
-
   return (
     <EuiFormRow
       error={meta.error}
@@ -50,9 +51,6 @@ export const FormRow: FunctionComponent<EuiFormRowProps & { name?: string }> = (
         props.label ? (
           <FormLabel isEqual={meta.value === meta.initialValue}>{props.label}</FormLabel>
         ) : undefined
-      }
-      labelAppend={
-        !props.labelAppend && isOptional && !isDisabled ? <OptionalText /> : props.labelAppend
       }
     >
       {child}

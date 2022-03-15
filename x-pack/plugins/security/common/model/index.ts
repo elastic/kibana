@@ -17,7 +17,7 @@ export type {
 export { getUserAvatarColor, getUserAvatarInitials } from './user_profile';
 export { getUserDisplayName } from './user';
 export type { AuthenticatedUser, UserRealm } from './authenticated_user';
-export { canUserChangePassword } from './authenticated_user';
+export { canUserChangePassword, isUserAnonymous } from './authenticated_user';
 export type { AuthenticationProvider } from './authentication_provider';
 export { shouldProviderUseLoginForm } from './authentication_provider';
 export type { BuiltinESPrivileges } from './builtin_es_privileges';
