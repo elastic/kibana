@@ -102,7 +102,7 @@ export class UserProfileService {
       try {
         await clusterClient.asScoped(request).asCurrentUser.transport.request({
           method: 'POST',
-          path: `_security/profile/_data/${uid}`,
+          path: `_security/profile/${uid}/_data`,
           body: {
             data: {
               [KIBANA_DATA_ROOT]: data,

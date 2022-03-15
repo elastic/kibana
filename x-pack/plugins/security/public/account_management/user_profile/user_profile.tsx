@@ -369,7 +369,10 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 <EuiSpacer />
 
                 <EuiSplitPanel.Outer direction="row" hasBorder>
-                  <EuiSplitPanel.Inner grow={false} color="subdued">
+                  <EuiSplitPanel.Inner
+                    grow={false}
+                    color={isReservedUser ? 'transparent' : 'subdued'}
+                  >
                     <UserAvatar
                       user={{ username: user.username, full_name: formik.values.user.full_name }}
                       avatar={
@@ -391,7 +394,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       size="xl"
                     />
                   </EuiSplitPanel.Inner>
-                  <EuiSplitPanel.Inner color="plain">
+                  <EuiSplitPanel.Inner color={isReservedUser ? 'transparent' : 'plain'}>
                     {formik.values.avatarType === 'image' ? (
                       <FormRow
                         label={

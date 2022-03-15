@@ -16,7 +16,7 @@ export interface FormLabelProps {
 }
 
 /**
- * Renders a form label which indicates if a field value has changed.
+ * Renders a form label that indicates if a field value has changed.
  *
  * @example
  * ```typescript

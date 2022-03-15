@@ -17,7 +17,7 @@ export interface FormFieldProps<T extends React.ElementType> {
 }
 
 /**
- * Renders a field inside with correct inline validation states.
+ * Renders a form field with correct inline validation states.
  *
  * @example Text field with validation rule:
  * ```typescript
