@@ -59,7 +59,7 @@ const updateStatusRegex = new RegExp(
   `\\S${importedCase.user}marked case as${importedCase.status}\\S*\\s?(\\S*)?\\s?(\\S*)?`
 );
 const alertUpdateRegex = new RegExp(
-  `\\S${importedCase.user}added an alert from ${importedCase.ruleName}\\S*\\s?(\\S*)?\\s?(\\S*)?`
+  `\\S${importedCase.user}added an alert from Unknown\\S*\\s?(\\S*)?\\s?(\\S*)?`
 );
 const incidentManagementSystemRegex = new RegExp(
   `\\S${importedCase.participants[0]}selected ${importedCase.connector} as incident management system\\S*\\s?(\\S*)?\\s?(\\S*)?`
