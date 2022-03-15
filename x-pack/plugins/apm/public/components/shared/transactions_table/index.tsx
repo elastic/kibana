@@ -104,7 +104,7 @@ export function TransactionsTable({
     '/services/{serviceName}/overview'
   );
 
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+  const { offset } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
@@ -211,8 +211,7 @@ export function TransactionsTable({
                 transactionNames: JSON.stringify(
                   transactionGroups.map(({ name }) => name).sort()
                 ),
-                comparisonStart,
-                comparisonEnd,
+                offset,
               },
             },
           }

@@ -74,7 +74,7 @@ export function FailedTransactionRateChart({
   const { serviceName, transactionType } = useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+  const { offset } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
@@ -98,8 +98,7 @@ export function FailedTransactionRateChart({
                 end,
                 transactionType,
                 transactionName,
-                comparisonStart,
-                comparisonEnd,
+                offset,
               },
             },
           }
@@ -114,8 +113,7 @@ export function FailedTransactionRateChart({
       end,
       transactionType,
       transactionName,
-      comparisonStart,
-      comparisonEnd,
+      offset,
     ]
   );
 

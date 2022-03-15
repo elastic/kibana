@@ -94,17 +94,13 @@ describe('Service overview: Time Comparison', () => {
       cy.contains('opbeans-java');
 
       cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
-      const comparisonStartEnd = `comparisonStart=${encodeURIComponent(
-        moment(start).subtract(1, 'day').toISOString()
-      )}&comparisonEnd=${encodeURIComponent(
-        moment(end).subtract(1, 'day').toISOString()
-      )}`;
+      const offset = `offset=1d`;
 
       // When the page loads it fetches all APIs with comparison time range
       cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
         (interceptions) => {
           interceptions.map((interception) => {
-            expect(interception.request.url).include(comparisonStartEnd);
+            expect(interception.request.url).include(offset);
           });
         }
       );
@@ -116,7 +112,7 @@ describe('Service overview: Time Comparison', () => {
       cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
         (interceptions) => {
           interceptions.map((interception) => {
-            expect(interception.request.url).not.include(comparisonStartEnd);
+            expect(interception.request.url).not.include(offset);
           });
         }
       );

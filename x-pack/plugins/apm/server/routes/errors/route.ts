@@ -14,7 +14,7 @@ import {
   environmentRt,
   kueryRt,
   rangeRt,
-  comparisonRangeRt,
+  offsetRt,
 } from '../default_api_types';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
@@ -83,7 +83,7 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      comparisonRangeRt,
+      offsetRt,
       t.type({
         numBuckets: toNumberRt,
         groupIds: jsonRt.pipe(t.array(t.string)),
@@ -111,16 +111,7 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: {
-        environment,
-        kuery,
-        numBuckets,
-        groupIds,
-        comparisonStart,
-        comparisonEnd,
-        start,
-        end,
-      },
+      query: { environment, kuery, numBuckets, groupIds, start, end, offset },
     } = params;
 
     return getErrorGroupPeriods({
@@ -130,10 +121,9 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
       setup,
       numBuckets,
       groupIds,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     });
   },
 });
@@ -187,7 +177,7 @@ const errorDistributionRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      comparisonRangeRt,
+      offsetRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -204,15 +194,7 @@ const errorDistributionRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const {
-      environment,
-      kuery,
-      groupId,
-      start,
-      end,
-      comparisonStart,
-      comparisonEnd,
-    } = params.query;
+    const { environment, kuery, groupId, start, end, offset } = params.query;
     return getErrorDistribution({
       environment,
       kuery,
@@ -221,8 +203,7 @@ const errorDistributionRoute = createApmServerRoute({
       setup,
       start,
       end,
-      comparisonStart,
-      comparisonEnd,
+      offset,
     });
   },
 });

@@ -75,7 +75,7 @@ export function TransactionColdstartRateChart({
 
   const { serviceName, transactionType } = useApmServiceContext();
   const comparisonChartTheme = getComparisonChartTheme();
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+  const { offset } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
@@ -100,8 +100,7 @@ export function TransactionColdstartRateChart({
               start,
               end,
               transactionType,
-              comparisonStart,
-              comparisonEnd,
+              offset,
               ...(transactionName ? { transactionName } : {}),
             },
           },
@@ -116,8 +115,7 @@ export function TransactionColdstartRateChart({
       end,
       transactionType,
       transactionName,
-      comparisonStart,
-      comparisonEnd,
+      offset,
       endpoint,
     ]
   );

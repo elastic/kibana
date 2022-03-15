@@ -86,7 +86,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+  const { offset } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
@@ -117,8 +117,7 @@ export function ServiceOverviewInstancesChartAndTable({
               start,
               end,
               transactionType,
-              comparisonStart,
-              comparisonEnd,
+              offset,
             },
           },
         }
@@ -206,8 +205,7 @@ export function ServiceOverviewInstancesChartAndTable({
               serviceNodeIds: JSON.stringify(
                 currentPeriodOrderedItems.map((item) => item.serviceNodeName)
               ),
-              comparisonStart,
-              comparisonEnd,
+              offset: comparisonEnabled ? offset : undefined,
             },
           },
         }

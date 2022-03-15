@@ -25,7 +25,7 @@ export function useErrorGroupDistributionFetcher({
   } = useApmParams('/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+  const { offset } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
@@ -44,8 +44,7 @@ export function useErrorGroupDistributionFetcher({
                 kuery,
                 start,
                 end,
-                comparisonStart,
-                comparisonEnd,
+                offset,
                 groupId,
               },
             },
@@ -53,16 +52,7 @@ export function useErrorGroupDistributionFetcher({
         );
       }
     },
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      comparisonStart,
-      comparisonEnd,
-      groupId,
-    ]
+    [environment, kuery, serviceName, start, end, offset, groupId]
   );
 
   return { errorDistributionData: data, status };

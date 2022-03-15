@@ -62,7 +62,7 @@ export function ErrorGroupOverview() {
   } = useApmParams('/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+  const { offset } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
@@ -133,8 +133,7 @@ export function ErrorGroupOverview() {
                 groupIds: JSON.stringify(
                   errorGroupMainStatistics.map(({ groupId }) => groupId).sort()
                 ),
-                comparisonStart,
-                comparisonEnd,
+                offset,
               },
             },
           }

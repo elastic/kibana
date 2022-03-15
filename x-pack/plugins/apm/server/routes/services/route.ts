@@ -30,7 +30,6 @@ import { getServiceInfrastructure } from './get_service_infrastructure';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
-  comparisonRangeRt,
   environmentRt,
   kueryRt,
   offsetRt,
@@ -509,7 +508,7 @@ const serviceThroughputRoute = createApmServerRoute({
     query: t.intersection([
       t.type({ transactionType: t.string }),
       t.partial({ transactionName: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -530,8 +529,7 @@ const serviceThroughputRoute = createApmServerRoute({
       kuery,
       transactionType,
       transactionName,
-      comparisonStart,
-      comparisonEnd,
+      offset,
       start,
       end,
     } = params.query;
@@ -567,11 +565,12 @@ const serviceThroughputRoute = createApmServerRoute({
         start,
         end,
       }),
-      comparisonStart && comparisonEnd
+      offset
         ? getThroughput({
             ...commonProps,
-            start: comparisonStart,
-            end: comparisonEnd,
+            start,
+            end,
+            offset,
           })
         : [],
     ]);
@@ -598,7 +597,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
         latencyAggregationType: latencyAggregationTypeRt,
         transactionType: t.string,
       }),
-      comparisonRangeRt,
+      offsetRt,
       environmentRt,
       kueryRt,
       rangeRt,
@@ -633,8 +632,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       kuery,
       transactionType,
       latencyAggregationType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
       start,
       end,
     } = params.query;
@@ -658,7 +656,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
         start,
         end,
       }),
-      ...(comparisonStart && comparisonEnd
+      ...(offset
         ? [
             getServiceInstancesMainStatistics({
               environment,
@@ -668,8 +666,9 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
               setup,
               transactionType,
               searchAggregatedTransactions,
-              start: comparisonStart,
-              end: comparisonEnd,
+              start,
+              end,
+              offset,
             }),
           ]
         : []),
@@ -696,7 +695,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      comparisonRangeRt,
+      offsetRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -752,8 +751,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       environment,
       kuery,
       transactionType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
       serviceNodeIds,
       numBuckets,
       latencyAggregationType,
@@ -778,8 +776,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       searchAggregatedTransactions,
       numBuckets,
       serviceNodeIds,
-      comparisonStart,
-      comparisonEnd,
+      offset,
       start,
       end,
     });

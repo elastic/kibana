@@ -61,7 +61,7 @@ export function ServiceOverviewThroughputChart({
   const { transactionType, serviceName } = useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+  const { offset } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
@@ -84,8 +84,7 @@ export function ServiceOverviewThroughputChart({
                 start,
                 end,
                 transactionType,
-                comparisonStart,
-                comparisonEnd,
+                offset,
                 transactionName,
               },
             },
@@ -100,8 +99,7 @@ export function ServiceOverviewThroughputChart({
       start,
       end,
       transactionType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
       transactionName,
     ]
   );

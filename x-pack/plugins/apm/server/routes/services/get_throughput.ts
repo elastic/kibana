@@ -21,6 +21,7 @@ import {
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 interface Options {
   environment: string;
@@ -34,6 +35,7 @@ interface Options {
   end: number;
   intervalString: string;
   bucketSize: number;
+  offset?: string;
 }
 
 export async function getThroughput({
@@ -48,8 +50,15 @@ export async function getThroughput({
   end,
   intervalString,
   bucketSize,
+  offset,
 }: Options) {
   const { apmEventClient } = setup;
+
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const params = {
     apm: {
@@ -65,7 +74,7 @@ export async function getThroughput({
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
-            ...rangeQuery(start, end),
+            ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...termQuery(TRANSACTION_NAME, transactionName),
@@ -78,7 +87,7 @@ export async function getThroughput({
             field: '@timestamp',
             fixed_interval: intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
             throughput: {

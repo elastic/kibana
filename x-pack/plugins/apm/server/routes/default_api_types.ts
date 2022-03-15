@@ -17,9 +17,4 @@ export const rangeRt = t.type({
 
 export const offsetRt = t.partial({ offset: t.string });
 
-export const comparisonRangeRt = t.partial({
-  comparisonStart: isoToEpochRt,
-  comparisonEnd: isoToEpochRt,
-});
-
 export const kueryRt = t.type({ kuery: t.string });

@@ -22,7 +22,7 @@ import { getFailedTransactionRatePeriods } from './get_failed_transaction_rate_p
 import { getColdstartRatePeriods } from '../../lib/transaction_groups/get_coldstart_rate';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
-  comparisonRangeRt,
+  offsetRt,
   environmentRt,
   kueryRt,
   rangeRt,
@@ -104,7 +104,7 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      comparisonRangeRt,
+      offsetRt,
       t.type({
         transactionNames: jsonRt.pipe(t.array(t.string)),
         numBuckets: toNumberRt,
@@ -155,10 +155,9 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
         latencyAggregationType,
         numBuckets,
         transactionType,
-        comparisonStart,
-        comparisonEnd,
         start,
         end,
+        offset,
       },
     } = params;
 
@@ -179,10 +178,9 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       transactionType,
       numBuckets,
       latencyAggregationType,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     });
   },
 });
@@ -200,7 +198,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
         latencyAggregationType: latencyAggregationTypeRt,
       }),
       t.partial({ transactionName: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -237,10 +235,9 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       transactionType,
       transactionName,
       latencyAggregationType,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -266,8 +263,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
     const { currentPeriod, previousPeriod } = await getLatencyPeriods({
       ...options,
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
     });
 
     return {
@@ -397,7 +393,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
     query: t.intersection([
       t.type({ transactionType: t.string }),
       t.partial({ transactionName: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -433,10 +429,9 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       kuery,
       transactionType,
       transactionName,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -454,10 +449,9 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       transactionName,
       setup,
       searchAggregatedTransactions,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     });
   },
 });
@@ -471,7 +465,7 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -504,15 +498,8 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
 
     const { params } = resources;
     const { serviceName } = params.path;
-    const {
-      environment,
-      kuery,
-      transactionType,
-      comparisonStart,
-      comparisonEnd,
-      start,
-      end,
-    } = params.query;
+    const { environment, kuery, transactionType, start, end, offset } =
+      params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
@@ -528,10 +515,9 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
       transactionType,
       setup,
       searchAggregatedTransactions,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     });
   },
 });
@@ -546,7 +532,7 @@ const transactionChartsColdstartRateByTransactionNameRoute =
       }),
       query: t.intersection([
         t.type({ transactionType: t.string, transactionName: t.string }),
-        t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+        t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
       ]),
     }),
     options: { tags: ['access:apm'] },
@@ -584,10 +570,9 @@ const transactionChartsColdstartRateByTransactionNameRoute =
         kuery,
         transactionType,
         transactionName,
-        comparisonStart,
-        comparisonEnd,
         start,
         end,
+        offset,
       } = params.query;
 
       const searchAggregatedTransactions =
@@ -606,10 +591,9 @@ const transactionChartsColdstartRateByTransactionNameRoute =
         transactionName,
         setup,
         searchAggregatedTransactions,
-        comparisonStart,
-        comparisonEnd,
         start,
         end,
+        offset,
       });
     },
   });

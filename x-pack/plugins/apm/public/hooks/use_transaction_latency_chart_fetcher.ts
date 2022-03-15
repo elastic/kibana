@@ -32,7 +32,7 @@ export function useTransactionLatencyChartsFetcher({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+  const { offset } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
@@ -60,8 +60,7 @@ export function useTransactionLatencyChartsFetcher({
                 transactionType,
                 transactionName,
                 latencyAggregationType,
-                comparisonStart,
-                comparisonEnd,
+                offset,
               },
             },
           }
@@ -77,8 +76,7 @@ export function useTransactionLatencyChartsFetcher({
       transactionName,
       transactionType,
       latencyAggregationType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
     ]
   );
 

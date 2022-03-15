@@ -81,7 +81,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+  const { offset } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
@@ -163,8 +163,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 groupIds: JSON.stringify(
                   items.map(({ groupId: groupId }) => groupId).sort()
                 ),
-                comparisonStart,
-                comparisonEnd,
+                offset,
               },
             },
           }
