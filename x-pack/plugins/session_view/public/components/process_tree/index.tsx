@@ -77,7 +77,7 @@ export const ProcessTree = ({
     [isInvestigatedEventVisible, isInvestigatedEventAbove]
   );
 
-  const hadnleBackToInvestigatedAlert = useCallback(() => {
+  const handleBackToInvestigatedAlert = useCallback(() => {
     onProcessSelected(null);
     setIsInvestigatedEventVisible(true);
   }, [onProcessSelected]);
@@ -200,7 +200,7 @@ export const ProcessTree = ({
       </div>
       {!isInvestigatedEventVisible && (
         <BackToInvestigatedAlert
-          onClick={hadnleBackToInvestigatedAlert}
+          onClick={handleBackToInvestigatedAlert}
           isDisplayedAbove={isInvestigatedEventAbove}
         />
       )}
