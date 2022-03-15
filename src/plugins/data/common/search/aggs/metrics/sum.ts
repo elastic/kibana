@@ -19,6 +19,7 @@ const sumTitle = i18n.translate('data.search.aggs.metrics.sumTitle', {
 
 export interface AggParamsSum extends BaseAggParams {
   field: string;
+  emptyAsNull?: boolean;
 }
 
 export const getSumMetricAgg = () => {

@@ -7,9 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { BaseAggParams } from '../types';
 import { aggCountFnName } from './count_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
+
+export interface AggParamsCount extends BaseAggParams {
+  emptyAsNull?: boolean;
+}
 
 export const getCountMetricAgg = () =>
   new MetricAggType({
@@ -32,11 +37,16 @@ export const getCountMetricAgg = () =>
     },
     getValue(agg, bucket) {
       const timeShift = agg.getTimeShift();
+      let value: unknown;
       if (!timeShift) {
-        return bucket.doc_count;
+        value = bucket.doc_count;
       } else {
-        return bucket[`doc_count_${timeShift.asMilliseconds()}`];
+        value = bucket[`doc_count_${timeShift.asMilliseconds()}`];
       }
+      if (value === 0 && agg.params.emptyAsNull) {
+        return null;
+      }
+      return value;
     },
     isScalable() {
       return true;

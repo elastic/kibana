@@ -19,6 +19,7 @@ const uniqueCountTitle = i18n.translate('data.search.aggs.metrics.uniqueCountTit
 
 export interface AggParamsCardinality extends BaseAggParams {
   field: string;
+  emptyAsNull?: boolean;
 }
 
 export const getCardinalityMetricAgg = () =>

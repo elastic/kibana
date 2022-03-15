@@ -5,31 +5,34 @@
  * 2.0.
  */
 
+import React from 'react';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
+import { OperationDefinition, ParamEditorProps } from './index';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
   combineErrorMessages,
+  isColumnOfType,
 } from './helpers';
-import {
-  FormattedIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-} from './column_types';
+import { FieldBasedIndexPatternColumn, BaseIndexPatternColumn, FormatParams } from './column_types';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { updateColumnParam } from '../layer_helpers';
 
-type MetricColumn<T> = FormattedIndexPatternColumn &
-  FieldBasedIndexPatternColumn & {
-    operationType: T;
+type MetricColumn<T> = FieldBasedIndexPatternColumn & {
+  operationType: T;
+  params?: {
+    emptyAsNull?: boolean;
+    format?: FormatParams;
   };
+};
 
 const typeToFn: Record<string, string> = {
   min: 'aggMin',
@@ -49,6 +52,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   priority,
   optionalTimeScaling,
   supportsDate,
+  hideZeroOption,
 }: {
   type: T['operationType'];
   displayName: string;
@@ -57,6 +61,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   optionalTimeScaling?: boolean;
   description?: string;
   supportsDate?: boolean;
+  hideZeroOption?: boolean;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
@@ -115,7 +120,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,
-        params: getFormatFromPreviousColumn(previousColumn),
+        params: {
+          ...getFormatFromPreviousColumn(previousColumn),
+          emptyAsNull:
+            hideZeroOption && previousColumn && isColumnOfType<T>(type, previousColumn)
+              ? previousColumn.params?.emptyAsNull
+              : undefined,
+        },
       } as T;
     },
     onFieldChange: (oldColumn, field) => {
@@ -126,6 +137,31 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
+    paramEditor: hideZeroOption
+      ? function ParamEditor({ layer, columnId, currentColumn, updateLayer }: ParamEditorProps<T>) {
+          return (
+            <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.indexPattern.metrics.hideZero', {
+                  defaultMessage: 'Hide in case of no data',
+                })}
+                checked={Boolean(currentColumn.params?.emptyAsNull)}
+                onChange={(ev) => {
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'emptyAsNull',
+                      value: ev.target.checked,
+                    })
+                  );
+                }}
+                compressed
+              />
+            </EuiFormRow>
+          );
+        }
+      : undefined,
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {
         id: columnId,
@@ -134,6 +170,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         field: column.sourceField,
         // time shift is added to wrapping aggFilteredMetric if filter is set
         timeShift: column.filter ? undefined : column.timeShift,
+        emptyAsNull: hideZeroOption ? column.params?.emptyAsNull : undefined,
       }).toAst();
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
@@ -242,6 +279,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that sums up numeric values that are extracted from the aggregated documents.',
   }),
+  hideZeroOption: true,
 });
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
