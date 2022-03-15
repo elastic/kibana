@@ -46,4 +46,6 @@ export const useNavigation = jest.fn().mockReturnValue({
   navigateTo: jest.fn(),
 });
 
-export const useKibanaCapabilities = jest.fn().mockReturnValue({});
+export const useKibanaCapabilities = jest.fn().mockReturnValue({
+  visualize: true,
+});

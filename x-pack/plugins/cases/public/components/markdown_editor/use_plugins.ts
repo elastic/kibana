@@ -40,7 +40,7 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     if (
       kibanaConfig?.markdownPlugins?.lens &&
       !disabledPlugins?.includes(LensPluginId) &&
-      appCapabilities.visualize
+      appCapabilities?.visualize
     ) {
       uiPlugins.push(lensMarkdownPlugin.plugin);
     }
@@ -55,7 +55,7 @@ export const usePlugins = (disabledPlugins?: string[]) => {
       processingPlugins,
     };
   }, [
-    appCapabilities.visualize,
+    appCapabilities?.visualize,
     disabledPlugins,
     kibanaConfig?.markdownPlugins?.lens,
     timelinePlugins,
