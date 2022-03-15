@@ -146,7 +146,7 @@ export function registerMonitoringTelemetryCollection(
       const callCluster = kibanaRequest ? esClient : getClient().asInternalUser;
       const clusterDetails = await getClusterUuids(callCluster, timestamp, maxBucketSize);
       const [licenses, stats] = await Promise.all([
-        getLicenses(clusterDetails, callCluster, maxBucketSize),
+        getLicenses(clusterDetails, callCluster, timestamp, maxBucketSize),
         getAllStats(clusterDetails, callCluster, timestamp, maxBucketSize),
       ]);
 
