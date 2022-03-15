@@ -11657,7 +11657,6 @@
     "xpack.fileUpload.fileTypeError": "文件不是可接受类型之一：{types}",
     "xpack.fileUpload.geoFilePicker.acceptedFormats": "接受的格式：{fileTypes}",
     "xpack.fileUpload.geoFilePicker.filePicker": "选择或拖放文件",
-    "xpack.fileUpload.geoFilePicker.maxSize": "最大大小：{maxFileSize}",
     "xpack.fileUpload.geoFilePicker.noFeaturesDetected": "选定文件中未找到任何特征。",
     "xpack.fileUpload.geoFilePicker.previewSummary": "正在预览 {numFeatures} 个特征、{previewCoverage}% 的文件。",
     "xpack.fileUpload.geojsonImporter.noGeometry": "特征不包含必需的字段“geometry”",

@@ -11636,7 +11636,6 @@
     "xpack.fileUpload.fileTypeError": "ファイルは使用可能なタイプのいずれかではありません。{types}",
     "xpack.fileUpload.geoFilePicker.acceptedFormats": "使用可能な形式：{fileTypes}",
     "xpack.fileUpload.geoFilePicker.filePicker": "ファイルを選択するかドラッグ &amp;amp; ドロップしてください",
-    "xpack.fileUpload.geoFilePicker.maxSize": "最大サイズ：{maxFileSize}",
     "xpack.fileUpload.geoFilePicker.noFeaturesDetected": "選択したファイルには特徴量がありません。",
     "xpack.fileUpload.geoFilePicker.previewSummary": "{numFeatures}個の特徴量。ファイルの{previewCoverage}%。",
     "xpack.fileUpload.geojsonImporter.noGeometry": "特長量には必須フィールド「ジオメトリ」が含まれていません",
