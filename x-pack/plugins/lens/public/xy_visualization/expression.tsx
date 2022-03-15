@@ -939,11 +939,7 @@ export function XYChart({
                 <LineSeries
                   key={index}
                   {...seriesProps}
-                  // fit={getFitOptions(fittingFunction, endValue)}
-                  fit={{
-                    type: 'linear',
-                    endValue: 1,
-                  }}
+                  fit={getFitOptions(fittingFunction, endValue)}
                   curve={curveType}
                 />
               );
