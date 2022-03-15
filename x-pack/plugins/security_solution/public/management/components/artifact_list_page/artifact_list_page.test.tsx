@@ -23,7 +23,7 @@ import { getEndpointPrivilegesInitialStateMock } from '../../../common/component
 jest.mock('../../../common/components/user_privileges');
 const useUserPrivileges = _useUserPrivileges as jest.Mock;
 
-describe('When using the ArtifactListPage component', () => {
+describe.skip('When using the ArtifactListPage component', () => {
   let render: (
     props?: Partial<ArtifactListPageProps>
   ) => ReturnType<AppContextTestRender['render']>;
@@ -253,7 +253,7 @@ describe('When using the ArtifactListPage component', () => {
       expect(history.location.search).toEqual('');
     });
 
-    it('should pass to the Form component the expected props', async () => {
+    it.skip('should pass to the Form component the expected props', async () => {
       await renderAndWaitForFlyout();
 
       expect(FormComponentMock).toHaveBeenLastCalledWith(
