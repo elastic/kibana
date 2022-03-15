@@ -36,16 +36,22 @@ export const SessionViewDisplayOptions = ({
   const optionsList: EuiSelectableOption[] = useMemo(
     () => [
       {
-        label: i18n.translate('xpack.sessionView.sessionViewToggle.sessionViewToggleOptionsTimestamp', {
-          defaultMessage: 'Timestamp',
-        }),
+        label: i18n.translate(
+          'xpack.sessionView.sessionViewToggle.sessionViewToggleOptionsTimestamp',
+          {
+            defaultMessage: 'Timestamp',
+          }
+        ),
         key: timestampString,
         checked: optionsStates?.timestamp ? 'on' : undefined,
       },
       {
-        label: i18n.translate('xpack.sessionView.sessionViewToggle.sessionViewToggleOptionsVerbosemode', {
-          defaultMessage: 'Verbose mode',
-        }),
+        label: i18n.translate(
+          'xpack.sessionView.sessionViewToggle.sessionViewToggleOptionsVerbosemode',
+          {
+            defaultMessage: 'Verbose mode',
+          }
+        ),
         key: verboseModeString,
         checked: optionsStates?.verboseMode ? 'on' : undefined,
       },
