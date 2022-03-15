@@ -22,6 +22,7 @@ check_for_changed_files() {
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
 
   if [[ "${GITHUB_PR_TARGET_BRANCH:-}" == "main" ]]; then
+    # api_docs can also generate new files and deletions, which don't show up in ls-files
     GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc'; git status --porcelain api_docs)"
   else
     GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
