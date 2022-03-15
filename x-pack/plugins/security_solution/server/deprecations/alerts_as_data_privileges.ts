@@ -7,26 +7,27 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { DeprecationsServiceSetup, PackageInfo } from 'src/core/server';
+import { DeprecationsServiceSetup } from 'src/core/server';
 import type { PrivilegeDeprecationsService, Role } from '../../../security/common/model';
 import { DEFAULT_SIGNALS_INDEX } from '../../common/constants';
 import { roleHasReadAccess, roleIsExternal } from './utils';
 
-const PREVIEW_INDEX_PREFIX = '.preview.alerts-security.alerts';
+const ALERTS_INDEX_PREFIX = '.alerts-security.alerts';
+const INTERNAL_ALERTS_INDEX_PREFIX = '.internal.alerts-security.alerts';
 
 const buildManualSteps = (roleNames: string[]): string[] => {
   const baseSteps = [
-    i18n.translate('xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep1', {
+    i18n.translate('xpack.securitySolution.deprecations.alertsIndexPrivileges.manualStep1', {
       defaultMessage:
-        'Update your roles to include read privileges for the detection alerts preview indices appropriate for that role and space(s).',
+        'Update your roles to include read privileges for the detection alerts indices appropriate for that role and space(s).',
     }),
-    i18n.translate('xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep2', {
+    i18n.translate('xpack.securitySolution.deprecations.alertsIndexPrivileges.manualStep2', {
       defaultMessage:
-        'In 8.0, users will be unable to view preview results until those permissions are added.',
+        'In 8.0, users will be unable to view alerts until those permissions are added.',
     }),
   ];
   const informationalStep = i18n.translate(
-    'xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep3',
+    'xpack.securitySolution.deprecations.alertsIndexPrivileges.manualStep3',
     {
       defaultMessage:
         'The roles that currently have read access to detection alerts indices are: {roles}',
@@ -46,13 +47,11 @@ const buildManualSteps = (roleNames: string[]): string[] => {
 interface Dependencies {
   deprecationsService: DeprecationsServiceSetup;
   getKibanaRoles?: PrivilegeDeprecationsService['getKibanaRoles'];
-  packageInfo: PackageInfo;
 }
 
-export const registerRulePreviewPrivilegeDeprecations = ({
+export const registerAlertsIndexPrivilegeDeprecations = ({
   deprecationsService,
   getKibanaRoles,
-  packageInfo,
 }: Dependencies) => {
   deprecationsService.registerDeprecations({
     getDeprecations: async (context) => {
@@ -69,7 +68,8 @@ export const registerRulePreviewPrivilegeDeprecations = ({
             (role) =>
               roleIsExternal(role) &&
               roleHasReadAccess(role) &&
-              !roleHasReadAccess(role, PREVIEW_INDEX_PREFIX)
+              (!roleHasReadAccess(role, ALERTS_INDEX_PREFIX) ||
+                !roleHasReadAccess(role, INTERNAL_ALERTS_INDEX_PREFIX))
           ) ?? [];
       }
 
@@ -81,23 +81,28 @@ export const registerRulePreviewPrivilegeDeprecations = ({
 
       return [
         {
-          title: i18n.translate('xpack.securitySolution.deprecations.rulePreviewPrivileges.title', {
-            defaultMessage: 'The Detections Rule Preview feature is changing',
+          title: i18n.translate('xpack.securitySolution.deprecations.alertsIndexPrivileges.title', {
+            defaultMessage: 'The Detection Alerts index names are changing',
           }),
           message: i18n.translate(
-            'xpack.securitySolution.deprecations.rulePreviewPrivileges.message',
+            'xpack.securitySolution.deprecations.alertsIndexPrivileges.message',
             {
               values: {
-                previewIndexPrefix: PREVIEW_INDEX_PREFIX,
+                alertsIndexPrefix: ALERTS_INDEX_PREFIX,
+                internalAlertsIndexPrefix: INTERNAL_ALERTS_INDEX_PREFIX,
                 signalsIndexPrefix: DEFAULT_SIGNALS_INDEX,
               },
-              defaultMessage:
-                'In order to enable a more robust preview in 8.0+, users will need read privileges to new detection alerts preview indices ({previewIndexPrefix}-<KIBANA_SPACE>), analogous to existing detection alerts indices ({signalsIndexPrefix}-<KIBANA_SPACE>).',
+              defaultMessage: `In order to view detection alerts in 8.0+, users will need read privileges to new detection alerts index aliases \
+({alertsIndexPrefix}-<KIBANA_SPACE>) and backing indices ({internalAlertsIndexPrefix}-<KIBANA_SPACE>-*), \
+analogous to existing detection alerts indices ({signalsIndexPrefix}-<KIBANA_SPACE>). \
+In addition, any enabled Detection rules will be automatically disabled during the upgrade and must be manually re-enabled after \
+upgrading. Rules that are automatically disabled will also automatically be tagged to assist in manually re-enabling them post-upgrade. \
+Alerts created after upgrading will use a different schema.`,
             }
           ),
           level: 'warning',
           deprecationType: 'feature',
-          documentationUrl: `https://www.elastic.co/guide/en/security/${packageInfo.branch}/rules-ui-create.html#preview-rules`,
+          documentationUrl: `https://www.elastic.co/guide/en/security/8.0/upgrade-intro.html#upgrade-reqs`,
           correctiveActions: {
             manualSteps: buildManualSteps(roleNamesWhichReadSignals),
           },
