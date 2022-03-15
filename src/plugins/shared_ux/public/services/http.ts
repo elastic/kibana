@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { NoDataCard, ElasticAgentCard } from './no_data_page/no_data_card';
+export interface SharedUXHttpService {
+  addBasePath: (url: string) => string;
+}
