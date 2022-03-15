@@ -55,7 +55,7 @@ export const cspRuleTemplateAssetType: SavedObjectsType<CspRuleTemplateSchema> =
   hidden: false,
   management: {
     importableAndExportable: true,
-    visibleInManagement: false,
+    visibleInManagement: true,
   },
   namespaceType: 'agnostic',
   mappings: ruleTemplateAssetSavedObjectMappings,
