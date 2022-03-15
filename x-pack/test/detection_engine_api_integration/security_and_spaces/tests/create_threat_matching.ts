@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  // Failing: See https://github.com/elastic/kibana/issues/127770
   describe.skip('create_threat_matching', () => {
     describe('creating threat match rule', () => {
       before(async () => {
