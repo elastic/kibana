@@ -13,12 +13,53 @@ import { useEsSearch } from '../../../../../observability/public';
 import { Ping } from '../../../../common/runtime_types';
 import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
+import { useInlineErrorsCount } from './use_inline_errors_count';
 
 const sortFieldMap: Record<string, string> = {
   name: 'monitor.name',
   urls: 'url.full',
   '@timestamp': '@timestamp',
 };
+
+export const getInlineErrorFilters = () => [
+  {
+    exists: {
+      field: 'summary',
+    },
+  },
+  {
+    exists: {
+      field: 'error',
+    },
+  },
+  {
+    bool: {
+      minimum_should_match: 1,
+      should: [
+        {
+          match_phrase: {
+            'error.message': 'journey did not finish executing',
+          },
+        },
+        {
+          match_phrase: {
+            'error.message': 'ReferenceError:',
+          },
+        },
+      ],
+    },
+  },
+  {
+    range: {
+      'monitor.timespan': {
+        lte: moment().toISOString(),
+        gte: moment().subtract(5, 'minutes').toISOString(),
+      },
+    },
+  },
+  EXCLUDE_RUN_ONCE_FILTER,
+];
+
 export function useInlineErrors({
   onlyInvalidMonitors,
   sortField = '@timestamp',
@@ -45,68 +86,18 @@ export function useInlineErrors({
         size: 1000,
         query: {
           bool: {
-            filter: [
-              ...(!onlyInvalidMonitors
-                ? [
-                    {
-                      terms: {
-                        config_id: configIds,
-                      },
-                    },
-                  ]
-                : []),
-
-              {
-                exists: {
-                  field: 'summary',
-                },
-              },
-              {
-                exists: {
-                  field: 'error',
-                },
-              },
-              {
-                bool: {
-                  minimum_should_match: 1,
-                  should: [
-                    {
-                      match_phrase: {
-                        'error.message': 'journey did not finish executing',
-                      },
-                    },
-                    {
-                      match_phrase: {
-                        'error.message': 'ReferenceError:',
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                range: {
-                  'monitor.timespan': {
-                    lte: moment().toISOString(),
-                    gte: moment().subtract(5, 'minutes').toISOString(),
-                  },
-                },
-              },
-              EXCLUDE_RUN_ONCE_FILTER,
-            ],
+            filter: getInlineErrorFilters(),
           },
         },
         collapse: { field: 'config_id' },
         sort: [{ [sortFieldMap[sortField]]: sortOrder }],
-        aggs: {
-          total: {
-            cardinality: { field: 'config_id' },
-          },
-        },
       },
     },
     [settings?.heartbeatIndices, monitorList, lastRefresh, doFetch, sortField, sortOrder],
     { name: 'getInvalidMonitors' }
   );
+
+  const { count, loading: countLoading } = useInlineErrorsCount();
 
   return useMemo(() => {
     const errorSummaries = data?.hits.hits.map(({ _source: source }) => ({
@@ -114,6 +105,6 @@ export function useInlineErrors({
       timestamp: (source as any)['@timestamp'],
     }));
 
-    return { loading, errorSummaries };
-  }, [data, loading]);
+    return { loading: loading || countLoading, errorSummaries, count };
+  }, [count, countLoading, data, loading]);
 }

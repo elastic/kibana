@@ -14,11 +14,11 @@ import { Ping } from '../../../../common/runtime_types';
 interface Props {
   loading: boolean;
   pageState: MonitorManagementListPageState;
-  monitorList: MonitorManagementListState;
+  monitorSavedObjects: [];
   onPageStateChange: (state: MonitorManagementListPageState) => void;
   onUpdate: () => void;
   errorSummaries: Ping[];
-  setInvalidTotal: (val: number) => void;
+  invalidTotal: number;
 }
 export const InvalidMonitors = ({
   loading: summariesLoading,
@@ -26,30 +26,25 @@ export const InvalidMonitors = ({
   onPageStateChange,
   onUpdate,
   errorSummaries,
-  setInvalidTotal,
+  invalidTotal,
+  monitorSavedObjects,
 }: Props) => {
-  const { data, loading } = useInvalidMonitors(errorSummaries);
-
   const { pageSize, pageIndex } = pageState;
 
   const startIndex = (pageIndex - 1) * pageSize;
-
-  useEffect(() => {
-    setInvalidTotal(data?.length ?? 0);
-  }, [data?.length, setInvalidTotal]);
 
   return (
     <MonitorManagementList
       pageState={pageState}
       monitorList={{
         list: {
-          monitors: data?.slice(startIndex, startIndex + pageSize) ?? [],
+          monitors: monitorSavedObjects?.slice(startIndex, startIndex + pageSize) ?? [],
           page: pageState.pageIndex,
           perPage: pageState.pageSize,
-          total: data?.length ?? 0,
+          total: invalidTotal ?? 0,
         },
         error: { monitorList: null, serviceLocations: null },
-        loading: { monitorList: Boolean(loading) || summariesLoading, serviceLocations: false },
+        loading: { monitorList: summariesLoading, serviceLocations: false },
         locations: [],
       }}
       onPageStateChange={onPageStateChange}

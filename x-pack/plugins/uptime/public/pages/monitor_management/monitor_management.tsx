@@ -18,6 +18,7 @@ import { useInlineErrors } from '../../components/monitor_management/hooks/use_i
 import { MonitorListTabs } from '../../components/monitor_management/monitor_list/list_tabs';
 import { AllMonitors } from '../../components/monitor_management/monitor_list/all_monitors';
 import { InvalidMonitors } from '../../components/monitor_management/monitor_list/invalid_monitors';
+import { useInvalidMonitors } from '../../components/monitor_management/hooks/use_invalid_monitors';
 
 export const MonitorManagementPage: React.FC = () => {
   const [pageState, dispatchPageAction] = useReducer<typeof monitorManagementPageReducer>(
@@ -29,8 +30,6 @@ export const MonitorManagementPage: React.FC = () => {
       sortField: ConfigKey.NAME,
     }
   );
-
-  const [invalidTotal, setInvalidTotal] = useState(0);
 
   const onPageStateChange = useCallback(
     (state) => {
@@ -52,7 +51,7 @@ export const MonitorManagementPage: React.FC = () => {
   const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementListPageState;
 
   const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
-  const { errorSummaries, loading } = useInlineErrors({
+  const { errorSummaries, loading, count } = useInlineErrors({
     onlyInvalidMonitors: viewType === 'invalid',
     sortField: pageState.sortField,
     sortOrder: pageState.sortOrder,
@@ -64,12 +63,11 @@ export const MonitorManagementPage: React.FC = () => {
     }
   }, [dispatch, pageState, pageIndex, pageSize, sortField, sortOrder, viewType]);
 
+  const { data: monitorSavedObjects, loading: objectsLoading } = useInvalidMonitors(errorSummaries);
+
   return (
     <>
-      <MonitorListTabs
-        invalidTotal={viewType === 'all' ? errorSummaries?.length ?? 0 : invalidTotal}
-        onUpdate={onUpdate}
-      />
+      <MonitorListTabs invalidTotal={monitorSavedObjects?.length ?? 0} onUpdate={onUpdate} />
       {viewType === 'all' ? (
         <AllMonitors
           pageState={pageState}
@@ -81,12 +79,12 @@ export const MonitorManagementPage: React.FC = () => {
       ) : (
         <InvalidMonitors
           pageState={pageState}
-          monitorList={monitorList}
+          monitorSavedObjects={monitorSavedObjects}
           onPageStateChange={onPageStateChange}
           onUpdate={onUpdate}
           errorSummaries={errorSummaries}
-          setInvalidTotal={setInvalidTotal}
-          loading={Boolean(loading)}
+          invalidTotal={count ?? 0}
+          loading={Boolean(loading) || objectsLoading}
         />
       )}
     </>
