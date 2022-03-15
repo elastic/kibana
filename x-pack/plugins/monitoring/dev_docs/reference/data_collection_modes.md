@@ -45,6 +45,8 @@ Stack Monitoring will read those same logs, as configured by the `monitoring.ui.
 
 Beats and Enterprise Search don't have filebeat modules, but the logs can be ingested using basic JSON filebeat configurations.
 
+See (internal) https://github.com/elastic/enterprise-search-team/issues/1532 for updates on Enterprise Search filebeat modules and configurations.
+
 ## Unified collection
 
 ### Package-driven collection
