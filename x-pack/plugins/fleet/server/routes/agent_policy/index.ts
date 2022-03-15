@@ -14,6 +14,7 @@ import {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
+  GetK8sManifestRequestSchema,
 } from '../../types';
 import type { FleetAuthzRouter } from '../security';
 
@@ -25,8 +26,9 @@ import {
   copyAgentPolicyHandler,
   deleteAgentPoliciesHandler,
   getFullAgentPolicy,
-  downloadFullAgentPolicy,
+  downloadFullAgentPolicy, downloadK8sManifest, getK8sManifest,
 } from './handlers';
+import {K8S_API_ROUTES} from "../../../common";
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // List - Fleet Server needs access to run setup
@@ -123,5 +125,29 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     downloadFullAgentPolicy
+  );
+
+  // Get agent manifest
+  router.get(
+    {
+      path: K8S_API_ROUTES.K8S_INFO_PATTERN,
+      validate: GetK8sManifestRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getK8sManifest
+  );
+
+  // Download agent manifest
+  router.get(
+    {
+      path: K8S_API_ROUTES.K8S_DOWNLOAD_PATTERN,
+      validate: GetK8sManifestRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    downloadK8sManifest
   );
 };

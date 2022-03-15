@@ -59,3 +59,11 @@ export const GetFullAgentPolicyRequestSchema = {
     kubernetes: schema.maybe(schema.boolean()),
   }),
 };
+
+export const GetK8sManifestRequestSchema = {
+  query: schema.object({
+    download: schema.maybe(schema.boolean()),
+    fleetServer: schema.maybe(schema.string()),
+    enrolToken: schema.maybe(schema.string()),
+  }),
+};

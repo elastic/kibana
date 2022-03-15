@@ -52,7 +52,7 @@ import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
 
-import { elasticAgentManifest } from './elastic_agent_manifest';
+import { elasticAgentStandaloneManifest, elasticAgentManagedManifest } from './elastic_agent_manifest';
 
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
@@ -709,7 +709,7 @@ class AgentPolicyService {
       };
 
       const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
-      const updateManifestVersion = elasticAgentManifest.replace(
+      const updateManifestVersion = elasticAgentStandaloneManifest.replace(
         'VERSION',
         appContextService.getKibanaVersion()
       );
@@ -718,6 +718,28 @@ class AgentPolicyService {
     } else {
       return '';
     }
+  }
+
+  public async getFullAgentManifest(fleetServer: string, enrolToken: string): Promise<string | null> {
+      const updateManifestVersion = elasticAgentManagedManifest.replace(
+        'VERSION',
+        appContextService.getKibanaVersion()
+      );
+      let updateManifest = updateManifestVersion;
+      if (fleetServer !== '') {
+         updateManifest = updateManifest.replace(
+          'https://fleet-server:8220',
+          fleetServer
+        );
+      }
+    if (enrolToken !== '') {
+      updateManifest = updateManifest.replace(
+        'token-id',
+        enrolToken
+      );
+    }
+
+      return updateManifest;
   }
 
   public async getFullAgentPolicy(

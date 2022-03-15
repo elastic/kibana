@@ -159,7 +159,7 @@ export const StandaloneInstructions = React.memo<InstructionProps>(
       downloadLink =
         isK8s === 'IS_KUBERNETES'
           ? core.http.basePath.prepend(
-              `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?kubernetes=true`
+              `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?kubernetes=true&standalone=true`
             )
           : core.http.basePath.prepend(
               `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?standalone=true`
@@ -188,7 +188,7 @@ export const StandaloneInstructions = React.memo<InstructionProps>(
             refreshAgentPolicies,
           })
         : undefined,
-      DownloadStep(false),
+      DownloadStep(false, ''),
       {
         title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigureAgentTitle', {
           defaultMessage: 'Configure the agent',

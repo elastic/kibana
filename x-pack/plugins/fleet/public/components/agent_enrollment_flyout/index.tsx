@@ -28,7 +28,7 @@ import {
   useFleetStatus,
   useAgentEnrollmentFlyoutData,
 } from '../../hooks';
-import { FLEET_SERVER_PACKAGE } from '../../constants';
+import {FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT} from '../../constants';
 import type { PackagePolicy } from '../../types';
 
 import { Loading } from '..';
@@ -37,6 +37,7 @@ import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
 import type { BaseProps } from './types';
+import {FLEET_KUBERNETES_PACKAGE} from "../../../common";
 
 type FlyoutMode = 'managed' | 'standalone';
 
@@ -92,6 +93,34 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 
     checkPolicyIsFleetServer();
   }, [policyId]);
+
+
+  const [isK8s, setIsK8s] = useState<'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES'>(
+    'IS_LOADING'
+  );
+  useEffect(() => {
+    async function checkifK8s() {
+      if (!policyId) {
+        setIsK8s('IS_LOADING');
+        return;
+      }
+      const agentPolicyRequest = await sendGetOneAgentPolicy(policyId);
+      const agentPol = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
+
+      if (!agentPol) {
+        setIsK8s('IS_NOT_KUBERNETES');
+        return;
+      }
+      const k8s = (pkg: PackagePolicy) => pkg.package?.name === FLEET_KUBERNETES_PACKAGE;
+      setIsK8s(
+        (agentPol.package_policies as PackagePolicy[]).some(k8s)
+          ? 'IS_KUBERNETES'
+          : 'IS_NOT_KUBERNETES'
+      );
+    }
+    checkifK8s();
+  }, [policyId]);
+
 
   const isLoadingInitialRequest = settings.isLoading && settings.isInitialRequest;
 
@@ -154,10 +183,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           <ManagedInstructions
             settings={settings.data?.item}
             setSelectedPolicyId={setSelectedPolicyId}
+            policyId={policyId}
             agentPolicy={agentPolicy}
             agentPolicies={agentPolicies}
             viewDataStep={viewDataStep}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
+            isK8s={isK8s}
             refreshAgentPolicies={refreshAgentPolicies}
             isLoadingAgentPolicies={isLoadingAgentPolicies}
           />
