@@ -61,7 +61,7 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
-import { storedPackagePoliciesToAgentInputs } from './agent_policies';
+import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
@@ -726,7 +726,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       diff: [packagePolicy, updatedPackagePolicy],
       // TODO: Currently only returns the agent inputs for current package policy, not the upgraded one
       // as we only show this version in the UI
-      agent_diff: [await storedPackagePoliciesToAgentInputs(soClient, [packagePolicy])],
+      agent_diff: [storedPackagePolicyToAgentInputs(packagePolicy, packageInfo)],
       hasErrors,
     };
   }
