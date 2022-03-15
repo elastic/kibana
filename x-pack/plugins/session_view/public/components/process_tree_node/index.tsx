@@ -18,6 +18,7 @@ import React, {
   useEffect,
   MouseEvent,
   useCallback,
+  useMemo,
 } from 'react';
 import { EuiButton, EuiIcon, formatDate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +33,8 @@ interface ProcessDeps {
   isSessionLeader?: boolean;
   depth?: number;
   onProcessSelected?: (process: Process) => void;
+  jumpToAlertID?: string;
+  selectedProcessId?: string;
   timeStampOn?: boolean;
   verboseModeOn?: boolean;
 }
@@ -44,6 +47,8 @@ export function ProcessTreeNode({
   isSessionLeader = false,
   depth = 0,
   onProcessSelected,
+  jumpToAlertID,
+  selectedProcessId,
   timeStampOn = true,
   verboseModeOn = true,
 }: ProcessDeps) {
@@ -58,8 +63,24 @@ export function ProcessTreeNode({
   }, [isSessionLeader, process.autoExpand]);
 
   const alerts = process.getAlerts();
-  const styles = useStyles({ depth, hasAlerts: !!alerts.length });
-  const buttonStyles = useButtonStyles();
+  const hasAlerts = useMemo(() => !!alerts.length, [alerts]);
+  const hasInvestigatedAlert = useMemo(
+    () =>
+      !!(
+        hasAlerts &&
+        alerts.find((alert) => jumpToAlertID && jumpToAlertID === alert.kibana?.alert.uuid)
+      ),
+    [hasAlerts, alerts, jumpToAlertID]
+  );
+  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert });
+  const buttonStyles = useButtonStyles({});
+
+  // Automatically expand alerts list when investigating an alert
+  useEffect(() => {
+    if (hasInvestigatedAlert) {
+      setAlertsExpanded(true);
+    }
+  }, [hasInvestigatedAlert]);
 
   useLayoutEffect(() => {
     if (searchMatched !== null && textRef.current) {
@@ -100,7 +121,7 @@ export function ProcessTreeNode({
 
   const processDetails = process.getDetails();
 
-  if (!processDetails) {
+  if (!processDetails?.process) {
     return null;
   }
 
@@ -120,7 +141,7 @@ export function ProcessTreeNode({
   const shouldRenderChildren = childrenExpanded && children && children.length > 0;
   const childrenTreeDepth = depth + 1;
 
-  const showRootEscalation = user.name === 'root' && user.id !== parent.user.id;
+  const showUserEscalation = user.id !== parent.user.id;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'consoleApp' : 'compute';
   const hasExec = process.hasExec();
@@ -177,27 +198,39 @@ export function ProcessTreeNode({
             </span>
           )}
 
-          {showRootEscalation && (
+          {showUserEscalation && (
             <EuiButton
               data-test-subj="sessionView:processTreeNodeRootEscalationFlag"
               css={buttonStyles.userChangedButton}
             >
               <FormattedMessage
                 id="xpack.sessionView.execUserChange"
-                defaultMessage="Root escalation"
+                defaultMessage="Exec user change: "
               />
+              <span css={buttonStyles.userChangedButtonUsername}>{user.name}</span>
             </EuiButton>
           )}
           {!isSessionLeader && childCount > 0 && (
             <ChildrenProcessesButton isExpanded={childrenExpanded} onToggle={onChildrenToggle} />
           )}
           {alerts.length > 0 && (
-            <AlertButton onToggle={onAlertsToggle} isExpanded={alertsExpanded} />
+            <AlertButton
+              onToggle={onAlertsToggle}
+              isExpanded={alertsExpanded}
+              alertsCount={alerts.length}
+            />
           )}
         </div>
       </div>
 
-      {alertsExpanded && <ProcessTreeAlerts alerts={alerts} />}
+      {alertsExpanded && (
+        <ProcessTreeAlerts
+          alerts={alerts}
+          jumpToAlertID={jumpToAlertID}
+          isProcessSelected={selectedProcessId === process.id}
+          onAlertSelected={onProcessClicked}
+        />
+      )}
 
       {shouldRenderChildren && (
         <div css={styles.children}>
@@ -208,6 +241,8 @@ export function ProcessTreeNode({
                 process={child}
                 depth={childrenTreeDepth}
                 onProcessSelected={onProcessSelected}
+                jumpToAlertID={jumpToAlertID}
+                selectedProcessId={selectedProcessId}
                 timeStampOn={timeStampOn}
                 verboseModeOn={verboseModeOn}
               />

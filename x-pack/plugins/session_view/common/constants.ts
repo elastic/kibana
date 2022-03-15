@@ -26,3 +26,4 @@ export const KIBANA_DATE_FORMAT = 'MMM DD, YYYY @ hh:mm:ss.SSS';
 //    search functionality will instead use a separate ES backend search to avoid this.
 // 3. Fewer round trips to the backend!
 export const PROCESS_EVENTS_PER_PAGE = 1000;
+export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
