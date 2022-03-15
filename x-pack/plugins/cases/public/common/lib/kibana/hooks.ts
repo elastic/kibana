@@ -172,10 +172,11 @@ export const useApplicationCapabilities = (): { crud: boolean; read: boolean } =
     read: !!casesCapabilities?.read_cases,
   };
 };
-export const useKibanaCapabilities = (): { visualize?: boolean } => {
+export const useKibanaCapabilities = (): { visualize?: boolean; dashboard?: boolean } => {
   const capabilities = useKibana().services?.application?.capabilities;
 
   return {
     visualize: !!capabilities?.visualize?.save,
+    dashboard: !!capabilities?.dashboard?.show && !!capabilities?.dashboard?.createNew,
   };
 };
