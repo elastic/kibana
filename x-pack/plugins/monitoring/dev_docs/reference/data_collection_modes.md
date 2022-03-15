@@ -110,6 +110,31 @@ Regardless of the metrics collection mode, logs should always be collected using
  
 Stack Monitoring will read those same logs, as configured by the `monitoring.ui.logs.index` setting.
 
+For example, in the case of the elasticsearch filebeat module reading slow query logs and writing to the corresponding pipeline on Elasticsearch:
+
+```mermaid
+graph LR
+subgraph Production Elasticsearch
+  SlowQueryLogs[*_index_search_slowlog.log]
+end
+
+subgraph Monitoring Deployment
+  subgraph Elasticsearch
+    Pipeline>filebeat-8.2.0-elasticsearch-slowlog-pipeline]
+  end
+end
+
+subgraph Filebeat
+  ElasticsearchModule[Elasticsearch Module]
+end
+
+Disk[(Disk)]
+SlowQueryLogs-.->|write|Disk
+
+ElasticsearchModule-.->|read|Disk
+ElasticsearchModule-->|_bulk|Pipeline
+```
+
 Beats and Enterprise Search don't have filebeat modules, but the logs can be ingested using basic JSON filebeat configurations.
 
 See (internal) https://github.com/elastic/enterprise-search-team/issues/1532 for updates on Enterprise Search filebeat modules and configurations.
