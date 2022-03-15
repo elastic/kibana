@@ -13,6 +13,9 @@ import {
   ExpressionsServiceStart,
 } from '.';
 import { ExpressionAstExpression } from '../ast';
+import { AnyExpressionFunctionDefinition } from '../expression_functions';
+import { AnyExpressionTypeDefinition } from '../expression_types';
+import { AnyExpressionRenderDefinition } from '../expression_renderers';
 
 export interface ExpressionServiceFork {
   setup(): ExpressionsServiceSetup;
@@ -42,8 +45,72 @@ export class ExpressionsServiceFork implements ExpressionServiceFork {
   /**
    * @note Workaround since the expressions service is frozen.
    */
-  constructor(private namespace: string, private expressionsService: ExpressionsService) {}
+  constructor(private namespace: string, private expressionsService: ExpressionsService) {
+    this.registerFunction = this.registerFunction.bind(this);
+    this.registerRenderer = this.registerRenderer.bind(this);
+    this.registerType = this.registerType.bind(this);
+    this.run = this.run.bind(this);
+    this.execute = this.execute.bind(this);
+    this.getFunction = this.getFunction.bind(this);
+    this.getFunctions = this.getFunctions.bind(this);
+  }
 
+  protected registerFunction(
+    definition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
+  ) {
+    if (typeof definition === 'function') definition = definition();
+    return this.expressionsService.registerFunction({
+      ...definition,
+      namespace: this.namespace,
+    });
+  }
+
+  protected registerRenderer(
+    definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
+  ) {
+    if (typeof definition === 'function') definition = definition();
+    return this.expressionsService.registerRenderer({
+      ...definition,
+      namespace: this.namespace,
+    });
+  }
+
+  protected registerType(
+    definition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
+  ) {
+    if (typeof definition === 'function') definition = definition();
+    return this.expressionsService.registerType({ ...definition, namespace: this.namespace });
+  }
+
+  protected run<Input, Output>(
+    ast: string | ExpressionAstExpression,
+    input: Input,
+    params?: ExpressionExecutionParams
+  ) {
+    return this.expressionsService.run<Input, Output>(ast, input, {
+      ...params,
+      namespace: this.namespace,
+    });
+  }
+
+  protected execute<Input = unknown, Output = unknown>(
+    ast: string | ExpressionAstExpression,
+    input: Input,
+    params?: ExpressionExecutionParams
+  ) {
+    return this.expressionsService.execute<Input, Output>(ast, input, {
+      ...params,
+      namespace: this.namespace,
+    });
+  }
+
+  protected getFunction(name: string) {
+    return this.expressionsService.getFunction(name, this.namespace);
+  }
+
+  protected getFunctions() {
+    return this.expressionsService.getFunctions(this.namespace);
+  }
   /**
    * Returns Kibana Platform *setup* life-cycle contract. Useful to return the
    * same contract on server-side and browser-side.
@@ -51,24 +118,9 @@ export class ExpressionsServiceFork implements ExpressionServiceFork {
   public setup(): ExpressionsServiceSetup {
     return {
       ...this.expressionsService,
-      registerFunction: (definition) => {
-        if (typeof definition === 'function') definition = definition();
-        return this.expressionsService.registerFunction({
-          ...definition,
-          namespace: this.namespace,
-        });
-      },
-      registerRenderer: (definition) => {
-        if (typeof definition === 'function') definition = definition();
-        return this.expressionsService.registerRenderer({
-          ...definition,
-          namespace: this.namespace,
-        });
-      },
-      registerType: (definition) => {
-        if (typeof definition === 'function') definition = definition();
-        return this.expressionsService.registerType({ ...definition, namespace: this.namespace });
-      },
+      registerFunction: this.registerFunction,
+      registerRenderer: this.registerRenderer,
+      registerType: this.registerType,
     };
   }
 
@@ -79,33 +131,10 @@ export class ExpressionsServiceFork implements ExpressionServiceFork {
   public start(): ExpressionsServiceStart {
     return {
       ...this.expressionsService,
-      run: <Input, Output>(
-        ast: string | ExpressionAstExpression,
-        input: Input,
-        params?: ExpressionExecutionParams
-      ) => {
-        return this.expressionsService.run<Input, Output>(ast, input, {
-          ...params,
-          namespace: this.namespace,
-        });
-      },
-      execute: <Input = unknown, Output = unknown>(
-        ast: string | ExpressionAstExpression,
-        // This any is for legacy reasons.
-        input: Input,
-        params?: ExpressionExecutionParams
-      ) => {
-        return this.expressionsService.execute<Input, Output>(ast, input, {
-          ...params,
-          namespace: this.namespace,
-        });
-      },
-      getFunction: (name: string) => {
-        return this.expressionsService.getFunction(name, this.namespace);
-      },
-      getFunctions: () => {
-        return this.expressionsService.getFunctions(this.namespace);
-      },
+      run: this.run,
+      execute: this.execute,
+      getFunction: this.getFunction,
+      getFunctions: this.getFunctions,
     };
   }
 }
