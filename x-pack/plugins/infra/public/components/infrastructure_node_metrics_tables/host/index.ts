@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { createLazyHostMetricsTable } from './create_lazy_host_metrics_table';
 export { HostMetricsTable } from './host_metrics_table';
 export { useHostMetricsTable } from './use_host_metrics_table';
