@@ -11,7 +11,7 @@ import { useKibana } from '../../lib/kibana';
 export const getUniqueStorageKey = (id: string): string => `kibana.siem:${id}.query.toggle`;
 
 export const useQueryToggle = (
-  id: string
+  id?: string
 ): {
   toggleStatus: boolean;
   setToggleStatus: (b: boolean) => void;
@@ -30,8 +30,13 @@ export const useQueryToggle = (
     [storage, storageKey]
   );
 
-  return {
-    toggleStatus: storageValue,
-    setToggleStatus,
-  };
+  return id
+    ? {
+        toggleStatus: storageValue,
+        setToggleStatus,
+      }
+    : {
+        toggleStatus: true,
+        setToggleStatus: () => {},
+      };
 };

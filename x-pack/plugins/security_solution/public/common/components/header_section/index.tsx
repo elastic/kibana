@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle, EuiTitleSize } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiTitle,
+  EuiTitleSize,
+} from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
@@ -51,6 +58,8 @@ export interface HeaderSectionProps extends HeaderProps {
   split?: boolean;
   stackHeader?: boolean;
   subtitle?: string | React.ReactNode;
+  toggleQuery: (status: boolean) => void;
+  toggleStatus: boolean;
   title: string | React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
@@ -74,6 +83,8 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   subtitle,
   title,
   titleSize = 'm',
+  toggleQuery,
+  toggleStatus,
   tooltip,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
@@ -85,24 +96,39 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
       <EuiFlexItem grow={growLeftSplit}>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
-            <EuiTitle size={titleSize}>
-              <StyledTitle data-test-subj="header-section-title">
-                <span className="eui-textBreakNormal">{title}</span>
-                {tooltip && (
-                  <>
-                    {' '}
-                    <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
-                  </>
-                )}
-              </StyledTitle>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize={'none'}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  color="text"
+                  size="xs"
+                  display="empty"
+                  title={toggleStatus ? 'Open' : 'Closed'}
+                  aria-label={toggleStatus ? 'Open' : 'Closed'}
+                  iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
+                  onClick={() => toggleQuery(!toggleStatus)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size={titleSize}>
+                  <StyledTitle data-test-subj="header-section-title">
+                    <span className="eui-textBreakNormal">{title}</span>
+                    {tooltip && (
+                      <>
+                        {' '}
+                        <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
+                      </>
+                    )}
+                  </StyledTitle>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-            {!hideSubtitle && (
+            {!hideSubtitle && !toggleStatus && (
               <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
             )}
           </EuiFlexItem>
 
-          {id && showInspectButton && (
+          {id && showInspectButton && !toggleStatus && (
             <EuiFlexItem grow={false}>
               <InspectButton
                 isDisabled={isInspectDisabled}
@@ -113,11 +139,11 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
             </EuiFlexItem>
           )}
 
-          {headerFilters && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}
+          {headerFilters && toggleStatus && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      {children && (
+      {children && toggleStatus && (
         <EuiFlexItem data-test-subj="header-section-supplements" grow={split ? true : false}>
           {children}
         </EuiFlexItem>

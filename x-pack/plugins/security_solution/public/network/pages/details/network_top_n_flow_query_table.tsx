@@ -6,11 +6,12 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useState } from 'react';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
-import { useNetworkTopNFlow } from '../../containers/network_top_n_flow';
+import { useNetworkTopNFlow, ID } from '../../containers/network_top_n_flow';
 import { NetworkWithIndexComponentsQueryTableProps } from './types';
+import { useQueryToggle } from '../../../common/components/query_toggle';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 
@@ -25,6 +26,9 @@ export const NetworkTopNFlowQueryTable = ({
   startDate,
   type,
 }: NetworkWithIndexComponentsQueryTableProps) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip && !toggleStatus);
+  console.log('querySkip', querySkip);
   const [
     loading,
     { id, inspect, isInspected, loadPage, networkTopNFlow, pageInfo, refetch, totalCount },
@@ -34,7 +38,7 @@ export const NetworkTopNFlowQueryTable = ({
     flowTarget,
     indexNames,
     ip,
-    skip,
+    skip: querySkip,
     startDate,
     type,
   });
@@ -51,6 +55,7 @@ export const NetworkTopNFlowQueryTable = ({
       loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}
