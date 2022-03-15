@@ -19,12 +19,12 @@ export default function ({ getService }) {
       max: '2019-04-09T23:59:59.741Z',
     };
 
-    before('load archive', async () => {
-      await esArchiver.load(archive);
+    before('load archive', () => {
+      return esArchiver.load(archive);
     });
 
-    after('unload archive', async () => {
-      await esArchiver.unload(archive);
+    after('unload archive', () => {
+      return esArchiver.unload(archive);
     });
 
     it('should get collection status', async () => {
