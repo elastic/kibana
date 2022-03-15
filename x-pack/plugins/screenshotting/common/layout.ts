@@ -69,7 +69,7 @@ export type LayoutParams<ID = string> = Ensure<
  * Supported layout types.
  */
 export const LayoutTypes = {
-  PRESERVE_LAYOUT: 'preserve_layout' as 'preserve_layout',
-  PRINT: 'print' as 'print',
-  CANVAS: 'canvas' as 'canvas', // no margins or branding in the layout
+  PRESERVE_LAYOUT: 'preserve_layout' as const,
+  PRINT: 'print' as const,
+  CANVAS: 'canvas' as const, // no margins or branding in the layout
 };

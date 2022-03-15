@@ -34,9 +34,10 @@ export type { ScreenshotObservableResult } from './observable';
 export interface ScreenshotOptions<F extends 'pdf' | 'png' = 'png'>
   extends ScreenshotObservableOptions {
   /**
-   * Whether to format the output as a PDF or PNG. Defaults to PNG.
+   * Whether to format the output as a PDF or PNG. Defaults to requiring 'png'
+   * unless specified otherwise.
    */
-  format?: F;
+  format: F;
 
   layout: LayoutParams;
 
