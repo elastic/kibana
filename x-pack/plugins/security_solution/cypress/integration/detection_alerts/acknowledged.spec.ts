@@ -73,7 +73,7 @@ describe('Marking alerts as acknowledged with read only role', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
-    createCustomRuleEnabled(getNewRule());
+    createCustomRuleActivated(getNewRule());
     refreshPage();
     waitForAlertsToPopulate(100);
   });
