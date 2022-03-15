@@ -13,7 +13,7 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const defaultSelectionColor = euiTheme.colors.accent;
+    const defaultSelectionColor = euiTheme.colors.primary;
 
     const scroller: CSSObject = {
       position: 'relative',
