@@ -19,9 +19,12 @@ import {
 
 describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', () => {
   let testBed: OverviewTestBed;
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('When load succeeds', () => {
@@ -31,7 +34,7 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         const deprecationService = deprecationsServiceMock.createStartContract();
         kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
 
-        testBed = await setupOverviewPage(mockEnvironment.httpSetup, {
+        testBed = await setupOverviewPage(httpSetup, {
           services: {
             core: {
               deprecations: deprecationService,
@@ -46,9 +49,7 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
 
     describe('when there are critical and warning issues', () => {
       beforeEach(async () => {
-        mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
-          esCriticalAndWarningDeprecations
-        );
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esCriticalAndWarningDeprecations);
         await setup();
       });
 
@@ -68,9 +69,7 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
 
     describe('when there are critical but no warning issues', () => {
       beforeEach(async () => {
-        mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
-          esCriticalOnlyDeprecations
-        );
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esCriticalOnlyDeprecations);
         await setup();
       });
 
@@ -90,7 +89,7 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
 
     describe('when there no critical or warning issues', () => {
       beforeEach(async () => {
-        mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esNoDeprecations);
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esNoDeprecations);
         await setup();
       });
 
@@ -116,10 +115,10 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         message: 'Internal server error',
       };
 
-      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupOverviewPage(mockEnvironment.httpSetup);
+        testBed = await setupOverviewPage(httpSetup);
       });
 
       const { component, find } = testBed;
@@ -136,10 +135,10 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         message: 'Forbidden',
       };
 
-      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupOverviewPage(mockEnvironment.httpSetup);
+        testBed = await setupOverviewPage(httpSetup);
       });
 
       const { component, find } = testBed;
@@ -159,10 +158,10 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         },
       };
 
-      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupOverviewPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
+        testBed = await setupOverviewPage(httpSetup, { isReadOnlyMode: false });
       });
 
       const { component, find } = testBed;
@@ -182,10 +181,10 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         },
       };
 
-      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupOverviewPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
+        testBed = await setupOverviewPage(httpSetup, { isReadOnlyMode: false });
       });
 
       const { component, find } = testBed;

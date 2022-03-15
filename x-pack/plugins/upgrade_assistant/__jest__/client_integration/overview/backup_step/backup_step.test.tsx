@@ -14,14 +14,19 @@ import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Backup Step', () => {
   let testBed: OverviewTestBed;
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let setDelayResponse: ReturnType<typeof setupEnvironment>['setDelayResponse'];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+    setDelayResponse = mockEnvironment.setDelayResponse;
   });
 
   describe('On-prem', () => {
     beforeEach(async () => {
-      testBed = await setupOverviewPage(mockEnvironment.httpSetup);
+      testBed = await setupOverviewPage(httpSetup);
     });
 
     test('Shows link to Snapshot and Restore', () => {
@@ -38,7 +43,7 @@ describe('Overview - Backup Step', () => {
 
   describe('On Cloud', () => {
     const setupCloudOverviewPage = async () =>
-      setupOverviewPage(mockEnvironment.httpSetup, {
+      setupOverviewPage(httpSetup, {
         plugins: {
           cloud: {
             isCloudEnabled: true,
@@ -50,7 +55,7 @@ describe('Overview - Backup Step', () => {
     describe('initial loading state', () => {
       beforeEach(async () => {
         // We don't want the request to load backup status to resolve immediately.
-        mockEnvironment.setDelayResponse(true);
+        setDelayResponse(true);
         testBed = await setupCloudOverviewPage();
       });
 
@@ -62,7 +67,7 @@ describe('Overview - Backup Step', () => {
 
     describe('error state', () => {
       beforeEach(async () => {
-        mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
+        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
           statusCode: 400,
           message: 'error',
         });
@@ -83,7 +88,7 @@ describe('Overview - Backup Step', () => {
       });
 
       test('loads on prem if missing found-snapshots repository', async () => {
-        mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
+        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
           statusCode: 404,
           message: `[${CLOUD_SNAPSHOT_REPOSITORY}] missing`,
         });
@@ -102,7 +107,7 @@ describe('Overview - Backup Step', () => {
     describe('success state', () => {
       describe('when data is backed up', () => {
         beforeEach(async () => {
-          mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
+          httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
             isBackedUp: true,
             lastBackupTime: '2021-08-25T19:59:59.863Z',
           });
@@ -125,7 +130,7 @@ describe('Overview - Backup Step', () => {
 
       describe(`when data isn't backed up`, () => {
         beforeEach(async () => {
-          mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
+          httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
             isBackedUp: false,
             lastBackupTime: undefined,
           });
@@ -151,7 +156,7 @@ describe('Overview - Backup Step', () => {
         jest.useFakeTimers();
 
         // First request will succeed.
-        mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
+        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
           isBackedUp: true,
           lastBackupTime: '2021-08-25T19:59:59.863Z',
         });
@@ -168,7 +173,7 @@ describe('Overview - Backup Step', () => {
         expect(exists('backupStep-complete')).toBe(true);
 
         // Second request will error.
-        mockEnvironment.httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
+        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
           statusCode: 400,
           message: 'error',
         });

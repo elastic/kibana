@@ -18,35 +18,34 @@ import {
 
 describe('Index settings deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   const indexSettingDeprecation = esDeprecationsMockResponse.deprecations[1];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
-    mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
-      esDeprecationsMockResponse
-    );
-    mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
+    httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
       snapshotId: MOCK_SNAPSHOT_ID,
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
-    mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse(
-      MOCK_REINDEX_DEPRECATION.index!,
-      {
-        reindexOp: null,
-        warnings: [],
-        hasRequiredPrivileges: true,
-        meta: {
-          indexName: 'foo',
-          reindexName: 'reindexed-foo',
-          aliases: [],
-        },
-      }
-    );
+    httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
+      reindexOp: null,
+      warnings: [],
+      hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'foo',
+        reindexName: 'reindexed-foo',
+        aliases: [],
+      },
+    });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
     const { actions, component } = testBed;
@@ -70,16 +69,15 @@ describe('Index settings deprecation flyout', () => {
   it('removes deprecated index settings', async () => {
     const { find, actions, exists } = testBed;
 
-    mockEnvironment.httpRequestsMockHelpers.setUpdateIndexSettingsResponse(
-      indexSettingDeprecation.index!,
-      { acknowledged: true }
-    );
+    httpRequestsMockHelpers.setUpdateIndexSettingsResponse(indexSettingDeprecation.index!, {
+      acknowledged: true,
+    });
 
     expect(exists('indexSettingsDetails.warningDeprecationBadge')).toBe(true);
 
     await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
-    expect(mockEnvironment.httpSetup.post).toHaveBeenLastCalledWith(
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
       `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`,
       expect.anything()
     );
@@ -108,7 +106,7 @@ describe('Index settings deprecation flyout', () => {
       message: 'Remove index settings error',
     };
 
-    mockEnvironment.httpRequestsMockHelpers.setUpdateIndexSettingsResponse(
+    httpRequestsMockHelpers.setUpdateIndexSettingsResponse(
       indexSettingDeprecation.index!,
       undefined,
       error
@@ -116,7 +114,7 @@ describe('Index settings deprecation flyout', () => {
 
     await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
-    expect(mockEnvironment.httpSetup.post).toHaveBeenLastCalledWith(
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
       `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`,
       expect.anything()
     );

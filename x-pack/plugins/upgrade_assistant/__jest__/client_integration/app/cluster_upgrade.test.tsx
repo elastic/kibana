@@ -12,14 +12,17 @@ import { AppTestBed, setupAppPage } from './app.helpers';
 
 describe('Cluster upgrade', () => {
   let testBed: AppTestBed;
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('when user is still preparing for upgrade', () => {
     beforeEach(async () => {
-      testBed = await setupAppPage(mockEnvironment.httpSetup);
+      testBed = await setupAppPage(httpSetup);
     });
 
     test('renders overview', () => {
@@ -37,7 +40,7 @@ describe('Cluster upgrade', () => {
   // `es deprecations` response.
   describe('when cluster is in the process of a rolling upgrade', () => {
     beforeEach(async () => {
-      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, {
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, {
         statusCode: 426,
         message: '',
         attributes: {
@@ -46,7 +49,7 @@ describe('Cluster upgrade', () => {
       });
 
       await act(async () => {
-        testBed = await setupAppPage(mockEnvironment.httpSetup);
+        testBed = await setupAppPage(httpSetup);
       });
     });
 
@@ -61,7 +64,7 @@ describe('Cluster upgrade', () => {
 
   describe('when cluster has been upgraded', () => {
     beforeEach(async () => {
-      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, {
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, {
         statusCode: 426,
         message: '',
         attributes: {
@@ -70,7 +73,7 @@ describe('Cluster upgrade', () => {
       });
 
       await act(async () => {
-        testBed = await setupAppPage(mockEnvironment.httpSetup);
+        testBed = await setupAppPage(httpSetup);
       });
     });
 

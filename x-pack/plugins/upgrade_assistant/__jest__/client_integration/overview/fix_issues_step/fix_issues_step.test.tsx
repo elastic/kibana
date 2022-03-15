@@ -15,22 +15,23 @@ import { esCriticalAndWarningDeprecations, esNoDeprecations } from './mock_es_is
 
 describe('Overview - Fix deprecation issues step', () => {
   let testBed: OverviewTestBed;
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('when there are critical issues in one panel', () => {
     beforeEach(async () => {
-      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
-        esCriticalAndWarningDeprecations
-      );
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esCriticalAndWarningDeprecations);
 
       await act(async () => {
         const deprecationService = deprecationsServiceMock.createStartContract();
         kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
 
-        testBed = await setupOverviewPage(mockEnvironment.httpSetup, {
+        testBed = await setupOverviewPage(httpSetup, {
           services: {
             core: {
               deprecations: deprecationService,
@@ -50,13 +51,13 @@ describe('Overview - Fix deprecation issues step', () => {
 
   describe('when there are no critical issues for either panel', () => {
     beforeEach(async () => {
-      mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esNoDeprecations);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esNoDeprecations);
 
       await act(async () => {
         const deprecationService = deprecationsServiceMock.createStartContract();
         kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
 
-        testBed = await setupOverviewPage(mockEnvironment.httpSetup, {
+        testBed = await setupOverviewPage(httpSetup, {
           services: {
             core: {
               deprecations: deprecationService,

@@ -24,15 +24,16 @@ describe('Kibana deprecations - Deprecations table', () => {
     mockedConfigKibanaDeprecations,
   } = kibanaDeprecationsServiceHelpers.defaultMockedResponses;
 
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
+    const mockEnvironment = setupEnvironment();
+    httpSetup = mockEnvironment.httpSetup;
     deprecationService = deprecationsServiceMock.createStartContract();
 
     await act(async () => {
       kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService });
 
-      testBed = await setupKibanaPage(mockEnvironment.httpSetup, {
+      testBed = await setupKibanaPage(httpSetup, {
         services: {
           core: {
             deprecations: deprecationService,
@@ -105,7 +106,7 @@ describe('Kibana deprecations - Deprecations table', () => {
   describe('No deprecations', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setupKibanaPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
+        testBed = await setupKibanaPage(httpSetup, { isReadOnlyMode: false });
       });
 
       const { component } = testBed;

@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from 'src/core/public';
-import { Overview } from '../../../public/application/components/overview';
+import { Overview } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {

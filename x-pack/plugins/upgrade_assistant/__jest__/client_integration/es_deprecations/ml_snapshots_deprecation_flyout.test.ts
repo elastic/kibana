@@ -15,22 +15,22 @@ import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './moc
 describe('Machine learning deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
   const mlDeprecation = esDeprecationsMockResponse.deprecations[0];
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
-    mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
-      esDeprecationsMockResponse
-    );
-    mockEnvironment.httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({
-      mlUpgradeModeEnabled: false,
-    });
-    mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
+    httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeModeEnabled: false });
+    httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
       snapshotId: MOCK_SNAPSHOT_ID,
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
-    mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
+    httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
       reindexOp: null,
       warnings: [],
       hasRequiredPrivileges: true,
@@ -64,14 +64,14 @@ describe('Machine learning deprecation flyout', () => {
     it('successfully upgrades snapshots', async () => {
       const { find, actions, exists } = testBed;
 
-      mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotResponse({
+      httpRequestsMockHelpers.setUpgradeMlSnapshotResponse({
         nodeId: 'my_node',
         snapshotId: MOCK_SNAPSHOT_ID,
         jobId: MOCK_JOB_ID,
         status: 'in_progress',
       });
 
-      mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+      httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
         nodeId: 'my_node',
         snapshotId: MOCK_SNAPSHOT_ID,
         jobId: MOCK_JOB_ID,
@@ -84,13 +84,13 @@ describe('Machine learning deprecation flyout', () => {
       await actions.mlDeprecationFlyout.clickUpgradeSnapshot();
 
       // First, we expect a POST request to upgrade the snapshot
-      expect(mockEnvironment.httpSetup.post).toHaveBeenLastCalledWith(
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
         '/api/upgrade_assistant/ml_snapshots',
         expect.anything()
       );
 
       // Next, we expect a GET request to check the status of the upgrade
-      expect(mockEnvironment.httpSetup.get).toHaveBeenLastCalledWith(
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
         `/api/upgrade_assistant/ml_snapshots/${MOCK_JOB_ID}/${MOCK_SNAPSHOT_ID}`,
         expect.anything()
       );
@@ -117,8 +117,8 @@ describe('Machine learning deprecation flyout', () => {
         message: 'Upgrade snapshot error',
       };
 
-      mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotResponse(undefined, error);
-      mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+      httpRequestsMockHelpers.setUpgradeMlSnapshotResponse(undefined, error);
+      httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
         nodeId: 'my_node',
         snapshotId: MOCK_SNAPSHOT_ID,
         jobId: MOCK_JOB_ID,
@@ -128,7 +128,7 @@ describe('Machine learning deprecation flyout', () => {
 
       await actions.mlDeprecationFlyout.clickUpgradeSnapshot();
 
-      expect(mockEnvironment.httpSetup.post).toHaveBeenLastCalledWith(
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
         '/api/upgrade_assistant/ml_snapshots',
         expect.anything()
       );
@@ -148,14 +148,12 @@ describe('Machine learning deprecation flyout', () => {
     });
 
     it('Disables actions if ml_upgrade_mode is enabled', async () => {
-      mockEnvironment.httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({
+      httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({
         mlUpgradeModeEnabled: true,
       });
 
       await act(async () => {
-        testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, {
-          isReadOnlyMode: false,
-        });
+        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
       });
 
       const { actions, exists, component } = testBed;
@@ -179,7 +177,7 @@ describe('Machine learning deprecation flyout', () => {
 
       const jobId = (mlDeprecation.correctiveAction! as MlAction).jobId;
       const snapshotId = (mlDeprecation.correctiveAction! as MlAction).snapshotId;
-      mockEnvironment.httpRequestsMockHelpers.setDeleteMlSnapshotResponse(jobId, snapshotId, {
+      httpRequestsMockHelpers.setDeleteMlSnapshotResponse(jobId, snapshotId, {
         acknowledged: true,
       });
 
@@ -188,7 +186,7 @@ describe('Machine learning deprecation flyout', () => {
 
       await actions.mlDeprecationFlyout.clickDeleteSnapshot();
 
-      expect(mockEnvironment.httpSetup.delete).toHaveBeenLastCalledWith(
+      expect(httpSetup.delete).toHaveBeenLastCalledWith(
         `/api/upgrade_assistant/ml_snapshots/${jobId}/${snapshotId}`,
         expect.anything()
       );
@@ -217,16 +215,11 @@ describe('Machine learning deprecation flyout', () => {
 
       const jobId = (mlDeprecation.correctiveAction! as MlAction).jobId;
       const snapshotId = (mlDeprecation.correctiveAction! as MlAction).snapshotId;
-      mockEnvironment.httpRequestsMockHelpers.setDeleteMlSnapshotResponse(
-        jobId,
-        snapshotId,
-        undefined,
-        error
-      );
+      httpRequestsMockHelpers.setDeleteMlSnapshotResponse(jobId, snapshotId, undefined, error);
 
       await actions.mlDeprecationFlyout.clickDeleteSnapshot();
 
-      expect(mockEnvironment.httpSetup.delete).toHaveBeenLastCalledWith(
+      expect(httpSetup.delete).toHaveBeenLastCalledWith(
         `/api/upgrade_assistant/ml_snapshots/${jobId}/${snapshotId}`,
         expect.anything()
       );

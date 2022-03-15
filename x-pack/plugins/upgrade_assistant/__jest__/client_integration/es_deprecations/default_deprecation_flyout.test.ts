@@ -13,19 +13,21 @@ import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './moc
 
 describe('Default deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
-    mockEnvironment.httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
-      esDeprecationsMockResponse
-    );
-    mockEnvironment.httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
+    httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
       snapshotId: MOCK_SNAPSHOT_ID,
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
-    mockEnvironment.httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
+    httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
       reindexOp: null,
       warnings: [],
       hasRequiredPrivileges: true,
@@ -37,7 +39,7 @@ describe('Default deprecation flyout', () => {
     });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, {
+      testBed = await setupElasticsearchPage(httpSetup, {
         isReadOnlyMode: false,
       });
     });

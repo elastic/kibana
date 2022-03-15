@@ -16,9 +16,10 @@ describe('Kibana deprecations - Deprecations table - Error handling', () => {
   let testBed: KibanaTestBed;
   const deprecationService = deprecationsServiceMock.createStartContract();
 
-  let mockEnvironment: ReturnType<typeof setupEnvironment>;
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    mockEnvironment = setupEnvironment();
+    const mockEnvironment = setupEnvironment();
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   test('handles plugin errors', async () => {
@@ -57,7 +58,7 @@ describe('Kibana deprecations - Deprecations table - Error handling', () => {
         ],
       });
 
-      testBed = await setupKibanaPage(mockEnvironment.httpSetup, {
+      testBed = await setupKibanaPage(httpSetup, {
         services: {
           core: {
             deprecations: deprecationService,
@@ -83,7 +84,7 @@ describe('Kibana deprecations - Deprecations table - Error handling', () => {
         mockRequestErrorMessage: 'Internal Server Error',
       });
 
-      testBed = await setupKibanaPage(mockEnvironment.httpSetup, {
+      testBed = await setupKibanaPage(httpSetup, {
         services: {
           core: {
             deprecations: deprecationService,
