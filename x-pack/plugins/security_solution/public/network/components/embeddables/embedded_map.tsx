@@ -245,6 +245,28 @@ export const EmbeddedMapComponent = ({
     [storage]
   );
 
+  const content = useMemo(
+    () =>
+      storageValue ? (
+        <Embeddable>
+          <InPortal node={portalNode}>
+            <MapToolTip />
+          </InPortal>
+
+          <EmbeddableMap maintainRatio={!isIndexError}>
+            {isIndexError ? (
+              <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
+            ) : embeddable != null ? (
+              <services.embeddable.EmbeddablePanel embeddable={embeddable} />
+            ) : (
+              <Loader data-test-subj="loading-panel" overlay size="xl" />
+            )}
+          </EmbeddableMap>
+        </Embeddable>
+      ) : null,
+    [embeddable, isIndexError, portalNode, services, storageValue]
+  );
+
   return isError ? null : (
     <StyledEuiAccordion
       onToggle={setDefaultMapVisibility}
@@ -265,21 +287,7 @@ export const EmbeddedMapComponent = ({
       paddingSize="none"
       initialIsOpen={storageValue}
     >
-      <Embeddable>
-        <InPortal node={portalNode}>
-          <MapToolTip />
-        </InPortal>
-
-        <EmbeddableMap maintainRatio={!isIndexError}>
-          {isIndexError ? (
-            <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
-          ) : embeddable != null ? (
-            <services.embeddable.EmbeddablePanel embeddable={embeddable} />
-          ) : (
-            <Loader data-test-subj="loading-panel" overlay size="xl" />
-          )}
-        </EmbeddableMap>
-      </Embeddable>
+      {content}
     </StyledEuiAccordion>
   );
 };
