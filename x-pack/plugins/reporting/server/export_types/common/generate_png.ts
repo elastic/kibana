@@ -24,7 +24,7 @@ interface PngResult {
 export function generatePngObservable(
   reporting: ReportingCore,
   logger: Logger,
-  options: PngScreenshotOptions
+  options: Omit<PngScreenshotOptions, 'format'>
 ): Rx.Observable<PngResult> {
   const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);
   const apmLayout = apmTrans?.startSpan('create-layout', 'setup');
@@ -41,7 +41,7 @@ export function generatePngObservable(
   const apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', 'setup');
   let apmBuffer: typeof apm.currentSpan;
 
-  return reporting.getScreenshotsPng({ ...options, layout }).pipe(
+  return reporting.getScreenshotsPng({ ...options, layout, format: 'png' }).pipe(
     tap(({ metrics }) => {
       if (metrics) {
         apmTrans?.setLabel('cpu', metrics.cpu, false);

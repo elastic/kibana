@@ -31,8 +31,13 @@ import { Semaphore } from './semaphore';
 export type { UrlOrUrlWithContext } from './observable';
 export type { ScreenshotObservableResult } from './observable';
 
-export interface ScreenshotOptions<F extends string = 'png'> extends ScreenshotObservableOptions {
-  format: F;
+export interface ScreenshotOptions<F extends 'pdf' | 'png' = 'png'>
+  extends ScreenshotObservableOptions {
+  /**
+   * Whether to format the output as a PDF or PNG. Defaults to PNG.
+   */
+  format?: F;
+
   layout: LayoutParams;
 
   /**
