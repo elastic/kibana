@@ -14,11 +14,7 @@ import {
   IScopedClusterClient,
 } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../../security/server';
-import type {
-  JobType,
-  MlSavedObjectType,
-  TrainedModelType,
-} from '../../common/types/saved_objects';
+import type { JobType, TrainedModelType } from '../../common/types/saved_objects';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
@@ -50,7 +46,7 @@ export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFacto
 
 type UpdateJobsSpacesResult = Record<
   string,
-  { success: boolean; type: MlSavedObjectType; error?: any }
+  { success: boolean; type: JobType | TrainedModelType; error?: any }
 >;
 
 export function jobSavedObjectServiceFactory(
@@ -340,6 +336,7 @@ export function jobSavedObjectServiceFactory(
     spacesToAdd: string[],
     spacesToRemove: string[]
   ): Promise<UpdateJobsSpacesResult> {
+    const type = jobType;
     if (jobIds.length === 0 || (spacesToAdd.length === 0 && spacesToRemove.length === 0)) {
       return {};
     }
@@ -354,7 +351,7 @@ export function jobSavedObjectServiceFactory(
       if (job === undefined) {
         results[jobId] = {
           success: false,
-          type: ML_JOB_SAVED_OBJECT_TYPE,
+          type,
           error: createJobError(jobId, 'job_id'),
         };
       } else {
@@ -374,13 +371,13 @@ export function jobSavedObjectServiceFactory(
         if (error) {
           results[jobId] = {
             success: false,
-            type: ML_JOB_SAVED_OBJECT_TYPE,
+            type,
             error: getSavedObjectClientError(error),
           };
         } else {
           results[jobId] = {
             success: true,
-            type: ML_JOB_SAVED_OBJECT_TYPE,
+            type,
           };
         }
       });
@@ -391,7 +388,7 @@ export function jobSavedObjectServiceFactory(
         const jobId = jobObjectIdMap.get(objectId)!;
         results[jobId] = {
           success: false,
-          type: ML_JOB_SAVED_OBJECT_TYPE,
+          type,
           error: clientError,
         };
       });
@@ -685,6 +682,7 @@ export function jobSavedObjectServiceFactory(
     spacesToAdd: string[],
     spacesToRemove: string[]
   ): Promise<UpdateJobsSpacesResult> {
+    const type: TrainedModelType = 'trained-model';
     if (modelIds.length === 0 || (spacesToAdd.length === 0 && spacesToRemove.length === 0)) {
       return {};
     }
@@ -698,7 +696,7 @@ export function jobSavedObjectServiceFactory(
       if (model === undefined) {
         results[modelId] = {
           success: false,
-          type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+          type,
           error: createTrainedModelError(modelId),
         };
       } else {
@@ -717,13 +715,13 @@ export function jobSavedObjectServiceFactory(
         if (error) {
           results[model] = {
             success: false,
-            type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+            type,
             error: getSavedObjectClientError(error),
           };
         } else {
           results[model] = {
             success: true,
-            type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+            type,
           };
         }
       });
@@ -734,7 +732,7 @@ export function jobSavedObjectServiceFactory(
         const modelId = trainedModelObjectIdMap.get(objectId)!;
         results[modelId] = {
           success: false,
-          type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+          type,
           error: clientError,
         };
       });
