@@ -21,7 +21,7 @@ export class ExpressionFunctionParameter<T = unknown> {
   /**
    * @deprecated
    */
-  strict: boolean;
+  strict?: boolean;
   options: T[];
 
   constructor(name: string, arg: ArgumentType<T>) {
@@ -40,7 +40,7 @@ export class ExpressionFunctionParameter<T = unknown> {
     this.multi = !!multi;
     this.options = options || [];
     this.resolve = resolve == null ? true : resolve;
-    this.strict = !!strict;
+    this.strict = strict;
   }
 
   accepts(type: string) {
