@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 
-export * from './use_quick_start_create_form';
-export * from './use_wait_for_fleet_server';
+export const AdvancedTab: React.FunctionComponent = () => {
+  return <>Advanced!</>;
+};

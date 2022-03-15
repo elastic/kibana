@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './advanced';
 export * from './quick_start';

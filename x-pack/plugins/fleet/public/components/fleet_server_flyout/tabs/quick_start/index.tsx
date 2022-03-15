@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import {
@@ -24,17 +25,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useQuickStartCreateForm } from '../hooks';
-import { useKibanaVersion, useLink } from '../../../hooks';
+import { useKibanaVersion, useLink } from '../../../../hooks';
 
-// TODO: Move me 🙂
-import { PlatformSelector } from '../../enrollment_instructions/manual/platform_selector';
+import { PlatformSelector } from '../../../enrollment_instructions/manual/platform_selector';
+import { useQuickStartCreateForm, useWaitForFleetServer } from '../../hooks';
 
 const ARTIFACT_BASE_URL = 'https://artifacts.elastic.co/downloads/beats/elastic-agent';
 
 export const QuickStartTab: React.FunctionComponent = () => {
   const [fleetServerHost, setFleetServerHost] = useState('');
   const quickStartCreateForm = useQuickStartCreateForm();
+  const { isFleetServerReady } = useWaitForFleetServer();
 
   const kibanaVersion = useKibanaVersion();
   const { getHref } = useLink();
@@ -149,7 +150,12 @@ export const QuickStartTab: React.FunctionComponent = () => {
         title: i18n.translate('xpack.fleet.fleetServerFlyout.installFleetServerTitle', {
           defaultMessage: 'Install Fleet Server to a centralized host',
         }),
-        status: quickStartCreateForm.status === 'success' ? 'current' : 'disabled',
+        status:
+          quickStartCreateForm.status === 'success'
+            ? isFleetServerReady
+              ? 'complete'
+              : 'current'
+            : 'disabled',
         children:
           quickStartCreateForm.status === 'success' ? (
             <>
@@ -177,11 +183,43 @@ export const QuickStartTab: React.FunctionComponent = () => {
         title: i18n.translate('xpack.fleet.fleetServerFlyout.confirmConnectionTitle', {
           defaultMessage: 'Confirm connection',
         }),
-        status: 'disabled',
-        children: <>Step 3!</>,
+        status:
+          quickStartCreateForm.status === 'success' && isFleetServerReady ? 'complete' : 'disabled',
+        children:
+          quickStartCreateForm.status === 'success' && isFleetServerReady ? (
+            <>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.fleetServerFlyout.connectionSuccessful"
+                  defaultMessage="You can now continue enrolling agents with Fleet."
+                />
+              </EuiText>
+
+              <EuiSpacer size="m" />
+
+              <EuiButton color="primary">
+                <FormattedMessage
+                  id="xpack.fleet.fleetServerFlyout.continueEnrollingButton"
+                  defaultMessage="Continue enrolling Elastic Agent"
+                />
+              </EuiButton>
+            </>
+          ) : (
+            <>{quickStartCreateForm.status === 'success' && <EuiLoadingSpinner size="m" />}</>
+          ),
       },
     ];
-  }, [commands, fleetServerHost, getHref, quickStartCreateForm]);
+  }, [
+    commands.deb,
+    commands.linux,
+    commands.macos,
+    commands.rpm,
+    commands.windows,
+    fleetServerHost,
+    getHref,
+    isFleetServerReady,
+    quickStartCreateForm,
+  ]);
 
   return <EuiSteps steps={steps} />;
 };

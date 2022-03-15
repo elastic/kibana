@@ -27,7 +27,7 @@ export const getHttp = (basepath = BASE_PATH) => {
       serverBasePath: basepath,
     },
     get: (async (path: string, options: HttpFetchOptions) => {
-      action('get')(path, options);
+      action('get')(path, JSON.stringify(options));
       // TODO: all of this needs revision, as it's far too clunky... but it works for now,
       // with the few paths we're supporting.
       if (path === '/api/fleet/agents/setup') {
@@ -35,7 +35,7 @@ export const getHttp = (basepath = BASE_PATH) => {
           isReady = true;
           return { isReady: false, missing_requirements: ['api_keys', 'fleet_server'] };
         }
-        return { isInitialized: true, nonFatalErrors: [] };
+        return { isReady: true, isInitialized: true, nonFatalErrors: [], missing_requirements: [] };
       }
 
       if (path === '/api/fleet/epm/categories') {
@@ -87,15 +87,24 @@ export const getHttp = (basepath = BASE_PATH) => {
         return { items: [] };
       }
 
-      action(path)('KP: UNSUPPORTED ROUTE');
+      action(path)(`UNSUPPORTED ROUTE: GET ${path}`);
       return {};
     }) as HttpHandler,
     post: (async (path: string, options: HttpFetchOptions) => {
+      action('post')(path, JSON.stringify(options));
+
       if (path.match('/api/fleet/settings')) {
         return { items: [] };
       }
 
-      action(path)('KP: UNSUPPORTED ROUTE');
+      if (path.match('/api/fleet/service_tokens')) {
+        return {
+          name: 'test-token',
+          value: 'test-token-value',
+        };
+      }
+
+      action(path)(`UNSUPPORTED ROUTE: POST ${path}`);
     }) as HttpHandler,
   } as unknown as HttpStart;
 
