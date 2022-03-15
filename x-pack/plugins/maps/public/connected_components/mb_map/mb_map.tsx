@@ -190,7 +190,6 @@ export class MbMap extends Component<Props, State> {
         options.bounds = [-170, -60, 170, 75];
       }
       const mbMap = new maplibregl.Map(options);
-      console.log(maplibregl);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
 
