@@ -173,7 +173,7 @@ export function ChangeDataView({
                     }}
                   >
                     {i18n.translate('data.query.queryBar.indexPattern.addFieldButton', {
-                      defaultMessage: 'Add a field to this data view...',
+                      defaultMessage: 'Add a field to this data view',
                     })}
                   </EuiContextMenuItem>,
                   <EuiContextMenuItem
@@ -188,7 +188,7 @@ export function ChangeDataView({
                     }}
                   >
                     {i18n.translate('data.query.queryBar.indexPattern.manageFieldButton', {
-                      defaultMessage: 'Manage this data view...',
+                      defaultMessage: 'Manage this data view',
                     })}
                   </EuiContextMenuItem>,
                 ]}
@@ -221,7 +221,7 @@ export function ChangeDataView({
                 }}
               >
                 {i18n.translate('data.query.queryBar.indexPattern.addNewDataView', {
-                  defaultMessage: 'New data view...',
+                  defaultMessage: 'Create a data view',
                 })}
               </EuiContextMenuItem>
             </>
