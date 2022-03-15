@@ -413,6 +413,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+        disableEmptyRows: true,
       });
 
       await PageObjects.lens.configureDimension({
@@ -425,7 +426,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('@timestamp per 3 hours');
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-19 06:00');
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql('Average of bytes');
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
     });
