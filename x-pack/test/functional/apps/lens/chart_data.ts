@@ -32,8 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
-
-      await PageObjects.lens.waitForVisualization();
     });
 
     const expectedData = [
@@ -75,6 +73,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     it('should render xy chart', async () => {
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
     });

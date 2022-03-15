@@ -521,386 +521,388 @@ export function XYChart({
       };
 
   return (
-    <Chart ref={chartRef}>
-      <Settings
-        onPointerUpdate={handleCursorUpdate}
-        debugState={window._echDebugStateFlag ?? false}
-        showLegend={
-          legend.isVisible && !legend.showSingleSeries
-            ? chartHasMoreThanOneSeries
-            : legend.isVisible
-        }
-        legendPosition={legend?.isInside ? legendInsideParams : legend.position}
-        legendSize={legend.legendSize}
-        theme={{
-          ...chartTheme,
-          barSeriesStyle: {
-            ...chartTheme.barSeriesStyle,
-            ...valueLabelsStyling,
-          },
-          background: {
-            color: undefined, // removes background for embeddables
-          },
-          legend: {
-            labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
-          },
-          // if not title or labels are shown for axes, add some padding if required by reference line markers
-          chartMargins: {
-            ...chartTheme.chartPaddings,
-            ...computeChartMargins(
-              referenceLinePaddings,
-              tickLabelsVisibilitySettings,
-              axisTitlesVisibilitySettings,
-              yAxesMap,
-              shouldRotate
-            ),
-          },
-        }}
-        baseTheme={chartBaseTheme}
-        tooltip={{
-          boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-          headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
-        }}
-        allowBrushingLastHistogramBin={isTimeViz}
-        rotation={shouldRotate ? 90 : 0}
-        xDomain={xDomain}
-        onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
-        onElementClick={interactive ? clickHandler : undefined}
-        legendAction={
-          interactive
-            ? getLegendAction(
-                filteredLayers,
-                data.tables,
-                onClickValue,
-                formatFactory,
-                layersAlreadyFormatted
-              )
-            : undefined
-        }
-        showLegendExtra={isHistogramViz && valuesInLegend}
-        ariaLabel={args.ariaLabel}
-        ariaUseDefaultSummary={!args.ariaLabel}
-      />
+    <div data-test-subj="xyVisChart">
+      <Chart ref={chartRef}>
+        <Settings
+          onPointerUpdate={handleCursorUpdate}
+          debugState={window._echDebugStateFlag ?? false}
+          showLegend={
+            legend.isVisible && !legend.showSingleSeries
+              ? chartHasMoreThanOneSeries
+              : legend.isVisible
+          }
+          legendPosition={legend?.isInside ? legendInsideParams : legend.position}
+          legendSize={legend.legendSize}
+          theme={{
+            ...chartTheme,
+            barSeriesStyle: {
+              ...chartTheme.barSeriesStyle,
+              ...valueLabelsStyling,
+            },
+            background: {
+              color: undefined, // removes background for embeddables
+            },
+            legend: {
+              labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+            },
+            // if not title or labels are shown for axes, add some padding if required by reference line markers
+            chartMargins: {
+              ...chartTheme.chartPaddings,
+              ...computeChartMargins(
+                referenceLinePaddings,
+                tickLabelsVisibilitySettings,
+                axisTitlesVisibilitySettings,
+                yAxesMap,
+                shouldRotate
+              ),
+            },
+          }}
+          baseTheme={chartBaseTheme}
+          tooltip={{
+            boundary: document.getElementById('app-fixed-viewport') ?? undefined,
+            headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
+          }}
+          allowBrushingLastHistogramBin={isTimeViz}
+          rotation={shouldRotate ? 90 : 0}
+          xDomain={xDomain}
+          onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
+          onElementClick={interactive ? clickHandler : undefined}
+          legendAction={
+            interactive
+              ? getLegendAction(
+                  filteredLayers,
+                  data.tables,
+                  onClickValue,
+                  formatFactory,
+                  layersAlreadyFormatted
+                )
+              : undefined
+          }
+          showLegendExtra={isHistogramViz && valuesInLegend}
+          ariaLabel={args.ariaLabel}
+          ariaUseDefaultSummary={!args.ariaLabel}
+        />
 
-      <Axis
-        id="x"
-        position={shouldRotate ? Position.Left : Position.Bottom}
-        title={xTitle}
-        gridLine={gridLineStyle}
-        hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor}
-        tickFormat={(d) => safeXAccessorLabelRenderer(d)}
-        style={xAxisStyle}
-        timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
-      />
+        <Axis
+          id="x"
+          position={shouldRotate ? Position.Left : Position.Bottom}
+          title={xTitle}
+          gridLine={gridLineStyle}
+          hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor}
+          tickFormat={(d) => safeXAccessorLabelRenderer(d)}
+          style={xAxisStyle}
+          timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
+        />
 
-      {yAxesConfiguration.map((axis) => {
-        return (
-          <Axis
-            key={axis.groupId}
-            id={axis.groupId}
-            groupId={axis.groupId}
-            position={axis.position}
-            title={getYAxesTitles(axis.series, axis.groupId)}
-            gridLine={{
-              visible:
-                axis.groupId === 'right'
-                  ? gridlinesVisibilitySettings?.yRight
-                  : gridlinesVisibilitySettings?.yLeft,
-            }}
-            hide={filteredLayers[0].hide}
-            tickFormat={(d) => axis.formatter?.convert(d) || ''}
-            style={getYAxesStyle(axis.groupId as 'left' | 'right')}
-            domain={getYAxisDomain(axis)}
-            ticks={5}
+        {yAxesConfiguration.map((axis) => {
+          return (
+            <Axis
+              key={axis.groupId}
+              id={axis.groupId}
+              groupId={axis.groupId}
+              position={axis.position}
+              title={getYAxesTitles(axis.series, axis.groupId)}
+              gridLine={{
+                visible:
+                  axis.groupId === 'right'
+                    ? gridlinesVisibilitySettings?.yRight
+                    : gridlinesVisibilitySettings?.yLeft,
+              }}
+              hide={filteredLayers[0].hide}
+              tickFormat={(d) => axis.formatter?.convert(d) || ''}
+              style={getYAxesStyle(axis.groupId as 'left' | 'right')}
+              domain={getYAxisDomain(axis)}
+              ticks={5}
+            />
+          );
+        })}
+
+        {!hideEndzones && (
+          <XyEndzones
+            baseDomain={rawXDomain}
+            extendedDomain={xDomain}
+            darkMode={darkMode}
+            histogramMode={filteredLayers.every(
+              (layer) =>
+                layer.isHistogram &&
+                (layer.seriesType.includes('stacked') || !layer.splitAccessor) &&
+                (layer.seriesType.includes('stacked') ||
+                  !layer.seriesType.includes('bar') ||
+                  !chartHasMoreThanOneBarSeries)
+            )}
           />
-        );
-      })}
+        )}
 
-      {!hideEndzones && (
-        <XyEndzones
-          baseDomain={rawXDomain}
-          extendedDomain={xDomain}
-          darkMode={darkMode}
-          histogramMode={filteredLayers.every(
-            (layer) =>
-              layer.isHistogram &&
-              (layer.seriesType.includes('stacked') || !layer.splitAccessor) &&
-              (layer.seriesType.includes('stacked') ||
-                !layer.seriesType.includes('bar') ||
-                !chartHasMoreThanOneBarSeries)
-          )}
-        />
-      )}
+        {filteredLayers.flatMap((layer, layerIndex) =>
+          layer.accessors.map((accessor, accessorIndex) => {
+            const {
+              splitAccessor,
+              seriesType,
+              accessors,
+              xAccessor,
+              layerId,
+              columnToLabel,
+              yScaleType,
+              xScaleType,
+              isHistogram,
+              palette,
+            } = layer;
+            const columnToLabelMap: Record<string, string> = columnToLabel
+              ? JSON.parse(columnToLabel)
+              : {};
 
-      {filteredLayers.flatMap((layer, layerIndex) =>
-        layer.accessors.map((accessor, accessorIndex) => {
-          const {
-            splitAccessor,
-            seriesType,
-            accessors,
-            xAccessor,
-            layerId,
-            columnToLabel,
-            yScaleType,
-            xScaleType,
-            isHistogram,
-            palette,
-          } = layer;
-          const columnToLabelMap: Record<string, string> = columnToLabel
-            ? JSON.parse(columnToLabel)
-            : {};
+            const table = data.tables[layerId];
 
-          const table = data.tables[layerId];
+            const formatterPerColumn = new Map<DatatableColumn, FieldFormat>();
+            for (const column of table.columns) {
+              formatterPerColumn.set(column, formatFactory(column.meta.params));
+            }
 
-          const formatterPerColumn = new Map<DatatableColumn, FieldFormat>();
-          for (const column of table.columns) {
-            formatterPerColumn.set(column, formatFactory(column.meta.params));
-          }
-
-          // what if row values are not primitive? That is the case of, for instance, Ranges
-          // remaps them to their serialized version with the formatHint metadata
-          // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
-          const tableConverted: Datatable = {
-            ...table,
-            rows: table.rows.map((row: DatatableRow) => {
-              const newRow = { ...row };
-              for (const column of table.columns) {
-                const record = newRow[column.id];
-                if (
-                  record != null &&
-                  // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
-                  (!isPrimitive(record) || (column.id === xAccessor && xScaleType === 'ordinal'))
-                ) {
-                  newRow[column.id] = formatterPerColumn.get(column)!.convert(record);
+            // what if row values are not primitive? That is the case of, for instance, Ranges
+            // remaps them to their serialized version with the formatHint metadata
+            // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
+            const tableConverted: Datatable = {
+              ...table,
+              rows: table.rows.map((row: DatatableRow) => {
+                const newRow = { ...row };
+                for (const column of table.columns) {
+                  const record = newRow[column.id];
+                  if (
+                    record != null &&
+                    // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
+                    (!isPrimitive(record) || (column.id === xAccessor && xScaleType === 'ordinal'))
+                  ) {
+                    newRow[column.id] = formatterPerColumn.get(column)!.convert(record);
+                  }
                 }
-              }
-              return newRow;
-            }),
-          };
+                return newRow;
+              }),
+            };
 
-          // save the id of the layer with the custom table
-          table.columns.reduce<Record<string, boolean>>(
-            (alreadyFormatted: Record<string, boolean>, { id }) => {
-              if (alreadyFormatted[id]) {
+            // save the id of the layer with the custom table
+            table.columns.reduce<Record<string, boolean>>(
+              (alreadyFormatted: Record<string, boolean>, { id }) => {
+                if (alreadyFormatted[id]) {
+                  return alreadyFormatted;
+                }
+                alreadyFormatted[id] = table.rows.some(
+                  (row, i) => row[id] !== tableConverted.rows[i][id]
+                );
                 return alreadyFormatted;
-              }
-              alreadyFormatted[id] = table.rows.some(
-                (row, i) => row[id] !== tableConverted.rows[i][id]
-              );
-              return alreadyFormatted;
-            },
-            layersAlreadyFormatted
-          );
+              },
+              layersAlreadyFormatted
+            );
 
-          const isStacked = seriesType.includes('stacked');
-          const isPercentage = seriesType.includes('percentage');
-          const isBarChart = seriesType.includes('bar');
-          const enableHistogramMode =
-            isHistogram &&
-            (isStacked || !splitAccessor) &&
-            (isStacked || !isBarChart || !chartHasMoreThanOneBarSeries);
+            const isStacked = seriesType.includes('stacked');
+            const isPercentage = seriesType.includes('percentage');
+            const isBarChart = seriesType.includes('bar');
+            const enableHistogramMode =
+              isHistogram &&
+              (isStacked || !splitAccessor) &&
+              (isStacked || !isBarChart || !chartHasMoreThanOneBarSeries);
 
-          // For date histogram chart type, we're getting the rows that represent intervals without data.
-          // To not display them in the legend, they need to be filtered out.
-          const rows = tableConverted.rows.filter(
-            (row) =>
-              !(xAccessor && typeof row[xAccessor] === 'undefined') &&
-              !(
-                splitAccessor &&
-                typeof row[splitAccessor] === 'undefined' &&
-                typeof row[accessor] === 'undefined'
-              )
-          );
+            // For date histogram chart type, we're getting the rows that represent intervals without data.
+            // To not display them in the legend, they need to be filtered out.
+            const rows = tableConverted.rows.filter(
+              (row) =>
+                !(xAccessor && typeof row[xAccessor] === 'undefined') &&
+                !(
+                  splitAccessor &&
+                  typeof row[splitAccessor] === 'undefined' &&
+                  typeof row[accessor] === 'undefined'
+                )
+            );
 
-          if (!xAccessor) {
-            rows.forEach((row) => {
-              row.unifiedX = i18n.translate('xpack.lens.xyChart.emptyXLabel', {
-                defaultMessage: '(empty)',
+            if (!xAccessor) {
+              rows.forEach((row) => {
+                row.unifiedX = i18n.translate('xpack.lens.xyChart.emptyXLabel', {
+                  defaultMessage: '(empty)',
+                });
               });
-            });
-          }
+            }
 
-          const yAxis = yAxesConfiguration.find((axisConfiguration) =>
-            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
-          );
+            const yAxis = yAxesConfiguration.find((axisConfiguration) =>
+              axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+            );
 
-          const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
-          const splitHint = table.columns.find((col) => col.id === splitAccessor)?.meta?.params;
-          const splitFormatter = formatFactory(splitHint);
+            const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
+            const splitHint = table.columns.find((col) => col.id === splitAccessor)?.meta?.params;
+            const splitFormatter = formatFactory(splitHint);
 
-          const seriesProps: SeriesSpec = {
-            splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
-            stackAccessors: isStacked ? [xAccessor as string] : [],
-            id: `${splitAccessor}-${accessor}`,
-            xAccessor: xAccessor || 'unifiedX',
-            yAccessors: [accessor],
-            data: rows,
-            xScaleType: xAccessor ? xScaleType : 'ordinal',
-            yScaleType:
-              formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
-                ? ScaleType.LinearBinary
-                : yScaleType,
-            color: ({ yAccessor, seriesKeys }) => {
-              const overwriteColor = getSeriesColor(layer, accessor);
-              if (overwriteColor !== null) {
-                return overwriteColor;
-              }
-              const colorAssignment = colorAssignments[palette.name];
-              const seriesLayers: SeriesLayer[] = [
-                {
-                  name: splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
-                  totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-                  rankAtDepth: colorAssignment.getRank(
-                    layer,
-                    String(seriesKeys[0]),
-                    String(yAccessor)
-                  ),
-                },
-              ];
-              return paletteService.get(palette.name).getCategoricalColor(
-                seriesLayers,
-                {
-                  maxDepth: 1,
-                  behindText: false,
-                  totalSeries: colorAssignment.totalSeriesCount,
-                  syncColors,
-                },
-                palette.params
-              );
-            },
-            groupId: yAxis?.groupId,
-            enableHistogramMode,
-            stackMode: isPercentage ? StackMode.Percentage : undefined,
-            timeZone,
-            areaSeriesStyle: {
-              point: {
-                visible: !xAccessor,
-                radius: 5,
-              },
-              ...(args.fillOpacity && { area: { opacity: args.fillOpacity } }),
-            },
-            lineSeriesStyle: {
-              point: {
-                visible: !xAccessor,
-                radius: 5,
-              },
-            },
-            name(d) {
-              // For multiple y series, the name of the operation is used on each, either:
-              // * Key - Y name
-              // * Formatted value - Y name
-              if (accessors.length > 1) {
-                const result = d.seriesKeys
-                  .map((key: string | number, i) => {
-                    if (
-                      i === 0 &&
-                      splitHint &&
-                      splitAccessor &&
-                      !layersAlreadyFormatted[splitAccessor]
-                    ) {
-                      return splitFormatter.convert(key);
-                    }
-                    return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
-                  })
-                  .join(' - ');
-                return result;
-              }
-
-              // For formatted split series, format the key
-              // This handles splitting by dates, for example
-              if (splitHint) {
-                if (splitAccessor && layersAlreadyFormatted[splitAccessor]) {
-                  return d.seriesKeys[0];
+            const seriesProps: SeriesSpec = {
+              splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
+              stackAccessors: isStacked ? [xAccessor as string] : [],
+              id: `${splitAccessor}-${accessor}`,
+              xAccessor: xAccessor || 'unifiedX',
+              yAccessors: [accessor],
+              data: rows,
+              xScaleType: xAccessor ? xScaleType : 'ordinal',
+              yScaleType:
+                formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
+                  ? ScaleType.LinearBinary
+                  : yScaleType,
+              color: ({ yAccessor, seriesKeys }) => {
+                const overwriteColor = getSeriesColor(layer, accessor);
+                if (overwriteColor !== null) {
+                  return overwriteColor;
                 }
-                return splitFormatter.convert(d.seriesKeys[0]);
-              }
-              // This handles both split and single-y cases:
-              // * If split series without formatting, show the value literally
-              // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
-              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
-            },
-          };
-
-          const index = `${layerIndex}-${accessorIndex}`;
-
-          const curveType = args.curveType ? CurveType[args.curveType] : undefined;
-
-          switch (seriesType) {
-            case 'line':
-              return (
-                <LineSeries
-                  key={index}
-                  {...seriesProps}
-                  fit={getFitOptions(fittingFunction)}
-                  curve={curveType}
-                />
-              );
-            case 'bar':
-            case 'bar_stacked':
-            case 'bar_percentage_stacked':
-            case 'bar_horizontal':
-            case 'bar_horizontal_stacked':
-            case 'bar_horizontal_percentage_stacked':
-              const valueLabelsSettings = {
-                displayValueSettings: {
-                  // This format double fixes two issues in elastic-chart
-                  // * when rotating the chart, the formatter is not correctly picked
-                  // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
-                  valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
-                  showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
-                  isValueContainedInElement: false,
-                  isAlternatingValueLabel: false,
-                  overflowConstraints: [
-                    LabelOverflowConstraint.ChartEdges,
-                    LabelOverflowConstraint.BarGeometry,
-                  ],
+                const colorAssignment = colorAssignments[palette.name];
+                const seriesLayers: SeriesLayer[] = [
+                  {
+                    name: splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
+                    totalSeriesAtDepth: colorAssignment.totalSeriesCount,
+                    rankAtDepth: colorAssignment.getRank(
+                      layer,
+                      String(seriesKeys[0]),
+                      String(yAccessor)
+                    ),
+                  },
+                ];
+                return paletteService.get(palette.name).getCategoricalColor(
+                  seriesLayers,
+                  {
+                    maxDepth: 1,
+                    behindText: false,
+                    totalSeries: colorAssignment.totalSeriesCount,
+                    syncColors,
+                  },
+                  palette.params
+                );
+              },
+              groupId: yAxis?.groupId,
+              enableHistogramMode,
+              stackMode: isPercentage ? StackMode.Percentage : undefined,
+              timeZone,
+              areaSeriesStyle: {
+                point: {
+                  visible: !xAccessor,
+                  radius: 5,
                 },
-              };
-              return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
-            case 'area_stacked':
-            case 'area_percentage_stacked':
-              return (
-                <AreaSeries
-                  key={index}
-                  {...seriesProps}
-                  fit={isPercentage ? 'zero' : getFitOptions(fittingFunction)}
-                  curve={curveType}
-                />
-              );
-            case 'area':
-              return (
-                <AreaSeries
-                  key={index}
-                  {...seriesProps}
-                  fit={getFitOptions(fittingFunction)}
-                  curve={curveType}
-                />
-              );
-            default:
-              return assertNever(seriesType);
-          }
-        })
-      )}
-      {referenceLineLayers.length ? (
-        <ReferenceLineAnnotations
-          layers={referenceLineLayers}
-          data={data}
-          syncColors={syncColors}
-          paletteService={paletteService}
-          formatters={{
-            left: yAxesMap.left?.formatter,
-            right: yAxesMap.right?.formatter,
-            bottom: xAxisFormatter,
-          }}
-          axesMap={{
-            left: Boolean(yAxesMap.left),
-            right: Boolean(yAxesMap.right),
-          }}
-          isHorizontal={shouldRotate}
-          paddingMap={referenceLinePaddings}
-        />
-      ) : null}
-    </Chart>
+                ...(args.fillOpacity && { area: { opacity: args.fillOpacity } }),
+              },
+              lineSeriesStyle: {
+                point: {
+                  visible: !xAccessor,
+                  radius: 5,
+                },
+              },
+              name(d) {
+                // For multiple y series, the name of the operation is used on each, either:
+                // * Key - Y name
+                // * Formatted value - Y name
+                if (accessors.length > 1) {
+                  const result = d.seriesKeys
+                    .map((key: string | number, i) => {
+                      if (
+                        i === 0 &&
+                        splitHint &&
+                        splitAccessor &&
+                        !layersAlreadyFormatted[splitAccessor]
+                      ) {
+                        return splitFormatter.convert(key);
+                      }
+                      return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
+                    })
+                    .join(' - ');
+                  return result;
+                }
+
+                // For formatted split series, format the key
+                // This handles splitting by dates, for example
+                if (splitHint) {
+                  if (splitAccessor && layersAlreadyFormatted[splitAccessor]) {
+                    return d.seriesKeys[0];
+                  }
+                  return splitFormatter.convert(d.seriesKeys[0]);
+                }
+                // This handles both split and single-y cases:
+                // * If split series without formatting, show the value literally
+                // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
+                return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
+              },
+            };
+
+            const index = `${layerIndex}-${accessorIndex}`;
+
+            const curveType = args.curveType ? CurveType[args.curveType] : undefined;
+
+            switch (seriesType) {
+              case 'line':
+                return (
+                  <LineSeries
+                    key={index}
+                    {...seriesProps}
+                    fit={getFitOptions(fittingFunction)}
+                    curve={curveType}
+                  />
+                );
+              case 'bar':
+              case 'bar_stacked':
+              case 'bar_percentage_stacked':
+              case 'bar_horizontal':
+              case 'bar_horizontal_stacked':
+              case 'bar_horizontal_percentage_stacked':
+                const valueLabelsSettings = {
+                  displayValueSettings: {
+                    // This format double fixes two issues in elastic-chart
+                    // * when rotating the chart, the formatter is not correctly picked
+                    // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
+                    valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
+                    showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
+                    isValueContainedInElement: false,
+                    isAlternatingValueLabel: false,
+                    overflowConstraints: [
+                      LabelOverflowConstraint.ChartEdges,
+                      LabelOverflowConstraint.BarGeometry,
+                    ],
+                  },
+                };
+                return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
+              case 'area_stacked':
+              case 'area_percentage_stacked':
+                return (
+                  <AreaSeries
+                    key={index}
+                    {...seriesProps}
+                    fit={isPercentage ? 'zero' : getFitOptions(fittingFunction)}
+                    curve={curveType}
+                  />
+                );
+              case 'area':
+                return (
+                  <AreaSeries
+                    key={index}
+                    {...seriesProps}
+                    fit={getFitOptions(fittingFunction)}
+                    curve={curveType}
+                  />
+                );
+              default:
+                return assertNever(seriesType);
+            }
+          })
+        )}
+        {referenceLineLayers.length ? (
+          <ReferenceLineAnnotations
+            layers={referenceLineLayers}
+            data={data}
+            syncColors={syncColors}
+            paletteService={paletteService}
+            formatters={{
+              left: yAxesMap.left?.formatter,
+              right: yAxesMap.right?.formatter,
+              bottom: xAxisFormatter,
+            }}
+            axesMap={{
+              left: Boolean(yAxesMap.left),
+              right: Boolean(yAxesMap.right),
+            }}
+            isHorizontal={shouldRotate}
+            paddingMap={referenceLinePaddings}
+          />
+        ) : null}
+      </Chart>
+    </div>
   );
 }
 
