@@ -31,7 +31,8 @@ describe('Reader - only READ', () => {
     cy.contains('Add saved query').should('be.disabled');
     cy.react('PlayButtonComponent', {
       props: { savedQuery: { attributes: { id: SAVED_QUERY_ID } } },
-    }).should('be.disabled');
+      options: { timeout: 3000 },
+    }).should('not.exist');
     cy.react('CustomItemAction', {
       props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
     }).click();
