@@ -8,7 +8,7 @@
 
 import './discover_field_search.scss';
 
-import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
+import React, { OptionHTMLAttributes, ReactNode, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
@@ -28,10 +28,13 @@ import {
   EuiFilterButton,
   EuiSpacer,
   EuiIcon,
+  EuiPagination,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldTypeDescription } from './lib/get_field_type_description';
+import { usePager } from '../../../../utils/use_pager';
 
 export interface State {
   searchable: string;
@@ -57,6 +60,34 @@ export interface Props {
    */
   types: string[];
 }
+
+interface FieldTypeTableItem {
+  id: number;
+  dataType: string;
+  description: string;
+}
+
+const TABLE_STYLE = { width: 350 };
+const FIELD_TYPES_PER_PAGE = 6;
+const FIELD_TYPES = [
+  'boolean',
+  'conflict',
+  'date',
+  'date_range',
+  'geo_point',
+  'geo_shape',
+  'histogram',
+  'ip',
+  'ip_range',
+  'keyword',
+  'murmur3',
+  'number',
+  'number_range',
+  '_source',
+  'string',
+  'nested',
+  'version',
+];
 
 /**
  * Component is Discover's side bar to  search of available fields
@@ -91,17 +122,29 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     missing: true,
   });
 
-  const onHelpClick = () => {
-    setIsHelpOpen((isHelpOpen) => !isHelpOpen);
-  };
+  const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex } = usePager({
+    initialPageSize: FIELD_TYPES_PER_PAGE,
+    totalItems: FIELD_TYPES.length,
+  });
+  const items: FieldTypeTableItem[] = useMemo(
+    () =>
+      FIELD_TYPES.map((element, index) => ({
+        id: index,
+        dataType: element,
+        description: getFieldTypeDescription(element),
+      })).slice(startIndex, pageSize + startIndex),
+    [pageSize, startIndex]
+  );
+
+  const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
 
-  const columnsSidebar = [
+  const columnsSidebar: Array<EuiBasicTableColumn<FieldTypeTableItem>> = [
     {
       field: 'dataType',
       name: 'Data type',
       width: '110px',
-      render: (name) => (
+      render: (name: string) => (
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem grow={false}>
             <FieldIcon type={name} />
@@ -115,36 +158,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
       name: 'Description',
     },
   ];
-
-  const items = [];
-
-  const discoverFieldTypes = [
-    'boolean',
-    'conflict',
-    'date',
-    'date_range',
-    'geo_point',
-    'geo_shape',
-    'histogram',
-    'ip',
-    'ip_range',
-    'keyword',
-    'murmur3',
-    'number',
-    'number_range',
-    '_source',
-    'string',
-    'nested',
-    'version',
-  ];
-
-  discoverFieldTypes.forEach((element, index) =>
-    items.push({
-      id: index,
-      dataType: element,
-      description: getFieldTypeDescription(element),
-    })
-  );
 
   const filterBtnAriaLabel = isPopoverOpen
     ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
@@ -373,15 +386,32 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             className="dscFieldTypesHelp__popover"
             closePopover={closeHelp}
           >
-            <EuiPopoverTitle paddingSize="s">Field types</EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s">
+              {i18n.translate('discover.fieldChooser.popoverTitle', {
+                defaultMessage: 'Field types',
+              })}
+            </EuiPopoverTitle>
             <EuiBasicTable
-              style={{ width: 350 }}
+              style={TABLE_STYLE}
               tableCaption="Description of field types"
               items={items}
               compressed={true}
               rowHeader="firstName"
               columns={columnsSidebar}
             />
+            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiPagination
+                  aria-label={i18n.translate('discover.fieldChooser.paginationAriaLabel', {
+                    defaultMessage: 'Field types navigation',
+                  })}
+                  activePage={curPageIndex}
+                  pageCount={totalPages}
+                  onPageClick={changePageIndex}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPopover>
         </EuiFilterGroup>
       </EuiFlexItem>
