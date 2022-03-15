@@ -11,20 +11,8 @@ import { getRemoteRoutePaths } from '../common';
 
 export interface Services {
   fetchTopN: (type: string, seconds: string) => Promise<any[] | HttpFetchError>;
-  fetchElasticFlamechart: (seconds: string) => Promise<any[] | HttpFetchError>;
-  fetchPixiFlamechart: (seconds: string) => Promise<any[] | HttpFetchError>;
-}
-
-function getFetchQuery(seconds: string): HttpFetchQuery {
-  const unixTime = Math.floor(Date.now() / 1000);
-  return {
-    index: 'profiling-events',
-    projectID: 5,
-    timeFrom: unixTime - parseInt(seconds, 10),
-    timeTo: unixTime,
-    // TODO remove hard-coded value for topN items length and expose it through the UI
-    n: 100,
-  } as HttpFetchQuery;
+  fetchElasticFlamechart: (timeFrom: number, timeTo: number) => Promise<any[] | HttpFetchError>;
+  fetchPixiFlamechart: (timeFrom: number, timeTo: number) => Promise<any[] | HttpFetchError>;
 }
 
 export function getServices(core: CoreStart): Services {
@@ -34,25 +22,47 @@ export function getServices(core: CoreStart): Services {
   return {
     fetchTopN: async (type: string, seconds: string) => {
       try {
-        const query = getFetchQuery(seconds);
+        const unixTime = Math.floor(Date.now() / 1000);
+        const query: HttpFetchQuery = {
+          index: 'profiling-events',
+          projectID: 5,
+          timeFrom: unixTime - parseInt(seconds, 10),
+          timeTo: unixTime,
+          // TODO remove hard-coded value for topN items length and expose it through the UI
+          n: 100,
+        };
         return await core.http.get(`${paths.TopN}/${type}`, { query });
       } catch (e) {
         return e;
       }
     },
 
-    fetchElasticFlamechart: async (seconds: string) => {
+    fetchElasticFlamechart: async (timeFrom: number, timeTo: number) => {
       try {
-        const query = getFetchQuery(seconds);
+        const query: HttpFetchQuery = {
+          index: 'profiling-events',
+          projectID: 5,
+          timeFrom: timeFrom,
+          timeTo: timeTo,
+          // TODO remove hard-coded value for topN items length and expose it through the UI
+          n: 100,
+        };
         return await core.http.get(paths.FlamechartElastic, { query });
       } catch (e) {
         return e;
       }
     },
 
-    fetchPixiFlamechart: async (seconds: string) => {
+    fetchPixiFlamechart: async (timeFrom: number, timeTo: number) => {
       try {
-        const query = getFetchQuery(seconds);
+        const query: HttpFetchQuery = {
+          index: 'profiling-events',
+          projectID: 5,
+          timeFrom: timeFrom,
+          timeTo: timeTo,
+          // TODO remove hard-coded value for topN items length and expose it through the UI
+          n: 100,
+        };
         return await core.http.get(paths.FlamechartPixi, { query });
       } catch (e) {
         return e;
