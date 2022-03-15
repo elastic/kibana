@@ -15,6 +15,7 @@ import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { sendGetAgentPolicyList } from '../../pages/policy/store/services/ingest';
 import { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
+import { ServerApiError } from '../../../common/types';
 
 export function useGetEndpointSpecificPolicies(
   {
@@ -59,7 +60,6 @@ export function useGetAgentCountForPolicy({
   policyIds: string[];
   customQueryOptions?: UseQueryOptions<GetAgentPoliciesResponse, HttpFetchError>;
 }): QueryObserverResult<GetAgentPoliciesResponse, HttpFetchError> {
-  // is there a more elegant way to do this? w/o the conditional, the call is a bad request when the policyId is empty
   const http = useHttp();
   return useQuery<GetAgentPoliciesResponse, HttpFetchError>(
     ['endpointCountForPolicy', policyIds],
