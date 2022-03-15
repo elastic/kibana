@@ -39,7 +39,7 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   skip,
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip && !toggleStatus);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiTlsHandshakes({
     filterQuery,
     endDate: to,

@@ -37,6 +37,7 @@ import { InspectButton } from '../inspect';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { LensAttributes } from '../visualization_actions/types';
+import * as i18n from '../query_toggle/translations';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -259,13 +260,13 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
               <EuiFlexGroup gutterSize={'none'}>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
                     color="text"
-                    size="xs"
                     display="empty"
-                    title={toggleStatus ? 'Open' : 'Closed'}
-                    aria-label={toggleStatus ? 'Open' : 'Closed'}
                     iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
                     onClick={() => toggleQuery(!toggleStatus)}
+                    size="xs"
+                    title={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>

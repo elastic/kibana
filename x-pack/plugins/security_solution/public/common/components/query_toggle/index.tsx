@@ -8,7 +8,8 @@
 import { useCallback, useState } from 'react';
 import { useKibana } from '../../lib/kibana';
 
-export const getUniqueStorageKey = (id: string): string => `kibana.siem:${id}.query.toggle`;
+export const getUniqueStorageKey = (id?: string): string | null =>
+  id ? `kibana.siem:${id}.query.toggle` : null;
 
 export const useQueryToggle = (
   id?: string
@@ -20,12 +21,16 @@ export const useQueryToggle = (
     services: { storage },
   } = useKibana();
   const storageKey = getUniqueStorageKey(id);
-  const [storageValue, setStorageValue] = useState(storage.get(storageKey) ?? true);
+  const [storageValue, setStorageValue] = useState(
+    storageKey != null ? storage.get(storageKey) ?? true : true
+  );
 
   const setToggleStatus = useCallback(
     (isOpen: boolean) => {
-      storage.set(storageKey, isOpen);
-      setStorageValue(isOpen);
+      if (storageKey != null) {
+        storage.set(storageKey, isOpen);
+        setStorageValue(isOpen);
+      }
     },
     [storage, storageKey]
   );

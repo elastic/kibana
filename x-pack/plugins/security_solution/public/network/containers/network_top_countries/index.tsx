@@ -218,5 +218,13 @@ export const useNetworkTopCountries = ({
     };
   }, [networkTopCountriesRequest, networkTopCountriesSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   return [loading, networkTopCountriesResponse];
 };

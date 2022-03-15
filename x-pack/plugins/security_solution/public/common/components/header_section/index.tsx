@@ -19,6 +19,7 @@ import styled, { css } from 'styled-components';
 import { InspectButton } from '../inspect';
 
 import { Subtitle } from '../subtitle';
+import * as i18n from '../query_toggle/translations';
 
 interface HeaderProps {
   border?: boolean;
@@ -58,8 +59,8 @@ export interface HeaderSectionProps extends HeaderProps {
   split?: boolean;
   stackHeader?: boolean;
   subtitle?: string | React.ReactNode;
-  toggleQuery: (status: boolean) => void;
-  toggleStatus: boolean;
+  toggleQuery?: (status: boolean) => void;
+  toggleStatus?: boolean;
   title: string | React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
@@ -84,7 +85,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   title,
   titleSize = 'm',
   toggleQuery,
-  toggleStatus,
+  toggleStatus = true,
   tooltip,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
@@ -97,17 +98,19 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
             <EuiFlexGroup gutterSize={'none'}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="text"
-                  size="xs"
-                  display="empty"
-                  title={toggleStatus ? 'Open' : 'Closed'}
-                  aria-label={toggleStatus ? 'Open' : 'Closed'}
-                  iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
-                  onClick={() => toggleQuery(!toggleStatus)}
-                />
-              </EuiFlexItem>
+              {toggleQuery && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
+                    color="text"
+                    display="empty"
+                    iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
+                    onClick={() => toggleQuery(!toggleStatus)}
+                    size="s"
+                    title={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem>
                 <EuiTitle size={titleSize}>
                   <StyledTitle data-test-subj="header-section-title">
@@ -123,12 +126,12 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
 
-            {!hideSubtitle && !toggleStatus && (
+            {!hideSubtitle && toggleStatus && (
               <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
             )}
           </EuiFlexItem>
 
-          {id && showInspectButton && !toggleStatus && (
+          {id && showInspectButton && toggleStatus && (
             <EuiFlexItem grow={false}>
               <InspectButton
                 isDisabled={isInspectDisabled}

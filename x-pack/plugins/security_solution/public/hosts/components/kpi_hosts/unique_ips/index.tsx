@@ -59,7 +59,7 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
   skip,
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip && !toggleStatus);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   const [loading, { refetch, id, inspect, ...data }] = useHostsKpiUniqueIps({
     filterQuery,
     endDate: to,

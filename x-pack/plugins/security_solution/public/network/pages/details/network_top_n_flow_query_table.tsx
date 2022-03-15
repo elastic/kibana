@@ -26,9 +26,8 @@ export const NetworkTopNFlowQueryTable = ({
   startDate,
   type,
 }: NetworkWithIndexComponentsQueryTableProps) => {
-  const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip && !toggleStatus);
-  console.log('querySkip', querySkip);
+  const { toggleStatus } = useQueryToggle(`${ID}-${flowTarget}`);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   const [
     loading,
     { id, inspect, isInspected, loadPage, networkTopNFlow, pageInfo, refetch, totalCount },

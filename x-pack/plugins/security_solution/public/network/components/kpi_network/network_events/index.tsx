@@ -44,7 +44,7 @@ const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
   skip,
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip && !toggleStatus);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiNetworkEvents({
     filterQuery,
     endDate: to,

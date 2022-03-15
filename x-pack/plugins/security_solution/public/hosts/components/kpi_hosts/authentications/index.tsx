@@ -59,7 +59,7 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
   skip,
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip && !toggleStatus);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   const [loading, { refetch, id, inspect, ...data }] = useHostsKpiAuthentications({
     filterQuery,
     endDate: to,

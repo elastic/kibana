@@ -266,10 +266,12 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     },
     [setQuerySkip, setToggleStatus]
   );
+
   return (
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
+          height={!toggleStatus ? 40 : undefined}
           toggleStatus={toggleStatus}
           toggleQuery={toggleQuery}
           headerFilters={headerFilters}
