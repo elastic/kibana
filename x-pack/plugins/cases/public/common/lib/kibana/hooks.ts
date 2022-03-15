@@ -173,7 +173,7 @@ export const useApplicationCapabilities = (): { crud: boolean; read: boolean } =
   };
 };
 export const useKibanaCapabilities = (): { visualize?: boolean } => {
-  const capabilities = useKibana().services.application.capabilities;
+  const capabilities = useKibana().services?.application?.capabilities;
 
   return {
     visualize: !!capabilities?.visualize?.save,
