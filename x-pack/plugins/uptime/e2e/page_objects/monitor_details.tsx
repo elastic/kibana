@@ -6,7 +6,7 @@
  */
 
 import { expect, Page } from '@elastic/synthetics';
-import { byTestId, delay } from '../journeys/utils';
+import { byTestId, delay, getQuerystring } from '../journeys/utils';
 
 interface AlertType {
   id: string;
