@@ -31,6 +31,7 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
     },
     position: {
       types: ['string'],
+      default: Position.Right,
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
       help: i18n.translate('expressionHeatmap.function.args.legend.position.help', {
         defaultMessage: 'Specifies the legend position.',
@@ -47,6 +48,12 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
       default: true,
       help: i18n.translate('expressionHeatmap.function.args.legend.shouldTruncate.help', {
         defaultMessage: 'Specifies whether or not the legend items should be truncated.',
+      }),
+    },
+    legendSize: {
+      types: ['number'],
+      help: i18n.translate('expressionHeatmap.function.args.legendSize.help', {
+        defaultMessage: 'Specifies the legend size in pixels.',
       }),
     },
   },

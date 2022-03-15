@@ -120,7 +120,6 @@ export const ManagedInstructions = React.memo<InstructionProps>(
               selectedApiKeyId,
               setSelectedAPIKeyId,
               setSelectedPolicyId,
-              excludeFleetServer: true,
               refreshAgentPolicies,
             })
           : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),

@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
-import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
+import {
+  getExecutionContext,
+  getHttp,
+  getIndexPatternService,
+  getSearchService,
+} from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import {
   ES_GEO_FIELD_TYPE,
@@ -129,6 +135,13 @@ describe('ESGeoGridSource', () => {
         },
       },
     });
+
+    const coreStartMock = coreMock.createStart();
+    coreStartMock.executionContext.get.mockReturnValue({
+      name: 'some-app',
+    });
+    // @ts-expect-error
+    getExecutionContext.mockReturnValue(coreStartMock.executionContext);
   });
 
   afterEach(() => {
