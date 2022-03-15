@@ -16,7 +16,7 @@ import {
   EuiButtonGroupProps,
 } from '@elastic/eui';
 import { IconButtonGroupStyles } from './icon_button_group.styles';
-export interface QuickButton {
+export interface IconButton {
   /**
    * The accessible button label
    */
@@ -40,16 +40,16 @@ export interface Props {
   /**
    * Array of `QuickButton`s
    */
-  buttons: QuickButton[];
+  buttons: IconButton[];
 }
 
-type Option = EuiButtonGroupOptionProps & Omit<QuickButton, 'label'>;
+type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label'>;
 
 export const IconButtonGroup = ({ buttons, legend }: Props) => {
   const euiTheme = useEuiTheme();
   const iconButtonGroupStyles = IconButtonGroupStyles(euiTheme);
 
-  const buttonGroupOptions: Option[] = buttons.map((button: QuickButton, index) => {
+  const buttonGroupOptions: Option[] = buttons.map((button: IconButton, index) => {
     const { label, title = label, ...rest } = button;
 
     return {

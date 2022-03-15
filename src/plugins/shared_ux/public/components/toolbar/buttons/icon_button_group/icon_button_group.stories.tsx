@@ -13,8 +13,8 @@ import { IconButtonGroup } from './icon_button_group';
 import mdx from './icon_button_group.mdx';
 
 export default {
-  title: 'Toolbar/Toolbar Icon Button Group',
-  description: 'A collection of buttons that is a part of the solution toolbar.',
+  title: 'Toolbar/Icon Button Group',
+  description: 'A collection of buttons that is a part of a toolbar.',
   parameters: {
     docs: {
       page: mdx,
@@ -46,7 +46,6 @@ const quickButtons = [
   },
   {
     label: 'Markup',
-    getLegend: '',
     onClick: action('onMarkupClick'),
     iconType: 'visVega',
   },
@@ -62,7 +61,7 @@ export const ConnectedComponent: Story<{ quickButtonCount: number }> = ({ quickB
 };
 
 ConnectedComponent.argTypes = {
-  quickButtonCount: {
+  buttonCount: {
     defaultValue: 2,
     control: {
       type: 'number',

@@ -12,8 +12,8 @@ import { ToolbarButton } from './primary';
 import mdx from './primary.mdx';
 
 export default {
-  title: 'Toolbar/Toolbar Button',
-  description: 'A primary button that is a part of toolbar.',
+  title: 'Toolbar/Primary button',
+  description: 'A primary button that is a part of a toolbar.',
   parameters: {
     docs: {
       page: mdx,
