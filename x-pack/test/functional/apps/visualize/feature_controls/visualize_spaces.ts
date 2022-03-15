@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'security', 'spaceSelector', 'error']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const kibanaServer = getService('kibanaServer');
 
   describe('visualize', () => {
     before(async () => {
@@ -26,7 +27,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/visualize/default');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+        );
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -36,7 +40,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+        );
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('shows visualize navlink', async () => {
@@ -67,7 +74,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/visualize/default');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+        );
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -77,7 +87,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+        );
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it(`doesn't show visualize navlink`, async () => {

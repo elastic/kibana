@@ -12,6 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
     'error',
@@ -30,8 +31,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('visualize feature controls security', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/visualize/default');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+      );
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
@@ -40,8 +44,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
-
-      await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+      );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('global visualize all privileges', () => {
