@@ -16,9 +16,15 @@ import {
   pagePathGetters,
 } from '../../../../../../../fleet/public';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../fleet/common';
-import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
+import { useAppUrl, useHttp } from '../../../../../common/lib/kibana/hooks';
 import { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
-import { getPolicyDetailPath, getPolicyTrustedAppsPath } from '../../../../common/routing';
+import {
+  getPolicyDetailPath,
+  getPolicyTrustedAppsPath,
+  getPolicyBlocklistsPath,
+  getPolicyHostIsolationExceptionsPath,
+  getPolicyEventFiltersPath,
+} from '../../../../common/routing';
 import { PolicyDetailsForm } from '../policy_details_form';
 import { AppAction } from '../../../../../common/store/actions';
 import { usePolicyDetailsSelector } from '../policy_hooks';
@@ -27,12 +33,18 @@ import {
   policyDetails,
   policyDetailsForUpdate,
 } from '../../store/policy_details/selectors';
-import { FleetTrustedAppsCard } from './endpoint_package_custom_extension/components/fleet_trusted_apps_card';
+
 import { LinkWithIcon } from './endpoint_package_custom_extension/components/link_with_icon';
-import { FleetIntegrationHostIsolationExceptionsCard } from './endpoint_package_custom_extension/components/fleet_integration_host_isolation_exceptions_card';
-import { FleetIntegrationEventFiltersCard } from './endpoint_package_custom_extension/components/fleet_integration_event_filters_card';
-import { FleetIntegrationBlocklistsCard } from './endpoint_package_custom_extension/components/fleet_integration_blocklists_card';
 import { ReactQueryClientProvider } from '../../../../../common/containers/query_client/query_client_provider';
+import { FleetIntegrationArtifactsCard } from './endpoint_package_custom_extension/components/fleet_integration_artifacts_card';
+import { BlocklistsApiClient } from '../../../blocklist/services';
+import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { EventFiltersApiClient } from '../../../event_filters/service/event_filters_api_client';
+import { TrustedAppsApiClient } from '../../../trusted_apps/service/trusted_apps_api_client';
+import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
+import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
+import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
+import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -59,6 +71,114 @@ const WrappedPolicyDetailsForm = memo<{
   const endpointDetailsLoadingError = usePolicyDetailsSelector(apiError);
   const { getAppUrl } = useAppUrl();
   const [, setLastUpdatedPolicy] = useState(updatedPolicy);
+
+  const http = useHttp();
+  const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
+
+  const BLOCKLISTS_LABELS = {
+    artifactsSummaryApiError: (error: string) =>
+      i18n.translate(
+        'xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsSummary.error',
+        {
+          defaultMessage: 'There was an error trying to fetch blocklists stats: "{error}"',
+          values: { error },
+        }
+      ),
+    cardTitle: (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
+        defaultMessage="Blocklists"
+      />
+    ),
+    linkLabel: (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsManageLabel"
+        defaultMessage="Manage blocklists"
+      />
+    ),
+  };
+  const hostIsolationExceptionsApiClientInstance = useMemo(
+    () => HostIsolationExceptionsApiClient.getInstance(http),
+    [http]
+  );
+
+  const HOST_ISOLATION_EXCEPTIONS_LABELS = {
+    artifactsSummaryApiError: (error: string) =>
+      i18n.translate(
+        'xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsSummary.error',
+        {
+          defaultMessage:
+            'There was an error trying to fetch host isolation exceptions stats: "{error}"',
+          values: { error },
+        }
+      ),
+    cardTitle: (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.hostIsolationExceptions.fleetIntegration.title"
+        defaultMessage="Host isolation exceptions"
+      />
+    ),
+    linkLabel: (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsManageLabel"
+        defaultMessage="Manage host isolation exceptions"
+      />
+    ),
+  };
+  const eventFiltersApiClientInstance = useMemo(
+    () => EventFiltersApiClient.getInstance(http),
+    [http]
+  );
+
+  const EVENT_FILTERS_LABELS = {
+    artifactsSummaryApiError: (error: string) =>
+      i18n.translate(
+        'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummarySummary.error',
+        {
+          defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
+          values: { error },
+        }
+      ),
+    cardTitle: (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.eventFilters.fleetIntegration.title"
+        defaultMessage="Event filters"
+      />
+    ),
+    linkLabel: (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersManageLabel"
+        defaultMessage="Manage event filters"
+      />
+    ),
+  };
+  const trustedAppsApiClientInstance = useMemo(
+    () => TrustedAppsApiClient.getInstance(http),
+    [http]
+  );
+
+  const TRUSTED_APPS_LABELS = {
+    artifactsSummaryApiError: (error: string) =>
+      i18n.translate(
+        'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummarySummary.error',
+        {
+          defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
+          values: { error },
+        }
+      ),
+    cardTitle: (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title"
+        defaultMessage="Trusted apps"
+      />
+    ),
+    linkLabel: (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsManageLabel"
+        defaultMessage="Manage trusted apps"
+      />
+    ),
+  };
 
   // When the form is initially displayed, trigger the Redux middleware which is based on
   // the location information stored via the `userChangedUrl` action.
@@ -172,17 +292,37 @@ const WrappedPolicyDetailsForm = memo<{
             </h5>
           </EuiText>
           <EuiSpacer size="s" />
-          <FleetTrustedAppsCard
+          <FleetIntegrationArtifactsCard
             policyId={policyId}
-            cardSize="m"
-            customLink={policyTrustedAppsLink}
+            artifactApiClientInstance={trustedAppsApiClientInstance}
+            getArtifactsPath={getPolicyTrustedAppsPath}
+            searchableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
+            labels={TRUSTED_APPS_LABELS}
           />
           <EuiSpacer size="s" />
-          <FleetIntegrationEventFiltersCard policyId={policyId} />
+          <FleetIntegrationArtifactsCard
+            policyId={policyId}
+            artifactApiClientInstance={eventFiltersApiClientInstance}
+            getArtifactsPath={getPolicyEventFiltersPath}
+            searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
+            labels={EVENT_FILTERS_LABELS}
+          />
           <EuiSpacer size="s" />
-          <FleetIntegrationHostIsolationExceptionsCard policyId={policyId} />
+          <FleetIntegrationArtifactsCard
+            policyId={policyId}
+            artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
+            getArtifactsPath={getPolicyHostIsolationExceptionsPath}
+            searchableFields={HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS}
+            labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
+          />
           <EuiSpacer size="s" />
-          <FleetIntegrationBlocklistsCard policyId={policyId} />
+          <FleetIntegrationArtifactsCard
+            policyId={policyId}
+            artifactApiClientInstance={blocklistsApiClientInstance}
+            getArtifactsPath={getPolicyBlocklistsPath}
+            searchableFields={BLOCKLIST_SEARCHABLE_FIELDS}
+            labels={BLOCKLISTS_LABELS}
+          />
         </div>
         <EuiSpacer size="l" />
         <div>
