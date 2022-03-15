@@ -37,6 +37,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
 
           apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
           return generatePdfObservable(reporting, {
+            format: 'pdf',
             title,
             logo,
             urls,

@@ -25,8 +25,6 @@ import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server'
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
 import type {
-  PdfScreenshotResult,
-  PngScreenshotResult,
   ScreenshottingStart,
   PngScreenshotOptions as BasePngScreenshotOptions,
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -385,10 +383,10 @@ export class ReportingCore {
     };
   }
 
-  public getScreenshotsPdf(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult> {
+  public getScreenshotsPdf(options: PdfScreenshotOptions) {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        return screenshotting.getScreenshotsPdf({
+        return screenshotting.getScreenshots({
           ...options,
           ...(this.mapToScreenshotConfigOptions(options) as BasePdfScreenshotOptions),
         });
@@ -396,10 +394,10 @@ export class ReportingCore {
     );
   }
 
-  public getScreenshotsPng(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult> {
+  public getScreenshotsPng(options: PngScreenshotOptions) {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        return screenshotting.getScreenshotsPng({
+        return screenshotting.getScreenshots({
           ...options,
           ...(this.mapToScreenshotConfigOptions(options) as BasePngScreenshotOptions),
         });
