@@ -74,6 +74,7 @@ export const performBulkEditPOCRoute = (
         return response.ok({
           body: {
             success: true,
+            total: results?.rules.length,
             results,
           },
         });

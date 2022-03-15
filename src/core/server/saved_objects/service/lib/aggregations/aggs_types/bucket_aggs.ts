@@ -63,6 +63,29 @@ const boolSchema = s.object({
   }),
 });
 
+const termsSchema = s.object({
+  field: s.maybe(s.string()),
+  collect_mode: s.maybe(s.string()),
+  exclude: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
+  include: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
+  execution_hint: s.maybe(s.string()),
+  missing: s.maybe(s.number()),
+  min_doc_count: s.maybe(s.number({ min: 1 })),
+  size: s.maybe(s.number()),
+  show_term_doc_count_error: s.maybe(s.boolean()),
+  order: s.maybe(
+    s.oneOf([
+      sortOrderSchema,
+      s.recordOf(s.string(), sortOrderSchema),
+      s.arrayOf(s.recordOf(s.string(), sortOrderSchema)),
+    ])
+  ),
+});
+
+const multiTermsSchema = s.object({
+  terms: s.arrayOf(termsSchema),
+});
+
 export const bucketAggsSchemas: Record<string, ObjectType> = {
   filter: termSchema,
   filters: s.object({
@@ -99,22 +122,6 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
   reverse_nested: s.object({
     path: s.maybe(s.string()),
   }),
-  terms: s.object({
-    field: s.maybe(s.string()),
-    collect_mode: s.maybe(s.string()),
-    exclude: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
-    include: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
-    execution_hint: s.maybe(s.string()),
-    missing: s.maybe(s.number()),
-    min_doc_count: s.maybe(s.number({ min: 1 })),
-    size: s.maybe(s.number()),
-    show_term_doc_count_error: s.maybe(s.boolean()),
-    order: s.maybe(
-      s.oneOf([
-        sortOrderSchema,
-        s.recordOf(s.string(), sortOrderSchema),
-        s.arrayOf(s.recordOf(s.string(), sortOrderSchema)),
-      ])
-    ),
-  }),
+  multi_terms: multiTermsSchema,
+  terms: termsSchema,
 };

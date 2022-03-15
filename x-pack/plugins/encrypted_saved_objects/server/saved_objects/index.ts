@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
+  ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
   ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectsBaseOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsServiceSetup,
   StartServicesAccessor,
 } from 'src/core/server';
@@ -43,6 +48,18 @@ export interface EncryptedSavedObjectsClient {
     id: string,
     options?: SavedObjectsBaseOptions
   ) => Promise<SavedObject<T>>;
+
+  bulkGetDecryptedAsInternalUser: <T = unknown>(
+    type: string,
+    ids: string[],
+    options?: SavedObjectsBaseOptions
+  ) => Promise<Array<SavedObject<T>>>;
+
+  createPointInTimeFinderAsInternalUser<T = unknown, A = unknown>(
+    options: { type: string; namespace?: string },
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ): Promise<ISavedObjectsPointInTimeFinder<T, A>>;
 }
 
 export function setupSavedObjects({
@@ -95,6 +112,61 @@ export function setupSavedObjects({
             savedObject.attributes as Record<string, unknown>
           )) as T,
         };
+      },
+
+      bulkGetDecryptedAsInternalUser: async <T = unknown>(
+        type: string,
+        ids: string[],
+        options?: SavedObjectsBaseOptions
+      ): Promise<Array<SavedObject<T>>> => {
+        const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
+        const { saved_objects: savedObjectsList } = await internalRepository.bulkGet(
+          ids.map((id) => ({ id, type })),
+          options
+        );
+
+        const saved = pMap(savedObjectsList, async (savedObject) => ({
+          ...savedObject,
+          attributes: (await service.decryptAttributes(
+            {
+              type,
+              id: savedObject.id,
+              namespace: getDescriptorNamespace(typeRegistry, type, options?.namespace),
+            },
+            savedObject.attributes as Record<string, unknown>
+          )) as T,
+        }));
+
+        return saved;
+      },
+
+      createPointInTimeFinderAsInternalUser: async <T = unknown, A = unknown>(
+        { type, namespace }: { type: string; namespace?: string },
+        findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+        dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+      ): Promise<ISavedObjectsPointInTimeFinder<T, A>> => {
+        const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
+        const finder = internalRepository.createPointInTimeFinder<T, A>(findOptions, dependencies);
+        const x = finder.find();
+
+        async function* encryptedFinder() {
+          for await (const res of x) {
+            const encryptedSavedObjects = pMap(res.saved_objects, async (savedObject) => ({
+              ...savedObject,
+              attributes: (await service.decryptAttributes(
+                {
+                  type,
+                  id: savedObject.id,
+                  namespace: getDescriptorNamespace(typeRegistry, type, namespace),
+                },
+                savedObject.attributes as Record<string, unknown>
+              )) as T,
+            }));
+            yield { ...res, save_objects: encryptedSavedObjects };
+          }
+        }
+
+        return { ...finder, find: () => encryptedFinder() };
       },
     };
   };

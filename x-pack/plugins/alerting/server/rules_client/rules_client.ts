@@ -127,7 +127,7 @@ export interface RuleAggregation {
 export interface RuleBulkUpdateAggregation {
   alertTypeId: {
     buckets: Array<{
-      key: string;
+      key: string[];
       doc_count: number;
     }>;
   };
@@ -1188,7 +1188,9 @@ export class RulesClient {
       type: 'alert',
       aggs: {
         alertTypeId: {
-          terms: { field: 'alert.attributes.alertTypeId' },
+          multi_terms: {
+            terms: [{ field: 'alert.alertTypeId' }, { field: 'alert.consumer' }],
+          },
         },
       },
     });
@@ -1199,23 +1201,26 @@ export class RulesClient {
       throw Error('Aggregation by alertTypeId is empty');
     }
 
-    await pMap(buckets, async ({ key }) => {
-      this.ruleTypeRegistry.ensureRuleTypeEnabled(key);
+    await pMap(buckets, async ({ key: [ruleType, consumer] }) => {
+      this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
 
       await this.authorization.ensureAuthorized({
-        ruleTypeId: key,
-        // TODO: need multi aggregation for alertTypeId & consumer?
-        consumer: 'siem',
+        ruleTypeId: ruleType,
+        consumer,
         operation: WriteOperations.Update,
         entity: AlertingAuthorizationEntity.Rule,
       });
     });
 
-    const rulesFinder = await this.unsecuredSavedObjectsClient.createPointInTimeFinder<RawRule>({
-      filter,
-      type: 'alert',
-      perPage: 1000,
-    });
+    const rulesFinder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser<RawRule>(
+        { namespace: this.namespace, type: 'alert' },
+        {
+          filter,
+          type: 'alert',
+          perPage: 1000,
+        }
+      );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const errors: BulkUpdateError[] = [];
