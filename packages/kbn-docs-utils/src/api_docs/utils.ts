@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import fs from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/dev-utils';
 import {
@@ -271,3 +272,17 @@ function scopeAccessor(scope: ApiScope): 'server' | 'common' | 'client' {
 export const isInternal = (dec: ApiDeclaration) => {
   return dec.tags && dec.tags.find((tag) => tag === 'internal');
 };
+
+export function writeFileIfChanged(filePath: string, contents: string, log: ToolingLog) {
+  if (fs.existsSync(filePath)) {
+    const currentContents = fs.readFileSync(filePath);
+    const removeDate = /^date: [0-9]{4}-[0-9]{2}-[0-9]{2}$/m;
+
+    if (currentContents.toString().replace(removeDate, '') === contents.replace(removeDate, '')) {
+      log.debug(`File content unchanged, skip writing: ${filePath}`);
+      return;
+    }
+  }
+
+  fs.writeFileSync(filePath, contents);
+}
