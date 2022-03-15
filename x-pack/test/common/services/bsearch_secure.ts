@@ -55,6 +55,8 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
         .set('kbn-version', version)
         .set('kbn-xsrf', 'true')
         .send(options);
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(result));
       if (result.status === 500 || result.status === 200) {
         return result;
       }
