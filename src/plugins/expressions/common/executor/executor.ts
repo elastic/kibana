@@ -148,7 +148,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   public getFunction(name: string, namespace?: string): ExpressionFunction | undefined {
     const fn = this.container.get().functions[name];
-    if (!fn || !fn.namespace || fn.namespace === namespace) return fn;
+    if (!fn?.namespace || fn.namespace === namespace) return fn;
   }
 
   public getFunctions(namespace?: string): Record<string, ExpressionFunction> {
