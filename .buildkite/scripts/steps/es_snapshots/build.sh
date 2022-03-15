@@ -69,6 +69,7 @@ echo "--- Build Elasticsearch"
   :distribution:archives:darwin-aarch64-tar:assemble \
   :distribution:archives:darwin-tar:assemble \
   :distribution:docker:docker-export:assemble \
+  :distribution:docker:cloud-docker-export:assemble \
   :distribution:archives:linux-aarch64-tar:assemble \
   :distribution:archives:linux-tar:assemble \
   :distribution:archives:windows-zip:assemble \
