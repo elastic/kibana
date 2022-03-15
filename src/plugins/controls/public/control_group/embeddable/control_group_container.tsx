@@ -119,7 +119,6 @@ export class ControlGroupContainer extends Container<
         ownFocus
         label={ControlGroupStrings.getControlButtonTitle()}
         iconType="arrowDown"
-        iconSide="right"
         panelPaddingSize="none"
         data-test-subj="dashboardControlsMenuButton"
       >
