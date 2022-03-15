@@ -336,6 +336,12 @@ export async function resolveSavedObjects(
     }
   }
 
+  // eslint-disable-next-line no-console
+  console.log(
+    '🚨 resolveSavedObjects(...)',
+    `conflictedIndexPatterns: ${conflictedIndexPatterns.length}; failedImports: ${failedImports.length}`
+  );
+
   return {
     conflictedIndexPatterns,
     conflictedSavedObjectsLinkedToSavedSearches,
