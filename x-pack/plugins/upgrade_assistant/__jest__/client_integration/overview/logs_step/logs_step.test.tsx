@@ -12,11 +12,13 @@ import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Logs Step', () => {
   let testBed: OverviewTestBed;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
+  beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('error state', () => {
@@ -30,7 +32,7 @@ describe('Overview - Logs Step', () => {
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupOverviewPage();
+        testBed = await setupOverviewPage(httpSetup);
       });
 
       testBed.component.update();
@@ -58,7 +60,7 @@ describe('Overview - Logs Step', () => {
         });
 
         await act(async () => {
-          testBed = await setupOverviewPage();
+          testBed = await setupOverviewPage(httpSetup);
         });
 
         const { component, exists } = testBed;
@@ -74,7 +76,7 @@ describe('Overview - Logs Step', () => {
         });
 
         await act(async () => {
-          testBed = await setupOverviewPage();
+          testBed = await setupOverviewPage(httpSetup);
         });
 
         const { component, exists } = testBed;
@@ -90,7 +92,7 @@ describe('Overview - Logs Step', () => {
         });
 
         await act(async () => {
-          testBed = await setupOverviewPage();
+          testBed = await setupOverviewPage(httpSetup);
         });
 
         const { component, find } = testBed;
@@ -110,7 +112,7 @@ describe('Overview - Logs Step', () => {
         });
 
         await act(async () => {
-          testBed = await setupOverviewPage();
+          testBed = await setupOverviewPage(httpSetup);
         });
 
         const { component } = testBed;
@@ -135,7 +137,7 @@ describe('Overview - Logs Step', () => {
       });
 
       await act(async () => {
-        testBed = await setupOverviewPage({
+        testBed = await setupOverviewPage(httpSetup, {
           privileges: {
             hasAllPrivileges: true,
             missingPrivileges: {
