@@ -53,7 +53,7 @@ export const toSavedSearchAttributes = (
 ): SavedSearchAttributes => ({
   kibanaSavedObjectMeta: { searchSourceJSON },
   title: savedSearch.title ?? '',
-  sort: (savedSearch.sort as unknown as string) ?? [],
+  sort: (savedSearch.sort as unknown as string[]) ?? [],
   columns: savedSearch.columns ?? [],
   description: savedSearch.description ?? '',
   grid: (savedSearch.grid as unknown as string) ?? {},
