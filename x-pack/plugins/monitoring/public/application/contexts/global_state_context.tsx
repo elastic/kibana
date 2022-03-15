@@ -7,12 +7,13 @@
 import React, { createContext } from 'react';
 import { GlobalState } from '../../url_state';
 import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
-import { TimeRange, RefreshInterval } from '../../../../../../src/plugins/data/public';
+import { TimeRange, RefreshInterval, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { Legacy } from '../../legacy_shims';
 
 interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
   toasts: MonitoringStartServices['notifications']['toasts'];
+  uiSettings: MonitoringStartServices['uiSettings'];
 }
 
 export interface State {
@@ -28,6 +29,7 @@ export interface State {
 export const GlobalStateContext = createContext({} as State);
 
 export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
+  uiSettings,
   query,
   toasts,
   children,
@@ -43,7 +45,16 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     localState[key] = initialState[key];
   }
 
-  localState.refreshInterval = { value: 10000, pause: false };
+  const { value, pause } = Legacy.shims.timefilter.getRefreshInterval();
+  const refreshDefaults = uiSettings.get(
+    UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
+  ) as RefreshInterval;
+
+  localState.refreshInterval = {
+    value: value ?? refreshDefaults.value,
+    pause: pause ?? refreshDefaults.pause,
+  };
+  Legacy.shims.timefilter.setRefreshInterval(localState.refreshInterval);
 
   localState.save = () => {
     const newState = { ...localState };
@@ -51,11 +62,7 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     state.setState(newState);
   };
 
-  const { value, pause } = Legacy.shims.timefilter.getRefreshInterval();
-  if (!value && pause) {
-    Legacy.shims.timefilter.setRefreshInterval(localState.refreshInterval);
-    localState.save?.();
-  }
+  localState.save?.();
 
   return <GlobalStateContext.Provider value={localState}>{children}</GlobalStateContext.Provider>;
 };
