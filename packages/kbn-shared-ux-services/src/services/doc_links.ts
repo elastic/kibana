@@ -10,5 +10,6 @@
  * A service providing links to documentation about various features in Kibana.
  */
 export interface SharedUxDocLinksService {
+  /** A link to information about Data Views in Kibana */
   dataViewsDocLink: string;
 }

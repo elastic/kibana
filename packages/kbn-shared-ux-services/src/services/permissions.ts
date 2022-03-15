@@ -10,5 +10,6 @@
  * A service providing permissions information, typically for the current user.
  */
 export interface SharedUxUserPermissionsService {
+  /** True if the user has permission to create a new Data View, false otherwise. */
   canCreateNewDataView: boolean;
 }

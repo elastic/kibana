@@ -18,6 +18,7 @@
 export interface SharedUxPlatformService {
   /**
    * Sets the fullscreen state of the chrome.
+   * @param isFullscreen True if the chrome should be fullscreen, false otherwise.
    */
   setIsFullscreen: (isFullscreen: boolean) => void;
 }

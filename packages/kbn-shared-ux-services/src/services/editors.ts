@@ -20,6 +20,7 @@ type DataView = unknown;
  * @see: src/plugins/data_view_editor/public/types.ts
  */
 interface DataViewEditorOptions {
+  /** Handler to be invoked when the Data View Editor completes a save operation. */
   onSave: (dataView: DataView) => void;
 }
 
@@ -28,5 +29,6 @@ interface DataViewEditorOptions {
  * in Kibana.
  */
 export interface SharedUxEditorsService {
+  /** A method to open the Data View Editor flow. */
   openDataViewEditor: (options: DataViewEditorOptions) => () => void;
 }

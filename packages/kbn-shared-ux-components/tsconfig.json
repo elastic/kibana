@@ -8,7 +8,7 @@
     "stripInternal": false,
     "types": [
       "jest",
-      "node"
+      "node",
     ]
   },
   "include": [
