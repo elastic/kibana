@@ -8,4 +8,3 @@
 
 export * from './discover_packages';
 export type { BazelPackage } from './bazel_package';
-export * from './generate_packages_build_bazel_file';
