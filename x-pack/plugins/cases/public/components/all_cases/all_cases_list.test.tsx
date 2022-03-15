@@ -873,4 +873,16 @@ describe('AllCasesListGeneric', () => {
 
     expect(alertCounts.length).toBeGreaterThan(0);
   });
+
+  it('should show the alerts column if the alert object is empty', async () => {
+    const { findAllByTestId } = render(
+      <TestProviders features={{ alerts: {} }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    const alertCounts = await findAllByTestId('case-table-column-alertsCount');
+
+    expect(alertCounts.length).toBeGreaterThan(0);
+  });
 });
