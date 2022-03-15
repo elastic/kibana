@@ -31,6 +31,7 @@ interface MetricAggTypeConfig<TMetricAggConfig extends AggConfig>
   extends AggTypeConfig<TMetricAggConfig, MetricAggParam<TMetricAggConfig>> {
   isScalable?: () => boolean;
   subtype?: string;
+  enableEmptyAsNull?: boolean;
 }
 
 // TODO need to make a more explicit interface for this
@@ -57,14 +58,16 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
       }) as MetricAggParam<TMetricAggConfig>
     );
 
-    this.params.push(
-      new BaseParamType({
-        name: 'emptyAsNull',
-        type: 'boolean',
-        default: false,
-        write: () => {},
-      }) as MetricAggParam<TMetricAggConfig>
-    );
+    if (config.enableEmptyAsNull) {
+      this.params.push(
+        new BaseParamType({
+          name: 'emptyAsNull',
+          type: 'boolean',
+          default: false,
+          write: () => {},
+        }) as MetricAggParam<TMetricAggConfig>
+      );
+    }
 
     this.getValue =
       config.getValue ||
