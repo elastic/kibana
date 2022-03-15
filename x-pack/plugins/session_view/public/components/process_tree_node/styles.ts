@@ -102,9 +102,8 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
 
     const timeStamp: CSSObject = {
       float: 'right',
-      fontFamily: 'Roboto Mono',
-      fontSize: '11px',
-      fontStyle: 'normal',
+      fontFamily: font.familyCode,
+      fontSize: size.m,
       fontWeight: font.weight.regular,
       lineHeight: '18px',
       letterSpacing: '0em',

@@ -24,10 +24,10 @@ const VERBOSE_MODE_OPTION_KEY = 'Verbose mode';
 
 export const SessionViewDisplayOptions = ({
   onChange,
-  optionsStates,
+  displayOptions,
 }: {
   onChange: (vars: DisplayOptionsState) => void;
-  optionsStates: DisplayOptionsState;
+  displayOptions: DisplayOptionsState;
 }) => {
   const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
 
@@ -43,7 +43,7 @@ export const SessionViewDisplayOptions = ({
           }
         ),
         key: TIMESTAMP_OPTION_KEY,
-        checked: optionsStates?.timestamp ? 'on' : undefined,
+        checked: displayOptions?.timestamp ? 'on' : undefined,
       },
       {
         label: i18n.translate(
@@ -53,10 +53,10 @@ export const SessionViewDisplayOptions = ({
           }
         ),
         key: VERBOSE_MODE_OPTION_KEY,
-        checked: optionsStates?.verboseMode ? 'on' : undefined,
+        checked: displayOptions?.verboseMode ? 'on' : undefined,
       },
     ],
-    [optionsStates]
+    [displayOptions]
   );
 
   const toggleOptionButton = () => {
@@ -71,7 +71,7 @@ export const SessionViewDisplayOptions = ({
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
         iconType="eye"
-        display={optionsStates.verboseMode ? 'fill' : 'empty'}
+        display={displayOptions.verboseMode ? 'fill' : 'empty'}
         onClick={toggleOptionButton}
         size="m"
         aria-label="Option"
@@ -90,7 +90,7 @@ export const SessionViewDisplayOptions = ({
         }
         return chosenOptionStates;
       },
-      { ...optionsStates }
+      { ...displayOptions }
     );
     onChange(updateOptionState);
   };

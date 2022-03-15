@@ -108,7 +108,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
           <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
             <SessionViewDisplayOptions
-              optionsStates={displayOptions}
+              displayOptions={displayOptions}
               onChange={handleOptionChange}
             />
           </EuiFlexItem>
