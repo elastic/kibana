@@ -329,6 +329,11 @@ describe('disable()', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            consumer: 'myApp',
+          },
+        },
         alerting: {
           action_group_id: 'default',
           action_subgroup: 'newSubgroup',

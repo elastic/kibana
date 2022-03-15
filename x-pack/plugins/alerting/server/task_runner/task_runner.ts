@@ -101,6 +101,7 @@ export class TaskRunner<
   private logger: Logger;
   private taskInstance: RuleTaskInstance;
   private ruleName: string | null;
+  private ruleConsumer: string | null;
   private ruleType: NormalizedRuleType<
     Params,
     ExtractedParams,
@@ -134,6 +135,7 @@ export class TaskRunner<
     this.usageCounter = context.usageCounter;
     this.ruleType = ruleType;
     this.ruleName = null;
+    this.ruleConsumer = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
@@ -144,19 +146,19 @@ export class TaskRunner<
   private async getDecryptedAttributes(
     ruleId: string,
     spaceId: string
-  ): Promise<{ apiKey: string | null; enabled: boolean }> {
+  ): Promise<{ apiKey: string | null; enabled: boolean; consumer: string }> {
     const namespace = this.context.spaceIdToNamespace(spaceId);
     // Only fetch encrypted attributes here, we'll create a saved objects client
     // scoped with the API key to fetch the remaining data.
     const {
-      attributes: { apiKey, enabled },
+      attributes: { apiKey, enabled, consumer },
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
       'alert',
       ruleId,
       { namespace }
     );
 
-    return { apiKey, enabled };
+    return { apiKey, enabled, consumer };
   }
 
   private getFakeKibanaRequest(spaceId: string, apiKey: RawRule['apiKey']) {
@@ -209,6 +211,7 @@ export class TaskRunner<
     >({
       ruleId,
       ruleName,
+      ruleConsumer: this.ruleConsumer!,
       tags,
       executionId: this.executionId,
       logger: this.logger,
@@ -578,13 +581,18 @@ export class TaskRunner<
     } = this.taskInstance;
     let enabled: boolean;
     let apiKey: string | null;
+    let consumer: string;
     try {
       const decryptedAttributes = await this.getDecryptedAttributes(ruleId, spaceId);
       apiKey = decryptedAttributes.apiKey;
       enabled = decryptedAttributes.enabled;
+      consumer = decryptedAttributes.consumer;
     } catch (err) {
+      // If decryption fails, the event log execute event will be written without a consumer field
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
+
+    this.ruleConsumer = consumer;
 
     if (!enabled) {
       throw new ErrorWithReason(
@@ -671,6 +679,7 @@ export class TaskRunner<
     const event = createAlertEventLogRecordObject({
       ruleId,
       ruleType: this.ruleType as UntypedNormalizedRuleType,
+      consumer: this.ruleConsumer!,
       action: EVENT_LOG_ACTIONS.execute,
       namespace,
       executionId: this.executionId,
@@ -698,6 +707,8 @@ export class TaskRunner<
       },
       message: `rule execution start: "${ruleId}"`,
     });
+
+    // execute-start event is written without "consumer" field
     eventLogger.logEvent(startEvent);
 
     const { state, schedule, monitoring } = await errorAsRuleTaskRunResult(
@@ -734,6 +745,10 @@ export class TaskRunner<
 
     eventLogger.stopTiming(event);
     set(event, 'kibana.alerting.status', executionStatus.status);
+
+    if (this.ruleConsumer) {
+      set(event, 'kibana.alert.rule.consumer', this.ruleConsumer);
+    }
 
     const monitoringHistory: RuleMonitoringHistory = {
       success: true,
@@ -890,6 +905,7 @@ export class TaskRunner<
       kibana: {
         alert: {
           rule: {
+            ...(this.ruleConsumer ? { consumer: this.ruleConsumer } : {}),
             execution: {
               uuid: this.executionId,
             },
@@ -1067,6 +1083,7 @@ function generateNewAndRecoveredAlertEvents<
       kibana: {
         alert: {
           rule: {
+            consumer: rule.consumer,
             execution: {
               uuid: executionId,
             },

@@ -73,6 +73,7 @@ const createExecutionHandlerParams: jest.Mocked<
   spaceId: 'test1',
   ruleId: '1',
   ruleName: 'name-of-alert',
+  ruleConsumer: 'rule-consumer',
   executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
   tags: ['tag-A', 'tag-B'],
   apiKey: 'MTIzOmFiYw==',
@@ -179,6 +180,7 @@ describe('Create Execution Handler', () => {
           "kibana": Object {
             "alert": Object {
               "rule": Object {
+                "consumer": "rule-consumer",
                 "execution": Object {
                   "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 },

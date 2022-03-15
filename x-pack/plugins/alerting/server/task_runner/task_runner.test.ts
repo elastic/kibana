@@ -324,6 +324,7 @@ describe('Task Runner', () => {
           actionSubgroup: 'subDefault',
           actionGroupId: 'default',
           instanceId: '1',
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -335,6 +336,7 @@ describe('Task Runner', () => {
           actionGroupId: 'default',
           actionSubgroup: 'subDefault',
           instanceId: '1',
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -345,6 +347,7 @@ describe('Task Runner', () => {
           instanceId: '1',
           actionSubgroup: 'subDefault',
           savedObjects: [generateAlertSO('1'), generateActionSO('1')],
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -355,6 +358,7 @@ describe('Task Runner', () => {
           status: 'active',
           numberOfTriggeredActions: 1,
           task: true,
+          consumer: 'bar',
         })
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -424,6 +428,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
         instanceId: '1',
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -434,6 +439,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
         instanceId: '1',
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -444,6 +450,7 @@ describe('Task Runner', () => {
         status: 'active',
         numberOfTriggeredActions: 0,
         task: true,
+        consumer: 'bar',
       })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -674,6 +681,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
         instanceId: '1',
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -684,6 +692,7 @@ describe('Task Runner', () => {
         status: 'active',
         numberOfTriggeredActions: 0,
         task: true,
+        consumer: 'bar',
       })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -746,6 +755,7 @@ describe('Task Runner', () => {
           status: 'active',
           numberOfTriggeredActions: 1,
           task: true,
+          consumer: 'bar',
         })
       );
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
@@ -817,6 +827,7 @@ describe('Task Runner', () => {
           status: 'active',
           numberOfTriggeredActions: 1,
           task: true,
+          consumer: 'bar',
         })
       );
 
@@ -898,6 +909,7 @@ describe('Task Runner', () => {
           action: EVENT_LOG_ACTIONS.newInstance,
           actionGroupId: 'default',
           instanceId: '1',
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -908,6 +920,7 @@ describe('Task Runner', () => {
           action: EVENT_LOG_ACTIONS.activeInstance,
           actionGroupId: 'default',
           instanceId: '1',
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -917,6 +930,7 @@ describe('Task Runner', () => {
           actionGroupId: 'default',
           instanceId: '1',
           savedObjects: [generateAlertSO('1'), generateActionSO('1')],
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -927,6 +941,7 @@ describe('Task Runner', () => {
           status: 'active',
           numberOfTriggeredActions: 1,
           task: true,
+          consumer: 'bar',
         })
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -1027,6 +1042,7 @@ describe('Task Runner', () => {
           instanceId: '2',
           start: '1969-12-31T06:00:00.000Z',
           end: DATE_1970,
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1037,6 +1053,7 @@ describe('Task Runner', () => {
           duration: MOCK_DURATION,
           start: DATE_1969,
           instanceId: '1',
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1046,6 +1063,7 @@ describe('Task Runner', () => {
           savedObjects: [generateAlertSO('1'), generateActionSO('2')],
           actionGroupId: 'recovered',
           instanceId: '2',
+          consumer: 'bar',
         })
       );
 
@@ -1056,6 +1074,7 @@ describe('Task Runner', () => {
           savedObjects: [generateAlertSO('1'), generateActionSO('1')],
           actionGroupId: 'default',
           instanceId: '1',
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1066,6 +1085,7 @@ describe('Task Runner', () => {
           status: 'active',
           numberOfTriggeredActions: 2,
           task: true,
+          consumer: 'bar',
         })
       );
 
@@ -1299,6 +1319,7 @@ describe('Task Runner', () => {
         instanceId: '2',
         start: '1969-12-31T06:00:00.000Z',
         end: DATE_1970,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1309,6 +1330,7 @@ describe('Task Runner', () => {
         duration: MOCK_DURATION,
         start: DATE_1969,
         instanceId: '1',
+        consumer: 'bar',
       })
     );
 
@@ -1320,6 +1342,7 @@ describe('Task Runner', () => {
         status: 'active',
         numberOfTriggeredActions: 0,
         task: true,
+        consumer: 'bar',
       })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -1476,6 +1499,7 @@ describe('Task Runner', () => {
         reason: 'execute',
         task: true,
         status: 'error',
+        consumer: 'bar',
       })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -1557,6 +1581,7 @@ describe('Task Runner', () => {
         task: true,
         reason: 'license',
         status: 'error',
+        consumer: 'bar',
       })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -1591,6 +1616,7 @@ describe('Task Runner', () => {
         task: true,
         reason: 'unknown',
         status: 'error',
+        consumer: 'bar',
       })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -1624,6 +1650,7 @@ describe('Task Runner', () => {
         task: true,
         reason: 'read',
         status: 'error',
+        consumer: 'bar',
       })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -1855,6 +1882,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
         instanceId: '1',
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1865,6 +1893,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
         instanceId: '2',
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1875,6 +1904,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
         instanceId: '1',
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1885,6 +1915,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
         instanceId: '2',
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1895,6 +1926,7 @@ describe('Task Runner', () => {
         status: 'active',
         numberOfTriggeredActions: 0,
         task: true,
+        consumer: 'bar',
       })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -1972,6 +2004,7 @@ describe('Task Runner', () => {
         duration: MOCK_DURATION,
         start: DATE_1969,
         instanceId: '1',
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1982,6 +2015,7 @@ describe('Task Runner', () => {
         duration: 64800000000000,
         start: '1969-12-31T06:00:00.000Z',
         instanceId: '2',
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1992,6 +2026,7 @@ describe('Task Runner', () => {
         status: 'active',
         numberOfTriggeredActions: 0,
         task: true,
+        consumer: 'bar',
       })
     );
 
@@ -2059,6 +2094,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
         instanceId: '1',
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -2066,6 +2102,7 @@ describe('Task Runner', () => {
       generateEventLog({
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
+        consumer: 'bar',
         instanceId: '2',
       })
     );
@@ -2075,6 +2112,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.execute,
         outcome: 'success',
         status: 'active',
+        consumer: 'bar',
         numberOfTriggeredActions: 0,
         task: true,
       })
@@ -2139,6 +2177,7 @@ describe('Task Runner', () => {
         duration: MOCK_DURATION,
         start: DATE_1969,
         end: DATE_1970,
+        consumer: 'bar',
         instanceId: '1',
       })
     );
@@ -2149,6 +2188,7 @@ describe('Task Runner', () => {
         duration: 64800000000000,
         start: '1969-12-31T06:00:00.000Z',
         end: DATE_1970,
+        consumer: 'bar',
         instanceId: '2',
       })
     );
@@ -2159,6 +2199,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.execute,
         outcome: 'success',
         status: 'ok',
+        consumer: 'bar',
         numberOfTriggeredActions: 0,
         task: true,
       })
@@ -2222,6 +2263,7 @@ describe('Task Runner', () => {
       2,
       generateEventLog({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
+        consumer: 'bar',
         instanceId: '1',
       })
     );
@@ -2229,6 +2271,7 @@ describe('Task Runner', () => {
       3,
       generateEventLog({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
+        consumer: 'bar',
         instanceId: '2',
       })
     );
@@ -2239,6 +2282,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.execute,
         outcome: 'success',
         status: 'ok',
+        consumer: 'bar',
         numberOfTriggeredActions: 0,
         task: true,
       })
@@ -2355,6 +2399,7 @@ describe('Task Runner', () => {
       generateEventLog({
         errorMessage: 'Rule failed to execute because rule ran after it was disabled.',
         action: EVENT_LOG_ACTIONS.execute,
+        consumer: 'bar',
         outcome: 'failure',
         task: true,
         reason: 'disabled',

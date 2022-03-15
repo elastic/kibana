@@ -29,6 +29,7 @@ export const SAVED_OBJECT = {
   type: 'alert',
   attributes: {
     apiKey: Buffer.from('123:abc').toString('base64'),
+    consumer: 'bar',
     enabled: true,
   },
   references: [],
@@ -182,6 +183,7 @@ export const generateEventLog = ({
   action,
   task,
   duration,
+  consumer,
   start,
   end,
   outcome,
@@ -211,6 +213,7 @@ export const generateEventLog = ({
   kibana: {
     alert: {
       rule: {
+        ...(consumer && { consumer }),
         execution: {
           uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
           ...(!isNil(numberOfTriggeredActions) && {

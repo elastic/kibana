@@ -28,6 +28,7 @@ describe('createAlertEventLogRecordObject', () => {
         executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleType,
+        consumer: 'rule-consumer',
         action: 'execute-start',
         timestamp: '1970-01-01T00:00:00.000Z',
         task: {
@@ -53,6 +54,7 @@ describe('createAlertEventLogRecordObject', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'rule-consumer',
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
@@ -88,6 +90,7 @@ describe('createAlertEventLogRecordObject', () => {
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
+        consumer: 'rule-consumer',
         action: 'recovered-instance',
         instanceId: 'test1',
         group: 'group 1',
@@ -120,6 +123,7 @@ describe('createAlertEventLogRecordObject', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'rule-consumer',
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
@@ -158,6 +162,7 @@ describe('createAlertEventLogRecordObject', () => {
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
+        consumer: 'rule-consumer',
         action: 'execute-action',
         instanceId: 'test1',
         group: 'group 1',
@@ -195,6 +200,7 @@ describe('createAlertEventLogRecordObject', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'rule-consumer',
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
