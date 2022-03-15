@@ -7,8 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
-import { EsDeprecationLogs } from '../../../public/application/components';
+import { EsDeprecationLogs } from '../../../public/application/components/es_deprecation_logs';
 import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
@@ -66,11 +65,10 @@ const createActions = (testBed: TestBed) => {
 };
 
 export const setupESDeprecationLogsPage = async (
-  httpSetup: HttpSetup,
   overrides?: Record<string, unknown>
 ): Promise<EsDeprecationLogsTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(EsDeprecationLogs, httpSetup, overrides),
+    WithAppDependencies(EsDeprecationLogs, overrides),
     testBedConfig
   );
   const testBed = await initTestBed();
