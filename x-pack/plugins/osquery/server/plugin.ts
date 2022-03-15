@@ -15,7 +15,6 @@ import {
   SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../fleet/common';
 import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
 
 import { createConfig } from './create_config';
@@ -166,7 +165,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 includeIn: 'all',
                 name: 'All',
                 savedObject: {
-                  all: [packSavedObjectType, AGENT_POLICY_SAVED_OBJECT_TYPE],
+                  all: [packSavedObjectType],
                   read: [],
                 },
                 ui: ['writePacks', 'readPacks'],
