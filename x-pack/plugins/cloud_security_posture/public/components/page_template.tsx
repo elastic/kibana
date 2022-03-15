@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import type { QueryStatus } from 'react-query';
 import { NavLink } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiErrorBoundary, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,6 +25,7 @@ import {
   NO_DATA_CONFIG_SOLUTION_NAME,
   NO_DATA_CONFIG_TITLE,
 } from './translations';
+import { useCisKubernetesIntegraion } from '../common/api/use_cis_kubernetes_integration';
 
 const activeItemStyle = { fontWeight: 700 };
 
@@ -65,50 +67,87 @@ const NO_DATA_CONFIG: KibanaPageTemplateProps['noDataConfig'] = {
   },
 };
 
-export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({
+const PACKAGE_NOT_INSTALLED_CONFIG: KibanaPageTemplateProps['noDataConfig'] = {
+  pageTitle: NO_DATA_CONFIG_TITLE,
+  solution: NO_DATA_CONFIG_SOLUTION_NAME,
+  // TODO: Add real docs link once we have it
+  docsLink: 'https://www.elastic.co/guide/index.html',
+  logo: 'logoSecurity',
+  actions: {
+    elasticAgent: {
+      // TODO: Use `href` prop to link to our own integration once we have it
+      title: NO_DATA_CONFIG_BUTTON,
+      description: NO_DATA_CONFIG_DESCRIPTION,
+    },
+  },
+};
+
+const DefaultLoading = () => <CspLoadingState>{LOADING}</CspLoadingState>;
+
+const DefaultError = () => (
+  <EuiEmptyPrompt
+    color="danger"
+    iconType="alert"
+    title={
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            id="xpack.csp.pageTemplate.loadErrorMessage"
+            defaultMessage="We couldn't fetch your cloud security posture data"
+          />
+        </h2>
+      </EuiTitle>
+    }
+  />
+);
+
+export const CspPageTemplate: React.FC<
+  KibanaPageTemplateProps & {
+    status: QueryStatus;
+    loadingRender?: React.FC;
+    errorRender?: React.FC;
+  }
+> = ({
   children,
+  status,
+  loadingRender = DefaultLoading,
+  errorRender = DefaultError,
   ...kibanaPageTemplateProps
 }) => {
+  const cisKubernetes = useCisKubernetesIntegraion();
+
   // TODO: Consider using more sophisticated logic to find out if our integration is installed
   const kubeBeatQuery = useKubebeatDataView();
 
   let noDataConfig: KibanaPageTemplateProps['noDataConfig'];
-  if (kubeBeatQuery.status === 'success' && !kubeBeatQuery.data) {
-    noDataConfig = NO_DATA_CONFIG;
+  if (cisKubernetes?.status === 'not_installed') {
+    noDataConfig = PACKAGE_NOT_INSTALLED_CONFIG;
+  }
+  // NEED TO PASS NO DATA CONFIG FROM FINDINGS AND DASHBOARD AS WELL AS STATUS
+  if (cisKubernetes?.status === 'installed') {
+    noDataConfig = PACKAGE_NOT_INSTALLED_CONFIG;
   }
 
-  let template: KibanaPageTemplateProps['template'] = 'default';
-  if (kubeBeatQuery.status === 'error' || kubeBeatQuery.status === 'loading') {
-    template = 'centeredContent';
-  }
+  const getTemplate = (): KibanaPageTemplateProps['template'] => {
+    if (status === 'loading' || status === 'error') return 'centeredContent';
+    return 'default';
+  };
+
+  const render = () => {
+    if (status === 'loading') return loadingRender;
+    if (status === 'error') return errorRender;
+    if (status === 'success') return children;
+    return null;
+  };
 
   return (
     <KibanaPageTemplate
       {...DEFAULT_PROPS}
       {...kibanaPageTemplateProps}
-      template={template}
+      template={getTemplate()}
       noDataConfig={noDataConfig}
     >
-      <EuiErrorBoundary>
-        {kubeBeatQuery.status === 'loading' && <CspLoadingState>{LOADING}</CspLoadingState>}
-        {kubeBeatQuery.status === 'error' && (
-          <EuiEmptyPrompt
-            color="danger"
-            iconType="alert"
-            title={
-              <EuiTitle>
-                <h2>
-                  <FormattedMessage
-                    id="xpack.csp.pageTemplate.loadErrorMessage"
-                    defaultMessage="We couldn't fetch your cloud security posture data"
-                  />
-                </h2>
-              </EuiTitle>
-            }
-          />
-        )}
-        {kubeBeatQuery.status === 'success' && children}
-      </EuiErrorBoundary>
+      <EuiErrorBoundary>{render()}</EuiErrorBoundary>
     </KibanaPageTemplate>
   );
 };
