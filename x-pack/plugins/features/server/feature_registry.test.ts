@@ -1953,8 +1953,7 @@ describe('FeatureRegistry', () => {
             ui: ['ui_a'],
           },
           {
-            requiredClusterPrivileges: [],
-            requiredRoles: ['some_role'],
+            requiredClusterPrivileges: ['monitor'],
             ui: ['ui_b'],
           },
         ],

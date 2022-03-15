@@ -484,17 +484,9 @@ export function validateElasticsearchFeature(feature: ElasticsearchFeatureConfig
   // the following validation can't be enforced by the Joi schema without a very convoluted and verbose definition
   const { privileges } = feature;
   privileges.forEach((privilege, index) => {
-    const {
-      requiredClusterPrivileges = [],
-      requiredIndexPrivileges = [],
-      requiredRoles = [],
-    } = privilege;
+    const { requiredClusterPrivileges = [], requiredIndexPrivileges = [] } = privilege;
 
-    if (
-      requiredClusterPrivileges.length === 0 &&
-      requiredIndexPrivileges.length === 0 &&
-      requiredRoles.length === 0
-    ) {
+    if (requiredClusterPrivileges.length === 0 && requiredIndexPrivileges.length === 0) {
       throw new Error(
         `Feature ${feature.id} has a privilege definition at index ${index} without any privileges defined.`
       );
