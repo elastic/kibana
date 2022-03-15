@@ -66,10 +66,10 @@ describe('internalBulkResolve', () => {
 
   /** Mocks the elasticsearch client so it returns the expected results for a bulk operation */
   function mockBulkResults(
-    ...results: Array<{ found: boolean; targetId?: string; disabled?: boolean }>
+    ...results: Array<{ found: boolean; targetId?: string; disabled?: boolean; purpose?: string }>
   ) {
     client.bulk.mockResponseOnce({
-      items: results.map(({ found, targetId, disabled }) => ({
+      items: results.map(({ found, targetId, disabled, purpose }) => ({
         update: {
           _index: 'doesnt-matter',
           status: 0,
@@ -77,7 +77,7 @@ describe('internalBulkResolve', () => {
             found,
             _source: {
               ...((targetId || disabled) && {
-                [LEGACY_URL_ALIAS_TYPE]: { targetId, disabled },
+                [LEGACY_URL_ALIAS_TYPE]: { targetId, disabled, purpose },
               }),
             },
             ...VERSION_PROPS,
@@ -150,27 +150,53 @@ describe('internalBulkResolve', () => {
     );
   }
 
-  function expectUnsupportedTypeError(id: string) {
+  function expectUnsupportedTypeError({ id }: { id: string }) {
     const error = SavedObjectsErrorHelpers.createUnsupportedTypeError(UNSUPPORTED_TYPE);
     return { type: UNSUPPORTED_TYPE, id, error };
   }
 
-  function expectNotFoundError(id: string) {
+  function expectNotFoundError({ id }: { id: string }) {
     const error = SavedObjectsErrorHelpers.createGenericNotFoundError(OBJ_TYPE, id);
     return { type: OBJ_TYPE, id, error };
   }
 
-  function expectExactMatchResult(id: string) {
+  function expectExactMatchResult({ id }: { id: string }) {
     return { saved_object: `mock-obj-for-${id}`, outcome: 'exactMatch' };
   }
 
-  function expectAliasMatchResult(id: string) {
-    return { saved_object: `mock-obj-for-${id}`, outcome: 'aliasMatch', alias_target_id: id };
+  function expectAliasMatchResult({
+    id,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    suppress_redirect_toast,
+  }: {
+    id: string;
+    suppress_redirect_toast?: boolean;
+  }) {
+    return {
+      saved_object: `mock-obj-for-${id}`,
+      outcome: 'aliasMatch',
+      alias_target_id: id,
+      suppress_redirect_toast,
+    };
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  function expectConflictResult(id: string, alias_target_id: string) {
-    return { saved_object: `mock-obj-for-${id}`, outcome: 'conflict', alias_target_id };
+  function expectConflictResult({
+    id,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    alias_target_id,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    suppress_redirect_toast,
+  }: {
+    id: string;
+    alias_target_id: string;
+    suppress_redirect_toast?: boolean;
+  }) {
+    return {
+      saved_object: `mock-obj-for-${id}`,
+      outcome: 'conflict',
+      alias_target_id,
+      suppress_redirect_toast,
+    };
   }
 
   for (const namespace of [undefined, 'default', 'space-x']) {
@@ -210,7 +236,7 @@ describe('internalBulkResolve', () => {
       const result = await internalBulkResolve(params);
       expect(client.bulk).not.toHaveBeenCalled();
       expect(client.mget).not.toHaveBeenCalled();
-      expect(result.resolved_objects).toEqual([expectUnsupportedTypeError('1')]);
+      expect(result.resolved_objects).toEqual([expectUnsupportedTypeError({ id: '1' })]);
     });
 
     it('returns errors for objects that are not found', async () => {
@@ -239,9 +265,9 @@ describe('internalBulkResolve', () => {
       expectMgetArgs(namespace, ['1', '2', '2-newId', '3', '3-newId']);
       expect(mockRawDocExistsInNamespace).toHaveBeenCalledTimes(2); // for objs 3 and 3-newId
       expect(result.resolved_objects).toEqual([
-        expectNotFoundError('1'),
-        expectNotFoundError('2'),
-        expectNotFoundError('3'),
+        expectNotFoundError({ id: '1' }),
+        expectNotFoundError({ id: '2' }),
+        expectNotFoundError({ id: '3' }),
       ]);
     });
 
@@ -260,7 +286,7 @@ describe('internalBulkResolve', () => {
       expectBulkArgs(expectedNamespaceString, ['1']);
       expectMgetArgs(namespace, ['1']);
       expect(result.resolved_objects).toEqual([
-        expectExactMatchResult('1'), // result for obj 1
+        expectExactMatchResult({ id: '1' }), // result for obj 1
       ]);
     });
 
@@ -293,11 +319,48 @@ describe('internalBulkResolve', () => {
       expectBulkArgs(expectedNamespaceString, ['2', '3', '4', '5']);
       expectMgetArgs(namespace, ['2', '3', '4', '4-newId', '5', '5-newId']);
       expect(result.resolved_objects).toEqual([
-        expectUnsupportedTypeError('1'),
-        expectNotFoundError('2'),
-        expectExactMatchResult('3'),
-        expectAliasMatchResult('4-newId'),
-        expectConflictResult('5', '5-newId'),
+        expectUnsupportedTypeError({ id: '1' }),
+        expectNotFoundError({ id: '2' }),
+        expectExactMatchResult({ id: '3' }),
+        expectAliasMatchResult({ id: '4-newId' }),
+        expectConflictResult({ id: '5', alias_target_id: '5-newId' }),
+      ]);
+    });
+
+    it('returns `suppress_redirect_toast: true` iff the alias has a purpose and the outcome is aliasMatch', async () => {
+      const objects = [
+        { type: UNSUPPORTED_TYPE, id: '1' }, // unsupported type error
+        { type: OBJ_TYPE, id: '2' }, // not found error
+        { type: OBJ_TYPE, id: '3' }, // exactMatch outcome
+        { type: OBJ_TYPE, id: '4' }, // aliasMatch outcome
+        { type: OBJ_TYPE, id: '5' }, // conflict outcome
+      ];
+      const params = setup(objects, { namespace });
+      mockBulkResults(
+        // does not attempt to fetch alias for obj 1, because that is an unsupported type
+        { found: false }, // fetch alias for obj 2
+        { found: false }, // fetch alias for obj 3
+        { found: true, targetId: '4-newId', purpose: 'some-purpose' }, // fetch alias for obj 4
+        { found: true, targetId: '5-newId', purpose: 'some-purpose' } // fetch alias for obj 5
+      );
+      mockMgetResults(
+        { found: false }, // fetch obj 2
+        { found: true }, // fetch obj 3
+        { found: false }, // fetch obj 4
+        { found: true }, // fetch obj 4-newId
+        { found: true }, // fetch obj 5
+        { found: true } // fetch obj 5-newId
+      );
+
+      const result = await internalBulkResolve(params);
+      expectBulkArgs(expectedNamespaceString, ['2', '3', '4', '5']);
+      expectMgetArgs(namespace, ['2', '3', '4', '4-newId', '5', '5-newId']);
+      expect(result.resolved_objects).toEqual([
+        expectUnsupportedTypeError({ id: '1' }),
+        expectNotFoundError({ id: '2' }),
+        expectExactMatchResult({ id: '3' }),
+        expectAliasMatchResult({ id: '4-newId', suppress_redirect_toast: true }),
+        expectConflictResult({ id: '5', alias_target_id: '5-newId' }), // even though this alias has a purpose, this result does not include `suppress_redirect_toast: true`
       ]);
     });
   }

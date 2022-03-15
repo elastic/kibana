@@ -165,7 +165,7 @@ interface] has four fields, summarized below:
 * `alias_target_id` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It means that a legacy URL alias with this ID points
   to an object with a _different_ ID.
 * `suppress_redirect_toast` - This can be defined if the outcome is `'aliasMatch'`. It means that a legacy URL alias was intentionally
-  created by a user, and when Kibana redirects the browser using this alias, it should not show a toast message.
+  created for a specific purpose, and Kibana should not display a toast telling the user that the object has a new URL.
 
 The SavedObjectsClient is available both on the server-side and the client-side. You may be fetching the object on the server-side via a
 custom HTTP route, or you may be fetching it on the client-side directly. Either way, the `outcome` and `alias_target_id` fields need to be

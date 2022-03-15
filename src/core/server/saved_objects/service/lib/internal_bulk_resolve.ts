@@ -134,7 +134,8 @@ export async function internalBulkResolve<T>(
           _id: serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
           _index: objectIndex,
         });
-        const { targetId, suppressRedirectToast } = legacyUrlAlias;
+        const { targetId, purpose } = legacyUrlAlias;
+        const suppressRedirectToast = !!purpose ? true : undefined; // If this alias was intentionally created by a user for a reason, the client should not display a redirect toast.
         aliasInfoArray.push({ targetId, suppressRedirectToast });
         return;
       }
