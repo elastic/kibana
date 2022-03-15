@@ -443,7 +443,7 @@ export class Execution<
   }
 
   validate<Type = unknown>(value: Type, argDef: ExpressionFunctionParameter<Type>): void {
-    if (argDef.options?.length && !argDef.options.includes(value)) {
+    if (argDef.strict && argDef.options?.length && !argDef.options.includes(value)) {
       throw new Error(
         `Value '${value}' is not among the allowed options for argument '${
           argDef.name
