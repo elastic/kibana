@@ -693,8 +693,8 @@ describe('Detections Rules API', () => {
           method: 'GET',
           query: {
             end: 'now',
-            queryText: '',
-            statusFilters: '',
+            query_text: '',
+            status_filters: '',
             start: 'now-30',
           },
           signal: abortCtrl.signal,
