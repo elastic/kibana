@@ -13,6 +13,12 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
+import type { CoreProvidersProps } from './apps/common_providers';
+import {
+  createLazyContainerMetricsTable,
+  createLazyHostMetricsTable,
+  createLazyPodMetricsTable,
+} from './components/infrastructure_node_metrics_tables';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
@@ -204,7 +210,19 @@ export class Plugin implements InfraClientPluginClass {
     });
   }
 
-  start(_core: InfraClientCoreStart, _plugins: InfraClientStartDeps) {}
+  start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
+    const coreProvidersProps: CoreProvidersProps = {
+      core,
+      plugins,
+      theme$: core.theme.theme$,
+    };
+
+    return {
+      ContainerMetricsTable: createLazyContainerMetricsTable(coreProvidersProps),
+      HostMetricsTable: createLazyHostMetricsTable(coreProvidersProps),
+      PodMetricsTable: createLazyPodMetricsTable(coreProvidersProps),
+    };
+  }
 
   stop() {}
 }
