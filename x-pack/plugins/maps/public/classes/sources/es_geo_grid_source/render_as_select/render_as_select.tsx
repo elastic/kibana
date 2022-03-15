@@ -8,9 +8,11 @@
 import React from 'react';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ES_GEO_FIELD_TYPE, RENDER_AS } from '../../../../common/constants';
-import { getIsCloud } from '../../../kibana_services';
-import { getIsGoldPlus } from '../../../licensed_features';
+import { ES_GEO_FIELD_TYPE, RENDER_AS } from '../../../../../common/constants';
+import { getIsCloud } from '../../../../kibana_services';
+import { getIsGoldPlus } from '../../../../licensed_features';
+import { CLUSTER_LABEL, GRID_LABEL, HEX_LABEL } from './i18n_constants';
+import { ShowAsLabel } from './show_as_label';
 
 interface Props {
   geoFieldType?: ES_GEO_FIELD_TYPE;
@@ -41,23 +43,17 @@ export function RenderAsSelect(props: Props) {
   const options = [
     {
       id: RENDER_AS.POINT,
-      label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
-        defaultMessage: 'clusters',
-      }),
+      label: CLUSTER_LABEL,
       value: RENDER_AS.POINT,
     },
     {
       id: RENDER_AS.GRID,
-      label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
-        defaultMessage: 'grids',
-      }),
+      label: GRID_LABEL,
       value: RENDER_AS.GRID,
     },
     {
       id: RENDER_AS.HEX,
-      label: i18n.translate('xpack.maps.source.esGeoGrid.hexDropdownOption', {
-        defaultMessage: 'hexbins',
-      }),
+      label: HEX_LABEL,
       value: RENDER_AS.HEX,
       isDisabled: isHexDisabled,
     },
@@ -72,12 +68,11 @@ export function RenderAsSelect(props: Props) {
 
   const currentOption = options.find((option) => option.value === props.renderAs) || options[0];
 
+  const selectLabel = <ShowAsLabel isHexDisabled={isHexDisabled} hexDisabledReason={hexDisabledReason}/>;
+
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.maps.source.esGeoGrid.showAsLabel', {
-        defaultMessage: 'Show as',
-      })}
-      helpText={hexDisabledReason}
+      label={selectLabel}
       display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
     >
       <EuiButtonGroup
