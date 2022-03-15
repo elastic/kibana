@@ -77,7 +77,9 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     </EuiHeaderSectionItemButton>
   );
 
-  const isAnonymousUser = false; // authenticatedUser?.authentication_provider.type === 'anonymous';
+  const isAnonymousUser = userProfile.value
+    ? userProfile.value.authentication_provider.type === 'anonymous'
+    : false;
   const items: EuiContextMenuPanelItemDescriptor[] = [];
 
   if (userMenuLinks.length) {

@@ -7,7 +7,7 @@
 
 import type { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
 
-import type { UserData, UserInfo, UserProfile } from '../../common';
+import type { AuthenticationProvider, UserData, UserInfo, UserProfile } from '../../common';
 import { getDetailedErrorMessage } from '../errors';
 import type { UserProfileGrant } from './user_profile_grant';
 
@@ -47,6 +47,7 @@ type GetProfileResponse<T extends UserData> = Record<
     access: {};
     enabled: boolean;
     last_synchronized: number;
+    authentication_provider: AuthenticationProvider;
   }
 >;
 
@@ -90,8 +91,7 @@ export class UserProfileService {
             dataPath ? `?data=${KIBANA_DATA_ROOT}.${dataPath}` : ''
           }`,
         });
-        const { user, enabled, data } = body[uid];
-        return { uid, enabled, user, data: data[KIBANA_DATA_ROOT] ?? {} };
+        return { ...body[uid], data: body[uid].data[KIBANA_DATA_ROOT] ?? {} };
       } catch (error) {
         logger.error(`Failed to retrieve user profile [uid=${uid}]: ${error.message}`);
         throw error;

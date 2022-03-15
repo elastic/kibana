@@ -7,7 +7,13 @@
 
 export type { ApiKey, ApiKeyToInvalidate, ApiKeyRoleDescriptors } from './api_key';
 export type { User, EditUser } from './user';
-export type { UserProfile, UserData, UserInfo, UserAvatar } from './user_profile';
+export type {
+  AuthenticatedUserProfile,
+  UserProfile,
+  UserData,
+  UserInfo,
+  UserAvatar,
+} from './user_profile';
 export { getUserAvatarColor, getUserAvatarInitials } from './user_profile';
 export { getUserDisplayName } from './user';
 export type { AuthenticatedUser, UserRealm } from './authenticated_user';

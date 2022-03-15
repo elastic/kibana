@@ -7,6 +7,7 @@
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 
+import type { AuthenticationProvider } from '../';
 import type { User } from './user';
 import { getUserDisplayName } from './user';
 
@@ -45,6 +46,16 @@ export interface UserProfile<T extends UserData = UserData> {
    * User specific data associated with the profile.
    */
   data: T;
+}
+
+/**
+ * User profile enriched with session information.
+ */
+export interface AuthenticatedUserProfile<T extends UserData = UserData> extends UserProfile<T> {
+  /**
+   * Authentication provider of this user's session.
+   */
+  authentication_provider: AuthenticationProvider;
 }
 
 const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "a"

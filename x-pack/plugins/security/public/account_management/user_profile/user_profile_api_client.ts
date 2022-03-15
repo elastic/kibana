@@ -7,7 +7,7 @@
 
 import type { HttpStart } from 'src/core/public';
 
-import type { UserData, UserProfile } from '../../../common/model';
+import type { AuthenticatedUserProfile, UserData } from '../../../common/model';
 
 const USER_PROFILE_URL = '/internal/security/user_profile';
 
@@ -19,7 +19,9 @@ export class UserProfileAPIClient {
    * @param dataPath By default `get()` returns user information, but does not return any user data. The optional "dataPath" parameter can be used to return personal data for this user.
    */
   public get<T extends UserData>(dataPath?: string) {
-    return this.http.get<UserProfile<T>>(USER_PROFILE_URL, { query: { data: dataPath } });
+    return this.http.get<AuthenticatedUserProfile<T>>(USER_PROFILE_URL, {
+      query: { data: dataPath },
+    });
   }
 
   /**
