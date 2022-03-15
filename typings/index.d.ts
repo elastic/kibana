@@ -19,9 +19,9 @@ declare module '*.png' {
 }
 
 declare module '*.svg' {
-  const ElasticAgentCardIllustration: string;
+  const content: string;
   // eslint-disable-next-line import/no-default-export
-  export default ElasticAgentCardIllustration;
+  export default content;
 }
 
 declare module 'axios/lib/adapters/xhr';
