@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'unifiedSearch']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const browser = getService('browser');
@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should update and delete a formula', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 

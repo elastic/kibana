@@ -9,13 +9,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'unifiedSearch']);
 
   describe('lens drag and drop tests', () => {
     describe('basic drag and drop', () => {
       it('should construct the basic split xy chart', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.dragFieldToWorkspace('@timestamp');
@@ -227,6 +228,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       it('should drop a field to workspace', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.dragFieldWithKeyboard('@timestamp');
@@ -311,6 +313,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       it('should always nest time dimension in categorical dimension', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.dragFieldToWorkspace('@timestamp');

@@ -8,7 +8,14 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'home', 'lens']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'timePicker',
+    'home',
+    'lens',
+    'unifiedSearch',
+  ]);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
@@ -39,6 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('lens', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.timePicker.ensureHiddenNoDataPopover();
       await a11y.testAppSnapshot();
     });

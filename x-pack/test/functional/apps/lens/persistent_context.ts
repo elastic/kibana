@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         before(async () => {
           await PageObjects.visualize.navigateToNewVisualization();
           await PageObjects.visualize.clickVisType('lens');
+          await PageObjects.unifiedSearch.closeTour();
           await PageObjects.lens.goToTimeRange();
           await PageObjects.navigationalSearch.focus();
           await PageObjects.navigationalSearch.searchFor('type:lens lnsTableVis');
@@ -119,6 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickNewVisualization();
         await PageObjects.visualize.waitForGroupsSelectPage();
         await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.lens.waitForEmptyWorkspace();
         await PageObjects.lens.switchToVisualization('lnsMetric');
         await PageObjects.lens.dragFieldToWorkspace('@timestamp');

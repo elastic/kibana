@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'header',
     'lens',
+    'unifiedSearch',
   ]);
 
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -120,6 +121,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should allow new lens to be added by value, but not by reference', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.lens.goToTimeRange();
 
         await PageObjects.lens.configureDimension({

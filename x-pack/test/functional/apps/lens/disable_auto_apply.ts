@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['lens', 'visualize']);
+  const PageObjects = getPageObjects(['lens', 'visualize', 'unifiedSearch']);
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should persist auto-apply setting across page refresh', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.unifiedSearch.closeTour();
 
       expect(await PageObjects.lens.getAutoApplyEnabled()).to.be.ok();
 
