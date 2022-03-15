@@ -13,16 +13,16 @@ import { esDeprecationsMockResponse } from './mocked_responses';
 
 describe('Cluster settings deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
   const clusterSettingDeprecation = esDeprecationsMockResponse.deprecations[4];
-
-  afterAll(() => {
-    server.restore();
-  });
-
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
-    httpRequestsMockHelpers.setReindexStatusResponse({
+    httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
       reindexOp: null,
       warnings: [],
       hasRequiredPrivileges: true,
@@ -34,7 +34,7 @@ describe('Cluster settings deprecation flyout', () => {
     });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
     const { actions, component } = testBed;
@@ -68,11 +68,10 @@ describe('Cluster settings deprecation flyout', () => {
 
     await actions.clusterSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
-    const request = server.requests[server.requests.length - 1];
-
-    expect(request.method).toBe('POST');
-    expect(request.url).toBe(`/api/upgrade_assistant/cluster_settings`);
-    expect(request.status).toEqual(200);
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      '/api/upgrade_assistant/cluster_settings',
+      expect.anything()
+    );
 
     // Verify the "Resolution" column of the table is updated
     expect(find('clusterSettingsResolutionStatusCell').at(0).text()).toEqual(
@@ -102,11 +101,10 @@ describe('Cluster settings deprecation flyout', () => {
 
     await actions.clusterSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
-    const request = server.requests[server.requests.length - 1];
-
-    expect(request.method).toBe('POST');
-    expect(request.url).toBe(`/api/upgrade_assistant/cluster_settings`);
-    expect(request.status).toEqual(500);
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      '/api/upgrade_assistant/cluster_settings',
+      expect.anything()
+    );
 
     // Verify the "Resolution" column of the table is updated
     expect(find('clusterSettingsResolutionStatusCell').at(0).text()).toEqual(
