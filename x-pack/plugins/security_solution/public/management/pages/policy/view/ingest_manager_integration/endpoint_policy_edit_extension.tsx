@@ -36,6 +36,7 @@ import {
 
 import { LinkWithIcon } from './endpoint_package_custom_extension/components/link_with_icon';
 import { ReactQueryClientProvider } from '../../../../../common/containers/query_client/query_client_provider';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { FleetIntegrationArtifactsCard } from './endpoint_package_custom_extension/components/fleet_integration_artifacts_card';
 import { BlocklistsApiClient } from '../../../blocklist/services';
 import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
@@ -71,6 +72,7 @@ const WrappedPolicyDetailsForm = memo<{
   const endpointDetailsLoadingError = usePolicyDetailsSelector(apiError);
   const { getAppUrl } = useAppUrl();
   const [, setLastUpdatedPolicy] = useState(updatedPolicy);
+  const privileges = useUserPrivileges().endpointPrivileges;
 
   const http = useHttp();
   const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
@@ -314,6 +316,7 @@ const WrappedPolicyDetailsForm = memo<{
             getArtifactsPath={getPolicyHostIsolationExceptionsPath}
             searchableFields={HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS}
             labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
+            privileges={privileges.canIsolateHost}
           />
           <EuiSpacer size="s" />
           <FleetIntegrationArtifactsCard

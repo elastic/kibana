@@ -47,6 +47,7 @@ export const FleetIntegrationArtifactsCard = memo<{
   getArtifactsPath: (policyId: string) => string;
   searchableFields: readonly string[];
   labels?: ARTIFACTS_LABELS_TYPE;
+  privileges?: boolean;
 }>(
   ({
     policyId,
@@ -54,6 +55,7 @@ export const FleetIntegrationArtifactsCard = memo<{
     getArtifactsPath,
     searchableFields,
     labels = ARTIFACTS_LABELS,
+    privileges = true,
   }) => {
     const toasts = useToasts();
     const { getAppUrl } = useAppUrl();
@@ -111,6 +113,12 @@ export const FleetIntegrationArtifactsCard = memo<{
       ),
       [getAppUrl, labels.linkLabel, policyArtifactsPath, policyArtifactsRouteState]
     );
+
+    // do not render if doesn't have privileges.
+    // render if doesn't have privileges but has data to show
+    if ((data === undefined && !privileges) || (data?.total === 0 && !privileges)) {
+      return null;
+    }
 
     return (
       <EuiPanel
