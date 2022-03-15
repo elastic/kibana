@@ -4,7 +4,7 @@ The kibana source references a central APM server for use by anyone working at E
 
 ## For local development
 
-For Elasticians doing local development you can simply export these env vars:
+Elasticians are able to send data to a central APM server and kibana instance by exporting the following environment variables:
 
 ```shell
 export ELASTIC_APM_ACTIVE=true
