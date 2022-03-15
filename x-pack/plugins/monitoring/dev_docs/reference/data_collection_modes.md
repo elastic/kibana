@@ -6,8 +6,8 @@ Stack monitoring has three metrics collection modes:
 
 And two log collection modes:
 
-- Current standard: [Filebeat log collection](#filebeat-log-collection)
-- Planned future standard: [Package-driven collection](#package-collection)
+- Current standard: [Filebeat log collection](#logs-collection-filebeat)
+- Planned future standard: [Package-driven collection](#package-driven-collection)
 
 ## Metrics collection
 
@@ -33,7 +33,7 @@ Each component has a corresponding metricbeat module that will read the endpoint
 - [Beats](https://github.com/elastic/beats/tree/main/metricbeat/module/beat)
 - [Enterprise Search](https://github.com/elastic/beats/tree/main/x-pack/metricbeat/module/enterprisesearch)
 
-## Logs collection
+## Logs collection (Filebeat)
 
 Regardless of the metrics collection mode, logs should always be collected using filebeat. Filebeat ships with a module for some stack components that can be used to collect the logs for that component.
 
