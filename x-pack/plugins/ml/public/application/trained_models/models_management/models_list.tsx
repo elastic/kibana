@@ -129,7 +129,7 @@ export const ModelsList: FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
-  const [modelsToDelete, setModelsToDelete] = useState<ModelItemFull[]>([]);
+  const [modelIdsToDelete, setModelIdsToDelete] = useState<string[]>([]);
   const [modelSpaces, setModelSpaces] = useState<{ [modelId: string]: string[] }>({});
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
@@ -461,7 +461,7 @@ export const ModelsList: FC<Props> = ({
           color: 'danger',
           isPrimary: false,
           onClick: (model) => {
-            setModelsToDelete([model as ModelItemFull]);
+            setModelIdsToDelete([model.model_id]);
           },
           available: (item) => canDeleteTrainedModels && !isBuiltInModel(item),
           enabled: (item) => {
@@ -634,7 +634,10 @@ export const ModelsList: FC<Props> = ({
         <EuiFlexItem>
           <EuiButton
             color="danger"
-            onClick={setModelsToDelete.bind(null, selectedModels as ModelItemFull[])}
+            onClick={setModelIdsToDelete.bind(
+              null,
+              selectedModels.map((m) => m.model_id)
+            )}
           >
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel"
@@ -755,15 +758,15 @@ export const ModelsList: FC<Props> = ({
           data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
         />
       </div>
-      {modelsToDelete.length > 0 && (
+      {modelIdsToDelete.length > 0 && (
         <DeleteModelsModal
           onClose={(refreshList) => {
-            setModelsToDelete([]);
+            setModelIdsToDelete([]);
             if (refreshList) {
               fetchModelsData();
             }
           }}
-          models={modelsToDelete}
+          modelIds={modelIdsToDelete}
         />
       )}
     </>
