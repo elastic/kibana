@@ -23,10 +23,6 @@ describe('<SolutionToolbarButton />', () => {
       enzymeMount(<ServicesProvider {...services}>{element}</ServicesProvider>);
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   test('is rendered', () => {
     const component = mount(
       <SolutionToolbarButton iconType="folderOpen" label="Add from library" />
