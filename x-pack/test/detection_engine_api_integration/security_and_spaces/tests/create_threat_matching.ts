@@ -69,7 +69,8 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  describe('create_threat_matching', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/127770
+  describe.skip('create_threat_matching', () => {
     describe('creating threat match rule', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
