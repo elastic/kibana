@@ -14,19 +14,21 @@ import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Backup Step', () => {
   let testBed: OverviewTestBed;
+  let server: ReturnType<typeof setupEnvironment>['server'];
+  let setServerAsync: ReturnType<typeof setupEnvironment>['setServerAsync'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  let setDelayResponse: ReturnType<typeof setupEnvironment>['setDelayResponse'];
-  beforeEach(async () => {
-    const mockEnvironment = setupEnvironment();
-    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
-    httpSetup = mockEnvironment.httpSetup;
-    setDelayResponse = mockEnvironment.setDelayResponse;
+
+  beforeEach(() => {
+    ({ server, setServerAsync, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterEach(() => {
+    server.restore();
   });
 
   describe('On-prem', () => {
     beforeEach(async () => {
-      testBed = await setupOverviewPage(httpSetup);
+      testBed = await setupOverviewPage();
     });
 
     test('Shows link to Snapshot and Restore', () => {
@@ -43,7 +45,7 @@ describe('Overview - Backup Step', () => {
 
   describe('On Cloud', () => {
     const setupCloudOverviewPage = async () =>
-      setupOverviewPage(httpSetup, {
+      setupOverviewPage({
         plugins: {
           cloud: {
             isCloudEnabled: true,
@@ -55,8 +57,12 @@ describe('Overview - Backup Step', () => {
     describe('initial loading state', () => {
       beforeEach(async () => {
         // We don't want the request to load backup status to resolve immediately.
-        setDelayResponse(true);
+        setServerAsync(true);
         testBed = await setupCloudOverviewPage();
+      });
+
+      afterEach(() => {
+        setServerAsync(false);
       });
 
       test('is rendered', () => {
