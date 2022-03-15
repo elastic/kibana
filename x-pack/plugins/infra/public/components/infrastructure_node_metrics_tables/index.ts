@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { ContainerMetricsTable, useContainerMetricsTable } from './container';
-export { HostMetricsTable, useHostMetricsTable } from './host';
-export { PodMetricsTable, usePodMetricsTable } from './pod';
+export {
+  ContainerMetricsTable,
+  createLazyContainerMetricsTable,
+  useContainerMetricsTable,
+} from './container';
+export { createLazyHostMetricsTable, HostMetricsTable, useHostMetricsTable } from './host';
+export { createLazyPodMetricsTable, PodMetricsTable, usePodMetricsTable } from './pod';

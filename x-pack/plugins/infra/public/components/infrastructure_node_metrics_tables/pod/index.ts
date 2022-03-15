@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export { createLazyPodMetricsTable } from './create_lazy_pod_metrics_table';
 export { PodMetricsTable } from './pod_metrics_table';
 export { usePodMetricsTable } from './use_pod_metrics_table';
