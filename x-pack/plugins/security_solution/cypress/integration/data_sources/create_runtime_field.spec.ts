@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { cleanKibana } from '../../tasks/common';
-
 import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
@@ -23,7 +21,6 @@ import { assertFieldDisplayed, createField } from '../../tasks/create_runtime_fi
 
 describe('Create DataView runtime field', () => {
   before(() => {
-    cleanKibana();
     login();
   });
 

@@ -6,7 +6,6 @@
  */
 
 import { INSPECT_MODAL, INSPECT_NETWORK_BUTTONS_IN_SECURITY } from '../../screens/inspect';
-import { cleanKibana } from '../../tasks/common';
 
 import { closesModal, openStatsAndTables } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';
@@ -16,7 +15,6 @@ import { NETWORK_URL } from '../../urls/navigation';
 describe('Inspect', () => {
   context('Network stats and tables', () => {
     before(() => {
-      cleanKibana();
       login();
       visit(NETWORK_URL);
     });

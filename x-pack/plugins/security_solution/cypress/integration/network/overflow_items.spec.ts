@@ -13,7 +13,6 @@ import {
   FILTER_OUT,
   SHOW_TOP_FIELD,
 } from '../../screens/network/flows';
-import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 import { login, visit } from '../../tasks/login';
@@ -27,7 +26,6 @@ const testDomainTwo = 'myTest2';
 describe('Overflow items', () => {
   context('Network stats and tables', () => {
     before(() => {
-      cleanKibana();
       esArchiverLoad('network');
       login();
     });

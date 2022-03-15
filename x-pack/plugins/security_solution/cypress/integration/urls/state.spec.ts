@@ -39,7 +39,6 @@ import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 
 import { getTimeline } from '../../objects/timeline';
 import { TIMELINE } from '../../screens/create_new_case';
-import { cleanKibana } from '../../tasks/common';
 
 const ABSOLUTE_DATE = {
   endTime: 'Aug 1, 2019 @ 20:33:29.186',
@@ -55,10 +54,6 @@ const ABSOLUTE_DATE = {
 };
 
 describe('url state', () => {
-  beforeEach(() => {
-    cleanKibana();
-  });
-
   it('sets the global start and end dates from the url', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(

@@ -16,12 +16,10 @@ import {
 
 import { login, visit } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 describe('CTI Link Panel', () => {
   before(() => {
-    cleanKibana();
     login();
   });
 

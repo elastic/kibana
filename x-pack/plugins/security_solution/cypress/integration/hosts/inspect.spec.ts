@@ -7,7 +7,6 @@
 
 import { INSPECT_HOSTS_BUTTONS_IN_SECURITY, INSPECT_MODAL } from '../../screens/inspect';
 import { HOST_OVERVIEW } from '../../screens/hosts/main';
-import { cleanKibana } from '../../tasks/common';
 
 import { clickInspectButton, closesModal, openStatsAndTables } from '../../tasks/inspect';
 
@@ -17,7 +16,6 @@ import { HOSTS_URL } from '../../urls/navigation';
 
 describe('Inspect', () => {
   before(() => {
-    cleanKibana();
     login();
   });
   context('Hosts stats and tables', () => {

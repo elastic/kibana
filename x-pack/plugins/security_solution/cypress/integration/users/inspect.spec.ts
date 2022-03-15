@@ -7,7 +7,6 @@
 
 import { INSPECT_MODAL } from '../../screens/inspect';
 import { ALL_USERS_TABLE } from '../../screens/users/all_users';
-import { cleanKibana } from '../../tasks/common';
 
 import { clickInspectButton, closesModal } from '../../tasks/inspect';
 import { loginAndWaitForPage } from '../../tasks/login';
@@ -15,9 +14,6 @@ import { loginAndWaitForPage } from '../../tasks/login';
 import { USERS_URL } from '../../urls/navigation';
 
 describe('Inspect', () => {
-  before(() => {
-    cleanKibana();
-  });
   context('Users stats and tables', () => {
     before(() => {
       loginAndWaitForPage(USERS_URL);

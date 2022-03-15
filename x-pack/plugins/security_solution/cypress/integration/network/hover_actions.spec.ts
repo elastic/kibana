@@ -7,7 +7,6 @@
 import { TOP_N_CONTAINER } from '../../screens/network/flows';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../screens/search_bar';
 import { DATA_PROVIDERS } from '../../screens/timeline';
-import { cleanKibana } from '../../tasks/common';
 
 import { login, visit } from '../../tasks/login';
 import { NETWORK_URL } from '../../urls/navigation';
@@ -31,7 +30,6 @@ describe('Hover actions', () => {
   };
 
   before(() => {
-    cleanKibana();
     esArchiverLoad('network');
     login();
   });

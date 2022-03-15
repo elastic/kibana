@@ -20,14 +20,12 @@ import {
   ruleDetailsUrl,
 } from '../../urls/navigation';
 
-import { cleanKibana } from '../../tasks/common';
 import { NOT_FOUND } from '../../screens/common/page';
 
 const mockRuleId = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
 describe('Display not found page', () => {
   before(() => {
-    cleanKibana();
     loginAndWaitForPage(TIMELINES_URL);
   });
 

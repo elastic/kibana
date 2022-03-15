@@ -6,7 +6,6 @@
  */
 
 import { KQL_INPUT } from '../../screens/security_header';
-import { cleanKibana } from '../../tasks/common';
 
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
@@ -29,7 +28,6 @@ import {
 describe('ml conditional links', () => {
   before(() => {
     login();
-    cleanKibana();
   });
 
   it('sets the KQL from a single IP with a value for the query', () => {

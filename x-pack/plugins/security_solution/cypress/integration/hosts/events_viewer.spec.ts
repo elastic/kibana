@@ -35,7 +35,6 @@ import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
 
 import { HOSTS_URL } from '../../urls/navigation';
 import { resetFields } from '../../tasks/timeline';
-import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const defaultHeadersInDefaultEcsCategory = [
@@ -50,7 +49,6 @@ const defaultHeadersInDefaultEcsCategory = [
 
 describe('Events Viewer', () => {
   before(() => {
-    cleanKibana();
     esArchiverLoad('auditbeat_big');
     login();
   });

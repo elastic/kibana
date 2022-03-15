@@ -25,7 +25,6 @@ import {
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
   DATE_PICKER_END_DATE_POPOVER_BUTTON,
 } from '../../screens/date_picker';
-import { cleanKibana } from '../../tasks/common';
 
 const ABSOLUTE_DATE = {
   endTime: 'Aug 1, 2019 @ 20:33:29.186',
@@ -35,10 +34,6 @@ const ABSOLUTE_DATE = {
 const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
 describe('URL compatibility', () => {
-  before(() => {
-    cleanKibana();
-  });
-
   it('Redirects to alerts from old siem Detections URL', () => {
     loginAndWaitForPage(DETECTIONS);
     cy.url().should('include', ALERTS_URL);

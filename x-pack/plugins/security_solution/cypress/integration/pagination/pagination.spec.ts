@@ -10,7 +10,6 @@ import {
   UNCOMMON_PROCESSES_TABLE,
 } from '../../screens/hosts/uncommon_processes';
 import { FIRST_PAGE_SELECTOR, SECOND_PAGE_SELECTOR } from '../../screens/pagination';
-import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 import { openAllHosts, openUncommonProcesses } from '../../tasks/hosts/main';
@@ -23,7 +22,6 @@ import { HOSTS_PAGE_TAB_URLS } from '../../urls/navigation';
 
 describe('Pagination', () => {
   before(() => {
-    cleanKibana();
     esArchiverLoad('host_uncommon_processes');
     login();
     visit(HOSTS_PAGE_TAB_URLS.uncommonProcesses);

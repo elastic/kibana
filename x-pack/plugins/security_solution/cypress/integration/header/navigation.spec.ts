@@ -49,11 +49,9 @@ import {
   OVERVIEW_PAGE,
   TIMELINES_PAGE,
 } from '../../screens/kibana_navigation';
-import { cleanKibana } from '../../tasks/common';
 
 describe('top-level navigation common to all pages in the Security app', () => {
   before(() => {
-    cleanKibana();
     login();
     visit(TIMELINES_URL);
   });
