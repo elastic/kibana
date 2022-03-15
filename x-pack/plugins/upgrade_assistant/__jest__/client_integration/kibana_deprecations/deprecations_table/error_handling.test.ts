@@ -14,12 +14,11 @@ import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
 
 describe('Kibana deprecations - Deprecations table - Error handling', () => {
   let testBed: KibanaTestBed;
+  const { server } = setupEnvironment();
   const deprecationService = deprecationsServiceMock.createStartContract();
 
-  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
-    const mockEnvironment = setupEnvironment();
-    httpSetup = mockEnvironment.httpSetup;
+  afterAll(() => {
+    server.restore();
   });
 
   test('handles plugin errors', async () => {
@@ -58,7 +57,7 @@ describe('Kibana deprecations - Deprecations table - Error handling', () => {
         ],
       });
 
-      testBed = await setupKibanaPage(httpSetup, {
+      testBed = await setupKibanaPage({
         services: {
           core: {
             deprecations: deprecationService,
@@ -84,7 +83,7 @@ describe('Kibana deprecations - Deprecations table - Error handling', () => {
         mockRequestErrorMessage: 'Internal Server Error',
       });
 
-      testBed = await setupKibanaPage(httpSetup, {
+      testBed = await setupKibanaPage({
         services: {
           core: {
             deprecations: deprecationService,
