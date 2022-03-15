@@ -9,11 +9,7 @@ import { noop, omit } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Observable } from 'rxjs';
 
-import {
-  OptionalSignalArgs,
-  useObservable,
-  withOptionalSignal,
-} from '@kbn/securitysolution-hook-utils';
+import { OptionalSignalArgs, useObservable } from '@kbn/securitysolution-hook-utils';
 
 import * as i18n from './translations';
 
@@ -91,7 +87,6 @@ const searchComplete = <ResponseType extends IKibanaSearchResponse>(
   );
 };
 
-// TODO add unit tests
 export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   factoryQueryType,
   initialResult,
@@ -107,22 +102,17 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
    */
   errorMessage?: string;
 }) => {
+  const abortCtrl = useRef(new AbortController());
   const { getTransformChangesIfTheyExist } = useTransforms();
 
   const refetch = useRef<inputsModel.Refetch>(noop);
   const { data } = useKibana().services;
   const { addError } = useAppToasts();
 
-  // It needs to be memoized otherwise `useObservable` would receive a new instance on every render
-  const searchDataOptionalSignal = useMemo(
-    () =>
-      withOptionalSignal<UseSearchStrategyRequestArgs, Observable<StrategyResponseType<QueryType>>>(
-        searchComplete
-      ),
-    []
-  );
-
-  const { start, error, result, loading } = useObservable(searchDataOptionalSignal);
+  const { start, error, result, loading } = useObservable<
+    [UseSearchStrategyRequestArgs],
+    StrategyResponseType<QueryType>
+  >(searchComplete);
 
   useEffect(() => {
     if (error != null) {
@@ -135,15 +125,29 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   const searchCb = useCallback(
     (props: OptionalSignalArgs<StrategyRequestType<QueryType>>) => {
       const asyncSearch = () => {
-        start({ ...props, data, factoryQueryType, getTransformChangesIfTheyExist } as never); // This typescast is required because every StrategyRequestType instance has different fields.
+        abortCtrl.current = new AbortController();
+        start({
+          ...props,
+          data,
+          factoryQueryType,
+          getTransformChangesIfTheyExist,
+          signal: abortCtrl.current.signal,
+        } as never); // This typescast is required because every StrategyRequestType instance has different fields.
       };
 
+      abortCtrl.current.abort();
       asyncSearch();
 
       refetch.current = asyncSearch;
     },
     [data, start, factoryQueryType, getTransformChangesIfTheyExist]
   );
+
+  useEffect(() => {
+    return () => {
+      abortCtrl.current.abort();
+    };
+  }, []);
 
   const [formatedResult, inspect] = useMemo(
     () => [
