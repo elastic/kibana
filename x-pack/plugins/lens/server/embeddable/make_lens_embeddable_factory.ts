@@ -20,6 +20,7 @@ import {
   commonRenameOperationsForFormula,
   commonRenameRecordsField,
   commonSetIncludeEmptyRowsDateHistogram,
+  commonSetLastValueShowArrayValues,
   commonUpdateVisLayerType,
   getLensCustomVisualizationMigrations,
   getLensFilterMigrations,
@@ -94,8 +95,9 @@ export const makeLensEmbeddableFactory =
             },
             '8.2.0': (state) => {
               const lensState = state as unknown as { attributes: LensDocShape810<VisState810> };
-              let migratedLensState = commonEnhanceTableRowHeight(lensState.attributes);
-              migratedLensState = commonSetIncludeEmptyRowsDateHistogram(lensState.attributes);
+              let migratedLensState = commonSetLastValueShowArrayValues(lensState.attributes);
+              migratedLensState = commonEnhanceTableRowHeight(migratedLensState);
+              migratedLensState = commonSetIncludeEmptyRowsDateHistogram(migratedLensState);
               return {
                 ...lensState,
                 attributes: migratedLensState,
