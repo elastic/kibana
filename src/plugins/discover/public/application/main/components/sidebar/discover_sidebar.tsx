@@ -308,6 +308,7 @@ export function DiscoverSidebarComponent({
               label: selectedIndexPattern?.title || '',
               'data-test-subj': 'indexPattern-switch-link',
               title: selectedIndexPattern?.title || '',
+              fullWidth: true,
             }}
           />
         )}

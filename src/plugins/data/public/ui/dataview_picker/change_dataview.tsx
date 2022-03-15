@@ -28,8 +28,8 @@ import { IDataPluginServices } from '../../';
 import { useKibana } from '../../../../kibana_react/public';
 import type { ChangeDataViewTriggerProps } from './index';
 import { DataViewsList } from './dataview_list';
+import { ChangeDataViewStyles } from './change_dataview.styles';
 
-const POPOVER_CONTENT_WIDTH = 280;
 const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
 
 export function ChangeDataView({
@@ -54,6 +54,7 @@ export function ChangeDataView({
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const kibana = useKibana<IDataPluginServices>();
   const { application, data, storage } = kibana.services;
+  const styles = ChangeDataViewStyles({ fullWidth: trigger.fullWidth });
 
   const [isTourDismissed, setIsTourDismissed] = useState(() =>
     Boolean(storage.get(NEW_DATA_VIEW_MENU_STORAGE_KEY))
@@ -84,12 +85,10 @@ export function ChangeDataView({
   }, [data, currentDataViewId]);
 
   const createTrigger = function () {
-    const { label, title, 'data-test-subj': dataTestSubj, ...rest } = trigger;
+    const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
     return (
       <EuiButton
-        css={css`
-          max-width: ${POPOVER_CONTENT_WIDTH}px;
-        `}
+        css={styles.trigger}
         data-test-subj={dataTestSubj}
         onClick={() => {
           setPopoverIsOpen(!isPopoverOpen);
@@ -100,6 +99,7 @@ export function ChangeDataView({
         iconSide="right"
         iconType="arrowDown"
         title={title}
+        fullWidth={fullWidth}
         {...rest}
       >
         {label}
@@ -132,6 +132,7 @@ export function ChangeDataView({
         </EuiLink>
       }
       repositionOnScroll
+      display="block"
     >
       <EuiPopover
         panelClassName="changeDataViewPopover"
@@ -143,9 +144,10 @@ export function ChangeDataView({
         closePopover={() => setPopoverIsOpen(false)}
         panelPaddingSize="none"
         initialFocus={`#${searchListInputId}`}
+        display="block"
         buffer={8}
       >
-        <div style={{ width: POPOVER_CONTENT_WIDTH }}>
+        <div css={styles.popoverContent}>
           {onAddField && (
             <>
               <EuiContextMenuPanel
