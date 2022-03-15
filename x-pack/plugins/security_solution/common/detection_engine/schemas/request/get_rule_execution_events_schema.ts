@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import { sort_field, sort_order } from '../common';
+import { sortFieldOrUndefined, sortOrderOrUndefined } from '../common';
 
 export const GetRuleExecutionEventsRequestParams = t.exact(
   t.type({
@@ -23,8 +23,8 @@ export const GetRuleExecutionEventsQueryParams = t.exact(
     status_filters: t.union([t.string, t.undefined]),
     per_page: t.union([t.string, t.undefined]),
     page: t.union([t.string, t.undefined]),
-    sort_field,
-    sort_order,
+    sort_field: sortFieldOrUndefined,
+    sort_order: sortOrderOrUndefined,
   })
 );
 
