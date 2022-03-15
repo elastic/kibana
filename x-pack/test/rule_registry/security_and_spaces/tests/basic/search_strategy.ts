@@ -96,6 +96,24 @@ export default ({ getService }: FtrProviderContext) => {
         const second = result.rawResponse.hits.hits[1].fields?.['kibana.alert.evaluation.value'];
         expect(first > second).to.be(true);
       });
+
+      it('should reject public requests', async () => {
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: logsOnlySpacesAll.username,
+            password: logsOnlySpacesAll.password,
+          },
+          options: {
+            featureIds: [AlertConsumers.LOGS],
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+        });
+        expect(result.statusCode).to.be(500);
+        expect(result.message).to.be(
+          `The privateRuleRegistryAlertsSearchStrategy search strategy is currently only available for internal use.`
+        );
+      });
     });
 
     describe('siem', () => {

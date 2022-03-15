@@ -14,6 +14,7 @@ import type SuperTest from 'supertest';
 import { IEsSearchResponse } from 'src/plugins/data/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { RetryService } from '../../../../test/common/services/retry/retry';
+// @ts-ignore
 import { version } from '../../../package.json';
 
 const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {
