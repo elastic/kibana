@@ -57,11 +57,11 @@ export function FailedTransactionRateChart({
   kuery,
 }: Props) {
   const {
-    urlParams: { transactionName, comparisonEnabled, comparisonType },
+    urlParams: { transactionName },
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -74,7 +74,7 @@ export function FailedTransactionRateChart({
 
   const { serviceName, transactionType, alerts } = useApmServiceContext();
 
-  const comparisonChartThem = getComparisonChartTheme();
+  const comparisonChartTheme = getComparisonChartTheme();
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
@@ -165,7 +165,7 @@ export function FailedTransactionRateChart({
         timeseries={timeseries}
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
-        customTheme={comparisonChartThem}
+        customTheme={comparisonChartTheme}
         anomalyTimeseries={preferredAnomalyTimeseries}
         alerts={alerts.filter(
           (alert) =>
