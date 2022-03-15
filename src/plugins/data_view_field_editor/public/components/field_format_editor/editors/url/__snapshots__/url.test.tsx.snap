@@ -168,7 +168,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <a
           class="euiLink euiLink--primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/field-formatters-string.html"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
           rel="noopener"
           target="_blank"
         >
@@ -231,7 +231,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <a
           class="euiLink euiLink--primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/field-formatters-string.html"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
           rel="noopener"
           target="_blank"
         >
