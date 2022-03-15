@@ -30,9 +30,9 @@ subgraph Monitoring Deployment
 end
 
 subgraph Kibana
-  Collectors-->|poll|Metrics[OS, Cgroups, etc]
-  Collectors-->|update|OpsMetricsObservable
-  BulkUploader-->|observe|OpsMetricsObservable
+  Collectors-.->|poll|Metrics[OS, Cgroups, etc]
+  Collectors-.->|update|OpsMetricsObservable
+  BulkUploader-.->|observe|OpsMetricsObservable
   
   click Collectors "https://github.com/elastic/kibana/tree/main/src/core/server/metrics/collectors"
   click OpsMetricsObservable "https://github.com/elastic/kibana/blob/92a8636f0ff63ab072527574e96e6616327b2ea4/src/core/server/metrics/metrics_service.ts#L32"
@@ -52,7 +52,7 @@ Here's an example from Logstash, which is capable of sending data directly to a 
 ```mermaid
 graph LR
 subgraph Logstash
-  Pipeline-->|output uuid|MonitoringExtension
+  Pipeline-.->|output uuid|MonitoringExtension
   MonitoringExtension
   click MonitoringExtension "https://github.com/elastic/logstash/blob/main/x-pack/lib/monitoring/monitoring.rb"
 end
@@ -93,8 +93,8 @@ subgraph Metricbeat
   click ElasticsearchModule "https://github.com/elastic/beats/tree/main/metricbeat/module/elasticsearch"
 end
 
-ElasticsearchModule-->|poll|ClusterStats
-ElasticsearchModule-->|poll|NodeStats
+ElasticsearchModule-.->|poll|ClusterStats
+ElasticsearchModule-.->|poll|NodeStats
 ElasticsearchModule-->|_bulk|MonElasticsearch
 ```
 
