@@ -1,7 +1,7 @@
 [[saved-objects-api-bulk-update]]
 === Bulk update object API
 ++++
-<titleabbrev>Bulk update object</titleabbrev>
+<titleabbrev>Bulk update objects</titleabbrev>
 ++++
 
 experimental[] Update the attributes for multiple existing {kib} saved objects.
@@ -39,9 +39,9 @@ WARNING: When you update, attributes are not validated, which allows you to pass
 `version`::
   (Optional, number) Ensures the version matches that of the persisted object.
   
-`namespace`:: (Optional, string) Identifier for the spaces in which to search for this object. If this is defined, it will supersede the namespace ID that is in.
+`namespace`:: (Optional, string) Identifier for the space in which to update this object. If this is defined, it will supersede the space ID that is in the URL.
 
-[[saved-objects-api-bulk-update-errors-codes]]
+[[saved-objects-api-bulk-update-codes]]
 ==== Response code
 
 `200`::
@@ -51,7 +51,7 @@ WARNING: When you update, attributes are not validated, which allows you to pass
 [[saved-objects-api-bulk-update-example]]
 ==== Example
 
-Update existing {data-source} objects,`my-visualization`, `my-dashboard` and `my-pattern`, with a different title for each, where the id of `my-visualization` is corrupted:
+Update three saved objects, where one of them does not exist:
 
 [source,sh]
 --------------------------------------------------

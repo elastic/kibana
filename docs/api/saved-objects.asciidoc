@@ -26,7 +26,7 @@ The following saved objects APIs are available:
 
 * <<saved-objects-api-update, Update object API>> to update the attributes for existing {kib} saved objects
 
-* <<saved-objects-api-bulk-update, Bulk update object API>> to update the attributes for multiple existing {kib} saved objects
+* <<saved-objects-api-bulk-update, Bulk update objects API>> to update the attributes for multiple existing {kib} saved objects
 
 * <<saved-objects-api-delete, Delete object API>> to remove {kib} saved objects
 
