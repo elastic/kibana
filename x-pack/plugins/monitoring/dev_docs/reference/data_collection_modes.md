@@ -23,7 +23,7 @@ Alternatively some stack components (logstash & beats) can be configured to send
 
 ### Standalone Metricbeat collection
 
-When using metricbeat collection, each component in your Elastic stack exposes an endpoint for metricbeat to collect metric data.
+When using standalone metricbeat collection, each component in your Elastic stack exposes an endpoint for metricbeat to collect metric data.
 
 Each component has a corresponding metricbeat module that will read the endpoint and publish data directly to the [monitoring deployment](../reference/terminology.md#monitoring-deployment).
 
