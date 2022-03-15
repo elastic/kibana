@@ -1,12 +1,13 @@
-Stack monitoring has a number of metrics collection modes:
+Stack monitoring has three metrics collection modes:
 
-- Originally: [Internal collection](#internal-collection)
-- Currently recommended: [Standalone Metricbeat collection](#metricbeat-collection)
+- Previous standard, still supported: [Internal collection](#internal-collection)
+- Current standard: [Standalone Metricbeat collection](#metricbeat-collection)
 - Planned future standard: [Package-driven collection](#package-collection)
 
-And just one log collection mode:
+And two log collection modes:
 
-- [Filebeat log collection](#filebeat-log-collection)
+- Current standard: [Filebeat log collection](#filebeat-log-collection)
+- Planned future standard: [Package-driven collection](#package-collection)
 
 ## Metrics collection
 
@@ -32,12 +33,6 @@ Each component has a corresponding metricbeat module that will read the endpoint
 - [Beats](https://github.com/elastic/beats/tree/main/metricbeat/module/beat)
 - [Enterprise Search](https://github.com/elastic/beats/tree/main/x-pack/metricbeat/module/enterprisesearch)
 
-### Package-driven collection
-
-When using package-driven collection, each component in your Elastic stack is given a corresponding fleet integration.
-
-The elastic agents connected to fleet then using the integration data to collect metrics from each component according to its requirements. This is likely similar to metricbeat, but will evolve over time since the implementation of each integration can be changed without impacting user-level configuration.
-
 ## Logs collection
 
 Regardless of the metrics collection mode, logs should always be collected using filebeat. Filebeat ships with a module for some stack components that can be used to collect the logs for that component.
@@ -49,3 +44,13 @@ Regardless of the metrics collection mode, logs should always be collected using
 Stack Monitoring will read those same logs, as configured by the `monitoring.ui.logs.index` setting.
 
 Beats and Enterprise Search don't have filebeat modules, but the logs can be ingested using basic JSON filebeat configurations.
+
+## Unified collection
+
+### Package-driven collection
+
+When using package-driven collection, each component in your Elastic stack is given a corresponding fleet integration.
+
+The Elastic agents connected to fleet then using the integration data to collect metrics from each component according to its requirements. This is likely similar to standalone metricbeat and filebeat and may use those modules internally.
+
+Over time the exact collection mechanism may change since it's an implementation detail of package-driven collection rather than something a user would have to manually configure.
