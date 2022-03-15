@@ -42,7 +42,7 @@ export class ExpressionsServiceFork implements ExpressionServiceFork {
   /**
    * @note Workaround since the expressions service is frozen.
    */
-  constructor(private namespace: string, private expressions: ExpressionsService) {}
+  constructor(private namespace: string, private expressionsService: ExpressionsService) {}
 
   /**
    * Returns Kibana Platform *setup* life-cycle contract. Useful to return the
