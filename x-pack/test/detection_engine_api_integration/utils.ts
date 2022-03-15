@@ -457,6 +457,7 @@ export const getSimpleRulePreviewOutput = (
 ) => ({
   logs,
   previewId,
+  isAborted: false,
 });
 
 export const resolveSimpleRuleOutput = (

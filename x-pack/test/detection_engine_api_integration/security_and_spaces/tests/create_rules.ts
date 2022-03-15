@@ -105,8 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, log, body.id);
         });
 
-        // TODO: does the below test work?
-        it.skip('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
+        it('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
