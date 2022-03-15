@@ -100,7 +100,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     services: { cases },
   } = useKibana();
 
-  const CasesContext = cases.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const casesPermissions = useGetUserCasesPermissions();
 
   const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
