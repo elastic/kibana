@@ -23,10 +23,6 @@ describe('<IconButtonGroup />', () => {
       enzymeMount(<ServicesProvider {...services}>{element}</ServicesProvider>);
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   test('is rendered', () => {
     const component = mount(
       <IconButtonGroup
