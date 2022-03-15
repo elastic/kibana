@@ -23,20 +23,18 @@ import {
 } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
-import { isEqual, sortBy } from 'lodash';
+import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverField } from './discover_field';
-import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../common';
 import { groupFields } from './lib/group_fields';
-import { indexPatterns as indexPatternUtils } from '../../../../../../data/public';
+import { indexPatterns as indexPatternUtils, DataViewPicker } from '../../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
-import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
 import { DataViewField } from '../../../../../../data_views/common';
@@ -301,25 +299,17 @@ export function DiscoverSidebarComponent({
         responsive={false}
       >
         {Boolean(showDataViewPicker) && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
-                <DiscoverIndexPattern
-                  selectedIndexPattern={selectedIndexPattern}
-                  indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-                  onChangeIndexPattern={onChangeIndexPattern}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DiscoverIndexPatternManagement
-                  selectedIndexPattern={selectedIndexPattern}
-                  useNewFieldsApi={useNewFieldsApi}
-                  editField={editField}
-                  createNewDataView={createNewDataView}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <DataViewPicker
+            currentDataViewId={selectedIndexPattern.id}
+            onChangeDataView={onChangeIndexPattern}
+            onAddField={editField}
+            onDataViewCreated={createNewDataView}
+            trigger={{
+              label: selectedIndexPattern?.title || '',
+              'data-test-subj': 'indexPattern-switch-link',
+              title: selectedIndexPattern?.title || '',
+            }}
+          />
         )}
         <EuiFlexItem grow={false}>
           <form>

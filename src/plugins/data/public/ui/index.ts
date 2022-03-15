@@ -14,3 +14,4 @@ export type { SearchBarProps, StatefulSearchBarProps } from './search_bar';
 export { SearchBar } from './search_bar';
 export { SuggestionsComponent } from './typeahead';
 export { DataViewsList } from './dataview_picker/dataview_list';
+export { DataViewPicker } from './dataview_picker';
