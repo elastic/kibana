@@ -19,7 +19,7 @@ echo "--- Upload new git sha"
 .buildkite/scripts/steps/code_coverage/reporting/uploadPrevSha.sh
 
 .buildkite/scripts/bootstrap.sh
- 
+
 echo "--- Download coverage arctifacts"
 buildkite-agent artifact download target/kibana-coverage/jest/* .
 buildkite-agent artifact download target/kibana-coverage/functional/* .
@@ -53,3 +53,6 @@ echo "--- Upload coverage static site"
 
 echo "--- Ingest results to Kibana stats cluster"
 .buildkite/scripts/steps/code_coverage/reporting/ingestData.sh 'elastic+kibana+code-coverage' ${BUILDKITE_BUILD_ID} ${BUILDKITE_BUILD_URL} ${previousSha} 'src/dev/code_coverage/ingest_coverage/team_assignment/team_assignments.txt'
+
+# Truncate Old Data in GCS
+#. .buildkite/scripts/steps/code_coverage/data_retention/truncate_data.sh
