@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+
 import { appContextService } from '..';
 
 import { validateOutputForPolicy } from '.';
@@ -23,7 +25,7 @@ describe('validateOutputForPolicy', () => {
   describe('Without oldData (create)', () => {
     it('should allow default outputs without platinum licence', async () => {
       mockHasLicence(false);
-      await validateOutputForPolicy({
+      await validateOutputForPolicy(savedObjectsClientMock.create(), {
         data_output_id: null,
         monitoring_output_id: null,
       });
@@ -31,7 +33,7 @@ describe('validateOutputForPolicy', () => {
 
     it('should allow default outputs with platinum licence', async () => {
       mockHasLicence(false);
-      await validateOutputForPolicy({
+      await validateOutputForPolicy(savedObjectsClientMock.create(), {
         data_output_id: null,
         monitoring_output_id: null,
       });
@@ -39,7 +41,7 @@ describe('validateOutputForPolicy', () => {
 
     it('should not allow custom data outputs without platinum licence', async () => {
       mockHasLicence(false);
-      const res = validateOutputForPolicy({
+      const res = validateOutputForPolicy(savedObjectsClientMock.create(), {
         data_output_id: 'test1',
         monitoring_output_id: null,
       });
@@ -50,7 +52,7 @@ describe('validateOutputForPolicy', () => {
 
     it('should not allow custom monitoring outputs without platinum licence', async () => {
       mockHasLicence(false);
-      const res = validateOutputForPolicy({
+      const res = validateOutputForPolicy(savedObjectsClientMock.create(), {
         data_output_id: null,
         monitoring_output_id: 'test1',
       });
@@ -61,7 +63,7 @@ describe('validateOutputForPolicy', () => {
 
     it('should allow custom data output with platinum licence', async () => {
       mockHasLicence(true);
-      await validateOutputForPolicy({
+      await validateOutputForPolicy(savedObjectsClientMock.create(), {
         data_output_id: 'test1',
         monitoring_output_id: null,
       });
@@ -69,7 +71,7 @@ describe('validateOutputForPolicy', () => {
 
     it('should allow custom monitoring output with platinum licence', async () => {
       mockHasLicence(true);
-      await validateOutputForPolicy({
+      await validateOutputForPolicy(savedObjectsClientMock.create(), {
         data_output_id: null,
         monitoring_output_id: 'test1',
       });
@@ -77,7 +79,7 @@ describe('validateOutputForPolicy', () => {
 
     it('should allow custom outputs for managed preconfigured policy without licence', async () => {
       mockHasLicence(false);
-      await validateOutputForPolicy({
+      await validateOutputForPolicy(savedObjectsClientMock.create(), {
         is_managed: true,
         is_preconfigured: true,
         data_output_id: 'test1',
@@ -90,6 +92,7 @@ describe('validateOutputForPolicy', () => {
     it('should allow default outputs without platinum licence', async () => {
       mockHasLicence(false);
       await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
         {
           data_output_id: null,
           monitoring_output_id: null,
@@ -104,6 +107,7 @@ describe('validateOutputForPolicy', () => {
     it('should not allow custom data outputs without platinum licence', async () => {
       mockHasLicence(false);
       const res = validateOutputForPolicy(
+        savedObjectsClientMock.create(),
         {
           data_output_id: 'test1',
           monitoring_output_id: null,
@@ -121,6 +125,7 @@ describe('validateOutputForPolicy', () => {
     it('should not allow custom monitoring outputs without platinum licence', async () => {
       mockHasLicence(false);
       const res = validateOutputForPolicy(
+        savedObjectsClientMock.create(),
         {
           data_output_id: null,
           monitoring_output_id: 'test1',
@@ -138,6 +143,7 @@ describe('validateOutputForPolicy', () => {
     it('should allow custom data output with platinum licence', async () => {
       mockHasLicence(true);
       await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
         {
           data_output_id: 'test1',
           monitoring_output_id: null,
@@ -151,7 +157,7 @@ describe('validateOutputForPolicy', () => {
 
     it('should allow custom monitoring output with platinum licence', async () => {
       mockHasLicence(true);
-      await validateOutputForPolicy({
+      await validateOutputForPolicy(savedObjectsClientMock.create(), {
         data_output_id: null,
         monitoring_output_id: 'test1',
       });
@@ -160,6 +166,7 @@ describe('validateOutputForPolicy', () => {
     it('should allow custom outputs for managed preconfigured policy without licence', async () => {
       mockHasLicence(false);
       await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
         {
           data_output_id: 'test1',
           monitoring_output_id: 'test1',
@@ -171,6 +178,7 @@ describe('validateOutputForPolicy', () => {
     it('should allow custom outputs if they did not change without licence', async () => {
       mockHasLicence(false);
       await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
         {
           data_output_id: 'test1',
           monitoring_output_id: 'test1',

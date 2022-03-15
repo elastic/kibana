@@ -5,9 +5,26 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from 'kibana/server';
+
 import type { AgentPolicySOAttributes } from '../../types';
-import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../common';
+import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common';
 import { appContextService } from '..';
+import { outputService } from '../output';
+
+export async function getDataOutputForAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  agentPolicy: Partial<AgentPolicySOAttributes>
+) {
+  const dataOutputId =
+    agentPolicy.data_output_id || (await outputService.getDefaultDataOutputId(soClient));
+
+  if (!dataOutputId) {
+    throw new Error('No default data output found.');
+  }
+
+  return outputService.get(soClient, dataOutputId);
+}
 
 /**
  * Validate outputs are valid for a policy using the current kibana licence or throw.
@@ -15,17 +32,28 @@ import { appContextService } from '..';
  * @returns
  */
 export async function validateOutputForPolicy(
+  soClient: SavedObjectsClientContract,
   newData: Partial<AgentPolicySOAttributes>,
-  oldData: Partial<AgentPolicySOAttributes> = {}
+  existingData: Partial<AgentPolicySOAttributes> = {},
+  isPolicyUsingAPM = false
 ) {
   if (
-    newData.data_output_id === oldData.data_output_id &&
-    newData.monitoring_output_id === oldData.monitoring_output_id
+    newData.data_output_id === existingData.data_output_id &&
+    newData.monitoring_output_id === existingData.monitoring_output_id
   ) {
     return;
   }
 
-  const data = { ...oldData, ...newData };
+  const data = { ...existingData, ...newData };
+
+  //  TODO test
+  if (isPolicyUsingAPM) {
+    const dataOutput = await getDataOutputForAgentPolicy(soClient, data);
+
+    if (dataOutput.type === outputType.Logstash) {
+      throw new Error('Logstash output is not usable with policy using the APM integration.');
+    }
+  }
 
   if (!data.data_output_id && !data.monitoring_output_id) {
     return;
