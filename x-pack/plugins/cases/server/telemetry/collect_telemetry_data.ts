@@ -40,8 +40,8 @@ export const collectTelemetryData = async ({
       configuration,
     };
   } catch (err) {
-    logger.warn('Failed collecting Cases telemetry data');
-    logger.warn(err);
+    logger.debug('Failed collecting Cases telemetry data');
+    logger.debug(err);
     /**
      * Return an empty object instead of an empty state to distinguish between
      * clusters that they do not use cases thus all counts will be zero
