@@ -26,6 +26,11 @@ import {
   logsOnlySpacesAll,
 } from '../../../common/lib/authentication/users';
 
+type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
+  statusCode: number;
+  message: string;
+};
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -98,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should reject public requests', async () => {
-        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+        const result = await secureBsearch.send<RuleRegistrySearchResponseWithErrors>({
           supertestWithoutAuth,
           auth: {
             username: logsOnlySpacesAll.username,
@@ -159,10 +164,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should throw an error when trying to to search for more than just siem', async () => {
-        type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
-          statusCode: number;
-          message: string;
-        };
         const result = await secureBsearch.send<RuleRegistrySearchResponseWithErrors>({
           supertestWithoutAuth,
           auth: {
