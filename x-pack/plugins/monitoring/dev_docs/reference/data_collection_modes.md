@@ -63,7 +63,6 @@ end
 MonitoringExtension-->|_bulk|MonElasticsearch
 ```
 
-
 ### Standalone Metricbeat collection
 
 When using standalone metricbeat collection, each component in your Elastic stack exposes an endpoint for metricbeat to collect metric data.
@@ -75,6 +74,26 @@ Each component has a corresponding metricbeat module that will read the endpoint
 - [Logstash](https://github.com/elastic/beats/tree/main/metricbeat/module/logstash)
 - [Beats](https://github.com/elastic/beats/tree/main/metricbeat/module/beat)
 - [Enterprise Search](https://github.com/elastic/beats/tree/main/x-pack/metricbeat/module/enterprisesearch)
+
+Here's an example using Elasticsearch. All other components implement similar HTTP endpoints and metricbeat modules.
+
+```mermaid
+graph LR
+subgraph Production Elasticsearch
+  ClusterStats["/_cluster/stats"]
+  NodeStats["/_nodes/_local/stats"]
+end
+
+subgraph Monitoring Deployment
+  MonElasticsearch[Elasticsearch]
+end
+
+Metricbeat-->|poll|ClusterStats
+Metricbeat-->|poll|NodeStats
+Metricbeat-->|_bulk|MonElasticsearch
+```
+
+You can monitor many components from a single metricbeat process as is typically done during local development. You can also have a dedicated metricbeat process for each instance in a deployment as is done on ESS.
 
 ## Logs collection (Filebeat)
 
