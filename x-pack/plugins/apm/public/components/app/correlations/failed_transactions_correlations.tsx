@@ -230,14 +230,30 @@ export function FailedTransactionsCorrelations({
         width: '116px',
         field: 'normalizedScore',
         name: (
-          <>
-            {i18n.translate(
-              'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.apm.correlations.failedTransactions.correlationsTable.scoreTooltip',
               {
-                defaultMessage: 'Score',
+                defaultMessage:
+                  'The score [0-1] of an attribute; the greater the score, the more an attribute contributes to failed transactions.',
               }
             )}
-          </>
+          >
+            <>
+              {i18n.translate(
+                'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
+                {
+                  defaultMessage: 'Score',
+                }
+              )}
+              <EuiIcon
+                size="s"
+                color="subdued"
+                type="questionInCircle"
+                className="eui-alignTop"
+              />
+            </>
+          </EuiToolTip>
         ),
         render: (_, { normalizedScore }) => {
           return <div>{asPreciseDecimal(normalizedScore, 2)}</div>;
