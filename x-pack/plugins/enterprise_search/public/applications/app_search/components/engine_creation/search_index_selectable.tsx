@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { EuiSelectable, EuiPanel, EuiFormFieldset, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const SearchIndexSelectable: React.FC = () => {
   const options = [
@@ -26,7 +26,9 @@ export const SearchIndexSelectable: React.FC = () => {
           children: (
             <EuiTitle size="xxs">
               <span>
-                {i18n.translate('xpack.enterpriseSearch.elasticsearchIndexSelectionLabel', {defaultMessage: "Select an Elasticsearch index to use"})}
+                {i18n.translate('xpack.enterpriseSearch.elasticsearchIndexSelectionLabel', {
+                  defaultMessage: 'Select an Elasticsearch index to use',
+                })}
               </span>
             </EuiTitle>
           ),
