@@ -9,6 +9,7 @@ import { groupBy } from 'lodash';
 import type { Logger } from 'src/core/server';
 import { LayoutParams, LayoutTypes } from '../../../common';
 import { ScreenshotResult, ScreenshotOptions } from '../../screenshots';
+import { FormattedScreenshotResult } from '../types';
 import { pngsToPdf } from './pdf_maker';
 
 const supportedLayouts = [LayoutTypes.PRESERVE_LAYOUT, LayoutTypes.CANVAS, LayoutTypes.PRINT];
@@ -21,7 +22,10 @@ const supportedLayouts = [LayoutTypes.PRESERVE_LAYOUT, LayoutTypes.CANVAS, Layou
  */
 export type PdfLayoutParams = LayoutParams<typeof supportedLayouts[number]>;
 
-export interface PdfScreenshotOptions extends ScreenshotOptions {
+/**
+ * Options that should be provided to a PDF screenshot request.
+ */
+export interface PdfScreenshotOptions extends ScreenshotOptions<'pdf'> {
   title?: string;
   logo?: string;
   /**
@@ -30,11 +34,20 @@ export interface PdfScreenshotOptions extends ScreenshotOptions {
   layout: PdfLayoutParams;
 }
 
-export interface PdfScreenshotResult extends Omit<ScreenshotResult, 'results' | 'layout'> {
+/**
+ * Final, formatted PDF result
+ */
+export interface PdfScreenshotResult extends Omit<FormattedScreenshotResult, 'results'> {
   metadata: { pageCount: number };
   result: {
     data: Buffer;
+    /**
+     * Any errors that were encountered while create the PDF and navigating between pages
+     */
     errors: Error[];
+    /**
+     * Any render errors that could mean some visualizations are missing from the end result.
+     */
     renderErrors: string[];
   };
 }

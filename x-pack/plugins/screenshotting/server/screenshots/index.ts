@@ -31,7 +31,8 @@ import { Semaphore } from './semaphore';
 export type { UrlOrUrlWithContext } from './observable';
 export type { ScreenshotObservableResult } from './observable';
 
-export interface ScreenshotOptions extends ScreenshotObservableOptions {
+export interface ScreenshotOptions<F extends string = 'png'> extends ScreenshotObservableOptions {
+  format: F;
   layout: LayoutParams;
 
   /**
@@ -73,7 +74,7 @@ export class Screenshots {
     this.semaphore = new Semaphore(poolSize);
   }
 
-  getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
+  getScreenshots<F extends string>(options: ScreenshotOptions<F>): Observable<ScreenshotResult> {
     const apmTrans = apm.startTransaction('screenshot-pipeline', 'screenshotting');
     const apmCreateLayout = apmTrans?.startSpan('create-layout', 'setup');
     const layout = createLayout(options.layout);

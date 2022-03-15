@@ -7,3 +7,4 @@
 
 export * from './pdf';
 export * from './png';
+export type { FormattedScreenshotResult } from './types';

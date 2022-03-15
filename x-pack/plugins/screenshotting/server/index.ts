@@ -22,5 +22,6 @@ export type {
   PdfScreenshotResult,
   PngScreenshotOptions,
   PngScreenshotResult,
+  FormattedScreenshotResult,
 } from './formats';
 export type { UrlOrUrlWithContext } from './screenshots';

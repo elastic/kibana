@@ -17,13 +17,13 @@ import type {
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { ChromiumArchivePaths, HeadlessChromiumDriverFactory, install } from './browsers';
 import { ConfigType, createConfig } from './config';
-import { Screenshots } from './screenshots';
+import { ScreenshotResult, Screenshots } from './screenshots';
 import { getChromiumPackage } from './utils';
 import {
   PngScreenshotOptions,
-  PngScreenshotResult,
   PdfScreenshotOptions,
   PdfScreenshotResult,
+  PngScreenshotResult,
   toPng,
   toPdf,
 } from './formats';
@@ -41,17 +41,14 @@ export interface ScreenshottingStart {
    * @returns Observable with output messages.
    */
   diagnose: HeadlessChromiumDriverFactory['diagnose'];
-
   /**
-   * Takes one or more screenshots and returns them as an array of PNGs.
+   * Takes screenshots of multiple pages.
+   * @param options Screenshots session options.
+   * @returns Observable with screenshotting results.
    */
-  getScreenshotsPng: (options: PngScreenshotOptions) => Observable<PngScreenshotResult>;
-
-  /**
-   * Takes one or more screenshots, compiles a PDF and returns a single, possibly
-   * multi-page, PDF.
-   */
-  getScreenshotsPdf: (options: PdfScreenshotOptions) => Observable<PdfScreenshotResult>;
+  getScreenshots: <O extends PdfScreenshotOptions | PngScreenshotOptions>(
+    options: O
+  ) => Observable<O['format'] extends 'pdf' ? PdfScreenshotResult : PngScreenshotResult>;
 }
 
 export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, SetupDeps> {
@@ -106,15 +103,14 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     return {
       diagnose: () =>
         from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
-      getScreenshotsPng: (options) =>
+      getScreenshots: (options): Observable<ReturnType<ScreenshottingStart['getScreenshots']>> =>
         from(this.screenshots).pipe(
           switchMap((screenshots) => screenshots.getScreenshots(options)),
-          mergeMap(toPng)
-        ),
-      getScreenshotsPdf: (options) =>
-        from(this.screenshots).pipe(
-          switchMap((screenshots) => screenshots.getScreenshots(options)),
-          mergeMap(toPdf({ logger: this.logger, logo: options.logo, title: options.title }))
+          mergeMap<ScreenshotResult, Promise<PngScreenshotResult | PdfScreenshotResult>>(
+            options.format === 'pdf'
+              ? toPdf({ logger: this.logger, logo: options.logo, title: options.title })
+              : toPng
+          )
         ),
     };
   }
