@@ -7,8 +7,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
-import { EsDeprecations } from '../../../public/application/components';
+import { EsDeprecations } from '../../../public/application/components/es_deprecations';
 import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
@@ -147,11 +146,10 @@ const createActions = (testBed: TestBed) => {
 };
 
 export const setupElasticsearchPage = async (
-  httpSetup: HttpSetup,
   overrides?: Record<string, unknown>
 ): Promise<ElasticsearchTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(EsDeprecations, httpSetup, overrides),
+    WithAppDependencies(EsDeprecations, overrides),
     testBedConfig
   );
   const testBed = await initTestBed();
