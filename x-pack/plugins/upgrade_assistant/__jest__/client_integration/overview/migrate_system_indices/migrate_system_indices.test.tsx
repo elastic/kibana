@@ -12,15 +12,15 @@ import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Migrate system indices', () => {
   let testBed: OverviewTestBed;
-  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
-    const mockEnvironment = setupEnvironment();
-    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
-    httpSetup = mockEnvironment.httpSetup;
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
-    testBed = await setupOverviewPage(httpSetup);
+  beforeEach(async () => {
+    testBed = await setupOverviewPage();
     testBed.component.update();
+  });
+
+  afterAll(() => {
+    server.restore();
   });
 
   describe('Error state', () => {
@@ -30,7 +30,7 @@ describe('Overview - Migrate system indices', () => {
         message: 'error',
       });
 
-      testBed = await setupOverviewPage(httpSetup);
+      testBed = await setupOverviewPage();
     });
 
     test('Is rendered', () => {
@@ -59,7 +59,7 @@ describe('Overview - Migrate system indices', () => {
       migration_status: 'NO_MIGRATION_NEEDED',
     });
 
-    testBed = await setupOverviewPage(httpSetup);
+    testBed = await setupOverviewPage();
 
     const { exists, component } = testBed;
 
@@ -75,7 +75,7 @@ describe('Overview - Migrate system indices', () => {
       migration_status: 'IN_PROGRESS',
     });
 
-    testBed = await setupOverviewPage(httpSetup);
+    testBed = await setupOverviewPage();
 
     const { exists, component, find } = testBed;
 
@@ -94,7 +94,7 @@ describe('Overview - Migrate system indices', () => {
         migration_status: 'MIGRATION_NEEDED',
       });
 
-      testBed = await setupOverviewPage(httpSetup);
+      testBed = await setupOverviewPage();
 
       const { exists, component, find } = testBed;
 
@@ -116,7 +116,7 @@ describe('Overview - Migrate system indices', () => {
         message: 'error',
       });
 
-      testBed = await setupOverviewPage(httpSetup);
+      testBed = await setupOverviewPage();
 
       const { exists, component, find } = testBed;
 
@@ -154,7 +154,7 @@ describe('Overview - Migrate system indices', () => {
         ],
       });
 
-      testBed = await setupOverviewPage(httpSetup);
+      testBed = await setupOverviewPage();
 
       const { exists } = testBed;
 
