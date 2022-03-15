@@ -165,7 +165,7 @@ export class MbMap extends Component<Props, State> {
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
     return new Promise((resolve) => {
       const mbStyle = {
-        version: maplibregl.v8,
+        version: 8 as 8,
         sources: {},
         layers: [],
         glyphs: getGlyphUrl(),

@@ -9,7 +9,6 @@
 
 import _ from 'lodash';
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
-import { maplibregl } from '@kbn/mapbox-gl';
 import { getIsTextLayer, syncLayerOrder } from './sort_layers';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
 import { ILayer } from '../../classes/layers/layer';
@@ -129,7 +128,7 @@ describe('sortLayer', () => {
   // Initial order that styles are added to mapbox is non-deterministic and depends on the order of data fetches.
   test('Should sort initial layer load order to expected order', () => {
     const initialMbStyle = {
-      version: maplibregl.v8,
+      version: 8 as 8,
       layers: [
         { id: `${BRAVO_LAYER_ID}_text`, type: 'symbol' } as LayerSpecification,
         { id: `${BRAVO_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
@@ -169,7 +168,7 @@ describe('sortLayer', () => {
   // Test case testing when layer is moved in Table of Contents
   test('Should sort single layer single move to expected order', () => {
     const initialMbStyle = {
-      version: maplibregl.v8,
+      version: 8 as 8,
       layers: [
         { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as LayerSpecification,
         { id: `${ALPHA_LAYER_ID}_text`, type: 'symbol' } as LayerSpecification,
@@ -208,7 +207,7 @@ describe('sortLayer', () => {
   test('Should sort with missing mblayers to expected order', () => {
     // Notice there are no bravo mbLayers in initial style.
     const initialMbStyle = {
-      version: maplibregl.v8,
+      version: 8 as 8,
       layers: [
         { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as LayerSpecification,
         { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
@@ -226,7 +225,7 @@ describe('sortLayer', () => {
 
   test('Should not call move layers when layers are in expected order', () => {
     const initialMbStyle = {
-      version: maplibregl.v8,
+      version: 8 as 8,
       layers: [
         { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as LayerSpecification,
         { id: `${BRAVO_LAYER_ID}_text`, type: 'symbol' } as LayerSpecification,
