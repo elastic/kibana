@@ -45,8 +45,8 @@ export const getMockPolicyDetailsArtifactsPageLocationUrlParams = (
   overrides: Partial<PolicyDetailsArtifactsPageLocation> = {}
 ): PolicyDetailsArtifactsPageLocation => {
   return {
-    page_index: 0,
-    page_size: 10,
+    page: 0,
+    pageSize: 10,
     filter: '',
     show: undefined,
     ...overrides,
@@ -57,8 +57,8 @@ export const getMockPolicyDetailsArtifactListUrlParams = (
   overrides: Partial<PolicyDetailsArtifactsPageListLocationParams> = {}
 ): PolicyDetailsArtifactsPageListLocationParams => {
   return {
-    page_index: 0,
-    page_size: 10,
+    page: 0,
+    pageSize: 10,
     filter: '',
     ...overrides,
   };
