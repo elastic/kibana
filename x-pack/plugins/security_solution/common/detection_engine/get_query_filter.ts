@@ -91,7 +91,6 @@ export const buildEqlSearchRequest = (
     excludeExceptions: true,
     chunkSize: 1024,
   });
-  const indexString = index.join();
   const requestFilter: QueryDslQueryContainer[] = [
     {
       range: {
@@ -120,7 +119,7 @@ export const buildEqlSearchRequest = (
     ...docFields,
   ];
   return {
-    index: indexString,
+    index,
     allow_no_indices: true,
     body: {
       size,
