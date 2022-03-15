@@ -88,9 +88,14 @@ subgraph Monitoring Deployment
   MonElasticsearch[Elasticsearch]
 end
 
-Metricbeat-->|poll|ClusterStats
-Metricbeat-->|poll|NodeStats
-Metricbeat-->|_bulk|MonElasticsearch
+subgraph Metricbeat
+  ElasticsearchModule[Elasticsearch Module]
+  click ElasticsearchModule "https://github.com/elastic/beats/tree/main/metricbeat/module/elasticsearch"
+end
+
+ElasticsearchModule-->|poll|ClusterStats
+ElasticsearchModule-->|poll|NodeStats
+ElasticsearchModule-->|_bulk|MonElasticsearch
 ```
 
 You can monitor many components from a single metricbeat process as is typically done during local development. You can also have a dedicated metricbeat process for each instance in a deployment as is done on ESS.
