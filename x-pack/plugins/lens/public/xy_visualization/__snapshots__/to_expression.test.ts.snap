@@ -107,9 +107,6 @@ Object {
                   "layerId": Array [
                     "first",
                   ],
-                  "layerType": Array [
-                    "data",
-                  ],
                   "seriesType": Array [
                     "area",
                   ],
@@ -208,7 +205,7 @@ Object {
                   ],
                   "upperBound": Array [],
                 },
-                "function": "axisExtent",
+                "function": "axisExtentConfig",
                 "type": "function",
               },
             ],
@@ -230,7 +227,7 @@ Object {
                     456,
                   ],
                 },
-                "function": "axisExtent",
+                "function": "axisExtentConfig",
                 "type": "function",
               },
             ],
