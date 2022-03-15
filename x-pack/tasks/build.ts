@@ -70,6 +70,7 @@ async function copySourceAndBabelify() {
         ignore: [
           '**/*.{md,mdx,asciidoc}',
           '**/jest.config.js',
+          '**/jest.config.dev.js',
           '**/jest_setup.js',
           '**/jest.integration.config.js',
           '**/*.stories.js',
@@ -83,6 +84,7 @@ async function copySourceAndBabelify() {
           'plugins/screenshotting/chromium/**',
           'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
           'plugins/apm/ftr_e2e/**',
+          'plugins/apm/scripts/**',
           'plugins/lists/server/scripts/**',
         ],
         allowEmpty: true,
