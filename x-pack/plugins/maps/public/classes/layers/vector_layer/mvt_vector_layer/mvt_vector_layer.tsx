@@ -8,8 +8,7 @@
 import type {
   Map as MbMap,
   LayerSpecification,
-  Source as MbSource,
-  VectorSourceSpecification,
+  VectorTileSource,
 } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
@@ -316,7 +315,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       // Expected source is not compatible, so remove.
       return true;
     }
-    const mbTileSource = mbSource as MbSource & VectorSourceSpecification;
+    const mbTileSource = mbSource as VectorTileSource;
 
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest) {

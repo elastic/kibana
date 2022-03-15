@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FilterSpecification } from '@kbn/mapbox-gl';
 import {
   GEO_JSON_TYPE,
   FEATURE_VISIBLE_PROPERTY_NAME,
@@ -18,14 +19,14 @@ export interface TimesliceMaskConfig {
   timeslice: Timeslice;
 }
 
-export const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
+export const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true] as FilterSpecification;
 
 function getFilterExpression(
-  filters: unknown[],
+  filters: FilterSpecification[],
   hasJoins: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
-) {
-  const allFilters: unknown[] = [...filters];
+): FilterSpecification {
+  const allFilters: FilterSpecification = [...filters];
 
   if (hasJoins) {
     allFilters.push(['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]);
@@ -51,7 +52,7 @@ function getFilterExpression(
 export function getFillFilterExpression(
   hasJoins: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
-): unknown[] {
+): FilterSpecification {
   return getFilterExpression(
     [
       // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
@@ -69,7 +70,7 @@ export function getFillFilterExpression(
 export function getLineFilterExpression(
   hasJoins: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
-): unknown[] {
+): FilterSpecification {
   return getFilterExpression(
     [
       // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
@@ -95,7 +96,7 @@ const IS_POINT_FEATURE = [
 export function getPointFilterExpression(
   hasJoins: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
-): unknown[] {
+): FilterSpecification {
   return getFilterExpression(
     [EXCLUDE_CENTROID_FEATURES, IS_POINT_FEATURE],
     hasJoins,
@@ -107,8 +108,8 @@ export function getLabelFilterExpression(
   hasJoins: boolean,
   isSourceGeoJson: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
-): unknown[] {
-  const filters: unknown[] = [];
+): FilterSpecification {
+  const filters: FilterSpecification[] = [];
 
   if (isSourceGeoJson) {
     // Centroid feature added to GeoJSON feature collection for LINE_STRING, MULTI_LINE_STRING, POLYGON, MULTI_POLYGON, and GEOMETRY_COLLECTION geometries

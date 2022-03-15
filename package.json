@@ -291,7 +291,7 @@
     "lru-cache": "^4.1.5",
     "lz-string": "^1.4.4",
     "mapbox-gl-draw-rectangle-mode": "1.0.4",
-    "maplibre-gl": "2.0.5",
+    "maplibre-gl": "2.1.7",
     "markdown-it": "^12.3.2",
     "md5": "^2.1.0",
     "mdast-util-to-hast": "10.0.1",

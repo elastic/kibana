@@ -10,8 +10,9 @@ import type {
   Map,
   LayerSpecification,
   Source,
+  GeoJSONSource,
+  VectorTileSource,
   StyleSpecification,
-  VectorSourceSpecification,
   MapEvent,
   MapOptions,
   MapMouseEvent,
@@ -22,6 +23,7 @@ import type {
   PointLike,
   GeoJSONFeature,
   CustomLayerInterface,
+  FilterSpecification,
 } from 'maplibre-gl';
 
 // @ts-expect-error
@@ -43,7 +45,8 @@ export type {
   LayerSpecification,
   StyleSpecification,
   Source,
-  VectorSourceSpecification,
+  GeoJSONSource,
+  VectorTileSource,
   MapEvent,
   MapOptions,
   MapMouseEvent,
@@ -54,4 +57,5 @@ export type {
   PointLike,
   GeoJSONFeature,
   CustomLayerInterface,
+  FilterSpecification,
 };

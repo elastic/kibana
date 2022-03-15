@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { Feature, FeatureCollection } from 'geojson';
-import type { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from '@kbn/mapbox-gl';
+import type { Map as MbMap, GeoJSONSource } from '@kbn/mapbox-gl';
 import {
   EMPTY_FEATURE_COLLECTION,
   FEATURE_VISIBLE_PROPERTY_NAME,
@@ -160,7 +160,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
   }
 
   _syncFeatureCollectionWithMb(mbMap: MbMap) {
-    const mbGeoJSONSource = mbMap.getSource(this.getId()) as MbGeoJSONSource;
+    const mbGeoJSONSource = mbMap.getSource(this.getId()) as GeoJSONSource;
     const featureCollection = this._getSourceFeatureCollection();
     const featureCollectionOnMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
 
