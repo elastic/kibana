@@ -7,7 +7,10 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { EncryptedSavedObjectsClient } from '../../../../encrypted_saved_objects/server';
-import { SyntheticsMonitorWithSecrets } from '../../../common/runtime_types';
+import {
+  SyntheticsMonitorWithSecrets,
+  EncryptedSyntheticsMonitor,
+} from '../../../common/runtime_types';
 import {
   syntheticsMonitor,
   syntheticsMonitorType,
@@ -23,7 +26,10 @@ export const getSyntheticsMonitor = async ({
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<SavedObject<SyntheticsMonitorWithSecrets>> => {
   try {
-    const encryptedMonitor = await savedObjectsClient.get(syntheticsMonitorType, monitorId);
+    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
+      syntheticsMonitorType,
+      monitorId
+    );
 
     return await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
       syntheticsMonitor.name,

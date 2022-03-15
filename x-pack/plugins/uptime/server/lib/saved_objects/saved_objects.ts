@@ -12,7 +12,8 @@ import {
 import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { DynamicSettings, SecretKeys } from '../../../common/runtime_types';
+import { secretKeys } from '../../../common/constants/monitor_management';
+import { DynamicSettings } from '../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
 import { UptimeConfig } from '../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
@@ -37,7 +38,16 @@ export const registerUptimeSavedObjects = (
 
     encryptedSavedObjects.registerType({
       type: syntheticsMonitor.name,
-      attributesToEncrypt: new Set(['secrets', ...SecretKeys]),
+      attributesToEncrypt: new Set([
+        'secrets',
+        /* adding secretKeys to the list of attributes to encrypt ensures
+         * that secrets are never stored on the resulting saved object,
+         * even in the presence of developer error.
+         *
+         * In practice, all secrets should be stored as a single JSON
+         * payload on the `secrets` key. This ensures performant decryption. */
+        ...secretKeys,
+      ]),
     });
   }
 };

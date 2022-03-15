@@ -9,7 +9,7 @@ import type { Logger } from 'src/core/server';
 import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
 import {
   MonitorFields,
-  SyntheticsMonitorWithSecrets,
+  EncryptedSyntheticsMonitor,
   ConfigKey,
   ServiceLocationErrors,
 } from '../../../../common/runtime_types';
@@ -48,7 +48,7 @@ export function formatTelemetryEvent({
   deletedAt,
   errors,
 }: {
-  monitor: SavedObject<SyntheticsMonitorWithSecrets>;
+  monitor: SavedObject<EncryptedSyntheticsMonitor>;
   kibanaVersion: string;
   lastUpdatedAt?: string;
   durationSinceLastUpdated?: number;
@@ -88,8 +88,8 @@ export function formatTelemetryEvent({
 }
 
 export function formatTelemetryUpdateEvent(
-  currentMonitor: SavedObjectsUpdateResponse<SyntheticsMonitorWithSecrets>,
-  previousMonitor: SavedObject<SyntheticsMonitorWithSecrets>,
+  currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
   kibanaVersion: string,
   errors?: ServiceLocationErrors
 ) {
@@ -101,7 +101,7 @@ export function formatTelemetryUpdateEvent(
   }
 
   return formatTelemetryEvent({
-    monitor: currentMonitor as SavedObject<SyntheticsMonitorWithSecrets>,
+    monitor: currentMonitor as SavedObject<EncryptedSyntheticsMonitor>,
     kibanaVersion,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
@@ -110,7 +110,7 @@ export function formatTelemetryUpdateEvent(
 }
 
 export function formatTelemetryDeleteEvent(
-  previousMonitor: SavedObject<SyntheticsMonitorWithSecrets>,
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
   kibanaVersion: string,
   deletedAt: string,
   errors?: ServiceLocationErrors
@@ -122,7 +122,7 @@ export function formatTelemetryDeleteEvent(
   }
 
   return formatTelemetryEvent({
-    monitor: previousMonitor as SavedObject<SyntheticsMonitorWithSecrets>,
+    monitor: previousMonitor as SavedObject<EncryptedSyntheticsMonitor>,
     kibanaVersion,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,

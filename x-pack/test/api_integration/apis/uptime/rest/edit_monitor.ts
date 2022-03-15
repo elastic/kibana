@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { SimpleSavedObject } from 'kibana/public';
+import { secretKeys } from '../../../../../plugins/uptime/common/constants/monitor_management';
 import {
   ConfigKey,
   HTTPFields,
   MonitorFields,
-  SecretKeys,
 } from '../../../../../plugins/uptime/common/runtime_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
         newMonitor as MonitorFields
       );
 
-      expect(savedMonitor).eql(omit(newMonitor, SecretKeys));
+      expect(savedMonitor).eql(omit(newMonitor, secretKeys));
 
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(editResponse.body.attributes).eql(
-        omit({ ...modifiedMonitor, revision: 2 }, SecretKeys)
+        omit({ ...modifiedMonitor, revision: 2 }, secretKeys)
       );
     });
 

@@ -6,15 +6,15 @@
  */
 import { omit, pick } from 'lodash';
 import { SavedObject } from 'kibana/server';
+import { secretKeys } from '../../../../common/constants/monitor_management';
 import {
-  SecretKeys,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
 } from '../../../../common/runtime_types/monitor_management';
 
 export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWithSecrets {
-  const monitorWithoutSecrets = omit(monitor, SecretKeys) as SyntheticsMonitorWithSecrets;
-  const secrets = pick(monitor, SecretKeys);
+  const monitorWithoutSecrets = omit(monitor, secretKeys) as SyntheticsMonitorWithSecrets;
+  const secrets = pick(monitor, secretKeys);
 
   return {
     ...monitorWithoutSecrets,

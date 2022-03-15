@@ -10,6 +10,7 @@ import {
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
+  EncryptedSyntheticsMonitor,
 } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
@@ -34,7 +35,7 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    const newMonitor: SavedObject<SyntheticsMonitorWithSecrets> =
+    const newMonitor: SavedObject<EncryptedSyntheticsMonitor> =
       await savedObjectsClient.create<SyntheticsMonitorWithSecrets>(
         syntheticsMonitorType,
         formatSecrets({
