@@ -153,7 +153,9 @@ When using package-driven collection, each component in your Elastic stack is gi
 - Beats (WIP)
 - Enterprise Search (WIP)
 
-The Elastic agents connected to fleet then use the package configuration to collect metrics and logs from each component according to its requirements. This is likely similar to standalone metricbeat and filebeat and may use the same modules internally.
+An operator will install the package via the monitoring deployment's kibana instance (or possible a separate deployment used for fleet management).
+
+The [Elastic agents](https://github.com/elastic/elastic-agent) connected to [Fleet Server](https://github.com/elastic/fleet-server) then use the package configuration to collect metrics and logs from each component according to its requirements. This is likely similar to standalone metricbeat and filebeat and may use the same modules internally.
 
 Over time the exact collection mechanism may change since it's an implementation detail of package-driven collection rather than something a user would have to manually configure.
 
@@ -168,11 +170,14 @@ subgraph Production Elasticsearch
 end
 
 subgraph Monitoring Deployment
-  MonElasticsearch[Elasticsearch]
-  MonKibana[Kibana]
-  EsPackage((ES Package))-->|install|MonKibana
-  MonFleetServer[Fleet Server]-->|read policies|MonKibana
-  MonKibana-->|templates, dashboards, etc.|MonElasticsearch
+  Elasticsearch
+  Kibana
+  EsPackage((ES Package))-->|install|Kibana
+  FleetServer[Fleet Server]-->|read policies|Kibana
+  Kibana-->|templates, dashboards, etc.|Elasticsearch
+  
+  click EsPackage "https://github.com/elastic/integrations/tree/main/packages/elasticsearch"
+  click FleetServer "https://github.com/elastic/fleet-server"
 end
 
 Disk[(Disk)]
@@ -185,12 +190,10 @@ subgraph Elastic Agent
   publisher[publisher]
 end
 
-MonFleetServer-.->configuration
+FleetServer-.->configuration
 
 metrics-.->|poll|ClusterStats
 logs-.->|read|Disk
 
-publisher-->|_bulk|MonElasticsearch
-
-
+publisher-->|_bulk|Elasticsearch
 ```
