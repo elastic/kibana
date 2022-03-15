@@ -40,6 +40,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/remote_clusters'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/enterprise_search'),
+      require.resolve('./apps/license_management'),
     ],
 
     pageObjects,

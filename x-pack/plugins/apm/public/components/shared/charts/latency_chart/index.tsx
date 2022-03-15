@@ -15,7 +15,6 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
@@ -28,6 +27,7 @@ import { getComparisonChartTheme } from '../../time_comparison/get_time_range_co
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
   height?: number;
@@ -48,9 +48,15 @@ export function LatencyChart({ height, kuery }: Props) {
   const history = useHistory();
 
   const comparisonChartTheme = getComparisonChartTheme();
-  const { urlParams } = useLegacyUrlParams();
-  const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();
+
+  const {
+    query: { comparisonEnabled, latencyAggregationType },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/overview',
+    '/services/{serviceName}/transactions',
+    '/services/{serviceName}/transactions/view'
+  );
 
   const { environment } = useEnvironmentsContext();
 
