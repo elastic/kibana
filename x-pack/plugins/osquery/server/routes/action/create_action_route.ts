@@ -36,6 +36,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
+      const soClient = context.core.savedObjects.client;
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
