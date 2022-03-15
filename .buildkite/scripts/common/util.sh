@@ -19,12 +19,54 @@ verify_no_git_changes() {
   YELLOW='\033[0;33m'
   C_RESET='\033[0m' # Reset color
 
-  GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
+  SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
+
+  if [[ "${GITHUB_PR_TARGET_BRANCH:-}" == "main" ]]; then
+    GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc'; git status --porcelain api_docs)"
+  else
+    GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
+  fi
+
   if [ "$GIT_CHANGES" ]; then
-    echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
-    echo -e "$GIT_CHANGES\n"
-    echo -e "\n${YELLOW}TO FIX: Run '$1' locally, commit the changes and push to your branch${C_RESET}\n"
-    exit 1
+    if [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
+      NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
+      PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
+
+      if [[ "$NEW_COMMIT_MESSAGE" == "$PREVIOUS_COMMIT_MESSAGE" ]]; then
+        echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
+        echo -e "$GIT_CHANGES\n"
+        echo -e "CI already attempted to commit these changes, but the file(s) seem to have changed again."
+        echo -e "Please review and fix manually."
+        exit 1
+      fi
+
+      echo "'$1' caused changes to the following files:"
+      echo "$GIT_CHANGES"
+      echo ""
+      echo "Auto-committing these changes now. A new build should start soon if successful."
+
+      git config --global user.name kibanamachine
+      git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
+      gh pr checkout "${BUILDKITE_PULL_REQUEST}"
+      git add -u -- . ':!.bazelrc'
+
+      # Mostly, we're concerned about files that already exist that could be updated
+      # However, api_docs can create new files or delete old ones
+      # If there are more specialized cases like this in the future, we should figure out a better solution for this
+      if [[ "${GITHUB_PR_TARGET_BRANCH:-}" == "main" ]]; then
+        git add 'api_docs/*.json' || true
+        git add 'api_docs/*.mdx' || true
+      fi
+
+      git commit -m "$NEW_COMMIT_MESSAGE"
+      git push
+      exit 1
+    else
+      echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
+      echo -e "$GIT_CHANGES\n"
+      echo -e "\n${YELLOW}TO FIX: Run '$1' locally, commit the changes and push to your branch${C_RESET}\n"
+      exit 1
+    fi
   fi
 }
 

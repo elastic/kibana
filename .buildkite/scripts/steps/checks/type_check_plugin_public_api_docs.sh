@@ -35,6 +35,10 @@ echo --- Building api docs
 cat target/build_api_docs.log
 if [[ "$api_docs_exit" != "0" ]]; then echo "^^^ +++"; fi
 
+if [[ "${GITHUB_PR_TARGET_BRANCH:-}" == "main" ]]; then
+  verify_no_git_changes 'node scripts/build_api_docs' true
+fi
+
 if [[ "${api_docs_exit}${check_types_exit}" != "00" ]]; then
   exit 1
 fi
