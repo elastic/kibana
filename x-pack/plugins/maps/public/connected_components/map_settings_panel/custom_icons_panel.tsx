@@ -131,7 +131,7 @@ export class CustomIconsPanel extends Component<Props, State> {
           >
             <FormattedMessage
               id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
-              defaultMessage="Add"
+              defaultMessage="Add custom icon"
             />
           </EuiButtonEmpty>
         </EuiTextAlign>

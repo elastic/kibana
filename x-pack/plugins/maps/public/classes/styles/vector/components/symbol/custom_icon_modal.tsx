@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
@@ -21,9 +22,9 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +36,10 @@ import { CustomIcon } from '../../../../../../common/descriptor_types';
 const MAX_NAME_LENGTH = 40;
 
 const strings = {
+  getAdvancedOptionsLabel: () =>
+    i18n.translate('xpack.maps.customIconModal.advancedOptionsLabel', {
+      defaultMessage: 'Advanced options',
+    }),
   getCancelButtonLabel: () =>
     i18n.translate('xpack.maps.customIconModal.cancelButtonLabel', {
       defaultMessage: 'Cancel',
@@ -65,32 +70,14 @@ const strings = {
     i18n.translate('xpack.maps.customIconModal.deleteButtonLabel', {
       defaultMessage: 'Delete',
     }),
-  getIconPreviewTitle: () => (
-    <EuiToolTip
-      content={i18n.translate('xpack.maps.customIconModal.elementPreviewTooltip', {
-        defaultMessage:
-          'Dynamic styling requires rendering SVG icons using a signed distance function. As a result, sharp corners and intricate details may not render correctly. You may be able to tweak the Alpha threshold and Radius for better results.',
-      })}
-    >
-      <>
-        {i18n.translate('xpack.maps.customIconModal.elementPreviewTitle', {
-          defaultMessage: 'Icon preview',
-        })}{' '}
-        <EuiIcon color="subdued" type="questionInCircle" />
-      </>
-    </EuiToolTip>
-  ),
   getImageFilePickerPlaceholder: () =>
     i18n.translate('xpack.maps.customIconModal.imageFilePickerPlaceholder', {
       defaultMessage: 'Select or drag and drop an SVG icon',
     }),
   getImageInputDescription: () =>
     i18n.translate('xpack.maps.customIconModal.imageInputDescription', {
-      defaultMessage: 'Upload your SVG icon here and preview the rendering on the right.',
-    }),
-  getImageInputLabel: () =>
-    i18n.translate('xpack.maps.customIconModal.imageInputLabel', {
-      defaultMessage: 'SVG icon',
+      defaultMessage:
+        'SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering.',
     }),
   getInvalidFileLabel: () =>
     i18n.translate('xpack.maps.customIconModal.invalidFileError', {
@@ -115,11 +102,23 @@ const strings = {
       </>
     </EuiToolTip>
   ),
+  getResetButtonLabel: () =>
+    i18n.translate('xpack.maps.customIconModal.resetButtonLabel', {
+      defaultMessage: 'Reset',
+    }),
   getSaveButtonLabel: () =>
     i18n.translate('xpack.maps.customIconModal.saveButtonLabel', {
       defaultMessage: 'Save',
     }),
 };
+
+function getFileNameWithoutExt(fileName: string) {
+  const splits = fileName.split('.');
+  if (splits.length > 1) {
+    splits.pop();
+  }
+  return splits.join('.');
+}
 interface Props {
   /**
    * initial value for the id of image added to map
@@ -212,20 +211,122 @@ export class CustomIconModal extends Component<Props, State> {
     this.setState({ radius: value });
   };
 
-  private _handleUpload = (files: FileList | null) => {
-    if (!files || !files.length) {
-      this._handleChange('svg', '');
-      return;
-    }
-    const file = files[0];
-    const { type } = file;
-    if (type === 'image/svg+xml') {
-      this.setState({ isFileInvalid: false });
-    } else {
-      this.setState({ isFileInvalid: true });
-    }
-    file.text().then((img: string) => this._handleChange('svg', img));
+  private _resetAdvancedOptions = () => {
+    this.setState({ radius: this.props.radius, cutoff: this.props.cutoff });
   };
+
+  private _onFileSelect = (files: FileList | null) => {
+    this.setState({
+      name: '',
+      svg: '',
+      isFileInvalid: false,
+    });
+
+    if (files && files.length) {
+      const file = files[0];
+      const { type } = file;
+      if (type === 'image/svg+xml') {
+        const name = this.props.name ?? getFileNameWithoutExt(file.name);
+        file
+          .text()
+          .then((svg: string) => {
+            this.setState({ isFileInvalid: false, name, svg });
+          })
+          .catch((err) => {
+            this.setState({ isFileInvalid: true });
+          });
+      } else {
+        this.setState({ isFileInvalid: true });
+      }
+    }
+  };
+
+  private _renderAdvancedOptions() {
+    const { cutoff, radius } = this.state;
+    return (
+      <EuiAccordion
+        id="advancedOptionsAccordion"
+        buttonContent={strings.getAdvancedOptionsLabel()}
+        paddingSize="xs"
+      >
+        <EuiPanel color="subdued" paddingSize="s">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="xs" onClick={this._resetAdvancedOptions}>
+                {strings.getResetButtonLabel()}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFormRow
+            className="mapsCustomIconForm__cutoff"
+            label={strings.getCutoffRangeLabel()}
+            display="rowCompressed"
+          >
+            <ValidatedRange
+              min={0}
+              max={1}
+              value={cutoff}
+              step={0.01}
+              showInput
+              showLabels
+              compressed
+              className="mapsCutoffRange"
+              onChange={this._handleCutoffChange}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            className="mapsCustomIconForm__radius"
+            label={strings.getRadiusRangeLabel()}
+            display="rowCompressed"
+          >
+            <ValidatedRange
+              min={0}
+              max={1}
+              value={radius}
+              step={0.01}
+              showInput
+              showLabels
+              compressed
+              className="mapsRadiusRange"
+              onChange={this._handleRadiusChange}
+            />
+          </EuiFormRow>
+        </EuiPanel>
+      </EuiAccordion>
+    );
+  }
+
+  private _renderIconForm() {
+    const { name, svg } = this.state;
+    return svg !== '' ? (
+      <>
+        <EuiFormRow
+          label={strings.getNameInputLabel()}
+          helpText={strings.getCharactersRemainingDescription(MAX_NAME_LENGTH - name.length)}
+          display="rowCompressed"
+        >
+          <EuiFieldText
+            value={name}
+            className="mapsCustomIconForm__name"
+            onChange={(e) => this._handleChange('name', e.target.value)}
+            required
+            data-test-subj="mapsCustomIconForm-name"
+          />
+        </EuiFormRow>
+        <EuiSpacer />
+        {this._renderAdvancedOptions()}
+      </>
+    ) : null;
+  }
+
+  private _renderIconPreview() {
+    const { svg, isFileInvalid, cutoff, radius } = this.state;
+    return svg !== '' ? (
+      <EuiFlexItem className="mapsIconPreview__wrapper mapsCustomIconForm__preview" grow={false}>
+        <IconPreview svg={svg} isSvgInvalid={isFileInvalid} cutoff={cutoff} radius={radius} />
+      </EuiFlexItem>
+    ) : null;
+  }
 
   public render() {
     const { onSave, onCancel, onDelete, title, ...rest } = this.props;
@@ -246,101 +347,36 @@ export class CustomIconModal extends Component<Props, State> {
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" gutterSize="m">
             <EuiFlexItem className="mapsCustomIconForm" grow={2}>
               <EuiFormRow
-                label={strings.getNameInputLabel()}
-                helpText={strings.getCharactersRemainingDescription(MAX_NAME_LENGTH - name.length)}
-                display="rowCompressed"
-              >
-                <EuiFieldText
-                  value={name}
-                  className="mapsCustomIconForm__name"
-                  onChange={(e) => this._handleChange('name', e.target.value)}
-                  required
-                  data-test-subj="mapsCustomIconForm-name"
-                />
-              </EuiFormRow>
-              <EuiFormRow
                 className="mapsCustomIconForm__thumbnail"
-                label={strings.getImageInputLabel()}
                 display="rowCompressed"
                 isInvalid={!!fileError}
                 error={fileError}
               >
                 <EuiFilePicker
                   initialPromptText={strings.getImageFilePickerPlaceholder()}
-                  onChange={this._handleUpload}
+                  onChange={this._onFileSelect}
                   className="mapsImageUpload"
                   accept=".svg"
                   isInvalid={!!fileError}
                   required
                 />
               </EuiFormRow>
-              <EuiText className="mapsCustomIconForm__thumbnailHelp" size="xs">
+              <EuiText grow={false} className="mapsCustomIconForm__thumbnailHelp" size="xs">
                 <p>{strings.getImageInputDescription()}</p>
               </EuiText>
               <EuiSpacer />
-              <EuiFormRow
-                className="mapsCustomIconForm__cutoff"
-                label={strings.getCutoffRangeLabel()}
-                display="rowCompressed"
-              >
-                <ValidatedRange
-                  min={0}
-                  max={1}
-                  value={cutoff}
-                  step={0.001}
-                  showInput
-                  showLabels
-                  compressed
-                  className="mapsCutoffRange"
-                  onChange={this._handleCutoffChange}
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                className="mapsCustomIconForm__radius"
-                label={strings.getRadiusRangeLabel()}
-                display="rowCompressed"
-              >
-                <ValidatedRange
-                  min={0}
-                  max={1}
-                  value={radius}
-                  step={0.001}
-                  showInput
-                  showLabels
-                  compressed
-                  className="mapsRadiusRange"
-                  onChange={this._handleRadiusChange}
-                />
-              </EuiFormRow>
+              {this._renderIconForm()}
             </EuiFlexItem>
-            <EuiFlexItem className="mapsIconPreview__wrapper mapsCustomIconForm__preview" grow={1}>
-              <EuiTitle size="xxxs">
-                <h4>{strings.getIconPreviewTitle()}</h4>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <IconPreview svg={svg} isSvgInvalid={isFileInvalid} cutoff={cutoff} radius={radius} />
-            </EuiFlexItem>
+            {this._renderIconPreview()}
           </EuiFlexGroup>
         </EuiModalBody>
         <EuiModalFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={onCancel}>{strings.getCancelButtonLabel()}</EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={() => {
-                  onSave({ symbolId, name, svg, cutoff, radius });
-                }}
-                data-test-subj="mapsCustomIconForm-submit"
-                isDisabled={!isComplete}
-              >
-                {strings.getSaveButtonLabel()}
-              </EuiButton>
             </EuiFlexItem>
             {onDelete ? (
               <EuiFlexItem grow={false}>
@@ -355,6 +391,18 @@ export class CustomIconModal extends Component<Props, State> {
                 </EuiButton>
               </EuiFlexItem>
             ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={() => {
+                  onSave({ symbolId, name, svg, cutoff, radius });
+                }}
+                data-test-subj="mapsCustomIconForm-submit"
+                isDisabled={!isComplete}
+              >
+                {strings.getSaveButtonLabel()}
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalFooter>
       </EuiModal>

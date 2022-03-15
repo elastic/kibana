@@ -6,8 +6,18 @@
  */
 
 import React, { Component } from 'react';
-import { EuiColorPicker, EuiFlexItem, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiColorPicker,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { mapboxgl, Map as MapboxMap } from '@kbn/mapbox-gl';
+import { i18n } from '@kbn/i18n';
 import { ResizeChecker } from '.././../../../../../../../../src/plugins/kibana_utils/public';
 import {
   CUSTOM_ICON_PREFIX_SDF,
@@ -29,7 +39,7 @@ interface State {
 }
 
 export class IconPreview extends Component<Props, State> {
-  static iconId = `${CUSTOM_ICON_PREFIX_SDF}__iconPreview`;
+  static iconId = `${CUSTOM_ICON_PREFIX_SDF}iconPreview`;
   private _checker?: ResizeChecker;
   private _isMounted = false;
   private _containerRef: HTMLDivElement | null = null;
@@ -106,6 +116,7 @@ export class IconPreview extends Component<Props, State> {
     map.setPaintProperty('icon-layer', 'icon-halo-color', '#000000');
     map.setPaintProperty('icon-layer', 'icon-halo-width', 1);
     map.setPaintProperty('icon-layer', 'icon-color', iconColor);
+    map.setLayoutProperty('icon-layer', 'icon-size', 12);
   }
 
   _initResizerChecker() {
@@ -121,6 +132,7 @@ export class IconPreview extends Component<Props, State> {
     return new Promise((resolve) => {
       const map = new mapboxgl.Map({
         container: this._containerRef!,
+        interactive: false,
         center: [0, 0],
         zoom: 2,
         style: {
@@ -138,8 +150,7 @@ export class IconPreview extends Component<Props, State> {
           ],
         },
       });
-      map.dragRotate.disable();
-      map.touchZoomRotate.disableRotation();
+
       map.on('load', () => {
         map.addLayer({
           id: 'icon-layer',
@@ -180,20 +191,38 @@ export class IconPreview extends Component<Props, State> {
     return (
       <div>
         <EuiFlexItem>
-          <EuiPanel>
+          <EuiPanel color="subdued" hasBorder={true} hasShadow={false} grow={true}>
+            <EuiTitle size="xxxs">
+              <h4>
+                <EuiToolTip
+                  content={i18n.translate('xpack.maps.customIconModal.elementPreviewTooltip', {
+                    defaultMessage:
+                      'Dynamic styling requires rendering SVG icons using a signed distance function. As a result, sharp corners and intricate details may not render correctly. You may be able to tweak the Alpha threshold and Radius for better results.',
+                  })}
+                >
+                  <>
+                    {i18n.translate('xpack.maps.customIconModal.elementPreviewTitle', {
+                      defaultMessage: 'Render preview',
+                    })}{' '}
+                    <EuiIcon color="subdued" type="questionInCircle" />
+                  </>
+                </EuiToolTip>
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiPanel hasBorder={true} hasShadow={false}>
             <div
               id="mapsCustomIconPreview__mapContainer"
               ref={this._setContainerRef}
               data-test-subj="mapsCustomIconPreview"
               className="mapsCustomIconPreview__mapContainer"
             />
+            </EuiPanel>
+            <EuiSpacer size="m" />
+            <EuiFormRow label="Preview color">
+              <EuiColorPicker onChange={this._setIconColor} color={iconColor} />
+            </EuiFormRow>
           </EuiPanel>
-        </EuiFlexItem>
-        <EuiSpacer size="s" />
-        <EuiFlexItem>
-          <EuiFormRow label="Preview color">
-            <EuiColorPicker onChange={this._setIconColor} color={iconColor} />
-          </EuiFormRow>
         </EuiFlexItem>
       </div>
     );
