@@ -56,6 +56,10 @@ exports.EcsCustomPropertyMappings = {
         properties: {
           rule: {
             properties: {
+              consumer: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
               execution: {
                 properties: {
                   uuid: {
