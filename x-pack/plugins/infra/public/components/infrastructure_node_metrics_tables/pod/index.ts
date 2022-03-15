@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { metricsToApiOptions, useInfrastructureNodeMetrics } from './hooks';
-export type { MetricsMap, SortState } from './hooks';
-export type { UseNodeMetricsTableOptions } from './types';
+export { usePodMetricsTable } from './use_pod_metrics_table';

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { metricsToApiOptions, useInfrastructureNodeMetrics } from './hooks';
-export type { MetricsMap, SortState } from './hooks';
-export type { UseNodeMetricsTableOptions } from './types';
+export { useContainerMetricsTable } from './use_container_metrics_table';
