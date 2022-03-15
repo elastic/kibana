@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import type { MouseEvent } from 'react';
 
 /**
  * Returns true if any modifier key is active on the event, false otherwise.
  */
-export const hasActiveModifierKey = (event: React.MouseEvent): boolean => {
+export const hasActiveModifierKey = (event: MouseEvent): boolean => {
   return event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 };
 
 /**
- * Returns the closest anchor (`<a>`) element in the element parents (self included) up to the given container (excluded), or undefined if none is found.
+ * Returns the closest anchor (`<a>`) element in the element parents (self included) up
+ * to the given container (excluded), or undefined if none is found.
  */
 export const getClosestLink = (
   element: HTMLElement | null | undefined,

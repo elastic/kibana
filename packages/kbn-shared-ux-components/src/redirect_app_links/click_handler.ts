@@ -7,11 +7,10 @@
  */
 
 import React from 'react';
-import { ApplicationStart } from 'src/core/public';
-import { getClosestLink, hasActiveModifierKey } from '../utility/utils';
+import { getClosestLink, hasActiveModifierKey } from '@kbn/shared-ux-utility';
 
 interface CreateCrossAppClickHandlerOptions {
-  navigateToUrl: ApplicationStart['navigateToUrl'];
+  navigateToUrl(url: string): Promise<void>;
   container?: HTMLElement;
 }
 

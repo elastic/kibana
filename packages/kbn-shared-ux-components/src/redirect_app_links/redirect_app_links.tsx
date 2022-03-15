@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, useRef, useMemo } from 'react';
+import React, { useRef, useMemo } from 'react';
+import type { HTMLAttributes, FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { ApplicationStart } from 'src/core/public';
+import { Observable } from 'rxjs';
+
 import { createNavigateToUrlClickHandler } from './click_handler';
 
-type Props = React.HTMLAttributes<HTMLDivElement> &
-  Pick<ApplicationStart, 'navigateToUrl' | 'currentAppId$'>;
-
-export interface RedirectAppLinksProps extends Props {
-  className?: string;
-  'data-test-subj'?: string;
+export interface RedirectAppLinksProps extends HTMLAttributes<HTMLDivElement> {
+  currentAppId$: Observable<string | undefined>;
+  navigateToUrl(url: string): Promise<void>;
 }
 
 /**
@@ -36,7 +35,7 @@ export interface RedirectAppLinksProps extends Props {
  * require to handle the links. A good practice is to consider it as a context provider and to use it
  * at the root level of an application or of the page that require the feature.
  */
-export const RedirectAppLinks: FunctionComponent<RedirectAppLinksProps> = ({
+export const RedirectAppLinks: FC<RedirectAppLinksProps> = ({
   navigateToUrl,
   currentAppId$,
   children,

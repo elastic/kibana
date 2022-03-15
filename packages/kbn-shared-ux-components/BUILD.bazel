@@ -44,12 +44,12 @@ RUNTIME_DEPS = [
   "//packages/kbn-shared-ux-services",
   "//packages/kbn-shared-ux-storybook",
   "//packages/kbn-shared-ux-utility",
-  "@npm//react",
   "@npm//@elastic/eui",
-  "@npm//@emotion/react",
   "@npm//@emotion/css",
+  "@npm//@emotion/react",
   "@npm//classnames",
-  "@npm//@storybook/addon-actions",
+  "@npm//react-use",
+  "@npm//react",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -70,11 +70,11 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
-  "@npm//@elastic/eui",
+  "@npm//@types/classnames",
   "@npm//@emotion/react",
   "@npm//@emotion/css",
-  "@npm//@storybook/addon-actions",
-  "@npm//@types/classnames",
+  "@npm//@elastic/eui",
+  "@npm//react-use",
 ]
 
 jsts_transpiler(

@@ -8,8 +8,7 @@
     "stripInternal": false,
     "types": [
       "jest",
-      "node",
-      "@emotion/react/types/css-prop"
+      "node"
     ]
   },
   "include": [

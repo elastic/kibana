@@ -8,7 +8,7 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
-import { servicesFactory } from '../../../services/storybook';
+import { servicesFactory } from '@kbn/shared-ux-storybook';
 
 import { NoDataViews as NoDataViewsComponent, Props } from './no_data_views.component';
 import { NoDataViews } from './no_data_views';

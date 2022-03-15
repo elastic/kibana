@@ -8,3 +8,4 @@
 
 export { Fallback } from './fallback';
 export { withSuspense } from './with_suspense';
+export { getClosestLink, hasActiveModifierKey } from './utils';

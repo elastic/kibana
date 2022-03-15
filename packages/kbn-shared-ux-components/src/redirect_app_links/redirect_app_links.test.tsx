@@ -8,18 +8,30 @@
 
 import React, { MouseEvent } from 'react';
 import { mount } from 'enzyme';
-import { applicationServiceMock } from '../../../../../core/public/mocks';
-import { RedirectAppLinks } from './redirect_app_links';
 import { BehaviorSubject } from 'rxjs';
+
+import { RedirectAppLinks } from './redirect_app_links';
+
+export type UnmountCallback = () => void;
+export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
+
+const createServiceMock = () => {
+  const currentAppId$ = new BehaviorSubject<string>('currentApp');
+
+  return {
+    currentAppId$: currentAppId$.asObservable(),
+    navigateToApp: jest.fn(),
+    navigateToUrl: jest.fn(),
+  };
+};
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
 describe('RedirectAppLinks', () => {
-  let application: ReturnType<typeof applicationServiceMock.createStartContract>;
+  let application = createServiceMock();
 
   beforeEach(() => {
-    application = applicationServiceMock.createStartContract();
-    application.currentAppId$ = new BehaviorSubject<string>('currentApp');
+    application = createServiceMock();
   });
 
   it('intercept click events on children link elements', () => {
