@@ -6,5 +6,4 @@
  */
 
 export { ContainerMetricsTable } from './container_metrics_table';
-export { createLazyContainerMetricsTable } from './create_lazy_container_metrics_table';
 export { useContainerMetricsTable } from './use_container_metrics_table';
