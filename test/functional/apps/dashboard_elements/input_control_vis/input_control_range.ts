@@ -27,6 +27,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      });
       await visualize.navigateToNewVisualization();
       await visualize.clickInputControlVis();
     });
@@ -39,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visEditor.inputControlSubmit();
       const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
       expect(controlFilters).to.have.length(1);
-      expect(await controlFilters[0].getVisibleText()).to.equal('hour_of_day: Warning');
+      expect(await controlFilters[0].getVisibleText()).to.equal('hour_of_day: 7 to 10');
     });
 
     it('should add filter with price field', async () => {
@@ -50,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visEditor.inputControlSubmit();
       const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
       expect(controlFilters).to.have.length(2);
-      expect(await controlFilters[1].getVisibleText()).to.equal('AvgTicketPrice: Warning');
+      expect(await controlFilters[1].getVisibleText()).to.equal('AvgTicketPrice: $400 to $999');
     });
 
     after(async () => {
@@ -58,6 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await kibanaServer.uiSettings.unset('defaultIndex');
       await security.testUser.restoreDefaults();
     });
   });
