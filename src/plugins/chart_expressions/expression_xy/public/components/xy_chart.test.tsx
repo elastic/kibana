@@ -1994,13 +1994,7 @@ describe('XYChart component', () => {
             {
               ...args.layers[0],
               xScaleType: 'ordinal',
-              seriesType: 'bar_stacked',
-              type: 'dataLayer',
-              layerType: LayerTypes.DATA,
-              yScaleType: 'linear',
-              isHistogram: false,
-              palette: mockPaletteOutput,
-            },
+            } as DataLayerConfigResult,
           ],
         }}
       />
@@ -2022,13 +2016,7 @@ describe('XYChart component', () => {
             {
               ...args.layers[0],
               yScaleType: 'sqrt',
-              seriesType: 'bar_stacked',
-              type: 'dataLayer',
-              layerType: LayerTypes.DATA,
-              xScaleType: 'ordinal',
-              isHistogram: false,
-              palette: mockPaletteOutput,
-            },
+            } as DataLayerConfigResult,
           ],
         }}
       />

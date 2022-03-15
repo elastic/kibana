@@ -7,8 +7,6 @@
  */
 
 import React, { useRef } from 'react';
-import { IconType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   Chart,
   Settings,
@@ -37,6 +35,8 @@ import {
   BarSeriesProps,
   LineSeriesProps,
 } from '@elastic/charts';
+import { IconType } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Datatable, DatatableRow, DatatableColumn } from '../../../../expressions/public';
 import { RenderMode } from '../../../../expressions/common';
 import { FieldFormat } from '../../../../field_formats/common';
