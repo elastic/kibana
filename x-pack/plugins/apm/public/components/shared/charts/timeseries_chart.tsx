@@ -111,7 +111,7 @@ export function TimeseriesChart({
     >
       <Chart ref={chartRef} id={id}>
         <Settings
-          tooltip={{ stickTo: 'top' }}
+          tooltip={{ stickTo: 'top', showNullValues: true }}
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }
