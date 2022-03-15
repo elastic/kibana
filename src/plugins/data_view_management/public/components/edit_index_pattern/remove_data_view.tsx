@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient, OverlayStart } from 'src/core/public';
 import { asyncForEach } from '@kbn/std';
@@ -39,32 +36,11 @@ interface RemoveDataViewDeps {
 
 export const removeDataView =
   ({ dataViews, overlays, onDelete }: RemoveDataViewDeps) =>
-  (dataViewArray: RemoveDataViewProps[]) => {
-    const dataView = dataViewArray[0];
-    async function doRemove() {
-      await asyncForEach(dataViewArray, async ({ id }) => dataViews.delete(id));
-      onDelete();
-    }
-
-    // todo change warning
-    const warning =
-      dataView.namespaces && dataView.namespaces.length > 1 ? (
-        <FormattedMessage
-          id="indexPatternManagement.editDataView.deleteWarning"
-          defaultMessage="When you delete {dataViewName}, you remove it from every space it is shared in. You can't undo this action."
-          values={{
-            dataViewName: <EuiCode>{dataView.title}</EuiCode>,
-          }}
-        />
-      ) : (
-        ''
-      );
-
-    overlays
-      .openConfirm(toMountPoint(<div>{warning}</div>), confirmModalOptionsDelete)
-      .then((isConfirmed) => {
-        if (isConfirmed) {
-          doRemove();
-        }
-      });
+  (dataViewArray: RemoveDataViewProps[], msg: JSX.Element) => {
+    overlays.openConfirm(toMountPoint(msg), confirmModalOptionsDelete).then(async (isConfirmed) => {
+      if (isConfirmed) {
+        await asyncForEach(dataViewArray, async ({ id }) => dataViews.delete(id));
+        onDelete();
+      }
+    });
   };

@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiLink,
   EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -118,12 +119,33 @@ export const EditIndexPattern = withRouter(
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
     const userEditPermission = dataViews.getCanSaveSync();
 
+    const warning =
+      indexPattern.namespaces && indexPattern.namespaces.length > 1 ? (
+        <FormattedMessage
+          id="indexPatternManagement.editDataView.deleteWarningWithNamespaces"
+          defaultMessage="The data view '{dataViewName}' will be deleted from every space it is shared in. You can't undo this action."
+          values={{
+            dataViewName: <EuiCode>{indexPattern.title}</EuiCode>,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="indexPatternManagement.editDataView.deleteWarning"
+          defaultMessage="The data view '{dataViewName}' will be deleted. You can't undo this action."
+          values={{
+            dataViewName: <EuiCode>{indexPattern.title}</EuiCode>,
+          }}
+        />
+      );
+
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         <IndexHeader
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
-          deleteIndexPatternClick={() => removeHandler([indexPattern as RemoveDataViewProps])}
+          deleteIndexPatternClick={() =>
+            removeHandler([indexPattern as RemoveDataViewProps], warning)
+          }
           defaultIndex={defaultIndex}
           canSave={userEditPermission}
         >
