@@ -13,53 +13,6 @@
     "functions": [
       {
         "parentPluginId": "actions",
-        "id": "def-server.asHttpRequestExecutionSource",
-        "type": "Function",
-        "tags": [],
-        "label": "asHttpRequestExecutionSource",
-        "description": [],
-        "signature": [
-          "(source: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
-          "<unknown, unknown, unknown, any>) => ",
-          "HttpRequestExecutionSource"
-        ],
-        "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.asHttpRequestExecutionSource.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "source",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>"
-            ],
-            "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "actions",
         "id": "def-server.asSavedObjectExecutionSource",
         "type": "Function",
         "tags": [],
@@ -81,11 +34,7 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": [
-              "Omit<",
-              "SavedObjectReference",
-              ", \"name\">"
-            ],
+            "signature": ["Omit<", "SavedObjectReference", ", \"name\">"],
             "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
             "deprecated": false,
             "isRequired": true
@@ -153,9 +102,7 @@
             "tags": [],
             "label": "isMissingSecrets",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
           },
@@ -166,9 +113,7 @@
             "tags": [],
             "label": "config",
             "description": [],
-            "signature": [
-              "Config | undefined"
-            ],
+            "signature": ["Config | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
           },
@@ -341,9 +286,7 @@
             "tags": [],
             "label": "maxAttempts",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
           },
@@ -393,9 +336,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": [
-                  "Params"
-                ],
+                "signature": ["Params"],
                 "path": "x-pack/plugins/actions/server/types.ts",
                 "deprecated": false,
                 "isRequired": true
@@ -407,9 +348,7 @@
                 "tags": [],
                 "label": "variables",
                 "description": [],
-                "signature": [
-                  "Record<string, unknown>"
-                ],
+                "signature": ["Record<string, unknown>"],
                 "path": "x-pack/plugins/actions/server/types.ts",
                 "deprecated": false,
                 "isRequired": true
@@ -421,9 +360,7 @@
                 "tags": [],
                 "label": "actionId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "x-pack/plugins/actions/server/types.ts",
                 "deprecated": false,
                 "isRequired": false
@@ -523,9 +460,7 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": [
-              "Services"
-            ],
+            "signature": ["Services"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
           },
@@ -536,9 +471,7 @@
             "tags": [],
             "label": "config",
             "description": [],
-            "signature": [
-              "Config"
-            ],
+            "signature": ["Config"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
           },
@@ -549,9 +482,7 @@
             "tags": [],
             "label": "secrets",
             "description": [],
-            "signature": [
-              "Secrets"
-            ],
+            "signature": ["Secrets"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
           },
@@ -562,9 +493,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "Params"
-            ],
+            "signature": ["Params"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
           },
@@ -575,9 +504,7 @@
             "tags": [],
             "label": "isEphemeral",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
           },
@@ -588,10 +515,7 @@
             "tags": [],
             "label": "taskInfo",
             "description": [],
-            "signature": [
-              "TaskInfo",
-              " | undefined"
-            ],
+            "signature": ["TaskInfo", " | undefined"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
           }
@@ -633,9 +557,7 @@
             "tags": [],
             "label": "secrets",
             "description": [],
-            "signature": [
-              "Secrets"
-            ],
+            "signature": ["Secrets"],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
           }
@@ -652,9 +574,7 @@
         "tags": [],
         "label": "ACTION_SAVED_OBJECT_TYPE",
         "description": [],
-        "signature": [
-          "\"action\""
-        ],
+        "signature": ["\"action\""],
         "path": "x-pack/plugins/actions/server/constants/saved_objects.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -722,9 +642,7 @@
         "tags": [],
         "label": "ActionParamsType",
         "description": [],
-        "signature": [
-          "{ readonly message: string; }"
-        ],
+        "signature": ["{ readonly message: string; }"],
         "path": "x-pack/plugins/actions/server/builtin_action_types/slack.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -736,9 +654,7 @@
         "tags": [],
         "label": "ActionParamsType",
         "description": [],
-        "signature": [
-          "{ readonly body?: string | undefined; }"
-        ],
+        "signature": ["{ readonly body?: string | undefined; }"],
         "path": "x-pack/plugins/actions/server/builtin_action_types/webhook.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -792,9 +708,7 @@
         "tags": [],
         "label": "ActionParamsType",
         "description": [],
-        "signature": [
-          "{ readonly message: string; }"
-        ],
+        "signature": ["{ readonly message: string; }"],
         "path": "x-pack/plugins/actions/server/builtin_action_types/teams.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -910,9 +824,7 @@
         "tags": [],
         "label": "ActionTypeId",
         "description": [],
-        "signature": [
-          "\".email\""
-        ],
+        "signature": ["\".email\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -924,9 +836,7 @@
         "tags": [],
         "label": "ActionTypeId",
         "description": [],
-        "signature": [
-          "\".index\""
-        ],
+        "signature": ["\".index\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/es_index.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -938,9 +848,7 @@
         "tags": [],
         "label": "ActionTypeId",
         "description": [],
-        "signature": [
-          "\".pagerduty\""
-        ],
+        "signature": ["\".pagerduty\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -952,9 +860,7 @@
         "tags": [],
         "label": "ActionTypeId",
         "description": [],
-        "signature": [
-          "\".server-log\""
-        ],
+        "signature": ["\".server-log\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/server_log.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -966,9 +872,7 @@
         "tags": [],
         "label": "ActionTypeId",
         "description": [],
-        "signature": [
-          "\".slack\""
-        ],
+        "signature": ["\".slack\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/slack.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -980,9 +884,7 @@
         "tags": [],
         "label": "ActionTypeId",
         "description": [],
-        "signature": [
-          "\".webhook\""
-        ],
+        "signature": ["\".webhook\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/webhook.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -994,9 +896,7 @@
         "tags": [],
         "label": "ActionTypeId",
         "description": [],
-        "signature": [
-          "\".jira\""
-        ],
+        "signature": ["\".jira\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/jira/index.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -1008,9 +908,7 @@
         "tags": [],
         "label": "ActionTypeId",
         "description": [],
-        "signature": [
-          "\".resilient\""
-        ],
+        "signature": ["\".resilient\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/resilient/index.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -1022,9 +920,7 @@
         "tags": [],
         "label": "ActionTypeId",
         "description": [],
-        "signature": [
-          "\".teams\""
-        ],
+        "signature": ["\".teams\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/teams.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -1036,9 +932,7 @@
         "tags": [],
         "label": "ServiceNowITSMActionTypeId",
         "description": [],
-        "signature": [
-          "\".servicenow\""
-        ],
+        "signature": ["\".servicenow\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/servicenow/config.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -1050,9 +944,7 @@
         "tags": [],
         "label": "ServiceNowSIRActionTypeId",
         "description": [],
-        "signature": [
-          "\".servicenow-sir\""
-        ],
+        "signature": ["\".servicenow-sir\""],
         "path": "x-pack/plugins/actions/server/builtin_action_types/servicenow/config.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -1133,9 +1025,7 @@
           "tags": [],
           "label": "isPreconfiguredConnector",
           "description": [],
-          "signature": [
-            "(connectorId: string) => boolean"
-          ],
+          "signature": ["(connectorId: string) => boolean"],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "children": [
@@ -1146,9 +1036,7 @@
               "tags": [],
               "label": "connectorId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "isRequired": true
@@ -1177,9 +1065,7 @@
           "tags": [],
           "label": "isActionTypeEnabled",
           "description": [],
-          "signature": [
-            "(id: string, options?: { notifyUsage: boolean; } | undefined) => boolean"
-          ],
+          "signature": ["(id: string, options?: { notifyUsage: boolean; } | undefined) => boolean"],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
           "children": [
@@ -1190,9 +1076,7 @@
               "tags": [],
               "label": "id",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "isRequired": true
@@ -1242,9 +1126,7 @@
               "tags": [],
               "label": "actionId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "isRequired": true
@@ -1256,9 +1138,7 @@
               "tags": [],
               "label": "actionTypeId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "isRequired": true
@@ -1446,9 +1326,7 @@
               "tags": [],
               "label": "actionTypeId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "isRequired": true
@@ -1460,9 +1338,7 @@
               "tags": [],
               "label": "actionId",
               "description": [],
-              "signature": [
-                "string"
-              ],
+              "signature": ["string"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "isRequired": true
@@ -1474,9 +1350,7 @@
               "tags": [],
               "label": "params",
               "description": [],
-              "signature": [
-                "Params"
-              ],
+              "signature": ["Params"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "isRequired": true
@@ -1488,9 +1362,7 @@
               "tags": [],
               "label": "variables",
               "description": [],
-              "signature": [
-                "Record<string, unknown>"
-              ],
+              "signature": ["Record<string, unknown>"],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
               "isRequired": true
@@ -1526,9 +1398,7 @@
             "tags": [],
             "label": "variables",
             "description": [],
-            "signature": [
-              "Record<string, unknown>"
-            ],
+            "signature": ["Record<string, unknown>"],
             "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
             "deprecated": false,
             "isRequired": true
@@ -1544,9 +1414,7 @@
         "tags": [],
         "label": "isActionTypeExecutorResult",
         "description": [],
-        "signature": [
-          "(result: unknown) => boolean"
-        ],
+        "signature": ["(result: unknown) => boolean"],
         "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
         "children": [
@@ -1557,9 +1425,7 @@
             "tags": [],
             "label": "result",
             "description": [],
-            "signature": [
-              "unknown"
-            ],
+            "signature": ["unknown"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "isRequired": true
@@ -1617,9 +1483,7 @@
             "tags": [],
             "label": "config",
             "description": [],
-            "signature": [
-              "{ [x: string]: any; }"
-            ],
+            "signature": ["{ [x: string]: any; }"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           },
@@ -1749,9 +1613,7 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": [
-              "\"error\" | \"ok\""
-            ],
+            "signature": ["\"error\" | \"ok\""],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           },
@@ -1762,9 +1624,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           },
@@ -1775,9 +1635,7 @@
             "tags": [],
             "label": "serviceMessage",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           },
@@ -1788,9 +1646,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "Data | undefined"
-            ],
+            "signature": ["Data | undefined"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           },
@@ -1801,9 +1657,7 @@
             "tags": [],
             "label": "retry",
             "description": [],
-            "signature": [
-              "boolean | Date | null | undefined"
-            ],
+            "signature": ["boolean | Date | null | undefined"],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           }
@@ -1832,9 +1686,7 @@
         "tags": [],
         "label": "ACTIONS_FEATURE_ID",
         "description": [],
-        "signature": [
-          "\"actions\""
-        ],
+        "signature": ["\"actions\""],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -1846,9 +1698,7 @@
         "tags": [],
         "label": "ALERT_HISTORY_PREFIX",
         "description": [],
-        "signature": [
-          "\"kibana-alert-history-\""
-        ],
+        "signature": ["\"kibana-alert-history-\""],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -1885,9 +1735,7 @@
         "tags": [],
         "label": "AlertHistoryEsIndexConnectorId",
         "description": [],
-        "signature": [
-          "\"preconfigured-alert-history-es-index\""
-        ],
+        "signature": ["\"preconfigured-alert-history-es-index\""],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -1913,9 +1761,7 @@
         "tags": [],
         "label": "BASE_ACTION_API_PATH",
         "description": [],
-        "signature": [
-          "\"/api/actions\""
-        ],
+        "signature": ["\"/api/actions\""],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -1927,9 +1773,7 @@
         "tags": [],
         "label": "INTERNAL_BASE_ACTION_API_PATH",
         "description": [],
-        "signature": [
-          "\"/internal/actions\""
-        ],
+        "signature": ["\"/internal/actions\""],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -2009,9 +1853,7 @@
             "tags": [],
             "label": "responded",
             "description": [],
-            "signature": [
-              "T"
-            ],
+            "signature": ["T"],
             "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
             "deprecated": false
           }

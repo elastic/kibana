@@ -2872,7 +2872,7 @@
         "label": "LayerWizard",
         "description": [],
         "signature": [
-          "{ id: string; title: string; categories: ",
+          "{ title: string; categories: ",
           {
             "pluginId": "maps",
             "scope": "common",
