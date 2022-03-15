@@ -42,7 +42,7 @@ const newMenuTourDescription = i18n.translate('data.query.dataViewMenu.newMenuTo
 });
 
 const newMenuTourDismissLabel = i18n.translate('data.query.dataViewMenu.newMenuTour.dismissLabel', {
-  defaultMessage: 'Got it!',
+  defaultMessage: 'Got it',
 });
 
 export function ChangeDataView({
