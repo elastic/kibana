@@ -35,7 +35,6 @@ function exampleState(): XYState {
         splitAccessor: 'd',
         xAccessor: 'a',
         accessors: ['b', 'c'],
-
       },
     ],
   };
