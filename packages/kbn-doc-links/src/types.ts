@@ -110,6 +110,7 @@ export interface DocLinks {
     readonly customSourcePermissions: string;
     readonly documentPermissions: string;
     readonly dropbox: string;
+    readonly externalSharePointOnline: string;
     readonly externalIdentities: string;
     readonly gitHub: string;
     readonly gettingStarted: string;
