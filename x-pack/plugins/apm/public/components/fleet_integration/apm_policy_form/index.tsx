@@ -15,7 +15,7 @@ import {
 } from './settings_definition/rum_settings';
 import {
   TAIL_SAMPLING_ENABLED_KEY,
-  getTailSamplingSettings,
+  GetTailSamplingSettings,
   isTailBasedSamplingValid,
 } from './settings_definition/tail_sampling_settings';
 import {
@@ -51,7 +51,7 @@ export function APMPolicyForm({
       agentAuthorizationSettings: getAgentAuthorizationSettings({
         isCloudPolicy,
       }),
-      tailSamplingSettings: getTailSamplingSettings(),
+      tailSamplingSettings: GetTailSamplingSettings(),
     };
   }, [isCloudPolicy]);
 
