@@ -11,6 +11,7 @@ import { fields } from '../../filters/stubs';
 import * as ast from '../ast';
 import * as and from './and';
 import * as is from './is';
+import { KqlAndFunctionNode } from './and';
 
 jest.mock('../grammar');
 
@@ -42,7 +43,7 @@ describe('kuery functions', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should wrap subqueries in an ES bool query's filter clause", () => {
-        const node = and.buildNode([childNode1, childNode2]);
+        const node = and.buildNode([childNode1, childNode2]) as KqlAndFunctionNode;
         const result = and.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
@@ -58,7 +59,7 @@ describe('kuery functions', () => {
       });
 
       test("should wrap subqueries in an ES bool query's must clause for scoring if enabled", () => {
-        const node = and.buildNode([childNode1, childNode2]);
+        const node = and.buildNode([childNode1, childNode2]) as KqlAndFunctionNode;
         const result = and.toElasticsearchQuery(node, indexPattern, {
           filtersInMustClause: true,
         });

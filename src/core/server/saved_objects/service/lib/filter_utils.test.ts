@@ -192,7 +192,7 @@ describe('Filter Utils', () => {
 
     test('Assemble filter with just "id" and one type', () => {
       expect(validateConvertFilterToKueryNode(['foo'], 'foo.id: 0123456789', mockMappings)).toEqual(
-        esKuery.fromKueryExpression('type: foo and _id: 0123456789')
+        fromKueryExpression('type: foo and _id: 0123456789')
       );
     });
 
@@ -204,7 +204,7 @@ describe('Filter Utils', () => {
           mockMappings
         )
       ).toEqual(
-        esKuery.fromKueryExpression(
+        fromKueryExpression(
           '(type: foo and _id: 0123456789) and ((type: foo and updated_at: 5678654567) or foo.bytes > 1000)'
         )
       );
@@ -218,9 +218,7 @@ describe('Filter Utils', () => {
           mockMappings
         )
       ).toEqual(
-        esKuery.fromKueryExpression(
-          '(type: foo and _id: 0123456789) and (type: bar and _id: 9876543210)'
-        )
+        fromKueryExpression('(type: foo and _id: 0123456789) and (type: bar and _id: 9876543210)')
       );
     });
 
@@ -231,9 +229,7 @@ describe('Filter Utils', () => {
           'foo.id: 0123456789 and bar.attributes._id: 9876543210',
           mockMappings
         )
-      ).toEqual(
-        esKuery.fromKueryExpression('(type: foo and _id: 0123456789) and (bar._id: 9876543210)')
-      );
+      ).toEqual(fromKueryExpression('(type: foo and _id: 0123456789) and (bar._id: 9876543210)'));
     });
 
     test('Lets make sure that we are throwing an exception if we are using id outside of saved object attribute when it does not belong', () => {

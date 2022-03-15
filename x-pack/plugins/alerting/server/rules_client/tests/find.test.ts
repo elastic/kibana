@@ -290,7 +290,7 @@ describe('find()', () => {
   });
 
   test('should translate filter/sort/search on params to mapped_params', async () => {
-    const filter = esKuery.fromKueryExpression(
+    const filter = fromKueryExpression(
       '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
     );
     authorization.getFindAuthorizationFilter.mockResolvedValue({

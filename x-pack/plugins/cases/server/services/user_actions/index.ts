@@ -17,7 +17,7 @@ import {
 } from 'kibana/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { KueryNode } from '@kbn/es-query';
+import { KqlFunctionNode } from '@kbn/es-query';
 import {
   isConnectorUserAction,
   isPushedUserAction,
@@ -376,7 +376,7 @@ export class CaseUserActionService {
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     caseId: string;
-    filter?: KueryNode;
+    filter?: KqlFunctionNode;
   }): Promise<Array<SavedObject<CaseUserActionResponse>>> {
     try {
       this.log.debug('Attempting to find status changes');
@@ -430,7 +430,7 @@ export class CaseUserActionService {
   }: {
     caseId: string;
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
-    filter?: KueryNode;
+    filter?: KqlFunctionNode;
   }): Promise<Array<{ id: string }>> {
     try {
       this.log.debug(`Attempting to count connectors for case id ${caseId}`);

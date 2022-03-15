@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewBase } from '../..';
+import type { DataViewBase, KqlOrFunctionNode } from '../..';
 import { fields } from '../../filters/stubs';
 import * as ast from '../ast';
 import * as is from './is';
@@ -42,7 +42,7 @@ describe('kuery functions', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should wrap subqueries in an ES bool query's should clause", () => {
-        const node = or.buildNode([childNode1, childNode2]);
+        const node = or.buildNode([childNode1, childNode2]) as KqlOrFunctionNode;
         const result = or.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
@@ -56,7 +56,7 @@ describe('kuery functions', () => {
       });
 
       test('should require one of the clauses to match', () => {
-        const node = or.buildNode([childNode1, childNode2]);
+        const node = or.buildNode([childNode1, childNode2]) as KqlOrFunctionNode;
         const result = or.toElasticsearchQuery(node, indexPattern);
 
         expect(result.bool).toHaveProperty('minimum_should_match', 1);
