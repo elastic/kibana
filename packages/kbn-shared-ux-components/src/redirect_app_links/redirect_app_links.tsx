@@ -7,17 +7,18 @@
  */
 
 import React, { useRef, useMemo } from 'react';
-import type { HTMLAttributes, FC } from 'react';
+import type { HTMLAttributes, DetailedHTMLProps, FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 
 import { createNavigateToUrlClickHandler } from './click_handler';
 
+type DivProps = DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
 /**
  * TODO: this interface recreates props from the `ApplicationStart` interface.
  * see: https://github.com/elastic/kibana/issues/127695
  */
-export interface RedirectAppLinksProps extends HTMLAttributes<HTMLDivElement> {
+export interface RedirectAppLinksProps extends DivProps {
   currentAppId$: Observable<string | undefined>;
   navigateToUrl(url: string): Promise<void>;
 }
