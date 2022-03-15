@@ -42,7 +42,7 @@ export interface BasicSettingRow {
   rowTitle?: string;
   rowDescription?: string;
   label?: string;
-  helpText?: string | ReactNode;
+  helpText?: ReactNode;
   placeholder?: string;
   labelAppend?: string;
   labelAppendLink?: string;
