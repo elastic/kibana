@@ -70,6 +70,7 @@ export interface LifecycleAlertServices<
   ActionGroupIds extends string = never
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
+  getAlertStartedDate: () => string | null;
 }
 
 export type LifecycleRuleExecutor<
@@ -167,6 +168,10 @@ export const createLifecycleExecutor =
         currentAlerts[id] = fields;
         return alertFactory.create(id);
       },
+      getAlertStartedDate: () =>
+        Object.values(state.trackedAlerts).length > 0
+          ? Object.values(state.trackedAlerts)[0].started
+          : null,
     };
 
     const nextWrappedState = await wrappedExecutor({
