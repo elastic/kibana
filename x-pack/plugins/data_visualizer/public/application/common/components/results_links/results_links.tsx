@@ -118,7 +118,7 @@ export const ResultsLinks: FC<Props> = ({
       if (capabilities.indexPatterns.save === true) {
         setDataViewsManagementLink(
           getUrlForApp('management', {
-            path: `/kibana/dataViews${createDataView ? `/dataViews/${dataViewId}` : ''}`,
+            path: `/kibana/dataViews${createDataView ? `/dataView/${dataViewId}` : ''}`,
           })
         );
       }
