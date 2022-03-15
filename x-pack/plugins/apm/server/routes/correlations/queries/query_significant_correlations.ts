@@ -77,27 +77,30 @@ export const fetchSignificantCorrelations = async (
     )
   );
 
-  let fallbackResult: LatencyCorrelation | undefined;
-  const latencyCorrelations: LatencyCorrelation[] = [];
-
-  fulfilled.forEach((d: LatencyCorrelation | undefined) => {
-    if (d === undefined) return;
-    if (Array.isArray(d.histogram)) {
-      latencyCorrelations.push(d);
-    } else {
-      if (!fallbackResult) {
-        fallbackResult = d;
-      } else {
-        if (
-          d.ksTest > fallbackResult.ksTest &&
-          d.correlation > fallbackResult.correlation
-        ) {
-          fallbackResult = d;
-        }
-      }
-    }
-  });
-
+  const latencyCorrelations: LatencyCorrelation[] = fulfilled.filter(
+    (d) => d && 'histogram' in d
+  );
+  let fallbackResult =
+    latencyCorrelations.length > 0
+      ? undefined
+      : fulfilled
+          .filter((d) => !d?.histogram)
+          .reduce((d, result) => {
+            if (d?.correlation !== undefined) {
+              if (!result) {
+                result = d?.correlation > 0 ? d : undefined;
+              } else {
+                if (
+                  d.correlation > 0 &&
+                  d.ksTest > result.ksTest &&
+                  d.correlation > result.correlation
+                ) {
+                  result = d;
+                }
+              }
+            }
+            return result;
+          }, undefined);
   if (latencyCorrelations.length === 0 && fallbackResult) {
     const { fieldName, fieldValue } = fallbackResult;
     const logHistogram = await fetchTransactionDurationRanges(
@@ -107,9 +110,9 @@ export const fetchSignificantCorrelations = async (
       [{ fieldName, fieldValue }]
     );
 
-    if (typeof fallbackResult === 'object' && fallbackResult !== null) {
+    if (fallbackResult) {
       fallbackResult = {
-        ...(fallbackResult as LatencyCorrelation),
+        ...fallbackResult,
         histogram: logHistogram,
       };
     }
