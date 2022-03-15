@@ -112,7 +112,6 @@ export const eqlExecutor = async ({
     const eqlSignalSearchStart = performance.now();
     logger.debug(`EQL query request: ${JSON.stringify(request)}`);
 
-    // TODO: fix this later
     const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
       request
     );
