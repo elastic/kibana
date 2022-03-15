@@ -14,7 +14,7 @@ is_pr() {
   false
 }
 
-verify_no_git_changes() {
+check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
   C_RESET='\033[0m' # Reset color
