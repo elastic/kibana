@@ -149,7 +149,6 @@ export const EditorMenu: FC<Props> = ({
       ownFocus
       label={strings.getEditorMenuButtonLabel()}
       iconType="arrowDown"
-      iconSide="right"
       panelPaddingSize="none"
       data-test-subj="canvasEditorMenuButton"
     >
