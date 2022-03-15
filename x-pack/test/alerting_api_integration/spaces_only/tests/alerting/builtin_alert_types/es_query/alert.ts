@@ -62,28 +62,73 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await esTestIndexToolOutput.destroy();
     });
 
-    describe('esQuery type', () => {
-      it('runs correctly: threshold on hit count < >', async () => {
+    [
+      [
+        'esQuery',
+        async () => {
+          await createAlert({
+            name: 'never fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            searchType: 'esQuery',
+          });
+          await createAlert({
+            name: 'always fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            searchType: 'esQuery',
+          });
+        },
+      ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
+          await createAlert({
+            name: 'never fire',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+          });
+          await createAlert({
+            name: 'always fire',
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+          });
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly: threshold on hit count < > for ${searchType} search type`, async () => {
         // write documents from now to the future end date in groups
         createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
-
-        await createAlert({
-          name: 'never fire',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          size: 100,
-          thresholdComparator: '<',
-          threshold: [0],
-          searchType: 'esQuery',
-        });
-
-        await createAlert({
-          name: 'always fire',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          size: 100,
-          thresholdComparator: '>',
-          threshold: [-1],
-          searchType: 'esQuery',
-        });
+        await initData();
 
         const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
@@ -106,31 +151,78 @@ export default function alertTests({ getService }: FtrProviderContext) {
             expect(previousTimestamp).not.to.be.empty();
           }
         }
-      });
+      })
+    );
 
-      it('runs correctly: use epoch millis - threshold on hit count < >', async () => {
+    [
+      [
+        'esQuery',
+        async () => {
+          await createAlert({
+            name: 'never fire',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            timeField: 'date_epoch_millis',
+            searchType: 'esQuery',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          });
+          await createAlert({
+            name: 'always fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            timeField: 'date_epoch_millis',
+            searchType: 'esQuery',
+          });
+        },
+      ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date_epoch_millis' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
+          await createAlert({
+            name: 'never fire',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+          });
+          await createAlert({
+            name: 'always fire',
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+          });
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly: use epoch millis - threshold on hit count < > for ${searchType} search type`, async () => {
         // write documents from now to the future end date in groups
         createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
-
-        await createAlert({
-          name: 'never fire',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          size: 100,
-          thresholdComparator: '<',
-          threshold: [0],
-          timeField: 'date_epoch_millis',
-          searchType: 'esQuery',
-        });
-
-        await createAlert({
-          name: 'always fire',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          size: 100,
-          thresholdComparator: '>',
-          threshold: [-1],
-          timeField: 'date_epoch_millis',
-          searchType: 'esQuery',
-        });
+        await initData();
 
         const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
@@ -153,49 +245,97 @@ export default function alertTests({ getService }: FtrProviderContext) {
             expect(previousTimestamp).not.to.be.empty();
           }
         }
-      });
+      })
+    );
 
-      it('runs correctly with query: threshold on hit count < >', async () => {
-        // write documents from now to the future end date in groups
-        createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
-
-        const rangeQuery = (rangeThreshold: number) => {
-          return {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      testedValue: {
-                        gte: rangeThreshold,
+    [
+      [
+        'esQuery',
+        async () => {
+          const rangeQuery = (rangeThreshold: number) => {
+            return {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        testedValue: {
+                          gte: rangeThreshold,
+                        },
                       },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
+            };
           };
-        };
-
-        await createAlert({
-          name: 'never fire',
-          esQuery: JSON.stringify(rangeQuery(ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE + 1)),
-          size: 100,
-          thresholdComparator: '<',
-          threshold: [-1],
-          searchType: 'esQuery',
-        });
-
-        await createAlert({
-          name: 'fires once',
-          esQuery: JSON.stringify(
-            rangeQuery(Math.floor((ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE) / 2))
-          ),
-          size: 100,
-          thresholdComparator: '>=',
-          threshold: [0],
-          searchType: 'esQuery',
-        });
+          await createAlert({
+            name: 'never fire',
+            esQuery: JSON.stringify(rangeQuery(ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE + 1)),
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [-1],
+            searchType: 'esQuery',
+          });
+          await createAlert({
+            name: 'fires once',
+            esQuery: JSON.stringify(
+              rangeQuery(Math.floor((ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE) / 2))
+            ),
+            size: 100,
+            thresholdComparator: '>=',
+            threshold: [0],
+            searchType: 'esQuery',
+          });
+        },
+      ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
+          await createAlert({
+            name: 'never fire',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [-1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: `testedValue > ${ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE + 1}`,
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+          });
+          await createAlert({
+            name: 'fires once',
+            size: 100,
+            thresholdComparator: '>=',
+            threshold: [0],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: `testedValue > ${Math.floor(
+                  (ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE) / 2
+                )}`,
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+          });
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly with query: threshold on hit count < > for ${searchType}`, async () => {
+        // write documents from now to the future end date in groups
+        createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+        await initData();
 
         const docs = await waitForDocs(1);
         for (const doc of docs) {
@@ -210,257 +350,52 @@ export default function alertTests({ getService }: FtrProviderContext) {
           expect(hits).not.to.be.empty();
           expect(previousTimestamp).to.be.empty();
         }
-      });
+      })
+    );
 
-      it('runs correctly: no matches', async () => {
-        await createAlert({
-          name: 'always fire',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          size: 100,
-          thresholdComparator: '<',
-          threshold: [1],
-          searchType: 'esQuery',
-        });
+    [
+      [
+        'esQuery',
+        async () => {
+          await createAlert({
+            name: 'always fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [1],
+            searchType: 'esQuery',
+          });
+        },
+      ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
 
-        const docs = await waitForDocs(1);
-
-        for (let i = 0; i < docs.length; i++) {
-          const doc = docs[i];
-          const { previousTimestamp, hits } = doc._source;
-          const { name, title, message } = doc._source.params;
-
-          expect(name).to.be('always fire');
-          expect(title).to.be(`alert 'always fire' matched query`);
-          const messagePattern =
-            /alert 'always fire' is active:\n\n- Value: 0+\n- Conditions Met: Number of matching documents is less than 1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
-          expect(message).to.match(messagePattern);
-          expect(hits).to.be.empty();
-
-          // during the first execution, the latestTimestamp value should be empty
-          // since this alert always fires, the latestTimestamp value should be updated each execution
-          if (!i) {
-            expect(previousTimestamp).to.be.empty();
-          } else {
-            expect(previousTimestamp).not.to.be.empty();
-          }
-        }
-      });
-    });
-
-    describe('searchSource type', () => {
-      it('runs correctly: threshold on hit count < >', async () => {
-        // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
-
-        const esTestDataView = await indexPatterns.create(
-          { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-          { override: true },
-          getUrlPrefix(Spaces.space1.id)
-        );
-
-        await createAlert({
-          name: 'never fire',
-          size: 100,
-          thresholdComparator: '<',
-          threshold: [0],
-          searchType: 'searchSource',
-          searchConfiguration: {
-            query: {
-              query: '',
-              language: 'kuery',
+          await createAlert({
+            name: 'always fire',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
             },
-            index: esTestDataView.id,
-            filter: [],
-          },
-        });
-        await createAlert({
-          name: 'always fire',
-          size: 100,
-          thresholdComparator: '>',
-          threshold: [-1],
-          searchType: 'searchSource',
-          searchConfiguration: {
-            query: {
-              query: '',
-              language: 'kuery',
-            },
-            index: esTestDataView.id,
-            filter: [],
-          },
-        });
-
-        const docs = await waitForDocs(2);
-        for (let i = 0; i < docs.length; i++) {
-          const doc = docs[i];
-          const { previousTimestamp, hits } = doc._source;
-          const { name, title, message } = doc._source.params;
-
-          expect(name).to.be('always fire');
-          expect(title).to.be(`alert 'always fire' matched query`);
-          const messagePattern =
-            /alert 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
-          expect(message).to.match(messagePattern);
-          expect(hits).not.to.be.empty();
-
-          // during the first execution, the latestTimestamp value should be empty
-          // since this alert always fires, the latestTimestamp value should be updated each execution
-          if (!i) {
-            expect(previousTimestamp).to.be.empty();
-          }
-          // else {
-          //   expect(previousTimestamp).not.to.be.empty();
-          // }
-        }
-      });
-
-      it('runs correctly: use epoch millis - threshold on hit count < >', async () => {
-        // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
-
-        const esTestDataView = await indexPatterns.create(
-          { title: ES_TEST_INDEX_NAME, timeFieldName: 'date_epoch_millis' },
-          { override: true },
-          getUrlPrefix(Spaces.space1.id)
-        );
-
-        await createAlert({
-          name: 'never fire',
-          size: 100,
-          thresholdComparator: '<',
-          threshold: [0],
-          searchType: 'searchSource',
-          searchConfiguration: {
-            query: {
-              query: '',
-              language: 'kuery',
-            },
-            index: esTestDataView.id,
-            filter: [],
-          },
-        });
-
-        await createAlert({
-          name: 'always fire',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          size: 100,
-          thresholdComparator: '>',
-          threshold: [-1],
-          searchType: 'searchSource',
-          searchConfiguration: {
-            query: {
-              query: '',
-              language: 'kuery',
-            },
-            index: esTestDataView.id,
-            filter: [],
-          },
-        });
-
-        const docs = await waitForDocs(2);
-        for (let i = 0; i < docs.length; i++) {
-          const doc = docs[i];
-          const { previousTimestamp, hits } = doc._source;
-          const { name, title, message } = doc._source.params;
-
-          expect(name).to.be('always fire');
-          expect(title).to.be(`alert 'always fire' matched query`);
-          const messagePattern =
-            /alert 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
-          expect(message).to.match(messagePattern);
-          expect(hits).not.to.be.empty();
-
-          // during the first execution, the latestTimestamp value should be empty
-          // since this alert always fires, the latestTimestamp value should be updated each execution
-          if (!i) {
-            expect(previousTimestamp).to.be.empty();
-          }
-          // else {
-          //   expect(previousTimestamp).not.to.be.empty();
-          // }
-        }
-      });
-
-      it('runs correctly with query: threshold on hit count < >', async () => {
-        // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
-
-        const esTestDataView = await indexPatterns.create(
-          { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-          { override: true },
-          getUrlPrefix(Spaces.space1.id)
-        );
-
-        await createAlert({
-          name: 'never fire',
-          size: 100,
-          thresholdComparator: '<',
-          threshold: [-1],
-          searchType: 'searchSource',
-          searchConfiguration: {
-            query: {
-              query: `testedValue > ${ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE + 1}`,
-              language: 'kuery',
-            },
-            index: esTestDataView.id,
-            filter: [],
-          },
-        });
-
-        await createAlert({
-          name: 'fires once',
-          size: 100,
-          thresholdComparator: '>=',
-          threshold: [0],
-          searchType: 'searchSource',
-          searchConfiguration: {
-            query: {
-              query: `testedValue > ${Math.floor(
-                (ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE) / 2
-              )}`,
-              language: 'kuery',
-            },
-            index: esTestDataView.id,
-            filter: [],
-          },
-        });
-
-        const docs = await waitForDocs(1);
-        for (const doc of docs) {
-          const { previousTimestamp, hits } = doc._source;
-          const { name, title, message } = doc._source.params;
-
-          expect(name).to.be('fires once');
-          expect(title).to.be(`alert 'fires once' matched query`);
-          const messagePattern =
-            /alert 'fires once' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
-          expect(message).to.match(messagePattern);
-          expect(hits).not.to.be.empty();
-          expect(previousTimestamp).to.be.empty();
-        }
-      });
-
-      it('runs correctly: no matches', async () => {
-        const esTestDataView = await indexPatterns.create(
-          { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-          { override: true },
-          getUrlPrefix(Spaces.space1.id)
-        );
-
-        await createAlert({
-          name: 'always fire',
-          size: 100,
-          thresholdComparator: '<',
-          threshold: [1],
-          searchType: 'searchSource',
-          searchConfiguration: {
-            query: {
-              query: '',
-              language: 'kuery',
-            },
-            index: esTestDataView.id,
-            filter: [],
-          },
-        });
+          });
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly: no matches for ${searchType} search type`, async () => {
+        await initData();
 
         const docs = await waitForDocs(1);
         for (let i = 0; i < docs.length; i++) {
@@ -483,8 +418,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
             expect(previousTimestamp).not.to.be.empty();
           }
         }
-      });
-    });
+      })
+    );
 
     async function createEsDocumentsInGroups(groups: number) {
       await createEsDocuments(

@@ -11,6 +11,7 @@ import {
   getTime,
   ISearchSource,
   ISearchStartSearchSource,
+  SortDirection,
 } from '../../../../../../../src/plugins/data/common';
 
 export async function fetchSearchSourceQuery(
@@ -79,6 +80,7 @@ export function updateSearchSource(
   }
   const searchSourceChild = searchSource.createChild();
   searchSourceChild.setField('filter', filters as Filter[]);
+  searchSourceChild.setField('sort', [{ [timeFieldName]: SortDirection.desc }]);
   return {
     searchSource: searchSourceChild,
     dateStart,
