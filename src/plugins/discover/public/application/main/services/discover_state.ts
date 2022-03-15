@@ -28,7 +28,7 @@ import {
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '../../../../../data/public';
-import { DataView } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/public';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
