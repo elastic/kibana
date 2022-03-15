@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef } from 'react';
+import React, { memo, useRef } from 'react';
 import {
   Chart,
   Settings,
@@ -128,11 +128,7 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
   return visualizationDefinitions.find((c) => c.id === seriesType)!.icon || 'empty';
 }
 
-const MemoizedChart = React.memo(XYChart);
-
-export function XYChartReportable(props: XYChartRenderProps) {
-  return <MemoizedChart {...props} />;
-}
+export const XYChartReportable = React.memo(XYChart);
 
 export function XYChart({
   data,
@@ -165,10 +161,13 @@ export function XYChart({
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
-  const layersById = filteredLayers.reduce<Record<string, XYLayerConfigResult>>((memo, layer) => {
-    memo[layer.layerId] = layer;
-    return memo;
-  }, {});
+  const layersById = filteredLayers.reduce<Record<string, XYLayerConfigResult>>(
+    (hashMap, layer) => {
+      hashMap[layer.layerId] = layer;
+      return hashMap;
+    },
+    {}
+  );
 
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
     datatables: Object.values(data.tables),
@@ -908,3 +907,6 @@ export function XYChart({
 function assertNever(x: never): never {
   throw new Error('Unexpected series type: ' + x);
 }
+
+// eslint-disable-next-line import/no-default-export
+export default memo(XYChart);
