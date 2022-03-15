@@ -11,6 +11,8 @@
  * is contained in this package-- and packages can only depend on other packages and never on
  * plugins-- we have to set this to `unknown`.  If and when `DataView` is exported from a
  * stateless package, we can remove this.
+ *
+ * @see: https://github.com/elastic/kibana/issues/127695
  */
 type DataView = unknown;
 

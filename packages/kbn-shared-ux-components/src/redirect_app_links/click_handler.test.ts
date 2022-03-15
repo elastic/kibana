@@ -7,7 +7,6 @@
  */
 
 import { MouseEvent } from 'react';
-import { ApplicationStart } from 'src/core/public';
 import { createNavigateToUrlClickHandler } from './click_handler';
 
 const createLink = ({
@@ -42,9 +41,11 @@ const createEvent = ({
   } as unknown as MouseEvent<HTMLElement>;
 };
 
+type NavigateToURLFn = (url: string) => Promise<void>;
+
 describe('createNavigateToUrlClickHandler', () => {
   let container: HTMLElement;
-  let navigateToUrl: jest.MockedFunction<ApplicationStart['navigateToUrl']>;
+  let navigateToUrl: jest.MockedFunction<NavigateToURLFn>;
 
   const createHandler = () =>
     createNavigateToUrlClickHandler({

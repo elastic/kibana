@@ -9,6 +9,7 @@
     "types": [
       "jest",
       "node",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [

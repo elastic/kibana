@@ -13,6 +13,7 @@ import type { SharedUxEditorsService } from '@kbn/shared-ux-services';
 
 import { NoDataViews as NoDataViewsComponent } from './no_data_views.component';
 
+// TODO: https://github.com/elastic/kibana/issues/127695
 export interface Props {
   onDataViewCreated: (dataView: unknown) => void;
 }

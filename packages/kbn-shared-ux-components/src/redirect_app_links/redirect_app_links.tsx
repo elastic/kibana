@@ -13,6 +13,10 @@ import { Observable } from 'rxjs';
 
 import { createNavigateToUrlClickHandler } from './click_handler';
 
+/**
+ * TODO: this interface recreates props from the `ApplicationStart` interface.
+ * see: https://github.com/elastic/kibana/issues/127695
+ */
 export interface RedirectAppLinksProps extends HTMLAttributes<HTMLDivElement> {
   currentAppId$: Observable<string | undefined>;
   navigateToUrl(url: string): Promise<void>;
