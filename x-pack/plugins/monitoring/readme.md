@@ -6,6 +6,7 @@ This plugin provides the Stack Monitoring kibana application.
 - [Local setup](dev_docs/how_to/local_setup.md)
 - [Cloud setup](dev_docs/how_to/cloud_setup.md)
 - [Testing](dev_docs/how_to/testing.md)
+- [Version Compatibility](dev_docs/how_to/version_compatibility.md)
 
 ## Concepts
 - [Architectural Overview](dev_docs/reference/architectural_overview.md) (WIP)
