@@ -46,7 +46,10 @@ export const useAlertPrevalence = ({
 
   let count: undefined | number;
   if (data) {
-    count = data.aggregations?.[ALERT_PREVALENCE_AGG].buckets[0]?.doc_count;
+    const buckets = data.aggregations?.[ALERT_PREVALENCE_AGG]?.buckets;
+    if (buckets && buckets.length > 0) {
+      count = buckets?.reduce((sum, bucket) => sum + (bucket?.doc_count ?? 0), 0);
+    }
   }
 
   const error = !loading && count === undefined;
@@ -64,7 +67,36 @@ const generateAlertPrevalenceQuery = (
   from: string,
   to: string
 ) => {
-  const actualValue = Array.isArray(value) ? value[0] : value;
+  let query;
+
+  query = {
+    bool: {
+      must: {
+        match: {
+          [field]: value,
+        },
+      },
+      filter: [
+        {
+          range: {
+            '@timestamp': {
+              gte: from,
+              lte: to,
+            },
+          },
+        },
+      ],
+    },
+  };
+
+  if (Array.isArray(value)) {
+    query = {
+      terms: {
+        [field]: value,
+      },
+    };
+  }
+
   return {
     size: 0,
     aggs: {
@@ -75,25 +107,7 @@ const generateAlertPrevalenceQuery = (
         },
       },
     },
-    query: {
-      bool: {
-        must: {
-          match: {
-            [field]: actualValue,
-          },
-        },
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: from,
-                lte: to,
-              },
-            },
-          },
-        ],
-      },
-    },
+    query,
     runtime_mappings: {},
   };
 };

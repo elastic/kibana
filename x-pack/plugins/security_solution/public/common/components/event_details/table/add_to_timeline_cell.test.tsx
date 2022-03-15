@@ -58,7 +58,7 @@ describe('AddToTimelineCellRenderer', () => {
           />
         </TestProviders>
       );
-      expect(screen.getByTestId('test-add-to-timeline')).toBeVisible();
+      expect(screen.getByTestId('test-add-to-timeline')).toBeInTheDocument();
     });
   });
 
