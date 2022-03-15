@@ -37,14 +37,14 @@ export const SessionViewDisplayOptions = ({
     () => [
       {
         label: i18n.translate('xpack.sessionView.sessionViewToggle.sessionViewToggleOptions', {
-          defaultMessage: timestampString,
+          defaultMessage: 'Timestamp',
         }),
         key: timestampString,
         checked: optionsStates?.timestamp ? 'on' : undefined,
       },
       {
         label: i18n.translate('xpack.sessionView.sessionViewToggle.sessionViewToggleOptions', {
-          defaultMessage: verboseModeString,
+          defaultMessage: 'Verbose mode',
         }),
         key: verboseModeString,
         checked: optionsStates?.verboseMode ? 'on' : undefined,
