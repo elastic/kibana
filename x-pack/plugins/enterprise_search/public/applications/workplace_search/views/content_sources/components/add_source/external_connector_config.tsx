@@ -49,8 +49,13 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
     saveExternalConnectorConfig,
   } = useActions(ExternalConnectorLogic);
 
-  const { buttonLoading, externalConnectorUrl, externalConnectorApiKey, sourceConfigData } =
-    useValues(ExternalConnectorLogic);
+  const {
+    formDisabled,
+    buttonLoading,
+    externalConnectorUrl,
+    externalConnectorApiKey,
+    sourceConfigData,
+  } = useValues(ExternalConnectorLogic);
 
   useEffect(() => {
     fetchExternalSource();
@@ -65,7 +70,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
   const { isOrganization } = useValues(AppLogic);
 
   const saveButton = (
-    <EuiButton color="primary" fill isLoading={buttonLoading} type="submit">
+    <EuiButton color="primary" fill isLoading={buttonLoading} disabled={formDisabled} type="submit">
       {OAUTH_SAVE_CONFIG_BUTTON}
     </EuiButton>
   );
@@ -111,6 +116,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
         >
           <EuiFieldText
             value={externalConnectorUrl}
+            disabled={formDisabled}
             required
             type="text"
             autoComplete="off"
@@ -128,6 +134,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
         >
           <EuiFieldText
             value={externalConnectorApiKey}
+            disabled={formDisabled}
             required
             type="text"
             autoComplete="off"
