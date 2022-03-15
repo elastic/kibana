@@ -47,7 +47,7 @@ const elasticAgentCardDescription = i18n.translate(
 );
 
 /**
- * Applies extra styling to a typical EuiAvatar
+ * Creates a specific NoDataCard pointing users to Integrations when `canAccessFleet`
  */
 export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardComponentProps> = ({
   canAccessFleet,
@@ -62,6 +62,7 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
       title={<EuiTextColor color="default">{noPermissionTitle}</EuiTextColor>}
       description={<EuiTextColor color="default">{noPermissionDescription}</EuiTextColor>}
       isDisabled
+      {...cardRest}
     />
   );
   const card = (
@@ -69,7 +70,6 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
       image={ElasticAgentLogo}
       title={title || elasticAgentCardTitle}
       description={elasticAgentCardDescription}
-      renderFooter={true}
       {...cardRest}
     />
   );

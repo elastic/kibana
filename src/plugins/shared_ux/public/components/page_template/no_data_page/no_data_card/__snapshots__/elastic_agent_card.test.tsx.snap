@@ -163,7 +163,6 @@ exports[`ElasticAgentCard renders 1`] = `
             description="Use Elastic Agent for a simple, unified way to collect data from your machines."
             href="/app/integrations/browse"
             image="test-file-stub"
-            renderFooter={true}
             title="Add Elastic Agent"
           >
             <EuiCard

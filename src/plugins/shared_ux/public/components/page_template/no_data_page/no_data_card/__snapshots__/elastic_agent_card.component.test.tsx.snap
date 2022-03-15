@@ -21,7 +21,6 @@ exports[`ElasticAgentCardComponent props button 1`] = `
     button="Button"
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     image="test-file-stub"
-    renderFooter={true}
     title="Add Elastic Agent"
   />
 </RedirectAppLinks>
@@ -48,7 +47,6 @@ exports[`ElasticAgentCardComponent props href 1`] = `
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     href="some path"
     image="test-file-stub"
-    renderFooter={true}
     title="Add Elastic Agent"
   />
 </RedirectAppLinks>
@@ -75,7 +73,6 @@ exports[`ElasticAgentCardComponent props recommended 1`] = `
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     image="test-file-stub"
     recommended={true}
-    renderFooter={true}
     title="Add Elastic Agent"
   />
 </RedirectAppLinks>
@@ -101,7 +98,6 @@ exports[`ElasticAgentCardComponent renders 1`] = `
   <NoDataCard
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     image="test-file-stub"
-    renderFooter={true}
     title="Add Elastic Agent"
   />
 </RedirectAppLinks>

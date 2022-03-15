@@ -24,16 +24,19 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
   title,
   button,
   description,
-  renderFooter,
+  isDisabled,
   ...cardRest
 }) => {
   const footer = () => {
+    // Don't render the footer action if disabled
+    if (isDisabled) {
+      return;
+    }
+    // Render a custom footer action if the button is not a simple string
     if (button && typeof button !== 'string') {
       return button;
     }
-    if (!button && !renderFooter) {
-      return button;
-    }
+    // Default footer action is a button with the provided or default string
     return <EuiButton fill>{button || title}</EuiButton>;
   };
   const label = recommended ? recommendedLabel : undefined;
@@ -46,6 +49,7 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
       description={cardDescription}
       betaBadgeProps={{ label }}
       footer={footer()}
+      isDisabled={isDisabled}
       {...cardRest}
     />
   );
