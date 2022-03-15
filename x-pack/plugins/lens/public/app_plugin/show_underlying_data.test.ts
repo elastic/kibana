@@ -9,14 +9,12 @@ import { createMockDatasource } from '../mocks';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { Filter } from '@kbn/es-query';
 import { DatasourcePublicAPI } from '../types';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { Capabilities } from 'kibana/public';
 
 describe('getLayerMetaInfo', () => {
   const capabilities = {
     navLinks: { discover: true },
     discover: { show: true },
-  } as unknown as RecursiveReadonly<Capabilities>;
+  };
   it('should return error in case of no data', () => {
     expect(
       getLayerMetaInfo(createMockDatasource('testDatasource'), {}, undefined, capabilities).error
@@ -85,7 +83,7 @@ describe('getLayerMetaInfo', () => {
         {
           navLinks: { discover: false },
           discover: { show: true },
-        } as unknown as RecursiveReadonly<Capabilities>
+        }
       ).isVisible
     ).toBeFalsy();
     expect(
@@ -98,7 +96,7 @@ describe('getLayerMetaInfo', () => {
         {
           navLinks: { discover: true },
           discover: { show: false },
-        } as unknown as RecursiveReadonly<Capabilities>
+        }
       ).isVisible
     ).toBeFalsy();
   });

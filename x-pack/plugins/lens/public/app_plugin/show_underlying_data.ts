@@ -55,7 +55,7 @@ export function getLayerMetaInfo(
   activeData: TableInspectorAdapter | undefined,
   capabilities: RecursiveReadonly<{
     navLinks: Capabilities['navLinks'];
-    discover: Capabilities['discover'];
+    discover?: Capabilities['discover'];
   }>
 ): { meta: LayerMetaInfo | undefined; isVisible: boolean; error: string | undefined } {
   const isVisible = Boolean(capabilities.navLinks?.discover && capabilities.discover?.show);
