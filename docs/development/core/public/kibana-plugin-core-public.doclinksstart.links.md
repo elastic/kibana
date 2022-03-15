@@ -87,6 +87,7 @@ readonly links: {
             readonly licenseManagement: string;
             readonly mailService: string;
             readonly usersAccess: string;
+            readonly troubleshootSetup: string;
         };
         readonly workplaceSearch: {
             readonly apiKeys: string;
