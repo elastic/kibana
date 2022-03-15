@@ -67,6 +67,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // Buildkite
   '.buildkite/**/*',
+
+  // generator templates use weird filenames based on the requirements for the files they're generating
+  'packages/kbn-generate/templates/**/*',
 ];
 
 /**
@@ -107,10 +110,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
  *
  * @type {Array}
  */
-export const REMOVE_EXTENSION = [
-  'packages/kbn-plugin-generator/template/**/*.ejs',
-  'packages/kbn-generate/templates/**/*.ejs',
-];
+export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!
