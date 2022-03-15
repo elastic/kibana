@@ -4,13 +4,20 @@
 <titleabbrev>Find connectors</titleabbrev>
 ++++
 
-Retrieves a paginated subset of all <<action-types,connectors>>.
+Retrieves a paginated subset of <<action-types,connectors>>.
 
-NOTE: Only {sn}, {jira}, and {ibm-r} connectors are returned.
+In particular, only the connectors that are supported for use in cases are
+returned. Refer to the list of supported external incident management systems in
+<<add-case-connectors>>.
 
 === Request
 
 `GET <kibana host>:<port>/api/cases/configure/connectors/_find`
+
+=== Prerequisite
+
+You must have `read` privileges for the *Actions and Connectors* feature in the *Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
 
 === Response code
 
@@ -29,31 +36,16 @@ The API returns a JSON object describing the connectors and their settings:
 
 [source,json]
 --------------------------------------------------
-{
-  "page": 1,
-  "perPage": 20,
-  "total": 2,
-  "data": [
-    {
-      "id": "61787f53-4eee-4741-8df6-8fe84fa616f7",
-      "actionTypeId": ".servicenow",
-      "name": "ServiceNow",
-      "config": {
-        "apiUrl": "https://dev78437.service-now.com",
-        "usesTableApi": false
-      },
-      "referencedByCount": 0
-    },
-    {
-      "id": "131d4448-abe0-4789-939d-8ef60680b498",
-      "actionTypeId": ".servicenow",
-      "name": "Defector",
-      "config": {
-        "apiUrl": "https://dev87359.service-now.com",
-        "usesTableApi": false
-      },
-      "referencedByCount": 0
-    }
-  ]
-}
+[{
+  "id":"61787f53-4eee-4741-8df6-8fe84fa616f7",
+  "actionTypeId": ".jira",
+  "name":"my-Jira",
+  "isMissingSecrets":false,
+  "config": {
+    "apiUrl":"https://elastic.atlassian.net/",
+    "projectKey":"ES"
+  },
+  "isPreconfigured":false,
+  "referencedByCount":0
+}]
 --------------------------------------------------
