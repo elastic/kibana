@@ -125,6 +125,70 @@ describe('last_value', () => {
       expect(column.label).toContain('bytes');
     });
 
+    it('should adjust filter if it is exists filter on the current field', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'source',
+        label: 'Last value of source',
+        isBucketed: true,
+        dataType: 'string',
+        filter: { language: 'kuery', query: 'source: *' },
+        params: {
+          sortField: 'datefield',
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newNumberField = indexPattern.getFieldByName('bytes')!;
+      const column = lastValueOperation.onFieldChange(oldColumn, newNumberField);
+
+      expect(column).toEqual(
+        expect.objectContaining({
+          filter: { language: 'kuery', query: 'bytes: *' },
+        })
+      );
+    });
+
+    it('should not adjust filter if it has some other filter', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'source',
+        label: 'Last value of source',
+        isBucketed: true,
+        dataType: 'string',
+        filter: { language: 'kuery', query: 'something_else: 123' },
+        params: {
+          sortField: 'datefield',
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newNumberField = indexPattern.getFieldByName('bytes')!;
+      const column = lastValueOperation.onFieldChange(oldColumn, newNumberField);
+
+      expect(column).toEqual(
+        expect.objectContaining({
+          filter: { language: 'kuery', query: 'something_else: 123' },
+        })
+      );
+    });
+
+    it('should not adjust filter if it is undefined', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'source',
+        label: 'Last value of source',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          sortField: 'datefield',
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newNumberField = indexPattern.getFieldByName('bytes')!;
+      const column = lastValueOperation.onFieldChange(oldColumn, newNumberField);
+
+      expect(column.filter).toBeFalsy();
+    });
+
     it('should remove numeric parameters when changing away from number', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
@@ -230,6 +294,21 @@ describe('last_value', () => {
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(lastValueColumn.dataType).toEqual('boolean');
+    });
+
+    it('should set exists filter on field', () => {
+      const lastValueColumn = lastValueOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+      });
+      expect(lastValueColumn.filter).toEqual({ language: 'kuery', query: 'test: *' });
     });
 
     it('should use indexPattern timeFieldName as a default sortField', () => {
