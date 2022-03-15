@@ -14,9 +14,6 @@ import {
   EuiPageHeader,
   EuiSpacer,
   EuiBasicTableColumn,
-  EuiCallOut,
-  EuiTableFieldDataColumnType,
-  EuiBasicTable,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
@@ -30,6 +27,7 @@ import { getListBreadcrumbs } from '../breadcrumbs';
 import { SpacesList } from './spaces_list';
 import type { SpacesContextProps } from '../../../../../../x-pack/plugins/spaces/public';
 import { removeDataView, RemoveDataViewProps } from '../edit_index_pattern';
+import { deleteModalMsg } from './delete_modal_msg';
 
 const pagination = {
   initialPageSize: 10,
@@ -104,7 +102,7 @@ export const IndexPatternTable = ({
       <EuiButton
         color="danger"
         iconType="trash"
-        onClick={() => clickHandler(selectedItems, deleteModalMsg(selectedItems))}
+        onClick={() => clickHandler(selectedItems, deleteModalMsg(selectedItems, !!spaces))}
       >
         <FormattedMessage
           id="indexPatternManagement.dataViewTable.deleteButtonLabel"
@@ -172,70 +170,6 @@ export const IndexPatternTable = ({
     onDelete: () => loadDataViews(),
   });
 
-  const deleteModalMsg = (views: RemoveDataViewProps[]) => {
-    const all = i18n.translate('indexPatternManagement.dataViewTable.spaceCountAll', {
-      defaultMessage: 'all',
-    });
-
-    const dataViewColumnName = i18n.translate(
-      'indexPatternManagement.dataViewTable.dataViewColumnName',
-      {
-        defaultMessage: 'Data view',
-      }
-    );
-
-    const spacesColumnName = i18n.translate(
-      'indexPatternManagement.dataViewTable.spacesColumnName',
-      {
-        defaultMessage: 'Spaces',
-      }
-    );
-
-    const columns: Array<EuiTableFieldDataColumnType<any>> = [
-      {
-        field: 'title',
-        name: dataViewColumnName,
-        sortable: true,
-      },
-    ];
-    if (spaces) {
-      columns.push({
-        field: 'namespaces',
-        name: spacesColumnName,
-        sortable: true,
-        width: '100px',
-        align: 'right',
-        render: (namespaces: string[]) =>
-          namespaces.indexOf('*') !== -1 ? all : namespaces.length,
-      });
-    }
-
-    return (
-      <div>
-        <EuiCallOut
-          color="warning"
-          iconType="alert"
-          title="Data views are deleted from every space they are shared in."
-        />
-        <div>
-          <FormattedMessage
-            id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
-            defaultMessage="You'll permanently delete {count, number} {count, plural,
-            one {data view}
-            other {data views}
-}."
-            values={{ count: views.length }}
-          />
-        </div>
-        <EuiBasicTable
-          tableCaption="Data views selected for deletion"
-          items={views}
-          columns={columns}
-        />
-      </div>
-    );
-  };
-
   const alertColumn = {
     name: 'Actions',
     field: 'id',
@@ -254,7 +188,7 @@ export const IndexPatternTable = ({
         color: 'danger',
         type: 'icon',
         onClick: (dataView: RemoveDataViewProps) =>
-          removeHandler([dataView], deleteModalMsg([dataView])),
+          removeHandler([dataView], deleteModalMsg([dataView], !!spaces)),
         isPrimary: true,
         'data-test-subj': 'action-delete',
       },
@@ -287,7 +221,9 @@ export const IndexPatternTable = ({
     },
     {
       field: 'namespaces',
-      name: 'spaces',
+      name: i18n.translate('indexPatternManagement.dataViewTable.spacesColumn', {
+        defaultMessage: 'Spaces',
+      }),
       render: (name: string, dataView: IndexPatternTableItem) => {
         return spaces ? (
           <SpacesList
