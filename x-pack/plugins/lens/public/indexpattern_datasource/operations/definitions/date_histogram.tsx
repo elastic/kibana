@@ -450,6 +450,7 @@ export const dateHistogramOperation: OperationDefinition<
               defaultMessage: 'Include empty rows',
             })}
             checked={Boolean(currentColumn.params.includeEmptyRows)}
+            data-test-subj="indexPattern-include-empty-rows"
             onChange={() => {
               updateLayer(
                 updateColumnParam({
