@@ -120,7 +120,7 @@ end
 
 subgraph Monitoring Deployment
   subgraph Elasticsearch
-    Pipeline>filebeat-8.2.0-elasticsearch-slowlog-pipeline]
+    Pipeline>filebeat-X.Y.Z-elasticsearch-slowlog-pipeline]
   end
 end
 
