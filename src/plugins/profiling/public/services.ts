@@ -12,6 +12,7 @@ import { getRemoteRoutePaths } from '../common';
 export interface Services {
   fetchTopN: (type: string, seconds: string) => Promise<any[] | HttpFetchError>;
   fetchElasticFlamechart: (timeFrom: number, timeTo: number) => Promise<any[] | HttpFetchError>;
+  fetchElasticFlamechart2: (timeFrom: number, timeTo: number) => Promise<any[] | HttpFetchError>;
   fetchPixiFlamechart: (timeFrom: number, timeTo: number) => Promise<any[] | HttpFetchError>;
 }
 
@@ -42,8 +43,24 @@ export function getServices(core: CoreStart): Services {
         const query: HttpFetchQuery = {
           index: 'profiling-events',
           projectID: 5,
-          timeFrom: timeFrom,
-          timeTo: timeTo,
+          timeFrom,
+          timeTo,
+          // TODO remove hard-coded value for topN items length and expose it through the UI
+          n: 100,
+        };
+        return await core.http.get(paths.FlamechartElastic, { query });
+      } catch (e) {
+        return e;
+      }
+    },
+
+    fetchElasticFlamechart2: async (timeFrom: number, timeTo: number) => {
+      try {
+        const query: HttpFetchQuery = {
+          index: 'profiling-events2',
+          projectID: 5,
+          timeFrom,
+          timeTo,
           // TODO remove hard-coded value for topN items length and expose it through the UI
           n: 100,
         };
@@ -58,8 +75,8 @@ export function getServices(core: CoreStart): Services {
         const query: HttpFetchQuery = {
           index: 'profiling-events',
           projectID: 5,
-          timeFrom: timeFrom,
-          timeTo: timeTo,
+          timeFrom,
+          timeTo,
           // TODO remove hard-coded value for topN items length and expose it through the UI
           n: 100,
         };
