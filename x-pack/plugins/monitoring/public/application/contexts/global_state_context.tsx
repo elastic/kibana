@@ -62,7 +62,7 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     state.setState(newState);
   };
 
-  localState.save?.();
+  localState.save();
 
   return <GlobalStateContext.Provider value={localState}>{children}</GlobalStateContext.Provider>;
 };
