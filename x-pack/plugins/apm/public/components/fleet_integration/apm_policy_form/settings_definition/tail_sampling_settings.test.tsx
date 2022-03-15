@@ -5,13 +5,16 @@
  * 2.0.
  */
 import {
-  GetTailSamplingSettings,
+  getTailSamplingSettings,
   isTailBasedSamplingValid,
 } from './tail_sampling_settings';
 
+const DOCS_LINK =
+  'https://www.elastic.co/guide/en/apm/guide/master/configure-tail-based-sampling.html';
+
 describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
   it('return true when tail_sampling_interval is greater than 1s', () => {
-    const settings = GetTailSamplingSettings();
+    const settings = getTailSamplingSettings(DOCS_LINK);
     const isValid = isTailBasedSamplingValid(
       {
         tail_sampling_enabled: { value: true, type: 'bool' },
@@ -27,7 +30,7 @@ describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
   });
 
   it('return false when tail_sampling_interval is less than 1s', () => {
-    const settings = GetTailSamplingSettings();
+    const settings = getTailSamplingSettings(DOCS_LINK);
     const isValid = isTailBasedSamplingValid(
       {
         tail_sampling_enabled: { value: true, type: 'bool' },
@@ -43,7 +46,7 @@ describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
   });
 
   it('returns true when tail_sampling_enabled is disabled', () => {
-    const settings = GetTailSamplingSettings();
+    const settings = getTailSamplingSettings(DOCS_LINK);
     const isValid = isTailBasedSamplingValid(
       { tail_sampling_enabled: { value: false, type: 'bool' } },
       settings

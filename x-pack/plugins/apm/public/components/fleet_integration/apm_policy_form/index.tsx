@@ -15,7 +15,7 @@ import {
 } from './settings_definition/rum_settings';
 import {
   TAIL_SAMPLING_ENABLED_KEY,
-  GetTailSamplingSettings,
+  getTailSamplingSettings,
   isTailBasedSamplingValid,
 } from './settings_definition/tail_sampling_settings';
 import {
@@ -25,6 +25,7 @@ import {
 import { SettingsForm, SettingsSection } from './settings_form';
 import { isSettingsFormValid, mergeNewVars } from './settings_form/utils';
 import { PackagePolicyVars } from './typings';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   updateAPMPolicy: (newVars: PackagePolicyVars, isValid: boolean) => void;
@@ -37,6 +38,8 @@ export function APMPolicyForm({
   isCloudPolicy,
   updateAPMPolicy,
 }: Props) {
+  const tailSamplingPoliciesDocsLink =
+    useKibana().services.docLinks?.links.apm.tailSamplingPolicies;
   const {
     apmSettings,
     rumSettings,
@@ -51,9 +54,11 @@ export function APMPolicyForm({
       agentAuthorizationSettings: getAgentAuthorizationSettings({
         isCloudPolicy,
       }),
-      tailSamplingSettings: GetTailSamplingSettings(),
+      tailSamplingSettings: getTailSamplingSettings(
+        tailSamplingPoliciesDocsLink
+      ),
     };
-  }, [isCloudPolicy]);
+  }, [isCloudPolicy, tailSamplingPoliciesDocsLink]);
 
   function handleFormChange(key: string, value: any) {
     // Merge new key/value with the rest of fields

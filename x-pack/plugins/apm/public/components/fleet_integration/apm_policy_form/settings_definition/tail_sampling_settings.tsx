@@ -11,12 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 import { PackagePolicyVars, SettingsRow } from '../typings';
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const TAIL_SAMPLING_ENABLED_KEY = 'tail_sampling_enabled';
 
-export function GetTailSamplingSettings(): SettingsRow[] {
-  const docLinks = useKibana().services.docLinks;
+export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
   return [
     {
       key: TAIL_SAMPLING_ENABLED_KEY,
@@ -78,10 +76,7 @@ export function GetTailSamplingSettings(): SettingsRow[] {
               defaultMessage="Learn more about tail sampling policies in our {link}."
               values={{
                 link: (
-                  <EuiLink
-                    href={docLinks?.links.apm.tailSamplingPolicies}
-                    target="_blank"
-                  >
+                  <EuiLink href={docsLinks} target="_blank">
                     {i18n.translate(
                       'xpack.apm.fleet_integration.settings.tailSamplingDocsHelpTextLink',
                       {
