@@ -8,10 +8,10 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiUserAuthenticationsArea } from '../../../../common/components/visualization_actions/configs/hosts/kpi_user_authentications_area';
-import { kpiUserAuthenticationsBar } from '../../../../common/components/visualization_actions/configs/hosts/kpi_user_authentications_bar';
-import { kpiUserAuthenticationsMetricSuccess } from '../../../../common/components/visualization_actions/configs/hosts/kpi_user_authentications_metric_success';
-import { kpiUserAuthenticationsMetricFailure } from '../../../../common/components/visualization_actions/configs/hosts/kpi_user_authentication_metric_failure';
+import { kpiUserAuthenticationsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_area';
+import { kpiUserAuthenticationsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_bar';
+import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_metric_success';
+import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentication_metric_failure';
 import { useHostsKpiAuthentications } from '../../../containers/kpi_hosts/authentications';
 import { HostsKpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
@@ -28,7 +28,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.authenticationsSuccess,
         icon: 'check',
-        lensAttributes: kpiUserAuthenticationsMetricSuccess,
+        lensAttributes: kpiUserAuthenticationsMetricSuccessLensAttributes,
       },
       {
         key: 'authenticationsFailure',
@@ -37,14 +37,14 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.authenticationsFailure,
         icon: 'cross',
-        lensAttributes: kpiUserAuthenticationsMetricFailure,
+        lensAttributes: kpiUserAuthenticationsMetricFailureLensAttributes,
       },
     ],
     enableAreaChart: true,
     enableBarChart: true,
     description: i18n.USER_AUTHENTICATIONS,
-    areaChartLensAttributes: kpiUserAuthenticationsArea,
-    barChartLensAttributes: kpiUserAuthenticationsBar,
+    areaChartLensAttributes: kpiUserAuthenticationsAreaLensAttributes,
+    barChartLensAttributes: kpiUserAuthenticationsBarLensAttributes,
   },
 ];
 

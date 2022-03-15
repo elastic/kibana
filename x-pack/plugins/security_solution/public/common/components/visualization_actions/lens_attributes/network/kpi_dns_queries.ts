@@ -7,7 +7,7 @@
 
 import { LensAttributes } from '../../types';
 
-export const kpiDnsQueries: LensAttributes = {
+export const kpiDnsQueriesLensAttributes: LensAttributes = {
   title: '[Network] DNS metric',
   description: '',
   visualizationType: 'lnsMetric',

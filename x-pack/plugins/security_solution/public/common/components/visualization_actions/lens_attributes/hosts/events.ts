@@ -7,7 +7,9 @@
 
 import { GetLensAttributes, LensAttributes } from '../../types';
 
-export const getEventsHistogramCongifs: GetLensAttributes = (stackByField = 'event.action') =>
+export const getEventsHistogramLensAttributes: GetLensAttributes = (
+  stackByField = 'event.action'
+) =>
   ({
     title: 'Host - events',
     description: '',
@@ -87,7 +89,7 @@ export const getEventsHistogramCongifs: GetLensAttributes = (stackByField = 'eve
                       type: 'column',
                       columnId: 'e09e0380-0740-4105-becc-0a4ca12e3944',
                     },
-                    orderDirection: 'desc',
+                    orderDirection: 'asc',
                     otherBucket: true,
                     missingBucket: false,
                     parentFormat: {

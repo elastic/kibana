@@ -7,7 +7,7 @@
 
 import { LensAttributes } from '../../types';
 
-export const authentication: LensAttributes = {
+export const authenticationLensAttributes: LensAttributes = {
   title: 'Authentication',
   description: '',
   visualizationType: 'lnsXY',

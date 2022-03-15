@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { dnsTopDomainsAttrs } from './configs/network/dns_top_domains';
+import { dnsTopDomainsLensAttributes } from './lens_attributes/network/dns_top_domains';
 import { VisualizationActions } from '.';
 import {
   createSecuritySolutionStorageMock,
@@ -54,7 +54,7 @@ describe('VisualizationActions', () => {
 
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const props = {
-    lensAttributes: dnsTopDomainsAttrs,
+    lensAttributes: dnsTopDomainsLensAttributes,
     queryId: 'networkDnsHistogramQuery',
     timerange: {
       from: '2022-03-06T16:00:00.000Z',

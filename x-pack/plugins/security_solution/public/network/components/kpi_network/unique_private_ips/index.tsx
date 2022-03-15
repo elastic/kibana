@@ -13,10 +13,10 @@ import { useNetworkKpiUniquePrivateIps } from '../../../containers/kpi_network/u
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
-import { kpiUniquePrivateIpsSourceMetric } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_source_metric';
-import { kpiUniquePrivateIpsDestinationMetric } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_destination_metric';
-import { kpiUniquePrivateIpsArea } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_area';
-import { kpiUniquePrivateIpsBar } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_private_ips_bar';
+import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_source_metric';
+import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
+import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
+import { kpiUniquePrivateIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];
@@ -33,7 +33,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         description: i18n.SOURCE_UNIT_LABEL,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
-        lensAttributes: kpiUniquePrivateIpsSourceMetric,
+        lensAttributes: kpiUniquePrivateIpsSourceMetricLensAttributes,
       },
       {
         key: 'uniqueDestinationPrivateIps',
@@ -42,14 +42,14 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         description: i18n.DESTINATION_UNIT_LABEL,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
-        lensAttributes: kpiUniquePrivateIpsDestinationMetric,
+        lensAttributes: kpiUniquePrivateIpsDestinationMetricLensAttributes,
       },
     ],
     description: i18n.UNIQUE_PRIVATE_IPS,
     enableAreaChart: true,
     enableBarChart: true,
-    areaChartLensAttributes: kpiUniquePrivateIpsArea,
-    barChartLensAttributes: kpiUniquePrivateIpsBar,
+    areaChartLensAttributes: kpiUniquePrivateIpsAreaLensAttributes,
+    barChartLensAttributes: kpiUniquePrivateIpsBarLensAttributes,
   },
 ];
 

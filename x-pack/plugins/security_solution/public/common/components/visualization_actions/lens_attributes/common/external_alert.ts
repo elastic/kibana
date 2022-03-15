@@ -7,7 +7,9 @@
 
 import { GetLensAttributes, LensAttributes } from '../../types';
 
-export const getExternalAlertConfigs: GetLensAttributes = (stackByField = 'event.module') => {
+export const getExternalAlertLensAttributes: GetLensAttributes = (
+  stackByField = 'event.module'
+) => {
   return {
     title: 'External alerts',
     description: '',

@@ -7,7 +7,7 @@
 
 import { LensAttributes } from '../../types';
 
-export const kpiNetworkEvents: LensAttributes = {
+export const kpiNetworkEventsLensAttributes: LensAttributes = {
   title: '[Network] Network events',
   description: '',
   visualizationType: 'lnsMetric',

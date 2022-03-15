@@ -7,23 +7,23 @@
 
 import { LensAttributes } from '../../types';
 
-export const kpiHostMetric: LensAttributes = {
+export const kpiUniqueIpsDestinationMetricLensAttributes: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
       indexpattern: {
         layers: {
-          '416b6fad-1923-4f6a-a2df-b223bb287e30': {
-            columnOrder: ['b00c65ea-32be-4163-bfc8-f795b1ef9d06'],
+          '8be0156b-d423-4a39-adf1-f54d4c9f2e69': {
+            columnOrder: ['d9a6eb6b-8b78-439e-98e7-a718f8ffbebe'],
             columns: {
-              'b00c65ea-32be-4163-bfc8-f795b1ef9d06': {
+              'd9a6eb6b-8b78-439e-98e7-a718f8ffbebe': {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: ' ',
                 operationType: 'unique_count',
                 scale: 'ratio',
-                sourceField: 'host.name',
+                sourceField: 'destination.ip',
               },
             },
             incompleteColumns: {},
@@ -34,12 +34,12 @@ export const kpiHostMetric: LensAttributes = {
     filters: [],
     query: { language: 'kuery', query: '' },
     visualization: {
-      accessor: 'b00c65ea-32be-4163-bfc8-f795b1ef9d06',
-      layerId: '416b6fad-1923-4f6a-a2df-b223bb287e30',
+      accessor: 'd9a6eb6b-8b78-439e-98e7-a718f8ffbebe',
+      layerId: '8be0156b-d423-4a39-adf1-f54d4c9f2e69',
       layerType: 'data',
     },
   },
-  title: '[Host] Hosts - metric',
+  title: '[Host] Unique IPs - destination metric',
   visualizationType: 'lnsMetric',
   references: [
     {
@@ -49,7 +49,7 @@ export const kpiHostMetric: LensAttributes = {
     },
     {
       id: '{dataViewId}',
-      name: 'indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30',
+      name: 'indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69',
       type: 'index-pattern',
     },
   ],

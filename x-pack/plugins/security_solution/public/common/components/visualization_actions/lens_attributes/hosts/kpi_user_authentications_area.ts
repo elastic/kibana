@@ -7,7 +7,7 @@
 
 import { LensAttributes } from '../../types';
 
-export const kpiUserAuthenticationsArea: LensAttributes = {
+export const kpiUserAuthenticationsAreaLensAttributes: LensAttributes = {
   title: '[Host] User authentications - area ',
   description: '',
   visualizationType: 'lnsXY',

@@ -4,26 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { SOURCE_CHART_LABEL } from '../../translations';
 import { LensAttributes } from '../../types';
 
-export const kpiUniqueIpsDestinationMetric: LensAttributes = {
+export const kpiUniquePrivateIpsSourceMetricLensAttributes: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
       indexpattern: {
         layers: {
-          '8be0156b-d423-4a39-adf1-f54d4c9f2e69': {
-            columnOrder: ['d9a6eb6b-8b78-439e-98e7-a718f8ffbebe'],
+          'cea37c70-8f91-43bf-b9fe-72d8c049f6a3': {
+            columnOrder: ['bd17c23e-4f83-4108-8005-2669170d064b'],
             columns: {
-              'd9a6eb6b-8b78-439e-98e7-a718f8ffbebe': {
+              'bd17c23e-4f83-4108-8005-2669170d064b': {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: ' ',
+                label: SOURCE_CHART_LABEL,
                 operationType: 'unique_count',
                 scale: 'ratio',
-                sourceField: 'destination.ip',
+                sourceField: 'source.ip',
+                filter: {
+                  query:
+                    'source.ip: "10.0.0.0/8" or source.ip: "192.168.0.0/16" or source.ip: "172.16.0.0/12" or source.ip: "fd00::/8"',
+                  language: 'kuery',
+                },
               },
             },
             incompleteColumns: {},
@@ -32,14 +37,17 @@ export const kpiUniqueIpsDestinationMetric: LensAttributes = {
       },
     },
     filters: [],
-    query: { language: 'kuery', query: '' },
+    query: {
+      language: 'kuery',
+      query: '',
+    },
     visualization: {
-      accessor: 'd9a6eb6b-8b78-439e-98e7-a718f8ffbebe',
-      layerId: '8be0156b-d423-4a39-adf1-f54d4c9f2e69',
+      accessor: 'bd17c23e-4f83-4108-8005-2669170d064b',
+      layerId: 'cea37c70-8f91-43bf-b9fe-72d8c049f6a3',
       layerType: 'data',
     },
   },
-  title: '[Host] Unique IPs - destination metric',
+  title: '[Network] Unique private IPs - source metric',
   visualizationType: 'lnsMetric',
   references: [
     {
@@ -49,7 +57,7 @@ export const kpiUniqueIpsDestinationMetric: LensAttributes = {
     },
     {
       id: '{dataViewId}',
-      name: 'indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69',
+      name: 'indexpattern-datasource-layer-cea37c70-8f91-43bf-b9fe-72d8c049f6a3',
       type: 'index-pattern',
     },
   ],

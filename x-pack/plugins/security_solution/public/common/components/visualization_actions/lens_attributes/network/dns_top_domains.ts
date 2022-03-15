@@ -8,7 +8,7 @@
 import { LensAttributes } from '../../types';
 
 /* Exported from Kibana Saved Object */
-export const dnsTopDomainsAttrs: LensAttributes = {
+export const dnsTopDomainsLensAttributes: LensAttributes = {
   title: 'Top domains by dns.question.registered_domain',
   description: 'Security Solution Network DNS',
   visualizationType: 'lnsXY',

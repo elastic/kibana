@@ -16,7 +16,7 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../mock';
-import { getExternalAlertConfigs } from './configs/common/external_alert';
+import { getExternalAlertLensAttributes } from './lens_attributes/common/external_alert';
 import { useLensAttributes } from './use_lens_attributes';
 import { filterHostExternalAlertData, getHostDetailsPageFilter, getIndexFilters } from './utils';
 import { createStore, State } from '../../store';
@@ -87,7 +87,7 @@ describe('useLensAttributes', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          getLensAttributes: getExternalAlertConfigs,
+          getLensAttributes: getExternalAlertLensAttributes,
           stackByField: 'event.dataset',
         }),
       { wrapper }
@@ -103,14 +103,14 @@ describe('useLensAttributes', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          getLensAttributes: getExternalAlertConfigs,
+          getLensAttributes: getExternalAlertLensAttributes,
           stackByField: 'event.dataset',
         }),
       { wrapper }
     );
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertConfigs().state.filters,
+      ...getExternalAlertLensAttributes().state.filters,
       ...filterFromSearchBar,
       ...getHostDetailsPageFilter('mockHost'),
       ...filterHostExternalAlertData,
@@ -125,7 +125,7 @@ describe('useLensAttributes', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          getLensAttributes: getExternalAlertConfigs,
+          getLensAttributes: getExternalAlertLensAttributes,
           stackByField: 'event.dataset',
         }),
       { wrapper }

@@ -8,7 +8,7 @@
 import { LensAttributes } from '../../types';
 import { FAIL_CHART_LABEL, SUCCESS_CHART_LABEL } from '../../translations';
 
-export const kpiUserAuthenticationsBar: LensAttributes = {
+export const kpiUserAuthenticationsBarLensAttributes: LensAttributes = {
   title: '[Host] User authentications - bar ',
   description: '',
   visualizationType: 'lnsXY',

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { DESTINATION_CHART_LABEL, SOURCE_CHART_LABEL } from '../../translations';
 import { LensAttributes } from '../../types';
-import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL } from '../../translations';
 
-export const kpiUniqueIpsBar: LensAttributes = {
+export const kpiUniqueIpsAreaLensAttributes: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
@@ -16,55 +16,54 @@ export const kpiUniqueIpsBar: LensAttributes = {
         layers: {
           '8be0156b-d423-4a39-adf1-f54d4c9f2e69': {
             columnOrder: [
-              'f8bfa719-5c1c-4bf2-896e-c318d77fc08e',
-              '32f66676-f4e1-48fd-b7f8-d4de38318601',
+              'a0cb6400-f708-46c3-ad96-24788f12dae4',
+              'd9a6eb6b-8b78-439e-98e7-a718f8ffbebe',
             ],
             columns: {
-              '32f66676-f4e1-48fd-b7f8-d4de38318601': {
+              'a0cb6400-f708-46c3-ad96-24788f12dae4': {
+                dataType: 'date',
+                isBucketed: true,
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: { interval: 'auto' },
+                scale: 'interval',
+                sourceField: '@timestamp',
+              },
+              'd9a6eb6b-8b78-439e-98e7-a718f8ffbebe': {
+                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Unique count of source.ip',
+                label: SOURCE_CHART_LABEL,
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'source.ip',
               },
-              'f8bfa719-5c1c-4bf2-896e-c318d77fc08e': {
-                dataType: 'string',
-                isBucketed: true,
-                label: 'Filters',
-                operationType: 'filters',
-                params: {
-                  filters: [{ input: { language: 'kuery', query: '' }, label: SOURCE_CHART_LABEL }],
-                },
-                scale: 'ordinal',
-              },
             },
             incompleteColumns: {},
           },
-          'ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e': {
+          'ca05ecdb-0fa4-49a8-9305-b23d91012a46': {
             columnOrder: [
-              'c72aad6a-fc9c-43dc-9194-e13ca3ee8aff',
-              'b7e59b08-96e6-40d1-84fd-e97b977d1c47',
+              'f95e74e6-99dd-4b11-8faf-439b4d959df9',
+              'e7052671-fb9e-481f-8df3-7724c98cfc6f',
             ],
             columns: {
-              'b7e59b08-96e6-40d1-84fd-e97b977d1c47': {
+              'e7052671-fb9e-481f-8df3-7724c98cfc6f': {
+                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Unique count of destination.ip',
+                label: DESTINATION_CHART_LABEL,
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'destination.ip',
               },
-              'c72aad6a-fc9c-43dc-9194-e13ca3ee8aff': {
-                customLabel: true,
-                dataType: 'string',
+              'f95e74e6-99dd-4b11-8faf-439b4d959df9': {
+                dataType: 'date',
                 isBucketed: true,
-                label: DESTINATION_CHART_LABEL,
-                operationType: 'filters',
-                params: {
-                  filters: [{ input: { language: 'kuery', query: '' }, label: 'Dest.' }],
-                },
-                scale: 'ordinal',
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: { interval: 'auto' },
+                scale: 'interval',
+                sourceField: '@timestamp',
               },
             },
             incompleteColumns: {},
@@ -81,31 +80,31 @@ export const kpiUniqueIpsBar: LensAttributes = {
       labelsOrientation: { x: 0, yLeft: 0, yRight: 0 },
       layers: [
         {
-          accessors: ['32f66676-f4e1-48fd-b7f8-d4de38318601'],
+          accessors: ['d9a6eb6b-8b78-439e-98e7-a718f8ffbebe'],
           layerId: '8be0156b-d423-4a39-adf1-f54d4c9f2e69',
           layerType: 'data',
-          seriesType: 'bar_horizontal_stacked',
-          xAccessor: 'f8bfa719-5c1c-4bf2-896e-c318d77fc08e',
-          yConfig: [{ color: '#d36186', forAccessor: '32f66676-f4e1-48fd-b7f8-d4de38318601' }],
+          seriesType: 'area',
+          xAccessor: 'a0cb6400-f708-46c3-ad96-24788f12dae4',
+          yConfig: [{ color: '#d36186', forAccessor: 'd9a6eb6b-8b78-439e-98e7-a718f8ffbebe' }],
         },
         {
-          accessors: ['b7e59b08-96e6-40d1-84fd-e97b977d1c47'],
-          layerId: 'ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e',
+          accessors: ['e7052671-fb9e-481f-8df3-7724c98cfc6f'],
+          layerId: 'ca05ecdb-0fa4-49a8-9305-b23d91012a46',
           layerType: 'data',
-          seriesType: 'bar_horizontal_stacked',
-          xAccessor: 'c72aad6a-fc9c-43dc-9194-e13ca3ee8aff',
-          yConfig: [{ color: '#9170b8', forAccessor: 'b7e59b08-96e6-40d1-84fd-e97b977d1c47' }],
+          seriesType: 'area',
+          xAccessor: 'f95e74e6-99dd-4b11-8faf-439b4d959df9',
+          yConfig: [{ color: '#9170b8', forAccessor: 'e7052671-fb9e-481f-8df3-7724c98cfc6f' }],
         },
       ],
       legend: { isVisible: false, position: 'right', showSingleSeries: false },
-      preferredSeriesType: 'bar_horizontal_stacked',
+      preferredSeriesType: 'area',
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       valueLabels: 'hide',
       yLeftExtent: { mode: 'full' },
       yRightExtent: { mode: 'full' },
     },
   },
-  title: '[Host] Unique IPs - bar',
+  title: '[Host] Unique IPs - area',
   visualizationType: 'lnsXY',
   references: [
     {
@@ -120,8 +119,11 @@ export const kpiUniqueIpsBar: LensAttributes = {
     },
     {
       id: '{dataViewId}',
-      name: 'indexpattern-datasource-layer-ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e',
+      name: 'indexpattern-datasource-layer-ca05ecdb-0fa4-49a8-9305-b23d91012a46',
       type: 'index-pattern',
     },
   ],
+  type: 'lens',
+  updated_at: '2022-02-09T17:44:03.359Z',
+  version: 'WzI5MTI5OSwzXQ==',
 } as LensAttributes;

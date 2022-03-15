@@ -6,7 +6,7 @@
  */
 import { LensAttributes } from '../../types';
 
-export const kpiTlsHandshakes: LensAttributes = {
+export const kpiTlsHandshakesLensAttributes: LensAttributes = {
   title: '[Network] TLS handshakes',
   description: '',
   visualizationType: 'lnsMetric',

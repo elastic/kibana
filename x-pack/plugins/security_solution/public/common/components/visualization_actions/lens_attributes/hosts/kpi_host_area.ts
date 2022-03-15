@@ -7,7 +7,7 @@
 
 import { LensAttributes } from '../../types';
 
-export const kpiHostArea: LensAttributes = {
+export const kpiHostAreaLensAttributes: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
