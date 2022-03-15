@@ -124,13 +124,15 @@ export function ReportDefinitionCol({
 
       {textDefinitionFields?.map((field) => {
         return (
-          <TextReportDefinitionField
-            seriesId={seriesId}
-            series={series}
-            seriesConfig={seriesConfig}
-            field={field}
-            onChange={onChangeTextDefinitionField}
-          />
+          <EuiFlexItem key={field} grow={1}>
+            <TextReportDefinitionField
+              seriesId={seriesId}
+              series={series}
+              seriesConfig={seriesConfig}
+              field={field}
+              onChange={onChangeTextDefinitionField}
+            />
+          </EuiFlexItem>
         );
       })}
     </EuiFlexGroup>
