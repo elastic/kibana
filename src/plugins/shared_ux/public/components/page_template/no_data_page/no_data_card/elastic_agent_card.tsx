@@ -21,6 +21,7 @@ export const ElasticAgentCard = (props: ElasticAgentCardProps) => {
     if (href) {
       return href;
     }
+    // TODO: get this URL from a locator
     const prefix = '/app/integrations/browse';
     if (category) {
       return addBasePath(`${prefix}/${category}`);
