@@ -1,4 +1,6 @@
-To get deeper information about the behavior of the stack monitoring application you can configure APM tracing.
+To get deeper information about the behavior of the stack monitoring application you can configure APM to send trace data an APM server.
+
+The kibana source references a central APM server for use by anyone working at Elastic, or you can send trace data to an APM server you manage yourself.
 
 ## For local development
 
@@ -40,4 +42,3 @@ elastic.apm.captureSpanStackTraces: false
 ```
 
 When running in ECE you can update `kibana.yml` settings via the ECE web UI under "Edit user setting" for the kibana nodes in the deployment.
-
