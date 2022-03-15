@@ -22,6 +22,7 @@ import type {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
+  GetK8sManifestRequestSchema,
   FleetRequestHandler,
 } from '../../types';
 
@@ -39,7 +40,6 @@ import type {
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
-import type { GetK8sManifestRequestSchema } from '../../types';
 
 export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
@@ -298,12 +298,11 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   } = request;
 
   if (request.query.kubernetes === true) {
-    if (request.query.standalone === true) {
       try {
         const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
           soClient,
           request.params.agentPolicyId,
-          { standalone: request.query.standalone }
+          { standalone: request.query.standalone === true }
         );
         if (fullAgentConfigMap) {
           const body = fullAgentConfigMap;
@@ -324,7 +323,6 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       } catch (error) {
         return defaultIngestErrorHandler({ error, response });
       }
-    }
   } else {
     try {
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
@@ -356,8 +354,8 @@ export const getK8sManifest: FleetRequestHandler<
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const fleetServer = request.query?.fleetServer ?? '';
-    const token = request.query?.enrolToken ?? '';
+    const fleetServer = request.query.fleetServer ?? '';
+    const token = request.query.enrolToken ?? '';
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(fleetServer, token);
     if (fullAgentManifest) {
       const body: GetFullAgentManifestResponse = {
