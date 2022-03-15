@@ -41,6 +41,8 @@ export const OVERVIEW_SEVERITY = '[data-test-subj="eventDetails"] [data-test-sub
 
 export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj="alertStatus"]';
 
+export const OVERVIEW_SEVERITY = '[data-test-subj="eventDetails"] [data-test-subj=severity]';
+
 export const OVERVIEW_THRESHOLD_COUNT =
   '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=threshold_result\\.count]';
 

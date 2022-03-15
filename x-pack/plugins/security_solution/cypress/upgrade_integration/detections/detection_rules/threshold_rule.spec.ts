@@ -36,10 +36,7 @@ import { loginAndWaitForPage } from '../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   OVERVIEW_HOST_NAME,
-  OVERVIEW_RISK_SCORE,
-  OVERVIEW_RULE,
   OVERVIEW_SEVERITY,
-  OVERVIEW_STATUS,
   OVERVIEW_THRESHOLD_COUNT,
   OVERVIEW_THRESHOLD_VALUE,
   SUMMARY_VIEW,
@@ -49,7 +46,7 @@ const EXPECTED_NUMBER_OF_ALERTS = '1';
 
 const alert = {
   rule: 'Threshold rule',
-  severity: 'medium',
+  severity: 'Medium',
   riskScore: '17',
   reason: 'event created medium alert Threshold rule.',
   hostName: 'security-solution.local',
