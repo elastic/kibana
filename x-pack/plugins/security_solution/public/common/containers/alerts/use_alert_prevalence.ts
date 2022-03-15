@@ -11,6 +11,9 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import { useGlobalTime } from '../use_global_time';
 import { GenericBuckets } from '../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { TimelineId } from '../../../../common/types';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { inputsSelectors } from '../../store';
 
 const ALERT_PREVALENCE_AGG = 'countOfAlertsWithSameFieldAndValue';
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
@@ -18,6 +21,7 @@ export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 interface UseAlertPrevalenceOptions {
   field: string;
   value: string | string[] | undefined | null;
+  timelineId: TimelineId;
   signalIndexName: string | null;
 }
 
@@ -30,9 +34,15 @@ interface UserAlertPrevalenceResult {
 export const useAlertPrevalence = ({
   field,
   value,
+  timelineId,
   signalIndexName,
 }: UseAlertPrevalenceOptions): UserAlertPrevalenceResult => {
-  const { to, from } = useGlobalTime();
+  const timelineTime = useDeepEqualSelector((state) =>
+    inputsSelectors.timelineTimeRangeSelector(state)
+  );
+  const globalTime = useGlobalTime();
+
+  const { to, from } = timelineId === TimelineId.active ? timelineTime : globalTime;
   const [initialQuery] = useState(() => generateAlertPrevalenceQuery(field, value, from, to));
 
   const { loading, data, setQuery } = useQueryAlerts<{}, AlertPrevalenceAggregation>({
@@ -67,36 +77,6 @@ const generateAlertPrevalenceQuery = (
   from: string,
   to: string
 ) => {
-  let query;
-
-  query = {
-    bool: {
-      must: {
-        match: {
-          [field]: value,
-        },
-      },
-      filter: [
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
-            },
-          },
-        },
-      ],
-    },
-  };
-
-  if (Array.isArray(value)) {
-    query = {
-      terms: {
-        [field]: value,
-      },
-    };
-  }
-
   return {
     size: 0,
     aggs: {
@@ -107,7 +87,25 @@ const generateAlertPrevalenceQuery = (
         },
       },
     },
-    query,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              [field]: value,
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
+              },
+            },
+          },
+        ],
+      },
+    },
     runtime_mappings: {},
   };
 };

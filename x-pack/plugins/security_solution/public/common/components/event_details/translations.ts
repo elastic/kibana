@@ -43,10 +43,10 @@ export const HIGHLIGHTED_FIELDS_VALUE = i18n.translate(
   }
 );
 
-export const HIGHLIGHTED_FIELDS_TOTAL_ALERTS = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.highlightedFields.totalAlert',
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalence',
   {
-    defaultMessage: 'Similar count',
+    defaultMessage: 'Alert Prevalence',
   }
 );
 

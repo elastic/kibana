@@ -42,7 +42,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
         timelineId={timelineId}
         values={values}
         applyWidthAndPadding={false}
-        hideAddToTimeline={true}
+        hideAddToTimeline={false}
       />
     )}
   </>

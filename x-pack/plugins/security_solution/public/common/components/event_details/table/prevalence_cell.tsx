@@ -11,21 +11,24 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { AlertSummaryRow } from '../helpers';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 
-const PrevalenceCell = React.memo<AlertSummaryRow['description']>(({ data, values }) => {
-  const { loading, count, error } = useAlertPrevalence({
-    field: data.field,
-    value: values,
-    signalIndexName: null,
-  });
+const PrevalenceCell = React.memo<AlertSummaryRow['description']>(
+  ({ data, values, timelineId }) => {
+    const { loading, count, error } = useAlertPrevalence({
+      field: data.field,
+      timelineId,
+      value: values,
+      signalIndexName: null,
+    });
 
-  if (loading) {
-    return <EuiLoadingSpinner />;
-  } else if (error) {
-    return null;
+    if (loading) {
+      return <EuiLoadingSpinner />;
+    } else if (error) {
+      return null;
+    }
+
+    return <>{count}</>;
   }
-
-  return <>{count}</>;
-});
+);
 
 PrevalenceCell.displayName = 'PrevalenceCell';
 

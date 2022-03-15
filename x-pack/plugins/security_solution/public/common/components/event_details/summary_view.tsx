@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -22,7 +23,7 @@ import { VIEW_ALL_FIELDS } from './translations';
 import { SummaryTable } from './table/summary_table';
 import { SummaryValueCell } from './table/summary_value_cell';
 import { PrevalenceCellRenderer } from './table/prevalence_cell';
-import { AddToTimelineCellRenderer } from './table/add_to_timeline_cell';
+// import { AddToTimelineCellRenderer } from './table/add_to_timeline_cell';
 
 const summaryColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
   {
@@ -41,17 +42,34 @@ const summaryColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
     field: 'description',
     truncateText: true,
     render: PrevalenceCellRenderer,
-    name: i18n.HIGHLIGHTED_FIELDS_TOTAL_ALERTS,
+    // name: i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE,
+    name: (
+      <>
+        {i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE}{' '}
+        <EuiIconTip
+          type="iInCircle"
+          color="subdued"
+          title="Alert Prevalence"
+          content={
+            <span>
+              {`This is the count of total alerts with the same value within the
+              the currently set timerange. This value is is not affected by any additional filters.`}
+            </span>
+          }
+        />
+      </>
+    ),
     align: 'right',
-    width: '94px',
+    width: '130px',
   },
-  {
-    field: 'description',
-    truncateText: false,
-    render: AddToTimelineCellRenderer,
-    name: '',
-    width: '40px',
-  },
+  // TODO: We want this to be smarter and apply an "Investigate in Timeline" like behavior.
+  // {
+  //   field: 'description',
+  //   truncateText: false,
+  //   render: AddToTimelineCellRenderer,
+  //   name: '',
+  //   width: '40px',
+  // },
 ];
 
 const rowProps = {
