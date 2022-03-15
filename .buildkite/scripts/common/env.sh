@@ -11,6 +11,8 @@ PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
+export ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.1.1/manifest-latest-verified.json"
+
 # A few things, such as Chrome, respect this variable
 # For many agent types, the workspace is mounted on a local ssd, so will be faster than the default tmp dir location
 if [[ -d /opt/local-ssd/buildkite ]]; then
