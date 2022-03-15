@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useLocation } from 'react-router-dom';
 import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useAppUrl } from '../../common/lib/kibana/hooks';
 import { getEndpointListPath, getPoliciesPath } from '../common/routing';
@@ -22,13 +23,14 @@ export const PolicyEndpointListLink = memo<
   }
 >(({ policyId, children, ...otherProps }) => {
   const filterByPolicyQuery = `(language:kuery,query:'united.endpoint.Endpoint.policy.applied.id : "${policyId}"')`;
+  const { search } = useLocation();
   const { getAppUrl } = useAppUrl();
   const { toRoutePathWithBackOptions, toRouteUrl } = useMemo(() => {
     const endpointListPath = getEndpointListPath({
       name: 'endpointList',
       admin_query: filterByPolicyQuery,
     });
-    const policyListPath = getPoliciesPath();
+    const policyListPath = getPoliciesPath(search);
     const backLink = {
       navigateTo: [
         APP_UI_ID,
@@ -49,7 +51,7 @@ export const PolicyEndpointListLink = memo<
       },
       toRouteUrl: getAppUrl({ path: endpointListPath }),
     };
-  }, [getAppUrl, filterByPolicyQuery]);
+  }, [getAppUrl, filterByPolicyQuery, search]);
   const clickHandler = useNavigateByRouterEventHandler(toRoutePathWithBackOptions);
 
   return (
