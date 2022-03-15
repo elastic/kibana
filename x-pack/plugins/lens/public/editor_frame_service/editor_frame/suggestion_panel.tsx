@@ -96,7 +96,6 @@ const PreviewRenderer = ({
   return (
     <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
     >
@@ -142,7 +141,6 @@ const SuggestionPreview = ({
           hasBorder
           hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
           })}
           paddingSize="none"
