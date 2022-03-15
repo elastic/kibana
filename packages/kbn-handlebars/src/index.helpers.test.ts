@@ -241,6 +241,32 @@ describe('helpers', () => {
   // The `knownHelpers` compile option ins't supported by @kbn/handlebars because it's a compile optimization flag
   // and hence isn't needed by @kbn/handlebars as we don't compile in the "eval" sense of the word
   describe('knownHelpers', () => {
+    it('Known helper should render helper', () => {
+      expectTemplate('{{hello}}')
+        .withCompileOptions({
+          knownHelpers: { hello: true },
+        })
+        .withHelper('hello', function () {
+          return 'foo';
+        })
+        .toCompileTo('foo');
+    });
+
+    it('Unknown helper in knownHelpers only mode should be passed as undefined', () => {
+      expectTemplate('{{typeof hello}}')
+        .withCompileOptions({
+          knownHelpers: { typeof: true },
+          knownHelpersOnly: true,
+        })
+        .withHelper('typeof', function (arg) {
+          return typeof arg;
+        })
+        .withHelper('hello', function () {
+          return 'foo';
+        })
+        .toCompileTo('undefined');
+    });
+
     it('Field lookup works in knownHelpers only mode', () => {
       expectTemplate('{{foo}}')
         .withCompileOptions({

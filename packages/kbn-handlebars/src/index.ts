@@ -220,19 +220,10 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // This operation is used when the helper is known to exist,
   // so a `helperMissing` fallback is not required.
   private invokeKnownHelper(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
-    const helper = this.container.lookupProperty(this.container.helpers, name);
-    const [context] = this.scopes;
-    const params = this.getParams(sexpr);
-    const result = helper.name.call(
-      context,
-      ...params,
-      Object.assign(
-        {
-          hash: getHash(sexpr),
-        },
-        this.defaultHelperOptions
-      )
-    );
+    const helper = this.setupHelper(sexpr, name);
+
+    const result = helper.fn.apply(helper.context, helper.params);
+
     this.output.push(result);
   }
 
@@ -241,30 +232,11 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   //
   // If the helper is not found, `helperMissing` is called.
   private invokeHelper(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
-    const helper =
-      this.container.lookupProperty(this.container.helpers, name) ||
-      (this.compileOptions.strict ? undefined : this.container.hooks.helperMissing);
+    const helper = this.setupHelper(sexpr, name);
+    helper.fn =
+      helper.fn || (this.compileOptions.strict ? undefined : this.container.hooks.helperMissing);
 
-    const [context] = this.scopes;
-    const params = this.getParams(sexpr);
-
-    const result = helper.call(
-      context,
-      ...params,
-      Object.assign(
-        {
-          fn: (nextContext: any) => {
-            this.scopes.unshift(nextContext);
-            this.acceptKey(sexpr, 'program');
-            this.scopes.shift();
-            return ''; // TODO: supposed to return a string
-          },
-          inverse: noop,
-          hash: getHash(sexpr),
-        },
-        this.defaultHelperOptions
-      )
-    );
+    const result = helper.fn.apply(helper.context, helper.params);
 
     this.output.push(result);
   }
@@ -307,19 +279,64 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // and can be avoided by passing the `knownHelpers` and
   // `knownHelpersOnly` flags at compile-time.
   private invokeAmbiguous(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
-    let helper = this.container.lookupProperty(this.container.helpers, name);
+    const helper = this.setupHelper(sexpr, name);
 
-    if (!helper) {
+    if (!helper.fn) {
       if (this.compileOptions.strict) {
-        helper = this.container.strict(sexpr, name, sexpr.loc);
+        helper.fn = this.container.strict(sexpr, name, sexpr.loc);
       } else {
-        helper = this.container.lookupProperty(sexpr, name) || this.container.hooks.helperMissing;
+        helper.fn =
+          this.container.lookupProperty(sexpr, name) || this.container.hooks.helperMissing;
       }
     }
 
-    const result = typeof helper === 'function' ? helper({ name, hash: {} }) : helper;
+    const result =
+      typeof helper.fn === 'function' ? helper.fn.apply(helper.context, helper.params) : helper.fn;
 
     return result;
+  }
+
+  private setupHelper(
+    block: hbs.AST.SubExpression | hbs.AST.BlockStatement,
+    helperName: string,
+    blockHelper: boolean = false
+  ) {
+    return {
+      fn: this.container.lookupProperty(this.container.helpers, helperName),
+      context: this.scopes[0],
+      params: this.setupHelperArgs(block, helperName, blockHelper),
+    };
+  }
+
+  private setupHelperArgs(
+    block: hbs.AST.SubExpression | hbs.AST.BlockStatement,
+    helperName: string,
+    blockHelper: boolean = false
+  ): [...any[], Handlebars.HelperOptions] {
+    if (blockHelper) {
+      throw new Error('Not implemented!'); // TODO: Handle or remove this
+    }
+    return [...this.getParams(block), this.setupParams(block, helperName)];
+  }
+
+  private setupParams(
+    block: hbs.AST.SubExpression | hbs.AST.BlockStatement,
+    helperName: string
+  ): Handlebars.HelperOptions {
+    return Object.assign(
+      {
+        name: helperName,
+        fn: (nextContext: any) => {
+          this.scopes.unshift(nextContext);
+          this.acceptKey(block, 'program');
+          this.scopes.shift();
+          return ''; // TODO: supposed to return a string
+        },
+        inverse: noop,
+        hash: getHash(block),
+      },
+      this.defaultHelperOptions
+    );
   }
 
   BlockStatement(block: hbs.AST.BlockStatement) {
@@ -341,20 +358,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     }
   }
 
-  private ambiguousBlockValue(block: hbs.AST.BlockStatement, value: any) {
+  private ambiguousBlockValue(block: hbs.AST.BlockStatement, result: any) {
     const name = block.path.parts[0];
-    const options = {
-      fn: (nextContext: any, runtimeOptions?: RuntimeOptions) => {
-        this.scopes.unshift(nextContext);
-        this.acceptKey(block, 'program');
-        this.scopes.shift();
-        return ''; // TODO: supposed to return a string
-      },
-      inverse: noop,
-    };
+    const helper = this.setupHelper(block, name);
 
-    if (!this.container.lookupProperty(this.container.helpers, name)) {
-      this.container.hooks.blockHelperMissing!.call(block, value, options);
+    if (!helper.fn) {
+      const options = helper.params[helper.params.length - 1];
+      this.container.hooks.blockHelperMissing!.call(block, result, options);
     }
   }
 
