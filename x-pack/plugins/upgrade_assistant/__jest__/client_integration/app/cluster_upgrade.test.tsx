@@ -12,17 +12,20 @@ import { AppTestBed, setupAppPage } from './app.helpers';
 
 describe('Cluster upgrade', () => {
   let testBed: AppTestBed;
+  let server: ReturnType<typeof setupEnvironment>['server'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
-    const mockEnvironment = setupEnvironment();
-    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
-    httpSetup = mockEnvironment.httpSetup;
+
+  beforeEach(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterEach(() => {
+    server.restore();
   });
 
   describe('when user is still preparing for upgrade', () => {
     beforeEach(async () => {
-      testBed = await setupAppPage(httpSetup);
+      testBed = await setupAppPage();
     });
 
     test('renders overview', () => {
@@ -49,7 +52,7 @@ describe('Cluster upgrade', () => {
       });
 
       await act(async () => {
-        testBed = await setupAppPage(httpSetup);
+        testBed = await setupAppPage();
       });
     });
 
@@ -73,7 +76,7 @@ describe('Cluster upgrade', () => {
       });
 
       await act(async () => {
-        testBed = await setupAppPage(httpSetup);
+        testBed = await setupAppPage();
       });
     });
 
