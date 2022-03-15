@@ -183,7 +183,7 @@ describe('alerts as data privileges deprecation', () => {
           },
           deprecationType: 'feature',
           documentationUrl:
-            'https://www.elastic.co/guide/en/security/8.0/whats-new.html#index-updates-8.0',
+            'https://www.elastic.co/guide/en/security/8.0/upgrade-intro.html#upgrade-reqs',
           level: 'warning',
           message: `In order to view detection alerts in 8.0+, users will need read privileges to new detection alerts index aliases \
 (.alerts-security.alerts-<KIBANA_SPACE>) and backing indices (.internal.alerts-security.alerts-<KIBANA_SPACE>-*), \

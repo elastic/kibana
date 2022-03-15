@@ -102,7 +102,7 @@ Alerts created after upgrading will use a different schema.`,
           ),
           level: 'warning',
           deprecationType: 'feature',
-          documentationUrl: `https://www.elastic.co/guide/en/security/8.0/whats-new.html#index-updates-8.0`,
+          documentationUrl: `https://www.elastic.co/guide/en/security/8.0/upgrade-intro.html#upgrade-reqs`,
           correctiveActions: {
             manualSteps: buildManualSteps(roleNamesWhichReadSignals),
           },
