@@ -41,6 +41,7 @@ describe('RuleExecutionStatus', () => {
       expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
+      expect(status.warning).toBe(undefined);
     });
 
     test('task state with no instances', () => {
@@ -56,6 +57,7 @@ describe('RuleExecutionStatus', () => {
       expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
+      expect(status.warning).toBe(undefined);
       expect(status.metrics).toBe(metrics);
     });
 
@@ -72,6 +74,7 @@ describe('RuleExecutionStatus', () => {
       expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
+      expect(status.warning).toBe(undefined);
       expect(status.metrics).toBe(metrics);
     });
 
@@ -88,6 +91,7 @@ describe('RuleExecutionStatus', () => {
       expect(status.numberOfTriggeredActions).toBe(1);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
+      expect(status.warning).toBe(undefined);
       expect(status.metrics).toBe(metrics);
     });
 
@@ -226,6 +230,7 @@ describe('RuleExecutionStatus', () => {
       checkDateIsNearNow(result.lastExecutionDate);
       expect(result.status).toBe('unknown');
       expect(result.error).toBe(undefined);
+      expect(result.warning).toBe(undefined);
       expect(MockLogger.debug).toBeCalledWith(
         'invalid ruleExecutionStatus lastExecutionDate "an invalid date" in raw rule rule-id'
       );

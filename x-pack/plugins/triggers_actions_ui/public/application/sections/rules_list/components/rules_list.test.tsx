@@ -31,6 +31,7 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/rule_api', () => ({
   loadRules: jest.fn(),
   loadRuleTypes: jest.fn(),
+  loadRuleAggregations: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -56,7 +57,8 @@ jest.mock('../../../lib/capabilities', () => ({
   hasShowActionsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
 }));
-const { loadRules, loadRuleTypes } = jest.requireMock('../../../lib/rule_api');
+const { loadRules, loadRuleTypes, loadRuleAggregations } =
+  jest.requireMock('../../../lib/rule_api');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -379,6 +381,11 @@ describe('rules_list component with items', () => {
     ]);
     loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
+    loadRuleAggregations.mockResolvedValue({
+      ruleEnabledStatus: { enabled: 2, disabled: 0 },
+      ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
+      ruleMutedStatus: { muted: 0, unmuted: 2 },
+    });
 
     const ruleTypeMock: RuleTypeModel = {
       id: 'test_rule_type',
@@ -408,6 +415,7 @@ describe('rules_list component with items', () => {
 
     expect(loadRules).toHaveBeenCalled();
     expect(loadActionTypes).toHaveBeenCalled();
+    expect(loadRuleAggregations).toHaveBeenCalled();
   }
 
   it('renders table of rules', async () => {
@@ -756,6 +764,28 @@ describe('rules_list component with items', () => {
     expect(wrapper.find('[data-test-subj="ruleSidebarEditAction"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="ruleSidebarDeleteAction"]').exists()).toBeTruthy();
   });
+
+  it('renders brief', async () => {
+    await setup();
+
+    // { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 }
+    expect(wrapper.find('EuiHealth[data-test-subj="totalOkRulesCount"]').text()).toEqual('Ok: 1');
+    expect(wrapper.find('EuiHealth[data-test-subj="totalActiveRulesCount"]').text()).toEqual(
+      'Active: 2'
+    );
+    expect(wrapper.find('EuiHealth[data-test-subj="totalErrorRulesCount"]').text()).toEqual(
+      'Error: 3'
+    );
+    expect(wrapper.find('EuiHealth[data-test-subj="totalPendingRulesCount"]').text()).toEqual(
+      'Pending: 4'
+    );
+    expect(wrapper.find('EuiHealth[data-test-subj="totalUnknownRulesCount"]').text()).toEqual(
+      'Unknown: 5'
+    );
+    expect(wrapper.find('EuiHealth[data-test-subj="totalWarningRulesCount"]').text()).toEqual(
+      'Warning: 6'
+    );
+  });
 });
 
 describe('rules_list component empty with show only capability', () => {
@@ -921,7 +951,7 @@ describe('rules_list with show only capability', () => {
   });
 });
 
-describe('rules_list with disabled itmes', () => {
+describe('rules_list with disabled items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {

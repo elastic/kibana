@@ -724,7 +724,6 @@ export class TaskRunner<
       (ruleExecutionState) => executionStatusFromState(ruleExecutionState),
       (err: ElasticsearchError) => executionStatusFromError(err)
     );
-
     // set the executionStatus date to same as event, if it's set
     if (event.event?.start) {
       executionStatus.lastExecutionDate = new Date(event.event.start);

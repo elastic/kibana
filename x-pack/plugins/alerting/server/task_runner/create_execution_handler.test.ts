@@ -19,7 +19,6 @@ import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
-  AlertAction,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
@@ -301,7 +300,6 @@ describe('Create Execution Handler', () => {
   });
 
   test('trow error error message when action type is disabled', async () => {
-    const triggeredActions: AlertAction[] = [];
     mockActionsPlugin.preconfiguredActions = [];
     mockActionsPlugin.isActionExecutable.mockReturnValue(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(false);
@@ -329,7 +327,7 @@ describe('Create Execution Handler', () => {
       alertId: '2',
       alertExecutionStore,
     });
-    expect(triggeredActions).toHaveLength(0);
+    expect(alertExecutionStore.numberOfTriggeredActions).toBe(0);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
 
     mockActionsPlugin.isActionExecutable.mockImplementation(() => true);
@@ -348,7 +346,6 @@ describe('Create Execution Handler', () => {
   });
 
   test('limits actionsPlugin.execute per action group', async () => {
-    const triggeredActions: AlertAction[] = [];
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
     await executionHandler({
       actionGroup: 'other-group',
@@ -357,7 +354,7 @@ describe('Create Execution Handler', () => {
       alertId: '2',
       alertExecutionStore,
     });
-    expect(triggeredActions).toEqual([]);
+    expect(alertExecutionStore.numberOfTriggeredActions).toBe(0);
     expect(actionsClient.enqueueExecution).not.toHaveBeenCalled();
   });
 
