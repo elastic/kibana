@@ -16,7 +16,7 @@ import type {
 } from './service';
 import type {
   JobType,
-  DeleteMLSpaceAwareItemCheckResponse,
+  DeleteMLSpaceAwareItemsCheckResponse,
   TrainedModelType,
 } from '../../common/types/saved_objects';
 
@@ -278,7 +278,7 @@ export function checksFactory(
     ids: string[],
     spacesEnabled: boolean,
     resolveMlCapabilities: ResolveMlCapabilities
-  ): Promise<DeleteMLSpaceAwareItemCheckResponse> {
+  ): Promise<DeleteMLSpaceAwareItemsCheckResponse> {
     if (['anomaly-detector', 'data-frame-analytics', 'trained-model'].includes(jobType) === false) {
       throw Boom.badRequest(
         'Saved object type must be "anomaly-detector", "data-frame-analytics" or "trained-model'
@@ -301,7 +301,7 @@ export function checksFactory(
           canRemoveFromSpace: false,
         };
         return results;
-      }, {} as DeleteMLSpaceAwareItemCheckResponse);
+      }, {} as DeleteMLSpaceAwareItemsCheckResponse);
     } else if (jobType === 'trained-model' && mlCapabilities.canDeleteTrainedModels === false) {
       // user does not have access to delete trained models.
       return ids.reduce((results, id) => {
@@ -310,7 +310,7 @@ export function checksFactory(
           canRemoveFromSpace: false,
         };
         return results;
-      }, {} as DeleteMLSpaceAwareItemCheckResponse);
+      }, {} as DeleteMLSpaceAwareItemsCheckResponse);
     }
 
     if (spacesEnabled === false) {
@@ -321,7 +321,7 @@ export function checksFactory(
           canRemoveFromSpace: false,
         };
         return results;
-      }, {} as DeleteMLSpaceAwareItemCheckResponse);
+      }, {} as DeleteMLSpaceAwareItemsCheckResponse);
     }
     const canCreateGlobalMlSavedObjects = await jobSavedObjectService.canCreateGlobalMlSavedObjects(
       jobType,
@@ -392,7 +392,7 @@ export function checksFactory(
         canRemoveFromSpace,
       };
       return results;
-    }, {} as DeleteMLSpaceAwareItemCheckResponse);
+    }, {} as DeleteMLSpaceAwareItemsCheckResponse);
   }
 
   return { checkStatus, canDeleteMLSpaceAwareItems };
