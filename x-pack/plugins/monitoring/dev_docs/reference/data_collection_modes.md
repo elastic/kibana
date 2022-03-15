@@ -147,6 +147,50 @@ See (internal) https://github.com/elastic/enterprise-search-team/issues/1532 for
 
 When using package-driven collection, each component in your Elastic stack is given a corresponding fleet package (also known as "integration").
 
-The Elastic agents connected to fleet then using the integration data to collect metrics from each component according to its requirements. This is likely similar to standalone metricbeat and filebeat and may use those modules internally.
+- [Elasticsearch](https://github.com/elastic/integrations/tree/main/packages/elasticsearch)
+- [Kibana](https://github.com/elastic/integrations/tree/main/packages/kibana)
+- [Logstash](https://github.com/elastic/integrations/tree/main/packages/logstash)
+- Beats (WIP)
+- Enterprise Search (WIP)
+
+The Elastic agents connected to fleet then use the package configuration to collect metrics and logs from each component according to its requirements. This is likely similar to standalone metricbeat and filebeat and may use the same modules internally.
 
 Over time the exact collection mechanism may change since it's an implementation detail of package-driven collection rather than something a user would have to manually configure.
+
+Here an example using the elasticsearch package to collect logs and metrics from elasticsearch:
+
+```mermaid
+graph LR
+
+subgraph Production Elasticsearch
+  ClusterStats["/_cluster/stats"]
+  SlowQueryLogs
+end
+
+subgraph Monitoring Deployment
+  MonElasticsearch[Elasticsearch]
+  MonKibana[Kibana]
+  EsPackage((ES Package))-->|install|MonKibana
+  MonFleetServer[Fleet Server]-->|read policies|MonKibana
+  MonKibana-->|templates, dashboards, etc.|MonElasticsearch
+end
+
+Disk[(Disk)]
+SlowQueryLogs-.->|write|Disk
+
+subgraph Elastic Agent
+  configuration
+  metrics>metrics]
+  logs>logs]
+  publisher[publisher]
+end
+
+MonFleetServer-.->configuration
+
+metrics-.->|poll|ClusterStats
+logs-.->|read|Disk
+
+publisher-->|_bulk|MonElasticsearch
+
+
+```
