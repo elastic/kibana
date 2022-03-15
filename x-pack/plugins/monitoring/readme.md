@@ -18,5 +18,5 @@ This plugin provides the Stack Monitoring kibana application.
 - [APM tracing](dev_docs/how_to/apm_tracing.md)
 
 ## Troubleshooting
-- [Diagnostic queries](dev_docs/runbook/diagnostic_queries.md) (WIP)
-- [CPU metrics](dev_docs/runbook/cpu_metrics.md) (WIP)
+- [Diagnostic queries](dev_docs/runbook/diagnostic_queries.md)
+- [CPU metrics](dev_docs/runbook/cpu_metrics.md)
