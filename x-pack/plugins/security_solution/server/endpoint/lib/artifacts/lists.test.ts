@@ -513,6 +513,358 @@ describe('artifacts lists', () => {
     });
   });
 
+  describe('Endpoint Artifacts', () => {
+    const getOsFilter = (os: 'macos' | 'linux' | 'windows') =>
+      `exception-list-agnostic.attributes.os_types:"${os} "`;
+
+    describe('linux', () => {
+      test('it should add process.name entry when wildcard process.executable entry has filename', async () => {
+        const os = 'linux';
+        const testEntries: EntriesArray = [
+          {
+            field: 'process.executable.caseless',
+            operator: 'included',
+            type: 'wildcard',
+            value: '/usr/bi*/doc.md',
+          },
+        ];
+
+        const expectedEndpointExceptions = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'process.executable',
+              operator: 'included',
+              type: 'wildcard_cased',
+              value: '/usr/bi*/doc.md',
+            },
+            {
+              field: 'process.name',
+              operator: 'included',
+              type: 'exact_cased',
+              value: 'doc.md',
+            },
+          ],
+        };
+
+        const first = getFoundExceptionListItemSchemaMock();
+        first.data[0].entries = testEntries;
+        first.data[0].os_types = [os];
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+        const resp = await getFilteredEndpointExceptionList({
+          elClient: mockExceptionClient,
+          schemaVersion: 'v1',
+          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
+          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        });
+        expect(resp).toEqual({
+          entries: [expectedEndpointExceptions],
+        });
+      });
+
+      test('it should add process.name entry when wildcard file.path.text entry has filename', async () => {
+        const os = 'linux';
+        const testEntries: EntriesArray = [
+          {
+            field: 'file.path.text',
+            operator: 'included',
+            type: 'wildcard',
+            value: '/usr/bi*/doc.md',
+          },
+        ];
+
+        const expectedEndpointExceptions = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'file.path.text',
+              operator: 'included',
+              type: 'wildcard_cased',
+              value: '/usr/bi*/doc.md',
+            },
+            {
+              field: 'process.name',
+              operator: 'included',
+              type: 'exact_cased',
+              value: 'doc.md',
+            },
+          ],
+        };
+
+        const first = getFoundExceptionListItemSchemaMock();
+        first.data[0].entries = testEntries;
+        first.data[0].os_types = [os];
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+        const resp = await getFilteredEndpointExceptionList({
+          elClient: mockExceptionClient,
+          schemaVersion: 'v1',
+          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
+          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        });
+        expect(resp).toEqual({
+          entries: [expectedEndpointExceptions],
+        });
+      });
+
+      test('it should not add process.name entry when wildcard process.executable entry has wildcard filename', async () => {
+        const os = 'linux';
+        const testEntries: EntriesArray = [
+          {
+            field: 'process.executable',
+            operator: 'included',
+            type: 'wildcard',
+            value: '/usr/bin/*.md',
+          },
+        ];
+
+        const expectedEndpointExceptions = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'process.executable',
+              operator: 'included',
+              type: 'wildcard_cased',
+              value: '/usr/bin/*.md',
+            },
+          ],
+        };
+
+        const first = getFoundExceptionListItemSchemaMock();
+        first.data[0].entries = testEntries;
+        first.data[0].os_types = [os];
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+        const resp = await getFilteredEndpointExceptionList({
+          elClient: mockExceptionClient,
+          schemaVersion: 'v1',
+          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
+          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        });
+        expect(resp).toEqual({
+          entries: [expectedEndpointExceptions],
+        });
+      });
+
+      test('it should not add process.name entry when wildcard file.path.text entry has wildcard filename', async () => {
+        const os = 'linux';
+        const testEntries: EntriesArray = [
+          {
+            field: 'file.path.text',
+            operator: 'included',
+            type: 'wildcard',
+            value: '/usr/bin/*.md',
+          },
+        ];
+
+        const expectedEndpointExceptions = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'file.path.text',
+              operator: 'included',
+              type: 'wildcard_cased',
+              value: '/usr/bin/*.md',
+            },
+          ],
+        };
+
+        const first = getFoundExceptionListItemSchemaMock();
+        first.data[0].entries = testEntries;
+        first.data[0].os_types = [os];
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+        const resp = await getFilteredEndpointExceptionList({
+          elClient: mockExceptionClient,
+          schemaVersion: 'v1',
+          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
+          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        });
+        expect(resp).toEqual({
+          entries: [expectedEndpointExceptions],
+        });
+      });
+    });
+
+    describe('macos/windows', () => {
+      test('it should add process.name entry for process.executable entry with wildcard type', async () => {
+        const os = Math.floor(Math.random() * 2) === 0 ? 'windows' : 'macos';
+        const value = os === 'windows' ? 'C:\\My Doc*\\doc.md' : '/usr/bi*/doc.md';
+
+        const testEntries: EntriesArray = [
+          {
+            field: 'process.executable.caseless',
+            operator: 'included',
+            type: 'wildcard',
+            value,
+          },
+        ];
+
+        const expectedEndpointExceptions = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'process.executable',
+              operator: 'included',
+              type: 'wildcard_caseless',
+              value,
+            },
+            {
+              field: 'process.name',
+              operator: 'included',
+              type: 'exact_caseless',
+              value: 'doc.md',
+            },
+          ],
+        };
+
+        const first = getFoundExceptionListItemSchemaMock();
+        first.data[0].entries = testEntries;
+        first.data[0].os_types = [os];
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+        const resp = await getFilteredEndpointExceptionList({
+          elClient: mockExceptionClient,
+          schemaVersion: 'v1',
+          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
+          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        });
+        expect(resp).toEqual({
+          entries: [expectedEndpointExceptions],
+        });
+      });
+
+      test('it should add process.name entry when wildcard file.path.text entry has filename', async () => {
+        const os = Math.floor(Math.random() * 2) === 0 ? 'windows' : 'macos';
+        const value = os === 'windows' ? 'C:\\My Doc*\\doc.md' : '/usr/bi*/doc.md';
+
+        const testEntries: EntriesArray = [
+          {
+            field: 'file.path.text',
+            operator: 'included',
+            type: 'wildcard',
+            value,
+          },
+        ];
+
+        const expectedEndpointExceptions = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'file.path.text',
+              operator: 'included',
+              type: 'wildcard_caseless',
+              value,
+            },
+            {
+              field: 'process.name',
+              operator: 'included',
+              type: 'exact_caseless',
+              value: 'doc.md',
+            },
+          ],
+        };
+
+        const first = getFoundExceptionListItemSchemaMock();
+        first.data[0].entries = testEntries;
+        first.data[0].os_types = [os];
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+        const resp = await getFilteredEndpointExceptionList({
+          elClient: mockExceptionClient,
+          schemaVersion: 'v1',
+          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
+          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        });
+        expect(resp).toEqual({
+          entries: [expectedEndpointExceptions],
+        });
+      });
+
+      test('it should not add process.name entry when wildcard process.executable entry has wildcard filename', async () => {
+        const os = Math.floor(Math.random() * 2) === 0 ? 'windows' : 'macos';
+        const value = os === 'windows' ? 'C:\\My Doc*\\*.md' : '/usr/bin/*.md';
+
+        const testEntries: EntriesArray = [
+          {
+            field: 'process.executable.caseless',
+            operator: 'included',
+            type: 'wildcard',
+            value,
+          },
+        ];
+
+        const expectedEndpointExceptions = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'process.executable',
+              operator: 'included',
+              type: 'wildcard_caseless',
+              value,
+            },
+          ],
+        };
+
+        const first = getFoundExceptionListItemSchemaMock();
+        first.data[0].entries = testEntries;
+        first.data[0].os_types = [os];
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+        const resp = await getFilteredEndpointExceptionList({
+          elClient: mockExceptionClient,
+          schemaVersion: 'v1',
+          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
+          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        });
+        expect(resp).toEqual({
+          entries: [expectedEndpointExceptions],
+        });
+      });
+
+      test('it should not add process.name entry when wildcard file.path.text entry has wildcard filename', async () => {
+        const os = Math.floor(Math.random() * 2) === 0 ? 'windows' : 'macos';
+        const value = os === 'windows' ? 'C:\\My Doc*\\*.md' : '/usr/bin/*.md';
+        const testEntries: EntriesArray = [
+          {
+            field: 'file.path.text',
+            operator: 'included',
+            type: 'wildcard',
+            value,
+          },
+        ];
+
+        const expectedEndpointExceptions = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'file.path.text',
+              operator: 'included',
+              type: 'wildcard_caseless',
+              value,
+            },
+          ],
+        };
+
+        const first = getFoundExceptionListItemSchemaMock();
+        first.data[0].entries = testEntries;
+        first.data[0].os_types = [os];
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+        const resp = await getFilteredEndpointExceptionList({
+          elClient: mockExceptionClient,
+          schemaVersion: 'v1',
+          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
+          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        });
+        expect(resp).toEqual({
+          entries: [expectedEndpointExceptions],
+        });
+      });
+    });
+  });
+
   const TEST_EXCEPTION_LIST_ITEM = {
     entries: [
       {
