@@ -32,6 +32,19 @@ import { ChangeDataViewStyles } from './change_dataview.styles';
 
 const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
 
+const newMenuTourTitle = i18n.translate('data.query.dataViewMenu.newMenuTour.title', {
+  defaultMessage: 'A better data view menu',
+});
+
+const newMenuTourDescription = i18n.translate('data.query.dataViewMenu.newMenuTour.description', {
+  defaultMessage:
+    'This menu now offers all the tools you need to create, find, and edit your data views.',
+});
+
+const newMenuTourDismissLabel = i18n.translate('data.query.dataViewMenu.newMenuTour.dismissLabel', {
+  defaultMessage: 'Got it!',
+});
+
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
@@ -109,26 +122,23 @@ export function ChangeDataView({
 
   return (
     <EuiTourStep
+      title={
+        <>
+          <EuiIcon type="bell" size="s" /> &nbsp; {newMenuTourTitle}
+        </>
+      }
       content={
-        <EuiText style={{ maxWidth: 320 }}>
-          <p>
-            The data view selector has moved! You&apos;ll find all related data view options in this
-            new menu.
-          </p>
+        <EuiText css={styles.popoverContent}>
+          <p>{newMenuTourDescription}</p>
         </EuiText>
       }
       isStepOpen={isTourOpen}
       onFinish={onTourDismiss}
       step={1}
       stepsTotal={1}
-      title={
-        <>
-          <EuiIcon type="bell" size="s" /> &nbsp; Hey there!
-        </>
-      }
       footerAction={
         <EuiLink data-test-subj="dataViewPickerTourLink" onClick={onTourDismiss}>
-          Got it!
+          {newMenuTourDismissLabel}
         </EuiLink>
       }
       repositionOnScroll
