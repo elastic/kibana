@@ -533,6 +533,7 @@ export const staticSourceData: SourceDataItem[] = [
     internalConnectorAvailable: true,
     externalConnectorAvailable: false,
     customConnectorAvailable: false,
+    isBeta: true,
   },
   {
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
