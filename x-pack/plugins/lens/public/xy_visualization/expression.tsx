@@ -1005,6 +1005,7 @@ export function XYChart({
       ) : null}
       {collectiveAnnotationConfigs.length ? (
         <Annotations
+          hide={annotationsLayers?.[0].hide}
           collectiveAnnotationConfigs={collectiveAnnotationConfigs}
           formatter={xAxisFormatter}
           isHorizontal={shouldRotate}

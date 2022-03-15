@@ -18,6 +18,7 @@ export interface AnnotationConfig {
   annotationType: AnnotationType;
   label: string;
   message?: string;
+  axisMode: YAxisMode;
   color?: string;
   icon?: string;
   lineWidth?: number;
@@ -25,7 +26,6 @@ export interface AnnotationConfig {
   iconPosition?: IconPosition;
   textVisibility?: boolean;
   isHidden?: boolean;
-  axisMode: YAxisMode;
 }
 
 export interface AnnotationState {

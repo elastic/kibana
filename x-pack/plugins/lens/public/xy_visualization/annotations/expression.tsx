@@ -7,7 +7,7 @@
 
 import './expression.scss';
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
 import {
   AnnotationDomainType,
   AnnotationTooltipFormatter,
@@ -22,6 +22,8 @@ import { hasIcon } from '../xy_config_panel/shared/icon_select';
 
 export const ANNOTATIONS_MARKER_SIZE = 20;
 
+const isNumericalString = (value?: string) => !value || !isNaN(Number(value));
+
 function getBaseIconPlacement(iconPosition?: IconPosition) {
   return iconPosition === 'below' ? Position.Bottom : Position.Top;
 }
@@ -33,6 +35,21 @@ function mapVerticalToHorizontalPlacement(placement: Position) {
     case Position.Bottom:
       return Position.Left;
   }
+}
+
+function NumberIcon({ number }: { number: number }) {
+  return (
+    <EuiFlexGroup
+      justifyContent="spaceAround"
+      className="lnsXyAnnotationNumberIcon"
+      gutterSize="none"
+      alignItems="center"
+    >
+      <EuiText color="ghost" className="lnsXyAnnotationNumberIcon__text">
+        {number < 10 ? number : `9+`}
+      </EuiText>
+    </EuiFlexGroup>
+  );
 }
 
 function MarkerBody({ label, isHorizontal }: { label: string | undefined; isHorizontal: boolean }) {
@@ -69,27 +86,28 @@ interface MarkerConfig {
   axisMode?: YAxisMode;
   icon?: string;
   textVisibility?: boolean;
+  label?: string;
 }
 
 function Marker({
   config,
-  label,
   isHorizontal,
   hasReducedPadding,
 }: {
   config: MarkerConfig;
-  label: string | undefined;
   isHorizontal: boolean;
   hasReducedPadding: boolean;
 }) {
-  // show an icon if present
+  if (isNumericalString(config.icon)) {
+    return <NumberIcon number={Number(config.icon)} />;
+  }
   if (hasIcon(config.icon)) {
     return <EuiIcon type={config.icon} />;
   }
   // if there's some text, check whether to show it as marker, or just show some padding for the icon
   if (config.textVisibility) {
     if (hasReducedPadding) {
-      return <MarkerBody label={label} isHorizontal={!isHorizontal} />;
+      return <MarkerBody label={config.label} isHorizontal={!isHorizontal} />;
     }
     return <EuiIcon type="empty" />;
   }
@@ -114,14 +132,13 @@ export interface AnnotationsProps {
   formatter?: FieldFormat;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
+  hide?: boolean;
 }
 
-type CollectiveConfig = AnnotationConfig & {
+interface CollectiveConfig extends AnnotationConfig {
   roundedTimestamp: number;
-  layerId: string;
-  hide: boolean;
-  customTooltipDetails: AnnotationTooltipFormatter | undefined;
-};
+  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
+}
 
 const groupVisibleConfigsByInterval = (
   layers: XYAnnotationLayerConfig[],
@@ -130,34 +147,23 @@ const groupVisibleConfigsByInterval = (
   isBarChart?: boolean
 ) => {
   return layers
-    .flatMap(({ config: configs, layerId, hide }) =>
-      configs
-        .filter((config) => !config.isHidden)
-        .map((config) => ({
-          ...config,
-          roundedTimestamp: getRoundedTimestamp(
-            Number(config.key.timestamp),
-            firstTimestamp,
-            minInterval,
-            isBarChart
-          ),
-          layerId,
-          hide,
-        }))
-    )
-    .reduce<Record<string, CollectiveConfig[]>>(
-      (acc, current) => ({
+    .flatMap(({ config: configs }) => configs.filter((config) => !config.isHidden))
+    .reduce<Record<string, AnnotationConfig[]>>((acc, current) => {
+      const roundedTimestamp = getRoundedTimestamp(
+        Number(current.key.timestamp),
+        firstTimestamp,
+        minInterval,
+        isBarChart
+      );
+      return {
         ...acc,
-        [current.roundedTimestamp]: acc[current.roundedTimestamp]
-          ? [...acc[current.roundedTimestamp], current]
-          : [current],
-      }),
-      {}
-    );
+        [roundedTimestamp]: acc[roundedTimestamp] ? [...acc[roundedTimestamp], current] : [current],
+      };
+    }, {});
 };
 
 const createCustomTooltipDetails =
-  (config: CollectiveConfig[], formatter?: FieldFormat): AnnotationTooltipFormatter | undefined =>
+  (config: AnnotationConfig[], formatter?: FieldFormat): AnnotationTooltipFormatter | undefined =>
   () => {
     return (
       <div>
@@ -176,6 +182,30 @@ const createCustomTooltipDetails =
     );
   };
 
+function getCommonProperty<T, K extends keyof AnnotationConfig>(
+  configArr: AnnotationConfig[],
+  propertyName: K,
+  fallbackValue: T
+) {
+  const firstStyle = configArr[0][propertyName];
+  if (configArr.every((config) => firstStyle === config[propertyName])) {
+    return firstStyle;
+  }
+  return fallbackValue;
+}
+
+const getCommonStyles = (configArr: AnnotationConfig[]) => {
+  return {
+    color: getCommonProperty<AnnotationConfig['color'], 'color'>(
+      configArr,
+      'color',
+      defaultAnnotationColor
+    ),
+    lineWidth: getCommonProperty(configArr, 'lineWidth', 1),
+    lineStyle: getCommonProperty(configArr, 'lineStyle', 'solid'),
+  };
+};
+
 export const getCollectiveConfigsByInterval = (
   layers: XYAnnotationLayerConfig[],
   minInterval?: number,
@@ -189,14 +219,17 @@ export const getCollectiveConfigsByInterval = (
     firstTimestamp,
     isBarChart
   );
-  return Object.entries(visibleGroupedConfigs).map(([, configArr]) => {
-    let collectiveConfig = configArr[0];
+  let collectiveConfig: CollectiveConfig;
+  return Object.entries(visibleGroupedConfigs).map(([roundedTimestamp, configArr]) => {
+    collectiveConfig = { ...configArr[0], roundedTimestamp: Number(roundedTimestamp) };
     if (configArr.length > 1) {
+      const commonStyles = getCommonStyles(configArr);
       collectiveConfig = {
         ...collectiveConfig,
+        ...commonStyles,
         iconPosition: Position.Top as IconPosition,
         textVisibility: false,
-        icon: !collectiveConfig.hide ? 'checkInCircleFilled' : undefined,
+        icon: String(configArr.length),
         customTooltipDetails: createCustomTooltipDetails(configArr, formatter),
       };
     }
@@ -209,24 +242,28 @@ export const Annotations = ({
   formatter,
   isHorizontal,
   paddingMap,
+  hide,
 }: AnnotationsProps) => {
   return (
     <>
       {collectiveAnnotationConfigs.map((config) => {
+        const { roundedTimestamp } = config;
         const markerPositionVertical = getBaseIconPlacement(config.iconPosition);
         const hasReducedPadding = paddingMap[markerPositionVertical] === ANNOTATIONS_MARKER_SIZE;
-        const { label, roundedTimestamp, customTooltipDetails } = config;
+        const id = `${config.id}-line`;
         return (
           <LineAnnotation
-            id={`${config.id}-line`}
-            key={`${config.id}-line`}
+            id={id}
+            key={id}
             domainType={AnnotationDomainType.XDomain}
-            marker={<Marker {...{ config, label, isHorizontal, hasReducedPadding }} />}
+            marker={!hide ? <Marker {...{ config, isHorizontal, hasReducedPadding }} /> : undefined}
             markerBody={
-              <MarkerBody
-                label={config.textVisibility && !hasReducedPadding ? label : undefined}
-                isHorizontal={!isHorizontal}
-              />
+              !hide ? (
+                <MarkerBody
+                  label={config.textVisibility && !hasReducedPadding ? config.label : undefined}
+                  isHorizontal={!isHorizontal}
+                />
+              ) : undefined
             }
             markerPosition={
               isHorizontal
@@ -237,10 +274,10 @@ export const Annotations = ({
               {
                 dataValue: Number(roundedTimestamp),
                 header: formatter?.convert(roundedTimestamp) || String(roundedTimestamp),
-                details: label,
+                details: config.label,
               },
             ]}
-            customTooltipDetails={customTooltipDetails}
+            customTooltipDetails={config.customTooltipDetails}
             style={{
               line: {
                 strokeWidth: config.lineWidth || 1,
