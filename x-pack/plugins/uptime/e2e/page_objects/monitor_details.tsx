@@ -14,6 +14,8 @@ interface AlertType {
 }
 
 export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
+  const overview = `${kibanaUrl}/app/uptime`;
+
   return {
     async dismissSyntheticsCallout() {
       await page.click('[data-test-subj=uptimeDismissSyntheticsCallout]', {
