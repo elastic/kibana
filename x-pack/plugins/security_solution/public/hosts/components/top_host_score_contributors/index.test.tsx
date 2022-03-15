@@ -9,16 +9,26 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TopHostScoreContributors } from '.';
 import { TestProviders } from '../../../common/mock';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
+import { useHostRiskScore } from '../../../risk_score/containers';
 
-jest.mock('../../../common/containers/hosts_risk/use_hosts_risk_score');
-const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
+jest.mock('../../../risk_score/containers');
+const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 
 describe('Host Risk Flyout', () => {
   it('renders', () => {
+    useHostRiskScoreMock.mockReturnValueOnce([
+      true,
+      {
+        data: [],
+        isModuleEnabled: true,
+      },
+    ]);
+
     const { queryByTestId } = render(
       <TestProviders>
         <TopHostScoreContributors
+          setQuery={jest.fn()}
+          deleteQuery={jest.fn()}
           hostName={'test-host-name'}
           from={'2020-07-07T08:20:18.966Z'}
           to={'2020-07-08T08:20:18.966Z'}
@@ -30,34 +40,38 @@ describe('Host Risk Flyout', () => {
   });
 
   it('renders sorted items', () => {
-    useHostsRiskScoreMock.mockReturnValueOnce({
-      loading: true,
-      isModuleEnabled: true,
-      result: [
-        {
-          risk_stats: {
-            rule_risks: [
-              {
-                rule_name: 'third',
-                rule_risk: '10',
-              },
-              {
-                rule_name: 'first',
-                rule_risk: '99',
-              },
-              {
-                rule_name: 'second',
-                rule_risk: '55',
-              },
-            ],
+    useHostRiskScoreMock.mockReturnValueOnce([
+      true,
+      {
+        data: [
+          {
+            risk_stats: {
+              rule_risks: [
+                {
+                  rule_name: 'third',
+                  rule_risk: '10',
+                },
+                {
+                  rule_name: 'first',
+                  rule_risk: '99',
+                },
+                {
+                  rule_name: 'second',
+                  rule_risk: '55',
+                },
+              ],
+            },
           },
-        },
-      ],
-    });
+        ],
+        isModuleEnabled: true,
+      },
+    ]);
 
     const { queryAllByRole } = render(
       <TestProviders>
         <TopHostScoreContributors
+          setQuery={jest.fn()}
+          deleteQuery={jest.fn()}
           hostName={'test-host-name'}
           from={'2020-07-07T08:20:18.966Z'}
           to={'2020-07-08T08:20:18.966Z'}

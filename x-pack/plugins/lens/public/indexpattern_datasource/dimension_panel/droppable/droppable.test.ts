@@ -698,7 +698,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             'replace_duplicate_incompatible',
             'swap_incompatible',
           ],
-          nextLabel: 'Unique count',
+          nextLabel: 'Minimum',
         });
       });
 
@@ -713,7 +713,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               label: 'Count of records',
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -736,7 +736,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           })
         ).toEqual({
           dropTypes: ['replace_incompatible', 'replace_duplicate_incompatible'],
-          nextLabel: 'Unique count',
+          nextLabel: 'Minimum',
         });
       });
 
@@ -768,6 +768,41 @@ describe('IndexPatternDimensionEditorPanel', () => {
           })
         ).toEqual({
           dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'combine_compatible'],
+        });
+      });
+
+      it('returns no combine_compatible drop type if the target column uses rarity ordering', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                orderBy: { type: 'rare' },
+              },
+            } as TermsIndexPatternColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible'],
         });
       });
 
@@ -1186,7 +1221,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   label: 'Count of records',
                   dataType: 'number',
                   isBucketed: false,
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   operationType: 'count',
                 },
               },
@@ -1249,7 +1284,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   label: 'Count of records',
                   dataType: 'number',
                   isBucketed: false,
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   operationType: 'count',
                 },
                 ref2: {
@@ -1329,7 +1364,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   label: 'Count of records',
                   dataType: 'number',
                   isBucketed: false,
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   operationType: 'count',
                 },
                 ref2: {
@@ -1415,7 +1450,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   label: 'Count of records',
                   dataType: 'number',
                   isBucketed: false,
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   operationType: 'count',
                 },
                 col2: {
@@ -1605,7 +1640,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
               // Private
               operationType: 'count',
-              sourceField: 'Records',
+              sourceField: '___records___',
               customLabel: true,
             },
           },
@@ -1822,7 +1857,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                       operationType: 'count',
                       label: '',
                       isBucketed: false,
-                      sourceField: 'Records',
+                      sourceField: '___records___',
                       customLabel: true,
                     },
                     col6: {
@@ -1830,7 +1865,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                       operationType: 'count',
                       label: '',
                       isBucketed: false,
-                      sourceField: 'Records',
+                      sourceField: '___records___',
                       customLabel: true,
                     },
                   },
@@ -1862,14 +1897,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
                     operationType: 'count',
                     label: '',
                     isBucketed: false,
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   }),
                   col6: expect.objectContaining({
                     dataType: 'number',
                     operationType: 'count',
                     label: '',
                     isBucketed: false,
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   }),
                 },
               },
@@ -2167,6 +2202,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                       },
                       orderDirection: 'desc',
                       size: 10,
+                      parentFormat: { id: 'terms' },
                     },
                   },
                   col3: testState.layers.first.columns.col3,
@@ -2257,6 +2293,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                         type: 'alphabetical',
                       },
                       orderDirection: 'desc',
+                      parentFormat: { id: 'terms' },
                       size: 10,
                     },
                   },
@@ -2267,6 +2304,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                     filter: undefined,
                     operationType: 'unique_count',
                     sourceField: 'src',
+                    timeShift: undefined,
                     dataType: 'number',
                     params: undefined,
                     scale: 'ratio',

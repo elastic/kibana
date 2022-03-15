@@ -101,8 +101,8 @@ const mockAppUrls: Record<string, string> = {
 };
 
 /* default mock core */
-const defaultCore = coreMock.createStart();
-const mockCore: () => Partial<CoreStart> = () => {
+export const defaultCore = coreMock.createStart();
+export const mockCore: () => Partial<CoreStart> = () => {
   const core: Partial<CoreStart & ClientPluginsStart & { storage: IStorageWrapper }> = {
     ...defaultCore,
     application: {
@@ -134,6 +134,7 @@ const mockCore: () => Partial<CoreStart> = () => {
     storage: createMockStore(),
     data: dataPluginMock.createStartContract(),
     observability: {
+      useRulesLink: () => ({ href: 'newRuleLink' }),
       navigation: {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,

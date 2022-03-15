@@ -9,6 +9,7 @@ import { KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionItemLikeOptions } from '../types';
 import { getEndpointAuthzInitialState } from '../../../../common/endpoint/service/authz';
@@ -16,10 +17,10 @@ import {
   getPolicyIdsFromArtifact,
   isArtifactByPolicy,
 } from '../../../../common/endpoint/service/artifacts';
-import { OperatingSystem } from '../../../../common/endpoint/types';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import type { FeatureKeys } from '../../../endpoint/services/feature_usage/service';
 
-const BasicEndpointExceptionDataSchema = schema.object(
+export const BasicEndpointExceptionDataSchema = schema.object(
   {
     // must have a name
     name: schema.string({ minLength: 1, maxLength: 256 }),
@@ -63,6 +64,15 @@ export class BaseValidator {
     }
   }
 
+  public notifyFeatureUsage(item: ExceptionItemLikeOptions, featureKey: FeatureKeys): void {
+    if (
+      (this.isItemByPolicy(item) && featureKey.endsWith('_BY_POLICY')) ||
+      (!this.isItemByPolicy(item) && !featureKey.endsWith('_BY_POLICY'))
+    ) {
+      this.endpointAppContext.getFeatureUsageService().notifyUsage(featureKey);
+    }
+  }
+
   protected isItemByPolicy(item: ExceptionItemLikeOptions): boolean {
     return isArtifactByPolicy(item);
   }
@@ -73,6 +83,12 @@ export class BaseValidator {
 
   protected async validateCanManageEndpointArtifacts(): Promise<void> {
     if (!(await this.endpointAuthzPromise).canAccessEndpointManagement) {
+      throw new EndpointArtifactExceptionValidationError('Endpoint authorization failure', 403);
+    }
+  }
+
+  protected async validateCanIsolateHosts(): Promise<void> {
+    if (!(await this.endpointAuthzPromise).canIsolateHost) {
       throw new EndpointArtifactExceptionValidationError('Endpoint authorization failure', 403);
     }
   }

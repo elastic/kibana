@@ -16,12 +16,12 @@ import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolutio
 import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
 import { HttpStart } from 'kibana/public';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../event_filters/constants';
-import { HOST_ISOLATION_EXCEPTIONS_LIST } from './constants';
+import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from './constants';
 
 async function createHostIsolationExceptionList(http: HttpStart): Promise<void> {
   try {
     await http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
-      body: JSON.stringify(HOST_ISOLATION_EXCEPTIONS_LIST),
+      body: JSON.stringify(HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION),
     });
   } catch (err) {
     // Ignore 409 errors. List already created

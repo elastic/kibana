@@ -26,6 +26,9 @@ export const analyticsJobExplorationRouteFactory = (
 ): MlRoute => ({
   path: '/data_frame_analytics/exploration',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  title: i18n.translate('xpack.ml.dataFrameAnalytics.exploration.docTitle', {
+    defaultMessage: 'Exploration',
+  }),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),

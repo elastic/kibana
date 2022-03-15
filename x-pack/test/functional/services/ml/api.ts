@@ -126,6 +126,47 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async hasForecastResults(jobId: string): Promise<boolean> {
+      const body = await es.search({
+        index: '.ml-anomalies-*',
+        body: {
+          size: 1,
+          query: {
+            bool: {
+              must: [
+                {
+                  match: {
+                    job_id: jobId,
+                  },
+                },
+                {
+                  match: {
+                    result_type: 'model_forecast',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      return body.hits.hits.length > 0;
+    },
+
+    async assertForecastResultsExist(jobId: string) {
+      await retry.waitForWithTimeout(
+        `forecast results for job ${jobId} to exist`,
+        30 * 1000,
+        async () => {
+          if ((await this.hasForecastResults(jobId)) === true) {
+            return true;
+          } else {
+            throw new Error(`expected forecast results for job '${jobId}' to exist`);
+          }
+        }
+      );
+    },
+
     async createIndex(
       indices: string,
       mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping
@@ -681,9 +722,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Datafeed stopped.');
     },
 
-    async createAndRunAnomalyDetectionLookbackJob(jobConfig: Job, datafeedConfig: Datafeed) {
-      await this.createAnomalyDetectionJob(jobConfig);
-      await this.createDatafeed(datafeedConfig);
+    async createAndRunAnomalyDetectionLookbackJob(
+      jobConfig: Job,
+      datafeedConfig: Datafeed,
+      space?: string
+    ) {
+      await this.createAnomalyDetectionJob(jobConfig, space);
+      await this.createDatafeed(datafeedConfig, space);
       await this.openAnomalyDetectionJob(jobConfig.job_id);
       await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end: `${Date.now()}` });
       await this.waitForDatafeedState(datafeedConfig.datafeed_id, DATAFEED_STATE.STOPPED);
@@ -941,6 +986,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.runDFAJob(dfaConfig.id);
       await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
       await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED, timeout);
+      await this.syncSavedObjects();
     },
 
     async updateJobSpaces(
@@ -956,7 +1002,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove })
         .expect(200);
 
-      expect(body).to.eql({ [jobId]: { success: true } });
+      expect(body).to.eql({ [jobId]: { success: true, type: 'ml-job' } });
     },
 
     async assertJobSpaces(jobId: string, jobType: JobType, expectedSpaces: string[]) {
@@ -979,10 +1025,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
-    async createTrainedModel(modelId: string, body: PutTrainedModelConfig) {
+    async syncSavedObjects(simulate: boolean = false, space?: string) {
+      const { body } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/sync?simulate=${simulate}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+      return body;
+    },
+
+    async createTrainedModel(modelId: string, body: PutTrainedModelConfig, space?: string) {
       log.debug(`Creating trained model with id "${modelId}"`);
-      const model = await esSupertest
-        .put(`/_ml/trained_models/${modelId}`)
+      const model = await kbnSupertest
+        .put(`${space ? `/s/${space}` : ''}/api/ml/trained_models/${modelId}`)
+        .set(COMMON_REQUEST_HEADERS)
         .send(body)
         .expect(200)
         .then((res: any) => res.body);
@@ -1044,7 +1099,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createModelAlias(modelId: string, modelAlias: string) {
       log.debug(`Creating alias for model "${modelId}"`);
       await esSupertest
-        .put(`/_ml/trained_models/${modelId}/model_aliases/${modelAlias}`)
+        .put(`/_ml/trained_models/${modelId}/model_aliases/${modelAlias}?reassign=true`)
         .expect(200);
       log.debug('> Model alias created');
     },

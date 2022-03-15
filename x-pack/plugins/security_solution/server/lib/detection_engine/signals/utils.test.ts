@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
@@ -46,7 +46,7 @@ import {
   isRACAlert,
   getField,
 } from './utils';
-import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
+import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
   sampleBulkResponse,
   sampleEmptyBulkResponse,
@@ -62,8 +62,8 @@ import {
   sampleAlertDocNoSortIdWithTimestamp,
   sampleAlertDocAADNoSortIdWithTimestamp,
 } from './__mocks__/es_results';
-import { ShardError } from '../../types';
-import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import type { ShardError } from '../../types';
+import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -568,12 +568,11 @@ describe('utils', () => {
     test('it successfully returns array of exception list items', async () => {
       listMock.getExceptionListClient = () =>
         ({
-          findExceptionListsItem: jest.fn().mockResolvedValue({
-            data: [getExceptionListItemSchemaMock()],
-            page: 1,
-            per_page: 10000,
-            total: 1,
-          }),
+          findExceptionListsItemPointInTimeFinder: jest
+            .fn()
+            .mockImplementationOnce(({ executeFunctionOnStream }) => {
+              executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
+            }),
         } as unknown as ExceptionListClient);
       const client = listMock.getExceptionListClient();
       const exceptions = await getExceptions({
@@ -581,23 +580,25 @@ describe('utils', () => {
         lists: getListArrayMock(),
       });
 
-      expect(client.findExceptionListsItem).toHaveBeenCalledWith({
-        listId: ['list_id_single', 'endpoint_list'],
-        namespaceType: ['single', 'agnostic'],
-        page: 1,
-        perPage: 10000,
-        filter: [],
-        sortOrder: undefined,
-        sortField: undefined,
-      });
+      expect(client.findExceptionListsItemPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          listId: ['list_id_single', 'endpoint_list'],
+          namespaceType: ['single', 'agnostic'],
+          perPage: 1_000,
+          filter: [],
+          maxSize: undefined,
+          sortOrder: undefined,
+          sortField: undefined,
+        })
+      );
       expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
     });
 
-    test('it throws if "getExceptionListClient" fails', async () => {
+    test('it throws if "findExceptionListsItemPointInTimeFinder" fails anywhere', async () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
         ({
-          getExceptionList: jest.fn().mockRejectedValue(err),
+          findExceptionListsItemPointInTimeFinder: jest.fn().mockRejectedValue(err),
         } as unknown as ExceptionListClient);
 
       await expect(() =>
@@ -605,22 +606,9 @@ describe('utils', () => {
           client: listMock.getExceptionListClient(),
           lists: getListArrayMock(),
         })
-      ).rejects.toThrowError('unable to fetch exception list items');
-    });
-
-    test('it throws if "findExceptionListsItem" fails', async () => {
-      const err = new Error('error fetching list');
-      listMock.getExceptionListClient = () =>
-        ({
-          findExceptionListsItem: jest.fn().mockRejectedValue(err),
-        } as unknown as ExceptionListClient);
-
-      await expect(() =>
-        getExceptions({
-          client: listMock.getExceptionListClient(),
-          lists: getListArrayMock(),
-        })
-      ).rejects.toThrowError('unable to fetch exception list items');
+      ).rejects.toThrowError(
+        'unable to fetch exception list items, message: "error fetching list" full error: "Error: error fetching list"'
+      );
     });
 
     test('it returns empty array if "findExceptionListsItem" returns null', async () => {
@@ -663,7 +651,7 @@ describe('utils', () => {
           },
         },
       };
-      const ruleExecutionLogger = ruleExecutionLogMock.logger.create();
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
       mockLogger.warn.mockClear();
 
       const res = await hasTimestampFields({
@@ -714,7 +702,7 @@ describe('utils', () => {
         },
       };
 
-      const ruleExecutionLogger = ruleExecutionLogMock.logger.create();
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
       mockLogger.warn.mockClear();
 
       const res = await hasTimestampFields({
@@ -750,7 +738,7 @@ describe('utils', () => {
         },
       };
 
-      const ruleExecutionLogger = ruleExecutionLogMock.logger.create({
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
         ruleName: 'Endpoint Security',
       });
       mockLogger.warn.mockClear();
@@ -769,12 +757,12 @@ describe('utils', () => {
 
       expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
       });
     });
 
@@ -789,7 +777,7 @@ describe('utils', () => {
       };
 
       // SUT uses rule execution logger's context to check the rule name
-      const ruleExecutionLogger = ruleExecutionLogMock.logger.create({
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
         ruleName: 'NOT Endpoint Security',
       });
 
@@ -809,12 +797,12 @@ describe('utils', () => {
 
       expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.',
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
       });
     });
   });

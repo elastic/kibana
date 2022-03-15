@@ -52,6 +52,19 @@ export const withReplacedIds = (
   return vis;
 };
 
+async function withDefaultIndexPattern(
+  vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
+): Promise<Vis<TimeseriesVisParams>> {
+  const { indexPatterns } = getDataStart();
+
+  const defaultIndex = await indexPatterns.getDefault();
+  if (!defaultIndex || !defaultIndex.id || vis.params.index_pattern) return vis;
+  vis.params.index_pattern = {
+    id: defaultIndex.id,
+  };
+  return vis;
+}
+
 async function resolveIndexPattern(
   indexPatternValue: IndexPatternValue,
   indexPatterns: DataViewsContract
@@ -138,7 +151,7 @@ export const metricsVisDefinition: VisTypeDefinition<
       drop_last_bucket: 0,
     },
   },
-  setup: (vis) => Promise.resolve(withReplacedIds(vis)),
+  setup: (vis) => withDefaultIndexPattern(withReplacedIds(vis)),
   editorConfig: {
     editor: TSVB_EDITOR_NAME,
   },
@@ -153,6 +166,14 @@ export const metricsVisDefinition: VisTypeDefinition<
       return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
     }
     return [];
+  },
+  navigateToLens: async (params?: VisParams) => {
+    const { triggerTSVBtoLensConfiguration } = await import('./trigger_action');
+
+    const triggerConfiguration = params
+      ? await triggerTSVBtoLensConfiguration(params as Panel)
+      : null;
+    return triggerConfiguration;
   },
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),

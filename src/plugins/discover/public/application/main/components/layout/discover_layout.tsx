@@ -24,8 +24,8 @@ import classNames from 'classnames';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import { esFilters } from '../../../../../../data/public';
-import { DataViewField } from '../../../../../../data/common';
+import { generateFilters } from '../../../../../../data/public';
+import { DataViewField } from '../../../../../../data_views/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
@@ -48,7 +48,7 @@ import {
 import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { DataViewType } from '../../../../../../data_views/common';
+import { DataViewType, DataView } from '../../../../../../data_views/public';
 
 /**
  * Local storage key for sidebar persistence state
@@ -172,7 +172,7 @@ export function DiscoverLayout({
     (field: DataViewField | string, values: string, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
-      const newFilters = esFilters.generateFilters(
+      const newFilters = generateFilters(
         filterManager,
         field,
         values,
@@ -204,6 +204,14 @@ export function DiscoverLayout({
   }, [isSidebarClosed, storage]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
+  const onDataViewCreated = useCallback(
+    (dataView: DataView) => {
+      if (dataView.id) {
+        onChangeIndexPattern(dataView.id);
+      }
+    },
+    [onChangeIndexPattern]
+  );
 
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
@@ -245,6 +253,8 @@ export function DiscoverLayout({
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
               viewMode={viewMode}
+              onDataViewCreated={onDataViewCreated}
+              availableFields$={savedSearchData$.availableFields$}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
@@ -308,7 +318,7 @@ export function DiscoverLayout({
                       savedSearchDataChart$={charts$}
                       savedSearchDataTotalHits$={totalHits$}
                       stateContainer={stateContainer}
-                      isTimeBased={isTimeBased}
+                      indexPattern={indexPattern}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
                       hideChart={state.hideChart}
@@ -330,6 +340,7 @@ export function DiscoverLayout({
                     />
                   ) : (
                     <FieldStatisticsTableMemoized
+                      availableFields$={savedSearchData$.availableFields$}
                       savedSearch={savedSearch}
                       indexPattern={indexPattern}
                       query={state.query}

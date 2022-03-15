@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithTheme } from '../../../utils/testHelpers';
+import { renderWithTheme } from '../../../utils/test_helpers';
 import { LibraryStacktrace } from './library_stacktrace';
 
 describe('LibraryStacktrace', () => {

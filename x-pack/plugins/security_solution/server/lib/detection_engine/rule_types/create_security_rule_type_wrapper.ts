@@ -72,7 +72,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } = options;
           let runState = state;
           const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
-          const { alertWithPersistence, savedObjectsClient, scopedClusterClient } = services;
+          const {
+            alertWithPersistence,
+            savedObjectsClient,
+            scopedClusterClient,
+            uiSettingsClient,
+          } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
           const esClient = scopedClusterClient.asCurrentUser;
@@ -118,7 +123,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let wroteWarningStatus = false;
 
           await ruleExecutionLogger.logStatusChange({
-            newStatus: RuleExecutionStatus['going to run'],
+            newStatus: RuleExecutionStatus.running,
           });
 
           let result = createResultObject(state);
@@ -155,17 +160,21 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 logger,
                 buildRuleMessage,
                 ruleExecutionLogger,
+                uiSettingsClient,
               });
 
               if (!wroteWarningStatus) {
                 const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
-                  services.scopedClusterClient.asCurrentUser.fieldCaps({
-                    index,
-                    fields: hasTimestampOverride
-                      ? ['@timestamp', timestampOverride as string]
-                      : ['@timestamp'],
-                    include_unmapped: true,
-                  })
+                  services.scopedClusterClient.asCurrentUser.fieldCaps(
+                    {
+                      index,
+                      fields: hasTimestampOverride
+                        ? ['@timestamp', timestampOverride as string]
+                        : ['@timestamp'],
+                      include_unmapped: true,
+                    },
+                    { meta: true }
+                  )
                 );
                 wroteWarningStatus = await hasTimestampFields({
                   timestampField: hasTimestampOverride
@@ -315,7 +324,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
                 if (completeRule.ruleConfig.throttle != null) {
                   await scheduleThrottledNotificationActions({
-                    alertInstance: services.alertInstanceFactory(alertId),
+                    alertInstance: services.alertFactory.create(alertId),
                     throttle: completeRule.ruleConfig.throttle ?? '',
                     startedAt,
                     id: alertId,
@@ -329,7 +338,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     logger,
                   });
                 } else if (createdSignalsCount) {
-                  const alertInstance = services.alertInstanceFactory(alertId);
+                  const alertInstance = services.alertFactory.create(alertId);
                   scheduleNotificationActions({
                     alertInstance,
                     signalsCount: createdSignalsCount,
@@ -371,7 +380,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
               if (completeRule.ruleConfig.throttle != null) {
                 await scheduleThrottledNotificationActions({
-                  alertInstance: services.alertInstanceFactory(alertId),
+                  alertInstance: services.alertFactory.create(alertId),
                   throttle: completeRule.ruleConfig.throttle ?? '',
                   startedAt,
                   id: completeRule.alertId,
@@ -403,7 +412,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
             if (completeRule.ruleConfig.throttle != null) {
               await scheduleThrottledNotificationActions({
-                alertInstance: services.alertInstanceFactory(alertId),
+                alertInstance: services.alertFactory.create(alertId),
                 throttle: completeRule.ruleConfig.throttle ?? '',
                 startedAt,
                 id: completeRule.alertId,

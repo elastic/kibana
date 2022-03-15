@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { first, get, last } from 'lodash';
+import { first, get } from 'lodash';
 import moment from 'moment';
 import {
   ActionGroup,
@@ -16,10 +16,7 @@ import {
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import {
-  AlertInstance as Alert,
-  AlertTypeState as RuleTypeState,
-} from '../../../../../alerting/server';
+import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
@@ -126,16 +123,12 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     const inventoryItems = Object.keys(first(results)!);
     for (const group of inventoryItems) {
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = results.every((result) => {
-        // Grab the result of the most recent bucket
-        return last(result[group].shouldFire);
-      });
-      const shouldAlertWarn = results.every((result) => last(result[group].shouldWarn));
-
+      const shouldAlertFire = results.every((result) => result[group]?.shouldFire);
+      const shouldAlertWarn = results.every((result) => result[group]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = results.some((result) => last(result[group].isNoData));
-      const isError = results.some((result) => result[group].isError);
+      const isNoData = results.some((result) => result[group]?.isNoData);
+      const isError = results.some((result) => result[group]?.isError);
 
       const nextState = isError
         ? AlertStates.ERROR
@@ -216,6 +209,24 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     }
   });
 
+const formatThreshold = (metric: SnapshotMetricType, value: number) => {
+  const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
+  const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
+
+  const threshold = Array.isArray(value)
+    ? value.map((v: number) => {
+        if (metricFormatter.formatter === 'percent') {
+          v = Number(v) / 100;
+        }
+        if (metricFormatter.formatter === 'bits') {
+          v = Number(v) / 8;
+        }
+        return formatter(v);
+      })
+    : value;
+  return threshold;
+};
+
 const buildReasonWithVerboseMetricName = (
   group: string,
   resultItem: any,
@@ -223,6 +234,10 @@ const buildReasonWithVerboseMetricName = (
   useWarningThreshold?: boolean
 ) => {
   if (!resultItem) return '';
+
+  const thresholdToFormat = useWarningThreshold
+    ? resultItem.warningThreshold!
+    : resultItem.threshold;
   const resultWithVerboseMetricName = {
     ...resultItem,
     group,
@@ -232,7 +247,7 @@ const buildReasonWithVerboseMetricName = (
         ? getCustomMetricLabel(resultItem.customMetric)
         : resultItem.metric),
     currentValue: formatMetric(resultItem.metric, resultItem.currentValue),
-    threshold: useWarningThreshold ? resultItem.warningThreshold! : resultItem.threshold,
+    threshold: formatThreshold(resultItem.metric, thresholdToFormat),
     comparator: useWarningThreshold ? resultItem.warningComparator! : resultItem.comparator,
   };
   return buildReason(resultWithVerboseMetricName);

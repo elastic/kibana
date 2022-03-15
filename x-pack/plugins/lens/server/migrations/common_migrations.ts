@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, mapValues } from 'lodash';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { Filter } from '@kbn/es-query';
+import { SerializableRecord } from '@kbn/utility-types';
 import {
+  mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
 } from '../../../../../src/plugins/kibana_utils/common';
@@ -22,8 +23,12 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  VisState810,
+  VisState820,
+  CustomVisualizationMigrations,
+  LensDocShape810,
 } from './types';
-import { CustomPaletteParams, layerTypes } from '../../common';
+import { CustomPaletteParams, DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -162,24 +167,76 @@ export const commonMakeReversePaletteAsCustom = (
   return newAttributes;
 };
 
-export const commonRenameFilterReferences = (attributes: LensDocShape715<VisState716>) => {
+export const commonRenameRecordsField = (attributes: LensDocShape810) => {
+  const newAttributes = cloneDeep(attributes);
+  Object.keys(newAttributes.state?.datasourceStates?.indexpattern?.layers || {}).forEach(
+    (layerId) => {
+      newAttributes.state.datasourceStates.indexpattern.layers[layerId].columnOrder.forEach(
+        (columnId) => {
+          const column =
+            newAttributes.state.datasourceStates.indexpattern.layers[layerId].columns[columnId];
+          if (column && column.operationType === 'count') {
+            column.sourceField = DOCUMENT_FIELD_NAME;
+          }
+        }
+      );
+    }
+  );
+  return newAttributes;
+};
+
+export const commonRenameFilterReferences = (attributes: LensDocShape715): LensDocShape810 => {
   const newAttributes = cloneDeep(attributes);
   for (const filter of newAttributes.state.filters) {
     filter.meta.index = filter.meta.indexRefName;
     delete filter.meta.indexRefName;
   }
+  return newAttributes as LensDocShape810;
+};
+
+export const commonSetLastValueShowArrayValues = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (
+        column.operationType === 'last_value' &&
+        !(typeof column.params.showArrayValues === 'boolean')
+      ) {
+        column.params.showArrayValues = true;
+      }
+    }
+  }
   return newAttributes;
 };
 
-const getApplyFilterMigrationToLens = (filterMigration: MigrateFunction<Filter[]>) => {
+export const commonEnhanceTableRowHeight = (
+  attributes: LensDocShape810<VisState810>
+): LensDocShape810<VisState820> => {
+  if (attributes.visualizationType !== 'lnsDatatable') {
+    return attributes;
+  }
+  const visState810 = attributes.state.visualization as VisState810;
+  const newAttributes = cloneDeep(attributes);
+  const vizState = newAttributes.state.visualization as VisState820;
+  vizState.rowHeight = visState810.fitRowToContent ? 'auto' : 'single';
+  vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
+  return newAttributes;
+};
+
+const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {
   return (savedObject: { attributes: LensDocShape }) => {
+    if (savedObject.attributes.visualizationType !== id) return savedObject;
     return {
       ...savedObject,
       attributes: {
         ...savedObject.attributes,
         state: {
           ...savedObject.attributes.state,
-          filters: filterMigration(savedObject.attributes.state.filters as unknown as Filter[]),
+          visualization: migration(
+            savedObject.attributes.state.visualization as SerializableRecord
+          ),
         },
       },
     };
@@ -187,14 +244,73 @@ const getApplyFilterMigrationToLens = (filterMigration: MigrateFunction<Filter[]
 };
 
 /**
+ * This creates a migration map that applies custom visualization migrations
+ */
+export const getLensCustomVisualizationMigrations = (
+  customVisualizationMigrations: CustomVisualizationMigrations
+) => {
+  return Object.entries(customVisualizationMigrations)
+    .map(([id, migrationGetter]) => {
+      const migrationMap: MigrateFunctionsObject = {};
+      const currentMigrations = migrationGetter();
+      for (const version in currentMigrations) {
+        if (currentMigrations.hasOwnProperty(version)) {
+          migrationMap[version] = getApplyCustomVisualizationMigrationToLens(
+            id,
+            currentMigrations[version]
+          );
+        }
+      }
+      return migrationMap;
+    })
+    .reduce(
+      (fullMigrationMap, currentVisualizationTypeMigrationMap) =>
+        mergeMigrationFunctionMaps(fullMigrationMap, currentVisualizationTypeMigrationMap),
+      {}
+    );
+};
+
+/**
  * This creates a migration map that applies filter migrations to Lens visualizations
  */
-export const getLensFilterMigrations = (filterMigrations: MigrateFunctionsObject) => {
-  const migrationMap: MigrateFunctionsObject = {};
-  for (const version in filterMigrations) {
-    if (filterMigrations.hasOwnProperty(version)) {
-      migrationMap[version] = getApplyFilterMigrationToLens(filterMigrations[version]);
-    }
-  }
-  return migrationMap;
+export const getLensFilterMigrations = (
+  filterMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
+  mapValues(filterMigrations, (migrate) => (lensDoc: { attributes: LensDocShape }) => ({
+    ...lensDoc,
+    attributes: {
+      ...lensDoc.attributes,
+      state: { ...lensDoc.attributes.state, filters: migrate(lensDoc.attributes.state.filters) },
+    },
+  }));
+
+export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): LensDocShape810 => {
+  const newAttributes = cloneDeep(attributes);
+  const datasourceLayers = newAttributes.state.datasourceStates.indexpattern.layers || {};
+  (newAttributes as LensDocShape810).state.datasourceStates.indexpattern.layers =
+    Object.fromEntries(
+      Object.entries(datasourceLayers).map(([layerId, layer]) => {
+        return [
+          layerId,
+          {
+            ...layer,
+            columns: Object.fromEntries(
+              Object.entries(layer.columns).map(([columnId, column]) => {
+                if (column.operationType === 'terms') {
+                  return [
+                    columnId,
+                    {
+                      ...column,
+                      params: { ...column.params, parentFormat: { id: 'terms' } },
+                    },
+                  ];
+                }
+                return [columnId, column];
+              })
+            ),
+          },
+        ];
+      })
+    );
+  return newAttributes as LensDocShape810;
 };

@@ -33,14 +33,12 @@ import {
   CaseUserActionResponse,
   CommentRequest,
   NONE_CONNECTOR_ID,
-  SubCaseAttributes,
   User,
 } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
-  SUB_CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
 } from '../../../common/constants';
 import { ClientArgs } from '..';
@@ -49,7 +47,6 @@ import {
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
-  SUB_CASE_REF_NAME,
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
 import { buildFilter, combineFilters, isTwoArraysDifference } from '../../client/utils';
@@ -59,7 +56,6 @@ import { defaultSortField } from '../../common/utils';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
-  subCaseId?: string;
 }
 
 export interface UserActionItem {
@@ -79,7 +75,7 @@ interface CreateUserActionES<T> extends ClientArgs {
 type CommonUserActionArgs = ClientArgs & CommonArguments;
 
 interface BulkCreateCaseDeletionUserAction extends ClientArgs {
-  cases: Array<{ id: string; owner: string; subCaseId?: string; connectorId: string }>;
+  cases: Array<{ id: string; owner: string; connectorId: string }>;
   user: User;
 }
 
@@ -90,8 +86,8 @@ interface GetUserActionItemByDifference extends CommonUserActionArgs {
 }
 
 interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs {
-  originalCases: Array<SavedObject<CaseAttributes | SubCaseAttributes>>;
-  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes | SubCaseAttributes>>;
+  originalCases: Array<SavedObject<CaseAttributes>>;
+  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
   user: User;
 }
 
@@ -114,7 +110,6 @@ export class CaseUserActionService {
     originalValue,
     newValue,
     caseId,
-    subCaseId,
     owner,
     user,
   }: GetUserActionItemByDifference): BuilderReturnValue[] {
@@ -131,7 +126,6 @@ export class CaseUserActionService {
         const tagAddUserAction = tagsUserActionBuilder?.build({
           action: Actions.add,
           caseId,
-          subCaseId,
           user,
           owner,
           payload: { tags: compareValues.addedItems },
@@ -146,7 +140,6 @@ export class CaseUserActionService {
         const tagsDeleteUserAction = tagsUserActionBuilder?.build({
           action: Actions.delete,
           caseId,
-          subCaseId,
           user,
           owner,
           payload: { tags: compareValues.deletedItems },
@@ -164,7 +157,6 @@ export class CaseUserActionService {
       const userActionBuilder = this.builderFactory.getBuilder(ActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
         caseId,
-        subCaseId,
         owner,
         user,
         payload: { [field]: newValue },
@@ -252,7 +244,6 @@ export class CaseUserActionService {
   public async bulkCreateAttachmentDeletion({
     unsecuredSavedObjectsClient,
     caseId,
-    subCaseId,
     attachments,
     user,
   }: BulkCreateAttachmentDeletionUserAction): Promise<void> {
@@ -263,7 +254,6 @@ export class CaseUserActionService {
         const deleteCommentUserAction = userActionBuilder?.build({
           action: Actions.delete,
           caseId,
-          subCaseId,
           user,
           owner: attachment.owner,
           attachmentId: attachment.id,
@@ -287,7 +277,6 @@ export class CaseUserActionService {
     action,
     type,
     caseId,
-    subCaseId,
     user,
     owner,
     payload,
@@ -301,7 +290,6 @@ export class CaseUserActionService {
       const userAction = userActionBuilder?.build({
         action,
         caseId,
-        subCaseId,
         user,
         owner,
         connectorId,
@@ -322,11 +310,10 @@ export class CaseUserActionService {
   public async getAll({
     unsecuredSavedObjectsClient,
     caseId,
-    subCaseId,
   }: GetCaseUserActionArgs): Promise<SavedObjectsFindResponse<CaseUserActionResponse>> {
     try {
-      const id = subCaseId ?? caseId;
-      const type = subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+      const id = caseId;
+      const type = CASE_SAVED_OBJECT;
 
       const userActions =
         await unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>({
@@ -534,7 +521,6 @@ function transformToExternalModel(
   const caseId = findReferenceId(CASE_REF_NAME, CASE_SAVED_OBJECT, references) ?? '';
   const commentId =
     findReferenceId(COMMENT_REF_NAME, CASE_COMMENT_SAVED_OBJECT, references) ?? null;
-  const subCaseId = findReferenceId(SUB_CASE_REF_NAME, SUB_CASE_SAVED_OBJECT, references) ?? '';
   const payload = addReferenceIdToPayload(userAction);
 
   return {
@@ -544,7 +530,6 @@ function transformToExternalModel(
       action_id: userAction.id,
       case_id: caseId,
       comment_id: commentId,
-      sub_case_id: subCaseId,
       payload,
     } as CaseUserActionResponse,
   };

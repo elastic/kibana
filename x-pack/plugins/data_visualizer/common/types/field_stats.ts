@@ -209,6 +209,7 @@ export interface OverallStatsSearchStrategyParams {
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   aggregatableFields: string[];
   nonAggregatableFields: string[];
+  fieldsToFetch?: string[];
 }
 
 export interface FieldStatsSearchStrategyReturnBase {

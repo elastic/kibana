@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-// @ts-ignore
 export { ElasticsearchMetric } from './elasticsearch/classes';
-// @ts-ignore
-// eslint-disable-next-line prettier/prettier
-export { KibanaClusterMetric, KibanaMetric, KibanaClusterRuleMetric, KibanaClusterActionMetric, } from './kibana/classes';
+export {
+  KibanaClusterMetric,
+  KibanaMetric,
+  KibanaClusterRuleMetric,
+  KibanaClusterActionMetric,
+} from './kibana/classes';
 export type { ApmMetricFields } from './apm/classes';
 export { ApmMetric, ApmClusterMetric } from './apm/classes';
-// @ts-ignore
 export { LogstashClusterMetric, LogstashMetric } from './logstash/classes';
 export type { BeatsMetricFields } from './beats/classes';
 export { BeatsClusterMetric, BeatsMetric } from './beats/classes';
 export { EnterpriseSearchMetric } from './enterprise_search/classes';
 export type { EnterpriseSearchMetricFields } from './enterprise_search/classes';
-// @ts-ignore
 export { metrics } from './metrics';

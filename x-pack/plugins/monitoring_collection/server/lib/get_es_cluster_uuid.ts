@@ -11,5 +11,5 @@ export async function getESClusterUuid(client: IScopedClusterClient) {
   const response = await client.asCurrentUser.info({
     filter_path: 'cluster_uuid',
   });
-  return response?.body?.cluster_uuid;
+  return response?.cluster_uuid;
 }

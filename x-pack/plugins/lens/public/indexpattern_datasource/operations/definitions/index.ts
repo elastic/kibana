@@ -55,7 +55,7 @@ export type {
 } from './column_types';
 
 export type { TermsIndexPatternColumn } from './terms';
-export type { FiltersIndexPatternColumn } from './filters';
+export type { FiltersIndexPatternColumn, Filter } from './filters';
 export type { CardinalityIndexPatternColumn } from './cardinality';
 export type { PercentileIndexPatternColumn } from './percentile';
 export type {
@@ -336,6 +336,12 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * Operation can influence some visual default settings. This function is used to collect default values offered
    */
   getDefaultVisualSettings?: (column: C) => { truncateText?: boolean };
+
+  /**
+   * Utility function useful for multi fields operation in order to get fields
+   * are not pass the transferable checks
+   */
+  getNonTransferableFields?: (column: C, indexPattern: IndexPattern) => string[];
 }
 
 interface BaseBuildColumnArgs {

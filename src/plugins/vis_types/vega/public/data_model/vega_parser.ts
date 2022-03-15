@@ -676,6 +676,11 @@ The URL is an identifier only. Kibana and your browser will never access this UR
           );
         }
         onFind(obj as Data);
+      } else if (key === 'data' && typeof obj.url === 'string') {
+        const bounds = this.timeCache.getTimeBounds();
+        obj.url = obj.url
+          .replaceAll('%timefilter_min%', bounds.min.toString())
+          .replaceAll('%timefilter_max%', bounds.max.toString());
       } else {
         for (const k of Object.keys(obj)) {
           this._findObjectDataUrls(obj[k], onFind, k);

@@ -7,22 +7,29 @@
 import { QueryObserverResult, useQuery } from 'react-query';
 import { useHttp } from '../../../common/lib/kibana/hooks';
 import { ServerApiError } from '../../../common/types';
+import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 
-export function useGetEndpointSpecificPolicies({
-  onError,
-}: {
-  onError?: (error: ServerApiError) => void;
-} = {}): QueryObserverResult<GetPolicyListResponse> {
+export function useGetEndpointSpecificPolicies(
+  {
+    onError,
+    page,
+    perPage,
+  }: {
+    onError?: (error: ServerApiError) => void;
+    page?: number;
+    perPage?: number;
+  } = { page: 1, perPage: MANAGEMENT_DEFAULT_PAGE_SIZE }
+): QueryObserverResult<GetPolicyListResponse> {
   const http = useHttp();
   return useQuery<GetPolicyListResponse, ServerApiError>(
-    ['endpointSpecificPolicies'],
+    ['endpointSpecificPolicies', page, perPage],
     () => {
       return sendGetEndpointSpecificPackagePolicies(http, {
         query: {
-          page: 1,
-          perPage: 1000,
+          page,
+          perPage,
         },
       });
     },

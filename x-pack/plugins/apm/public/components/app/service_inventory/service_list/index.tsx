@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { orderBy } from 'lodash';
 import React, { useMemo } from 'react';
-import { ValuesType } from 'utility-types';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
@@ -32,7 +31,7 @@ import {
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
@@ -41,18 +40,15 @@ import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { HealthBadge } from './HealthBadge';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
+import { HealthBadge } from './health_badge';
+import { ServiceListItem } from '../../../../../common/service_inventory';
 
-type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/services'>;
-type Items = ServiceListAPIResponse['items'];
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
-
-type ServiceListItem = ValuesType<Items>;
 
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
@@ -239,7 +235,7 @@ export function getServiceColumns({
 }
 
 interface Props {
-  items: Items;
+  items: ServiceListItem[];
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
   isLoading: boolean;
@@ -287,9 +283,8 @@ export function ServiceList({
     ]
   );
 
-  const initialSortField = displayHealthStatus
-    ? 'healthStatus'
-    : 'transactionsPerMinute';
+  const initialSortField = displayHealthStatus ? 'healthStatus' : 'serviceName';
+  const initialSortDirection = displayHealthStatus ? 'desc' : 'asc';
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -336,9 +331,9 @@ export function ServiceList({
           items={items}
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
-          initialSortDirection="desc"
+          initialSortDirection={initialSortDirection}
           sortFn={(itemsToSort, sortField, sortDirection) => {
-            // For healthStatus, sort items by healthStatus first, then by TPM
+            // For healthStatus, sort items by healthStatus first, then by name
             return sortField === 'healthStatus'
               ? orderBy(
                   itemsToSort,
@@ -348,9 +343,9 @@ export function ServiceList({
                         ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
                         : -1;
                     },
-                    (item) => item.throughput ?? 0,
+                    (item) => item.serviceName.toLowerCase(),
                   ],
-                  [sortDirection, sortDirection]
+                  [sortDirection, sortDirection === 'asc' ? 'desc' : 'asc']
                 )
               : orderBy(
                   itemsToSort,

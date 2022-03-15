@@ -9,16 +9,20 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { HostRiskScoreOverTime } from '.';
 import { TestProviders } from '../../../common/mock';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
+import { useHostRiskScore } from '../../../risk_score/containers';
 
-jest.mock('../../../common/containers/hosts_risk/use_hosts_risk_score');
-const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
+jest.mock('../../../risk_score/containers');
+const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 
 describe('Host Risk Flyout', () => {
   it('renders', () => {
+    useHostRiskScoreMock.mockReturnValueOnce([false, { data: [], isModuleEnabled: true }]);
+
     const { queryByTestId } = render(
       <TestProviders>
         <HostRiskScoreOverTime
+          setQuery={jest.fn()}
+          deleteQuery={jest.fn()}
           hostName={'test-host-name'}
           from={'2020-07-07T08:20:18.966Z'}
           to={'2020-07-08T08:20:18.966Z'}
@@ -30,15 +34,13 @@ describe('Host Risk Flyout', () => {
   });
 
   it('renders loader when HostsRiskScore is laoding', () => {
-    useHostsRiskScoreMock.mockReturnValueOnce({
-      loading: true,
-      isModuleEnabled: true,
-      result: [],
-    });
+    useHostRiskScoreMock.mockReturnValueOnce([true, { data: [], isModuleEnabled: true }]);
 
     const { queryByTestId } = render(
       <TestProviders>
         <HostRiskScoreOverTime
+          setQuery={jest.fn()}
+          deleteQuery={jest.fn()}
           hostName={'test-host-name'}
           from={'2020-07-07T08:20:18.966Z'}
           to={'2020-07-08T08:20:18.966Z'}

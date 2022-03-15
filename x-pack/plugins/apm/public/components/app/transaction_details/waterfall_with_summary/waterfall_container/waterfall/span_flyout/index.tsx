@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,7 +33,7 @@ import { DurationSummaryItem } from '../../../../../../shared/summary/duration_s
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
 import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
 import { ResponsiveFlyout } from '../responsive_flyout';
-import { SyncBadge } from '../sync_badge';
+import { SyncBadge } from '../badge/sync_badge';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
 import { FailureBadge } from '../failure_badge';
@@ -126,14 +125,12 @@ export function SpanFlyout({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DiscoverSpanLink span={span}>
-                <EuiButtonEmpty iconType="discoverApp">
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    {
-                      defaultMessage: 'View span in Discover',
-                    }
-                  )}
-                </EuiButtonEmpty>
+                {i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
+                  {
+                    defaultMessage: 'View span in Discover',
+                  }
+                )}
               </DiscoverSpanLink>
             </EuiFlexItem>
           </EuiFlexGroup>

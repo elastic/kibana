@@ -12,11 +12,12 @@
     "embeddable",
     "inspector",
     "savedObjects",
+    "screenshotMode",
     "presentationUtil"
   ],
-  "optionalPlugins": [ "home", "share", "usageCollection", "spaces", "savedObjectsTaggingOss"],
+  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "savedObjectsTaggingOss"],
   "requiredBundles": ["kibanaUtils", "discover", "kibanaReact", "home"],
-  "extraPublicDirs": ["common/constants", "common/prepare_log_table", "common/expression_functions"],
+  "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

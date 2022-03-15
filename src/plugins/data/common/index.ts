@@ -10,6 +10,7 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 export * from './constants';
+export * from './datatable_utilities';
 export * from './es_query';
 export * from './kbn_field_types';
 export * from './query';
@@ -35,7 +36,6 @@ export type {
   GetFieldsOptions,
   GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
-  IIndexPatternsApiClient,
   SavedObject,
   AggregationRestrictions,
   TypeMeta,
@@ -43,9 +43,7 @@ export type {
   FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
-  IndexPatternFieldMap,
   DataViewSpec,
-  IndexPatternSpec,
   SourceFilter,
   IndexPatternExpressionType,
   IndexPatternLoadStartDependencies,
@@ -54,12 +52,11 @@ export type {
 export type {
   IndexPatternsContract,
   DataViewsContract,
-  IndexPatternListItem,
   DataViewListItem,
 } from '../../data_views/common';
 export {
   RUNTIME_FIELD_TYPES,
-  FLEET_ASSETS_TO_IGNORE,
+  DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
@@ -68,7 +65,6 @@ export {
   DataViewField,
   IndexPatternField,
   DataViewType,
-  IndexPatternType,
   IndexPatternsService,
   DataViewsService,
   IndexPattern,

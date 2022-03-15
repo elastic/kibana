@@ -90,24 +90,39 @@ export function GraphVisualization({
         <g>
           {workspace.edges &&
             workspace.edges.map((edge) => (
-              <line
+              <g
                 key={`${makeNodeId(edge.source.data.field, edge.source.data.term)}-${makeNodeId(
                   edge.target.data.field,
                   edge.target.data.term
                 )}`}
-                x1={edge.topSrc.kx}
-                y1={edge.topSrc.ky}
-                x2={edge.topTarget.kx}
-                y2={edge.topTarget.ky}
-                onClick={() => {
-                  edgeClick(edge);
-                }}
-                className={classNames('gphEdge', {
-                  'gphEdge--selected': edge.isSelected,
-                })}
-                style={{ strokeWidth: edge.width }}
-                strokeLinecap="round"
-              />
+                className="gphEdge--wrapper"
+              >
+                {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
+                <line
+                  x1={edge.topSrc.kx}
+                  y1={edge.topSrc.ky}
+                  x2={edge.topTarget.kx}
+                  y2={edge.topTarget.ky}
+                  className={classNames('gphEdge', {
+                    'gphEdge--selected': edge.isSelected,
+                  })}
+                  strokeLinecap="round"
+                  style={{ strokeWidth: edge.width }}
+                />
+                <line
+                  x1={edge.topSrc.kx}
+                  y1={edge.topSrc.ky}
+                  x2={edge.topTarget.kx}
+                  y2={edge.topTarget.ky}
+                  onClick={() => {
+                    edgeClick(edge);
+                  }}
+                  className="gphEdge gphEdge--clickable"
+                  style={{
+                    strokeWidth: Math.max(edge.width, 15),
+                  }}
+                />
+              </g>
             ))}
         </g>
         {workspace.nodes &&
@@ -132,7 +147,6 @@ export function GraphVisualization({
                   cy={node.ky}
                   r={node.scaledSize}
                   className={classNames('gphNode__circle', {
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     'gphNode__circle--selected': node.isSelected,
                   })}
                   style={{ fill: node.color }}
@@ -140,7 +154,6 @@ export function GraphVisualization({
                 {node.icon && (
                   <text
                     className={classNames('fa gphNode__text', {
-                      // eslint-disable-next-line @typescript-eslint/naming-convention
                       'gphNode__text--inverse': isColorDark(...hexToRgb(node.color)),
                     })}
                     transform="translate(0,5)"

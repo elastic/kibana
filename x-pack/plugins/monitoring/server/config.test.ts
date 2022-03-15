@@ -70,6 +70,7 @@ describe('config schema', () => {
           "debug_mode": false,
           "elasticsearch": Object {
             "apiVersion": "master",
+            "compression": false,
             "customHeaders": Object {},
             "healthCheck": Object {
               "delay": "PT2.5S",
@@ -99,6 +100,9 @@ describe('config schema', () => {
             "index": "filebeat-*",
           },
           "max_bucket_size": 10000,
+          "metricbeat": Object {
+            "index": "metricbeat-*",
+          },
           "min_interval_seconds": 10,
           "show_license_expiration": true,
         },

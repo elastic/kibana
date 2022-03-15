@@ -63,7 +63,7 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
           <p>
             <FormattedMessage
               id="xpack.ml.overview.analyticsList.emptyPromptText"
-              defaultMessage="Data frame analytics enables you to perform outlier detection, regression, or classification analysis and put the annotated data in a new index. The classification and regression trained models can also be used for inference in pipelines and aggregations."
+              defaultMessage="Train outlier detection, regression, or classification machine learning models using data frame analytics."
             />
           </p>
           <EuiCallOut
@@ -71,13 +71,26 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
             title={
               <FormattedMessage
                 id="xpack.ml.overview.analyticsList.emptyPromptHelperText"
-                defaultMessage="Data frame analytics requires specifically structured source data. Use {transforms} to create data frames before you create the jobs."
+                defaultMessage="Before building a data frame analytics job, use {transforms} to construct an {sourcedata}."
                 values={{
                   transforms: (
                     <EuiLink href={transformsLink} target="blank" color={'accent'}>
                       <FormattedMessage
                         id="xpack.ml.overview.gettingStartedSectionTransforms"
-                        defaultMessage="Elasticsearch's transforms"
+                        defaultMessage="transforms"
+                      />
+                    </EuiLink>
+                  ),
+                  sourcedata: (
+                    <EuiLink
+                      href={docLinks.links.ml.dFAPrepareData}
+                      target="blank"
+                      color={'accent'}
+                      external
+                    >
+                      <FormattedMessage
+                        id="xpack.ml.overview.gettingStartedSectionSourceData"
+                        defaultMessage="entity-centric source data set"
                       />
                     </EuiLink>
                   ),

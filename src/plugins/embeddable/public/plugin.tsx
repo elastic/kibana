@@ -104,6 +104,7 @@ export type EmbeddablePanelHOC = React.FC<{
   embeddable: IEmbeddable;
   hideHeader?: boolean;
   containerContext?: EmbeddableContainerContext;
+  index?: number;
 }>;
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -167,15 +168,18 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         embeddable,
         hideHeader,
         containerContext,
+        index,
       }: {
         embeddable: IEmbeddable;
         hideHeader?: boolean;
         containerContext?: EmbeddableContainerContext;
+        index?: number;
       }) =>
         (
           <EmbeddablePanel
             hideHeader={hideHeader}
             embeddable={embeddable}
+            index={index}
             stateTransfer={this.stateTransferService}
             getActions={uiActions.getTriggerCompatibleActions}
             getEmbeddableFactory={this.getEmbeddableFactory}

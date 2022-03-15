@@ -44,13 +44,14 @@ import {
   kibanaFilterFunction,
   phraseFilterFunction,
   esRawResponse,
+  eqlRawResponse,
 } from '../../common/search';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IKibanaSearchResponse, IndexPatternsContract, SearchRequest } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { getEsaggs, getEsdsl } from './expressions';
+import { getEsaggs, getEsdsl, getEql } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
@@ -88,7 +89,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
-    { http, getStartServices, notifications, uiSettings, theme }: CoreSetup,
+    { http, getStartServices, notifications, uiSettings, executionContext, theme }: CoreSetup,
     { bfetch, expressions, usageCollection, nowProvider }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
@@ -107,6 +108,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.searchInterceptor = new SearchInterceptor({
       bfetch,
       toasts: notifications.toasts,
+      executionContext,
       http,
       uiSettings,
       startServices: getStartServices(),
@@ -152,7 +154,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
     );
+    expressions.registerFunction(
+      getEql({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
     expressions.registerType(esRawResponse);
+    expressions.registerType(eqlRawResponse);
 
     const aggs = this.aggsService.setup({
       registerFunction: expressions.registerFunction,

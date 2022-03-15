@@ -6,8 +6,8 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import { RULES_MONIROTING_TABLE, RULE_NAME } from '../../screens/alerts_detection_rules';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { RULES_MONITORING_TABLE, RULE_NAME } from '../../screens/alerts_detection_rules';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana, reload } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -16,7 +16,7 @@ describe('Rules talbes links', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRuleActivated(getNewRule(), 'rule1');
+    createCustomRuleEnabled(getNewRule(), 'rule1');
     reload();
   });
 
@@ -26,7 +26,7 @@ describe('Rules talbes links', () => {
   });
 
   it('should render correct link for rule name - rule monitoring', () => {
-    cy.get(RULES_MONIROTING_TABLE).first().click();
+    cy.get(RULES_MONITORING_TABLE).first().click();
     cy.get(RULE_NAME).first().click();
     cy.url().should('contain', 'rules/id/');
   });

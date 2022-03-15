@@ -13,10 +13,12 @@ import type {
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+  ENDPOINT_BLOCKLISTS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import { BaseDataGenerator } from './base_data_generator';
-import { ConditionEntryField } from '../types';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../service/artifacts/constants';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts/constants';
 
 /** Utility that removes null and undefined from a Type's property value */
 type NonNullableTypeProperties<T> = {
@@ -36,6 +38,60 @@ type UpdateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
   Omit<UpdateExceptionListItemSchema, 'meta'>
 > &
   Pick<UpdateExceptionListItemSchema, 'meta'>;
+
+const exceptionItemToCreateExceptionItem = (
+  exceptionItem: ExceptionListItemSchema
+): CreateExceptionListItemSchemaWithNonNullProps => {
+  const {
+    /* eslint-disable @typescript-eslint/naming-convention */
+    description,
+    entries,
+    list_id,
+    name,
+    type,
+    comments,
+    item_id,
+    meta,
+    namespace_type,
+    os_types,
+    tags,
+    /* eslint-enable @typescript-eslint/naming-convention */
+  } = exceptionItem;
+
+  return {
+    description,
+    entries,
+    list_id,
+    name,
+    type,
+    comments,
+    item_id,
+    meta,
+    namespace_type,
+    os_types,
+    tags,
+  };
+};
+
+const exceptionItemToUpdateExceptionItem = (
+  exceptionItem: ExceptionListItemSchema
+): UpdateExceptionListItemSchemaWithNonNullProps => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { id, item_id, _version } = exceptionItem;
+  const { list_id: _, ...updateAttributes } = exceptionItemToCreateExceptionItem(exceptionItem);
+
+  return {
+    ...updateAttributes,
+    id,
+    item_id,
+    _version: _version ?? 'some value',
+  };
+};
+
+const EFFECTIVE_SCOPE: readonly string[] = [
+  `${BY_POLICY_ARTIFACT_TAG_PREFIX}123-456`, // Policy Specific
+  GLOBAL_ARTIFACT_TAG,
+];
 
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
@@ -60,7 +116,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       name: `Generated Exception (${this.randomString(5)})`,
       namespace_type: 'agnostic',
       os_types: [this.randomOSFamily()] as ExceptionListItemSchema['os_types'],
-      tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}all`],
+      tags: [this.randomChoice(EFFECTIVE_SCOPE)],
       tie_breaker_id: this.seededUUIDv4(),
       type: 'simple',
       updated_at: '2020-04-20T15:25:31.830Z',
@@ -85,82 +141,22 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   generateForCreate(
     overrides: Partial<CreateExceptionListItemSchema> = {}
   ): CreateExceptionListItemSchemaWithNonNullProps {
-    const {
-      /* eslint-disable @typescript-eslint/naming-convention */
-      description,
-      entries,
-      list_id,
-      name,
-      type,
-      comments,
-      item_id,
-      meta,
-      namespace_type,
-      os_types,
-      tags,
-      /* eslint-enable @typescript-eslint/naming-convention */
-    } = this.generate();
-
-    return {
-      description,
-      entries,
-      list_id,
-      name,
-      type,
-      comments,
-      item_id,
-      meta,
-      namespace_type,
-      os_types,
-      tags,
-      ...overrides,
-    };
+    return Object.assign(exceptionItemToCreateExceptionItem(this.generate()), overrides);
   }
 
   generateTrustedApp(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
-    const trustedApp = this.generate(overrides);
-
-    return {
-      ...trustedApp,
+    return this.generate({
       name: `Trusted app (${this.randomString(5)})`,
       list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
-      // Remove the hash field which the generator above currently still sets to a field that is not
-      // actually valid when used with the Exception List
-      entries: trustedApp.entries.filter((entry) => entry.field !== ConditionEntryField.HASH),
-    };
+      ...overrides,
+    });
   }
 
   generateTrustedAppForCreate(
     overrides: Partial<CreateExceptionListItemSchema> = {}
   ): CreateExceptionListItemSchemaWithNonNullProps {
-    const {
-      /* eslint-disable @typescript-eslint/naming-convention */
-      description,
-      entries,
-      list_id,
-      name,
-      type,
-      comments,
-      item_id,
-      meta,
-      namespace_type,
-      os_types,
-      tags,
-      /* eslint-enable @typescript-eslint/naming-convention */
-    } = this.generateTrustedApp();
-
     return {
-      description,
-      entries,
-      list_id,
-      name,
-      type,
-      comments,
-      item_id,
-      meta,
-      namespace_type,
-      os_types,
-      tags,
+      ...exceptionItemToCreateExceptionItem(this.generateTrustedApp()),
       ...overrides,
     };
   }
@@ -168,80 +164,45 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   generateTrustedAppForUpdate(
     overrides: Partial<UpdateExceptionListItemSchema> = {}
   ): UpdateExceptionListItemSchemaWithNonNullProps {
-    const {
-      /* eslint-disable @typescript-eslint/naming-convention */
-      description,
-      entries,
-      name,
-      type,
-      comments,
-      id,
-      item_id,
-      meta,
-      namespace_type,
-      os_types,
-      tags,
-      _version,
-      /* eslint-enable @typescript-eslint/naming-convention */
-    } = this.generateTrustedApp();
-
     return {
-      description,
-      entries,
-      name,
-      type,
-      comments,
-      id,
-      item_id,
-      meta,
-      namespace_type,
-      os_types,
-      tags,
-      _version: _version ?? 'some value',
+      ...exceptionItemToUpdateExceptionItem(this.generateTrustedApp()),
       ...overrides,
     };
   }
 
   generateEventFilter(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
-    const eventFilter = this.generate(overrides);
-
-    return {
-      ...eventFilter,
+    return this.generate({
       name: `Event filter (${this.randomString(5)})`,
       list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-    };
+      entries: [
+        {
+          field: 'process.pe.company',
+          operator: 'excluded',
+          type: 'match',
+          value: 'elastic',
+        },
+        {
+          entries: [
+            {
+              field: 'status',
+              operator: 'included',
+              type: 'match',
+              value: 'dfdfd',
+            },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+        },
+      ],
+      ...overrides,
+    });
   }
 
   generateEventFilterForCreate(
     overrides: Partial<CreateExceptionListItemSchema> = {}
   ): CreateExceptionListItemSchemaWithNonNullProps {
-    const {
-      /* eslint-disable @typescript-eslint/naming-convention */
-      description,
-      entries,
-      list_id,
-      name,
-      type,
-      comments,
-      item_id,
-      meta,
-      namespace_type,
-      os_types,
-      tags,
-      /* eslint-enable @typescript-eslint/naming-convention */
-    } = this.generateEventFilter();
     return {
-      description,
-      entries,
-      list_id,
-      name,
-      type,
-      comments,
-      item_id,
-      meta,
-      namespace_type,
-      os_types,
-      tags,
+      ...exceptionItemToCreateExceptionItem(this.generateEventFilter()),
       ...overrides,
     };
   }
@@ -249,35 +210,130 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   generateEventFilterForUpdate(
     overrides: Partial<UpdateExceptionListItemSchema> = {}
   ): UpdateExceptionListItemSchemaWithNonNullProps {
-    const {
-      /* eslint-disable @typescript-eslint/naming-convention */
-      description,
-      entries,
-      name,
-      type,
-      comments,
-      id,
-      item_id,
-      meta,
-      namespace_type,
-      os_types,
-      tags,
-      _version,
-      /* eslint-enable @typescript-eslint/naming-convention */
-    } = this.generateEventFilter();
     return {
-      description,
-      entries,
-      name,
-      type,
-      comments,
-      id,
-      item_id,
-      meta,
-      namespace_type,
-      os_types,
-      tags,
-      _version: _version ?? 'some value',
+      ...exceptionItemToUpdateExceptionItem(this.generateEventFilter()),
+      ...overrides,
+    };
+  }
+
+  generateHostIsolationException(
+    overrides: Partial<ExceptionListItemSchema> = {}
+  ): ExceptionListItemSchema {
+    return this.generate({
+      name: `Host Isolation (${this.randomString(5)})`,
+      list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      os_types: ['macos', 'linux', 'windows'],
+      entries: [
+        {
+          field: 'destination.ip',
+          operator: 'included',
+          type: 'match',
+          value: '0.0.0.0/24',
+        },
+      ],
+      ...overrides,
+    });
+  }
+
+  generateHostIsolationExceptionForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateHostIsolationException()),
+      ...overrides,
+    };
+  }
+  generateHostIsolationExceptionForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateHostIsolationException()),
+      ...overrides,
+    };
+  }
+
+  generateBlocklist(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    const os = this.randomOSFamily() as ExceptionListItemSchema['os_types'][number];
+    const entriesList: CreateExceptionListItemSchema['entries'] = [
+      {
+        field: 'file.path.text',
+        operator: 'included',
+        type: 'wildcard',
+        value: os === 'windows' ? 'C:\\Fol*\\file.*' : '/usr/*/*.dmg',
+      },
+      {
+        field: 'file.path.text',
+        operator: 'included',
+        type: 'wildcard',
+        value: os === 'windows' ? 'C:\\Fol*\\file.exe' : '/usr/*/app.dmg',
+      },
+      {
+        field: 'process.executable.caseless',
+        value:
+          os === 'windows'
+            ? ['C:\\some\\path', 'C:\\some\\other\\path', 'C:\\yet\\another\\path']
+            : ['/some/path', 'some/other/path', 'yet/another/path'],
+        type: 'match_any',
+        operator: 'included',
+      },
+      {
+        field: 'process.hash.sha256',
+        value: [
+          'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+          '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
+          'FCDE2B2EDBA56BF408601FB721FE9B5C338D10EE429EA04FAE5511B68FBF8FB9',
+        ],
+        type: 'match_any',
+        operator: 'included',
+      },
+      {
+        field: 'process.Ext.code_signature',
+        entries: [
+          {
+            field: 'trusted',
+            value: 'true',
+            type: 'match',
+            operator: 'included',
+          },
+          {
+            field: 'subject_name',
+            value:
+              os === 'windows'
+                ? ['notsus.app', 'verynotsus.app', 'superlegit.app']
+                : ['notsus.exe', 'verynotsus.exe', 'superlegit.exe'],
+            type: 'match_any',
+            operator: 'included',
+          },
+        ],
+        type: 'nested',
+      },
+    ];
+
+    return this.generate({
+      name: `Blocklist ${this.randomString(5)}`,
+      list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
+      item_id: `generator_endpoint_blocklist_${this.seededUUIDv4()}`,
+      tags: [this.randomChoice([BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG])],
+      os_types: [os],
+      entries: [entriesList[this.randomN(5)]],
+      ...overrides,
+    });
+  }
+
+  generateBlocklistForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateBlocklist()),
+      ...overrides,
+    };
+  }
+
+  generateBlocklistForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateBlocklist()),
       ...overrides,
     };
   }

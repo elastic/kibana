@@ -54,7 +54,7 @@ export const deleteRulesBulkRoute = (
   const handler: Handler = async (context, request, response) => {
     const siemResponse = buildSiemResponse(response);
     const rulesClient = context.alerting.getRulesClient();
-    const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
+    const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
     const savedObjectsClient = context.core.savedObjects.client;
 
     const rules = await Promise.all(
@@ -81,14 +81,12 @@ export const deleteRulesBulkRoute = (
             return getIdBulkError({ id, ruleId });
           }
 
-          const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(
-            migratedRule.id
-          );
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(migratedRule.id);
 
           await deleteRules({
             ruleId: migratedRule.id,
             rulesClient,
-            ruleExecutionLogClient,
+            ruleExecutionLog,
           });
 
           return transformValidateBulkError(

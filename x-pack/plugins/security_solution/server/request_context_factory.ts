@@ -12,7 +12,7 @@ import { Logger, KibanaRequest, RequestHandlerContext } from 'kibana/server';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import { ConfigType } from './config';
-import { ruleExecutionLogClientFactory } from './lib/detection_engine/rule_execution_log';
+import { ruleExecutionLogForRoutesFactory } from './lib/detection_engine/rule_execution_log';
 import { buildFrameworkRequest } from './lib/timeline/utils/common';
 import {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -103,8 +103,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
-      getExecutionLogClient: memoize(() =>
-        ruleExecutionLogClientFactory(
+      getRuleExecutionLog: memoize(() =>
+        ruleExecutionLogForRoutesFactory(
           context.core.savedObjects.client,
           startPlugins.eventLog.getClient(request),
           logger

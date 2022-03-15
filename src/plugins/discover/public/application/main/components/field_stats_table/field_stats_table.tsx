@@ -10,7 +10,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { DataViewField, DataView, Query } from '../../../../../../data/common';
+import type { Query } from '../../../../../../data/public';
+import type { DataViewField, DataView } from '../../../../../../data_views/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -21,7 +22,7 @@ import {
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { SavedSearch } from '../../../../services/saved_searches';
 import type { GetStateReturn } from '../../services/discover_state';
-import { DataRefetch$ } from '../../utils/use_saved_search';
+import { AvailableFields$, DataRefetch$ } from '../../utils/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: DataView;
@@ -35,6 +36,7 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
+  fieldsToFetch?: string[];
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -84,11 +86,13 @@ export interface FieldStatisticsTableProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   savedSearchRefetch$?: DataRefetch$;
+  availableFields$?: AvailableFields$;
   searchSessionId?: string;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
+    availableFields$,
     indexPattern,
     savedSearch,
     query,
@@ -126,11 +130,19 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         embeddable.updateInput({ lastReloadRequestTime: Date.now() });
       }
     });
+
+    const fields = availableFields$?.subscribe(() => {
+      if (embeddable && !isErrorEmbeddable(embeddable) && !availableFields$?.getValue().error) {
+        embeddable.updateInput({ fieldsToFetch: availableFields$?.getValue().fields });
+      }
+    });
+
     return () => {
       sub?.unsubscribe();
       refetch?.unsubscribe();
+      fields?.unsubscribe();
     };
-  }, [embeddable, stateContainer, savedSearchRefetch$]);
+  }, [embeddable, stateContainer, savedSearchRefetch$, availableFields$]);
 
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
@@ -143,6 +155,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         visibleFieldNames: columns,
         onAddFilter,
         sessionId: searchSessionId,
+        fieldsToFetch: availableFields$?.getValue().fields,
       });
       embeddable.reload();
     }
@@ -155,6 +168,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     filters,
     onAddFilter,
     searchSessionId,
+    availableFields$,
   ]);
 
   useEffect(() => {

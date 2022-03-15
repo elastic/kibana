@@ -27,6 +27,7 @@ import './inline_editable_tables.scss';
 export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   items: Item[];
+  defaultItem?: Partial<Item>;
   title: string;
   addButtonText?: string;
   canRemoveLastItem?: boolean;
@@ -53,6 +54,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
   const {
     instanceId,
     columns,
+    defaultItem,
     onAdd,
     onDelete,
     onReorder,
@@ -67,6 +69,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
       props={{
         instanceId,
         columns,
+        defaultItem,
         onAdd,
         onDelete,
         onReorder,

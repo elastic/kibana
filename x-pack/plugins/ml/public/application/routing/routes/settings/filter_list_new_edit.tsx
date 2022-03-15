@@ -40,6 +40,9 @@ export const newFilterListRouteFactory = (
   basePath: string
 ): MlRoute => ({
   path: '/settings/filter_lists/new_filter_list',
+  title: i18n.translate('xpack.ml.settings.createFilter.docTitle', {
+    defaultMessage: 'Create Filter',
+  }),
   render: (props, deps) => <PageWrapper {...props} mode={MODE.NEW} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -59,6 +62,9 @@ export const editFilterListRouteFactory = (
   basePath: string
 ): MlRoute => ({
   path: '/settings/filter_lists/edit_filter_list/:filterId',
+  title: i18n.translate('xpack.ml.settings.editFilter.docTitle', {
+    defaultMessage: 'Edit Filter',
+  }),
   render: (props, deps) => <PageWrapper {...props} mode={MODE.EDIT} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),

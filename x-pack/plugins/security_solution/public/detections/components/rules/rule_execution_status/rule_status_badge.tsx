@@ -9,7 +9,7 @@ import React from 'react';
 
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HealthTruncateText } from '../../../../common/components/health_truncate_text';
-import { getCapitalizedRuleStatusText, getStatusColor } from './utils';
+import { getCapitalizedStatusText, getStatusColor } from './utils';
 
 import type { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
@@ -22,8 +22,8 @@ interface RuleStatusBadgeProps {
  * @param status - rule execution status
  */
 const RuleStatusBadgeComponent = ({ status }: RuleStatusBadgeProps) => {
-  const statusText = getCapitalizedRuleStatusText(status);
-  const statusColor = getStatusColor(status ?? null);
+  const statusText = getCapitalizedStatusText(status);
+  const statusColor = getStatusColor(status);
   return (
     <HealthTruncateText
       tooltipContent={statusText}

@@ -13,26 +13,14 @@ import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
 import { createApmAndObsUsersAndRoles } from '../../apm/scripts/create_apm_users_and_roles/create_apm_users_and_roles';
-
-const listOfJourneys = [
-  'uptime',
-  'StepsDuration',
-  'TlsFlyoutInAlertingApp',
-  'StatusFlyoutInAlertingApp',
-  'DefaultEmailSettings',
-  'MonitorManagement-http',
-  'MonitorManagement-tcp',
-  'MonitorManagement-icmp',
-  'MonitorManagement-browser',
-  'MonitorManagement breadcrumbs',
-] as const;
+import { importMonitors } from './tasks/import_monitors';
 
 export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {
   return async ({ getService }: any) => {
-    const result = await playwrightStart(getService, headless, match);
+    const results = await playwrightStart(getService, headless, match);
 
-    listOfJourneys.forEach((journey) => {
-      if (result?.[journey] && result[journey].status !== 'succeeded') {
+    Object.entries(results).forEach(([_journey, result]) => {
+      if (result.status !== 'succeeded') {
         throw new Error('Tests failed');
       }
     });
@@ -56,13 +44,15 @@ async function playwrightStart(getService: any, headless = true, match?: string)
     port: config.get('servers.kibana.port'),
   });
 
+  await importMonitors({ kibanaUrl });
+
   await createApmAndObsUsersAndRoles({
     elasticsearch: { username: 'elastic', password: 'changeme' },
     kibana: { roleSuffix: 'e2e', hostname: kibanaUrl },
   });
 
   const res = await playwrightRun({
-    params: { kibanaUrl },
+    params: { kibanaUrl, getService },
     playwrightOptions: { headless, chromiumSandbox: false, timeout: 60 * 1000 },
     match: match === 'undefined' ? '' : match,
   });

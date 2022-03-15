@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import {
   InventoryItemType,
@@ -18,11 +19,13 @@ import { createRequest } from './create_request';
 interface BucketKey {
   node: string;
 }
-type Response = Record<string, number | null>;
+type Response = Record<string, { value: number | null; warn: boolean; trigger: boolean }>;
 type Metric = Record<string, { value: number | null }>;
 interface Bucket {
   key: BucketKey;
   doc_count: number;
+  shouldWarn: { value: number };
+  shouldTrigger: { value: number };
 }
 type NodeBucket = Bucket & Metric;
 interface ResponseAggregations {
@@ -40,6 +43,7 @@ export const getData = async (
   source: InfraSource,
   logQueryFields: LogQueryFields | undefined,
   compositeSize: number,
+  condition: InventoryMetricConditions,
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput,
   afterKey?: BucketKey,
@@ -50,9 +54,13 @@ export const getData = async (
     const nextAfterKey = nodes.after_key;
     for (const bucket of nodes.buckets) {
       const metricId = customMetric && customMetric.field ? customMetric.id : metric;
-      previous[bucket.key.node] = bucket?.[metricId]?.value ?? null;
+      previous[bucket.key.node] = {
+        value: bucket?.[metricId]?.value ?? null,
+        warn: bucket?.shouldWarn.value > 0 ?? false,
+        trigger: bucket?.shouldTrigger.value > 0 ?? false,
+      };
     }
-    if (nextAfterKey && nodes.buckets.length === compositeSize) {
+    if (nextAfterKey) {
       return getData(
         esClient,
         nodeType,
@@ -61,6 +69,7 @@ export const getData = async (
         source,
         logQueryFields,
         compositeSize,
+        condition,
         filterQuery,
         customMetric,
         nextAfterKey,
@@ -81,10 +90,11 @@ export const getData = async (
     timerange,
     compositeSize,
     afterKey,
+    condition,
     filterQuery,
     customMetric
   );
-  const { body } = await esClient.search<undefined, ResponseAggregations>(request);
+  const body = await esClient.search<undefined, ResponseAggregations>(request);
   if (body.aggregations) {
     return handleResponse(body.aggregations, previousNodes);
   }

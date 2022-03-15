@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import moment from 'moment';
 import fs from 'fs';
 import Path from 'path';
 import dedent from 'dedent';
@@ -80,7 +80,7 @@ slug: /kibana-dev-docs/api/${slug}
 title: "${doc.id}"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the ${doc.id} plugin
-date: 2020-11-16
+date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana', '${doc.id}']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---

@@ -16,10 +16,10 @@ import {
   APP_WRAPPER_CLASS,
 } from '../../../../../src/core/public';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
-import { createCallApmApi } from '../services/rest/createCallApmApi';
+import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { createStaticDataView } from '../services/rest/data_view';
-import { setHelpExtension } from '../setHelpExtension';
-import { setReadonlyBadge } from '../updateBadge';
+import { setHelpExtension } from '../set_help_extension';
+import { setReadonlyBadge } from '../update_badge';
 import { ApmAppRoot } from '../components/routing/app_root';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 

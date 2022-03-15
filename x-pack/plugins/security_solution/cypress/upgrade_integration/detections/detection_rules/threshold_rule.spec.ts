@@ -13,7 +13,6 @@ import {
   ABOUT_RULE_DESCRIPTION,
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
-  getDetails,
   INDEX_PATTERNS_DETAILS,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
@@ -25,6 +24,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../../screens/rule_details';
 
+import { getDetails } from '../../../tasks/rule_details';
 import { expandFirstAlert } from '../../../tasks/alerts';
 import { waitForPageToBeLoaded } from '../../../tasks/common';
 import {
@@ -36,10 +36,7 @@ import { loginAndWaitForPage } from '../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   OVERVIEW_HOST_NAME,
-  OVERVIEW_RISK_SCORE,
-  OVERVIEW_RULE,
   OVERVIEW_SEVERITY,
-  OVERVIEW_STATUS,
   OVERVIEW_THRESHOLD_COUNT,
   OVERVIEW_THRESHOLD_VALUE,
   SUMMARY_VIEW,
@@ -49,7 +46,7 @@ const EXPECTED_NUMBER_OF_ALERTS = '1';
 
 const alert = {
   rule: 'Threshold rule',
-  severity: 'medium',
+  severity: 'Medium',
   riskScore: '17',
   reason: 'event created medium alert Threshold rule.',
   hostName: 'security-solution.local',
@@ -123,10 +120,9 @@ describe('After an upgrade, the threshold rule', () => {
   it('Displays the Overview alert details in the alert flyout', () => {
     expandFirstAlert();
 
-    cy.get(OVERVIEW_STATUS).should('have.text', 'open');
-    cy.get(OVERVIEW_RULE).should('have.text', alert.rule);
+    // TODO: Add verification of OVERVIEW_STATUS, OVERVIEW_RULE,
+    //       OVERVIEW_RISK_CODE - need data-test-subj attributes
     cy.get(OVERVIEW_SEVERITY).should('have.text', alert.severity);
-    cy.get(OVERVIEW_RISK_SCORE).should('have.text', alert.riskScore);
     cy.get(OVERVIEW_HOST_NAME).should('have.text', alert.hostName);
     cy.get(OVERVIEW_THRESHOLD_COUNT).should('have.text', alert.thresholdCount);
     cy.get(OVERVIEW_THRESHOLD_VALUE).should('have.text', alert.hostName);

@@ -131,7 +131,9 @@ export class GraphPageObject extends FtrService {
       const elements = document.querySelectorAll('#graphSvg text.gphNode__label');
       return [...elements].map(element => element.innerHTML);
     `);
-    const graphElements = await this.find.allByCssSelector('#graphSvg line, #graphSvg circle');
+    const graphElements = await this.find.allByCssSelector(
+      '#graphSvg line:not(.gphEdge--clickable), #graphSvg circle'
+    );
     const nodes: Node[] = [];
     const nodePositionMap: Record<string, number> = {};
     const edges: Edge[] = [];

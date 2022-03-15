@@ -11,7 +11,7 @@ import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   ensureDatetimeIsWithinRange,
   getConsumerUnauthorizedErrorMessage,
@@ -55,7 +55,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -132,7 +132,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
-                monitoring: response.body.monitoring,
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
@@ -157,7 +156,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
@@ -217,7 +216,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
-                monitoring: response.body.monitoring,
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
@@ -242,7 +240,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
@@ -313,7 +311,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
-                monitoring: response.body.monitoring,
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
@@ -338,7 +335,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alerts',
               })
@@ -409,7 +406,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
-                monitoring: response.body.monitoring,
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
@@ -433,7 +429,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -503,7 +499,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
-                monitoring: response.body.monitoring,
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
@@ -527,7 +522,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -579,7 +574,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -623,7 +618,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -696,7 +691,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.validation',
                 params: {
                   param1: 'test',
@@ -758,7 +753,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 schedule: { interval: '10x' },
                 enabled: undefined,
                 consumer: undefined,
@@ -790,7 +785,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 schedule: { interval: '30m' },
               })
             )
@@ -936,7 +931,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 schedule: { interval: '1m' },
               })
             )

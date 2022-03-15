@@ -21,6 +21,7 @@ import {
   KibanaPageTemplate,
   RedirectAppLinks,
 } from '../../../../../../../src/plugins/kibana_react/public';
+import { useDocTitle } from '../../routing/use_doc_title';
 
 export const MlPageControlsContext = createContext<{
   setPageTitle: (v?: React.ReactNode | undefined) => void;
@@ -55,7 +56,7 @@ function pageStateReducer(state: MlPageUIState, action: PageAction): MlPageUISta
  * Main page component of the ML App
  * @constructor
  */
-export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps, children }) => {
+export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps }) => {
   const navigateToPath = useNavigateToPath();
   const {
     services: {
@@ -79,6 +80,12 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
 
   const activeRoute = useActiveRoute(routeList);
 
+  const rightSideItems = useMemo(() => {
+    return [...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])];
+  }, [activeRoute.enableDatePicker]);
+
+  useDocTitle(activeRoute);
+
   return (
     <KibanaPageTemplate
       className={'ml-app'}
@@ -98,7 +105,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
       }}
       pageHeader={{
         pageTitle: pageState.pageHeader ?? <EuiLoadingContent lines={1} />,
-        rightSideItems: [...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])],
+        rightSideItems,
         restrictWidth: false,
       }}
       pageBodyProps={{

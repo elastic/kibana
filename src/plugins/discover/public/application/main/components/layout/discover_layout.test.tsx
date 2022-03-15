@@ -8,19 +8,20 @@
 
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
-import { DataView, IndexPatternAttributes } from '../../../../../../data/common';
+import type { DataView, DataViewAttributes } from '../../../../../../data_views/public';
 import { SavedObject } from '../../../../../../../core/types';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
+  AvailableFields$,
   DataCharts$,
   DataDocuments$,
   DataMain$,
@@ -32,35 +33,31 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { ElasticSearchHit } from '../../../../types';
+import { LocalStorageMock } from 'src/plugins/discover/public/__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
-import { FieldFormatsStart } from '../../../../../../field_formats/public';
-import { IUiSettingsClient } from 'kibana/public';
+import { DiscoverServices } from '../../../../build_services';
 
 setHeaderActionMenuMounter(jest.fn());
 
 function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
   const searchSourceMock = createSearchSourceMock({});
-  const services = discoverServiceMock;
+  const services = {
+    ...discoverServiceMock,
+    fieldFormats: {
+      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    },
+    storage: new LocalStorageMock({
+      [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
+    }) as unknown as Storage,
+  } as unknown as DiscoverServices;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
-  services.storage.get = (key: string) => {
-    if (key === SIDEBAR_CLOSED_KEY) {
-      return prevSidebarClosed;
-    }
-  };
-  services.fieldFormats = {
-    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-  } as unknown as FieldFormatsStart;
-  services.uiSettings = {
-    ...services.uiSettings,
-    get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
-  } as unknown as IUiSettingsClient;
 
   const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
-  }) as unknown as Array<SavedObject<IndexPatternAttributes>>;
+  }) as unknown as Array<SavedObject<DataViewAttributes>>;
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -71,6 +68,11 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     fetchStatus: FetchStatus.COMPLETE,
     result: esHits as ElasticSearchHit[],
   }) as DataDocuments$;
+
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -131,6 +133,7 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     documents$,
     totalHits$,
     charts$,
+    availableFields$,
   };
 
   const props = {
@@ -146,7 +149,7 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
   };
 

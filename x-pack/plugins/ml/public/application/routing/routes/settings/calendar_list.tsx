@@ -6,13 +6,10 @@
  */
 
 import React, { FC } from 'react';
-
-import { NavigateToPath } from '../../../contexts/kibana';
-
+import { i18n } from '@kbn/i18n';
+import { NavigateToPath, useTimefilter } from '../../../contexts/kibana';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
-
-import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license';
 import {
   checkGetJobsCapabilitiesResolver,
@@ -27,6 +24,9 @@ export const calendarListRouteFactory = (
   basePath: string
 ): MlRoute => ({
   path: '/settings/calendars_list',
+  title: i18n.translate('xpack.ml.settings.calendarList.docTitle', {
+    defaultMessage: 'Calendars',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
