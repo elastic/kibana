@@ -55,6 +55,7 @@ export { enableRule } from './application/lib/rule_api/enable';
 export { disableRule } from './application/lib/rule_api/disable';
 export { muteRule } from './application/lib/rule_api/mute';
 export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
+export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
 
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 

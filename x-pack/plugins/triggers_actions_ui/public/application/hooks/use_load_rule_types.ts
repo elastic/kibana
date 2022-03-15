@@ -6,7 +6,7 @@
  */
 import { useEffect, useState } from 'react';
 import { loadRuleTypes } from '../lib/rule_api';
-import { RuleType } from '../../types';
+import { RuleType, RuleTypeIndex } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
 
 interface RuleTypesState {
@@ -27,10 +27,18 @@ export function useLoadRuleTypes({ filteredSolutions }: RuleTypesProps) {
     data: [],
     error: null,
   });
+  const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex>(new Map());
+
   async function fetchRuleTypes() {
     setRuleTypesState({ ...ruleTypesState, isLoading: true });
     try {
       const response = await loadRuleTypes({ http });
+      const index: RuleTypeIndex = new Map();
+      for (const ruleTypeItem of response) {
+        index.set(ruleTypeItem.id, ruleTypeItem);
+      }
+      setRuleTypeIndex(index);
+
       let filteredResponse = response;
 
       if (filteredSolutions && filteredSolutions.length > 0) {
@@ -50,5 +58,7 @@ export function useLoadRuleTypes({ filteredSolutions }: RuleTypesProps) {
   // return availableRuleTypes, solutions, index
   return {
     ruleTypes: ruleTypesState.data,
+    error: ruleTypesState.error,
+    ruleTypeIndex,
   };
 }

@@ -36,6 +36,7 @@ import {
   enableRule,
   disableRule,
   muteRule,
+  useLoadRuleTypes,
 } from '../../../../triggers_actions_ui/public';
 import { AlertExecutionStatus, ALERTS_FEATURE_ID } from '../../../../alerting/common';
 import { Pagination } from './types';
@@ -88,6 +89,8 @@ export function RulesPage() {
     sort,
   });
   const { data: rules, totalItemCount, error } = rulesState;
+  const { ruleTypeIndex } = useLoadRuleTypes({ filteredSolutions: OBSERVABILITY_SOLUTIONS });
+
   useBreadcrumbs([
     {
       text: RULES_BREADCRUMB_TEXT,
@@ -281,7 +284,7 @@ export function RulesPage() {
         <EuiFlexItem>
           <RulesTable
             columns={getRulesTableColumns()}
-            rules={convertRulesToTableItems(rules, new Map(), true)} // TODO add ruleTypeIndex and canExecuteActions
+            rules={convertRulesToTableItems(rules, ruleTypeIndex, true)} // TODO add canExecuteActions and remove hardcoded true value
             isLoading={rulesState.isLoading}
             page={page}
             totalItemCount={totalItemCount}
