@@ -49,7 +49,7 @@ Beats and Enterprise Search don't have filebeat modules, but the logs can be ing
 
 ### Package-driven collection
 
-When using package-driven collection, each component in your Elastic stack is given a corresponding fleet integration.
+When using package-driven collection, each component in your Elastic stack is given a corresponding fleet package (also known as "integration").
 
 The Elastic agents connected to fleet then using the integration data to collect metrics from each component according to its requirements. This is likely similar to standalone metricbeat and filebeat and may use those modules internally.
 
