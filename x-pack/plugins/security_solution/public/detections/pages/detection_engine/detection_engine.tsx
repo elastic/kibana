@@ -127,7 +127,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       signalIndexName,
       hasIndexWrite = false,
       hasIndexMaintenance = false,
-      canUserCRUD = false,
       canUserREAD,
       hasIndexRead,
     },
@@ -379,8 +378,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             <AlertsTable
               timelineId={TimelineId.detectionsPage}
               loading={loading}
-              hasIndexWrite={(hasIndexWrite ?? false) && (canUserCRUD ?? false)}
-              hasIndexMaintenance={(hasIndexMaintenance ?? false) && (canUserCRUD ?? false)}
+              hasIndexWrite={hasIndexWrite ?? false}
+              hasIndexMaintenance={hasIndexMaintenance ?? false}
               from={from}
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
