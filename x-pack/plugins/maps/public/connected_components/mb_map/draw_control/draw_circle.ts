@@ -25,7 +25,7 @@ export const DRAW_CIRCLE_RADIUS_LABEL_STYLE = {
     'text-size': 16,
     'text-offset': [-1, 0],
     'text-ignore-placement': true,
-    'text-overlap': true,
+    'text-allow-overlap': true,
   },
   paint: {
     'text-color': '#fbb03b',
