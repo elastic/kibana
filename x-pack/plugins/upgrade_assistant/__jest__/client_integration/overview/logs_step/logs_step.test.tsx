@@ -136,7 +136,7 @@ describe('Overview - Logs Step', () => {
       });
 
       await act(async () => {
-        testBed = await setupOverviewPage(httpSetup,{
+        testBed = await setupOverviewPage(httpSetup, {
           privileges: {
             hasAllPrivileges: true,
             missingPrivileges: {
