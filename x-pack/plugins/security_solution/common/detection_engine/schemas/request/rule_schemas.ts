@@ -428,9 +428,11 @@ export interface RulePreviewLogs {
   errors: string[];
   warnings: string[];
   startedAt?: string;
+  duration: number;
 }
 
 export interface PreviewResponse {
   previewId: string | undefined;
   logs: RulePreviewLogs[] | undefined;
+  isAborted: boolean | undefined;
 }
