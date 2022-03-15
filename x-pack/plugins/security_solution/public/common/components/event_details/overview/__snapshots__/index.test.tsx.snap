@@ -152,12 +152,20 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   <div
                     data-test-subj="hover-actions-filter-for"
                   >
-                    Filter button
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
                   </div>
                   <div
                     data-test-subj="hover-actions-filter-out"
                   >
-                    Filter out button
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
                   </div>
                   <div
                     data-test-subj="more-actions-kibana.alert.workflow_status"
@@ -212,12 +220,20 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   <div
                     data-test-subj="hover-actions-filter-for"
                   >
-                    Filter button
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
                   </div>
                   <div
                     data-test-subj="hover-actions-filter-out"
                   >
-                    Filter out button
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
                   </div>
                   <div
                     data-test-subj="more-actions-kibana.alert.risk_score"
@@ -284,12 +300,20 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   <div
                     data-test-subj="hover-actions-filter-for"
                   >
-                    Filter button
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
                   </div>
                   <div
                     data-test-subj="hover-actions-filter-out"
                   >
-                    Filter out button
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
                   </div>
                   <div
                     data-test-subj="more-actions-kibana.alert.rule.name"

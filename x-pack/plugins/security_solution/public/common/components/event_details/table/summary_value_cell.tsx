@@ -29,6 +29,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
       fieldFromBrowserField={fieldFromBrowserField}
       linkValue={linkValue}
       isDraggable={isDraggable}
+      style={{ flexGrow: 0 }}
       values={values}
     />
     {timelineId !== TimelineId.active && (
