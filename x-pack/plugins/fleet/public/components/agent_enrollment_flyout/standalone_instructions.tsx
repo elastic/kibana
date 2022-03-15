@@ -159,7 +159,9 @@ export const StandaloneInstructions = React.memo<InstructionProps>(
       downloadLink =
         isK8s === 'IS_KUBERNETES'
           ? core.http.basePath.prepend(
-              `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?kubernetes=true&standalone=true`
+              `${agentPolicyRouteService.getInfoFullDownloadPath(
+                selectedPolicyId
+              )}?kubernetes=true&standalone=true`
             )
           : core.http.basePath.prepend(
               `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?standalone=true`

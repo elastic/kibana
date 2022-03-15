@@ -111,10 +111,7 @@ export const ManagedInstructions = React.memo<InstructionProps>(
       ];
     }, [fleetServerInstructions]);
 
-    const enrolToken =
-      apiKey.data
-    ? apiKey.data.item.api_key:
-      ''
+    const enrolToken = apiKey.data ? apiKey.data.item.api_key : '';
 
     const steps = useMemo(() => {
       const fleetServerHosts = settings?.fleet_server_hosts || [];

@@ -6,15 +6,15 @@
  */
 
 import { agentPolicyRouteService } from '../../services';
-import {  sendRequest } from './use_request';
-import {GetFullAgentManifestResponse} from "../../../common";
 
-export const sendGetK8sManifest = (
-  query: { fleetServer?: string; enrolToken?: string } = {}
-  ) => {
+import type { GetFullAgentManifestResponse } from '../../../common';
+
+import { sendRequest } from './use_request';
+
+export const sendGetK8sManifest = (query: { fleetServer?: string; enrolToken?: string } = {}) => {
   return sendRequest<GetFullAgentManifestResponse>({
     path: agentPolicyRouteService.getK8sInfoPath(),
     method: 'get',
-    query
+    query,
   });
 };

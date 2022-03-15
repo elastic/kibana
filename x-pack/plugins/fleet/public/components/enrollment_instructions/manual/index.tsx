@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { useStartServices, useKibanaVersion } from '../../../hooks';
 import type { EnrollmentAPIKey } from '../../../types';
 
@@ -23,24 +24,20 @@ function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHost
 }
 
 export const ManualInstructions: React.FunctionComponent<Props> = ({
-                                                                     apiKey,
-                                                                     fleetServerHosts,
-                                                                     policyId,
-                                                                     isK8s
-                                                                   }) => {
-
-
+  apiKey,
+  fleetServerHosts,
+  policyId,
+  isK8s,
+}) => {
   const { docLinks } = useStartServices();
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
   const linuxMacCommand =
     isK8s === 'IS_KUBERNETES'
-    ? `kubectl apply -f elastic-agent-managed-kubernetes.yaml`
-    :`sudo ./elastic-agent install ${enrollArgs}`;
-
+      ? `kubectl apply -f elastic-agent-managed-kubernetes.yaml`
+      : `sudo ./elastic-agent install ${enrollArgs}`;
 
   const windowsCommand = `.\\elastic-agent.exe install ${enrollArgs}`;
-
 
   return (
     <PlatformSelector

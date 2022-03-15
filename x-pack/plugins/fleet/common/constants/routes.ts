@@ -72,7 +72,7 @@ export const AGENT_POLICY_API_ROUTES = {
 export const K8S_API_ROUTES = {
   K8S_DOWNLOAD_PATTERN: `${K8S_API_ROOT}/download`,
   K8S_INFO_PATTERN: `${K8S_API_ROOT}`,
-}
+};
 
 // Output API routes
 export const OUTPUT_API_ROUTES = {

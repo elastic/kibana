@@ -18,6 +18,8 @@ import {
 } from '../../types';
 import type { FleetAuthzRouter } from '../security';
 
+import { K8S_API_ROUTES } from '../../../common';
+
 import {
   getAgentPoliciesHandler,
   getOneAgentPolicyHandler,
@@ -26,9 +28,10 @@ import {
   copyAgentPolicyHandler,
   deleteAgentPoliciesHandler,
   getFullAgentPolicy,
-  downloadFullAgentPolicy, downloadK8sManifest, getK8sManifest,
+  downloadFullAgentPolicy,
+  downloadK8sManifest,
+  getK8sManifest,
 } from './handlers';
-import {K8S_API_ROUTES} from "../../../common";
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // List - Fleet Server needs access to run setup

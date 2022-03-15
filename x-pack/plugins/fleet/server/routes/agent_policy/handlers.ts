@@ -39,7 +39,7 @@ import type {
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
-import {GetK8sManifestRequestSchema} from "../../types";
+import type { GetK8sManifestRequestSchema } from '../../types';
 
 export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
@@ -244,7 +244,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
       }
     } else {
       try {
-        const fullAgentManifest = await agentPolicyService.getFullAgentManifest("", "");
+        const fullAgentManifest = await agentPolicyService.getFullAgentManifest('', '');
         if (fullAgentManifest) {
           const body: GetFullAgentManifestResponse = {
             item: fullAgentManifest,
@@ -262,7 +262,6 @@ export const getFullAgentPolicy: FleetRequestHandler<
         return defaultIngestErrorHandler({ error, response });
       }
     }
-
   } else {
     try {
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
@@ -304,7 +303,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
           soClient,
           request.params.agentPolicyId,
-          {standalone: request.query.standalone }
+          { standalone: request.query.standalone }
         );
         if (fullAgentConfigMap) {
           const body = fullAgentConfigMap;
@@ -319,11 +318,11 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         } else {
           return response.customError({
             statusCode: 404,
-            body: {message: 'Agent config map not found'},
+            body: { message: 'Agent config map not found' },
           });
         }
       } catch (error) {
-        return defaultIngestErrorHandler({error, response});
+        return defaultIngestErrorHandler({ error, response });
       }
     }
   } else {
@@ -355,10 +354,12 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
 
 export const getK8sManifest: FleetRequestHandler<
   TypeOf<typeof GetK8sManifestRequestSchema.query>
-  > = async (context, request, response) => {
-
+> = async (context, request, response) => {
   try {
-    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(request.query.fleetServer, request.query.enrolToken);
+    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
+      request.query.fleetServer,
+      request.query.enrolToken
+    );
     if (fullAgentManifest) {
       const body: GetFullAgentManifestResponse = {
         item: fullAgentManifest,
@@ -379,10 +380,12 @@ export const getK8sManifest: FleetRequestHandler<
 
 export const downloadK8sManifest: FleetRequestHandler<
   TypeOf<typeof GetK8sManifestRequestSchema.query>
-  > = async (context, request, response) => {
-
+> = async (context, request, response) => {
   try {
-    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(request.query.fleetServer, request.query.enrolToken);
+    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
+      request.query.fleetServer,
+      request.query.enrolToken
+    );
     if (fullAgentManifest) {
       const body = fullAgentManifest;
       const headers: ResponseHeaders = {
@@ -396,10 +399,10 @@ export const downloadK8sManifest: FleetRequestHandler<
     } else {
       return response.customError({
         statusCode: 404,
-        body: {message: 'Agent manifest not found'},
+        body: { message: 'Agent manifest not found' },
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({error, response});
+    return defaultIngestErrorHandler({ error, response });
   }
 };

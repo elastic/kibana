@@ -28,16 +28,17 @@ import {
   useFleetStatus,
   useAgentEnrollmentFlyoutData,
 } from '../../hooks';
-import {FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT} from '../../constants';
+import { FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../constants';
 import type { PackagePolicy } from '../../types';
 
 import { Loading } from '..';
+
+import { FLEET_KUBERNETES_PACKAGE } from '../../../common';
 
 import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
 import type { BaseProps } from './types';
-import {FLEET_KUBERNETES_PACKAGE} from "../../../common";
 
 type FlyoutMode = 'managed' | 'standalone';
 
@@ -94,7 +95,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
     checkPolicyIsFleetServer();
   }, [policyId]);
 
-
   const [isK8s, setIsK8s] = useState<'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES'>(
     'IS_LOADING'
   );
@@ -120,7 +120,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
     }
     checkifK8s();
   }, [policyId]);
-
 
   const isLoadingInitialRequest = settings.isLoading && settings.isInitialRequest;
 
