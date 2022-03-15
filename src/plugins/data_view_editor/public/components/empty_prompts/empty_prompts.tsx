@@ -65,7 +65,6 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
         isRollupIndex: () => false,
         pattern: '*:*',
         showAllIndices: false,
-        searchClient,
       }).then((dataSources) => {
         setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
       });
