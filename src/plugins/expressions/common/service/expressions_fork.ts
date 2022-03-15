@@ -15,8 +15,8 @@ import {
 import { ExpressionAstExpression } from '../ast';
 
 export interface ExpressionServiceFork {
-  setup: () => ExpressionsServiceSetup;
-  start: () => ExpressionsServiceStart;
+  setup(): ExpressionsServiceSetup;
+  start(): ExpressionsServiceStart;
 }
 
 /**
@@ -42,13 +42,7 @@ export class ExpressionsServiceFork implements ExpressionServiceFork {
   /**
    * @note Workaround since the expressions service is frozen.
    */
-  private namespace: string | undefined;
-  private expressionsService: ExpressionsService;
-
-  constructor(namespace: string, expressions: ExpressionsService) {
-    this.namespace = namespace;
-    this.expressionsService = expressions;
-  }
+  constructor(private namespace: string, private expressions: ExpressionsService) {}
 
   /**
    * Returns Kibana Platform *setup* life-cycle contract. Useful to return the

@@ -312,7 +312,7 @@ export class ExpressionsService
   }
 
   private isStarted(): boolean {
-    return !!ExpressionsService.started.has(this);
+    return ExpressionsService.started.has(this);
   }
 
   private assertSetup() {
