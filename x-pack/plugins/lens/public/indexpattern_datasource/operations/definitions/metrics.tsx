@@ -125,7 +125,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           emptyAsNull:
             hideZeroOption && previousColumn && isColumnOfType<T>(type, previousColumn)
               ? previousColumn.params?.emptyAsNull
-              : undefined,
+              : !columnParams?.usedInMath,
         },
       } as T;
     },

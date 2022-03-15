@@ -103,7 +103,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         emptyAsNull:
           previousColumn && isColumnOfType<CountIndexPatternColumn>('count', previousColumn)
             ? previousColumn.params?.emptyAsNull
-            : undefined,
+            : !columnParams?.usedInMath,
       },
     };
   },

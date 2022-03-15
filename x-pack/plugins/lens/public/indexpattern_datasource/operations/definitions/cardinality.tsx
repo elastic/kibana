@@ -113,7 +113,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
           previousColumn &&
           isColumnOfType<CardinalityIndexPatternColumn>('unique_count', previousColumn)
             ? previousColumn.params?.emptyAsNull
-            : undefined,
+            : !columnParams?.usedInMath,
       },
     };
   },

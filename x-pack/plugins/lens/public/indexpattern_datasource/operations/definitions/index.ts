@@ -416,6 +416,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       kql?: string;
       lucene?: string;
       shift?: string;
+      usedInMath?: boolean;
     }
   ) => C;
   /**
